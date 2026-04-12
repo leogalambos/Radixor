@@ -9,16 +9,14 @@ group = 'org.egothor.stemmer'
 version = gitVersion(prefix:'release@')
 
 pmd {
-        consoleOutput = true
-        toolVersion = '7.20.0'
-        sourceSets = [sourceSets.main]
-        ruleSetFiles = files(rootProject.file(".ruleset"))
+    consoleOutput = true
+    toolVersion = '7.20.0'
+    sourceSets = [sourceSets.main]
+    ruleSetFiles = files(rootProject.file(".ruleset"))
 }
 
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
-    }
+tasks.withType(JavaCompile).configureEach {
+    options.release = 21
 }
 
 repositories {
