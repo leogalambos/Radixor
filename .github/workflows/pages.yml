@@ -109,7 +109,7 @@ jobs:
             <ul>
               <li><a href="./javadoc/">Javadoc</a></li>
               <li><a href="./test/">Test Report</a></li>
-              <li><a href="./pmd/">PMD Report</a></li>
+              <li><a href="./pmd/main.html">PMD Report</a></li>
               <li><a href="./coverage/">Coverage Report</a></li>
               $( [ "${HAS_JMH}" = "true" ] && echo '<li><a href="./jmh/">Benchmark Report</a></li>' || echo '<li>Benchmark Report: not available in this build</li>' )
             </ul>
@@ -151,7 +151,7 @@ jobs:
               <li><a href="./builds/latest/">Latest build summary</a></li>
               <li><a href="./builds/latest/javadoc/">Javadoc</a></li>
               <li><a href="./builds/latest/test/">Test Report</a></li>
-              <li><a href="./builds/latest/pmd/">PMD Report</a></li>
+              <li><a href="./builds/latest/pmd/main.html">PMD Report</a></li>
               <li><a href="./builds/latest/coverage/">Coverage Report</a></li>
           EOF
 
