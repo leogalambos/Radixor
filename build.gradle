@@ -8,6 +8,10 @@ plugins {
 group = 'org.egothor.stemmer'
 version = gitVersion(prefix:'release@')
 
+configurations {
+    mockitoAgent
+}
+
 pmd {
     consoleOutput = true
     toolVersion = '7.20.0'
@@ -27,14 +31,22 @@ dependencies {
     testImplementation platform(libs.junit.bom)
     testImplementation libs.junit.jupiter
     testRuntimeOnly libs.junit.platform.launcher
+
+    testImplementation libs.mockito.core
+    testImplementation libs.mockito.junit.jupiter
+    
+    mockitoAgent(libs.mockito.core) {
+        transitive = false
+    }
+}
+
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
+    jvmArgs += "-javaagent:${configurations.mockitoAgent.singleFile}"
 }
 
 application {
     mainClass = 'org.egothor.stemmer.Compile'
-}
-
-tasks.test {
-    useJUnitPlatform()
 }
 
 javadoc {
