@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'application'
     id 'pmd'
+    id 'jacoco'
     id 'com.palantir.git-version' version '4.0.0'
 }
 
@@ -10,6 +11,10 @@ version = gitVersion(prefix:'release@')
 
 configurations {
     mockitoAgent
+}
+
+jacoco {
+    toolVersion = '0.8.14'
 }
 
 pmd {
@@ -43,6 +48,34 @@ dependencies {
 tasks.withType(Test).configureEach {
     useJUnitPlatform()
     jvmArgs += "-javaagent:${configurations.mockitoAgent.singleFile}"
+    
+    finalizedBy(tasks.named('jacocoTestReport'))
+    
+    reports {
+        junitXml.required = true
+        html.required = true
+    }
+}
+
+tasks.withType(Pmd).configureEach {
+    reports {
+        xml.required = true
+        html.required = true
+    }
+}
+
+tasks.named('jacocoTestReport', JacocoReport) {
+    dependsOn(tasks.named('test'))
+
+    reports {
+        xml.required = true
+        csv.required = false
+        html.required = true
+    }
+}
+
+tasks.named('check') {
+    dependsOn(tasks.named('jacocoTestReport'))
 }
 
 application {
