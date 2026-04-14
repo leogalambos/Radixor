@@ -3,6 +3,7 @@ plugins {
     id 'application'
     id 'pmd'
     id 'jacoco'
+    id 'info.solidsoft.pitest' version '1.19.0'
     id 'com.palantir.git-version' version '4.0.0'
 }
 
@@ -76,6 +77,27 @@ tasks.named('jacocoTestReport', JacocoReport) {
 
 tasks.named('check') {
     dependsOn(tasks.named('jacocoTestReport'))
+}
+
+pitest {
+    pitestVersion = '1.22.1'
+    junit5PluginVersion = '1.2.3'
+
+    targetClasses = [
+        'org.egothor.stemmer.*',
+        'org.egothor.stemmer.trie.*'
+    ]
+    targetTests = [
+        'org.egothor.stemmer.*Test',
+        'org.egothor.stemmer.trie.*Test'
+    ]
+
+    excludedClasses = ['org.egothor.stemmer.Compile']
+    outputFormats = ['XML', 'HTML']
+    timestampedReports = false
+    exportLineCoverage = true
+    failWhenNoMutations = true
+    threads = Math.max(1, Runtime.runtime.availableProcessors().intdiv(2))
 }
 
 application {

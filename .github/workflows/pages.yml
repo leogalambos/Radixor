@@ -37,7 +37,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Build reports for publication
-        run: ./gradlew --no-daemon clean build pmdMain javadoc jacocoTestReport
+        run: ./gradlew --no-daemon clean build pmdMain javadoc jacocoTestReport pitest
 
       - name: Prepare gh-pages worktree
         shell: bash
@@ -80,6 +80,9 @@ jobs:
           cp -R build/reports/jacoco/test/html "${RUN_DIR}/coverage"
           cp -R build/reports/jacoco/test/html "${LATEST_DIR}/coverage"
 
+          cp -R build/reports/pitest "${RUN_DIR}/pitest"
+          cp -R build/reports/pitest "${LATEST_DIR}/pitest"
+
           if [ -d "build/reports/jmh" ]; then
             cp -R build/reports/jmh "${RUN_DIR}/jmh"
             cp -R build/reports/jmh "${LATEST_DIR}/jmh"
@@ -111,6 +114,7 @@ jobs:
               <li><a href="./test/">Test Report</a></li>
               <li><a href="./pmd/main.html">PMD Report</a></li>
               <li><a href="./coverage/">Coverage Report</a></li>
+              <li><a href="./pitest/">Mutation Testing Report</a></li>
               $( [ "${HAS_JMH}" = "true" ] && echo '<li><a href="./jmh/">Benchmark Report</a></li>' || echo '<li>Benchmark Report: not available in this build</li>' )
             </ul>
             <p><a href="../latest/">Open latest report set</a></p>
@@ -153,6 +157,7 @@ jobs:
               <li><a href="./builds/latest/test/">Test Report</a></li>
               <li><a href="./builds/latest/pmd/main.html">PMD Report</a></li>
               <li><a href="./builds/latest/coverage/">Coverage Report</a></li>
+              <li><a href="./builds/latest/pitest/">Mutation Testing Report</a></li>
           EOF
 
             if [ "${HAS_JMH}" = "true" ]; then
