@@ -37,7 +37,6 @@ import org.junit.jupiter.api.io.TempDir;
  * </p>
  */
 @Tag("unit")
-@Tag("cli")
 @DisplayName("Compile")
 class CompileTest {
 
