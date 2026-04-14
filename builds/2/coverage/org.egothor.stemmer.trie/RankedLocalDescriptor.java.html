@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RankedLocalDescriptor.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Radixor</a> &gt; <a href="index.source.html" class="el_package">org.egothor.stemmer.trie</a> &gt; <span class="el_source">RankedLocalDescriptor.java</span></div><h1>RankedLocalDescriptor.java</h1><pre class="source lang-java linenums">/*******************************************************************************
+ * Copyright (C) 2026, Leo Galambos
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * 
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ * 
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ * 
+ * 3. All advertising materials mentioning features or use of this software must
+ *    display the following acknowledgement:
+ *    This product includes software developed by the Egothor project.
+ * 
+ * 4. Neither the name of the copyright holder nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&quot;
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ ******************************************************************************/
+package org.egothor.stemmer.trie;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * Local descriptor preserving ranked {@code getAll()} semantics.
+ */
+/* default */ final class RankedLocalDescriptor {
+
+    /**
+     * Ordered values.
+     */
+    private final List&lt;Object&gt; orderedValues;
+
+    /**
+     * Creates a descriptor.
+     *
+     * @param orderedValues ordered values
+     */
+<span class="fc" id="L56">    private RankedLocalDescriptor(final List&lt;Object&gt; orderedValues) {</span>
+<span class="fc" id="L57">        this.orderedValues = orderedValues;</span>
+<span class="fc" id="L58">    }</span>
+
+    /**
+     * Creates a descriptor from an ordered value array.
+     *
+     * @param orderedValues ordered values
+     * @return descriptor
+     */
+    @SuppressWarnings(&quot;PMD.UseVarargs&quot;)
+    /* default */ static RankedLocalDescriptor of(final Object[] orderedValues) {
+<span class="fc" id="L68">        return new RankedLocalDescriptor(</span>
+<span class="fc" id="L69">                Collections.unmodifiableList(Arrays.asList(Arrays.copyOf(orderedValues, orderedValues.length))));</span>
+    }
+
+    @Override
+    public int hashCode() {
+<span class="fc" id="L74">        return this.orderedValues.hashCode();</span>
+    }
+
+    @Override
+    public boolean equals(final Object other) {
+<span class="pc bpc" id="L79" title="1 of 2 branches missed.">        if (this == other) {</span>
+<span class="nc" id="L80">            return true;</span>
+        }
+<span class="fc bfc" id="L82" title="All 2 branches covered.">        if (!(other instanceof RankedLocalDescriptor)) {</span>
+<span class="fc" id="L83">            return false;</span>
+        }
+<span class="fc" id="L85">        final RankedLocalDescriptor that = (RankedLocalDescriptor) other;</span>
+<span class="fc" id="L86">        return this.orderedValues.equals(that.orderedValues);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

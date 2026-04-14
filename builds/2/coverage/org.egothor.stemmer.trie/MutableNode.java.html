@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MutableNode.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Radixor</a> &gt; <a href="index.source.html" class="el_package">org.egothor.stemmer.trie</a> &gt; <span class="el_source">MutableNode.java</span></div><h1>MutableNode.java</h1><pre class="source lang-java linenums">/*******************************************************************************
+ * Copyright (C) 2026, Leo Galambos
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * 
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ * 
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ * 
+ * 3. All advertising materials mentioning features or use of this software must
+ *    display the following acknowledgement:
+ *    This product includes software developed by the Egothor project.
+ * 
+ * 4. Neither the name of the copyright holder nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&quot;
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ ******************************************************************************/
+package org.egothor.stemmer.trie;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+/**
+ * Mutable build-time node.
+ *
+ * &lt;p&gt;
+ * The maps exposed by the accessors are the internal mutable backing state of
+ * the node. They are returned directly for efficiency and are intended only for
+ * closely related trie-building infrastructure.
+ *
+ * @param &lt;V&gt; value type
+ */
+public final class MutableNode&lt;V&gt; {
+
+    /**
+     * Child nodes indexed by transition character.
+     */
+    private final Map&lt;Character, MutableNode&lt;V&gt;&gt; children;
+
+    /**
+     * Local terminal value counts stored exactly at this node.
+     */
+    private final Map&lt;V, Integer&gt; valueCounts;
+
+    /**
+     * Creates an empty node.
+     */
+<span class="fc" id="L65">    public MutableNode() {</span>
+<span class="fc" id="L66">        this.children = new LinkedHashMap&lt;&gt;();</span>
+<span class="fc" id="L67">        this.valueCounts = new LinkedHashMap&lt;&gt;();</span>
+<span class="fc" id="L68">    }</span>
+
+    /**
+     * Returns the internal child-node map indexed by transition character.
+     *
+     * &lt;p&gt;
+     * The returned map is the internal mutable backing state of this node and is
+     * exposed only for efficient cooperation with trie-building infrastructure.
+     *
+     * @return internal child-node map
+     */
+    public Map&lt;Character, MutableNode&lt;V&gt;&gt; children() {
+<span class="fc" id="L80">        return this.children;</span>
+    }
+
+    /**
+     * Returns the internal local terminal value-count map.
+     *
+     * &lt;p&gt;
+     * The returned map is the internal mutable backing state of this node and is
+     * exposed only for efficient cooperation with trie-building infrastructure.
+     *
+     * @return internal local value-count map
+     */
+    public Map&lt;V, Integer&gt; valueCounts() {
+<span class="fc" id="L93">        return this.valueCounts;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

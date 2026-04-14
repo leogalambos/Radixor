@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+    <link rel="stylesheet" type="text/css" href="../style.css">
+</head>
+<body>
+
+
+<h1>SortableValue.java</h1>
+
+<table class="src">
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@602aeb87_1'/>
+1
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@602aeb87_1'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>/*******************************************************************************</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@602aeb87_2'/>
+2
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@602aeb87_2'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * Copyright (C) 2026, Leo Galambos</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@602aeb87_3'/>
+3
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@602aeb87_3'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * All rights reserved.</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@602aeb87_4'/>
+4
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@602aeb87_4'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * </span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@602aeb87_5'/>
+5
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@602aeb87_5'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * Redistribution and use in source and binary forms, with or without</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@602aeb87_6'/>
+6
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@602aeb87_6'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * modification, are permitted provided that the following conditions are met:</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@602aeb87_7'/>
+7
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@602aeb87_7'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * </span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@602aeb87_8'/>
+8
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@602aeb87_8'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * 1. Redistributions of source code must retain the above copyright notice,</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@602aeb87_9'/>
+9
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@602aeb87_9'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> *    this list of conditions and the following disclaimer.</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@602aeb87_10'/>
+10
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@602aeb87_10'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * </span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@602aeb87_11'/>
+11
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@602aeb87_11'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * 2. Redistributions in binary form must reproduce the above copyright notice,</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@602aeb87_12'/>
+12
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@602aeb87_12'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> *    this list of conditions and the following disclaimer in the documentation</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@602aeb87_13'/>
+13
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@602aeb87_13'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> *    and/or other materials provided with the distribution.</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@602aeb87_14'/>
+14
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@602aeb87_14'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * </span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@602aeb87_15'/>
+15
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@602aeb87_15'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * 3. All advertising materials mentioning features or use of this software must</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@602aeb87_16'/>
+16
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@602aeb87_16'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> *    display the following acknowledgement:</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@602aeb87_17'/>
+17
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@602aeb87_17'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> *    This product includes software developed by the Egothor project.</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@602aeb87_18'/>
+18
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@602aeb87_18'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * </span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@602aeb87_19'/>
+19
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@602aeb87_19'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * 4. Neither the name of the copyright holder nor the names of its contributors</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@602aeb87_20'/>
+20
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@602aeb87_20'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> *    may be used to endorse or promote products derived from this software</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@602aeb87_21'/>
+21
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@602aeb87_21'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> *    without specific prior written permission.</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@602aeb87_22'/>
+22
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@602aeb87_22'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * </span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@602aeb87_23'/>
+23
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@602aeb87_23'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &#34;AS IS&#34;</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@602aeb87_24'/>
+24
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@602aeb87_24'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@602aeb87_25'/>
+25
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@602aeb87_25'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@602aeb87_26'/>
+26
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@602aeb87_26'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@602aeb87_27'/>
+27
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@602aeb87_27'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@602aeb87_28'/>
+28
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@602aeb87_28'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@602aeb87_29'/>
+29
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@602aeb87_29'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@602aeb87_30'/>
+30
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@602aeb87_30'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@602aeb87_31'/>
+31
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@602aeb87_31'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@602aeb87_32'/>
+32
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@602aeb87_32'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@602aeb87_33'/>
+33
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@602aeb87_33'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * POSSIBILITY OF SUCH DAMAGE.</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@602aeb87_34'/>
+34
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@602aeb87_34'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> ******************************************************************************/</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@602aeb87_35'/>
+35
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@602aeb87_35'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>package org.egothor.stemmer.trie;</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@602aeb87_36'/>
+36
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@602aeb87_36'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@602aeb87_37'/>
+37
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@602aeb87_37'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>/**</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@602aeb87_38'/>
+38
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@602aeb87_38'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * Sortable local value entry used to produce deterministic value ordering.</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@602aeb87_39'/>
+39
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@602aeb87_39'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> *</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@602aeb87_40'/>
+40
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@602aeb87_40'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * @param &#60;V&#62;            value type</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@602aeb87_41'/>
+41
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@602aeb87_41'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * @param value          stored value</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@602aeb87_42'/>
+42
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@602aeb87_42'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * @param count          local frequency</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@602aeb87_43'/>
+43
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@602aeb87_43'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * @param text           textual representation</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@602aeb87_44'/>
+44
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@602aeb87_44'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * @param insertionOrder first-seen insertion order</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@602aeb87_45'/>
+45
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@602aeb87_45'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> */</span></pre></td></tr>
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@602aeb87_46'/>
+46
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@602aeb87_46'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>record SortableValue&#60;V&#62;(V value, int count, String text, int insertionOrder) {</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@602aeb87_47'/>
+47
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@602aeb87_47'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    /**</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@602aeb87_48'/>
+48
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@602aeb87_48'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>     * Returns the length of the textual representation.</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@602aeb87_49'/>
+49
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@602aeb87_49'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>     *</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@602aeb87_50'/>
+50
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@602aeb87_50'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>     * @return textual representation length</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@602aeb87_51'/>
+51
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@602aeb87_51'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>     */</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@602aeb87_52'/>
+52
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@602aeb87_52'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    /* default */ int textLength() {</span></pre></td></tr>
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@602aeb87_53'/>
+53
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@602aeb87_53'>1</a>
+<span>
+1. textLength : replaced int return with 0 for org/egothor/stemmer/trie/SortableValue::textLength &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        return this.text.length();</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@602aeb87_54'/>
+54
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@602aeb87_54'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    }</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@602aeb87_55'/>
+55
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@602aeb87_55'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>}</span></pre></td></tr>
+
+
+
+<tr><td></td><td></td><td><h2>Mutations</h2></td></tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@602aeb87_53'>53</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@602aeb87_53'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>textLength<br/><b>Killed by : </b>org.egothor.stemmer.FrequencyTrieTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieTest]/[method:equalFrequenciesPreferShorterStringRepresentation()]</span></span> replaced int return with 0 for org/egothor/stemmer/trie/SortableValue::textLength &rarr; KILLED</span>
+</div> 
+</td>
+</tr>
+
+</table>
+
+
+<h2>Active mutators</h2>
+<ul>
+<li class='mutator'>CONDITIONALS_BOUNDARY</li>
+<li class='mutator'>EMPTY_RETURNS</li>
+<li class='mutator'>FALSE_RETURNS</li>
+<li class='mutator'>INCREMENTS</li>
+<li class='mutator'>INVERT_NEGS</li>
+<li class='mutator'>MATH</li>
+<li class='mutator'>NEGATE_CONDITIONALS</li>
+<li class='mutator'>NULL_RETURNS</li>
+<li class='mutator'>PRIMITIVE_RETURNS</li>
+<li class='mutator'>TRUE_RETURNS</li>
+<li class='mutator'>VOID_METHOD_CALLS</li>
+
+</ul>
+
+<h2>Tests examined</h2>
+<ul>
+<li>org.egothor.stemmer.trie.LocalValueSummaryTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.trie.LocalValueSummaryTest]/[method:shouldUseInsertionOrderAsFinalTieBreaker()] (0 ms)</li><li>org.egothor.stemmer.trie.LocalValueSummaryTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.trie.LocalValueSummaryTest]/[method:shouldOrderByFrequencyLengthAndLexicographicalValue()] (0 ms)</li><li>org.egothor.stemmer.FrequencyTrieTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieTest]/[method:getAllReturnsDefensiveCopy()] (0 ms)</li><li>org.egothor.stemmer.FrequencyTrieBuildersTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieBuildersTest]/[method:shouldRejectNullArguments()] (3 ms)</li><li>org.egothor.stemmer.FrequencyTrieTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieTest]/[method:equalFrequenciesPreferShorterStringRepresentation()] (0 ms)</li><li>org.egothor.stemmer.FrequencyTrieTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieTest]/[method:internalNodeValuesRemainLocalToThatNode()] (1 ms)</li><li>org.egothor.stemmer.FrequencyTrieTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieTest]/[method:equalFrequenciesAndLengthsPreferLexicographicallyLowerString()] (0 ms)</li><li>org.egothor.stemmer.FrequencyTrieTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieTest]/[method:equalTextualRepresentationsPreserveFirstSeenOrder()] (2 ms)</li><li>org.egothor.stemmer.FrequencyTrieBuildersTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieBuildersTest]/[method:shouldPreserveLocalCountsAndOrdering()] (1 ms)</li><li>org.egothor.stemmer.FrequencyTrieBuildersTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieBuildersTest]/[method:shouldReconstructUsingReductionModeShortcut()] (1 ms)</li><li>org.egothor.stemmer.FrequencyTrieBuildersTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieBuildersTest]/[method:shouldPreserveCompiledSemanticsAfterReconstruction()] (1 ms)</li><li>org.egothor.stemmer.FrequencyTrieTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieTest]/[method:rankedReductionMergesEquivalentRankedGetAllSubtrees()] (4 ms)</li><li>org.egothor.stemmer.FrequencyTrieTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieTest]/[method:unorderedReductionMergesNodesWithSameGetAllValueSet()] (5 ms)</li><li>org.egothor.stemmer.FrequencyTrieTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieTest]/[method:dominantReductionMergesQualifiedDominantWinnerNodes()] (3 ms)</li><li>org.egothor.stemmer.FrequencyTrieTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieTest]/[method:writeToAndReadFromRoundTripTrieContent()] (5 ms)</li><li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:BundledDictionaryTests]/[test-template:shouldPreserveAllStemCandidatesForBundledDictionaries(java.lang.String, org.egothor.stemmer.StemmerPatchTrieLoader$Language, org.egothor.stemmer.ReductionMode)]/[test-template-invocation:#16] (116 ms)</li><li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:BundledDictionaryTests]/[test-template:shouldPreserveAllStemCandidatesForBundledDictionaries(java.lang.String, org.egothor.stemmer.StemmerPatchTrieLoader$Language, org.egothor.stemmer.ReductionMode)]/[test-template-invocation:#4] (133 ms)</li><li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:BundledDictionaryTests]/[test-template:shouldPreserveAllStemCandidatesForBundledDictionaries(java.lang.String, org.egothor.stemmer.StemmerPatchTrieLoader$Language, org.egothor.stemmer.ReductionMode)]/[test-template-invocation:#7] (142 ms)</li><li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:BundledDictionaryTests]/[test-template:shouldPreserveAllStemCandidatesForBundledDictionaries(java.lang.String, org.egothor.stemmer.StemmerPatchTrieLoader$Language, org.egothor.stemmer.ReductionMode)]/[test-template-invocation:#10] (143 ms)</li><li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:BundledDictionaryTests]/[test-template:shouldLoadBundledDictionariesEquivalentlyAcrossOverloads(java.lang.String, org.egothor.stemmer.StemmerPatchTrieLoader$Language)]/[test-template-invocation:#3] (158 ms)</li><li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:BundledDictionaryTests]/[test-template:shouldPreserveAllStemCandidatesForBundledDictionaries(java.lang.String, org.egothor.stemmer.StemmerPatchTrieLoader$Language, org.egothor.stemmer.ReductionMode)]/[test-template-invocation:#19] (164 ms)</li><li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:BundledDictionaryTests]/[test-template:shouldPreserveAllStemCandidatesForBundledDictionaries(java.lang.String, org.egothor.stemmer.StemmerPatchTrieLoader$Language, org.egothor.stemmer.ReductionMode)]/[test-template-invocation:#11] (168 ms)</li><li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:BundledDictionaryTests]/[test-template:shouldPreserveAllStemCandidatesForBundledDictionaries(java.lang.String, org.egothor.stemmer.StemmerPatchTrieLoader$Language, org.egothor.stemmer.ReductionMode)]/[test-template-invocation:#23] (178 ms)</li><li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:BundledDictionaryTests]/[test-template:shouldPreserveAllStemCandidatesForBundledDictionaries(java.lang.String, org.egothor.stemmer.StemmerPatchTrieLoader$Language, org.egothor.stemmer.ReductionMode)]/[test-template-invocation:#8] (181 ms)</li><li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:BundledDictionaryTests]/[test-template:shouldPreserveAllStemCandidatesForBundledDictionaries(java.lang.String, org.egothor.stemmer.StemmerPatchTrieLoader$Language, org.egothor.stemmer.ReductionMode)]/[test-template-invocation:#15] (183 ms)</li><li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:BundledDictionaryTests]/[test-template:shouldPreserveAllStemCandidatesForBundledDictionaries(java.lang.String, org.egothor.stemmer.StemmerPatchTrieLoader$Language, org.egothor.stemmer.ReductionMode)]/[test-template-invocation:#22] (183 ms)</li><li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:BundledDictionaryTests]/[test-template:shouldPreserveAllStemCandidatesForBundledDictionaries(java.lang.String, org.egothor.stemmer.StemmerPatchTrieLoader$Language, org.egothor.stemmer.ReductionMode)]/[test-template-invocation:#5] (194 ms)</li><li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:BundledDictionaryTests]/[test-template:shouldPreserveAllStemCandidatesForBundledDictionaries(java.lang.String, org.egothor.stemmer.StemmerPatchTrieLoader$Language, org.egothor.stemmer.ReductionMode)]/[test-template-invocation:#20] (198 ms)</li><li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:BundledDictionaryTests]/[test-template:shouldPreserveAllStemCandidatesForBundledDictionaries(java.lang.String, org.egothor.stemmer.StemmerPatchTrieLoader$Language, org.egothor.stemmer.ReductionMode)]/[test-template-invocation:#17] (217 ms)</li><li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:BundledDictionaryTests]/[test-template:shouldPreserveAllStemCandidatesForBundledDictionaries(java.lang.String, org.egothor.stemmer.StemmerPatchTrieLoader$Language, org.egothor.stemmer.ReductionMode)]/[test-template-invocation:#13] (231 ms)</li><li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:BundledDictionaryTests]/[test-template:shouldPreserveAllStemCandidatesForBundledDictionaries(java.lang.String, org.egothor.stemmer.StemmerPatchTrieLoader$Language, org.egothor.stemmer.ReductionMode)]/[test-template-invocation:#14] (246 ms)</li><li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:BundledDictionaryTests]/[test-template:shouldLoadBundledDictionariesEquivalentlyAcrossOverloads(java.lang.String, org.egothor.stemmer.StemmerPatchTrieLoader$Language)]/[test-template-invocation:#1] (271 ms)</li><li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:BundledDictionaryTests]/[test-template:shouldPreserveAllStemCandidatesForBundledDictionaries(java.lang.String, org.egothor.stemmer.StemmerPatchTrieLoader$Language, org.egothor.stemmer.ReductionMode)]/[test-template-invocation:#6] (292 ms)</li><li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:BundledDictionaryTests]/[test-template:shouldPreserveAllStemCandidatesForBundledDictionaries(java.lang.String, org.egothor.stemmer.StemmerPatchTrieLoader$Language, org.egothor.stemmer.ReductionMode)]/[test-template-invocation:#9] (317 ms)</li><li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:BundledDictionaryTests]/[test-template:shouldPreserveAllStemCandidatesForBundledDictionaries(java.lang.String, org.egothor.stemmer.StemmerPatchTrieLoader$Language, org.egothor.stemmer.ReductionMode)]/[test-template-invocation:#3] (323 ms)</li><li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:BundledDictionaryTests]/[test-template:shouldPreserveAllStemCandidatesForBundledDictionaries(java.lang.String, org.egothor.stemmer.StemmerPatchTrieLoader$Language, org.egothor.stemmer.ReductionMode)]/[test-template-invocation:#18] (331 ms)</li><li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:BundledDictionaryTests]/[test-template:shouldPreserveAllStemCandidatesForBundledDictionaries(java.lang.String, org.egothor.stemmer.StemmerPatchTrieLoader$Language, org.egothor.stemmer.ReductionMode)]/[test-template-invocation:#21] (355 ms)</li><li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:BundledDictionaryTests]/[test-template:shouldLoadBundledDictionariesEquivalentlyAcrossOverloads(java.lang.String, org.egothor.stemmer.StemmerPatchTrieLoader$Language)]/[test-template-invocation:#2] (359 ms)</li><li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:BundledDictionaryTests]/[test-template:shouldPreserveAllStemCandidatesForBundledDictionaries(java.lang.String, org.egothor.stemmer.StemmerPatchTrieLoader$Language, org.egothor.stemmer.ReductionMode)]/[test-template-invocation:#1] (455 ms)</li><li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:BundledDictionaryTests]/[test-template:shouldPreserveAllStemCandidatesForBundledDictionaries(java.lang.String, org.egothor.stemmer.StemmerPatchTrieLoader$Language, org.egothor.stemmer.ReductionMode)]/[test-template-invocation:#2] (487 ms)</li>
+</ul>
+
+<br/>
+
+Report generated by <a href='https://pitest.org'>PIT</a> 1.22.1
+
+</body>
+</html>
