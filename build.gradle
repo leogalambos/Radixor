@@ -128,6 +128,27 @@ tasks.named('jmh') {
     description = 'Runs JMH benchmarks for the Radixor algorithmic core and Snowball comparison suite.'
 }
 
+tasks.register('regressionArtifactGenerator', JavaExec) {
+    group = 'verification'
+    description = 'Generates deterministic compiled trie regression artifacts.'
+
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'org.egothor.stemmer.RegressionArtifactGenerator'
+
+    if (project.hasProperty('regressionInput')) {
+        args '--input', project.property('regressionInput').toString()
+    }
+    if (project.hasProperty('regressionOutput')) {
+        args '--output', project.property('regressionOutput').toString()
+    }
+    if (project.hasProperty('regressionStoreOriginal')) {
+        args '--store-original', project.property('regressionStoreOriginal').toString()
+    }
+    if (project.hasProperty('regressionReductionMode')) {
+        args '--reduction-mode', project.property('regressionReductionMode').toString()
+    }
+}
+
 javadoc {
     failOnError = false
 
