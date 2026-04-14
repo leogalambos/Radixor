@@ -11,6 +11,7 @@ on:
       - 'build.gradle'
       - 'settings.gradle'
       - 'gradle/**'
+      - 'dependency-suppression.xml'
       - 'gradlew'
       - 'gradlew.bat'
       - '.github/workflows/pages.yml'
@@ -97,6 +98,8 @@ jobs:
           JMH_CSV_LINK=''
           JMH_TXT_LATEST_LINK=''
           JMH_CSV_LATEST_LINK=''
+          DEPENDENCY_CHECK_LINK=''
+          DEPENDENCY_CHECK_LATEST_LINK=''
 
           if [ -d "build/reports/jmh" ]; then
             cp -R build/reports/jmh "${RUN_DIR}/jmh"
@@ -114,6 +117,16 @@ jobs:
             HAS_JMH="true"
           else
             HAS_JMH="false"
+          fi
+
+          if [ -d "build/reports/dependency-check" ]; then
+            cp -R build/reports/dependency-check "${RUN_DIR}/dependency-check"
+            cp -R build/reports/dependency-check "${LATEST_DIR}/dependency-check"
+
+            if [ -f "${RUN_DIR}/dependency-check/dependency-check-report.html" ]; then
+              DEPENDENCY_CHECK_LINK='<li><a href="./dependency-check/dependency-check-report.html">Dependency Vulnerability Report</a></li>'
+              DEPENDENCY_CHECK_LATEST_LINK='<li><a href="./builds/latest/dependency-check/dependency-check-report.html">Dependency Vulnerability Report</a></li>'
+            fi
           fi
 
           cat > "${RUN_DIR}/index.html" <<EOF
@@ -139,6 +152,7 @@ jobs:
               <li><a href="./test/">Test Report</a></li>
               <li><a href="./pmd/main.html">PMD Report</a></li>
               <li><a href="./coverage/">Coverage Report</a></li>
+              ${DEPENDENCY_CHECK_LINK:-<li>Dependency Vulnerability Report: not available</li>}
               <li><a href="./pitest/">Mutation Testing Report</a></li>
               $(
                 [ "${HAS_JMH}" = "true" ] && { echo "${JMH_TXT_LINK:-<li>Benchmark Results (TXT): not available</li>}"; echo "${JMH_CSV_LINK:-<li>Benchmark Results (CSV): not available</li>}"; } \
@@ -185,6 +199,7 @@ jobs:
               <li><a href="./builds/latest/test/">Test Report</a></li>
               <li><a href="./builds/latest/pmd/main.html">PMD Report</a></li>
               <li><a href="./builds/latest/coverage/">Coverage Report</a></li>
+              ${DEPENDENCY_CHECK_LATEST_LINK:-<li>Dependency Vulnerability Report: not currently available</li>}
               <li><a href="./builds/latest/pitest/">Mutation Testing Report</a></li>
               $(
                 [ "${HAS_JMH}" = "true" ] && { echo "${JMH_TXT_LATEST_LINK:-<li>Benchmark Results (TXT): not available</li>}"; echo "${JMH_CSV_LATEST_LINK:-<li>Benchmark Results (CSV): not available</li>}"; } \

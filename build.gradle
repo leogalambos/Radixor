@@ -6,6 +6,7 @@ plugins {
     id 'jacoco'
     id 'info.solidsoft.pitest' version '1.19.0'
     id 'me.champeau.jmh' version '0.7.2'
+    id 'org.owasp.dependencycheck' version '12.2.1'
     id 'com.palantir.git-version' version '4.0.0'
 }
 
@@ -14,6 +15,11 @@ version = gitVersion(prefix:'release@')
 
 def benchmarkReportsDirectory = layout.buildDirectory.dir('reports/jmh')
 
+def nvdApiKey = providers.gradleProperty('nvdApiKey')
+        .orElse(providers.environmentVariable('NVD_API_KEY'))
+        .orNull
+def dependencyCheckSuppressionFile = rootProject.file('dependency-suppression.xml')
+ 
 configurations {
     mockitoAgent
 }
@@ -52,6 +58,38 @@ dependencies {
     }
 }
 
+dependencyCheck {
+    failBuildOnCVSS = 7.0
+    failOnError = true
+    autoUpdate = true
+    formats = ['HTML', 'JSON']
+    outputDirectory = layout.buildDirectory.dir('reports/dependency-check').get().asFile.absolutePath
+
+    /*
+     * Keep the scan focused on actual Java dependency inputs used by this project.
+     * testRuntimeClasspath is included intentionally because the current external
+     * dependency surface is primarily test-scoped.
+     */
+    scanConfigurations = ['runtimeClasspath', 'testRuntimeClasspath', 'mockitoAgent']
+    skipTestGroups = false
+
+    analyzers {
+        experimentalEnabled = false
+        centralEnabled = true
+    }
+
+    nvd {
+        apiKey = nvdApiKey
+        delay = nvdApiKey != null ? 3500 : 8000
+        validForHours = 4
+    }
+    
+    if (dependencyCheckSuppressionFile.exists()) {
+        suppressionFile = dependencyCheckSuppressionFile.absolutePath
+        failBuildOnUnusedSuppressionRule = true
+    }
+} 
+
 tasks.withType(Test).configureEach {
     useJUnitPlatform()
     jvmArgs += "-javaagent:${configurations.mockitoAgent.singleFile}"
@@ -83,6 +121,7 @@ tasks.named('jacocoTestReport', JacocoReport) {
 
 tasks.named('check') {
     dependsOn(tasks.named('jacocoTestReport'))
+    // no-default, only on-demand: dependsOn(tasks.named('dependencyCheckAnalyze'))
 }
 
 pitest {
@@ -147,6 +186,16 @@ tasks.register('regressionArtifactGenerator', JavaExec) {
     if (project.hasProperty('regressionReductionMode')) {
         args '--reduction-mode', project.property('regressionReductionMode').toString()
     }
+}
+
+tasks.register('printDependencyCheckNvdConfig') {
+    doLast {
+        System.out.println("NVD API key present: " + (nvdApiKey != null && !nvdApiKey.isBlank()))
+    }
+}
+
+tasks.named('dependencyCheckAnalyze') {
+    dependsOn(tasks.named('printDependencyCheckNvdConfig'))
 }
 
 javadoc {
