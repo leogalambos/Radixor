@@ -93,9 +93,24 @@ jobs:
           cp -R build/reports/pitest "${RUN_DIR}/pitest"
           cp -R build/reports/pitest "${LATEST_DIR}/pitest"
 
+          JMH_TXT_LINK=''
+          JMH_CSV_LINK=''
+          JMH_TXT_LATEST_LINK=''
+          JMH_CSV_LATEST_LINK=''
+
           if [ -d "build/reports/jmh" ]; then
             cp -R build/reports/jmh "${RUN_DIR}/jmh"
             cp -R build/reports/jmh "${LATEST_DIR}/jmh"
+
+            if [ -f "${RUN_DIR}/jmh/jmh-results.txt" ]; then
+              JMH_TXT_LINK='<li><a href="./jmh/jmh-results.txt">Benchmark Results (TXT)</a></li>'
+              JMH_TXT_LATEST_LINK='<li><a href="./builds/latest/jmh/jmh-results.txt">Benchmark Results (TXT)</a></li>'
+            fi
+            if [ -f "${RUN_DIR}/jmh/jmh-results.csv" ]; then
+              JMH_CSV_LINK='<li><a href="./jmh/jmh-results.csv">Benchmark Results (CSV)</a></li>'
+              JMH_CSV_LATEST_LINK='<li><a href="./builds/latest/jmh/jmh-results.csv">Benchmark Results (CSV)</a></li>'
+            fi
+
             HAS_JMH="true"
           else
             HAS_JMH="false"
@@ -125,7 +140,10 @@ jobs:
               <li><a href="./pmd/main.html">PMD Report</a></li>
               <li><a href="./coverage/">Coverage Report</a></li>
               <li><a href="./pitest/">Mutation Testing Report</a></li>
-              $( [ "${HAS_JMH}" = "true" ] && echo '<li><a href="./jmh/">Benchmark Report</a></li>' || echo '<li>Benchmark Report: not available in this build</li>' )
+              $(
+                [ "${HAS_JMH}" = "true" ] && { echo "${JMH_TXT_LINK:-<li>Benchmark Results (TXT): not available</li>}"; echo "${JMH_CSV_LINK:-<li>Benchmark Results (CSV): not available</li>}"; } \
+                || echo '<li>Benchmark results: not available in this build</li>'
+              )
             </ul>
             <p><a href="../latest/">Open latest report set</a></p>
             <p><a href="../../">Back to report home</a></p>
@@ -168,13 +186,11 @@ jobs:
               <li><a href="./builds/latest/pmd/main.html">PMD Report</a></li>
               <li><a href="./builds/latest/coverage/">Coverage Report</a></li>
               <li><a href="./builds/latest/pitest/">Mutation Testing Report</a></li>
+              $(
+                [ "${HAS_JMH}" = "true" ] && { echo "${JMH_TXT_LATEST_LINK:-<li>Benchmark Results (TXT): not available</li>}"; echo "${JMH_CSV_LATEST_LINK:-<li>Benchmark Results (CSV): not available</li>}"; } \
+                || echo '<li>Benchmark results: not currently available</li>'
+              )
           EOF
-
-            if [ "${HAS_JMH}" = "true" ]; then
-              echo '      <li><a href="./builds/latest/jmh/">Benchmark Report</a></li>'
-            else
-              echo '      <li>Benchmark Report: not currently available</li>'
-            fi
 
             cat <<EOF
             </ul>
