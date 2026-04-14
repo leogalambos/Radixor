@@ -1,0 +1,432 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StemmerPatchTrieLoader.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Radixor</a> &gt; <a href="index.source.html" class="el_package">org.egothor.stemmer</a> &gt; <span class="el_source">StemmerPatchTrieLoader.java</span></div><h1>StemmerPatchTrieLoader.java</h1><pre class="source lang-java linenums">/*******************************************************************************
+ * Copyright (C) 2026, Leo Galambos
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * 
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ * 
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ * 
+ * 3. All advertising materials mentioning features or use of this software must
+ *    display the following acknowledgement:
+ *    This product includes software developed by the Egothor project.
+ * 
+ * 4. Neither the name of the copyright holder nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&quot;
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ ******************************************************************************/
+package org.egothor.stemmer;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Objects;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+/**
+ * Loader of patch-command tries from bundled stemmer dictionaries.
+ *
+ * &lt;p&gt;
+ * Each dictionary is line-oriented. The first token on a line is interpreted as
+ * the stem, and all following tokens are treated as known variants of that
+ * stem.
+ *
+ * &lt;p&gt;
+ * For each line, the loader inserts:
+ * &lt;ul&gt;
+ * &lt;li&gt;the stem itself mapped to the canonical no-op patch command
+ * {@link PatchCommandEncoder#NOOP_PATCH}, when requested by the caller&lt;/li&gt;
+ * &lt;li&gt;every distinct variant mapped to the patch command transforming that
+ * variant to the stem&lt;/li&gt;
+ * &lt;/ul&gt;
+ *
+ * &lt;p&gt;
+ * Parsing is delegated to {@link StemmerDictionaryParser}, which also supports
+ * line remarks introduced by {@code #} or {@code //}.
+ */
+public final class StemmerPatchTrieLoader {
+
+    /**
+     * Logger of this class.
+     */
+<span class="fc" id="L74">    private static final Logger LOGGER = Logger.getLogger(StemmerPatchTrieLoader.class.getName());</span>
+
+    /**
+     * Canonical no-op patch command used when the source and target are equal.
+     */
+<span class="fc" id="L79">    private static final String NOOP_PATCH_COMMAND = PatchCommandEncoder.NOOP_PATCH;</span>
+
+    /**
+     * Utility class.
+     */
+<span class="nc" id="L84">    private StemmerPatchTrieLoader() {</span>
+<span class="nc" id="L85">        throw new AssertionError(&quot;No instances.&quot;);</span>
+    }
+
+    /**
+     * Supported bundled stemmer dictionaries.
+     */
+<span class="fc" id="L91">    public enum Language {</span>
+
+        /**
+         * Danish.
+         */
+<span class="fc" id="L96">        DA_DK(&quot;da_dk&quot;),</span>
+
+        /**
+         * German.
+         */
+<span class="fc" id="L101">        DE_DE(&quot;de_de&quot;),</span>
+
+        /**
+         * Spanish.
+         */
+<span class="fc" id="L106">        ES_ES(&quot;es_es&quot;),</span>
+
+        /**
+         * French.
+         */
+<span class="fc" id="L111">        FR_FR(&quot;fr_fr&quot;),</span>
+
+        /**
+         * Italian.
+         */
+<span class="fc" id="L116">        IT_IT(&quot;it_it&quot;),</span>
+
+        /**
+         * Dutch.
+         */
+<span class="fc" id="L121">        NL_NL(&quot;nl_nl&quot;),</span>
+
+        /**
+         * Norwegian.
+         */
+<span class="fc" id="L126">        NO_NO(&quot;no_no&quot;),</span>
+
+        /**
+         * Portuguese.
+         */
+<span class="fc" id="L131">        PT_PT(&quot;pt_pt&quot;),</span>
+
+        /**
+         * Russian.
+         */
+<span class="fc" id="L136">        RU_RU(&quot;ru_ru&quot;),</span>
+
+        /**
+         * Swedish.
+         */
+<span class="fc" id="L141">        SV_SE(&quot;sv_se&quot;),</span>
+
+        /**
+         * English.
+         */
+<span class="fc" id="L146">        US_UK(&quot;us_uk&quot;),</span>
+
+        /**
+         * English professional dictionary.
+         */
+<span class="fc" id="L151">        US_UK_PROFI(&quot;us_uk.profi&quot;);</span>
+
+        /**
+         * Resource directory name.
+         */
+        private final String resourceDirectory;
+
+        /**
+         * Creates a language constant.
+         *
+         * @param resourceDirectory resource directory name
+         */
+<span class="fc" id="L163">        Language(final String resourceDirectory) {</span>
+<span class="fc" id="L164">            this.resourceDirectory = resourceDirectory;</span>
+<span class="fc" id="L165">        }</span>
+
+        /**
+         * Returns the classpath resource path of the stemmer dictionary.
+         *
+         * @return classpath resource path
+         */
+        public String resourcePath() {
+<span class="fc" id="L173">            return this.resourceDirectory + &quot;/stemmer&quot;;</span>
+        }
+
+        /**
+         * Returns the resource directory name.
+         *
+         * @return resource directory name
+         */
+        public String resourceDirectory() {
+<span class="nc" id="L182">            return this.resourceDirectory;</span>
+        }
+    }
+
+    /**
+     * Loads a bundled dictionary using explicit reduction settings.
+     *
+     * @param language          bundled language dictionary
+     * @param storeOriginal     whether the stem itself should be inserted using the
+     *                          canonical no-op patch command
+     * @param reductionSettings reduction settings
+     * @return compiled patch-command trie
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IOException          if the dictionary cannot be found or read
+     */
+    public static FrequencyTrie&lt;String&gt; load(final Language language, final boolean storeOriginal,
+            final ReductionSettings reductionSettings) throws IOException {
+<span class="fc" id="L199">        Objects.requireNonNull(language, &quot;language&quot;);</span>
+<span class="fc" id="L200">        Objects.requireNonNull(reductionSettings, &quot;reductionSettings&quot;);</span>
+
+<span class="fc" id="L202">        final String resourcePath = language.resourcePath();</span>
+
+<span class="fc" id="L204">        try (InputStream inputStream = openBundledResource(resourcePath);</span>
+<span class="fc" id="L205">                BufferedReader reader = new BufferedReader(</span>
+                        new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+<span class="fc" id="L207">            return load(reader, resourcePath, storeOriginal, reductionSettings);</span>
+        }
+    }
+
+    /**
+     * Loads a bundled dictionary using default settings for the supplied reduction
+     * mode.
+     *
+     * @param language      bundled language dictionary
+     * @param storeOriginal whether the stem itself should be inserted using the
+     *                      canonical no-op patch command
+     * @param reductionMode reduction mode
+     * @return compiled patch-command trie
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IOException          if the dictionary cannot be found or read
+     */
+    public static FrequencyTrie&lt;String&gt; load(final Language language, final boolean storeOriginal,
+            final ReductionMode reductionMode) throws IOException {
+<span class="fc" id="L225">        Objects.requireNonNull(reductionMode, &quot;reductionMode&quot;);</span>
+<span class="fc" id="L226">        return load(language, storeOriginal, ReductionSettings.withDefaults(reductionMode));</span>
+    }
+
+    /**
+     * Loads a dictionary from a filesystem path using explicit reduction settings.
+     *
+     * @param path              path to the dictionary file
+     * @param storeOriginal     whether the stem itself should be inserted using the
+     *                          canonical no-op patch command
+     * @param reductionSettings reduction settings
+     * @return compiled patch-command trie
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IOException          if the file cannot be opened or read
+     */
+    public static FrequencyTrie&lt;String&gt; load(final Path path, final boolean storeOriginal,
+            final ReductionSettings reductionSettings) throws IOException {
+<span class="fc" id="L242">        Objects.requireNonNull(path, &quot;path&quot;);</span>
+<span class="fc" id="L243">        Objects.requireNonNull(reductionSettings, &quot;reductionSettings&quot;);</span>
+
+<span class="fc" id="L245">        try (BufferedReader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {</span>
+<span class="fc" id="L246">            return load(reader, path.toAbsolutePath().toString(), storeOriginal, reductionSettings);</span>
+        }
+    }
+
+    /**
+     * Loads a dictionary from a filesystem path using default settings for the
+     * supplied reduction mode.
+     *
+     * @param path          path to the dictionary file
+     * @param storeOriginal whether the stem itself should be inserted using the
+     *                      canonical no-op patch command
+     * @param reductionMode reduction mode
+     * @return compiled patch-command trie
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IOException          if the file cannot be opened or read
+     */
+    public static FrequencyTrie&lt;String&gt; load(final Path path, final boolean storeOriginal,
+            final ReductionMode reductionMode) throws IOException {
+<span class="fc" id="L264">        Objects.requireNonNull(reductionMode, &quot;reductionMode&quot;);</span>
+<span class="fc" id="L265">        return load(path, storeOriginal, ReductionSettings.withDefaults(reductionMode));</span>
+    }
+
+    /**
+     * Loads a dictionary from a filesystem path string using explicit reduction
+     * settings.
+     *
+     * @param fileName          file name or path string
+     * @param storeOriginal     whether the stem itself should be inserted using the
+     *                          canonical no-op patch command
+     * @param reductionSettings reduction settings
+     * @return compiled patch-command trie
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IOException          if the file cannot be opened or read
+     */
+    public static FrequencyTrie&lt;String&gt; load(final String fileName, final boolean storeOriginal,
+            final ReductionSettings reductionSettings) throws IOException {
+<span class="fc" id="L282">        Objects.requireNonNull(fileName, &quot;fileName&quot;);</span>
+<span class="fc" id="L283">        return load(Path.of(fileName), storeOriginal, reductionSettings);</span>
+    }
+
+    /**
+     * Loads a dictionary from a filesystem path string using default settings for
+     * the supplied reduction mode.
+     *
+     * @param fileName      file name or path string
+     * @param storeOriginal whether the stem itself should be inserted using the
+     *                      canonical no-op patch command
+     * @param reductionMode reduction mode
+     * @return compiled patch-command trie
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IOException          if the file cannot be opened or read
+     */
+    public static FrequencyTrie&lt;String&gt; load(final String fileName, final boolean storeOriginal,
+            final ReductionMode reductionMode) throws IOException {
+<span class="fc" id="L300">        Objects.requireNonNull(fileName, &quot;fileName&quot;);</span>
+<span class="fc" id="L301">        return load(Path.of(fileName), storeOriginal, reductionMode);</span>
+    }
+
+    /**
+     * Parses one dictionary and builds the compiled trie.
+     *
+     * @param reader            dictionary reader
+     * @param sourceDescription logical source description used for diagnostics
+     * @param storeOriginal     whether the stem itself should be inserted using the
+     *                          canonical no-op patch command
+     * @param reductionSettings reduction settings
+     * @return compiled patch-command trie
+     * @throws IOException if parsing fails
+     */
+    private static FrequencyTrie&lt;String&gt; load(final BufferedReader reader, final String sourceDescription,
+            final boolean storeOriginal, final ReductionSettings reductionSettings) throws IOException {
+<span class="fc" id="L317">        final FrequencyTrie.Builder&lt;String&gt; builder = new FrequencyTrie.Builder&lt;&gt;(String[]::new, reductionSettings);</span>
+<span class="fc" id="L318">        final PatchCommandEncoder patchCommandEncoder = new PatchCommandEncoder();</span>
+<span class="fc" id="L319">        final int[] insertedMappings = new int[1];</span>
+
+<span class="fc" id="L321">        final StemmerDictionaryParser.ParseStatistics statistics = StemmerDictionaryParser.parse(reader,</span>
+                sourceDescription, (stem, variants, lineNumber) -&gt; {
+<span class="fc bfc" id="L323" title="All 2 branches covered.">                    if (storeOriginal) {</span>
+<span class="fc" id="L324">                        builder.put(stem, NOOP_PATCH_COMMAND);</span>
+<span class="fc" id="L325">                        insertedMappings[0]++;</span>
+                    }
+
+<span class="fc bfc" id="L328" title="All 2 branches covered.">                    for (String variant : variants) {</span>
+<span class="fc bfc" id="L329" title="All 2 branches covered.">                        if (!variant.equals(stem)) {</span>
+<span class="fc" id="L330">                            builder.put(variant, patchCommandEncoder.encode(variant, stem));</span>
+<span class="fc" id="L331">                            insertedMappings[0]++;</span>
+                        }
+                    }
+<span class="fc" id="L334">                });</span>
+
+<span class="pc bpc" id="L336" title="1 of 2 branches missed.">        if (LOGGER.isLoggable(Level.FINE)) {</span>
+<span class="nc" id="L337">            LOGGER.log(Level.FINE,</span>
+                    &quot;Loaded stemmer dictionary from {0}; insertedMappings={1}, lines={2}, entries={3}, ignoredLines={4}.&quot;,
+<span class="nc" id="L339">                    new Object[] { sourceDescription, insertedMappings[0], statistics.lineCount(),</span>
+<span class="nc" id="L340">                            statistics.entryCount(), statistics.ignoredLineCount() });</span>
+        }
+
+<span class="fc" id="L343">        return builder.build();</span>
+    }
+
+    /**
+     * Loads a GZip-compressed binary patch-command trie from a filesystem path.
+     *
+     * @param path path to the compressed binary trie file
+     * @return compiled patch-command trie
+     * @throws NullPointerException if {@code path} is {@code null}
+     * @throws IOException          if the file cannot be opened, decompressed, or
+     *                              read
+     */
+    public static FrequencyTrie&lt;String&gt; loadBinary(final Path path) throws IOException {
+<span class="fc" id="L356">        Objects.requireNonNull(path, &quot;path&quot;);</span>
+<span class="fc" id="L357">        return StemmerPatchTrieBinaryIO.read(path);</span>
+    }
+
+    /**
+     * Loads a GZip-compressed binary patch-command trie from a filesystem path
+     * string.
+     *
+     * @param fileName file name or path string
+     * @return compiled patch-command trie
+     * @throws NullPointerException if {@code fileName} is {@code null}
+     * @throws IOException          if the file cannot be opened, decompressed, or
+     *                              read
+     */
+    public static FrequencyTrie&lt;String&gt; loadBinary(final String fileName) throws IOException {
+<span class="fc" id="L371">        Objects.requireNonNull(fileName, &quot;fileName&quot;);</span>
+<span class="fc" id="L372">        return StemmerPatchTrieBinaryIO.read(fileName);</span>
+    }
+
+    /**
+     * Loads a GZip-compressed binary patch-command trie from an input stream.
+     *
+     * @param inputStream source input stream
+     * @return compiled patch-command trie
+     * @throws NullPointerException if {@code inputStream} is {@code null}
+     * @throws IOException          if the stream cannot be decompressed or read
+     */
+    public static FrequencyTrie&lt;String&gt; loadBinary(final InputStream inputStream) throws IOException {
+<span class="fc" id="L384">        Objects.requireNonNull(inputStream, &quot;inputStream&quot;);</span>
+<span class="fc" id="L385">        return StemmerPatchTrieBinaryIO.read(inputStream);</span>
+    }
+
+    /**
+     * Saves a compiled patch-command trie as a GZip-compressed binary file.
+     *
+     * @param trie compiled trie
+     * @param path target file
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IOException          if writing fails
+     */
+    public static void saveBinary(final FrequencyTrie&lt;String&gt; trie, final Path path) throws IOException {
+<span class="fc" id="L397">        Objects.requireNonNull(trie, &quot;trie&quot;);</span>
+<span class="fc" id="L398">        Objects.requireNonNull(path, &quot;path&quot;);</span>
+<span class="fc" id="L399">        StemmerPatchTrieBinaryIO.write(trie, path);</span>
+<span class="fc" id="L400">    }</span>
+
+    /**
+     * Saves a compiled patch-command trie as a GZip-compressed binary file.
+     *
+     * @param trie     compiled trie
+     * @param fileName target file name or path string
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IOException          if writing fails
+     */
+    public static void saveBinary(final FrequencyTrie&lt;String&gt; trie, final String fileName) throws IOException {
+<span class="fc" id="L411">        Objects.requireNonNull(trie, &quot;trie&quot;);</span>
+<span class="nc" id="L412">        Objects.requireNonNull(fileName, &quot;fileName&quot;);</span>
+<span class="nc" id="L413">        StemmerPatchTrieBinaryIO.write(trie, fileName);</span>
+<span class="nc" id="L414">    }</span>
+
+    /**
+     * Opens a bundled resource from the classpath.
+     *
+     * @param resourcePath classpath resource path
+     * @return opened input stream
+     * @throws IOException if the resource cannot be found
+     */
+    private static InputStream openBundledResource(final String resourcePath) throws IOException {
+<span class="fc" id="L424">        final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();</span>
+<span class="fc" id="L425">        final InputStream inputStream = classLoader.getResourceAsStream(resourcePath);</span>
+<span class="pc bpc" id="L426" title="1 of 2 branches missed.">        if (inputStream == null) {</span>
+<span class="nc" id="L427">            throw new IOException(&quot;Stemmer resource not found: &quot; + resourcePath);</span>
+        }
+<span class="fc" id="L429">        return inputStream;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
