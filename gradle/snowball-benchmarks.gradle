@@ -1,0 +1,49 @@
+def snowballVersion = '3.0.1'
+def snowballArchiveName = "libstemmer_java-${snowballVersion}.tar.gz"
+def snowballDownloadUrl = "https://snowballstem.org/dist/${snowballArchiveName}"
+def snowballDownloadFile = layout.buildDirectory.file("third-party/snowball/${snowballArchiveName}")
+def snowballExtractDirectory = layout.buildDirectory.dir('third-party/snowball/source')
+def snowballJavaSourceDirectory = layout.buildDirectory.dir(
+        "third-party/snowball/source/libstemmer_java-${snowballVersion}/java")
+
+tasks.register('downloadSnowballJava') {
+    group = 'build setup'
+    description = 'Downloads the official Snowball Java source distribution for benchmark-only use.'
+
+    outputs.file(snowballDownloadFile)
+
+    doLast {
+        File targetFile = snowballDownloadFile.get().asFile
+        targetFile.parentFile.mkdirs()
+
+        if (!targetFile.exists()) {
+            new URL(snowballDownloadUrl).withInputStream { inputStream ->
+                targetFile.withOutputStream { outputStream ->
+                    outputStream << inputStream
+                }
+            }
+        }
+    }
+}
+
+tasks.register('extractSnowballJava', Copy) {
+    group = 'build setup'
+    description = 'Extracts the official Snowball Java source distribution.'
+
+    dependsOn(tasks.named('downloadSnowballJava'))
+
+    from(tarTree(resources.gzip(snowballDownloadFile)))
+    into(snowballExtractDirectory)
+}
+
+sourceSets {
+    jmh {
+        java {
+            srcDir(snowballJavaSourceDirectory)
+        }
+    }
+}
+
+tasks.named('compileJmhJava') {
+    dependsOn(tasks.named('extractSnowballJava'))
+}

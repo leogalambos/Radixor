@@ -125,7 +125,7 @@ jmh {
 
 tasks.named('jmh') {
     group = 'verification'
-    description = 'Runs JMH benchmarks for the Radixor algorithmic core.'
+    description = 'Runs JMH benchmarks for the Radixor algorithmic core and Snowball comparison suite.'
 }
 
 javadoc {
@@ -153,6 +153,8 @@ javadoc {
 
     source = sourceSets.main.allJava
 }
+
+apply from: 'gradle/snowball-benchmarks.gradle'
 
 gradle.taskGraph.whenReady { taskGraph ->
     def banner = """

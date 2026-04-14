@@ -2,9 +2,19 @@
 
 # Radixor
 
-*Fast algorithmic stemming with compact patch-command tries.*
+*Fast algorithmic stemming with compact patch-command tries — measured at about 4× to 6× the throughput of the Snowball Porter stemmer family on the current English benchmark workload.*
 
 **Radixor** is a fast, algorithmic stemming toolkit for Java, built around compact **patch-command tries** in the tradition of the original **Egothor** stemmer.
+
+On the current JMH English comparison benchmark, Radixor with bundled `US_UK_PROFI`
+reaches approximately **31 to 32 million tokens per second**, compared with about
+**8 million tokens per second** for Snowball original Porter and about
+**5 to 5.5 million tokens per second** for Snowball English (Porter2).
+
+That means the current Radixor implementation is approximately:
+
+- **4× faster** than Snowball original Porter
+- **6× faster** than Snowball English (Porter2)
 
 It is designed for production search and text-processing systems that need stemming which is:
 
@@ -22,6 +32,7 @@ Radixor keeps the valuable core of the original Egothor idea, modernizes the imp
 - [Heritage](#heritage)
 - [What Radixor adds](#what-radixor-adds)
 - [Key features](#key-features)
+- [Performance](#performance)
 - [Documentation](#documentation)
 - [Project philosophy](#project-philosophy)
 - [Historical note](#historical-note)
@@ -37,7 +48,7 @@ This gives you a stemmer that is:
 - compact enough for deployment-friendly binary artifacts
 - suitable for both offline compilation and runtime loading
 
-Radixor is especially attractive when you want something more adaptable than simple suffix stripping, but much smaller and easier to operate than a full morphological analyzer.
+Radixor is especially attractive when you want something more adaptable than simple suffix stripping, but much smaller and easier to operate than a full morphological analyzer. In the current English benchmark comparison against the Snowball Porter stemmer family, it also delivers a substantial throughput advantage.
 
 ## Heritage
 
@@ -95,6 +106,27 @@ Compared with the historical baseline, Radixor emphasizes:
 - Bundled language resources
 - Support for extending compiled stemmer tables
 
+## Performance
+
+Radixor includes a JMH benchmark suite for both its own algorithmic core and a
+side-by-side comparison against the Snowball Porter stemmer family.
+
+On the current English comparison workload, Radixor with bundled `US_UK_PROFI`
+reaches approximately **31 to 32 million tokens per second**. Snowball original
+Porter reaches approximately **8 million tokens per second**, and Snowball
+English (Porter2) approximately **5 to 5.5 million tokens per second**.
+
+That places Radixor at approximately **4× the throughput of Snowball original Porter**
+and approximately **6× the throughput of Snowball English (Porter2)**
+on the current benchmark workload.
+
+This is a throughput comparison on the same deterministic token stream. It is
+not a claim that the compared stemmers are linguistically equivalent or
+interchangeable.
+
+For benchmark scope, workload design, environment, commands, report locations,
+and interpretation guidance, see [Benchmarking](docs/benchmarking.md).
+
 ## Documentation
 
 The repository keeps the front page concise and places detailed documentation under `docs/`.
@@ -121,6 +153,9 @@ Start here:
 
 - [Quality and Operations](docs/quality-and-operations.md)  
   Testing, persistence, deployment, and operational guidance.
+
+- [Benchmarking](docs/benchmarking.md)  
+  JMH benchmark design, Snowball comparison, execution, and interpretation.
 
 ## Project philosophy
 
