@@ -1,14 +1,18 @@
 plugins {
     id 'java'
+    id 'eclipse'
     id 'application'
     id 'pmd'
     id 'jacoco'
     id 'info.solidsoft.pitest' version '1.19.0'
+    id 'me.champeau.jmh' version '0.7.2'
     id 'com.palantir.git-version' version '4.0.0'
 }
 
 group = 'org.egothor.stemmer'
 version = gitVersion(prefix:'release@')
+
+def benchmarkReportsDirectory = layout.buildDirectory.dir('reports/jmh')
 
 configurations {
     mockitoAgent
@@ -34,6 +38,8 @@ repositories {
 }
 
 dependencies {
+	jmhImplementation sourceSets.main.output
+
     testImplementation platform(libs.junit.bom)
     testImplementation libs.junit.jupiter
     testRuntimeOnly libs.junit.platform.launcher
@@ -102,6 +108,24 @@ pitest {
 
 application {
     mainClass = 'org.egothor.stemmer.Compile'
+}
+
+jmh {
+    jmhVersion = '1.37'
+    warmupIterations = 3
+    iterations = 5
+    fork = 1
+    benchmarkMode = ['avgt']
+    timeUnit = 'ns'
+    resultFormat = 'CSV'
+    resultsFile = benchmarkReportsDirectory.map { it.file('jmh-results.csv').asFile }.get()
+    humanOutputFile = benchmarkReportsDirectory.map { it.file('jmh-results.txt').asFile }.get()
+    duplicateClassesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+tasks.named('jmh') {
+    group = 'verification'
+    description = 'Runs JMH benchmarks for the Radixor algorithmic core.'
 }
 
 javadoc {

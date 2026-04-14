@@ -4,6 +4,16 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'src/main/**'
+      - 'src/test/**'
+      - 'src/jmh/**'
+      - 'build.gradle'
+      - 'settings.gradle'
+      - 'gradle/**'
+      - 'gradlew'
+      - 'gradlew.bat'
+      - '.github/workflows/pages.yml'
   workflow_dispatch:
 
 permissions:
@@ -37,7 +47,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Build reports for publication
-        run: ./gradlew --no-daemon clean build pmdMain javadoc jacocoTestReport pitest
+        run: ./gradlew --no-daemon clean build pmdMain javadoc jacocoTestReport pitest jmh
 
       - name: Prepare gh-pages worktree
         shell: bash
