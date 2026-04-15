@@ -48,7 +48,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Build reports for publication
-        run: ./gradlew --no-daemon clean build pmdMain javadoc jacocoTestReport pitest jmh
+        run: ./gradlew --no-daemon clean build pmdMain javadoc jacocoTestReport pitest jmh cyclonedxBom
 
       - name: Prepare gh-pages worktree
         shell: bash
@@ -100,6 +100,10 @@ jobs:
           JMH_CSV_LATEST_LINK=''
           DEPENDENCY_CHECK_LINK=''
           DEPENDENCY_CHECK_LATEST_LINK=''
+          SBOM_JSON_LINK=''
+          SBOM_XML_LINK=''
+          SBOM_JSON_LATEST_LINK=''
+          SBOM_XML_LATEST_LINK=''
 
           if [ -d "build/reports/jmh" ]; then
             cp -R build/reports/jmh "${RUN_DIR}/jmh"
@@ -129,6 +133,15 @@ jobs:
             fi
           fi
 
+          if [ -d "build/reports/sbom" ]; then
+            cp -R build/reports/sbom "${RUN_DIR}/sbom"
+            cp -R build/reports/sbom "${LATEST_DIR}/sbom"
+            SBOM_JSON_LINK='<li><a href="./sbom/radixor-sbom.json">SBOM (JSON)</a></li>'
+            SBOM_XML_LINK='<li><a href="./sbom/radixor-sbom.xml">SBOM (XML)</a></li>'
+            SBOM_JSON_LATEST_LINK='<li><a href="./builds/latest/sbom/radixor-sbom.json">SBOM (JSON)</a></li>'
+            SBOM_XML_LATEST_LINK='<li><a href="./builds/latest/sbom/radixor-sbom.xml">SBOM (XML)</a></li>'
+          fi
+
           cat > "${RUN_DIR}/index.html" <<EOF
           <!doctype html>
           <html lang="en">
@@ -153,6 +166,8 @@ jobs:
               <li><a href="./pmd/main.html">PMD Report</a></li>
               <li><a href="./coverage/">Coverage Report</a></li>
               ${DEPENDENCY_CHECK_LINK:-<li>Dependency Vulnerability Report: not available</li>}
+              ${SBOM_JSON_LINK:-<li>SBOM (JSON): not available</li>}
+              ${SBOM_XML_LINK:-<li>SBOM (XML): not available</li>}
               <li><a href="./pitest/">Mutation Testing Report</a></li>
               $(
                 [ "${HAS_JMH}" = "true" ] && { echo "${JMH_TXT_LINK:-<li>Benchmark Results (TXT): not available</li>}"; echo "${JMH_CSV_LINK:-<li>Benchmark Results (CSV): not available</li>}"; } \
@@ -200,6 +215,8 @@ jobs:
               <li><a href="./builds/latest/pmd/main.html">PMD Report</a></li>
               <li><a href="./builds/latest/coverage/">Coverage Report</a></li>
               ${DEPENDENCY_CHECK_LATEST_LINK:-<li>Dependency Vulnerability Report: not currently available</li>}
+              ${SBOM_JSON_LATEST_LINK:-<li>SBOM (JSON): not available</li>}
+              ${SBOM_XML_LATEST_LINK:-<li>SBOM (XML): not available</li>}
               <li><a href="./builds/latest/pitest/">Mutation Testing Report</a></li>
               $(
                 [ "${HAS_JMH}" = "true" ] && { echo "${JMH_TXT_LATEST_LINK:-<li>Benchmark Results (TXT): not available</li>}"; echo "${JMH_CSV_LATEST_LINK:-<li>Benchmark Results (CSV): not available</li>}"; } \
