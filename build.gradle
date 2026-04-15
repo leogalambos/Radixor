@@ -41,8 +41,10 @@ tasks.withType(JavaCompile).configureEach {
     options.release = 21
 }
 
-repositories {
-    mavenCentral()
+dependencyLocking {
+    lockAllConfigurations()
+
+	lockMode = LockMode.STRICT
 }
 
 dependencies {
@@ -94,10 +96,13 @@ dependencyCheck {
 
 tasks.withType(Test).configureEach {
     useJUnitPlatform()
-    jvmArgs += "-javaagent:${configurations.mockitoAgent.singleFile}"
-    
+
+    doFirst {
+        jvmArgs "-javaagent:${configurations.mockitoAgent.singleFile}"
+    }
+
     finalizedBy(tasks.named('jacocoTestReport'))
-    
+
     reports {
         junitXml.required = true
         html.required = true

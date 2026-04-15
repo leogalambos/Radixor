@@ -1,3 +1,23 @@
+#
+# After changing dependency versions:
+#
+# run:
+#     ./gradlew --write-locks classes testClasses jmh distZip cyclonedxBom
+#
+# if needed, refresh verification metadata:
+#     ./gradlew --write-verification-metadata sha256 test jmh distZip cyclonedxBom
+#
+# (optional - for Eclipse IDE)
+# insert trusted-artifacts into gradle/verification-metadata.xml/verification-metadata/configuration:
+#     <trusted-artifacts>
+#       <trust file=".*-javadoc[.]jar" regex="true"/>
+#       <trust file=".*-sources[.]jar" regex="true"/>
+#     </trusted-artifacts>
+#
+# commit:
+#     gradle.lockfile
+#     gradle/verification-metadata.xml
+#
 [versions]
 junit = "5.14.3"
 mockito = "5.23.0"
@@ -9,4 +29,3 @@ junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher
 
 mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
 mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter", version.ref = "mockito" }
-

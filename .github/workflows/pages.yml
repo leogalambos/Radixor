@@ -9,6 +9,8 @@ on:
       - 'src/test/**'
       - 'src/jmh/**'
       - 'build.gradle'
+      - 'gradle.properties'
+      - 'gradle.lockfile'
       - 'settings.gradle'
       - 'gradle/**'
       - 'dependency-suppression.xml'
@@ -46,6 +48,14 @@ jobs:
 
       - name: Set up Gradle caching and instrumentation
         uses: gradle/actions/setup-gradle@v4
+		 
+      - name: Verify reproducibility inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f gradle.lockfile
+          test -f gradle.properties
+          test -f gradle/verification-metadata.xml
 
       - name: Build reports for publication
         run: ./gradlew --no-daemon clean build pmdMain javadoc jacocoTestReport pitest jmh cyclonedxBom

@@ -11,6 +11,9 @@ on:
       - 'src/main/**'
       - 'src/jmh/**'
       - 'build.gradle'
+      - 'gradle.properties'
+      - 'gradle.lockfile'
+      - 'settings.gradle'
       - 'gradle/**'
       - 'gradlew'
       - 'gradlew.bat'
@@ -37,6 +40,14 @@ jobs:
 
       - name: Make Gradle executable
         run: chmod +x ./gradlew
+
+      - name: Verify reproducibility inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f gradle.lockfile
+          test -f gradle.properties
+          test -f gradle/verification-metadata.xml
 
       - name: Run JMH benchmarks
         run: ./gradlew clean jmh --no-daemon
