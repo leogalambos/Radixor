@@ -157,6 +157,9 @@ jobs:
           test -f gradle/verification-metadata.xml
 
       - name: Build release distribution, signed Maven bundle, and SBOM
+        env:
+          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+          SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
         run: ./gradlew --no-daemon clean build pmdMain javadoc jacocoTestReport distZip cyclonedxBom centralBundle
 
       - name: Publish bundle to Maven Central
