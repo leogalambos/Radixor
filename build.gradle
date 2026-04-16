@@ -187,6 +187,54 @@ pitest {
 
 application {
     mainClass = 'org.egothor.stemmer.Compile'
+    applicationName = 'radixor'
+    executableDir = 'bin'
+}
+
+distributions {
+    main {
+        distributionBaseName = 'radixor'
+
+        contents {
+            from('README.md') {
+                into ''
+            }
+
+            from('LICENSE') {
+                into ''
+            }
+
+            from('docs') {
+                into 'docs'
+                include 'quick-start.md'
+                include 'cli-compilation.md'
+                include 'dictionary-format.md'
+                include 'built-in-languages.md'
+                include 'programmatic-usage.md'
+                include 'architecture-and-reduction.md'
+                include 'quality-and-operations.md'
+                include 'benchmarking.md'
+            }
+            
+            from(layout.buildDirectory.dir('generated/release-notes')) {
+                into ''
+                include 'CHANGELOG.md'
+            }
+        }
+    }
+}
+
+tasks.named('startScripts') {
+    applicationName = 'radixor'
+}
+
+tasks.named('distZip', Zip) {
+    archiveBaseName = 'radixor'
+    archiveClassifier = 'bin'
+}
+
+tasks.named('distTar') {
+    enabled = false
 }
 
 jmh {

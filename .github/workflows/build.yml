@@ -156,11 +156,31 @@ jobs:
           test -f gradle.properties
           test -f gradle/verification-metadata.xml
 
-      - name: Build release distribution, signed Maven bundle, and SBOM
+      - name: Generate release changelog for tagged builds
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/release@')
+        shell: bash
+        run: |
+          set -euo pipefail
+          chmod +x ./tools/generate-release-notes.sh
+          mkdir -p build/generated/release-notes
+          ./tools/generate-release-notes.sh "${GITHUB_REF_NAME}" > build/generated/release-notes/CHANGELOG.md
+
+      - name: Build release inputs, signed Maven bundle, and SBOM
         env:
           SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
           SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
-        run: ./gradlew --no-daemon clean build pmdMain javadoc jacocoTestReport distZip cyclonedxBom centralBundle
+        run: ./gradlew --no-daemon clean build pmdMain javadoc jacocoTestReport cyclonedxBom centralBundle
+
+      - name: Generate release changelog
+        shell: bash
+        run: |
+          set -euo pipefail
+          chmod +x ./tools/generate-release-notes.sh
+          mkdir -p build/generated/release-notes
+          ./tools/generate-release-notes.sh "${GITHUB_REF_NAME}" > build/generated/release-notes/CHANGELOG.md
+
+      - name: Package release distribution
+        run: ./gradlew --no-daemon distZip
 
       - name: Publish bundle to Maven Central
         shell: bash
@@ -188,7 +208,7 @@ jobs:
       - name: Publish GitHub release assets
         uses: softprops/action-gh-release@v2
         with:
-          generate_release_notes: true
+          body_path: build/generated/release-notes/CHANGELOG.md
           files: |
             build/distributions/*.zip
             build/reports/sbom/radixor-sbom.json
