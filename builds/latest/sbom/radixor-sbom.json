@@ -1,0 +1,39 @@
+{
+  "bomFormat" : "CycloneDX",
+  "specVersion" : "1.6",
+  "serialNumber" : "urn:uuid:08646796-9d26-4b1c-b6bc-d5ff8efb7961",
+  "version" : 1,
+  "metadata" : {
+    "timestamp" : "2026-04-16T01:10:35Z",
+    "tools" : {
+      "components" : [
+        {
+          "type" : "application",
+          "author" : "CycloneDX",
+          "name" : "cyclonedx-gradle-plugin",
+          "version" : "3.2.4"
+        }
+      ]
+    },
+    "component" : {
+      "type" : "library",
+      "bom-ref" : "pkg:maven/org.egothor/Radixor@ff85aa6?project_path=%3A",
+      "group" : "org.egothor",
+      "name" : "Radixor",
+      "version" : "ff85aa6",
+      "purl" : "pkg:maven/org.egothor/Radixor@ff85aa6?project_path=%3A",
+      "modified" : false,
+      "externalReferences" : [
+        {
+          "type" : "build-system",
+          "url" : "https://github.com/leogalambos/Radixor/actions/runs/24486265503"
+        },
+        {
+          "type" : "vcs",
+          "url" : "https://github.com/leogalambos/Radixor"
+        }
+      ]
+    }
+  },
+  "dependencies" : [ ]
+}
