@@ -131,7 +131,15 @@ tasks.register('centralBundle', Zip) {
 
     dependsOn(tasks.named('createCentralChecksums'))
 
-    from(centralStagingRepositoryDirectory)
+    from(centralStagingRepositoryDirectory) {
+        exclude '**/maven-metadata*.xml'
+        exclude '**/maven-metadata*.xml.md5'
+        exclude '**/maven-metadata*.xml.sha1'
+        exclude '**/maven-metadata*.xml.asc'
+        exclude '**/maven-metadata*.xml.asc.md5'
+        exclude '**/maven-metadata*.xml.asc.sha1'
+    }
+    
     destinationDirectory = centralBundleDirectory
     archiveFileName = "radixor-${project.version}-central-bundle.zip"
 }
