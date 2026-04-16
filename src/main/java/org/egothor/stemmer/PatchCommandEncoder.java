@@ -117,7 +117,14 @@ public final class PatchCommandEncoder {
     private static final int MISMATCH_PENALTY = 100;
 
     /**
-     * Extra headroom added when internal matrices need to grow.
+     * Extra matrix headroom reserved beyond the immediately required dimensions.
+     *
+     * <p>
+     * A small fixed margin reduces repeated reallocation when a caller encodes many
+     * similarly sized terms in sequence. The value is intentionally modest: large
+     * enough to absorb minor size fluctuations, yet small enough to avoid
+     * materially over-allocating the reused dynamic-programming matrices.
+     * </p>
      */
     private static final int CAPACITY_MARGIN = 8;
 
@@ -288,6 +295,7 @@ public final class PatchCommandEncoder {
      * @param patchCommand compact patch command
      * @return transformed word, or {@code null} when {@code source} is {@code null}
      */
+    @SuppressWarnings({ "PMD.CyclomaticComplexity", "PMD.AvoidLiteralsInIfCondition" })
     public static String apply(String source, String patchCommand) {
         if (source == null) {
             return null;
@@ -296,6 +304,10 @@ public final class PatchCommandEncoder {
             return source;
         }
         if (NOOP_PATCH.equals(patchCommand)) {
+            return source;
+        }
+
+        if ((patchCommand.length() & 1) != 0) {
             return source;
         }
 
@@ -312,11 +324,14 @@ public final class PatchCommandEncoder {
 
                 char opcode = patchCommand.charAt(patchIndex);
                 char argument = patchCommand.charAt(patchIndex + 1);
-                int encodedCount = argument - 'a' + 1;
 
                 switch (opcode) {
                     case SKIP_OPCODE:
-                        position = position - encodedCount + 1;
+                        final int skipCount = decodeEncodedCount(argument);
+                        if (skipCount < 1) {
+                            return source;
+                        }
+                        position = position - skipCount + 1;
                         break;
 
                     case REPLACE_OPCODE:
@@ -324,8 +339,12 @@ public final class PatchCommandEncoder {
                         break;
 
                     case DELETE_OPCODE:
+                        final int deleteCount = decodeEncodedCount(argument);
+                        if (deleteCount < 1) {
+                            return source;
+                        }
                         int deleteEndExclusive = position + 1;
-                        position -= encodedCount - 1;
+                        position -= deleteCount - 1;
                         result.delete(position, deleteEndExclusive);
                         break;
 
@@ -351,6 +370,26 @@ public final class PatchCommandEncoder {
         }
 
         return result.toString();
+    }
+
+    /**
+     * Decodes a compact count argument used by skip and delete instructions.
+     *
+     * <p>
+     * Valid encoded counts start at {@code 'a'} for one affected character. Values
+     * below {@code 'a'} are malformed and are reported to callers via the
+     * compatibility fallback path rather than by throwing a dedicated exception.
+     * </p>
+     *
+     * @param argument serialized count argument
+     * @return decoded positive count, or {@code -1} when the argument is malformed
+     */
+    @SuppressWarnings("PMD.AvoidLiteralsInIfCondition")
+    private static int decodeEncodedCount(final char argument) {
+        if (argument < 'a') {
+            return -1;
+        }
+        return argument - 'a' + 1;
     }
 
     /**

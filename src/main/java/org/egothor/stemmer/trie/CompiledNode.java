@@ -31,6 +31,7 @@
 package org.egothor.stemmer.trie;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * Immutable compiled trie node optimized for read access.
@@ -38,7 +39,9 @@ import java.util.Arrays;
  * <p>
  * The returned arrays are the internal backing storage of the compiled node.
  * They are exposed for efficient access by closely related trie infrastructure
- * and therefore must never be modified by callers.
+ * and therefore must never be modified by callers. The node itself is still
+ * immutable from the public API perspective because construction wires these
+ * arrays once and all lookup operations thereafter treat them as read-only.
  *
  * @param <V>           value type
  * @param edgeLabels    internal edge label array
@@ -46,7 +49,89 @@ import java.util.Arrays;
  * @param orderedValues internal ordered values array
  * @param orderedCounts internal ordered counts array
  */
+@SuppressWarnings("PMD.DataClass")
 public record CompiledNode<V>(char[] edgeLabels, CompiledNode<V>[] children, V[] orderedValues, int... orderedCounts) {
+
+    /**
+     * Creates one validated compiled node.
+     *
+     * @throws NullPointerException     if any array argument is {@code null}
+     * @throws IllegalArgumentException if the edge-related arrays or value-related
+     *                                  arrays do not have matching lengths
+     */
+    public CompiledNode {
+        Objects.requireNonNull(edgeLabels, "edgeLabels");
+        Objects.requireNonNull(children, "children");
+        Objects.requireNonNull(orderedValues, "orderedValues");
+        Objects.requireNonNull(orderedCounts, "orderedCounts");
+
+        if (edgeLabels.length != children.length) {
+            throw new IllegalArgumentException("edgeLabels and children must have the same length.");
+        }
+        if (orderedValues.length != orderedCounts.length) {
+            throw new IllegalArgumentException("orderedValues and orderedCounts must have the same length.");
+        }
+    }
+
+    /**
+     * Returns the internal edge-label array.
+     *
+     * <p>
+     * The returned array is not copied for performance reasons and must be treated
+     * as read-only.
+     *
+     * @return internal edge-label array
+     */
+    @Override
+    @SuppressWarnings("PMD.MethodReturnsInternalArray")
+    public char[] edgeLabels() {
+        return this.edgeLabels;
+    }
+
+    /**
+     * Returns the internal child-node array.
+     *
+     * <p>
+     * The returned array is not copied for performance reasons and must be treated
+     * as read-only by external callers.
+     *
+     * @return internal child-node array
+     */
+    @Override
+    @SuppressWarnings("PMD.MethodReturnsInternalArray")
+    public CompiledNode<V>[] children() {
+        return this.children;
+    }
+
+    /**
+     * Returns the internal ordered-values array.
+     *
+     * <p>
+     * The returned array is not copied for performance reasons and must be treated
+     * as read-only.
+     *
+     * @return internal ordered-values array
+     */
+    @Override
+    @SuppressWarnings("PMD.MethodReturnsInternalArray")
+    public V[] orderedValues() {
+        return this.orderedValues;
+    }
+
+    /**
+     * Returns the internal ordered-counts array.
+     *
+     * <p>
+     * The returned array is not copied for performance reasons and must be treated
+     * as read-only.
+     *
+     * @return internal ordered-counts array
+     */
+    @Override
+    @SuppressWarnings("PMD.MethodReturnsInternalArray")
+    public int[] orderedCounts() {
+        return this.orderedCounts;
+    }
 
     /**
      * Finds a child for the supplied edge character.

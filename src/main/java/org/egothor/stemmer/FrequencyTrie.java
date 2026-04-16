@@ -426,6 +426,8 @@ public final class FrequencyTrie<V> {
                 childNodeIds[edgeIndex] = dataInput.readInt();
             }
 
+            validateSerializedEdges(nodeIndex, edgeLabels);
+
             final int valueCount = dataInput.readInt();
             if (valueCount < 0) {
                 throw new IOException("Negative value count at node " + nodeIndex + ": " + valueCount);
@@ -472,6 +474,28 @@ public final class FrequencyTrie<V> {
         }
 
         return nodes;
+    }
+
+    /**
+     * Validates the serialized edge-label sequence for one node.
+     *
+     * <p>
+     * Compiled nodes rely on binary search for child lookup and therefore require
+     * edge labels to be stored in strict ascending order without duplicates.
+     * Rejecting malformed streams here keeps lookup semantics deterministic and
+     * avoids silently constructing a trie whose search behavior would be undefined.
+     *
+     * @param nodeIndex  serialized node identifier
+     * @param edgeLabels serialized edge labels
+     * @throws IOException if the edge labels are not strictly ascending
+     */
+    private static void validateSerializedEdges(final int nodeIndex, final char... edgeLabels) throws IOException {
+        for (int edgeIndex = 1; edgeIndex < edgeLabels.length; edgeIndex++) {
+            if (edgeLabels[edgeIndex - 1] >= edgeLabels[edgeIndex]) {
+                throw new IOException("Edge labels must be strictly ascending at node " + nodeIndex + ", edge index "
+                        + edgeIndex + ": '" + edgeLabels[edgeIndex - 1] + "' then '" + edgeLabels[edgeIndex] + "'.");
+            }
+        }
     }
 
     /**

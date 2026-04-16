@@ -734,6 +734,30 @@ class FrequencyTrieTest {
     }
 
     /**
+     * Verifies that deserialization rejects unsorted or duplicate serialized edge
+     * labels because compiled lookup relies on binary search over a strictly
+     * ascending edge array.
+     */
+    @Test
+    @Tag("persistence")
+    @DisplayName("readFrom rejects non-ascending serialized edge labels")
+    void readFromRejectsNonAscendingSerializedEdgeLabels() {
+        final byte[] bytes = createSerializedStream(0x45475452, 1, 1, 0, new NodeWriter[] { dataOutput -> {
+            dataOutput.writeInt(2);
+            dataOutput.writeChar('b');
+            dataOutput.writeInt(0);
+            dataOutput.writeChar('a');
+            dataOutput.writeInt(0);
+            dataOutput.writeInt(0);
+        } });
+
+        final IOException exception = assertThrows(IOException.class,
+                () -> FrequencyTrie.readFrom(new ByteArrayInputStream(bytes), String[]::new, STRING_CODEC));
+
+        assertTrue(exception.getMessage().contains("Edge labels must be strictly ascending"));
+    }
+
+    /**
      * Verifies that deserialization rejects non-positive stored counts.
      */
     @Test

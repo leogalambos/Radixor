@@ -30,14 +30,18 @@
  ******************************************************************************/
 package org.egothor.stemmer.trie;
 
+import java.util.Objects;
+
 /**
  * Intermediate node data used during deserialization before child references
  * are resolved.
  *
  * <p>
  * The arrays exposed by the accessors are the internal backing storage of this
- * holder. They are returned directly for efficiency and therefore must be
- * treated as read-only by callers.
+ * holder. They are returned directly for efficiency because the deserialization
+ * pipeline copies references into immutable compiled nodes immediately after
+ * the record is created. Callers must therefore treat every returned array as
+ * read-only.
  *
  * @param <V>           value type
  * @param edgeLabels    edge labels
@@ -45,6 +49,87 @@ package org.egothor.stemmer.trie;
  * @param orderedValues ordered values
  * @param orderedCounts ordered counts
  */
+@SuppressWarnings("PMD.DataClass")
 public record NodeData<V>(char[] edgeLabels, int[] childNodeIds, V[] orderedValues, int... orderedCounts) {
+    /**
+     * Creates one validated node-data holder.
+     *
+     * @throws NullPointerException     if any array argument is {@code null}
+     * @throws IllegalArgumentException if the edge-related arrays or value-related
+     *                                  arrays do not have matching lengths
+     */
+    public NodeData {
+        Objects.requireNonNull(edgeLabels, "edgeLabels");
+        Objects.requireNonNull(childNodeIds, "childNodeIds");
+        Objects.requireNonNull(orderedValues, "orderedValues");
+        Objects.requireNonNull(orderedCounts, "orderedCounts");
+
+        if (edgeLabels.length != childNodeIds.length) {
+            throw new IllegalArgumentException("edgeLabels and childNodeIds must have the same length.");
+        }
+        if (orderedValues.length != orderedCounts.length) {
+            throw new IllegalArgumentException("orderedValues and orderedCounts must have the same length.");
+        }
+    }
+
+    /**
+     * Returns the internal edge-label array.
+     *
+     * <p>
+     * The returned array is not copied for performance reasons and must be treated
+     * as read-only.
+     *
+     * @return internal edge-label array
+     */
+    @Override
+    @SuppressWarnings("PMD.MethodReturnsInternalArray")
+    public char[] edgeLabels() {
+        return this.edgeLabels;
+    }
+
+    /**
+     * Returns the internal child-node identifier array.
+     *
+     * <p>
+     * The returned array is not copied for performance reasons and must be treated
+     * as read-only.
+     *
+     * @return internal child-node identifier array
+     */
+    @Override
+    @SuppressWarnings("PMD.MethodReturnsInternalArray")
+    public int[] childNodeIds() {
+        return this.childNodeIds;
+    }
+
+    /**
+     * Returns the internal ordered-values array.
+     *
+     * <p>
+     * The returned array is not copied for performance reasons and must be treated
+     * as read-only.
+     *
+     * @return internal ordered-values array
+     */
+    @Override
+    @SuppressWarnings("PMD.MethodReturnsInternalArray")
+    public V[] orderedValues() {
+        return this.orderedValues;
+    }
+
+    /**
+     * Returns the internal ordered-counts array.
+     *
+     * <p>
+     * The returned array is not copied for performance reasons and must be treated
+     * as read-only.
+     *
+     * @return internal ordered-counts array
+     */
+    @Override
+    @SuppressWarnings("PMD.MethodReturnsInternalArray")
+    public int[] orderedCounts() {
+        return this.orderedCounts;
+    }
 
 }

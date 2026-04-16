@@ -174,7 +174,13 @@ class PatchCommandEncoderTest {
                 // 9
                 Arguments.of(9, "", "-a"),
                 // 10
-                Arguments.of(10, "", "Ra"));
+                Arguments.of(10, "", "Ra"),
+                // 11
+                Arguments.of(11, "abc", "D`"),
+                // 12
+                Arguments.of(12, "abc", "-`"),
+                // 13
+                Arguments.of(13, "", "D`"));
     }
 
     /**
