@@ -17,6 +17,7 @@ on:
       - 'gradlew'
       - 'gradlew.bat'
       - '.github/workflows/pages.yml'
+      - 'tools/generate-pages-badges.py'
   workflow_dispatch:
 
 permissions:
@@ -83,11 +84,13 @@ jobs:
 
           SITE_DIR=".gh-pages"
           RUN_DIR="${SITE_DIR}/builds/${GITHUB_RUN_NUMBER}"
+          RUN_METRICS_DIR="${RUN_DIR}/metrics"
           LATEST_DIR="${SITE_DIR}/builds/latest"
+          LATEST_METRICS_DIR="${LATEST_DIR}/metrics"
 
           mkdir -p "${RUN_DIR}"
           rm -rf "${LATEST_DIR}"
-          mkdir -p "${LATEST_DIR}"
+          mkdir -p "${LATEST_DIR}" "${RUN_METRICS_DIR}" "${LATEST_METRICS_DIR}"
 
           cp -R build/docs/javadoc "${RUN_DIR}/javadoc"
           cp -R build/docs/javadoc "${LATEST_DIR}/javadoc"
@@ -152,6 +155,26 @@ jobs:
             SBOM_XML_LATEST_LINK='<li><a href="./builds/latest/sbom/radixor-sbom.xml">SBOM (XML)</a></li>'
           fi
 
+          python3 \
+            ./tools/generate-pages-badges.py \
+            --jacoco-xml build/reports/jacoco/test/jacocoTestReport.xml \
+            --pit-xml build/reports/pitest/mutations.xml \
+            --jmh-csv build/reports/jmh/jmh-results.csv \
+            --run-metrics-dir "${RUN_METRICS_DIR}" \
+            --latest-metrics-dir "${LATEST_METRICS_DIR}"
+
+          COVERAGE_BADGE_LINK='<li><a href="./metrics/coverage-badge.json">Coverage Badge Metadata</a></li>'
+          COVERAGE_BADGE_LATEST_LINK='<li><a href="./builds/latest/metrics/coverage-badge.json">Coverage Badge Metadata</a></li>'
+          MUTATION_BADGE_LINK='<li><a href="./metrics/pitest-badge.json">Mutation Badge Metadata</a></li>'
+          MUTATION_BADGE_LATEST_LINK='<li><a href="./builds/latest/metrics/pitest-badge.json">Mutation Badge Metadata</a></li>'
+          JMH_BADGE_LINK='<li><a href="./metrics/jmh-badge.json">Benchmark Badge Metadata</a></li>'
+          JMH_BADGE_LATEST_LINK='<li><a href="./builds/latest/metrics/jmh-badge.json">Benchmark Badge Metadata</a></li>'
+
+          if [ ! -f "${RUN_METRICS_DIR}/coverage-badge.json" ]; then
+            COVERAGE_BADGE_LINK='<li>Coverage Badge Metadata: not available</li>'
+            COVERAGE_BADGE_LATEST_LINK='<li>Coverage Badge Metadata: not available</li>'
+          fi
+
           cat > "${RUN_DIR}/index.html" <<EOF
           <!doctype html>
           <html lang="en">
@@ -178,6 +201,9 @@ jobs:
               ${DEPENDENCY_CHECK_LINK:-<li>Dependency Vulnerability Report: not available</li>}
               ${SBOM_JSON_LINK:-<li>SBOM (JSON): not available</li>}
               ${SBOM_XML_LINK:-<li>SBOM (XML): not available</li>}
+              ${COVERAGE_BADGE_LINK}
+              ${MUTATION_BADGE_LINK}
+              ${JMH_BADGE_LINK}
               <li><a href="./pitest/">Mutation Testing Report</a></li>
               $(
                 [ "${HAS_JMH}" = "true" ] && { echo "${JMH_TXT_LINK:-<li>Benchmark Results (TXT): not available</li>}"; echo "${JMH_CSV_LINK:-<li>Benchmark Results (CSV): not available</li>}"; } \
@@ -227,6 +253,9 @@ jobs:
               ${DEPENDENCY_CHECK_LATEST_LINK:-<li>Dependency Vulnerability Report: not currently available</li>}
               ${SBOM_JSON_LATEST_LINK:-<li>SBOM (JSON): not available</li>}
               ${SBOM_XML_LATEST_LINK:-<li>SBOM (XML): not available</li>}
+              ${COVERAGE_BADGE_LATEST_LINK}
+              ${MUTATION_BADGE_LATEST_LINK}
+              ${JMH_BADGE_LATEST_LINK}
               <li><a href="./builds/latest/pitest/">Mutation Testing Report</a></li>
               $(
                 [ "${HAS_JMH}" = "true" ] && { echo "${JMH_TXT_LATEST_LINK:-<li>Benchmark Results (TXT): not available</li>}"; echo "${JMH_CSV_LATEST_LINK:-<li>Benchmark Results (CSV): not available</li>}"; } \
