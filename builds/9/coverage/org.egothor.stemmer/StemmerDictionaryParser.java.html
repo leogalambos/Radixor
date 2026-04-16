@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StemmerDictionaryParser.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Radixor</a> &gt; <a href="index.source.html" class="el_package">org.egothor.stemmer</a> &gt; <span class="el_source">StemmerDictionaryParser.java</span></div><h1>StemmerDictionaryParser.java</h1><pre class="source lang-java linenums">/*******************************************************************************
+ * Copyright (C) 2026, Leo Galambos
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * 
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ * 
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ * 
+ * 3. Neither the name of the copyright holder nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&quot;
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ ******************************************************************************/
+package org.egothor.stemmer;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Locale;
+import java.util.Objects;
+import java.util.StringTokenizer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+/**
+ * Parser of line-oriented stemmer dictionary files.
+ *
+ * &lt;p&gt;
+ * Each non-empty logical line consists of a stem followed by zero or more known
+ * word variants separated by whitespace. The first token is interpreted as the
+ * canonical stem, and every following token on the same line is interpreted as
+ * a variant belonging to that stem.
+ *
+ * &lt;p&gt;
+ * Input lines are normalized to lower case using {@link Locale#ROOT}. Leading
+ * and trailing whitespace is ignored.
+ *
+ * &lt;p&gt;
+ * The parser supports line remarks and trailing remarks. The remark markers
+ * {@code #} and {@code //} terminate the logical content of the line, and the
+ * remainder of that line is ignored.
+ *
+ * &lt;p&gt;
+ * This class is intentionally stateless and allocation-light so it can be used
+ * both by runtime loading and by offline compilation tooling.
+ */
+public final class StemmerDictionaryParser {
+
+    /**
+     * Logger of this class.
+     */
+<span class="fc" id="L72">    private static final Logger LOGGER = Logger.getLogger(StemmerDictionaryParser.class.getName());</span>
+
+    /**
+     * Utility class.
+     */
+<span class="nc" id="L77">    private StemmerDictionaryParser() {</span>
+<span class="nc" id="L78">        throw new AssertionError(&quot;No instances.&quot;);</span>
+    }
+
+    /**
+     * Callback receiving one parsed dictionary line.
+     */
+    @FunctionalInterface
+    public interface EntryHandler {
+
+        /**
+         * Accepts one parsed dictionary entry.
+         *
+         * @param stem       canonical stem, never {@code null}
+         * @param variants   variants in encounter order, never {@code null}
+         * @param lineNumber original physical line number in the parsed source
+         * @throws IOException if processing fails
+         */
+        void onEntry(String stem, String[] variants, int lineNumber) throws IOException;
+    }
+
+    /**
+     * Parses a dictionary file from a filesystem path.
+     *
+     * @param path         dictionary file path
+     * @param entryHandler handler receiving parsed entries
+     * @return parsing statistics
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IOException          if reading fails
+     */
+    public static ParseStatistics parse(final Path path, final EntryHandler entryHandler) throws IOException {
+<span class="fc" id="L108">        Objects.requireNonNull(path, &quot;path&quot;);</span>
+<span class="fc" id="L109">        Objects.requireNonNull(entryHandler, &quot;entryHandler&quot;);</span>
+
+<span class="fc" id="L111">        try (BufferedReader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {</span>
+<span class="fc" id="L112">            return parse(reader, path.toAbsolutePath().toString(), entryHandler);</span>
+        }
+    }
+
+    /**
+     * Parses a dictionary file from a path string.
+     *
+     * @param fileName     dictionary file name or path string
+     * @param entryHandler handler receiving parsed entries
+     * @return parsing statistics
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IOException          if reading fails
+     */
+    public static ParseStatistics parse(final String fileName, final EntryHandler entryHandler) throws IOException {
+<span class="fc" id="L126">        Objects.requireNonNull(fileName, &quot;fileName&quot;);</span>
+<span class="fc" id="L127">        return parse(Path.of(fileName), entryHandler);</span>
+    }
+
+    /**
+     * Parses a dictionary from a reader.
+     *
+     * @param reader            source reader
+     * @param sourceDescription logical source description for diagnostics
+     * @param entryHandler      handler receiving parsed entries
+     * @return parsing statistics
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IOException          if reading or handler processing fails
+     */
+    public static ParseStatistics parse(final Reader reader, final String sourceDescription,
+            final EntryHandler entryHandler) throws IOException {
+<span class="fc" id="L142">        Objects.requireNonNull(reader, &quot;reader&quot;);</span>
+<span class="fc" id="L143">        Objects.requireNonNull(sourceDescription, &quot;sourceDescription&quot;);</span>
+<span class="fc" id="L144">        Objects.requireNonNull(entryHandler, &quot;entryHandler&quot;);</span>
+
+<span class="fc bfc" id="L146" title="All 2 branches covered.">        final BufferedReader bufferedReader = reader instanceof BufferedReader ? (BufferedReader) reader</span>
+<span class="fc" id="L147">                : new BufferedReader(reader);</span>
+
+<span class="fc" id="L149">        int lineNumber = 0;</span>
+<span class="fc" id="L150">        int logicalEntryCount = 0;</span>
+<span class="fc" id="L151">        int ignoredLineCount = 0;</span>
+
+<span class="fc bfc" id="L153" title="All 2 branches covered.">        for (String line = bufferedReader.readLine(); line != null; line = bufferedReader.readLine()) {</span>
+<span class="fc" id="L154">            lineNumber++;</span>
+
+<span class="fc" id="L156">            final String normalizedLine = stripRemark(line).trim().toLowerCase(Locale.ROOT);</span>
+<span class="fc bfc" id="L157" title="All 2 branches covered.">            if (normalizedLine.isEmpty()) {</span>
+<span class="fc" id="L158">                ignoredLineCount++;</span>
+<span class="fc" id="L159">                continue;</span>
+            }
+
+<span class="fc" id="L162">            final StringTokenizer tokenizer = new StringTokenizer(normalizedLine); // NOPMD</span>
+<span class="pc bpc" id="L163" title="1 of 2 branches missed.">            if (!tokenizer.hasMoreTokens()) {</span>
+<span class="nc" id="L164">                ignoredLineCount++;</span>
+<span class="nc" id="L165">                continue;</span>
+            }
+
+<span class="fc" id="L168">            final String stem = tokenizer.nextToken();</span>
+<span class="fc" id="L169">            final String[] variants = new String[tokenizer.countTokens()]; // NOPMD</span>
+
+<span class="fc bfc" id="L171" title="All 2 branches covered.">            for (int index = 0; index &lt; variants.length; index++) {</span>
+<span class="fc" id="L172">                variants[index] = tokenizer.nextToken();</span>
+            }
+
+<span class="fc" id="L175">            entryHandler.onEntry(stem, variants, lineNumber);</span>
+<span class="fc" id="L176">            logicalEntryCount++;</span>
+        }
+
+<span class="fc" id="L179">        final ParseStatistics statistics = new ParseStatistics(sourceDescription, lineNumber, logicalEntryCount,</span>
+                ignoredLineCount);
+
+<span class="pc bpc" id="L182" title="1 of 2 branches missed.">        if (LOGGER.isLoggable(Level.FINE)) {</span>
+<span class="nc" id="L183">            LOGGER.log(Level.FINE, &quot;Parsed dictionary source {0}: lines={1}, entries={2}, ignoredLines={3}.&quot;,</span>
+<span class="nc" id="L184">                    new Object[] { statistics.sourceDescription(), statistics.lineCount(), statistics.entryCount(),</span>
+<span class="nc" id="L185">                            statistics.ignoredLineCount() });</span>
+        }
+
+<span class="fc" id="L188">        return statistics;</span>
+    }
+
+    /**
+     * Removes a trailing remark from one physical line.
+     *
+     * &lt;p&gt;
+     * The earliest occurrence of either supported remark marker terminates the
+     * logical line content.
+     *
+     * @param line physical line
+     * @return line content without a trailing remark
+     */
+    private static String stripRemark(final String line) {
+<span class="fc" id="L202">        final int hashIndex = line.indexOf('#');</span>
+<span class="fc" id="L203">        final int slashIndex = line.indexOf(&quot;//&quot;);</span>
+
+        final int remarkIndex;
+<span class="fc bfc" id="L206" title="All 2 branches covered.">        if (hashIndex &lt; 0) {</span>
+<span class="fc" id="L207">            remarkIndex = slashIndex;</span>
+<span class="fc bfc" id="L208" title="All 2 branches covered.">        } else if (slashIndex &lt; 0) {</span>
+<span class="fc" id="L209">            remarkIndex = hashIndex;</span>
+        } else {
+<span class="fc" id="L211">            remarkIndex = Math.min(hashIndex, slashIndex);</span>
+        }
+
+<span class="fc bfc" id="L214" title="All 2 branches covered.">        if (remarkIndex &lt; 0) {</span>
+<span class="fc" id="L215">            return line;</span>
+        }
+<span class="fc" id="L217">        return line.substring(0, remarkIndex);</span>
+    }
+
+    /**
+     * Immutable parsing statistics.
+     *
+     * @param sourceDescription logical source description
+     * @param lineCount         number of physical lines read
+     * @param entryCount        number of logical dictionary entries emitted
+     * @param ignoredLineCount  number of ignored empty or remark-only lines
+     */
+    public record ParseStatistics(String sourceDescription, int lineCount, int entryCount, int ignoredLineCount) {
+
+        /**
+         * Creates parsing statistics.
+         *
+         * @param sourceDescription logical source description
+         * @param lineCount         number of physical lines read
+         * @param entryCount        number of logical dictionary entries emitted
+         * @param ignoredLineCount  number of ignored empty or remark-only lines
+         * @throws NullPointerException     if {@code sourceDescription} is {@code null}
+         * @throws IllegalArgumentException if any numeric value is negative
+         */
+<span class="fc" id="L240">        public ParseStatistics {</span>
+<span class="fc" id="L241">            Objects.requireNonNull(sourceDescription, &quot;sourceDescription&quot;);</span>
+<span class="fc bfc" id="L242" title="All 2 branches covered.">            if (lineCount &lt; 0) {</span>
+<span class="fc" id="L243">                throw new IllegalArgumentException(&quot;lineCount must not be negative.&quot;);</span>
+            }
+<span class="fc bfc" id="L245" title="All 2 branches covered.">            if (entryCount &lt; 0) {</span>
+<span class="fc" id="L246">                throw new IllegalArgumentException(&quot;entryCount must not be negative.&quot;);</span>
+            }
+<span class="fc bfc" id="L248" title="All 2 branches covered.">            if (ignoredLineCount &lt; 0) {</span>
+<span class="fc" id="L249">                throw new IllegalArgumentException(&quot;ignoredLineCount must not be negative.&quot;);</span>
+            }
+<span class="fc" id="L251">        }</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
