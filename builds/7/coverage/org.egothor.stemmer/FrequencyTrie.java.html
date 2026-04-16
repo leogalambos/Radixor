@@ -1,0 +1,781 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FrequencyTrie.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Radixor</a> &gt; <a href="index.source.html" class="el_package">org.egothor.stemmer</a> &gt; <span class="el_source">FrequencyTrie.java</span></div><h1>FrequencyTrie.java</h1><pre class="source lang-java linenums">/*******************************************************************************
+ * Copyright (C) 2026, Leo Galambos
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * 
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ * 
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ * 
+ * 3. Neither the name of the copyright holder nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&quot;
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ ******************************************************************************/
+package org.egothor.stemmer;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.IdentityHashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.IntFunction;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.egothor.stemmer.trie.CompiledNode;
+import org.egothor.stemmer.trie.LocalValueSummary;
+import org.egothor.stemmer.trie.MutableNode;
+import org.egothor.stemmer.trie.NodeData;
+import org.egothor.stemmer.trie.ReducedNode;
+import org.egothor.stemmer.trie.ReductionContext;
+import org.egothor.stemmer.trie.ReductionSignature;
+
+/**
+ * Read-only trie mapping {@link String} keys to one or more values with
+ * frequency tracking.
+ *
+ * &lt;p&gt;
+ * A key may be associated with multiple values. Each value keeps the number of
+ * times it was inserted during the build phase. The method {@link #get(String)}
+ * returns the locally most frequent value stored at the terminal node of the
+ * supplied key, while {@link #getAll(String)} returns all locally stored values
+ * ordered by descending frequency.
+ *
+ * &lt;p&gt;
+ * If multiple values have the same local frequency, their ordering is
+ * deterministic. The preferred value is selected by the following tie-breaking
+ * rules, in order:
+ * &lt;ol&gt;
+ * &lt;li&gt;shorter {@link String} representation wins, based on
+ * {@code value.toString()}&lt;/li&gt;
+ * &lt;li&gt;if the lengths are equal, lexicographically lower {@link String}
+ * representation wins&lt;/li&gt;
+ * &lt;li&gt;if the textual representations are still equal, first-seen insertion
+ * order remains stable&lt;/li&gt;
+ * &lt;/ol&gt;
+ *
+ * &lt;p&gt;
+ * Values may be stored at any trie node, including internal nodes and leaf
+ * nodes. Therefore, reduction and canonicalization always operate on both the
+ * node-local terminal values and the structure of all descendant edges.
+ *
+ * @param &lt;V&gt; value type
+ */
+public final class FrequencyTrie&lt;V&gt; {
+
+    /**
+     * Logger of this class.
+     */
+<span class="fc" id="L94">    private static final Logger LOGGER = Logger.getLogger(FrequencyTrie.class.getName());</span>
+
+    /**
+     * Binary format magic header.
+     */
+    private static final int STREAM_MAGIC = 0x45475452;
+
+    /**
+     * Binary format version.
+     */
+    private static final int STREAM_VERSION = 1;
+
+    /**
+     * Factory used to create correctly typed arrays for {@link #getAll(String)}.
+     */
+    private final IntFunction&lt;V[]&gt; arrayFactory;
+
+    /**
+     * Root node of the compiled read-only trie.
+     */
+    private final CompiledNode&lt;V&gt; root;
+
+    /**
+     * Creates a new compiled trie instance.
+     *
+     * @param arrayFactory array factory
+     * @param root         compiled root node
+     * @throws NullPointerException if any argument is {@code null}
+     */
+<span class="fc" id="L123">    private FrequencyTrie(final IntFunction&lt;V[]&gt; arrayFactory, final CompiledNode&lt;V&gt; root) {</span>
+<span class="fc" id="L124">        this.arrayFactory = Objects.requireNonNull(arrayFactory, &quot;arrayFactory&quot;);</span>
+<span class="fc" id="L125">        this.root = Objects.requireNonNull(root, &quot;root&quot;);</span>
+<span class="fc" id="L126">    }</span>
+
+    /**
+     * Returns the most frequent value stored at the node addressed by the supplied
+     * key.
+     *
+     * &lt;p&gt;
+     * If multiple values have the same local frequency, the returned value is
+     * selected deterministically by shorter {@code toString()} value first, then by
+     * lexicographically lower {@code toString()}, and finally by stable first-seen
+     * order.
+     * 
+     * @param key key to resolve
+     * @return most frequent value, or {@code null} if the key does not exist or no
+     *         value is stored at the addressed node
+     * @throws NullPointerException if {@code key} is {@code null}
+     */
+    public V get(final String key) {
+<span class="fc" id="L144">        Objects.requireNonNull(key, &quot;key&quot;);</span>
+<span class="fc" id="L145">        final CompiledNode&lt;V&gt; node = findNode(key);</span>
+<span class="fc bfc" id="L146" title="All 4 branches covered.">        if (node == null || node.orderedValues().length == 0) {</span>
+<span class="fc" id="L147">            return null;</span>
+        }
+<span class="fc" id="L149">        return node.orderedValues()[0];</span>
+    }
+
+    /**
+     * Returns all values stored at the node addressed by the supplied key, ordered
+     * by descending frequency.
+     *
+     * &lt;p&gt;
+     * If multiple values have the same local frequency, the ordering is
+     * deterministic by shorter {@code toString()} value first, then by
+     * lexicographically lower {@code toString()}, and finally by stable first-seen
+     * order.
+     *
+     * &lt;p&gt;
+     * The returned array is a defensive copy.
+     *
+     * @param key key to resolve
+     * @return all values stored at the addressed node, ordered by descending
+     *         frequency; returns an empty array if the key does not exist or no
+     *         value is stored at the addressed node
+     * @throws NullPointerException if {@code key} is {@code null}
+     */
+    public V[] getAll(final String key) {
+<span class="fc" id="L172">        Objects.requireNonNull(key, &quot;key&quot;);</span>
+<span class="fc" id="L173">        final CompiledNode&lt;V&gt; node = findNode(key);</span>
+<span class="fc bfc" id="L174" title="All 4 branches covered.">        if (node == null || node.orderedValues().length == 0) {</span>
+<span class="fc" id="L175">            return this.arrayFactory.apply(0);</span>
+        }
+<span class="fc" id="L177">        return Arrays.copyOf(node.orderedValues(), node.orderedValues().length);</span>
+    }
+
+    /**
+     * Returns all values stored at the node addressed by the supplied key together
+     * with their occurrence counts, ordered by the same rules as
+     * {@link #getAll(String)}.
+     *
+     * &lt;p&gt;
+     * The returned list is aligned with the arrays returned by
+     * {@link #getAll(String)} and the internal compiled count representation.
+     *
+     * &lt;p&gt;
+     * The returned list is immutable.
+     *
+     * &lt;p&gt;
+     * In reduction modes that merge semantically equivalent subtrees, the returned
+     * counts may be aggregated across multiple original build-time nodes that were
+     * reduced into the same canonical compiled node.
+     *
+     * @param key key to resolve
+     * @return immutable ordered list of value-count entries; returns an empty list
+     *         if the key does not exist or no value is stored at the addressed node
+     * @throws NullPointerException if {@code key} is {@code null}
+     */
+    public List&lt;ValueCount&lt;V&gt;&gt; getEntries(final String key) {
+<span class="fc" id="L203">        Objects.requireNonNull(key, &quot;key&quot;);</span>
+<span class="fc" id="L204">        final CompiledNode&lt;V&gt; node = findNode(key);</span>
+<span class="fc bfc" id="L205" title="All 4 branches covered.">        if (node == null || node.orderedValues().length == 0) {</span>
+<span class="fc" id="L206">            return List.of();</span>
+        }
+
+<span class="fc" id="L209">        final List&lt;ValueCount&lt;V&gt;&gt; entries = new ArrayList&lt;&gt;(node.orderedValues().length);</span>
+<span class="fc bfc" id="L210" title="All 2 branches covered.">        for (int index = 0; index &lt; node.orderedValues().length; index++) {</span>
+<span class="fc" id="L211">            entries.add(new ValueCount&lt;&gt;(node.orderedValues()[index], node.orderedCounts()[index]));</span>
+        }
+<span class="fc" id="L213">        return Collections.unmodifiableList(entries);</span>
+    }
+
+    /**
+     * Returns the root node mainly for diagnostics and tests within the package.
+     *
+     * @return compiled root node
+     */
+    /* default */ CompiledNode&lt;V&gt; root() {
+<span class="fc" id="L222">        return this.root;</span>
+    }
+
+    /**
+     * Writes this compiled trie to the supplied output stream.
+     *
+     * &lt;p&gt;
+     * The binary format is versioned and preserves canonical shared compiled nodes,
+     * therefore the serialized representation remains compact even for tries
+     * reduced by subtree merging.
+     *
+     * &lt;p&gt;
+     * The supplied codec is responsible for persisting individual values of type
+     * {@code V}.
+     *
+     * @param outputStream target output stream
+     * @param valueCodec   codec used to write values
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IOException          if writing fails
+     */
+    public void writeTo(final OutputStream outputStream, final ValueStreamCodec&lt;V&gt; valueCodec) throws IOException {
+<span class="fc" id="L243">        Objects.requireNonNull(outputStream, &quot;outputStream&quot;);</span>
+<span class="fc" id="L244">        Objects.requireNonNull(valueCodec, &quot;valueCodec&quot;);</span>
+
+        final DataOutputStream dataOutput; // NOPMD
+<span class="fc bfc" id="L247" title="All 2 branches covered.">        if (outputStream instanceof DataOutputStream) {</span>
+<span class="fc" id="L248">            dataOutput = (DataOutputStream) outputStream;</span>
+        } else {
+<span class="fc" id="L250">            dataOutput = new DataOutputStream(outputStream);</span>
+        }
+
+<span class="fc" id="L253">        final Map&lt;CompiledNode&lt;V&gt;, Integer&gt; nodeIds = new IdentityHashMap&lt;&gt;();</span>
+<span class="fc" id="L254">        final List&lt;CompiledNode&lt;V&gt;&gt; orderedNodes = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L255">        assignNodeIds(this.root, nodeIds, orderedNodes);</span>
+
+<span class="pc bpc" id="L257" title="1 of 2 branches missed.">        if (LOGGER.isLoggable(Level.FINE)) {</span>
+<span class="nc" id="L258">            LOGGER.log(Level.FINE, &quot;Writing compiled trie with {0} canonical nodes.&quot;, orderedNodes.size());</span>
+        }
+
+<span class="fc" id="L261">        dataOutput.writeInt(STREAM_MAGIC);</span>
+<span class="fc" id="L262">        dataOutput.writeInt(STREAM_VERSION);</span>
+<span class="fc" id="L263">        dataOutput.writeInt(orderedNodes.size());</span>
+<span class="fc" id="L264">        dataOutput.writeInt(nodeIds.get(this.root));</span>
+
+<span class="fc bfc" id="L266" title="All 2 branches covered.">        for (CompiledNode&lt;V&gt; node : orderedNodes) {</span>
+<span class="fc" id="L267">            writeNode(dataOutput, valueCodec, node, nodeIds);</span>
+<span class="fc" id="L268">        }</span>
+
+<span class="fc" id="L270">        dataOutput.flush();</span>
+<span class="fc" id="L271">    }</span>
+
+    /**
+     * Reads a compiled trie from the supplied input stream.
+     *
+     * &lt;p&gt;
+     * The caller must provide the same value codec semantics that were used during
+     * persistence as well as the array factory required for typed result arrays.
+     *
+     * @param inputStream  source input stream
+     * @param arrayFactory factory used to create typed arrays
+     * @param valueCodec   codec used to read values
+     * @param &lt;V&gt;          value type
+     * @return deserialized compiled trie
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IOException          if reading fails or the binary format is invalid
+     */
+    public static &lt;V&gt; FrequencyTrie&lt;V&gt; readFrom(final InputStream inputStream, final IntFunction&lt;V[]&gt; arrayFactory,
+            final ValueStreamCodec&lt;V&gt; valueCodec) throws IOException {
+<span class="fc" id="L290">        Objects.requireNonNull(inputStream, &quot;inputStream&quot;);</span>
+<span class="fc" id="L291">        Objects.requireNonNull(arrayFactory, &quot;arrayFactory&quot;);</span>
+<span class="fc" id="L292">        Objects.requireNonNull(valueCodec, &quot;valueCodec&quot;);</span>
+
+        final DataInputStream dataInput; // NOPMD
+<span class="fc bfc" id="L295" title="All 2 branches covered.">        if (inputStream instanceof DataInputStream) {</span>
+<span class="fc" id="L296">            dataInput = (DataInputStream) inputStream;</span>
+        } else {
+<span class="fc" id="L298">            dataInput = new DataInputStream(inputStream);</span>
+        }
+
+<span class="fc" id="L301">        final int magic = dataInput.readInt();</span>
+<span class="fc bfc" id="L302" title="All 2 branches covered.">        if (magic != STREAM_MAGIC) {</span>
+<span class="fc" id="L303">            throw new IOException(&quot;Unsupported trie stream header: &quot; + Integer.toHexString(magic));</span>
+        }
+
+<span class="fc" id="L306">        final int version = dataInput.readInt();</span>
+<span class="fc bfc" id="L307" title="All 2 branches covered.">        if (version != STREAM_VERSION) {</span>
+<span class="fc" id="L308">            throw new IOException(&quot;Unsupported trie stream version: &quot; + version);</span>
+        }
+
+<span class="fc" id="L311">        final int nodeCount = dataInput.readInt();</span>
+<span class="fc bfc" id="L312" title="All 2 branches covered.">        if (nodeCount &lt; 0) {</span>
+<span class="fc" id="L313">            throw new IOException(&quot;Negative node count: &quot; + nodeCount);</span>
+        }
+
+<span class="fc" id="L316">        final int rootNodeId = dataInput.readInt();</span>
+<span class="pc bpc" id="L317" title="1 of 4 branches missed.">        if (rootNodeId &lt; 0 || rootNodeId &gt;= nodeCount) {</span>
+<span class="fc" id="L318">            throw new IOException(&quot;Invalid root node id: &quot; + rootNodeId);</span>
+        }
+
+<span class="fc" id="L321">        final CompiledNode&lt;V&gt;[] nodes = readNodes(dataInput, arrayFactory, valueCodec, nodeCount);</span>
+<span class="fc" id="L322">        final CompiledNode&lt;V&gt; rootNode = nodes[rootNodeId];</span>
+
+<span class="pc bpc" id="L324" title="1 of 2 branches missed.">        if (LOGGER.isLoggable(Level.FINE)) {</span>
+<span class="nc" id="L325">            LOGGER.log(Level.FINE, &quot;Read compiled trie with {0} canonical nodes.&quot;, nodeCount);</span>
+        }
+
+<span class="fc" id="L328">        return new FrequencyTrie&lt;&gt;(arrayFactory, rootNode);</span>
+    }
+
+    /**
+     * Returns the number of canonical compiled nodes reachable from the root.
+     *
+     * &lt;p&gt;
+     * The returned value reflects the size of the final reduced immutable trie, not
+     * the number of mutable build-time nodes inserted before reduction. Shared
+     * canonical subtrees are counted only once.
+     *
+     * @return number of canonical compiled nodes in this trie
+     */
+    public int size() {
+<span class="fc" id="L342">        final Map&lt;CompiledNode&lt;V&gt;, Integer&gt; nodeIds = new IdentityHashMap&lt;&gt;();</span>
+<span class="fc" id="L343">        final List&lt;CompiledNode&lt;V&gt;&gt; orderedNodes = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L344">        assignNodeIds(this.root, nodeIds, orderedNodes);</span>
+<span class="fc" id="L345">        return orderedNodes.size();</span>
+    }
+
+    /**
+     * Assigns deterministic identifiers to all canonical compiled nodes reachable
+     * from the supplied root.
+     *
+     * @param node         current node
+     * @param nodeIds      assigned node identifiers
+     * @param orderedNodes ordered nodes in identifier order
+     */
+    private static &lt;V&gt; void assignNodeIds(final CompiledNode&lt;V&gt; node, final Map&lt;CompiledNode&lt;V&gt;, Integer&gt; nodeIds,
+            final List&lt;CompiledNode&lt;V&gt;&gt; orderedNodes) {
+<span class="fc bfc" id="L358" title="All 2 branches covered.">        if (nodeIds.containsKey(node)) {</span>
+<span class="fc" id="L359">            return;</span>
+        }
+
+<span class="fc" id="L362">        final int nodeId = orderedNodes.size();</span>
+<span class="fc" id="L363">        nodeIds.put(node, nodeId);</span>
+<span class="fc" id="L364">        orderedNodes.add(node);</span>
+
+<span class="fc bfc" id="L366" title="All 2 branches covered.">        for (CompiledNode&lt;V&gt; child : node.children()) {</span>
+<span class="fc" id="L367">            assignNodeIds(child, nodeIds, orderedNodes);</span>
+        }
+<span class="fc" id="L369">    }</span>
+
+    /**
+     * Writes one compiled node.
+     *
+     * @param dataOutput output
+     * @param valueCodec value codec
+     * @param node       node to write
+     * @param nodeIds    node identifiers
+     * @throws IOException if writing fails
+     */
+    private static &lt;V&gt; void writeNode(final DataOutputStream dataOutput, final ValueStreamCodec&lt;V&gt; valueCodec,
+            final CompiledNode&lt;V&gt; node, final Map&lt;CompiledNode&lt;V&gt;, Integer&gt; nodeIds) throws IOException {
+<span class="fc" id="L382">        dataOutput.writeInt(node.edgeLabels().length);</span>
+<span class="fc bfc" id="L383" title="All 2 branches covered.">        for (int index = 0; index &lt; node.edgeLabels().length; index++) {</span>
+<span class="fc" id="L384">            dataOutput.writeChar(node.edgeLabels()[index]);</span>
+<span class="fc" id="L385">            final Integer childNodeId = nodeIds.get(node.children()[index]);</span>
+<span class="pc bpc" id="L386" title="1 of 2 branches missed.">            if (childNodeId == null) {</span>
+<span class="nc" id="L387">                throw new IOException(&quot;Missing child node identifier during serialization.&quot;);</span>
+            }
+<span class="fc" id="L389">            dataOutput.writeInt(childNodeId);</span>
+        }
+
+<span class="fc" id="L392">        dataOutput.writeInt(node.orderedValues().length);</span>
+<span class="fc bfc" id="L393" title="All 2 branches covered.">        for (int index = 0; index &lt; node.orderedValues().length; index++) {</span>
+<span class="fc" id="L394">            valueCodec.write(dataOutput, node.orderedValues()[index]);</span>
+<span class="fc" id="L395">            dataOutput.writeInt(node.orderedCounts()[index]);</span>
+        }
+<span class="fc" id="L397">    }</span>
+
+    /**
+     * Reads all compiled nodes and resolves child references.
+     *
+     * @param dataInput    input
+     * @param arrayFactory array factory
+     * @param valueCodec   value codec
+     * @param nodeCount    number of nodes
+     * @param &lt;V&gt;          value type
+     * @return array of nodes indexed by serialized node identifier
+     * @throws IOException if reading fails or the stream is invalid
+     */
+    @SuppressWarnings(&quot;PMD.AvoidInstantiatingObjectsInLoops&quot;)
+    private static &lt;V&gt; CompiledNode&lt;V&gt;[] readNodes(final DataInputStream dataInput, final IntFunction&lt;V[]&gt; arrayFactory,
+            final ValueStreamCodec&lt;V&gt; valueCodec, final int nodeCount) throws IOException {
+<span class="fc" id="L413">        final List&lt;NodeData&lt;V&gt;&gt; nodeDataList = new ArrayList&lt;&gt;(nodeCount);</span>
+
+<span class="fc bfc" id="L415" title="All 2 branches covered.">        for (int nodeIndex = 0; nodeIndex &lt; nodeCount; nodeIndex++) {</span>
+<span class="fc" id="L416">            final int edgeCount = dataInput.readInt();</span>
+<span class="pc bpc" id="L417" title="1 of 2 branches missed.">            if (edgeCount &lt; 0) {</span>
+<span class="nc" id="L418">                throw new IOException(&quot;Negative edge count at node &quot; + nodeIndex + &quot;: &quot; + edgeCount);</span>
+            }
+
+<span class="fc" id="L421">            final char[] edgeLabels = new char[edgeCount];</span>
+<span class="fc" id="L422">            final int[] childNodeIds = new int[edgeCount];</span>
+
+<span class="fc bfc" id="L424" title="All 2 branches covered.">            for (int edgeIndex = 0; edgeIndex &lt; edgeCount; edgeIndex++) {</span>
+<span class="fc" id="L425">                edgeLabels[edgeIndex] = dataInput.readChar();</span>
+<span class="fc" id="L426">                childNodeIds[edgeIndex] = dataInput.readInt();</span>
+            }
+
+<span class="fc" id="L429">            final int valueCount = dataInput.readInt();</span>
+<span class="pc bpc" id="L430" title="1 of 2 branches missed.">            if (valueCount &lt; 0) {</span>
+<span class="nc" id="L431">                throw new IOException(&quot;Negative value count at node &quot; + nodeIndex + &quot;: &quot; + valueCount);</span>
+            }
+
+<span class="fc" id="L434">            final V[] orderedValues = arrayFactory.apply(valueCount);</span>
+<span class="fc" id="L435">            final int[] orderedCounts = new int[valueCount];</span>
+
+<span class="fc bfc" id="L437" title="All 2 branches covered.">            for (int valueIndex = 0; valueIndex &lt; valueCount; valueIndex++) {</span>
+<span class="fc" id="L438">                orderedValues[valueIndex] = valueCodec.read(dataInput);</span>
+<span class="fc" id="L439">                orderedCounts[valueIndex] = dataInput.readInt();</span>
+<span class="fc bfc" id="L440" title="All 2 branches covered.">                if (orderedCounts[valueIndex] &lt;= 0) {</span>
+<span class="fc" id="L441">                    throw new IOException(&quot;Non-positive stored count at node &quot; + nodeIndex + &quot;, value index &quot;</span>
+                            + valueIndex + &quot;: &quot; + orderedCounts[valueIndex]);
+                }
+            }
+
+<span class="fc" id="L446">            nodeDataList.add(new NodeData&lt;&gt;(edgeLabels, childNodeIds, orderedValues, orderedCounts));</span>
+        }
+
+        @SuppressWarnings(&quot;unchecked&quot;)
+<span class="fc" id="L450">        final CompiledNode&lt;V&gt;[] nodes = new CompiledNode[nodeCount];</span>
+
+<span class="fc bfc" id="L452" title="All 2 branches covered.">        for (int nodeIndex = 0; nodeIndex &lt; nodeCount; nodeIndex++) {</span>
+<span class="fc" id="L453">            final NodeData&lt;V&gt; nodeData = nodeDataList.get(nodeIndex);</span>
+            @SuppressWarnings(&quot;unchecked&quot;)
+<span class="fc" id="L455">            final CompiledNode&lt;V&gt;[] children = new CompiledNode[nodeData.childNodeIds().length];</span>
+<span class="fc" id="L456">            nodes[nodeIndex] = new CompiledNode&lt;&gt;(nodeData.edgeLabels(), children, nodeData.orderedValues(),</span>
+<span class="fc" id="L457">                    nodeData.orderedCounts());</span>
+        }
+
+<span class="fc bfc" id="L460" title="All 2 branches covered.">        for (int nodeIndex = 0; nodeIndex &lt; nodeCount; nodeIndex++) {</span>
+<span class="fc" id="L461">            final NodeData&lt;V&gt; nodeData = nodeDataList.get(nodeIndex);</span>
+<span class="fc" id="L462">            final CompiledNode&lt;V&gt; node = nodes[nodeIndex];</span>
+
+<span class="fc bfc" id="L464" title="All 2 branches covered.">            for (int edgeIndex = 0; edgeIndex &lt; nodeData.childNodeIds().length; edgeIndex++) {</span>
+<span class="fc" id="L465">                final int childNodeId = nodeData.childNodeIds()[edgeIndex];</span>
+<span class="pc bpc" id="L466" title="2 of 4 branches missed.">                if (childNodeId &lt; 0 || childNodeId &gt;= nodeCount) {</span>
+<span class="nc" id="L467">                    throw new IOException(&quot;Invalid child node id at node &quot; + nodeIndex + &quot;, edge index &quot; + edgeIndex</span>
+                            + &quot;: &quot; + childNodeId);
+                }
+<span class="fc" id="L470">                node.children()[edgeIndex] = nodes[childNodeId];</span>
+            }
+        }
+
+<span class="fc" id="L474">        return nodes;</span>
+    }
+
+    /**
+     * Locates the compiled node for the supplied key.
+     *
+     * @param key key to resolve
+     * @return compiled node, or {@code null} if the path does not exist
+     */
+    private CompiledNode&lt;V&gt; findNode(final String key) {
+<span class="fc" id="L484">        CompiledNode&lt;V&gt; current = this.root;</span>
+<span class="fc bfc" id="L485" title="All 2 branches covered.">        for (int index = 0; index &lt; key.length(); index++) {</span>
+<span class="fc" id="L486">            current = current.findChild(key.charAt(index));</span>
+<span class="fc bfc" id="L487" title="All 2 branches covered.">            if (current == null) {</span>
+<span class="fc" id="L488">                return null;</span>
+            }
+        }
+<span class="fc" id="L491">        return current;</span>
+    }
+
+    /**
+     * Builder of {@link FrequencyTrie}.
+     *
+     * &lt;p&gt;
+     * The builder is intentionally mutable and optimized for repeated
+     * {@link #put(String, Object)} calls. The final trie is created by
+     * {@link #build()}, which performs bottom-up subtree reduction and converts the
+     * structure to a compact immutable representation optimized for read
+     * operations.
+     *
+     * @param &lt;V&gt; value type
+     */
+    public static final class Builder&lt;V&gt; {
+
+        /**
+         * Logger of this class.
+         */
+<span class="fc" id="L511">        private static final Logger LOGGER = Logger.getLogger(Builder.class.getName());</span>
+
+        /**
+         * Factory used to create typed arrays.
+         */
+        private final IntFunction&lt;V[]&gt; arrayFactory;
+
+        /**
+         * Reduction configuration.
+         */
+        private final ReductionSettings reductionSettings;
+
+        /**
+         * Mutable root node.
+         */
+        private final MutableNode&lt;V&gt; root;
+
+        /**
+         * Creates a new builder with the provided settings.
+         *
+         * @param arrayFactory      array factory
+         * @param reductionSettings reduction configuration
+         * @throws NullPointerException if any argument is {@code null}
+         */
+<span class="fc" id="L535">        public Builder(final IntFunction&lt;V[]&gt; arrayFactory, final ReductionSettings reductionSettings) {</span>
+<span class="fc" id="L536">            this.arrayFactory = Objects.requireNonNull(arrayFactory, &quot;arrayFactory&quot;);</span>
+<span class="fc" id="L537">            this.reductionSettings = Objects.requireNonNull(reductionSettings, &quot;reductionSettings&quot;);</span>
+<span class="fc" id="L538">            this.root = new MutableNode&lt;&gt;();</span>
+<span class="fc" id="L539">        }</span>
+
+        /**
+         * Creates a new builder using default thresholds for the supplied reduction
+         * mode.
+         *
+         * @param arrayFactory  array factory
+         * @param reductionMode reduction mode
+         * @throws NullPointerException if any argument is {@code null}
+         */
+        public Builder(final IntFunction&lt;V[]&gt; arrayFactory, final ReductionMode reductionMode) {
+<span class="fc" id="L550">            this(arrayFactory, ReductionSettings.withDefaults(reductionMode));</span>
+<span class="fc" id="L551">        }</span>
+
+        /**
+         * Stores a value for the supplied key and increments its local frequency.
+         *
+         * &lt;p&gt;
+         * Values are stored at the node addressed by the full key. Since trie values
+         * may also appear on internal nodes, an empty key is valid and stores a value
+         * directly at the root.
+         *
+         * @param key   key
+         * @param value value
+         * @return this builder
+         * @throws NullPointerException if {@code key} or {@code value} is {@code null}
+         */
+        public Builder&lt;V&gt; put(final String key, final V value) {
+<span class="fc" id="L567">            return put(key, value, 1);</span>
+        }
+
+        /**
+         * Builds a compiled read-only trie.
+         *
+         * @return compiled trie
+         */
+        public FrequencyTrie&lt;V&gt; build() {
+<span class="pc bpc" id="L576" title="1 of 2 branches missed.">            if (LOGGER.isLoggable(Level.FINE)) {</span>
+<span class="nc" id="L577">                LOGGER.log(Level.FINE, &quot;Starting trie compilation with reduction mode {0}.&quot;,</span>
+<span class="nc" id="L578">                        this.reductionSettings.reductionMode());</span>
+            }
+
+<span class="fc" id="L581">            final ReductionContext&lt;V&gt; reductionContext = new ReductionContext&lt;&gt;(this.reductionSettings);</span>
+<span class="fc" id="L582">            final ReducedNode&lt;V&gt; reducedRoot = reduce(this.root, reductionContext);</span>
+<span class="fc" id="L583">            final CompiledNode&lt;V&gt; compiledRoot = freeze(reducedRoot, new IdentityHashMap&lt;&gt;());</span>
+
+<span class="pc bpc" id="L585" title="1 of 2 branches missed.">            if (LOGGER.isLoggable(Level.FINE)) {</span>
+<span class="nc" id="L586">                LOGGER.log(Level.FINE, &quot;Trie compilation finished. Canonical node count: {0}.&quot;,</span>
+<span class="nc" id="L587">                        reductionContext.canonicalNodeCount());</span>
+            }
+
+<span class="fc" id="L590">            return new FrequencyTrie&lt;&gt;(this.arrayFactory, compiledRoot);</span>
+        }
+
+        /**
+         * Stores a value for the supplied key and increments its local frequency by the
+         * specified positive count.
+         *
+         * &lt;p&gt;
+         * Values are stored at the node addressed by the full key. Since trie values
+         * may also appear on internal nodes, an empty key is valid and stores a value
+         * directly at the root.
+         *
+         * &lt;p&gt;
+         * This method is functionally equivalent to calling
+         * {@link #put(String, Object)} repeatedly {@code count} times, but it avoids
+         * unnecessary repeated map updates and is therefore preferable for bulk
+         * reconstruction from compiled tries or other aggregated sources.
+         *
+         * @param key   key
+         * @param value value
+         * @param count positive frequency increment
+         * @return this builder
+         * @throws NullPointerException     if {@code key} or {@code value} is
+         *                                  {@code null}
+         * @throws IllegalArgumentException if {@code count} is less than {@code 1}
+         */
+        public Builder&lt;V&gt; put(final String key, final V value, final int count) {
+<span class="fc" id="L617">            Objects.requireNonNull(key, &quot;key&quot;);</span>
+<span class="fc" id="L618">            Objects.requireNonNull(value, &quot;value&quot;);</span>
+
+<span class="fc bfc" id="L620" title="All 2 branches covered.">            if (count &lt; 1) { // NOPMD</span>
+<span class="fc" id="L621">                throw new IllegalArgumentException(&quot;count must be at least 1.&quot;);</span>
+            }
+
+<span class="fc" id="L624">            MutableNode&lt;V&gt; current = this.root;</span>
+<span class="fc bfc" id="L625" title="All 2 branches covered.">            for (int index = 0; index &lt; key.length(); index++) {</span>
+<span class="fc" id="L626">                final Character edge = key.charAt(index);</span>
+<span class="fc" id="L627">                MutableNode&lt;V&gt; child = current.children().get(edge);</span>
+<span class="fc bfc" id="L628" title="All 2 branches covered.">                if (child == null) {</span>
+<span class="fc" id="L629">                    child = new MutableNode&lt;&gt;(); // NOPMD</span>
+<span class="fc" id="L630">                    current.children().put(edge, child);</span>
+                }
+<span class="fc" id="L632">                current = child;</span>
+            }
+
+<span class="fc" id="L635">            final Integer previous = current.valueCounts().get(value);</span>
+<span class="fc bfc" id="L636" title="All 2 branches covered.">            if (previous == null) {</span>
+<span class="fc" id="L637">                current.valueCounts().put(value, count);</span>
+            } else {
+<span class="fc" id="L639">                current.valueCounts().put(value, previous + count);</span>
+            }
+<span class="fc" id="L641">            return this;</span>
+        }
+
+        /**
+         * Returns the number of mutable build-time nodes currently reachable from the
+         * builder root.
+         *
+         * &lt;p&gt;
+         * This metric is intended mainly for diagnostics and tests that compare the
+         * unreduced build-time structure with the final reduced compiled trie.
+         *
+         * @return number of mutable build-time nodes
+         */
+        /* default */ int buildTimeSize() {
+<span class="fc" id="L655">            return countMutableNodes(this.root);</span>
+        }
+
+        /**
+         * Counts mutable nodes recursively.
+         *
+         * @param node current node
+         * @return reachable mutable node count
+         */
+        private int countMutableNodes(final MutableNode&lt;V&gt; node) {
+<span class="fc" id="L665">            int count = 1;</span>
+<span class="fc bfc" id="L666" title="All 2 branches covered.">            for (MutableNode&lt;V&gt; child : node.children().values()) {</span>
+<span class="fc" id="L667">                count += countMutableNodes(child);</span>
+<span class="fc" id="L668">            }</span>
+<span class="fc" id="L669">            return count;</span>
+        }
+
+        /**
+         * Reduces a mutable node to a canonical reduced node.
+         *
+         * @param source  source mutable node
+         * @param context reduction context
+         * @return canonical reduced node
+         */
+        private ReducedNode&lt;V&gt; reduce(final MutableNode&lt;V&gt; source, final ReductionContext&lt;V&gt; context) {
+<span class="fc" id="L680">            final Map&lt;Character, ReducedNode&lt;V&gt;&gt; reducedChildren = new LinkedHashMap&lt;&gt;();</span>
+
+<span class="fc bfc" id="L682" title="All 2 branches covered.">            for (Map.Entry&lt;Character, MutableNode&lt;V&gt;&gt; childEntry : source.children().entrySet()) {</span>
+<span class="fc" id="L683">                final ReducedNode&lt;V&gt; reducedChild = reduce(childEntry.getValue(), context);</span>
+<span class="fc" id="L684">                reducedChildren.put(childEntry.getKey(), reducedChild);</span>
+<span class="fc" id="L685">            }</span>
+
+<span class="fc" id="L687">            final Map&lt;V, Integer&gt; localCounts = copyCounts(source.valueCounts());</span>
+<span class="fc" id="L688">            final LocalValueSummary&lt;V&gt; localSummary = LocalValueSummary.of(localCounts, this.arrayFactory);</span>
+<span class="fc" id="L689">            final ReductionSignature&lt;V&gt; signature = ReductionSignature.create(localSummary, reducedChildren,</span>
+<span class="fc" id="L690">                    context.settings());</span>
+
+<span class="fc" id="L692">            ReducedNode&lt;V&gt; canonical = context.lookup(signature);</span>
+<span class="fc bfc" id="L693" title="All 2 branches covered.">            if (canonical == null) {</span>
+<span class="fc" id="L694">                canonical = new ReducedNode&lt;&gt;(signature, localCounts, reducedChildren);</span>
+<span class="fc" id="L695">                context.register(signature, canonical);</span>
+<span class="fc" id="L696">                return canonical;</span>
+            }
+
+<span class="fc" id="L699">            canonical.mergeLocalCounts(localCounts);</span>
+<span class="fc" id="L700">            canonical.mergeChildren(reducedChildren);</span>
+
+<span class="fc" id="L702">            return canonical;</span>
+        }
+
+        /**
+         * Freezes a reduced node into an immutable compiled node.
+         *
+         * @param reducedNode reduced node
+         * @param cache       already frozen nodes
+         * @return immutable compiled node
+         */
+        private CompiledNode&lt;V&gt; freeze(final ReducedNode&lt;V&gt; reducedNode,
+                final Map&lt;ReducedNode&lt;V&gt;, CompiledNode&lt;V&gt;&gt; cache) {
+<span class="fc" id="L714">            final CompiledNode&lt;V&gt; existing = cache.get(reducedNode);</span>
+<span class="fc bfc" id="L715" title="All 2 branches covered.">            if (existing != null) {</span>
+<span class="fc" id="L716">                return existing;</span>
+            }
+
+<span class="fc" id="L719">            final LocalValueSummary&lt;V&gt; localSummary = LocalValueSummary.of(reducedNode.localCounts(),</span>
+                    this.arrayFactory);
+
+<span class="fc" id="L722">            final List&lt;Map.Entry&lt;Character, ReducedNode&lt;V&gt;&gt;&gt; childEntries = new ArrayList&lt;&gt;(</span>
+<span class="fc" id="L723">                    reducedNode.children().entrySet());</span>
+<span class="fc" id="L724">            childEntries.sort(Map.Entry.comparingByKey());</span>
+
+<span class="fc" id="L726">            final char[] edges = new char[childEntries.size()];</span>
+            @SuppressWarnings(&quot;unchecked&quot;)
+<span class="fc" id="L728">            final CompiledNode&lt;V&gt;[] childNodes = new CompiledNode[childEntries.size()];</span>
+
+<span class="fc bfc" id="L730" title="All 2 branches covered.">            for (int index = 0; index &lt; childEntries.size(); index++) {</span>
+<span class="fc" id="L731">                final Map.Entry&lt;Character, ReducedNode&lt;V&gt;&gt; entry = childEntries.get(index);</span>
+<span class="fc" id="L732">                edges[index] = entry.getKey();</span>
+<span class="fc" id="L733">                childNodes[index] = freeze(entry.getValue(), cache);</span>
+            }
+
+<span class="fc" id="L736">            final CompiledNode&lt;V&gt; frozen = new CompiledNode&lt;&gt;(edges, childNodes, localSummary.orderedValues(),</span>
+<span class="fc" id="L737">                    localSummary.orderedCounts());</span>
+<span class="fc" id="L738">            cache.put(reducedNode, frozen);</span>
+<span class="fc" id="L739">            return frozen;</span>
+        }
+
+        /**
+         * Creates a shallow frequency copy preserving deterministic insertion order of
+         * first occurrence.
+         *
+         * @param source source counts
+         * @return copied counts
+         */
+        private Map&lt;V, Integer&gt; copyCounts(final Map&lt;V, Integer&gt; source) {
+<span class="fc" id="L750">            return new LinkedHashMap&lt;&gt;(source);</span>
+        }
+    }
+
+    /**
+     * Codec used to persist values stored in the trie.
+     *
+     * @param &lt;V&gt; value type
+     */
+    public interface ValueStreamCodec&lt;V&gt; {
+
+        /**
+         * Writes one value to the supplied data output.
+         *
+         * @param dataOutput target data output
+         * @param value      value to write
+         * @throws IOException if writing fails
+         */
+        void write(DataOutputStream dataOutput, V value) throws IOException;
+
+        /**
+         * Reads one value from the supplied data input.
+         *
+         * @param dataInput source data input
+         * @return read value
+         * @throws IOException if reading fails
+         */
+        V read(DataInputStream dataInput) throws IOException;
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
