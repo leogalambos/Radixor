@@ -2,6 +2,8 @@ plugins {
     id 'java'
     id 'eclipse'
     id 'application'
+    id 'maven-publish'
+    id 'signing'
     id 'pmd'
     id 'jacoco'
     id 'info.solidsoft.pitest' version '1.19.0'
@@ -11,7 +13,7 @@ plugins {
     id 'com.palantir.git-version' version '4.0.0'
 }
 
-group = 'org.egothor.stemmer'
+group = 'org.egothor'
 version = gitVersion(prefix:'release@')
 
 def benchmarkReportsDirectory = layout.buildDirectory.dir('reports/jmh')
@@ -21,9 +23,21 @@ def nvdApiKey = providers.gradleProperty('nvdApiKey')
         .orElse(providers.environmentVariable('NVD_API_KEY'))
         .orNull
 def dependencyCheckSuppressionFile = rootProject.file('dependency-suppression.xml')
- 
+
+apply from: 'gradle/maven-pom.gradle'
+
 configurations {
     mockitoAgent
+}
+
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
+
+tasks.withType(AbstractArchiveTask).configureEach {
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
 }
 
 jacoco {

@@ -156,8 +156,31 @@ jobs:
           test -f gradle.properties
           test -f gradle/verification-metadata.xml
 
-      - name: Build release distribution and SBOM
-        run: ./gradlew --no-daemon clean build pmdMain javadoc jacocoTestReport distZip cyclonedxBom
+      - name: Build release distribution, signed Maven bundle, and SBOM
+        run: ./gradlew --no-daemon clean build pmdMain javadoc jacocoTestReport distZip cyclonedxBom centralBundle
+
+      - name: Publish bundle to Maven Central
+        shell: bash
+        env:
+          CENTRAL_BEARER_TOKEN: ${{ secrets.CENTRAL_BEARER_TOKEN }}
+        run: |
+          set -euo pipefail
+          echo "::add-mask::$CENTRAL_BEARER_TOKEN"
+
+          BUNDLE="$(ls build/central-bundle/*.zip)"
+          HEADER_FILE="$(mktemp)"
+          trap 'rm -f "$HEADER_FILE"' EXIT
+          printf 'Authorization: Bearer %s\n' "$CENTRAL_BEARER_TOKEN" > "$HEADER_FILE"
+
+          curl \
+            --fail \
+            --silent \
+            --show-error \
+            --request POST \
+            --header @"$HEADER_FILE" \
+            --form "bundle=@${BUNDLE}" \
+            --form "name=org.egothor:radixor:${GITHUB_REF_NAME#release@}" \
+            "https://central.sonatype.com/api/v1/publisher/upload?publishingType=AUTOMATIC"
 
       - name: Publish GitHub release assets
         uses: softprops/action-gh-release@v2
@@ -167,3 +190,4 @@ jobs:
             build/distributions/*.zip
             build/reports/sbom/radixor-sbom.json
             build/reports/sbom/radixor-sbom.xml
+            build/central-bundle/*.zip

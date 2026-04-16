@@ -1,0 +1,144 @@
+import java.security.MessageDigest
+
+def publicationArtifactId = providers.gradleProperty('mavenArtifactId').orElse('radixor').get()
+
+def pomName = providers.gradleProperty('pomName').orElse('Radixor').get()
+def pomDescription = providers.gradleProperty('pomDescription')
+        .orElse('Fast algorithmic stemming with compact patch-command tries in the Egothor tradition.')
+        .get()
+def pomUrl = providers.gradleProperty('pomUrl').orNull
+def pomScmUrl = providers.gradleProperty('pomScmUrl').orNull
+def pomScmConnection = providers.gradleProperty('pomScmConnection').orNull
+def pomScmDeveloperConnection = providers.gradleProperty('pomScmDeveloperConnection').orNull
+def pomLicenseName = providers.gradleProperty('pomLicenseName').orNull
+def pomLicenseUrl = providers.gradleProperty('pomLicenseUrl').orNull
+def pomLicenseDistribution = providers.gradleProperty('pomLicenseDistribution').orElse('repo').get()
+def pomDeveloperId = providers.gradleProperty('pomDeveloperId').orElse('egothor').get()
+def pomDeveloperName = providers.gradleProperty('pomDeveloperName').orElse('Leo Galambos').get()
+def pomDeveloperEmail = providers.gradleProperty('pomDeveloperEmail').orElse('egothor@gmail.com').get()
+
+def signingKey = providers.gradleProperty('pomSigningKey')
+        .orElse(providers.environmentVariable('SIGNING_KEY'))
+        .orNull
+
+def signingPassword = providers.gradleProperty('pomSigningPassword')
+        .orElse(providers.environmentVariable('SIGNING_PASSWORD'))
+        .orNull
+
+def centralStagingRepositoryDirectory = layout.buildDirectory.dir('staging-repository')
+def centralBundleDirectory = layout.buildDirectory.dir('central-bundle')
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            artifactId = publicationArtifactId
+
+            pom {
+                name = pomName
+                description = pomDescription
+                url = pomUrl
+
+                licenses {
+                    license {
+                        name = pomLicenseName
+                        url = pomLicenseUrl
+                        distribution = pomLicenseDistribution
+                    }
+                }
+
+                developers {
+                    developer {
+                        id = pomDeveloperId
+                        name = pomDeveloperName
+                        email = pomDeveloperEmail
+                    }
+                }
+
+                scm {
+                    url = pomScmUrl
+                    connection = pomScmConnection
+                    developerConnection = pomScmDeveloperConnection
+                }
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            name = 'centralStaging'
+            url = centralStagingRepositoryDirectory.get().asFile.toURI()
+        }
+    }
+}
+
+signing {
+    required { !version.toString().endsWith('-SNAPSHOT') }
+    if (signingKey != null && !signingKey.isBlank()) {
+        useInMemoryPgpKeys(signingKey, signingPassword)
+        sign publishing.publications.mavenJava
+    }
+}
+
+tasks.register('validateReleaseMetadata') {
+    group = 'publishing'
+    description = 'Validates release metadata and signing inputs required for Maven bundle generation.'
+
+    doLast {
+        List<String> missing = new ArrayList<>()
+
+        if (pomUrl == null || pomUrl.isBlank()) missing.add('pomUrl')
+        if (pomScmUrl == null || pomScmUrl.isBlank()) missing.add('pomScmUrl')
+        if (pomScmConnection == null || pomScmConnection.isBlank()) missing.add('pomScmConnection')
+        if (pomScmDeveloperConnection == null || pomScmDeveloperConnection.isBlank()) missing.add('pomScmDeveloperConnection')
+        if (pomLicenseName == null || pomLicenseName.isBlank()) missing.add('pomLicenseName')
+        if (pomLicenseUrl == null || pomLicenseUrl.isBlank()) missing.add('pomLicenseUrl')
+        if (signingKey == null || signingKey.isBlank()) missing.add('pomSigningKey / SIGNING_KEY')
+        if (signingPassword == null || signingPassword.isBlank()) missing.add('pomSigningPassword / SIGNING_PASSWORD')
+
+        if (!missing.isEmpty()) {
+            throw new GradleException('Missing release metadata: ' + String.join(', ', missing))
+        }
+    }
+}
+
+tasks.named('publishMavenJavaPublicationToCentralStagingRepository') {
+    dependsOn(tasks.named('validateReleaseMetadata'))
+}
+
+tasks.register('createCentralChecksums') {
+    group = 'publishing'
+    description = 'Creates MD5 and SHA-1 checksums for staged Maven publication artifacts.'
+    dependsOn(tasks.named('publishMavenJavaPublicationToCentralStagingRepository'))
+
+    doLast {
+        File root = centralStagingRepositoryDirectory.get().asFile
+        root.eachFileRecurse { File file ->
+            if (file.isFile() && !file.name.endsWith('.md5') && !file.name.endsWith('.sha1')) {
+                byte[] bytes = file.bytes
+                new File(file.absolutePath + '.md5').text =
+                        MessageDigest.getInstance('MD5').digest(bytes).encodeHex().toString()
+                new File(file.absolutePath + '.sha1').text =
+                        MessageDigest.getInstance('SHA-1').digest(bytes).encodeHex().toString()
+            }
+        }
+    }
+}
+
+tasks.register('centralBundle', Zip) {
+    group = 'publishing'
+    description = 'Builds a Maven Central-compatible deployment bundle ZIP.'
+
+    dependsOn(tasks.named('createCentralChecksums'))
+
+    from(centralStagingRepositoryDirectory)
+    destinationDirectory = centralBundleDirectory
+    archiveFileName = "radixor-${project.version}-central-bundle.zip"
+}
+
+tasks.register('packageReleaseCandidate') {
+    group = 'publishing'
+    description = 'Builds the signed local Central bundle without uploading it.'
+    dependsOn(tasks.named('clean'))
+    dependsOn(tasks.named('centralBundle'))
+}
