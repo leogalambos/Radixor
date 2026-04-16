@@ -90,6 +90,9 @@ local.properties
 # PMD plugin conf
 .pmd
 
+# jqwik local db
+.jqwik-database
+
 ##---------------------------------------------------------------------------------------- Gradle
 .gradle
 **/build/
