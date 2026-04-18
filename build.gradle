@@ -309,6 +309,17 @@ javadoc {
     options.version = true
     options.windowTitle = 'Radixor - Egothor Stemmer'
     options.docTitle = 'Radixor - Egothor Stemmer API'
+    options.overview = file('src/main/javadoc/overview.html')
+    options.bottom = """
+        <div class="legal-copy">
+            &copy; 2026 Egothor
+            <br/>
+            Licensed under <a href="https://github.com/leogalambos/Radixor/blob/main/LICENSE">BSD-3-Clause</a>
+        </div>
+    """
+    options.links('https://docs.oracle.com/en/java/javase/21/docs/api/')
+    options.group('Core Stemming API', 'org.egothor.stemmer')
+    options.group('Trie Infrastructure', 'org.egothor.stemmer.trie')
 
     source = sourceSets.main.allJava
 }

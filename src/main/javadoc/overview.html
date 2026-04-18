@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Radixor Overview</title>
+</head>
+<body>
+<h1>Radixor</h1>
+
+<p>
+    Radixor is a high-performance Java toolkit for dictionary-driven stemming based on
+    the proven Egothor patch-command trie approach. It is designed for production-grade
+    search and text-processing systems that require deterministic behavior, efficient
+    runtime execution, and maintainable lexical assets.
+</p>
+
+<p>
+    In addition to compiling and executing stemming dictionaries, Radixor extends the
+    traditional Egothor model with support for evolving compiled dictionary artifacts
+    through additional transformation layers. This allows existing lexical resources to
+    be refined incrementally without requiring full recompilation from source dictionaries.
+</p>
+
+<h2>Project Scope</h2>
+<ul>
+    <li>Compilation of Egothor-compatible stemming dictionaries</li>
+    <li>Runtime stemming over compact compiled trie artifacts</li>
+    <li>Transformation and reduction infrastructure for lexical processing</li>
+    <li>CLI and programmatic integration for Java 21 and newer</li>
+</ul>
+
+<h2>API Documentation</h2>
+<p>
+    This Javadoc site documents the Java API of the project. For usage guidance,
+    architectural context, benchmarking methodology, published reports, and general
+    project documentation, refer to the main project site:
+    <a href="https://leogalambos.github.io/Radixor/">leogalambos.github.io/Radixor</a>.
+</p>
+
+<h2>License</h2>
+<p>
+    Radixor is distributed under the
+    <a href="https://github.com/leogalambos/Radixor/blob/main/LICENSE">BSD-3-Clause License</a>.
+</p>
+
+<h2>Packages</h2>
+<p>
+    The main API is located in <code>org.egothor.stemmer</code>. Supporting trie-oriented
+    structures and related implementation components are located in
+    <code>org.egothor.stemmer.trie</code>.
+</p>
+</body>
+</html>

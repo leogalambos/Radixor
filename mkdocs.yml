@@ -3,7 +3,7 @@ site_description: High-performance multi-language stemming toolkit for Java
 site_url: https://leogalambos.github.io/Radixor/
 repo_url: https://github.com/leogalambos/Radixor
 repo_name: leogalambos/Radixor
-copyright: "&copy; ${year} Egothor. Licensed under <a href='https://github.com/leogalambos/Radixor/blob/main/LICENSE'>BSD-3-Clause</a>."
+copyright: "&copy; 2026 Egothor. Licensed under <a href='https://github.com/leogalambos/Radixor/blob/main/LICENSE'>BSD-3-Clause</a>."
 
 theme:
   name: material
@@ -19,6 +19,9 @@ theme:
     - scheme: default
       primary: indigo
       accent: indigo
+
+extra: 
+  generator: false
 
 markdown_extensions:
   - admonition
