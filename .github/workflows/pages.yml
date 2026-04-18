@@ -250,9 +250,6 @@ jobs:
 
           cp "${RUN_DIR}/index.html" "${LATEST_DIR}/index.html"
 
-          cat > "${SITE_DIR}/.nojekyll" <<EOF
-          EOF
-
           cat > docs/reports.md <<EOF
           # CI Reports
 
@@ -283,12 +280,42 @@ jobs:
           - [Browse historical build reports](https://leogalambos.github.io/Radixor/builds/)
           EOF
 
+          {
+            echo "# Historical Build Reports"
+            echo
+            echo "The following build report sets are currently published on GitHub Pages."
+            echo
+            echo "| Build | Published | Link |"
+            echo "|---:|---|---|"
+
+            find "${SITE_DIR}/builds" -mindepth 1 -maxdepth 1 -type d ! -name latest -printf '%P\n' \
+              | grep -E '^[0-9]+$' \
+              | while read -r build; do
+                  ts="$(git -C "${SITE_DIR}" log --diff-filter=A --format='%ct' --reverse -- "builds/${build}/index.html" | head -n 1)"
+                  if [ -n "${ts}" ]; then
+                    published="$(date -u -d "@${ts}" '+%Y-%m-%d %H:%M')"
+                  else
+                    published="unknown"
+                    ts="0"
+                  fi
+                  printf '%s\t%s\t%s\n' "${ts}" "${build}" "${published}"
+                done \
+              | sort -r -n -k1,1 \
+              | while IFS=$'\t' read -r _ts build published; do
+                  echo "| ${build} | ${published} | [Open](../builds/${build}/) |"
+                done
+          } > docs/builds.md
+
       - name: Build documentation site (MkDocs Material)
         shell: bash
         run: |
           set -euo pipefail
           mkdocs build --strict --site-dir .mkdocs-site
           rsync -a --delete --exclude '.git' --exclude '.git/' --exclude 'builds/' .mkdocs-site/ .gh-pages/
+          mkdir -p .gh-pages/builds
+          cp .mkdocs-site/builds/index.html .gh-pages/builds/index.html
+          cat > .gh-pages/.nojekyll <<EOF
+          EOF
           rm -rf .mkdocs-site
 
       - name: Commit and push gh-pages
