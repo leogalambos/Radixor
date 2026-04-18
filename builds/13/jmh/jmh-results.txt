@@ -1,0 +1,1361 @@
+# JMH version: 1.37
+# VM version: JDK 21.0.10, OpenJDK 64-Bit Server VM, 21.0.10+7-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.EnglishStemmerComparisonBenchmark.radixorUsUkProfiPreferredStem
+# Parameters: (familyCount = 1000)
+
+# Run progress: 0.00% complete, ETA 00:05:36
+# Fork: 1 of 1
+# Warmup Iteration   1: 764479.277 ns/op
+# Warmup Iteration   2: 747106.672 ns/op
+# Warmup Iteration   3: 742288.519 ns/op
+Iteration   1: 742787.498 ns/op
+Iteration   2: 743994.170 ns/op
+Iteration   3: 743325.112 ns/op
+Iteration   4: 742397.341 ns/op
+Iteration   5: 742146.315 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.EnglishStemmerComparisonBenchmark.radixorUsUkProfiPreferredStem":
+  742930.087 ±(99.9%) 2860.101 ns/op [Average]
+  (min, avg, max) = (742146.315, 742930.087, 743994.170), stdev = 742.759
+  CI (99.9%): [740069.987, 745790.188] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.10, OpenJDK 64-Bit Server VM, 21.0.10+7-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.EnglishStemmerComparisonBenchmark.radixorUsUkProfiPreferredStem
+# Parameters: (familyCount = 5000)
+
+# Run progress: 2.38% complete, ETA 00:06:06
+# Fork: 1 of 1
+# Warmup Iteration   1: 3788596.445 ns/op
+# Warmup Iteration   2: 3660720.058 ns/op
+# Warmup Iteration   3: 3654384.266 ns/op
+Iteration   1: 3656429.901 ns/op
+Iteration   2: 3690983.904 ns/op
+Iteration   3: 3659240.460 ns/op
+Iteration   4: 3660510.500 ns/op
+Iteration   5: 3658131.361 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.EnglishStemmerComparisonBenchmark.radixorUsUkProfiPreferredStem":
+  3665059.225 ±(99.9%) 56102.522 ns/op [Average]
+  (min, avg, max) = (3656429.901, 3665059.225, 3690983.904), stdev = 14569.647
+  CI (99.9%): [3608956.703, 3721161.747] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.10, OpenJDK 64-Bit Server VM, 21.0.10+7-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.EnglishStemmerComparisonBenchmark.snowballEnglishPorter2
+# Parameters: (familyCount = 1000)
+
+# Run progress: 4.76% complete, ETA 00:05:55
+# Fork: 1 of 1
+# Warmup Iteration   1: 4640382.944 ns/op
+# Warmup Iteration   2: 3919238.887 ns/op
+# Warmup Iteration   3: 3916576.422 ns/op
+Iteration   1: 3907456.129 ns/op
+Iteration   2: 3852675.523 ns/op
+Iteration   3: 3900451.755 ns/op
+Iteration   4: 3845855.605 ns/op
+Iteration   5: 3916387.156 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.EnglishStemmerComparisonBenchmark.snowballEnglishPorter2":
+  3884565.234 ±(99.9%) 126316.358 ns/op [Average]
+  (min, avg, max) = (3845855.605, 3884565.234, 3916387.156), stdev = 32803.957
+  CI (99.9%): [3758248.876, 4010881.591] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.10, OpenJDK 64-Bit Server VM, 21.0.10+7-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.EnglishStemmerComparisonBenchmark.snowballEnglishPorter2
+# Parameters: (familyCount = 5000)
+
+# Run progress: 7.14% complete, ETA 00:05:46
+# Fork: 1 of 1
+# Warmup Iteration   1: 28851631.314 ns/op
+# Warmup Iteration   2: 22604652.000 ns/op
+# Warmup Iteration   3: 21948503.978 ns/op
+Iteration   1: 22323230.689 ns/op
+Iteration   2: 22214408.587 ns/op
+Iteration   3: 21871190.978 ns/op
+Iteration   4: 22139156.043 ns/op
+Iteration   5: 21953415.565 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.EnglishStemmerComparisonBenchmark.snowballEnglishPorter2":
+  22100280.373 ±(99.9%) 715988.469 ns/op [Average]
+  (min, avg, max) = (21871190.978, 22100280.373, 22323230.689), stdev = 185939.932
+  CI (99.9%): [21384291.903, 22816268.842] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.10, OpenJDK 64-Bit Server VM, 21.0.10+7-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.EnglishStemmerComparisonBenchmark.snowballOriginalPorter
+# Parameters: (familyCount = 1000)
+
+# Run progress: 9.52% complete, ETA 00:05:37
+# Fork: 1 of 1
+# Warmup Iteration   1: 3100956.570 ns/op
+# Warmup Iteration   2: 2684361.263 ns/op
+# Warmup Iteration   3: 2700580.822 ns/op
+Iteration   1: 2650844.206 ns/op
+Iteration   2: 2671964.819 ns/op
+Iteration   3: 2673679.987 ns/op
+Iteration   4: 2644730.541 ns/op
+Iteration   5: 2679896.487 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.EnglishStemmerComparisonBenchmark.snowballOriginalPorter":
+  2664223.208 ±(99.9%) 59466.480 ns/op [Average]
+  (min, avg, max) = (2644730.541, 2664223.208, 2679896.487), stdev = 15443.256
+  CI (99.9%): [2604756.728, 2723689.688] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.10, OpenJDK 64-Bit Server VM, 21.0.10+7-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.EnglishStemmerComparisonBenchmark.snowballOriginalPorter
+# Parameters: (familyCount = 5000)
+
+# Run progress: 11.90% complete, ETA 00:05:29
+# Fork: 1 of 1
+# Warmup Iteration   1: 17257660.983 ns/op
+# Warmup Iteration   2: 15059122.776 ns/op
+# Warmup Iteration   3: 14787356.015 ns/op
+Iteration   1: 14904834.294 ns/op
+Iteration   2: 14843123.588 ns/op
+Iteration   3: 14656102.667 ns/op
+Iteration   4: 14830121.176 ns/op
+Iteration   5: 14784335.971 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.EnglishStemmerComparisonBenchmark.snowballOriginalPorter":
+  14803703.539 ±(99.9%) 358339.514 ns/op [Average]
+  (min, avg, max) = (14656102.667, 14803703.539, 14904834.294), stdev = 93059.634
+  CI (99.9%): [14445364.026, 15162043.053] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.10, OpenJDK 64-Bit Server VM, 21.0.10+7-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieCompilationBenchmark.compilePatchTrie
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS, stemCount = 2000, storeOriginalStem = true)
+
+# Run progress: 14.29% complete, ETA 00:05:20
+# Fork: 1 of 1
+# Warmup Iteration   1: 112080137.222 ns/op
+# Warmup Iteration   2: 70607950.267 ns/op
+# Warmup Iteration   3: 69375756.067 ns/op
+Iteration   1: 70018473.533 ns/op
+Iteration   2: 69692961.067 ns/op
+Iteration   3: 68922624.000 ns/op
+Iteration   4: 69145623.400 ns/op
+Iteration   5: 69421871.000 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieCompilationBenchmark.compilePatchTrie":
+  69440310.600 ±(99.9%) 1671024.873 ns/op [Average]
+  (min, avg, max) = (68922624.000, 69440310.600, 70018473.533), stdev = 433959.853
+  CI (99.9%): [67769285.727, 71111335.473] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.10, OpenJDK 64-Bit Server VM, 21.0.10+7-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieCompilationBenchmark.compilePatchTrie
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS, stemCount = 2000, storeOriginalStem = false)
+
+# Run progress: 16.67% complete, ETA 00:05:10
+# Fork: 1 of 1
+# Warmup Iteration   1: 105567847.200 ns/op
+# Warmup Iteration   2: 69766376.600 ns/op
+# Warmup Iteration   3: 68087980.733 ns/op
+Iteration   1: 68460075.600 ns/op
+Iteration   2: 67371329.400 ns/op
+Iteration   3: 68581278.067 ns/op
+Iteration   4: 67417904.067 ns/op
+Iteration   5: 67122376.733 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieCompilationBenchmark.compilePatchTrie":
+  67790592.773 ±(99.9%) 2607785.746 ns/op [Average]
+  (min, avg, max) = (67122376.733, 67790592.773, 68581278.067), stdev = 677233.677
+  CI (99.9%): [65182807.027, 70398378.520] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.10, OpenJDK 64-Bit Server VM, 21.0.10+7-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieCompilationBenchmark.compilePatchTrie
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS, stemCount = 10000, storeOriginalStem = true)
+
+# Run progress: 19.05% complete, ETA 00:05:00
+# Fork: 1 of 1
+# Warmup Iteration   1: 661569369.500 ns/op
+# Warmup Iteration   2: 372589492.667 ns/op
+# Warmup Iteration   3: 377733741.667 ns/op
+Iteration   1: 323347988.750 ns/op
+Iteration   2: 313907779.250 ns/op
+Iteration   3: 314605789.000 ns/op
+Iteration   4: 310302780.500 ns/op
+Iteration   5: 319160952.250 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieCompilationBenchmark.compilePatchTrie":
+  316265057.950 ±(99.9%) 19484106.195 ns/op [Average]
+  (min, avg, max) = (310302780.500, 316265057.950, 323347988.750), stdev = 5059960.504
+  CI (99.9%): [296780951.755, 335749164.145] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.10, OpenJDK 64-Bit Server VM, 21.0.10+7-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieCompilationBenchmark.compilePatchTrie
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS, stemCount = 10000, storeOriginalStem = false)
+
+# Run progress: 21.43% complete, ETA 00:04:56
+# Fork: 1 of 1
+# Warmup Iteration   1: 661894192.000 ns/op
+# Warmup Iteration   2: 358136272.000 ns/op
+# Warmup Iteration   3: 324046979.750 ns/op
+Iteration   1: 305529865.500 ns/op
+Iteration   2: 319624878.000 ns/op
+Iteration   3: 316572666.250 ns/op
+Iteration   4: 303019545.750 ns/op
+Iteration   5: 312122789.000 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieCompilationBenchmark.compilePatchTrie":
+  311373948.900 ±(99.9%) 27201918.535 ns/op [Average]
+  (min, avg, max) = (303019545.750, 311373948.900, 319624878.000), stdev = 7064251.860
+  CI (99.9%): [284172030.365, 338575867.435] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.10, OpenJDK 64-Bit Server VM, 21.0.10+7-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieCompilationBenchmark.compilePatchTrie
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS, stemCount = 2000, storeOriginalStem = true)
+
+# Run progress: 23.81% complete, ETA 00:04:51
+# Fork: 1 of 1
+# Warmup Iteration   1: 133418896.000 ns/op
+# Warmup Iteration   2: 89138156.500 ns/op
+# Warmup Iteration   3: 88077245.417 ns/op
+Iteration   1: 88713870.833 ns/op
+Iteration   2: 87734436.583 ns/op
+Iteration   3: 86680560.083 ns/op
+Iteration   4: 87987919.083 ns/op
+Iteration   5: 86776188.500 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieCompilationBenchmark.compilePatchTrie":
+  87578595.017 ±(99.9%) 3296186.585 ns/op [Average]
+  (min, avg, max) = (86680560.083, 87578595.017, 88713870.833), stdev = 856009.189
+  CI (99.9%): [84282408.431, 90874781.602] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.10, OpenJDK 64-Bit Server VM, 21.0.10+7-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieCompilationBenchmark.compilePatchTrie
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS, stemCount = 2000, storeOriginalStem = false)
+
+# Run progress: 26.19% complete, ETA 00:04:41
+# Fork: 1 of 1
+# Warmup Iteration   1: 155495087.429 ns/op
+# Warmup Iteration   2: 88274913.333 ns/op
+# Warmup Iteration   3: 86083861.333 ns/op
+Iteration   1: 84750967.083 ns/op
+Iteration   2: 84821314.417 ns/op
+Iteration   3: 85082763.333 ns/op
+Iteration   4: 85765249.833 ns/op
+Iteration   5: 84936129.333 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieCompilationBenchmark.compilePatchTrie":
+  85071284.800 ±(99.9%) 1570140.913 ns/op [Average]
+  (min, avg, max) = (84750967.083, 85071284.800, 85765249.833), stdev = 407760.609
+  CI (99.9%): [83501143.887, 86641425.713] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.10, OpenJDK 64-Bit Server VM, 21.0.10+7-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieCompilationBenchmark.compilePatchTrie
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS, stemCount = 10000, storeOriginalStem = true)
+
+# Run progress: 28.57% complete, ETA 00:04:31
+# Fork: 1 of 1
+# Warmup Iteration   1: 657714422.000 ns/op
+# Warmup Iteration   2: 406460664.667 ns/op
+# Warmup Iteration   3: 376859638.000 ns/op
+Iteration   1: 361825788.333 ns/op
+Iteration   2: 369593887.667 ns/op
+Iteration   3: 367247126.333 ns/op
+Iteration   4: 372923416.333 ns/op
+Iteration   5: 363955614.000 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieCompilationBenchmark.compilePatchTrie":
+  367109166.533 ±(99.9%) 16988427.397 ns/op [Average]
+  (min, avg, max) = (361825788.333, 367109166.533, 372923416.333), stdev = 4411840.646
+  CI (99.9%): [350120739.137, 384097593.930] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.10, OpenJDK 64-Bit Server VM, 21.0.10+7-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieCompilationBenchmark.compilePatchTrie
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS, stemCount = 10000, storeOriginalStem = false)
+
+# Run progress: 30.95% complete, ETA 00:04:23
+# Fork: 1 of 1
+# Warmup Iteration   1: 720467250.000 ns/op
+# Warmup Iteration   2: 404895524.333 ns/op
+# Warmup Iteration   3: 364184704.667 ns/op
+Iteration   1: 366534022.333 ns/op
+Iteration   2: 351222685.000 ns/op
+Iteration   3: 353715868.000 ns/op
+Iteration   4: 364097635.667 ns/op
+Iteration   5: 356571971.667 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieCompilationBenchmark.compilePatchTrie":
+  358428436.533 ±(99.9%) 25500012.440 ns/op [Average]
+  (min, avg, max) = (351222685.000, 358428436.533, 366534022.333), stdev = 6622272.252
+  CI (99.9%): [332928424.093, 383928448.974] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.10, OpenJDK 64-Bit Server VM, 21.0.10+7-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieCompilationBenchmark.compilePatchTrie
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS, stemCount = 2000, storeOriginalStem = true)
+
+# Run progress: 33.33% complete, ETA 00:04:14
+# Fork: 1 of 1
+# Warmup Iteration   1: 115067937.778 ns/op
+# Warmup Iteration   2: 65880097.250 ns/op
+# Warmup Iteration   3: 65160253.625 ns/op
+Iteration   1: 64585535.625 ns/op
+Iteration   2: 67065680.533 ns/op
+Iteration   3: 64849129.500 ns/op
+Iteration   4: 64956985.688 ns/op
+Iteration   5: 64657195.688 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieCompilationBenchmark.compilePatchTrie":
+  65222905.407 ±(99.9%) 4007496.328 ns/op [Average]
+  (min, avg, max) = (64585535.625, 65222905.407, 67065680.533), stdev = 1040734.070
+  CI (99.9%): [61215409.079, 69230401.735] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.10, OpenJDK 64-Bit Server VM, 21.0.10+7-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieCompilationBenchmark.compilePatchTrie
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS, stemCount = 2000, storeOriginalStem = false)
+
+# Run progress: 35.71% complete, ETA 00:04:04
+# Fork: 1 of 1
+# Warmup Iteration   1: 116112212.222 ns/op
+# Warmup Iteration   2: 67218485.733 ns/op
+# Warmup Iteration   3: 65219229.625 ns/op
+Iteration   1: 65379094.188 ns/op
+Iteration   2: 65101574.563 ns/op
+Iteration   3: 65633435.188 ns/op
+Iteration   4: 65423224.625 ns/op
+Iteration   5: 65338440.813 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieCompilationBenchmark.compilePatchTrie":
+  65375153.875 ±(99.9%) 733719.585 ns/op [Average]
+  (min, avg, max) = (65101574.563, 65375153.875, 65633435.188), stdev = 190544.646
+  CI (99.9%): [64641434.290, 66108873.460] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.10, OpenJDK 64-Bit Server VM, 21.0.10+7-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieCompilationBenchmark.compilePatchTrie
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS, stemCount = 10000, storeOriginalStem = true)
+
+# Run progress: 38.10% complete, ETA 00:03:55
+# Fork: 1 of 1
+# Warmup Iteration   1: 586013648.000 ns/op
+# Warmup Iteration   2: 364571185.667 ns/op
+# Warmup Iteration   3: 330559211.250 ns/op
+Iteration   1: 311316675.000 ns/op
+Iteration   2: 314428183.750 ns/op
+Iteration   3: 306754112.500 ns/op
+Iteration   4: 315380603.250 ns/op
+Iteration   5: 313686813.250 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieCompilationBenchmark.compilePatchTrie":
+  312313277.550 ±(99.9%) 13292455.218 ns/op [Average]
+  (min, avg, max) = (306754112.500, 312313277.550, 315380603.250), stdev = 3452008.408
+  CI (99.9%): [299020822.332, 325605732.768] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.10, OpenJDK 64-Bit Server VM, 21.0.10+7-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieCompilationBenchmark.compilePatchTrie
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS, stemCount = 10000, storeOriginalStem = false)
+
+# Run progress: 40.48% complete, ETA 00:03:47
+# Fork: 1 of 1
+# Warmup Iteration   1: 513060405.000 ns/op
+# Warmup Iteration   2: 354413489.333 ns/op
+# Warmup Iteration   3: 323664714.750 ns/op
+Iteration   1: 308083571.250 ns/op
+Iteration   2: 309763342.750 ns/op
+Iteration   3: 304668401.000 ns/op
+Iteration   4: 305677676.500 ns/op
+Iteration   5: 308029138.250 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieCompilationBenchmark.compilePatchTrie":
+  307244425.950 ±(99.9%) 7881010.603 ns/op [Average]
+  (min, avg, max) = (304668401.000, 307244425.950, 309763342.750), stdev = 2046673.426
+  CI (99.9%): [299363415.347, 315125436.553] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.10, OpenJDK 64-Bit Server VM, 21.0.10+7-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupAllPatches
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS, stemCount = 2000)
+
+# Run progress: 42.86% complete, ETA 00:03:39
+# Fork: 1 of 1
+# Warmup Iteration   1: 38273.382 ns/op
+# Warmup Iteration   2: 36345.207 ns/op
+# Warmup Iteration   3: 35967.289 ns/op
+Iteration   1: 37117.163 ns/op
+Iteration   2: 37378.883 ns/op
+Iteration   3: 32938.641 ns/op
+Iteration   4: 32835.472 ns/op
+Iteration   5: 33939.459 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupAllPatches":
+  34841.923 ±(99.9%) 8626.571 ns/op [Average]
+  (min, avg, max) = (32835.472, 34841.923, 37378.883), stdev = 2240.293
+  CI (99.9%): [26215.352, 43468.495] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.10, OpenJDK 64-Bit Server VM, 21.0.10+7-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupAllPatches
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS, stemCount = 10000)
+
+# Run progress: 45.24% complete, ETA 00:03:29
+# Fork: 1 of 1
+# Warmup Iteration   1: 267966.039 ns/op
+# Warmup Iteration   2: 244742.209 ns/op
+# Warmup Iteration   3: 246366.325 ns/op
+Iteration   1: 241765.975 ns/op
+Iteration   2: 246065.446 ns/op
+Iteration   3: 241471.261 ns/op
+Iteration   4: 246497.704 ns/op
+Iteration   5: 242302.875 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupAllPatches":
+  243620.652 ±(99.9%) 9442.069 ns/op [Average]
+  (min, avg, max) = (241471.261, 243620.652, 246497.704), stdev = 2452.075
+  CI (99.9%): [234178.584, 253062.721] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.10, OpenJDK 64-Bit Server VM, 21.0.10+7-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupAllPatches
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS, stemCount = 2000)
+
+# Run progress: 47.62% complete, ETA 00:03:20
+# Fork: 1 of 1
+# Warmup Iteration   1: 38547.583 ns/op
+# Warmup Iteration   2: 36088.982 ns/op
+# Warmup Iteration   3: 35706.756 ns/op
+Iteration   1: 36435.425 ns/op
+Iteration   2: 36203.360 ns/op
+Iteration   3: 33396.033 ns/op
+Iteration   4: 32804.648 ns/op
+Iteration   5: 32905.636 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupAllPatches":
+  34349.020 ±(99.9%) 6986.634 ns/op [Average]
+  (min, avg, max) = (32804.648, 34349.020, 36435.425), stdev = 1814.407
+  CI (99.9%): [27362.386, 41335.655] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.10, OpenJDK 64-Bit Server VM, 21.0.10+7-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupAllPatches
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS, stemCount = 10000)
+
+# Run progress: 50.00% complete, ETA 00:03:11
+# Fork: 1 of 1
+# Warmup Iteration   1: 252036.729 ns/op
+# Warmup Iteration   2: 248336.076 ns/op
+# Warmup Iteration   3: 242807.148 ns/op
+Iteration   1: 245245.547 ns/op
+Iteration   2: 238738.819 ns/op
+Iteration   3: 243212.777 ns/op
+Iteration   4: 240231.817 ns/op
+Iteration   5: 244783.002 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupAllPatches":
+  242442.392 ±(99.9%) 10981.547 ns/op [Average]
+  (min, avg, max) = (238738.819, 242442.392, 245245.547), stdev = 2851.873
+  CI (99.9%): [231460.845, 253423.940] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.10, OpenJDK 64-Bit Server VM, 21.0.10+7-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupAllPatches
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS, stemCount = 2000)
+
+# Run progress: 52.38% complete, ETA 00:03:02
+# Fork: 1 of 1
+# Warmup Iteration   1: 41222.533 ns/op
+# Warmup Iteration   2: 35791.618 ns/op
+# Warmup Iteration   3: 36877.967 ns/op
+Iteration   1: 35602.473 ns/op
+Iteration   2: 36351.072 ns/op
+Iteration   3: 32871.866 ns/op
+Iteration   4: 32810.959 ns/op
+Iteration   5: 34023.124 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupAllPatches":
+  34331.899 ±(99.9%) 6158.538 ns/op [Average]
+  (min, avg, max) = (32810.959, 34331.899, 36351.072), stdev = 1599.353
+  CI (99.9%): [28173.361, 40490.437] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.10, OpenJDK 64-Bit Server VM, 21.0.10+7-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupAllPatches
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS, stemCount = 10000)
+
+# Run progress: 54.76% complete, ETA 00:02:52
+# Fork: 1 of 1
+# Warmup Iteration   1: 255956.479 ns/op
+# Warmup Iteration   2: 243688.347 ns/op
+# Warmup Iteration   3: 245606.048 ns/op
+Iteration   1: 240904.946 ns/op
+Iteration   2: 245543.531 ns/op
+Iteration   3: 241866.092 ns/op
+Iteration   4: 245580.006 ns/op
+Iteration   5: 241016.687 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupAllPatches":
+  242982.253 ±(99.9%) 9179.755 ns/op [Average]
+  (min, avg, max) = (240904.946, 242982.253, 245580.006), stdev = 2383.953
+  CI (99.9%): [233802.497, 252162.008] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.10, OpenJDK 64-Bit Server VM, 21.0.10+7-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupPreferredPatch
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS, stemCount = 2000)
+
+# Run progress: 57.14% complete, ETA 00:02:43
+# Fork: 1 of 1
+# Warmup Iteration   1: 2575599.445 ns/op
+# Warmup Iteration   2: 2493620.271 ns/op
+# Warmup Iteration   3: 2488638.114 ns/op
+Iteration   1: 2484818.640 ns/op
+Iteration   2: 2481100.191 ns/op
+Iteration   3: 2479910.619 ns/op
+Iteration   4: 2470654.872 ns/op
+Iteration   5: 2488903.147 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupPreferredPatch":
+  2481077.494 ±(99.9%) 26203.497 ns/op [Average]
+  (min, avg, max) = (2470654.872, 2481077.494, 2488903.147), stdev = 6804.965
+  CI (99.9%): [2454873.997, 2507280.990] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.10, OpenJDK 64-Bit Server VM, 21.0.10+7-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupPreferredPatch
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS, stemCount = 10000)
+
+# Run progress: 59.52% complete, ETA 00:02:34
+# Fork: 1 of 1
+# Warmup Iteration   1: 15750574.000 ns/op
+# Warmup Iteration   2: 15216707.697 ns/op
+# Warmup Iteration   3: 15140998.179 ns/op
+Iteration   1: 15239520.894 ns/op
+Iteration   2: 14798481.647 ns/op
+Iteration   3: 15072092.761 ns/op
+Iteration   4: 14979820.836 ns/op
+Iteration   5: 15041702.328 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupPreferredPatch":
+  15026323.693 ±(99.9%) 614472.983 ns/op [Average]
+  (min, avg, max) = (14798481.647, 15026323.693, 15239520.894), stdev = 159576.682
+  CI (99.9%): [14411850.710, 15640796.676] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.10, OpenJDK 64-Bit Server VM, 21.0.10+7-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupPreferredPatch
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS, stemCount = 2000)
+
+# Run progress: 61.90% complete, ETA 00:02:25
+# Fork: 1 of 1
+# Warmup Iteration   1: 2593551.145 ns/op
+# Warmup Iteration   2: 2502924.465 ns/op
+# Warmup Iteration   3: 2518725.450 ns/op
+Iteration   1: 2583217.459 ns/op
+Iteration   2: 2510917.865 ns/op
+Iteration   3: 2520121.902 ns/op
+Iteration   4: 2606544.654 ns/op
+Iteration   5: 2512687.526 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupPreferredPatch":
+  2546697.881 ±(99.9%) 172834.644 ns/op [Average]
+  (min, avg, max) = (2510917.865, 2546697.881, 2606544.654), stdev = 44884.608
+  CI (99.9%): [2373863.237, 2719532.525] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.10, OpenJDK 64-Bit Server VM, 21.0.10+7-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupPreferredPatch
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS, stemCount = 10000)
+
+# Run progress: 64.29% complete, ETA 00:02:15
+# Fork: 1 of 1
+# Warmup Iteration   1: 14251941.535 ns/op
+# Warmup Iteration   2: 13495198.640 ns/op
+# Warmup Iteration   3: 13627256.473 ns/op
+Iteration   1: 13546665.392 ns/op
+Iteration   2: 13567183.811 ns/op
+Iteration   3: 13600880.095 ns/op
+Iteration   4: 13562793.892 ns/op
+Iteration   5: 14150264.014 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupPreferredPatch":
+  13685557.441 ±(99.9%) 1003195.580 ns/op [Average]
+  (min, avg, max) = (13546665.392, 13685557.441, 14150264.014), stdev = 260526.706
+  CI (99.9%): [12682361.861, 14688753.020] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.10, OpenJDK 64-Bit Server VM, 21.0.10+7-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupPreferredPatch
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS, stemCount = 2000)
+
+# Run progress: 66.67% complete, ETA 00:02:07
+# Fork: 1 of 1
+# Warmup Iteration   1: 2637775.982 ns/op
+# Warmup Iteration   2: 2534082.456 ns/op
+# Warmup Iteration   3: 2514224.148 ns/op
+Iteration   1: 2512467.078 ns/op
+Iteration   2: 2511845.524 ns/op
+Iteration   3: 2525615.783 ns/op
+Iteration   4: 2515517.643 ns/op
+Iteration   5: 2509979.005 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupPreferredPatch":
+  2515085.007 ±(99.9%) 23931.643 ns/op [Average]
+  (min, avg, max) = (2509979.005, 2515085.007, 2525615.783), stdev = 6214.972
+  CI (99.9%): [2491153.364, 2539016.649] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.10, OpenJDK 64-Bit Server VM, 21.0.10+7-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupPreferredPatch
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS, stemCount = 10000)
+
+# Run progress: 69.05% complete, ETA 00:01:57
+# Fork: 1 of 1
+# Warmup Iteration   1: 15099416.597 ns/op
+# Warmup Iteration   2: 13821698.123 ns/op
+# Warmup Iteration   3: 13689171.486 ns/op
+Iteration   1: 13928570.208 ns/op
+Iteration   2: 13685041.554 ns/op
+Iteration   3: 13709756.027 ns/op
+Iteration   4: 13668213.919 ns/op
+Iteration   5: 13645695.878 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupPreferredPatch":
+  13727455.517 ±(99.9%) 442210.624 ns/op [Average]
+  (min, avg, max) = (13645695.878, 13727455.517, 13928570.208), stdev = 114840.695
+  CI (99.9%): [13285244.893, 14169666.142] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.10, OpenJDK 64-Bit Server VM, 21.0.10+7-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.stemAllVariants
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS, stemCount = 2000)
+
+# Run progress: 71.43% complete, ETA 00:01:48
+# Fork: 1 of 1
+# Warmup Iteration   1: 312542.154 ns/op
+# Warmup Iteration   2: 281706.775 ns/op
+# Warmup Iteration   3: 278929.580 ns/op
+Iteration   1: 280235.263 ns/op
+Iteration   2: 279329.153 ns/op
+Iteration   3: 278856.505 ns/op
+Iteration   4: 278543.937 ns/op
+Iteration   5: 276760.785 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.stemAllVariants":
+  278745.129 ±(99.9%) 4928.255 ns/op [Average]
+  (min, avg, max) = (276760.785, 278745.129, 280235.263), stdev = 1279.852
+  CI (99.9%): [273816.873, 283673.384] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.10, OpenJDK 64-Bit Server VM, 21.0.10+7-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.stemAllVariants
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS, stemCount = 10000)
+
+# Run progress: 73.81% complete, ETA 00:01:39
+# Fork: 1 of 1
+# Warmup Iteration   1: 1867901.812 ns/op
+# Warmup Iteration   2: 1488115.667 ns/op
+# Warmup Iteration   3: 1469814.561 ns/op
+Iteration   1: 1528365.812 ns/op
+Iteration   2: 1468562.969 ns/op
+Iteration   3: 1471106.747 ns/op
+Iteration   4: 1467849.204 ns/op
+Iteration   5: 1471944.984 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.stemAllVariants":
+  1481565.943 ±(99.9%) 100953.935 ns/op [Average]
+  (min, avg, max) = (1467849.204, 1481565.943, 1528365.812), stdev = 26217.416
+  CI (99.9%): [1380612.009, 1582519.878] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.10, OpenJDK 64-Bit Server VM, 21.0.10+7-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.stemAllVariants
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS, stemCount = 2000)
+
+# Run progress: 76.19% complete, ETA 00:01:30
+# Fork: 1 of 1
+# Warmup Iteration   1: 322261.148 ns/op
+# Warmup Iteration   2: 279682.274 ns/op
+# Warmup Iteration   3: 279794.015 ns/op
+Iteration   1: 279405.520 ns/op
+Iteration   2: 281167.243 ns/op
+Iteration   3: 278282.397 ns/op
+Iteration   4: 277008.922 ns/op
+Iteration   5: 275156.033 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.stemAllVariants":
+  278204.023 ±(99.9%) 8812.196 ns/op [Average]
+  (min, avg, max) = (275156.033, 278204.023, 281167.243), stdev = 2288.499
+  CI (99.9%): [269391.827, 287016.219] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.10, OpenJDK 64-Bit Server VM, 21.0.10+7-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.stemAllVariants
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS, stemCount = 10000)
+
+# Run progress: 78.57% complete, ETA 00:01:21
+# Fork: 1 of 1
+# Warmup Iteration   1: 1629659.195 ns/op
+# Warmup Iteration   2: 1474601.811 ns/op
+# Warmup Iteration   3: 1476641.569 ns/op
+Iteration   1: 1475006.133 ns/op
+Iteration   2: 1474504.118 ns/op
+Iteration   3: 1500414.447 ns/op
+Iteration   4: 1480337.957 ns/op
+Iteration   5: 1479539.438 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.stemAllVariants":
+  1481960.418 ±(99.9%) 40978.306 ns/op [Average]
+  (min, avg, max) = (1474504.118, 1481960.418, 1500414.447), stdev = 10641.936
+  CI (99.9%): [1440982.112, 1522938.724] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.10, OpenJDK 64-Bit Server VM, 21.0.10+7-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.stemAllVariants
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS, stemCount = 2000)
+
+# Run progress: 80.95% complete, ETA 00:01:12
+# Fork: 1 of 1
+# Warmup Iteration   1: 317888.135 ns/op
+# Warmup Iteration   2: 279917.956 ns/op
+# Warmup Iteration   3: 277588.360 ns/op
+Iteration   1: 278665.063 ns/op
+Iteration   2: 276432.338 ns/op
+Iteration   3: 277561.800 ns/op
+Iteration   4: 276176.258 ns/op
+Iteration   5: 274075.862 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.stemAllVariants":
+  276582.264 ±(99.9%) 6604.419 ns/op [Average]
+  (min, avg, max) = (274075.862, 276582.264, 278665.063), stdev = 1715.147
+  CI (99.9%): [269977.845, 283186.683] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.10, OpenJDK 64-Bit Server VM, 21.0.10+7-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.stemAllVariants
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS, stemCount = 10000)
+
+# Run progress: 83.33% complete, ETA 00:01:03
+# Fork: 1 of 1
+# Warmup Iteration   1: 1640511.933 ns/op
+# Warmup Iteration   2: 1514232.324 ns/op
+# Warmup Iteration   3: 1477230.465 ns/op
+Iteration   1: 1476259.229 ns/op
+Iteration   2: 1481328.195 ns/op
+Iteration   3: 1473994.708 ns/op
+Iteration   4: 1507866.038 ns/op
+Iteration   5: 1477172.587 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.stemAllVariants":
+  1483324.151 ±(99.9%) 53808.578 ns/op [Average]
+  (min, avg, max) = (1473994.708, 1483324.151, 1507866.038), stdev = 13973.917
+  CI (99.9%): [1429515.573, 1537132.729] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.10, OpenJDK 64-Bit Server VM, 21.0.10+7-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.stemPreferredVariant
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS, stemCount = 2000)
+
+# Run progress: 85.71% complete, ETA 00:00:54
+# Fork: 1 of 1
+# Warmup Iteration   1: 3825739.718 ns/op
+# Warmup Iteration   2: 3392439.749 ns/op
+# Warmup Iteration   3: 3394177.390 ns/op
+Iteration   1: 3400210.047 ns/op
+Iteration   2: 3391342.264 ns/op
+Iteration   3: 3383156.517 ns/op
+Iteration   4: 3387898.416 ns/op
+Iteration   5: 3357910.134 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.stemPreferredVariant":
+  3384103.476 ±(99.9%) 61284.881 ns/op [Average]
+  (min, avg, max) = (3357910.134, 3384103.476, 3400210.047), stdev = 15915.489
+  CI (99.9%): [3322818.595, 3445388.357] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.10, OpenJDK 64-Bit Server VM, 21.0.10+7-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.stemPreferredVariant
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS, stemCount = 10000)
+
+# Run progress: 88.10% complete, ETA 00:00:45
+# Fork: 1 of 1
+# Warmup Iteration   1: 20610962.571 ns/op
+# Warmup Iteration   2: 18757298.056 ns/op
+# Warmup Iteration   3: 18579244.037 ns/op
+Iteration   1: 18223235.055 ns/op
+Iteration   2: 18552139.148 ns/op
+Iteration   3: 18631806.944 ns/op
+Iteration   4: 18464649.600 ns/op
+Iteration   5: 18368006.109 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.stemPreferredVariant":
+  18447967.371 ±(99.9%) 614372.206 ns/op [Average]
+  (min, avg, max) = (18223235.055, 18447967.371, 18631806.944), stdev = 159550.511
+  CI (99.9%): [17833595.165, 19062339.577] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.10, OpenJDK 64-Bit Server VM, 21.0.10+7-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.stemPreferredVariant
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS, stemCount = 2000)
+
+# Run progress: 90.48% complete, ETA 00:00:36
+# Fork: 1 of 1
+# Warmup Iteration   1: 3646106.625 ns/op
+# Warmup Iteration   2: 3447189.897 ns/op
+# Warmup Iteration   3: 3431650.627 ns/op
+Iteration   1: 3420302.915 ns/op
+Iteration   2: 3502882.776 ns/op
+Iteration   3: 3426178.103 ns/op
+Iteration   4: 3439040.739 ns/op
+Iteration   5: 3398544.292 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.stemPreferredVariant":
+  3437389.765 ±(99.9%) 151828.366 ns/op [Average]
+  (min, avg, max) = (3398544.292, 3437389.765, 3502882.776), stdev = 39429.345
+  CI (99.9%): [3285561.398, 3589218.131] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.10, OpenJDK 64-Bit Server VM, 21.0.10+7-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.stemPreferredVariant
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS, stemCount = 10000)
+
+# Run progress: 92.86% complete, ETA 00:00:27
+# Fork: 1 of 1
+# Warmup Iteration   1: 21492405.085 ns/op
+# Warmup Iteration   2: 18720920.204 ns/op
+# Warmup Iteration   3: 18553906.407 ns/op
+Iteration   1: 18640314.148 ns/op
+Iteration   2: 18616409.407 ns/op
+Iteration   3: 18123506.518 ns/op
+Iteration   4: 18571651.648 ns/op
+Iteration   5: 18635386.833 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.stemPreferredVariant":
+  18517453.711 ±(99.9%) 854389.569 ns/op [Average]
+  (min, avg, max) = (18123506.518, 18517453.711, 18640314.148), stdev = 221882.258
+  CI (99.9%): [17663064.142, 19371843.280] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.10, OpenJDK 64-Bit Server VM, 21.0.10+7-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.stemPreferredVariant
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS, stemCount = 2000)
+
+# Run progress: 95.24% complete, ETA 00:00:18
+# Fork: 1 of 1
+# Warmup Iteration   1: 3880570.473 ns/op
+# Warmup Iteration   2: 3410262.163 ns/op
+# Warmup Iteration   3: 3411962.289 ns/op
+Iteration   1: 3414814.747 ns/op
+Iteration   2: 3421983.614 ns/op
+Iteration   3: 3430195.318 ns/op
+Iteration   4: 3402124.765 ns/op
+Iteration   5: 3384145.787 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.stemPreferredVariant":
+  3410652.847 ±(99.9%) 69497.677 ns/op [Average]
+  (min, avg, max) = (3384145.787, 3410652.847, 3430195.318), stdev = 18048.326
+  CI (99.9%): [3341155.169, 3480150.524] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.10, OpenJDK 64-Bit Server VM, 21.0.10+7-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.stemPreferredVariant
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS, stemCount = 10000)
+
+# Run progress: 97.62% complete, ETA 00:00:09
+# Fork: 1 of 1
+# Warmup Iteration   1: 20254841.620 ns/op
+# Warmup Iteration   2: 18491690.000 ns/op
+# Warmup Iteration   3: 18550418.370 ns/op
+Iteration   1: 18696369.407 ns/op
+Iteration   2: 18933879.925 ns/op
+Iteration   3: 18469202.927 ns/op
+Iteration   4: 18755327.352 ns/op
+Iteration   5: 18439145.418 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.stemPreferredVariant":
+  18658785.006 ±(99.9%) 795214.235 ns/op [Average]
+  (min, avg, max) = (18439145.418, 18658785.006, 18933879.925), stdev = 206514.612
+  CI (99.9%): [17863570.771, 19453999.241] (assumes normal distribution)
+
+
+# Run complete. Total time: 00:06:19
+
+REMEMBER: The numbers below are just data. To gain reusable insights, you need to follow up on
+why the numbers are the way they are. Use profilers (see -prof, -lprof), design factorial
+experiments, perform baseline and negative tests that provide experimental control, make sure
+the benchmarking environment is safe on JVM/OS/HW level, ask for reviews from the domain experts.
+Do not assume the numbers tell you what you want them to tell.
+
+NOTE: Current JVM experimentally supports Compiler Blackholes, and they are in use. Please exercise
+extra caution when trusting the results, look into the generated code to check the benchmark still
+works, and factor in a small probability of new VM bugs. Additionally, while comparisons between
+different JVMs are already problematic, the performance difference caused by different Blackhole
+modes can be very significant. Please make sure you use the consistent Blackhole mode for comparisons.
+
+Benchmark                                                        (familyCount)                                           (reductionMode)  (stemCount)  (storeOriginalStem)  Mode  Cnt          Score          Error  Units
+EnglishStemmerComparisonBenchmark.radixorUsUkProfiPreferredStem           1000                                                       N/A          N/A                  N/A  avgt    5     742930.087 ±     2860.101  ns/op
+EnglishStemmerComparisonBenchmark.radixorUsUkProfiPreferredStem           5000                                                       N/A          N/A                  N/A  avgt    5    3665059.225 ±    56102.522  ns/op
+EnglishStemmerComparisonBenchmark.snowballEnglishPorter2                  1000                                                       N/A          N/A                  N/A  avgt    5    3884565.234 ±   126316.358  ns/op
+EnglishStemmerComparisonBenchmark.snowballEnglishPorter2                  5000                                                       N/A          N/A                  N/A  avgt    5   22100280.373 ±   715988.469  ns/op
+EnglishStemmerComparisonBenchmark.snowballOriginalPorter                  1000                                                       N/A          N/A                  N/A  avgt    5    2664223.208 ±    59466.480  ns/op
+EnglishStemmerComparisonBenchmark.snowballOriginalPorter                  5000                                                       N/A          N/A                  N/A  avgt    5   14803703.539 ±   358339.514  ns/op
+FrequencyTrieCompilationBenchmark.compilePatchTrie                         N/A     MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS         2000                 true  avgt    5   69440310.600 ±  1671024.873  ns/op
+FrequencyTrieCompilationBenchmark.compilePatchTrie                         N/A     MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS         2000                false  avgt    5   67790592.773 ±  2607785.746  ns/op
+FrequencyTrieCompilationBenchmark.compilePatchTrie                         N/A     MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS        10000                 true  avgt    5  316265057.950 ± 19484106.195  ns/op
+FrequencyTrieCompilationBenchmark.compilePatchTrie                         N/A     MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS        10000                false  avgt    5  311373948.900 ± 27201918.535  ns/op
+FrequencyTrieCompilationBenchmark.compilePatchTrie                         N/A  MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS         2000                 true  avgt    5   87578595.017 ±  3296186.585  ns/op
+FrequencyTrieCompilationBenchmark.compilePatchTrie                         N/A  MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS         2000                false  avgt    5   85071284.800 ±  1570140.913  ns/op
+FrequencyTrieCompilationBenchmark.compilePatchTrie                         N/A  MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS        10000                 true  avgt    5  367109166.533 ± 16988427.397  ns/op
+FrequencyTrieCompilationBenchmark.compilePatchTrie                         N/A  MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS        10000                false  avgt    5  358428436.533 ± 25500012.440  ns/op
+FrequencyTrieCompilationBenchmark.compilePatchTrie                         N/A       MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS         2000                 true  avgt    5   65222905.407 ±  4007496.328  ns/op
+FrequencyTrieCompilationBenchmark.compilePatchTrie                         N/A       MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS         2000                false  avgt    5   65375153.875 ±   733719.585  ns/op
+FrequencyTrieCompilationBenchmark.compilePatchTrie                         N/A       MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS        10000                 true  avgt    5  312313277.550 ± 13292455.218  ns/op
+FrequencyTrieCompilationBenchmark.compilePatchTrie                         N/A       MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS        10000                false  avgt    5  307244425.950 ±  7881010.603  ns/op
+FrequencyTrieLookupBenchmark.lookupAllPatches                              N/A     MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS         2000                  N/A  avgt    5      34841.923 ±     8626.571  ns/op
+FrequencyTrieLookupBenchmark.lookupAllPatches                              N/A     MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS        10000                  N/A  avgt    5     243620.652 ±     9442.069  ns/op
+FrequencyTrieLookupBenchmark.lookupAllPatches                              N/A  MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS         2000                  N/A  avgt    5      34349.020 ±     6986.634  ns/op
+FrequencyTrieLookupBenchmark.lookupAllPatches                              N/A  MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS        10000                  N/A  avgt    5     242442.392 ±    10981.547  ns/op
+FrequencyTrieLookupBenchmark.lookupAllPatches                              N/A       MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS         2000                  N/A  avgt    5      34331.899 ±     6158.538  ns/op
+FrequencyTrieLookupBenchmark.lookupAllPatches                              N/A       MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS        10000                  N/A  avgt    5     242982.253 ±     9179.755  ns/op
+FrequencyTrieLookupBenchmark.lookupPreferredPatch                          N/A     MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS         2000                  N/A  avgt    5    2481077.494 ±    26203.497  ns/op
+FrequencyTrieLookupBenchmark.lookupPreferredPatch                          N/A     MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS        10000                  N/A  avgt    5   15026323.693 ±   614472.983  ns/op
+FrequencyTrieLookupBenchmark.lookupPreferredPatch                          N/A  MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS         2000                  N/A  avgt    5    2546697.881 ±   172834.644  ns/op
+FrequencyTrieLookupBenchmark.lookupPreferredPatch                          N/A  MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS        10000                  N/A  avgt    5   13685557.441 ±  1003195.580  ns/op
+FrequencyTrieLookupBenchmark.lookupPreferredPatch                          N/A       MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS         2000                  N/A  avgt    5    2515085.007 ±    23931.643  ns/op
+FrequencyTrieLookupBenchmark.lookupPreferredPatch                          N/A       MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS        10000                  N/A  avgt    5   13727455.517 ±   442210.624  ns/op
+FrequencyTrieLookupBenchmark.stemAllVariants                               N/A     MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS         2000                  N/A  avgt    5     278745.129 ±     4928.255  ns/op
+FrequencyTrieLookupBenchmark.stemAllVariants                               N/A     MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS        10000                  N/A  avgt    5    1481565.943 ±   100953.935  ns/op
+FrequencyTrieLookupBenchmark.stemAllVariants                               N/A  MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS         2000                  N/A  avgt    5     278204.023 ±     8812.196  ns/op
+FrequencyTrieLookupBenchmark.stemAllVariants                               N/A  MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS        10000                  N/A  avgt    5    1481960.418 ±    40978.306  ns/op
+FrequencyTrieLookupBenchmark.stemAllVariants                               N/A       MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS         2000                  N/A  avgt    5     276582.264 ±     6604.419  ns/op
+FrequencyTrieLookupBenchmark.stemAllVariants                               N/A       MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS        10000                  N/A  avgt    5    1483324.151 ±    53808.578  ns/op
+FrequencyTrieLookupBenchmark.stemPreferredVariant                          N/A     MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS         2000                  N/A  avgt    5    3384103.476 ±    61284.881  ns/op
+FrequencyTrieLookupBenchmark.stemPreferredVariant                          N/A     MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS        10000                  N/A  avgt    5   18447967.371 ±   614372.206  ns/op
+FrequencyTrieLookupBenchmark.stemPreferredVariant                          N/A  MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS         2000                  N/A  avgt    5    3437389.765 ±   151828.366  ns/op
+FrequencyTrieLookupBenchmark.stemPreferredVariant                          N/A  MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS        10000                  N/A  avgt    5   18517453.711 ±   854389.569  ns/op
+FrequencyTrieLookupBenchmark.stemPreferredVariant                          N/A       MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS         2000                  N/A  avgt    5    3410652.847 ±    69497.677  ns/op
+FrequencyTrieLookupBenchmark.stemPreferredVariant                          N/A       MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS        10000                  N/A  avgt    5   18658785.006 ±   795214.235  ns/op
+
+Benchmark result is saved to /home/runner/work/Radixor/Radixor/build/reports/jmh/jmh-results.csv

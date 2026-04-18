@@ -1,0 +1,1323 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+    <link rel="stylesheet" type="text/css" href="../style.css">
+</head>
+<body>
+
+
+<h1>RankedLocalDescriptor.java</h1>
+
+<table class="src">
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_1'/>
+1
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_1'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>/*******************************************************************************</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_2'/>
+2
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_2'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * Copyright (C) 2026, Leo Galambos</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_3'/>
+3
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_3'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * All rights reserved.</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_4'/>
+4
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_4'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * </span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_5'/>
+5
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_5'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * Redistribution and use in source and binary forms, with or without</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_6'/>
+6
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_6'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * modification, are permitted provided that the following conditions are met:</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_7'/>
+7
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_7'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * </span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_8'/>
+8
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_8'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * 1. Redistributions of source code must retain the above copyright notice,</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_9'/>
+9
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_9'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> *    this list of conditions and the following disclaimer.</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_10'/>
+10
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_10'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * </span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_11'/>
+11
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_11'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * 2. Redistributions in binary form must reproduce the above copyright notice,</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_12'/>
+12
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_12'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> *    this list of conditions and the following disclaimer in the documentation</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_13'/>
+13
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_13'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> *    and/or other materials provided with the distribution.</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_14'/>
+14
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_14'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * </span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_15'/>
+15
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_15'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * 3. Neither the name of the copyright holder nor the names of its contributors</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_16'/>
+16
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_16'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> *    may be used to endorse or promote products derived from this software</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_17'/>
+17
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_17'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> *    without specific prior written permission.</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_18'/>
+18
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_18'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * </span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_19'/>
+19
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_19'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &#34;AS IS&#34;</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_20'/>
+20
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_20'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_21'/>
+21
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_21'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_22'/>
+22
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_22'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_23'/>
+23
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_23'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_24'/>
+24
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_24'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_25'/>
+25
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_25'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_26'/>
+26
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_26'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_27'/>
+27
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_27'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_28'/>
+28
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_28'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_29'/>
+29
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_29'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * POSSIBILITY OF SUCH DAMAGE.</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_30'/>
+30
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_30'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> ******************************************************************************/</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_31'/>
+31
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_31'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>package org.egothor.stemmer.trie;</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_32'/>
+32
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_32'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_33'/>
+33
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_33'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.util.Arrays;</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_34'/>
+34
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_34'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.util.Collections;</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_35'/>
+35
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_35'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.util.List;</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_36'/>
+36
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_36'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_37'/>
+37
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_37'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>/**</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_38'/>
+38
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_38'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * Local descriptor preserving ranked {@code getAll()} semantics.</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_39'/>
+39
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_39'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> */</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_40'/>
+40
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_40'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>/* default */ final class RankedLocalDescriptor {</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_41'/>
+41
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_41'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_42'/>
+42
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_42'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    /**</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_43'/>
+43
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_43'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>     * Ordered values.</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_44'/>
+44
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_44'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>     */</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_45'/>
+45
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_45'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    private final List&#60;Object&#62; orderedValues;</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_46'/>
+46
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_46'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_47'/>
+47
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_47'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    /**</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_48'/>
+48
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_48'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>     * Creates a descriptor.</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_49'/>
+49
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_49'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>     *</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_50'/>
+50
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_50'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>     * @param orderedValues ordered values</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_51'/>
+51
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_51'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>     */</span></pre></td></tr>
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_52'/>
+52
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_52'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    private RankedLocalDescriptor(final List&#60;Object&#62; orderedValues) {</span></pre></td></tr>
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_53'/>
+53
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_53'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>        this.orderedValues = orderedValues;</span></pre></td></tr>
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_54'/>
+54
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_54'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    }</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_55'/>
+55
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_55'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_56'/>
+56
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_56'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    /**</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_57'/>
+57
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_57'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>     * Creates a descriptor from an ordered value array.</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_58'/>
+58
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_58'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>     *</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_59'/>
+59
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_59'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>     * @param orderedValues ordered values</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_60'/>
+60
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_60'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>     * @return descriptor</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_61'/>
+61
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_61'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>     */</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_62'/>
+62
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_62'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    @SuppressWarnings(&#34;PMD.UseVarargs&#34;)</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_63'/>
+63
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_63'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    /* default */ static RankedLocalDescriptor of(final Object[] orderedValues) {</span></pre></td></tr>
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_64'/>
+64
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_64'>1</a>
+<span>
+1. of : replaced return value with null for org/egothor/stemmer/trie/RankedLocalDescriptor::of &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        return new RankedLocalDescriptor(</span></pre></td></tr>
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_65'/>
+65
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_65'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>                Collections.unmodifiableList(Arrays.asList(Arrays.copyOf(orderedValues, orderedValues.length))));</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_66'/>
+66
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_66'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    }</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_67'/>
+67
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_67'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_68'/>
+68
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_68'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    @Override</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_69'/>
+69
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_69'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    public int hashCode() {</span></pre></td></tr>
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_70'/>
+70
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_70'>1</a>
+<span>
+1. hashCode : replaced int return with 0 for org/egothor/stemmer/trie/RankedLocalDescriptor::hashCode &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>        return this.orderedValues.hashCode();</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_71'/>
+71
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_71'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    }</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_72'/>
+72
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_72'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_73'/>
+73
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_73'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    @Override</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_74'/>
+74
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_74'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    public boolean equals(final Object other) {</span></pre></td></tr>
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_75'/>
+75
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_75'>1</a>
+<span>
+1. equals : negated conditional &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        if (this == other) {</span></pre></td></tr>
+
+<tr>
+<td class='uncovered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_76'/>
+76
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_76'>1</a>
+<span>
+1. equals : replaced boolean return with false for org/egothor/stemmer/trie/RankedLocalDescriptor::equals &rarr; NO_COVERAGE<br/>
+
+</span>
+</span>
+</td>
+<td class='uncovered'><pre><span  class='survived'>            return true;</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_77'/>
+77
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_77'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>        }</span></pre></td></tr>
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_78'/>
+78
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_78'>1</a>
+<span>
+1. equals : negated conditional &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        if (!(other instanceof RankedLocalDescriptor)) {</span></pre></td></tr>
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_79'/>
+79
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_79'>1</a>
+<span>
+1. equals : replaced boolean return with true for org/egothor/stemmer/trie/RankedLocalDescriptor::equals &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>            return false;</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_80'/>
+80
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_80'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>        }</span></pre></td></tr>
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_81'/>
+81
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_81'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>        final RankedLocalDescriptor that = (RankedLocalDescriptor) other;</span></pre></td></tr>
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_82'/>
+82
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_82'>2</a>
+<span>
+1. equals : replaced boolean return with false for org/egothor/stemmer/trie/RankedLocalDescriptor::equals &rarr; KILLED<br/>
+2. equals : replaced boolean return with true for org/egothor/stemmer/trie/RankedLocalDescriptor::equals &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        return this.orderedValues.equals(that.orderedValues);</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_83'/>
+83
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_83'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    }</span></pre></td></tr>
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@dd77e0d_84'/>
+84
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_84'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>}</span></pre></td></tr>
+
+
+
+<tr><td></td><td></td><td><h2>Mutations</h2></td></tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@dd77e0d_64'>64</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_64'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>of<br/><b>Killed by : </b>org.egothor.stemmer.trie.RankedLocalDescriptorTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.trie.RankedLocalDescriptorTest]/[method:shouldPreserveOrderInEqualitySemantics()]</span></span> replaced return value with null for org/egothor/stemmer/trie/RankedLocalDescriptor::of &rarr; KILLED</span>
+</div> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@dd77e0d_70'>70</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_70'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>hashCode<br/><b>Killed by : </b>none</span></span> replaced int return with 0 for org/egothor/stemmer/trie/RankedLocalDescriptor::hashCode &rarr; SURVIVED</span>
+<a title="Click to view covering tests" class="view-covered-by-tests" onClick="document.getElementById('MutationIdentifier-[location=Location-[clazz=org.egothor.stemmer.trie.RankedLocalDescriptor,-method=hashCode,-methodDesc=()I],-indexes=[6],-mutator=org.pitest.mutationtest.engine.gregor.mutators.returns.PrimitiveReturnsMutator]').style.display=(document.getElementById('MutationIdentifier-[location=Location-[clazz=org.egothor.stemmer.trie.RankedLocalDescriptor,-method=hashCode,-methodDesc=()I],-indexes=[6],-mutator=org.pitest.mutationtest.engine.gregor.mutators.returns.PrimitiveReturnsMutator]').style.display == 'block')?'none':'block';">Covering tests</a>
+<div class="covered-tests" id="MutationIdentifier-[location=Location-[clazz=org.egothor.stemmer.trie.RankedLocalDescriptor,-method=hashCode,-methodDesc=()I],-indexes=[6],-mutator=org.pitest.mutationtest.engine.gregor.mutators.returns.PrimitiveReturnsMutator]" style="display:none;">Covered by tests:
+<ul>
+<li>org.egothor.stemmer.trie.RankedLocalDescriptorTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.trie.RankedLocalDescriptorTest]/[method:shouldPreserveOrderInEqualitySemantics()]</li> <li>org.egothor.stemmer.trie.ReductionContextTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.trie.ReductionContextTest]/[method:shouldExposeSettingsAndManageCanonicalNodeRegistry()]</li> <li>org.egothor.stemmer.trie.ReductionContextTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.trie.ReductionContextTest]/[method:shouldReplacePreviousCanonicalNodeForTheSameSignature()]</li> <li>org.egothor.stemmer.trie.ChildDescriptorTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.trie.ChildDescriptorTest]/[method:shouldImplementEqualityAndHashCodeFromEdgeAndChildSignature()]</li> <li>org.egothor.stemmer.FrequencyTrieTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieTest]/[method:trieRejectsNullLookupKeys()]</li> <li>org.egothor.stemmer.FrequencyTrieTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieTest]/[method:emptyTrieReturnsNullEmptyArrayAndEmptyEntries()]</li> <li>org.egothor.stemmer.FrequencyTrieBuildersTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieBuildersTest]/[method:shouldReconstructEmptyTrie()]</li> <li>org.egothor.stemmer.FrequencyTrieTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieTest]/[method:writeToAndReadFromRejectNullArguments()]</li> <li>org.egothor.stemmer.FrequencyTrieTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieTest]/[method:emptyKeyStoresValuesAtRootNode()]</li> <li>org.egothor.stemmer.FrequencyTrieTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieTest]/[method:missingPathBelowExistingPrefixReturnsEmptyResults()]</li> <li>org.egothor.stemmer.FrequencyTrieTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieTest]/[method:rankedReductionKeepsNodesSeparateWhenOrderingDiffers()]</li> <li>org.egothor.stemmer.FrequencyTrieTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieTest]/[method:getAllReturnsDefensiveCopy()]</li> <li>org.egothor.stemmer.FrequencyTrieTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieTest]/[method:getEntriesReturnsImmutableList()]</li> <li>org.egothor.stemmer.FrequencyTrieTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieTest]/[method:internalNodeValuesRemainLocalToThatNode()]</li> <li>org.egothor.stemmer.FrequencyTrieBuildersTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieBuildersTest]/[method:shouldRejectNullArguments()]</li> <li>org.egothor.stemmer.FrequencyTrieTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieTest]/[method:equalFrequenciesAndLengthsPreferLexicographicallyLowerString()]</li> <li>org.egothor.stemmer.FrequencyTrieTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieTest]/[method:dominantReductionFallsBackWhenWinnerIsNotDominantEnough()]</li> <li>org.egothor.stemmer.FrequencyTrieTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieTest]/[method:countedInsertionAggregatesFrequenciesCorrectly()]</li> <li>org.egothor.stemmer.FrequencyTrieTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieTest]/[method:equalTextualRepresentationsPreserveFirstSeenOrder()]</li> <li>org.egothor.stemmer.FrequencyTrieTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieTest]/[method:getAllReturnsValuesOrderedByDescendingLocalFrequency()]</li> <li>org.egothor.stemmer.FrequencyTrieTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieTest]/[method:equalFrequenciesPreferShorterStringRepresentation()]</li> <li>org.egothor.stemmer.FrequencyTrieTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieTest]/[method:reductionTakesInternalNodeLocalValuesIntoAccount()]</li> <li>org.egothor.stemmer.FrequencyTrieTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieTest]/[method:equivalentDescendantsDoNotOverrideDifferingInternalNodeSemantics()]</li> <li>org.egothor.stemmer.FrequencyTrieBuildersTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieBuildersTest]/[method:shouldPreserveSiblingBranchesUnderSharedPrefix()]</li> <li>org.egothor.stemmer.FrequencyTrieBuildersTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieBuildersTest]/[method:shouldAllowFurtherModificationsWithoutAffectingSourceTrie()]</li> <li>org.egothor.stemmer.FrequencyTrieBuildersTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieBuildersTest]/[method:shouldPreserveLocalCountsAndOrdering()]</li> <li>org.egothor.stemmer.FrequencyTrieTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieTest]/[method:rankedReductionMergesEquivalentRankedGetAllSubtrees()]</li> <li>org.egothor.stemmer.FrequencyTrieBuildersTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieBuildersTest]/[method:shouldReconstructUsingReductionModeShortcut()]</li> <li>org.egothor.stemmer.FrequencyTrieBuildersTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieBuildersTest]/[method:shouldPreserveCompiledSemanticsAfterReconstruction()]</li> <li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:ApiContractTests]/[test-template:shouldRejectNullArguments(java.lang.String, org.egothor.stemmer.StemmerPatchTrieLoaderTest$ExecutableOperation, java.lang.String)]/[test-template-invocation:#1]</li> <li>org.egothor.stemmer.FrequencyTrieTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieTest]/[method:dominantReductionMergesQualifiedDominantWinnerNodes()]</li> <li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:FilesystemAndParserTests]/[method:shouldStoreOriginalStemWhenRequested()]</li> <li>org.egothor.stemmer.FrequencyTrieTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieTest]/[method:reductionMateriallyDecreasesCompiledTrieSizeForRepeatedEquivalentSuffixes()]</li> <li>org.egothor.stemmer.FrequencyTrieBuildersTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieBuildersTest]/[method:shouldPreserveRootLocalValues()]</li> <li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:FilesystemAndParserTests]/[method:shouldNotStoreOriginalStemWhenDisabled()]</li> <li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:FilesystemAndParserTests]/[method:shouldIgnoreHashAndDoubleSlashRemarks()]</li> <li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:FilesystemAndParserTests]/[method:shouldLoadEquivalentTrieFromPathAndStringOverloads()]</li> <li>org.egothor.stemmer.CompileTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.CompileTest]/[method:shouldFailWithProcessingErrorWhenOutputExistsAndOverwriteIsNotEnabled()]</li> <li>org.egothor.stemmer.CompiledTrieArtifactRegressionTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.CompiledTrieArtifactRegressionTest]/[test-template:shouldProduceIdenticalBytesAcrossRepeatedCompilation(org.egothor.stemmer.CompiledTrieArtifactRegressionTest$ArtifactCase)]/[test-template-invocation:#3]</li> <li>org.egothor.stemmer.CompileTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.CompileTest]/[method:shouldCompileMinimalDictionaryIntoNonEmptyOutputFile()]</li> <li>org.egothor.stemmer.CompileTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.CompileTest]/[method:shouldOverwriteExistingOutputWhenOverwriteIsEnabled()]</li> <li>org.egothor.stemmer.CompiledTrieArtifactRegressionTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.CompiledTrieArtifactRegressionTest]/[test-template:shouldProduceIdenticalBytesAcrossRepeatedCompilation(org.egothor.stemmer.CompiledTrieArtifactRegressionTest$ArtifactCase)]/[test-template-invocation:#1]</li> <li>org.egothor.stemmer.FrequencyTrieTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieTest]/[method:writeToAndReadFromRoundTripTrieContent()]</li> <li>org.egothor.stemmer.CompiledTrieArtifactRegressionTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.CompiledTrieArtifactRegressionTest]/[test-template:shouldMatchGoldenArtifactAndExpectedHash(org.egothor.stemmer.CompiledTrieArtifactRegressionTest$ArtifactCase)]/[test-template-invocation:#3]</li> <li>org.egothor.stemmer.CompileTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.CompileTest]/[method:shouldCompileSuccessfullyWhenStoreOriginalIsEnabled()]</li> <li>org.egothor.stemmer.CompiledTrieArtifactRegressionTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.CompiledTrieArtifactRegressionTest]/[test-template:shouldPreserveRepresentativeSemanticProbes(org.egothor.stemmer.CompiledTrieArtifactRegressionTest$ArtifactCase)]/[test-template-invocation:#3]</li> <li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:FilesystemAndParserTests]/[method:shouldRoundTripBinaryTrieAcrossAllBinaryOverloads()]</li> <li>org.egothor.stemmer.CompiledTrieArtifactRegressionTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.CompiledTrieArtifactRegressionTest]/[test-template:shouldMatchGoldenArtifactAndExpectedHash(org.egothor.stemmer.CompiledTrieArtifactRegressionTest$ArtifactCase)]/[test-template-invocation:#1]</li> <li>org.egothor.stemmer.CompiledTrieArtifactRegressionTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.CompiledTrieArtifactRegressionTest]/[test-template:shouldPreserveRepresentativeSemanticProbes(org.egothor.stemmer.CompiledTrieArtifactRegressionTest$ArtifactCase)]/[test-template-invocation:#1]</li> <li>org.egothor.stemmer.CompileIntegrationTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.CompileIntegrationTest]/[nested-class:RemarkAwareFixtureWorkflow]/[method:shouldCompileRemarkAwareFixtureAndPreserveExpectedLookups()]</li> <li>org.egothor.stemmer.CompileIntegrationTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.CompileIntegrationTest]/[nested-class:RemarkAwareFixtureWorkflow]/[method:shouldRequireOverwriteForExistingOutput()]</li> <li>org.egothor.stemmer.FuzzStemmerAndTrieCompilationTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FuzzStemmerAndTrieCompilationTest]/[method:generatedDictionariesShouldCompileAndStemConsistently()]</li> <li>org.egothor.stemmer.FuzzStemmerAndTrieCompilationTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FuzzStemmerAndTrieCompilationTest]/[method:generatedStemmerTriesShouldSurviveBinaryPersistence()]</li> <li>org.egothor.stemmer.FuzzStemmerAndTrieCompilationTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FuzzStemmerAndTrieCompilationTest]/[method:generatedTrieInsertionsShouldPreserveSemanticsAcrossCompilationForms()]</li> <li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:BundledDictionaryTests]/[test-template:shouldPreserveAllStemCandidatesForBundledDictionaries(java.lang.String, org.egothor.stemmer.StemmerPatchTrieLoader$Language, org.egothor.stemmer.ReductionMode)]/[test-template-invocation:#7]</li> <li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:BundledDictionaryTests]/[test-template:shouldPreserveAllStemCandidatesForBundledDictionaries(java.lang.String, org.egothor.stemmer.StemmerPatchTrieLoader$Language, org.egothor.stemmer.ReductionMode)]/[test-template-invocation:#4]</li> <li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:BundledDictionaryTests]/[test-template:shouldPreserveAllStemCandidatesForBundledDictionaries(java.lang.String, org.egothor.stemmer.StemmerPatchTrieLoader$Language, org.egothor.stemmer.ReductionMode)]/[test-template-invocation:#11]</li> <li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:BundledDictionaryTests]/[test-template:shouldPreserveAllStemCandidatesForBundledDictionaries(java.lang.String, org.egothor.stemmer.StemmerPatchTrieLoader$Language, org.egothor.stemmer.ReductionMode)]/[test-template-invocation:#8]</li> <li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:BundledDictionaryTests]/[test-template:shouldPreserveAllStemCandidatesForBundledDictionaries(java.lang.String, org.egothor.stemmer.StemmerPatchTrieLoader$Language, org.egothor.stemmer.ReductionMode)]/[test-template-invocation:#10]</li> <li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:BundledDictionaryTests]/[test-template:shouldLoadBundledDictionariesEquivalentlyAcrossOverloads(java.lang.String, org.egothor.stemmer.StemmerPatchTrieLoader$Language)]/[test-template-invocation:#3]</li> <li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:BundledDictionaryTests]/[test-template:shouldPreserveAllStemCandidatesForBundledDictionaries(java.lang.String, org.egothor.stemmer.StemmerPatchTrieLoader$Language, org.egothor.stemmer.ReductionMode)]/[test-template-invocation:#3]</li> <li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:BundledDictionaryTests]/[test-template:shouldPreserveAllStemCandidatesForBundledDictionaries(java.lang.String, org.egothor.stemmer.StemmerPatchTrieLoader$Language, org.egothor.stemmer.ReductionMode)]/[test-template-invocation:#5]</li> <li>org.egothor.stemmer.CompileIntegrationTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.CompileIntegrationTest]/[nested-class:BundledProjectDictionaryWorkflows]/[test-template:shouldCompileBundledProjectDictionaryAndPreserveRepresentativeVariantSemantics(java.lang.String, java.lang.String)]/[test-template-invocation:#11]</li> <li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:BundledDictionaryTests]/[test-template:shouldPreserveAllStemCandidatesForBundledDictionaries(java.lang.String, org.egothor.stemmer.StemmerPatchTrieLoader$Language, org.egothor.stemmer.ReductionMode)]/[test-template-invocation:#12]</li> <li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:BundledDictionaryTests]/[test-template:shouldLoadBundledDictionariesEquivalentlyAcrossOverloads(java.lang.String, org.egothor.stemmer.StemmerPatchTrieLoader$Language)]/[test-template-invocation:#1]</li> <li>org.egothor.stemmer.CompileIntegrationTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.CompileIntegrationTest]/[nested-class:BundledProjectDictionaryWorkflows]/[test-template:shouldCompileBundledProjectDictionaryAndPreserveRepresentativeVariantSemantics(java.lang.String, java.lang.String)]/[test-template-invocation:#4]</li> <li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:BundledDictionaryTests]/[test-template:shouldPreserveAllStemCandidatesForBundledDictionaries(java.lang.String, org.egothor.stemmer.StemmerPatchTrieLoader$Language, org.egothor.stemmer.ReductionMode)]/[test-template-invocation:#9]</li> <li>org.egothor.stemmer.CompileIntegrationTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.CompileIntegrationTest]/[nested-class:BundledProjectDictionaryWorkflows]/[test-template:shouldCompileBundledProjectDictionaryAndPreserveRepresentativeVariantSemantics(java.lang.String, java.lang.String)]/[test-template-invocation:#10]</li> <li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:BundledDictionaryTests]/[test-template:shouldPreserveAllStemCandidatesForBundledDictionaries(java.lang.String, org.egothor.stemmer.StemmerPatchTrieLoader$Language, org.egothor.stemmer.ReductionMode)]/[test-template-invocation:#6]</li> <li>org.egothor.stemmer.CompileIntegrationTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.CompileIntegrationTest]/[nested-class:BundledProjectDictionaryWorkflows]/[test-template:shouldCompileBundledProjectDictionaryAndPreserveRepresentativeVariantSemantics(java.lang.String, java.lang.String)]/[test-template-invocation:#12]</li> <li>org.egothor.stemmer.CompileIntegrationTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.CompileIntegrationTest]/[nested-class:BundledProjectDictionaryWorkflows]/[test-template:shouldCompileBundledProjectDictionaryAndPreserveRepresentativeVariantSemantics(java.lang.String, java.lang.String)]/[test-template-invocation:#7]</li> <li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:BundledDictionaryTests]/[test-template:shouldPreserveAllStemCandidatesForBundledDictionaries(java.lang.String, org.egothor.stemmer.StemmerPatchTrieLoader$Language, org.egothor.stemmer.ReductionMode)]/[test-template-invocation:#2]</li> <li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:BundledDictionaryTests]/[test-template:shouldLoadBundledDictionariesEquivalentlyAcrossOverloads(java.lang.String, org.egothor.stemmer.StemmerPatchTrieLoader$Language)]/[test-template-invocation:#2]</li> <li>org.egothor.stemmer.CompileIntegrationTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.CompileIntegrationTest]/[nested-class:BundledProjectDictionaryWorkflows]/[test-template:shouldCompileBundledProjectDictionaryAndPreserveRepresentativeVariantSemantics(java.lang.String, java.lang.String)]/[test-template-invocation:#8]</li> <li>org.egothor.stemmer.CompileIntegrationTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.CompileIntegrationTest]/[nested-class:BundledProjectDictionaryWorkflows]/[test-template:shouldCompileBundledProjectDictionaryAndPreserveRepresentativeVariantSemantics(java.lang.String, java.lang.String)]/[test-template-invocation:#3]</li> <li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:BundledDictionaryTests]/[test-template:shouldPreserveAllStemCandidatesForBundledDictionaries(java.lang.String, org.egothor.stemmer.StemmerPatchTrieLoader$Language, org.egothor.stemmer.ReductionMode)]/[test-template-invocation:#1]</li> <li>org.egothor.stemmer.CompileIntegrationTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.CompileIntegrationTest]/[nested-class:BundledProjectDictionaryWorkflows]/[test-template:shouldCompileBundledProjectDictionaryAndPreserveRepresentativeVariantSemantics(java.lang.String, java.lang.String)]/[test-template-invocation:#5]</li> <li>org.egothor.stemmer.CompileIntegrationTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.CompileIntegrationTest]/[nested-class:BundledProjectDictionaryWorkflows]/[test-template:shouldCompileBundledProjectDictionaryAndPreserveRepresentativeVariantSemantics(java.lang.String, java.lang.String)]/[test-template-invocation:#2]</li> <li>org.egothor.stemmer.CompileIntegrationTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.CompileIntegrationTest]/[nested-class:BundledProjectDictionaryWorkflows]/[test-template:shouldCompileBundledProjectDictionaryAndPreserveRepresentativeVariantSemantics(java.lang.String, java.lang.String)]/[test-template-invocation:#6]</li> <li>org.egothor.stemmer.CompileIntegrationTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.CompileIntegrationTest]/[nested-class:BundledProjectDictionaryWorkflows]/[test-template:shouldCompileBundledProjectDictionaryAndPreserveRepresentativeVariantSemantics(java.lang.String, java.lang.String)]/[test-template-invocation:#9]</li> <li>org.egothor.stemmer.CompileIntegrationTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.CompileIntegrationTest]/[nested-class:BundledProjectDictionaryWorkflows]/[test-template:shouldCompileBundledProjectDictionaryAndPreserveRepresentativeVariantSemantics(java.lang.String, java.lang.String)]/[test-template-invocation:#1]</li> 
+</ul>
+</div></div> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@dd77e0d_75'>75</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_75'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.egothor.stemmer.trie.RankedLocalDescriptorTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.trie.RankedLocalDescriptorTest]/[method:shouldPreserveOrderInEqualitySemantics()]</span></span> negated conditional &rarr; KILLED</span>
+</div> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@dd77e0d_76'>76</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_76'/> 
+
+<p class='NO_COVERAGE'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>none</span></span> replaced boolean return with false for org/egothor/stemmer/trie/RankedLocalDescriptor::equals &rarr; NO_COVERAGE</span>
+</div> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@dd77e0d_78'>78</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_78'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.egothor.stemmer.trie.RankedLocalDescriptorTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.trie.RankedLocalDescriptorTest]/[method:shouldDefensivelyCopySourceArray()]</span></span> negated conditional &rarr; KILLED</span>
+</div> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@dd77e0d_79'>79</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_79'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.egothor.stemmer.trie.RankedLocalDescriptorTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.trie.RankedLocalDescriptorTest]/[method:shouldPreserveOrderInEqualitySemantics()]</span></span> replaced boolean return with true for org/egothor/stemmer/trie/RankedLocalDescriptor::equals &rarr; KILLED</span>
+</div> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@dd77e0d_82'>82</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@dd77e0d_82'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.egothor.stemmer.trie.RankedLocalDescriptorTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.trie.RankedLocalDescriptorTest]/[method:shouldDefensivelyCopySourceArray()]</span></span> replaced boolean return with false for org/egothor/stemmer/trie/RankedLocalDescriptor::equals &rarr; KILLED</span>
+</div> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>equals<br/><b>Killed by : </b>org.egothor.stemmer.trie.RankedLocalDescriptorTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.trie.RankedLocalDescriptorTest]/[method:shouldPreserveOrderInEqualitySemantics()]</span></span> replaced boolean return with true for org/egothor/stemmer/trie/RankedLocalDescriptor::equals &rarr; KILLED</span>
+</div> 
+</td>
+</tr>
+
+</table>
+
+
+<h2>Active mutators</h2>
+<ul>
+<li class='mutator'>CONDITIONALS_BOUNDARY</li>
+<li class='mutator'>EMPTY_RETURNS</li>
+<li class='mutator'>FALSE_RETURNS</li>
+<li class='mutator'>INCREMENTS</li>
+<li class='mutator'>INVERT_NEGS</li>
+<li class='mutator'>MATH</li>
+<li class='mutator'>NEGATE_CONDITIONALS</li>
+<li class='mutator'>NULL_RETURNS</li>
+<li class='mutator'>PRIMITIVE_RETURNS</li>
+<li class='mutator'>TRUE_RETURNS</li>
+<li class='mutator'>VOID_METHOD_CALLS</li>
+
+</ul>
+
+<h2>Tests examined</h2>
+<ul>
+<li>org.egothor.stemmer.trie.RankedLocalDescriptorTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.trie.RankedLocalDescriptorTest]/[method:shouldDefensivelyCopySourceArray()] (0 ms)</li><li>org.egothor.stemmer.trie.RankedLocalDescriptorTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.trie.RankedLocalDescriptorTest]/[method:shouldPreserveOrderInEqualitySemantics()] (0 ms)</li><li>org.egothor.stemmer.trie.ReductionSignatureTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.trie.ReductionSignatureTest]/[method:shouldFallBackToRankedDescriptorWhenDominantWinnerDoesNotQualify()] (0 ms)</li><li>org.egothor.stemmer.trie.ReductionSignatureTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.trie.ReductionSignatureTest]/[method:shouldPreserveRankedGetAllSemanticsInRankedMode()] (0 ms)</li><li>org.egothor.stemmer.trie.ReductionSignatureTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.trie.ReductionSignatureTest]/[method:shouldIncludeChildSignaturesInEquality()] (0 ms)</li><li>org.egothor.stemmer.trie.ChildDescriptorTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.trie.ChildDescriptorTest]/[method:shouldImplementEqualityAndHashCodeFromEdgeAndChildSignature()] (1 ms)</li><li>org.egothor.stemmer.trie.ReductionSignatureTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.trie.ReductionSignatureTest]/[method:shouldSortChildDescriptorsByEdgeRegardlessOfMapInsertionOrder()] (0 ms)</li><li>org.egothor.stemmer.FrequencyTrieTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieTest]/[method:reductionTakesInternalNodeLocalValuesIntoAccount()] (0 ms)</li><li>org.egothor.stemmer.FrequencyTrieTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieTest]/[method:equivalentDescendantsDoNotOverrideDifferingInternalNodeSemantics()] (2 ms)</li><li>org.egothor.stemmer.FrequencyTrieTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieTest]/[method:rankedReductionMergesEquivalentRankedGetAllSubtrees()] (1 ms)</li><li>org.egothor.stemmer.FrequencyTrieTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieTest]/[method:dominantReductionMergesQualifiedDominantWinnerNodes()] (2 ms)</li><li>org.egothor.stemmer.FrequencyTrieTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieTest]/[method:reductionMateriallyDecreasesCompiledTrieSizeForRepeatedEquivalentSuffixes()] (5 ms)</li><li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:FilesystemAndParserTests]/[method:shouldNotStoreOriginalStemWhenDisabled()] (1 ms)</li><li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:FilesystemAndParserTests]/[method:shouldLoadEquivalentTrieFromPathAndStringOverloads()] (1 ms)</li><li>org.egothor.stemmer.CompileTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.CompileTest]/[method:shouldFailWithProcessingErrorWhenOutputExistsAndOverwriteIsNotEnabled()] (5 ms)</li><li>org.egothor.stemmer.CompiledTrieArtifactRegressionTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.CompiledTrieArtifactRegressionTest]/[test-template:shouldProduceIdenticalBytesAcrossRepeatedCompilation(org.egothor.stemmer.CompiledTrieArtifactRegressionTest$ArtifactCase)]/[test-template-invocation:#3] (2 ms)</li><li>org.egothor.stemmer.CompileTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.CompileTest]/[method:shouldCompileMinimalDictionaryIntoNonEmptyOutputFile()] (3 ms)</li><li>org.egothor.stemmer.CompileTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.CompileTest]/[method:shouldOverwriteExistingOutputWhenOverwriteIsEnabled()] (3 ms)</li><li>org.egothor.stemmer.CompiledTrieArtifactRegressionTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.CompiledTrieArtifactRegressionTest]/[test-template:shouldProduceIdenticalBytesAcrossRepeatedCompilation(org.egothor.stemmer.CompiledTrieArtifactRegressionTest$ArtifactCase)]/[test-template-invocation:#1] (2 ms)</li><li>org.egothor.stemmer.FrequencyTrieTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieTest]/[method:writeToAndReadFromRoundTripTrieContent()] (3 ms)</li><li>org.egothor.stemmer.CompiledTrieArtifactRegressionTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.CompiledTrieArtifactRegressionTest]/[test-template:shouldMatchGoldenArtifactAndExpectedHash(org.egothor.stemmer.CompiledTrieArtifactRegressionTest$ArtifactCase)]/[test-template-invocation:#3] (5 ms)</li><li>org.egothor.stemmer.CompileTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.CompileTest]/[method:shouldCompileSuccessfullyWhenStoreOriginalIsEnabled()] (8 ms)</li><li>org.egothor.stemmer.CompiledTrieArtifactRegressionTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.CompiledTrieArtifactRegressionTest]/[test-template:shouldPreserveRepresentativeSemanticProbes(org.egothor.stemmer.CompiledTrieArtifactRegressionTest$ArtifactCase)]/[test-template-invocation:#3] (2 ms)</li><li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:FilesystemAndParserTests]/[method:shouldRoundTripBinaryTrieAcrossAllBinaryOverloads()] (3 ms)</li><li>org.egothor.stemmer.CompiledTrieArtifactRegressionTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.CompiledTrieArtifactRegressionTest]/[test-template:shouldMatchGoldenArtifactAndExpectedHash(org.egothor.stemmer.CompiledTrieArtifactRegressionTest$ArtifactCase)]/[test-template-invocation:#1] (13 ms)</li><li>org.egothor.stemmer.CompiledTrieArtifactRegressionTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.CompiledTrieArtifactRegressionTest]/[test-template:shouldPreserveRepresentativeSemanticProbes(org.egothor.stemmer.CompiledTrieArtifactRegressionTest$ArtifactCase)]/[test-template-invocation:#1] (7 ms)</li><li>org.egothor.stemmer.CompileIntegrationTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.CompileIntegrationTest]/[nested-class:RemarkAwareFixtureWorkflow]/[method:shouldCompileRemarkAwareFixtureAndPreserveExpectedLookups()] (5 ms)</li><li>org.egothor.stemmer.CompileIntegrationTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.CompileIntegrationTest]/[nested-class:RemarkAwareFixtureWorkflow]/[method:shouldRequireOverwriteForExistingOutput()] (10 ms)</li><li>org.egothor.stemmer.FuzzStemmerAndTrieCompilationTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FuzzStemmerAndTrieCompilationTest]/[method:generatedDictionariesShouldCompileAndStemConsistently()] (48 ms)</li><li>org.egothor.stemmer.FuzzStemmerAndTrieCompilationTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FuzzStemmerAndTrieCompilationTest]/[method:generatedStemmerTriesShouldSurviveBinaryPersistence()] (49 ms)</li><li>org.egothor.stemmer.FuzzStemmerAndTrieCompilationTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FuzzStemmerAndTrieCompilationTest]/[method:generatedTrieInsertionsShouldPreserveSemanticsAcrossCompilationForms()] (95 ms)</li><li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:BundledDictionaryTests]/[test-template:shouldPreserveAllStemCandidatesForBundledDictionaries(java.lang.String, org.egothor.stemmer.StemmerPatchTrieLoader$Language, org.egothor.stemmer.ReductionMode)]/[test-template-invocation:#7] (147 ms)</li><li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:BundledDictionaryTests]/[test-template:shouldPreserveAllStemCandidatesForBundledDictionaries(java.lang.String, org.egothor.stemmer.StemmerPatchTrieLoader$Language, org.egothor.stemmer.ReductionMode)]/[test-template-invocation:#4] (157 ms)</li><li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:BundledDictionaryTests]/[test-template:shouldPreserveAllStemCandidatesForBundledDictionaries(java.lang.String, org.egothor.stemmer.StemmerPatchTrieLoader$Language, org.egothor.stemmer.ReductionMode)]/[test-template-invocation:#11] (158 ms)</li><li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:BundledDictionaryTests]/[test-template:shouldPreserveAllStemCandidatesForBundledDictionaries(java.lang.String, org.egothor.stemmer.StemmerPatchTrieLoader$Language, org.egothor.stemmer.ReductionMode)]/[test-template-invocation:#8] (167 ms)</li><li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:BundledDictionaryTests]/[test-template:shouldPreserveAllStemCandidatesForBundledDictionaries(java.lang.String, org.egothor.stemmer.StemmerPatchTrieLoader$Language, org.egothor.stemmer.ReductionMode)]/[test-template-invocation:#10] (170 ms)</li><li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:BundledDictionaryTests]/[test-template:shouldLoadBundledDictionariesEquivalentlyAcrossOverloads(java.lang.String, org.egothor.stemmer.StemmerPatchTrieLoader$Language)]/[test-template-invocation:#3] (179 ms)</li><li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:BundledDictionaryTests]/[test-template:shouldPreserveAllStemCandidatesForBundledDictionaries(java.lang.String, org.egothor.stemmer.StemmerPatchTrieLoader$Language, org.egothor.stemmer.ReductionMode)]/[test-template-invocation:#3] (187 ms)</li><li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:BundledDictionaryTests]/[test-template:shouldPreserveAllStemCandidatesForBundledDictionaries(java.lang.String, org.egothor.stemmer.StemmerPatchTrieLoader$Language, org.egothor.stemmer.ReductionMode)]/[test-template-invocation:#5] (240 ms)</li><li>org.egothor.stemmer.CompileIntegrationTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.CompileIntegrationTest]/[nested-class:BundledProjectDictionaryWorkflows]/[test-template:shouldCompileBundledProjectDictionaryAndPreserveRepresentativeVariantSemantics(java.lang.String, java.lang.String)]/[test-template-invocation:#11] (210 ms)</li><li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:BundledDictionaryTests]/[test-template:shouldPreserveAllStemCandidatesForBundledDictionaries(java.lang.String, org.egothor.stemmer.StemmerPatchTrieLoader$Language, org.egothor.stemmer.ReductionMode)]/[test-template-invocation:#12] (262 ms)</li><li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:BundledDictionaryTests]/[test-template:shouldLoadBundledDictionariesEquivalentlyAcrossOverloads(java.lang.String, org.egothor.stemmer.StemmerPatchTrieLoader$Language)]/[test-template-invocation:#1] (287 ms)</li><li>org.egothor.stemmer.CompileIntegrationTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.CompileIntegrationTest]/[nested-class:BundledProjectDictionaryWorkflows]/[test-template:shouldCompileBundledProjectDictionaryAndPreserveRepresentativeVariantSemantics(java.lang.String, java.lang.String)]/[test-template-invocation:#4] (263 ms)</li><li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:BundledDictionaryTests]/[test-template:shouldPreserveAllStemCandidatesForBundledDictionaries(java.lang.String, org.egothor.stemmer.StemmerPatchTrieLoader$Language, org.egothor.stemmer.ReductionMode)]/[test-template-invocation:#9] (320 ms)</li><li>org.egothor.stemmer.CompileIntegrationTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.CompileIntegrationTest]/[nested-class:BundledProjectDictionaryWorkflows]/[test-template:shouldCompileBundledProjectDictionaryAndPreserveRepresentativeVariantSemantics(java.lang.String, java.lang.String)]/[test-template-invocation:#10] (316 ms)</li><li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:BundledDictionaryTests]/[test-template:shouldPreserveAllStemCandidatesForBundledDictionaries(java.lang.String, org.egothor.stemmer.StemmerPatchTrieLoader$Language, org.egothor.stemmer.ReductionMode)]/[test-template-invocation:#6] (346 ms)</li><li>org.egothor.stemmer.CompileIntegrationTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.CompileIntegrationTest]/[nested-class:BundledProjectDictionaryWorkflows]/[test-template:shouldCompileBundledProjectDictionaryAndPreserveRepresentativeVariantSemantics(java.lang.String, java.lang.String)]/[test-template-invocation:#12] (330 ms)</li><li>org.egothor.stemmer.CompileIntegrationTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.CompileIntegrationTest]/[nested-class:BundledProjectDictionaryWorkflows]/[test-template:shouldCompileBundledProjectDictionaryAndPreserveRepresentativeVariantSemantics(java.lang.String, java.lang.String)]/[test-template-invocation:#7] (374 ms)</li><li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:BundledDictionaryTests]/[test-template:shouldPreserveAllStemCandidatesForBundledDictionaries(java.lang.String, org.egothor.stemmer.StemmerPatchTrieLoader$Language, org.egothor.stemmer.ReductionMode)]/[test-template-invocation:#2] (431 ms)</li><li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:BundledDictionaryTests]/[test-template:shouldLoadBundledDictionariesEquivalentlyAcrossOverloads(java.lang.String, org.egothor.stemmer.StemmerPatchTrieLoader$Language)]/[test-template-invocation:#2] (441 ms)</li><li>org.egothor.stemmer.CompileIntegrationTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.CompileIntegrationTest]/[nested-class:BundledProjectDictionaryWorkflows]/[test-template:shouldCompileBundledProjectDictionaryAndPreserveRepresentativeVariantSemantics(java.lang.String, java.lang.String)]/[test-template-invocation:#8] (433 ms)</li><li>org.egothor.stemmer.CompileIntegrationTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.CompileIntegrationTest]/[nested-class:BundledProjectDictionaryWorkflows]/[test-template:shouldCompileBundledProjectDictionaryAndPreserveRepresentativeVariantSemantics(java.lang.String, java.lang.String)]/[test-template-invocation:#3] (499 ms)</li><li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:BundledDictionaryTests]/[test-template:shouldPreserveAllStemCandidatesForBundledDictionaries(java.lang.String, org.egothor.stemmer.StemmerPatchTrieLoader$Language, org.egothor.stemmer.ReductionMode)]/[test-template-invocation:#1] (577 ms)</li><li>org.egothor.stemmer.CompileIntegrationTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.CompileIntegrationTest]/[nested-class:BundledProjectDictionaryWorkflows]/[test-template:shouldCompileBundledProjectDictionaryAndPreserveRepresentativeVariantSemantics(java.lang.String, java.lang.String)]/[test-template-invocation:#5] (634 ms)</li><li>org.egothor.stemmer.CompileIntegrationTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.CompileIntegrationTest]/[nested-class:BundledProjectDictionaryWorkflows]/[test-template:shouldCompileBundledProjectDictionaryAndPreserveRepresentativeVariantSemantics(java.lang.String, java.lang.String)]/[test-template-invocation:#2] (701 ms)</li><li>org.egothor.stemmer.CompileIntegrationTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.CompileIntegrationTest]/[nested-class:BundledProjectDictionaryWorkflows]/[test-template:shouldCompileBundledProjectDictionaryAndPreserveRepresentativeVariantSemantics(java.lang.String, java.lang.String)]/[test-template-invocation:#6] (702 ms)</li><li>org.egothor.stemmer.CompileIntegrationTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.CompileIntegrationTest]/[nested-class:BundledProjectDictionaryWorkflows]/[test-template:shouldCompileBundledProjectDictionaryAndPreserveRepresentativeVariantSemantics(java.lang.String, java.lang.String)]/[test-template-invocation:#9] (835 ms)</li><li>org.egothor.stemmer.CompileIntegrationTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.CompileIntegrationTest]/[nested-class:BundledProjectDictionaryWorkflows]/[test-template:shouldCompileBundledProjectDictionaryAndPreserveRepresentativeVariantSemantics(java.lang.String, java.lang.String)]/[test-template-invocation:#1] (1282 ms)</li><li>org.egothor.stemmer.trie.ReducedNodeTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.trie.ReducedNodeTest]/[method:shouldExposeInternalBackingChildrenMap()] (0 ms)</li><li>org.egothor.stemmer.trie.ReducedNodeTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.trie.ReducedNodeTest]/[method:shouldExposeInternalBackingLocalCountsMap()] (0 ms)</li><li>org.egothor.stemmer.trie.ReducedNodeTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.trie.ReducedNodeTest]/[method:shouldDefensivelyCopyInputMaps()] (0 ms)</li><li>org.egothor.stemmer.trie.ReducedNodeTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.trie.ReducedNodeTest]/[method:shouldAppendChildWhenEdgeIsAbsent()] (0 ms)</li><li>org.egothor.stemmer.trie.ReductionContextTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.trie.ReductionContextTest]/[method:shouldExposeSettingsAndManageCanonicalNodeRegistry()] (0 ms)</li><li>org.egothor.stemmer.trie.ReducedNodeTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.trie.ReducedNodeTest]/[method:shouldRejectIncompatibleCanonicalChildInstanceForSameEdge()] (0 ms)</li><li>org.egothor.stemmer.trie.ReducedNodeTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.trie.ReducedNodeTest]/[method:shouldAllowSameCanonicalChildInstanceForSameEdge()] (0 ms)</li><li>org.egothor.stemmer.trie.ReductionContextTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.trie.ReductionContextTest]/[method:shouldReplacePreviousCanonicalNodeForTheSameSignature()] (0 ms)</li><li>org.egothor.stemmer.trie.ReducedNodeTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.trie.ReducedNodeTest]/[method:shouldMergeLocalCountsBySummingAndAppending()] (0 ms)</li><li>org.egothor.stemmer.FrequencyTrieTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieTest]/[method:trieRejectsNullLookupKeys()] (1 ms)</li><li>org.egothor.stemmer.FrequencyTrieTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieTest]/[method:emptyTrieReturnsNullEmptyArrayAndEmptyEntries()] (1 ms)</li><li>org.egothor.stemmer.FrequencyTrieBuildersTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieBuildersTest]/[method:shouldReconstructEmptyTrie()] (0 ms)</li><li>org.egothor.stemmer.FrequencyTrieTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieTest]/[method:writeToAndReadFromRejectNullArguments()] (2 ms)</li><li>org.egothor.stemmer.FrequencyTrieTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieTest]/[method:emptyKeyStoresValuesAtRootNode()] (0 ms)</li><li>org.egothor.stemmer.FrequencyTrieTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieTest]/[method:missingPathBelowExistingPrefixReturnsEmptyResults()] (0 ms)</li><li>org.egothor.stemmer.FrequencyTrieTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieTest]/[method:rankedReductionKeepsNodesSeparateWhenOrderingDiffers()] (0 ms)</li><li>org.egothor.stemmer.FrequencyTrieTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieTest]/[method:getAllReturnsDefensiveCopy()] (0 ms)</li><li>org.egothor.stemmer.FrequencyTrieTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieTest]/[method:getEntriesReturnsImmutableList()] (0 ms)</li><li>org.egothor.stemmer.FrequencyTrieTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieTest]/[method:internalNodeValuesRemainLocalToThatNode()] (0 ms)</li><li>org.egothor.stemmer.FrequencyTrieBuildersTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieBuildersTest]/[method:shouldRejectNullArguments()] (2 ms)</li><li>org.egothor.stemmer.FrequencyTrieTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieTest]/[method:equalFrequenciesAndLengthsPreferLexicographicallyLowerString()] (0 ms)</li><li>org.egothor.stemmer.FrequencyTrieTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieTest]/[method:dominantReductionFallsBackWhenWinnerIsNotDominantEnough()] (1 ms)</li><li>org.egothor.stemmer.FrequencyTrieTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieTest]/[method:countedInsertionAggregatesFrequenciesCorrectly()] (0 ms)</li><li>org.egothor.stemmer.FrequencyTrieTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieTest]/[method:equalTextualRepresentationsPreserveFirstSeenOrder()] (2 ms)</li><li>org.egothor.stemmer.FrequencyTrieTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieTest]/[method:getAllReturnsValuesOrderedByDescendingLocalFrequency()] (0 ms)</li><li>org.egothor.stemmer.FrequencyTrieTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieTest]/[method:equalFrequenciesPreferShorterStringRepresentation()] (0 ms)</li><li>org.egothor.stemmer.FrequencyTrieBuildersTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieBuildersTest]/[method:shouldPreserveSiblingBranchesUnderSharedPrefix()] (1 ms)</li><li>org.egothor.stemmer.FrequencyTrieBuildersTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieBuildersTest]/[method:shouldAllowFurtherModificationsWithoutAffectingSourceTrie()] (1 ms)</li><li>org.egothor.stemmer.FrequencyTrieBuildersTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieBuildersTest]/[method:shouldPreserveLocalCountsAndOrdering()] (1 ms)</li><li>org.egothor.stemmer.FrequencyTrieBuildersTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieBuildersTest]/[method:shouldReconstructUsingReductionModeShortcut()] (0 ms)</li><li>org.egothor.stemmer.FrequencyTrieBuildersTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieBuildersTest]/[method:shouldPreserveCompiledSemanticsAfterReconstruction()] (0 ms)</li><li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:ApiContractTests]/[test-template:shouldRejectNullArguments(java.lang.String, org.egothor.stemmer.StemmerPatchTrieLoaderTest$ExecutableOperation, java.lang.String)]/[test-template-invocation:#1] (5 ms)</li><li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:FilesystemAndParserTests]/[method:shouldStoreOriginalStemWhenRequested()] (1 ms)</li><li>org.egothor.stemmer.FrequencyTrieBuildersTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.FrequencyTrieBuildersTest]/[method:shouldPreserveRootLocalValues()] (14 ms)</li><li>org.egothor.stemmer.StemmerPatchTrieLoaderTest.[engine:junit-jupiter]/[class:org.egothor.stemmer.StemmerPatchTrieLoaderTest]/[nested-class:FilesystemAndParserTests]/[method:shouldIgnoreHashAndDoubleSlashRemarks()] (2 ms)</li>
+</ul>
+
+<br/>
+
+Report generated by <a href='https://pitest.org'>PIT</a> 1.22.1
+
+</body>
+</html>

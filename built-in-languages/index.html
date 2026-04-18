@@ -1,0 +1,1290 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="High-performance multi-language stemming toolkit for Java">
+      
+      
+      
+        <link rel="canonical" href="https://leogalambos.github.io/Radixor/built-in-languages/">
+      
+      
+        <link rel="prev" href="../programmatic-usage/">
+      
+      
+        <link rel="next" href="../architecture-and-reduction/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Built-in Languages - Radixor</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#built-in-languages" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Radixor" class="md-header__button md-logo" aria-label="Radixor" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Radixor
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Built-in Languages
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/leogalambos/Radixor" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    leogalambos/Radixor
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Radixor" class="md-nav__button md-logo" aria-label="Radixor" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Radixor
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/leogalambos/Radixor" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    leogalambos/Radixor
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quick-start/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dictionary-format/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dictionary Format
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli-compilation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Compilation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../programmatic-usage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Programmatic Usage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Built-in Languages
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Built-in Languages
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#supported-languages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Supported languages
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#basic-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Basic usage
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example-stemming-with-us_uk_profi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example: stemming with US_UK_PROFI
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#us_uk-vs-us_uk_profi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US_UK vs US_UK_PROFI
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="US_UK vs US_UK_PROFI">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#us_uk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US_UK
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us_uk_profi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US_UK_PROFI
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recommendation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recommendation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-bundled-dictionaries-are-loaded" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How bundled dictionaries are loaded
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#when-to-use-bundled-languages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When to use bundled languages
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#when-to-use-custom-dictionaries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When to use custom dictionaries
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#production-recommendation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Production recommendation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example workflow
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#limitations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Limitations
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next steps
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture-and-reduction/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture and Reduction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quality-and-operations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quality and Operations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarking/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Benchmarking
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reports/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CI Reports
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#supported-languages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Supported languages
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#basic-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Basic usage
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example-stemming-with-us_uk_profi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example: stemming with US_UK_PROFI
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#us_uk-vs-us_uk_profi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US_UK vs US_UK_PROFI
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="US_UK vs US_UK_PROFI">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#us_uk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US_UK
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#us_uk_profi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        US_UK_PROFI
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recommendation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recommendation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-bundled-dictionaries-are-loaded" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How bundled dictionaries are loaded
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#when-to-use-bundled-languages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When to use bundled languages
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#when-to-use-custom-dictionaries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When to use custom dictionaries
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#production-recommendation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Production recommendation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example workflow
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#limitations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Limitations
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next steps
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="built-in-languages">Built-in Languages</h1>
+<p>Radixor provides a set of <strong>bundled stemmer dictionaries</strong> that can be loaded directly without preparing custom data.</p>
+<p>These built-in resources are useful for:</p>
+<ul>
+<li>quick integration</li>
+<li>testing and evaluation</li>
+<li>reference behavior</li>
+<li>prototyping search pipelines</li>
+</ul>
+<h2 id="overview">Overview</h2>
+<p>Bundled dictionaries are exposed through:</p>
+<div class="highlight"><pre><span></span><code><span class="n">StemmerPatchTrieLoader</span><span class="p">.</span><span class="na">Language</span>
+</code></pre></div>
+<p>They are packaged with the library and loaded from the classpath.</p>
+<h2 id="supported-languages">Supported languages</h2>
+<p>The following language identifiers are currently available:</p>
+<table>
+<thead>
+<tr>
+<th>Language</th>
+<th>Enum constant</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Danish</td>
+<td><code>DA_DK</code></td>
+<td>Danish</td>
+</tr>
+<tr>
+<td>German</td>
+<td><code>DE_DE</code></td>
+<td>German</td>
+</tr>
+<tr>
+<td>Spanish</td>
+<td><code>ES_ES</code></td>
+<td>Spanish</td>
+</tr>
+<tr>
+<td>French</td>
+<td><code>FR_FR</code></td>
+<td>French</td>
+</tr>
+<tr>
+<td>Italian</td>
+<td><code>IT_IT</code></td>
+<td>Italian</td>
+</tr>
+<tr>
+<td>Dutch</td>
+<td><code>NL_NL</code></td>
+<td>Dutch</td>
+</tr>
+<tr>
+<td>Norwegian</td>
+<td><code>NO_NO</code></td>
+<td>Norwegian</td>
+</tr>
+<tr>
+<td>Portuguese</td>
+<td><code>PT_PT</code></td>
+<td>Portuguese</td>
+</tr>
+<tr>
+<td>Russian</td>
+<td><code>RU_RU</code></td>
+<td>Russian</td>
+</tr>
+<tr>
+<td>Swedish</td>
+<td><code>SV_SE</code></td>
+<td>Swedish</td>
+</tr>
+<tr>
+<td>English</td>
+<td><code>US_UK</code></td>
+<td>Standard English</td>
+</tr>
+<tr>
+<td>English</td>
+<td><code>US_UK_PROFI</code></td>
+<td>Extended English dictionary</td>
+</tr>
+</tbody>
+</table>
+<h2 id="basic-usage">Basic usage</h2>
+<p>Load a bundled stemmer:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">java.io.IOException</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.egothor.stemmer.FrequencyTrie</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.egothor.stemmer.ReductionMode</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.egothor.stemmer.StemmerPatchTrieLoader</span><span class="p">;</span>
+
+<span class="kd">public</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kd">class</span> <span class="nc">BuiltInExample</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">String</span><span class="o">[]</span><span class="w"> </span><span class="n">args</span><span class="p">)</span><span class="w"> </span><span class="kd">throws</span><span class="w"> </span><span class="n">IOException</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">FrequencyTrie</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">trie</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">StemmerPatchTrieLoader</span><span class="p">.</span><span class="na">load</span><span class="p">(</span>
+<span class="w">                </span><span class="n">StemmerPatchTrieLoader</span><span class="p">.</span><span class="na">Language</span><span class="p">.</span><span class="na">US_UK_PROFI</span><span class="p">,</span>
+<span class="w">                </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">                </span><span class="n">ReductionMode</span><span class="p">.</span><span class="na">MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS</span>
+<span class="w">        </span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<h2 id="example-stemming-with-us_uk_profi">Example: stemming with <code>US_UK_PROFI</code></h2>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">java.io.IOException</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.egothor.stemmer.*</span><span class="p">;</span>
+
+<span class="kd">public</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kd">class</span> <span class="nc">EnglishExample</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">String</span><span class="o">[]</span><span class="w"> </span><span class="n">args</span><span class="p">)</span><span class="w"> </span><span class="kd">throws</span><span class="w"> </span><span class="n">IOException</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">FrequencyTrie</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">trie</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">StemmerPatchTrieLoader</span><span class="p">.</span><span class="na">load</span><span class="p">(</span>
+<span class="w">                </span><span class="n">StemmerPatchTrieLoader</span><span class="p">.</span><span class="na">Language</span><span class="p">.</span><span class="na">US_UK_PROFI</span><span class="p">,</span>
+<span class="w">                </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">                </span><span class="n">ReductionMode</span><span class="p">.</span><span class="na">MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS</span>
+<span class="w">        </span><span class="p">);</span>
+
+<span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">word</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;running&quot;</span><span class="p">;</span>
+<span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">patch</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">trie</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">word</span><span class="p">);</span>
+<span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">stem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PatchCommandEncoder</span><span class="p">.</span><span class="na">apply</span><span class="p">(</span><span class="n">word</span><span class="p">,</span><span class="w"> </span><span class="n">patch</span><span class="p">);</span>
+
+<span class="w">        </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="n">word</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot; -&gt; &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">stem</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<h2 id="us_uk-vs-us_uk_profi"><code>US_UK</code> vs <code>US_UK_PROFI</code></h2>
+<h3 id="us_uk"><code>US_UK</code></h3>
+<ul>
+<li>smaller dictionary</li>
+<li>faster load time</li>
+<li>suitable for lightweight use cases</li>
+</ul>
+<h3 id="us_uk_profi"><code>US_UK_PROFI</code></h3>
+<ul>
+<li>larger and more complete dataset</li>
+<li>better coverage of word forms</li>
+<li>improved stemming quality</li>
+<li>slightly larger memory footprint</li>
+</ul>
+<h3 id="recommendation">Recommendation</h3>
+<p>Use:</p>
+<div class="highlight"><pre><span></span><code>US_UK_PROFI
+</code></pre></div>
+<p>for most applications unless memory constraints are strict.</p>
+<h2 id="how-bundled-dictionaries-are-loaded">How bundled dictionaries are loaded</h2>
+<p>Internally:</p>
+<ul>
+<li>dictionaries are stored as text resources</li>
+<li>parsed using <code>StemmerDictionaryParser</code></li>
+<li>compiled into a trie at load time</li>
+</ul>
+<p>This means:</p>
+<ul>
+<li>first load includes parsing + compilation cost</li>
+<li>subsequent usage is fast</li>
+</ul>
+<h2 id="when-to-use-bundled-languages">When to use bundled languages</h2>
+<p>Bundled dictionaries are suitable when:</p>
+<ul>
+<li>you need quick results without preparing custom data</li>
+<li>you are prototyping or experimenting</li>
+<li>your language requirements match the provided datasets</li>
+</ul>
+<h2 id="when-to-use-custom-dictionaries">When to use custom dictionaries</h2>
+<p>You should prefer custom dictionaries when:</p>
+<ul>
+<li>domain-specific vocabulary is important</li>
+<li>accuracy requirements are high</li>
+<li>you need full control over stemming behavior</li>
+</ul>
+<p>Typical examples:</p>
+<ul>
+<li>technical terminology</li>
+<li>product catalogs</li>
+<li>biomedical text</li>
+<li>legal or financial language</li>
+</ul>
+<h2 id="production-recommendation">Production recommendation</h2>
+<p>For production systems:</p>
+<ol>
+<li>Load a bundled dictionary</li>
+<li>Extend it with domain-specific terms (optional)</li>
+<li>Compile it into a binary <code>.radixor.gz</code> file</li>
+<li>Deploy the compiled artifact</li>
+<li>Load it using <code>loadBinary(...)</code></li>
+</ol>
+<p>This avoids:</p>
+<ul>
+<li>runtime parsing overhead</li>
+<li>repeated compilation</li>
+<li>startup latency</li>
+</ul>
+<h2 id="example-workflow">Example workflow</h2>
+<div class="highlight"><pre><span></span><code><span class="c1">// 1. Load bundled dictionary</span>
+<span class="n">FrequencyTrie</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">base</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">StemmerPatchTrieLoader</span><span class="p">.</span><span class="na">load</span><span class="p">(</span>
+<span class="w">        </span><span class="n">StemmerPatchTrieLoader</span><span class="p">.</span><span class="na">Language</span><span class="p">.</span><span class="na">US_UK_PROFI</span><span class="p">,</span>
+<span class="w">        </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">        </span><span class="n">ReductionMode</span><span class="p">.</span><span class="na">MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS</span>
+<span class="p">);</span>
+
+<span class="c1">// 2. Modify (optional)</span>
+<span class="n">FrequencyTrie</span><span class="p">.</span><span class="na">Builder</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">builder</span><span class="w"> </span><span class="o">=</span>
+<span class="w">        </span><span class="n">FrequencyTrieBuilders</span><span class="p">.</span><span class="na">copyOf</span><span class="p">(</span>
+<span class="w">                </span><span class="n">base</span><span class="p">,</span>
+<span class="w">                </span><span class="n">String</span><span class="o">[]</span><span class="p">::</span><span class="k">new</span><span class="p">,</span>
+<span class="w">                </span><span class="n">ReductionSettings</span><span class="p">.</span><span class="na">withDefaults</span><span class="p">(</span>
+<span class="w">                        </span><span class="n">ReductionMode</span><span class="p">.</span><span class="na">MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS</span>
+<span class="w">                </span><span class="p">)</span>
+<span class="w">        </span><span class="p">);</span>
+
+<span class="n">builder</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">&quot;microservices&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">PatchCommandEncoder</span><span class="p">.</span><span class="na">NOOP_PATCH</span><span class="p">);</span>
+
+<span class="c1">// 3. Compile</span>
+<span class="n">FrequencyTrie</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">compiled</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">builder</span><span class="p">.</span><span class="na">build</span><span class="p">();</span>
+
+<span class="c1">// 4. Save</span>
+<span class="n">StemmerPatchTrieBinaryIO</span><span class="p">.</span><span class="na">write</span><span class="p">(</span><span class="n">compiled</span><span class="p">,</span><span class="w"> </span><span class="n">Path</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="s">&quot;english-custom.radixor.gz&quot;</span><span class="p">));</span>
+</code></pre></div>
+<h2 id="limitations">Limitations</h2>
+<ul>
+<li>bundled dictionaries are <strong>general-purpose</strong></li>
+<li>
+<p>they may not reflect:</p>
+</li>
+<li>
+<p>domain-specific usage</p>
+</li>
+<li>rare or specialized vocabulary</li>
+<li>organization-specific terminology</li>
+</ul>
+<h2 id="next-steps">Next steps</h2>
+<ul>
+<li><a href="../quick-start/">Quick start</a></li>
+<li><a href="../dictionary-format/">Dictionary format</a></li>
+<li><a href="../cli-compilation/">CLI compilation</a></li>
+<li><a href="../programmatic-usage/">Programmatic usage</a></li>
+</ul>
+<h2 id="summary">Summary</h2>
+<p>Radixor’s built-in language support provides:</p>
+<ul>
+<li>immediate usability</li>
+<li>reference datasets</li>
+<li>a starting point for customization</li>
+</ul>
+<p>For production systems, they are best used as:</p>
+<ul>
+<li>a baseline</li>
+<li>a seed for further extension</li>
+<li>a source for compiled deployment artifacts</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      &copy; ${year} Egothor. Licensed under <a href='https://github.com/leogalambos/Radixor/blob/main/LICENSE'>BSD-3-Clause</a>.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.instant", "navigation.sections", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

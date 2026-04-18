@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bom serialNumber="urn:uuid:bbf397d9-3294-45aa-964a-32ba704d2481" version="1" xmlns="http://cyclonedx.org/schema/bom/1.6">
+<bom serialNumber="urn:uuid:83409d7a-240b-4734-8086-c1ade3ec0122" version="1" xmlns="http://cyclonedx.org/schema/bom/1.6">
   <metadata>
-    <timestamp>2026-04-16T20:40:15Z</timestamp>
+    <timestamp>2026-04-18T10:14:07Z</timestamp>
     <tools>
       <components>
         <component type="application">
@@ -11,15 +11,15 @@
         </component>
       </components>
     </tools>
-    <component type="library" bom-ref="pkg:maven/org.egothor/Radixor@0.9.2?project_path=%3A">
+    <component type="library" bom-ref="pkg:maven/org.egothor/Radixor@0.9.2-4-g31ed39c?project_path=%3A">
       <group>org.egothor</group>
       <name>Radixor</name>
-      <version>0.9.2</version>
-      <purl>pkg:maven/org.egothor/Radixor@0.9.2?project_path=%3A</purl>
+      <version>0.9.2-4-g31ed39c</version>
+      <purl>pkg:maven/org.egothor/Radixor@0.9.2-4-g31ed39c?project_path=%3A</purl>
       <modified>false</modified>
       <externalReferences>
         <reference type="build-system">
-          <url>https://github.com/leogalambos/Radixor/actions/runs/24532356069</url>
+          <url>https://github.com/leogalambos/Radixor/actions/runs/24602298663</url>
         </reference>
         <reference type="vcs">
           <url>https://github.com/leogalambos/Radixor</url>

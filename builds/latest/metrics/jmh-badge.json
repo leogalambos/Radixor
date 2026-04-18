@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
   "label": "english benchmark",
-  "message": "4.3x vs Porter (5000)",
+  "message": "4.0x vs Porter (5000)",
   "color": "brightgreen"
 }
