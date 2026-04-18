@@ -13,10 +13,10 @@
         <link rel="canonical" href="https://leogalambos.github.io/Radixor/built-in-languages/">
       
       
-        <link rel="prev" href="../programmatic-usage/">
+        <link rel="prev" href="../quick-start/">
       
       
-        <link rel="next" href="../architecture-and-reduction/">
+        <link rel="next" href="../dictionary-format/">
       
       
         
@@ -52,6 +52,8 @@
         <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
       
     
+    
+      <link rel="stylesheet" href="../assets/stylesheets/extra.css">
     
     <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
@@ -272,6 +274,60 @@
       
   
   
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
   
   
     <li class="md-nav__item">
@@ -294,90 +350,10 @@
     </li>
   
 
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../dictionary-format/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Dictionary Format
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../cli-compilation/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    CLI Compilation
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../programmatic-usage/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Programmatic Usage
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
+              
+            
+              
+                
   
   
     
@@ -487,15 +463,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#us_uk-vs-us_uk_profi" class="md-nav__link">
+  <a href="#us_uk-and-us_uk_profi" class="md-nav__link">
     <span class="md-ellipsis">
       
-        US_UK vs US_UK_PROFI
+        US_UK and US_UK_PROFI
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="US_UK vs US_UK_PROFI">
+    <nav class="md-nav" aria-label="US_UK and US_UK_PROFI">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -537,10 +513,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#how-bundled-dictionaries-are-loaded" class="md-nav__link">
+  <a href="#intended-role-of-bundled-dictionaries" class="md-nav__link">
     <span class="md-ellipsis">
       
-        How bundled dictionaries are loaded
+        Intended role of bundled dictionaries
       
     </span>
   </a>
@@ -548,10 +524,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#when-to-use-bundled-languages" class="md-nav__link">
+  <a href="#character-representation" class="md-nav__link">
     <span class="md-ellipsis">
       
-        When to use bundled languages
+        Character representation
       
     </span>
   </a>
@@ -559,10 +535,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#when-to-use-custom-dictionaries" class="md-nav__link">
+  <a href="#when-to-prefer-custom-dictionaries" class="md-nav__link">
     <span class="md-ellipsis">
       
-        When to use custom dictionaries
+        When to prefer custom dictionaries
       
     </span>
   </a>
@@ -581,10 +557,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#example-workflow" class="md-nav__link">
+  <a href="#example-refinement-workflow" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Example workflow
+        Example refinement workflow
       
     </span>
   </a>
@@ -592,10 +568,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#limitations" class="md-nav__link">
+  <a href="#extending-language-support" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Limitations
+        Extending language support
       
     </span>
   </a>
@@ -631,9 +607,296 @@
     </li>
   
 
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dictionary-format/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dictionary Format
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli-compilation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Compilation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
     
       
       
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Programmatic Usage
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Programmatic Usage
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../programmatic-usage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../programmatic-loading-and-building/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Loading and Building Stemmers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../programmatic-querying-and-ambiguity/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Querying and Ambiguity Handling
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../programmatic-extending-and-persistence/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Extending and Persisting Compiled Tries
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture and Semantics
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture and Semantics
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
   
   
   
@@ -646,7 +909,7 @@
   <span class="md-ellipsis">
     
   
-    Architecture and Reduction
+    Overview
   
 
     
@@ -658,9 +921,240 @@
     </li>
   
 
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reduction-semantics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reduction Semantics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../compatibility-and-guarantees/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compatibility and Guarantees
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
     
       
       
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dictionaries
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Dictionaries
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing-dictionaries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing Dictionaries
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quality and Operations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Quality and Operations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
   
   
   
@@ -685,9 +1179,10 @@
     </li>
   
 
-    
-      
-      
+              
+            
+              
+                
   
   
   
@@ -712,9 +1207,10 @@
     </li>
   
 
-    
-      
-      
+              
+            
+              
+                
   
   
   
@@ -727,7 +1223,7 @@
   <span class="md-ellipsis">
     
   
-    CI Reports
+    Reports
   
 
     
@@ -736,6 +1232,14 @@
   
 
       </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -811,15 +1315,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#us_uk-vs-us_uk_profi" class="md-nav__link">
+  <a href="#us_uk-and-us_uk_profi" class="md-nav__link">
     <span class="md-ellipsis">
       
-        US_UK vs US_UK_PROFI
+        US_UK and US_UK_PROFI
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="US_UK vs US_UK_PROFI">
+    <nav class="md-nav" aria-label="US_UK and US_UK_PROFI">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -861,10 +1365,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#how-bundled-dictionaries-are-loaded" class="md-nav__link">
+  <a href="#intended-role-of-bundled-dictionaries" class="md-nav__link">
     <span class="md-ellipsis">
       
-        How bundled dictionaries are loaded
+        Intended role of bundled dictionaries
       
     </span>
   </a>
@@ -872,10 +1376,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#when-to-use-bundled-languages" class="md-nav__link">
+  <a href="#character-representation" class="md-nav__link">
     <span class="md-ellipsis">
       
-        When to use bundled languages
+        Character representation
       
     </span>
   </a>
@@ -883,10 +1387,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#when-to-use-custom-dictionaries" class="md-nav__link">
+  <a href="#when-to-prefer-custom-dictionaries" class="md-nav__link">
     <span class="md-ellipsis">
       
-        When to use custom dictionaries
+        When to prefer custom dictionaries
       
     </span>
   </a>
@@ -905,10 +1409,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#example-workflow" class="md-nav__link">
+  <a href="#example-refinement-workflow" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Example workflow
+        Example refinement workflow
       
     </span>
   </a>
@@ -916,10 +1420,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#limitations" class="md-nav__link">
+  <a href="#extending-language-support" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Limitations
+        Extending language support
       
     </span>
   </a>
@@ -969,84 +1473,78 @@
 
 
 <h1 id="built-in-languages">Built-in Languages</h1>
-<p>Radixor provides a set of <strong>bundled stemmer dictionaries</strong> that can be loaded directly without preparing custom data.</p>
-<p>These built-in resources are useful for:</p>
-<ul>
-<li>quick integration</li>
-<li>testing and evaluation</li>
-<li>reference behavior</li>
-<li>prototyping search pipelines</li>
-</ul>
+<p>Radixor provides a set of bundled stemmer dictionaries that can be loaded directly without preparing custom lexical data first.</p>
+<p>These resources are intended as practical default dictionaries for common use. They provide a solid starting point for evaluation, integration, and general-purpose stemming workloads, while still fitting naturally into workflows where the bundled baseline is later refined, extended, or replaced by a custom dictionary.</p>
 <h2 id="overview">Overview</h2>
 <p>Bundled dictionaries are exposed through:</p>
 <div class="highlight"><pre><span></span><code><span class="n">StemmerPatchTrieLoader</span><span class="p">.</span><span class="na">Language</span>
 </code></pre></div>
-<p>They are packaged with the library and loaded from the classpath.</p>
+<p>They are packaged with the library as text resources and compiled into a <code>FrequencyTrie&lt;String&gt;</code> when loaded.</p>
 <h2 id="supported-languages">Supported languages</h2>
-<p>The following language identifiers are currently available:</p>
+<p>The following bundled language identifiers are currently available:</p>
 <table>
 <thead>
 <tr>
 <th>Language</th>
 <th>Enum constant</th>
-<th>Description</th>
+<th>Notes</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>Danish</td>
 <td><code>DA_DK</code></td>
-<td>Danish</td>
+<td>Bundled general-purpose dictionary</td>
 </tr>
 <tr>
 <td>German</td>
 <td><code>DE_DE</code></td>
-<td>German</td>
+<td>Bundled general-purpose dictionary</td>
 </tr>
 <tr>
 <td>Spanish</td>
 <td><code>ES_ES</code></td>
-<td>Spanish</td>
+<td>Bundled general-purpose dictionary</td>
 </tr>
 <tr>
 <td>French</td>
 <td><code>FR_FR</code></td>
-<td>French</td>
+<td>Bundled general-purpose dictionary</td>
 </tr>
 <tr>
 <td>Italian</td>
 <td><code>IT_IT</code></td>
-<td>Italian</td>
+<td>Bundled general-purpose dictionary</td>
 </tr>
 <tr>
 <td>Dutch</td>
 <td><code>NL_NL</code></td>
-<td>Dutch</td>
+<td>Bundled general-purpose dictionary</td>
 </tr>
 <tr>
 <td>Norwegian</td>
 <td><code>NO_NO</code></td>
-<td>Norwegian</td>
+<td>Bundled general-purpose dictionary</td>
 </tr>
 <tr>
 <td>Portuguese</td>
 <td><code>PT_PT</code></td>
-<td>Portuguese</td>
+<td>Bundled general-purpose dictionary</td>
 </tr>
 <tr>
 <td>Russian</td>
 <td><code>RU_RU</code></td>
-<td>Russian</td>
+<td>Currently supplied in normalized transliterated form</td>
 </tr>
 <tr>
 <td>Swedish</td>
 <td><code>SV_SE</code></td>
-<td>Swedish</td>
+<td>Bundled general-purpose dictionary</td>
 </tr>
 <tr>
 <td>English</td>
 <td><code>US_UK</code></td>
-<td>Standard English</td>
+<td>Standard English dictionary</td>
 </tr>
 <tr>
 <td>English</td>
@@ -1056,7 +1554,7 @@
 </tbody>
 </table>
 <h2 id="basic-usage">Basic usage</h2>
-<p>Load a bundled stemmer:</p>
+<p>Load a bundled stemmer like this:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">java.io.IOException</span><span class="p">;</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">org.egothor.stemmer.FrequencyTrie</span><span class="p">;</span>
@@ -1065,142 +1563,138 @@
 
 <span class="kd">public</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kd">class</span> <span class="nc">BuiltInExample</span><span class="w"> </span><span class="p">{</span>
 
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">String</span><span class="o">[]</span><span class="w"> </span><span class="n">args</span><span class="p">)</span><span class="w"> </span><span class="kd">throws</span><span class="w"> </span><span class="n">IOException</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="n">FrequencyTrie</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">trie</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">StemmerPatchTrieLoader</span><span class="p">.</span><span class="na">load</span><span class="p">(</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="nf">BuiltInExample</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">throw</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">AssertionError</span><span class="p">(</span><span class="s">&quot;No instances.&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kd">final</span><span class="w"> </span><span class="n">String</span><span class="o">[]</span><span class="w"> </span><span class="n">arguments</span><span class="p">)</span><span class="w"> </span><span class="kd">throws</span><span class="w"> </span><span class="n">IOException</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">final</span><span class="w"> </span><span class="n">FrequencyTrie</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">trie</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">StemmerPatchTrieLoader</span><span class="p">.</span><span class="na">load</span><span class="p">(</span>
 <span class="w">                </span><span class="n">StemmerPatchTrieLoader</span><span class="p">.</span><span class="na">Language</span><span class="p">.</span><span class="na">US_UK_PROFI</span><span class="p">,</span>
 <span class="w">                </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">                </span><span class="n">ReductionMode</span><span class="p">.</span><span class="na">MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS</span>
-<span class="w">        </span><span class="p">);</span>
+<span class="w">                </span><span class="n">ReductionMode</span><span class="p">.</span><span class="na">MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS</span><span class="p">);</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
+<p>The loader reads the bundled dictionary resource, parses the textual entries, derives patch-command mappings, and compiles the result into a read-only trie.</p>
 <h2 id="example-stemming-with-us_uk_profi">Example: stemming with <code>US_UK_PROFI</code></h2>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">java.io.IOException</span><span class="p">;</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">org.egothor.stemmer.*</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.egothor.stemmer.FrequencyTrie</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.egothor.stemmer.PatchCommandEncoder</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.egothor.stemmer.ReductionMode</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.egothor.stemmer.StemmerPatchTrieLoader</span><span class="p">;</span>
 
 <span class="kd">public</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kd">class</span> <span class="nc">EnglishExample</span><span class="w"> </span><span class="p">{</span>
 
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">String</span><span class="o">[]</span><span class="w"> </span><span class="n">args</span><span class="p">)</span><span class="w"> </span><span class="kd">throws</span><span class="w"> </span><span class="n">IOException</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="n">FrequencyTrie</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">trie</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">StemmerPatchTrieLoader</span><span class="p">.</span><span class="na">load</span><span class="p">(</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="nf">EnglishExample</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">throw</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">AssertionError</span><span class="p">(</span><span class="s">&quot;No instances.&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kd">final</span><span class="w"> </span><span class="n">String</span><span class="o">[]</span><span class="w"> </span><span class="n">arguments</span><span class="p">)</span><span class="w"> </span><span class="kd">throws</span><span class="w"> </span><span class="n">IOException</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">final</span><span class="w"> </span><span class="n">FrequencyTrie</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">trie</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">StemmerPatchTrieLoader</span><span class="p">.</span><span class="na">load</span><span class="p">(</span>
 <span class="w">                </span><span class="n">StemmerPatchTrieLoader</span><span class="p">.</span><span class="na">Language</span><span class="p">.</span><span class="na">US_UK_PROFI</span><span class="p">,</span>
 <span class="w">                </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">                </span><span class="n">ReductionMode</span><span class="p">.</span><span class="na">MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS</span>
-<span class="w">        </span><span class="p">);</span>
+<span class="w">                </span><span class="n">ReductionMode</span><span class="p">.</span><span class="na">MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS</span><span class="p">);</span>
 
-<span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">word</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;running&quot;</span><span class="p">;</span>
-<span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">patch</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">trie</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">word</span><span class="p">);</span>
-<span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">stem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PatchCommandEncoder</span><span class="p">.</span><span class="na">apply</span><span class="p">(</span><span class="n">word</span><span class="p">,</span><span class="w"> </span><span class="n">patch</span><span class="p">);</span>
+<span class="w">        </span><span class="kd">final</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">word</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;running&quot;</span><span class="p">;</span>
+<span class="w">        </span><span class="kd">final</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">patch</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">trie</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">word</span><span class="p">);</span>
+<span class="w">        </span><span class="kd">final</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">stem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PatchCommandEncoder</span><span class="p">.</span><span class="na">apply</span><span class="p">(</span><span class="n">word</span><span class="p">,</span><span class="w"> </span><span class="n">patch</span><span class="p">);</span>
 
 <span class="w">        </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="n">word</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot; -&gt; &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">stem</span><span class="p">);</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
-<h2 id="us_uk-vs-us_uk_profi"><code>US_UK</code> vs <code>US_UK_PROFI</code></h2>
+<h2 id="us_uk-and-us_uk_profi"><code>US_UK</code> and <code>US_UK_PROFI</code></h2>
+<p>Radixor currently provides two bundled English variants.</p>
 <h3 id="us_uk"><code>US_UK</code></h3>
-<ul>
-<li>smaller dictionary</li>
-<li>faster load time</li>
-<li>suitable for lightweight use cases</li>
-</ul>
+<p><code>US_UK</code> is the lighter-weight bundled English resource. It is suitable where a smaller default dictionary is preferred and maximal lexical coverage is not the primary goal.</p>
 <h3 id="us_uk_profi"><code>US_UK_PROFI</code></h3>
-<ul>
-<li>larger and more complete dataset</li>
-<li>better coverage of word forms</li>
-<li>improved stemming quality</li>
-<li>slightly larger memory footprint</li>
-</ul>
+<p><code>US_UK_PROFI</code> is the more extensive bundled English resource. It offers broader lexical coverage and is the better default for most applications that want stronger out-of-the-box behavior.</p>
 <h3 id="recommendation">Recommendation</h3>
-<p>Use:</p>
+<p>For most English-language deployments, prefer:</p>
 <div class="highlight"><pre><span></span><code>US_UK_PROFI
 </code></pre></div>
-<p>for most applications unless memory constraints are strict.</p>
-<h2 id="how-bundled-dictionaries-are-loaded">How bundled dictionaries are loaded</h2>
-<p>Internally:</p>
+<p>Use <code>US_UK</code> when a smaller bundled baseline is more appropriate.</p>
+<h2 id="intended-role-of-bundled-dictionaries">Intended role of bundled dictionaries</h2>
+<p>Bundled dictionaries should be understood as <strong>general-purpose default resources</strong>.</p>
+<p>They are a good fit when:</p>
 <ul>
-<li>dictionaries are stored as text resources</li>
-<li>parsed using <code>StemmerDictionaryParser</code></li>
-<li>compiled into a trie at load time</li>
+<li>a supported language is already available,</li>
+<li>immediate usability matters,</li>
+<li>a reasonable baseline is sufficient,</li>
+<li>the goal is evaluation, prototyping, or straightforward integration.</li>
 </ul>
-<p>This means:</p>
+<p>They are also well suited to staged refinement workflows in which the bundled base is loaded first, then extended with domain-specific vocabulary, and finally persisted as a custom binary artifact.</p>
+<h2 id="character-representation">Character representation</h2>
+<p>The current bundled resources follow a pragmatic normalization convention.</p>
+<p>At present, bundled dictionaries are supplied in normalized plain-ASCII form. For some languages, this is simply a lightweight maintenance convention. For others, especially languages commonly written in another script, it reflects a transliterated lexical resource. Russian is the clearest example in the current bundled set.</p>
+<p>This convention belongs to the supplied dictionary resources, not to the core stemming model. The parser reads UTF-8 text, the dictionary model works with ordinary Java strings, and the trie and patch-command mechanism operate on general character sequences. In practical terms, the architecture is compatible with native-script dictionaries when suitable lexical resources are available.</p>
+<h2 id="when-to-prefer-custom-dictionaries">When to prefer custom dictionaries</h2>
+<p>A custom dictionary is usually the better choice when:</p>
 <ul>
-<li>first load includes parsing + compilation cost</li>
-<li>subsequent usage is fast</li>
+<li>domain-specific vocabulary materially affects stemming quality,</li>
+<li>lexical coverage must be controlled more precisely,</li>
+<li>a stronger language resource is available than the bundled baseline,</li>
+<li>native-script support is needed beyond the currently bundled resources.</li>
 </ul>
-<h2 id="when-to-use-bundled-languages">When to use bundled languages</h2>
-<p>Bundled dictionaries are suitable when:</p>
+<p>Typical examples include:</p>
 <ul>
-<li>you need quick results without preparing custom data</li>
-<li>you are prototyping or experimenting</li>
-<li>your language requirements match the provided datasets</li>
-</ul>
-<h2 id="when-to-use-custom-dictionaries">When to use custom dictionaries</h2>
-<p>You should prefer custom dictionaries when:</p>
-<ul>
-<li>domain-specific vocabulary is important</li>
-<li>accuracy requirements are high</li>
-<li>you need full control over stemming behavior</li>
-</ul>
-<p>Typical examples:</p>
-<ul>
-<li>technical terminology</li>
-<li>product catalogs</li>
-<li>biomedical text</li>
-<li>legal or financial language</li>
+<li>technical terminology,</li>
+<li>biomedical language,</li>
+<li>legal or financial vocabulary,</li>
+<li>organization-specific product and process names,</li>
+<li>language resources maintained in native scripts.</li>
 </ul>
 <h2 id="production-recommendation">Production recommendation</h2>
-<p>For production systems:</p>
+<p>For production systems, the most robust workflow is usually:</p>
 <ol>
-<li>Load a bundled dictionary</li>
-<li>Extend it with domain-specific terms (optional)</li>
-<li>Compile it into a binary <code>.radixor.gz</code> file</li>
-<li>Deploy the compiled artifact</li>
-<li>Load it using <code>loadBinary(...)</code></li>
+<li>start from a bundled dictionary when it is suitable,</li>
+<li>extend it with domain-specific forms if needed,</li>
+<li>compile or rebuild it into a binary <code>.radixor.gz</code> artifact,</li>
+<li>deploy that compiled artifact,</li>
+<li>load it at runtime using <code>loadBinary(...)</code>.</li>
 </ol>
-<p>This avoids:</p>
-<ul>
-<li>runtime parsing overhead</li>
-<li>repeated compilation</li>
-<li>startup latency</li>
-</ul>
-<h2 id="example-workflow">Example workflow</h2>
-<div class="highlight"><pre><span></span><code><span class="c1">// 1. Load bundled dictionary</span>
-<span class="n">FrequencyTrie</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">base</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">StemmerPatchTrieLoader</span><span class="p">.</span><span class="na">load</span><span class="p">(</span>
-<span class="w">        </span><span class="n">StemmerPatchTrieLoader</span><span class="p">.</span><span class="na">Language</span><span class="p">.</span><span class="na">US_UK_PROFI</span><span class="p">,</span>
-<span class="w">        </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">        </span><span class="n">ReductionMode</span><span class="p">.</span><span class="na">MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS</span>
-<span class="p">);</span>
+<p>This avoids repeated startup parsing and makes the deployed stemming behavior explicit and versionable.</p>
+<h2 id="example-refinement-workflow">Example refinement workflow</h2>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">java.io.IOException</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.nio.file.Path</span><span class="p">;</span>
 
-<span class="c1">// 2. Modify (optional)</span>
-<span class="n">FrequencyTrie</span><span class="p">.</span><span class="na">Builder</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">builder</span><span class="w"> </span><span class="o">=</span>
-<span class="w">        </span><span class="n">FrequencyTrieBuilders</span><span class="p">.</span><span class="na">copyOf</span><span class="p">(</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.egothor.stemmer.FrequencyTrie</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.egothor.stemmer.FrequencyTrieBuilders</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.egothor.stemmer.ReductionMode</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.egothor.stemmer.ReductionSettings</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.egothor.stemmer.StemmerPatchTrieBinaryIO</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.egothor.stemmer.StemmerPatchTrieLoader</span><span class="p">;</span>
+
+<span class="kd">public</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kd">class</span> <span class="nc">BundledRefinementExample</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="nf">BundledRefinementExample</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">throw</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">AssertionError</span><span class="p">(</span><span class="s">&quot;No instances.&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kd">final</span><span class="w"> </span><span class="n">String</span><span class="o">[]</span><span class="w"> </span><span class="n">arguments</span><span class="p">)</span><span class="w"> </span><span class="kd">throws</span><span class="w"> </span><span class="n">IOException</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">final</span><span class="w"> </span><span class="n">FrequencyTrie</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">base</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">StemmerPatchTrieLoader</span><span class="p">.</span><span class="na">load</span><span class="p">(</span>
+<span class="w">                </span><span class="n">StemmerPatchTrieLoader</span><span class="p">.</span><span class="na">Language</span><span class="p">.</span><span class="na">US_UK_PROFI</span><span class="p">,</span>
+<span class="w">                </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">                </span><span class="n">ReductionMode</span><span class="p">.</span><span class="na">MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS</span><span class="p">);</span>
+
+<span class="w">        </span><span class="kd">final</span><span class="w"> </span><span class="n">FrequencyTrie</span><span class="p">.</span><span class="na">Builder</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">builder</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FrequencyTrieBuilders</span><span class="p">.</span><span class="na">copyOf</span><span class="p">(</span>
 <span class="w">                </span><span class="n">base</span><span class="p">,</span>
 <span class="w">                </span><span class="n">String</span><span class="o">[]</span><span class="p">::</span><span class="k">new</span><span class="p">,</span>
 <span class="w">                </span><span class="n">ReductionSettings</span><span class="p">.</span><span class="na">withDefaults</span><span class="p">(</span>
-<span class="w">                        </span><span class="n">ReductionMode</span><span class="p">.</span><span class="na">MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS</span>
-<span class="w">                </span><span class="p">)</span>
-<span class="w">        </span><span class="p">);</span>
+<span class="w">                        </span><span class="n">ReductionMode</span><span class="p">.</span><span class="na">MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS</span><span class="p">));</span>
 
-<span class="n">builder</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">&quot;microservices&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">PatchCommandEncoder</span><span class="p">.</span><span class="na">NOOP_PATCH</span><span class="p">);</span>
+<span class="w">        </span><span class="n">builder</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">&quot;microservices&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Na&quot;</span><span class="p">);</span>
 
-<span class="c1">// 3. Compile</span>
-<span class="n">FrequencyTrie</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">compiled</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">builder</span><span class="p">.</span><span class="na">build</span><span class="p">();</span>
+<span class="w">        </span><span class="kd">final</span><span class="w"> </span><span class="n">FrequencyTrie</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">compiled</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">builder</span><span class="p">.</span><span class="na">build</span><span class="p">();</span>
 
-<span class="c1">// 4. Save</span>
-<span class="n">StemmerPatchTrieBinaryIO</span><span class="p">.</span><span class="na">write</span><span class="p">(</span><span class="n">compiled</span><span class="p">,</span><span class="w"> </span><span class="n">Path</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="s">&quot;english-custom.radixor.gz&quot;</span><span class="p">));</span>
+<span class="w">        </span><span class="n">StemmerPatchTrieBinaryIO</span><span class="p">.</span><span class="na">write</span><span class="p">(</span><span class="n">compiled</span><span class="p">,</span><span class="w"> </span><span class="n">Path</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="s">&quot;english-custom.radixor.gz&quot;</span><span class="p">));</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
 </code></pre></div>
-<h2 id="limitations">Limitations</h2>
-<ul>
-<li>bundled dictionaries are <strong>general-purpose</strong></li>
-<li>
-<p>they may not reflect:</p>
-</li>
-<li>
-<p>domain-specific usage</p>
-</li>
-<li>rare or specialized vocabulary</li>
-<li>organization-specific terminology</li>
-</ul>
+<h2 id="extending-language-support">Extending language support</h2>
+<p>The built-in set is intentionally a practical baseline rather than a closed catalog. High-quality dictionaries for additional languages, improved language coverage, and stronger native-script resources are all natural extension paths for the project.</p>
+<p>What matters most is not only the number of entries, but the quality, consistency, and operational usefulness of the lexical resource being added.</p>
 <h2 id="next-steps">Next steps</h2>
 <ul>
 <li><a href="../quick-start/">Quick start</a></li>
@@ -1209,18 +1703,7 @@
 <li><a href="../programmatic-usage/">Programmatic usage</a></li>
 </ul>
 <h2 id="summary">Summary</h2>
-<p>Radixor’s built-in language support provides:</p>
-<ul>
-<li>immediate usability</li>
-<li>reference datasets</li>
-<li>a starting point for customization</li>
-</ul>
-<p>For production systems, they are best used as:</p>
-<ul>
-<li>a baseline</li>
-<li>a seed for further extension</li>
-<li>a source for compiled deployment artifacts</li>
-</ul>
+<p>Radixor’s built-in language support provides immediate usability, practical default dictionaries, and a strong starting point for custom refinement. The current bundled resources follow a pragmatic normalization convention, while the underlying architecture remains well suited to richer language resources and future extensions.</p>
 
 
 

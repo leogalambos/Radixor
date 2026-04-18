@@ -9,6 +9,10 @@
          <lastmod>2026-04-18</lastmod>
     </url>
     <url>
+         <loc>https://leogalambos.github.io/Radixor/architecture/</loc>
+         <lastmod>2026-04-18</lastmod>
+    </url>
+    <url>
          <loc>https://leogalambos.github.io/Radixor/benchmarking/</loc>
          <lastmod>2026-04-18</lastmod>
     </url>
@@ -25,7 +29,27 @@
          <lastmod>2026-04-18</lastmod>
     </url>
     <url>
+         <loc>https://leogalambos.github.io/Radixor/compatibility-and-guarantees/</loc>
+         <lastmod>2026-04-18</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/contributing-dictionaries/</loc>
+         <lastmod>2026-04-18</lastmod>
+    </url>
+    <url>
          <loc>https://leogalambos.github.io/Radixor/dictionary-format/</loc>
+         <lastmod>2026-04-18</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/programmatic-extending-and-persistence/</loc>
+         <lastmod>2026-04-18</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/programmatic-loading-and-building/</loc>
+         <lastmod>2026-04-18</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/programmatic-querying-and-ambiguity/</loc>
          <lastmod>2026-04-18</lastmod>
     </url>
     <url>
@@ -38,6 +62,10 @@
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/quick-start/</loc>
+         <lastmod>2026-04-18</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/reduction-semantics/</loc>
          <lastmod>2026-04-18</lastmod>
     </url>
     <url>

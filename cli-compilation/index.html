@@ -53,6 +53,8 @@
       
     
     
+      <link rel="stylesheet" href="../assets/stylesheets/extra.css">
+    
     <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -272,6 +274,60 @@
       
   
   
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
   
   
     <li class="md-nav__item">
@@ -294,9 +350,38 @@
     </li>
   
 
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../built-in-languages/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     
-      
-      
+  
+    Built-in Languages
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
   
   
   
@@ -321,9 +406,10 @@
     </li>
   
 
-    
-      
-      
+              
+            
+              
+                
   
   
     
@@ -389,10 +475,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
+  <a href="#what-the-cli-does" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Overview
+        What the CLI does
       
     </span>
   </a>
@@ -411,22 +497,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#required-arguments" class="md-nav__link">
+  <a href="#supported-arguments" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Required arguments
+        Supported arguments
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Required arguments">
+    <nav class="md-nav" aria-label="Supported arguments">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#-input" class="md-nav__link">
+  <a href="#-input-file" class="md-nav__link">
     <span class="md-ellipsis">
       
-        --input
+        --input &lt;file&gt;
       
     </span>
   </a>
@@ -434,58 +520,24 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#-output" class="md-nav__link">
+  <a href="#-output-file" class="md-nav__link">
     <span class="md-ellipsis">
       
-        --output
+        --output &lt;file&gt;
       
     </span>
   </a>
   
 </li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#optional-arguments" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Optional arguments
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Optional arguments">
-      <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#-reduction-mode" class="md-nav__link">
+  <a href="#-reduction-mode-mode" class="md-nav__link">
     <span class="md-ellipsis">
       
-        --reduction-mode
+        --reduction-mode &lt;mode&gt;
       
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="--reduction-mode">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#recommendation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Recommendation
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
         
@@ -494,6 +546,28 @@
     <span class="md-ellipsis">
       
         --store-original
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-dominant-winner-min-percent-1100" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --dominant-winner-min-percent &lt;1..100&gt;
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-dominant-winner-over-second-ratio-1n" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --dominant-winner-over-second-ratio &lt;1..n&gt;
       
     </span>
   </a>
@@ -511,50 +585,11 @@
   
 </li>
         
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#reduction-strategy-explained" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Reduction strategy explained
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Reduction strategy explained">
-      <ul class="md-nav__list">
-        
           <li class="md-nav__item">
-  <a href="#ranked-recommended" class="md-nav__link">
+  <a href="#-help" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Ranked (recommended)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#unordered" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Unordered
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#dominant" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Dominant
+        --help
       
     </span>
   </a>
@@ -567,33 +602,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#output-format" class="md-nav__link">
+  <a href="#reduction-modes-in-practice" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Output format
+        Reduction modes in practice
       
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#example-workflow" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Example workflow
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Example workflow">
+    <nav class="md-nav" aria-label="Reduction modes in practice">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#1-prepare-dictionary" class="md-nav__link">
+  <a href="#ranked-getall-equivalence" class="md-nav__link">
     <span class="md-ellipsis">
       
-        1. Prepare dictionary
+        Ranked getAll() equivalence
       
     </span>
   </a>
@@ -601,10 +625,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#2-compile" class="md-nav__link">
+  <a href="#unordered-getall-equivalence" class="md-nav__link">
     <span class="md-ellipsis">
       
-        2. Compile
+        Unordered getAll() equivalence
       
     </span>
   </a>
@@ -612,10 +636,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#3-use-in-application" class="md-nav__link">
+  <a href="#dominant-get-equivalence" class="md-nav__link">
     <span class="md-ellipsis">
       
-        3. Use in application
+        Dominant get() equivalence
       
     </span>
   </a>
@@ -628,33 +652,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#error-handling" class="md-nav__link">
+  <a href="#recommended-usage-patterns" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Error handling
+        Recommended usage patterns
       
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#performance-considerations" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Performance considerations
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Performance considerations">
+    <nav class="md-nav" aria-label="Recommended usage patterns">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#compilation" class="md-nav__link">
+  <a href="#use-offline-preparation" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Compilation
+        Use offline preparation
       
     </span>
   </a>
@@ -662,60 +675,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#output-size" class="md-nav__link">
+  <a href="#treat-compiled-files-as-versioned-assets" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Output size
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#runtime-impact" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Runtime impact
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#best-practices" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Best practices
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Best practices">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#use-offline-compilation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Use offline compilation
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#version-your-artifacts" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Version your artifacts
+        Treat compiled files as versioned assets
       
     </span>
   </a>
@@ -734,10 +697,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#keep-dictionaries-clean" class="md-nav__link">
+  <a href="#expect-memory-pressure-during-preparation-not-runtime" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Keep dictionaries clean
+        Expect memory pressure during preparation, not runtime
       
     </span>
   </a>
@@ -750,10 +713,71 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#integration-tips" class="md-nav__link">
+  <a href="#example-workflow" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Integration tips
+        Example workflow
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Example workflow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-prepare-a-dictionary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Prepare a dictionary
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-compile-it" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Compile it
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-load-it-in-an-application" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Load it in an application
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#exit-codes-and-error-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Exit codes and error handling
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#relation-to-programmatic-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Relation to programmatic usage
       
     </span>
   </a>
@@ -771,20 +795,17 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#summary" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Summary
-      
-    </span>
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
       
     </li>
   
@@ -796,9 +817,25 @@
   
   
   
-    <li class="md-nav__item">
-      <a href="../programmatic-usage/" class="md-nav__link">
+    
+    
+    
+    
+      
         
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
   
   
   <span class="md-ellipsis">
@@ -812,26 +849,35 @@
   
   
 
-      </a>
-    </li>
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Programmatic Usage
   
 
-    
-      
-      
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
   
   
   
   
     <li class="md-nav__item">
-      <a href="../built-in-languages/" class="md-nav__link">
+      <a href="../programmatic-usage/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Built-in Languages
+    Overview
   
 
     
@@ -843,9 +889,153 @@
     </li>
   
 
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../programmatic-loading-and-building/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Loading and Building Stemmers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../programmatic-querying-and-ambiguity/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Querying and Ambiguity Handling
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../programmatic-extending-and-persistence/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Extending and Persisting Compiled Tries
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
     
       
       
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture and Semantics
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture and Semantics
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
   
   
   
@@ -858,7 +1048,7 @@
   <span class="md-ellipsis">
     
   
-    Architecture and Reduction
+    Overview
   
 
     
@@ -870,9 +1060,240 @@
     </li>
   
 
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reduction-semantics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reduction Semantics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../compatibility-and-guarantees/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compatibility and Guarantees
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
     
       
       
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dictionaries
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Dictionaries
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing-dictionaries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing Dictionaries
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quality and Operations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Quality and Operations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
   
   
   
@@ -897,9 +1318,10 @@
     </li>
   
 
-    
-      
-      
+              
+            
+              
+                
   
   
   
@@ -924,9 +1346,10 @@
     </li>
   
 
-    
-      
-      
+              
+            
+              
+                
   
   
   
@@ -939,7 +1362,7 @@
   <span class="md-ellipsis">
     
   
-    CI Reports
+    Reports
   
 
     
@@ -948,6 +1371,14 @@
   
 
       </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -979,10 +1410,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
+  <a href="#what-the-cli-does" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Overview
+        What the CLI does
       
     </span>
   </a>
@@ -1001,22 +1432,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#required-arguments" class="md-nav__link">
+  <a href="#supported-arguments" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Required arguments
+        Supported arguments
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Required arguments">
+    <nav class="md-nav" aria-label="Supported arguments">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#-input" class="md-nav__link">
+  <a href="#-input-file" class="md-nav__link">
     <span class="md-ellipsis">
       
-        --input
+        --input &lt;file&gt;
       
     </span>
   </a>
@@ -1024,58 +1455,24 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#-output" class="md-nav__link">
+  <a href="#-output-file" class="md-nav__link">
     <span class="md-ellipsis">
       
-        --output
+        --output &lt;file&gt;
       
     </span>
   </a>
   
 </li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#optional-arguments" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Optional arguments
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Optional arguments">
-      <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#-reduction-mode" class="md-nav__link">
+  <a href="#-reduction-mode-mode" class="md-nav__link">
     <span class="md-ellipsis">
       
-        --reduction-mode
+        --reduction-mode &lt;mode&gt;
       
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="--reduction-mode">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#recommendation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Recommendation
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
         
@@ -1084,6 +1481,28 @@
     <span class="md-ellipsis">
       
         --store-original
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-dominant-winner-min-percent-1100" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --dominant-winner-min-percent &lt;1..100&gt;
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-dominant-winner-over-second-ratio-1n" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --dominant-winner-over-second-ratio &lt;1..n&gt;
       
     </span>
   </a>
@@ -1101,50 +1520,11 @@
   
 </li>
         
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#reduction-strategy-explained" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Reduction strategy explained
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Reduction strategy explained">
-      <ul class="md-nav__list">
-        
           <li class="md-nav__item">
-  <a href="#ranked-recommended" class="md-nav__link">
+  <a href="#-help" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Ranked (recommended)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#unordered" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Unordered
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#dominant" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Dominant
+        --help
       
     </span>
   </a>
@@ -1157,33 +1537,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#output-format" class="md-nav__link">
+  <a href="#reduction-modes-in-practice" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Output format
+        Reduction modes in practice
       
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#example-workflow" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Example workflow
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Example workflow">
+    <nav class="md-nav" aria-label="Reduction modes in practice">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#1-prepare-dictionary" class="md-nav__link">
+  <a href="#ranked-getall-equivalence" class="md-nav__link">
     <span class="md-ellipsis">
       
-        1. Prepare dictionary
+        Ranked getAll() equivalence
       
     </span>
   </a>
@@ -1191,10 +1560,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#2-compile" class="md-nav__link">
+  <a href="#unordered-getall-equivalence" class="md-nav__link">
     <span class="md-ellipsis">
       
-        2. Compile
+        Unordered getAll() equivalence
       
     </span>
   </a>
@@ -1202,10 +1571,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#3-use-in-application" class="md-nav__link">
+  <a href="#dominant-get-equivalence" class="md-nav__link">
     <span class="md-ellipsis">
       
-        3. Use in application
+        Dominant get() equivalence
       
     </span>
   </a>
@@ -1218,33 +1587,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#error-handling" class="md-nav__link">
+  <a href="#recommended-usage-patterns" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Error handling
+        Recommended usage patterns
       
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#performance-considerations" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Performance considerations
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Performance considerations">
+    <nav class="md-nav" aria-label="Recommended usage patterns">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#compilation" class="md-nav__link">
+  <a href="#use-offline-preparation" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Compilation
+        Use offline preparation
       
     </span>
   </a>
@@ -1252,60 +1610,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#output-size" class="md-nav__link">
+  <a href="#treat-compiled-files-as-versioned-assets" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Output size
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#runtime-impact" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Runtime impact
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#best-practices" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Best practices
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Best practices">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#use-offline-compilation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Use offline compilation
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#version-your-artifacts" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Version your artifacts
+        Treat compiled files as versioned assets
       
     </span>
   </a>
@@ -1324,10 +1632,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#keep-dictionaries-clean" class="md-nav__link">
+  <a href="#expect-memory-pressure-during-preparation-not-runtime" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Keep dictionaries clean
+        Expect memory pressure during preparation, not runtime
       
     </span>
   </a>
@@ -1340,10 +1648,71 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#integration-tips" class="md-nav__link">
+  <a href="#example-workflow" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Integration tips
+        Example workflow
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Example workflow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-prepare-a-dictionary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Prepare a dictionary
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-compile-it" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Compile it
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-load-it-in-an-application" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Load it in an application
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#exit-codes-and-error-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Exit codes and error handling
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#relation-to-programmatic-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Relation to programmatic usage
       
     </span>
   </a>
@@ -1355,17 +1724,6 @@
     <span class="md-ellipsis">
       
         Next steps
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#summary" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Summary
       
     </span>
   </a>
@@ -1393,52 +1751,53 @@
 
 
 <h1 id="cli-compilation">CLI Compilation</h1>
-<p>Radixor provides a command-line tool for compiling dictionary files into compact, production-ready binary stemmer tables.</p>
-<p>This is the recommended workflow for deployment environments, as it separates:</p>
-<ul>
-<li>dictionary preparation (offline)</li>
-<li>stemming execution (runtime)</li>
-</ul>
-<h2 id="overview">Overview</h2>
-<p>The <code>Compile</code> tool:</p>
+<p>Radixor provides a command-line compiler for turning line-oriented dictionary files into compact binary stemmer artifacts.</p>
+<p>This is the preferred preparation workflow when stemming should run against an already compiled artifact rather than against raw dictionary input. The CLI reads the dictionary, derives patch commands, builds a mutable trie, applies the selected subtree reduction strategy, and writes the final compiled trie in the project binary format under GZip compression. The result is a deployment-ready <code>.radixor.gz</code> file that can be loaded directly by application code.</p>
+<h2 id="what-the-cli-does">What the CLI does</h2>
+<p>The <code>Compile</code> tool performs the following steps:</p>
 <ol>
-<li>reads a line-oriented dictionary file</li>
-<li>converts word–stem pairs into patch commands</li>
-<li>builds a trie structure</li>
-<li>applies subtree reduction</li>
-<li>writes a compressed binary artifact</li>
+<li>reads the input dictionary in the standard Radixor stemmer format,</li>
+<li>parses each line into a canonical stem and its known variants,</li>
+<li>converts variants into patch commands,</li>
+<li>builds a mutable trie of patch-command values,</li>
+<li>applies the configured reduction mode,</li>
+<li>writes the compiled trie as a GZip-compressed binary artifact.</li>
 </ol>
-<p>The output is a <code>.radixor.gz</code> file suitable for fast runtime loading.</p>
+<p>This workflow is intentionally aligned with the same dictionary semantics used elsewhere in the library. Remarks introduced by <code>#</code> or <code>//</code> are supported through the shared dictionary parser.</p>
 <h2 id="basic-usage">Basic usage</h2>
 <div class="highlight"><pre><span></span><code>java<span class="w"> </span>org.egothor.stemmer.Compile<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--input<span class="w"> </span>./data/stemmer.txt<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--output<span class="w"> </span>./build/english.radixor.gz<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--reduction-mode<span class="w"> </span>MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--store-original<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--overwrite
+<span class="w">    </span>--input<span class="w"> </span>./data/stemmer.txt<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--output<span class="w"> </span>./build/english.radixor.gz<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--reduction-mode<span class="w"> </span>MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--store-original<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--overwrite
 </code></pre></div>
-<h2 id="required-arguments">Required arguments</h2>
-<h3 id="-input"><code>--input</code></h3>
+<h2 id="supported-arguments">Supported arguments</h2>
+<p>The CLI supports the following arguments:</p>
+<div class="highlight"><pre><span></span><code>--input &lt;file&gt;
+--output &lt;file&gt;
+--reduction-mode &lt;mode&gt;
+[--store-original]
+[--dominant-winner-min-percent &lt;1..100&gt;]
+[--dominant-winner-over-second-ratio &lt;1..n&gt;]
+[--overwrite]
+[--help]
+</code></pre></div>
+<h3 id="-input-file"><code>--input &lt;file&gt;</code></h3>
 <p>Path to the source dictionary file.</p>
-<ul>
-<li>must be in the <a href="../dictionary-format/">dictionary format</a></li>
-<li>must be readable</li>
-<li>UTF-8 encoding is expected</li>
-</ul>
+<p>The file must use the standard line-oriented dictionary format. Each non-empty logical line starts with the canonical stem and may contain zero or more variants. The parser expects UTF-8 input, lowercases it using <code>Locale.ROOT</code>, and ignores trailing remarks introduced by <code>#</code> or <code>//</code>.</p>
+<p>Example:</p>
 <div class="highlight"><pre><span></span><code>--input ./data/stemmer.txt
 </code></pre></div>
-<h3 id="-output"><code>--output</code></h3>
-<p>Path to the output binary file.</p>
-<ul>
-<li>parent directories are created automatically</li>
-<li>output is written as <strong>GZip-compressed binary</strong></li>
-</ul>
+<h3 id="-output-file"><code>--output &lt;file&gt;</code></h3>
+<p>Path to the output binary artifact.</p>
+<p>The output file is written as a GZip-compressed binary trie. Parent directories are created automatically when needed.</p>
+<p>Example:</p>
 <div class="highlight"><pre><span></span><code>--output ./build/english.radixor.gz
 </code></pre></div>
-<h2 id="optional-arguments">Optional arguments</h2>
-<h3 id="-reduction-mode"><code>--reduction-mode</code></h3>
-<p>Controls how aggressively the trie is reduced during compilation.</p>
-<p>Available values:</p>
+<h3 id="-reduction-mode-mode"><code>--reduction-mode &lt;mode&gt;</code></h3>
+<p>Selects the subtree reduction strategy used during compilation.</p>
+<p>Supported values are:</p>
 <ul>
 <li><code>MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS</code></li>
 <li><code>MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS</code></li>
@@ -1447,201 +1806,104 @@
 <p>Example:</p>
 <div class="highlight"><pre><span></span><code>--reduction-mode MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS
 </code></pre></div>
-<h4 id="recommendation">Recommendation</h4>
-<p>Use:</p>
-<div class="highlight"><pre><span></span><code>MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS
-</code></pre></div>
-<p>This provides:</p>
-<ul>
-<li>safe behavior</li>
-<li>deterministic ordering</li>
-<li>good compression</li>
-</ul>
+<p>This argument is required.</p>
 <h3 id="-store-original"><code>--store-original</code></h3>
-<p>Stores the stem itself as a no-op mapping.</p>
+<p>When this flag is present, the canonical stem itself is inserted using the no-op patch command.</p>
 <div class="highlight"><pre><span></span><code>--store-original
 </code></pre></div>
-<p>Effect:</p>
-<ul>
-<li>ensures that canonical forms are always resolvable</li>
-<li>improves robustness in real-world inputs</li>
-</ul>
-<p>Recommended for most use cases.</p>
+<p>This is usually a sensible default for real dictionaries because it ensures that canonical forms are directly representable in the compiled trie rather than relying only on their variants.</p>
+<h3 id="-dominant-winner-min-percent-1100"><code>--dominant-winner-min-percent &lt;1..100&gt;</code></h3>
+<p>Sets the minimum winner percentage used by dominant-result reduction settings.</p>
+<p>Example:</p>
+<div class="highlight"><pre><span></span><code>--dominant-winner-min-percent 75
+</code></pre></div>
+<p>This option matters primarily when <code>--reduction-mode</code> is <code>MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS</code>. The default value is <code>75</code>.</p>
+<h3 id="-dominant-winner-over-second-ratio-1n"><code>--dominant-winner-over-second-ratio &lt;1..n&gt;</code></h3>
+<p>Sets the minimum winner-over-second ratio used by dominant-result reduction settings.</p>
+<p>Example:</p>
+<div class="highlight"><pre><span></span><code>--dominant-winner-over-second-ratio 3
+</code></pre></div>
+<p>This option also matters primarily for <code>MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS</code>. The default value is <code>3</code>.</p>
 <h3 id="-overwrite"><code>--overwrite</code></h3>
-<p>Allows overwriting an existing output file.</p>
+<p>Allows the CLI to replace an already existing output file.</p>
 <div class="highlight"><pre><span></span><code>--overwrite
 </code></pre></div>
-<p>Without this flag:</p>
-<ul>
-<li>compilation fails if the output file already exists</li>
-</ul>
-<h2 id="reduction-strategy-explained">Reduction strategy explained</h2>
-<p>Reduction merges semantically equivalent subtrees to reduce memory and file size.</p>
-<p>Trade-offs:</p>
-<table>
-<thead>
-<tr>
-<th>Mode</th>
-<th>Compression</th>
-<th>Behavioral fidelity</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Ranked</td>
-<td>Medium</td>
-<td>High</td>
-</tr>
-<tr>
-<td>Unordered</td>
-<td>High</td>
-<td>Medium</td>
-</tr>
-<tr>
-<td>Dominant</td>
-<td>Highest</td>
-<td>Lower (heuristic)</td>
-</tr>
-</tbody>
-</table>
-<h3 id="ranked-recommended">Ranked (recommended)</h3>
-<ul>
-<li>preserves full <code>getAll()</code> ordering</li>
-<li>safest and most predictable</li>
-</ul>
-<h3 id="unordered">Unordered</h3>
-<ul>
-<li>ignores ordering differences</li>
-<li>higher compression, but less precise semantics</li>
-</ul>
-<h3 id="dominant">Dominant</h3>
-<ul>
-<li>focuses on the most frequent result</li>
-<li>useful when only <code>get()</code> is relevant</li>
-<li>may lose secondary candidates</li>
-</ul>
-<h2 id="output-format">Output format</h2>
-<p>The compiled file:</p>
-<ul>
-<li>is a binary representation of the trie</li>
-<li>uses <strong>GZip compression</strong></li>
-<li>
-<p>is optimized for:</p>
-</li>
-<li>
-<p>fast loading</p>
-</li>
-<li>minimal memory footprint</li>
-</ul>
-<p>Typical properties:</p>
-<ul>
-<li>small file size</li>
-<li>fast deserialization</li>
-<li>no runtime preprocessing required</li>
-</ul>
+<p>Without this flag, compilation fails when the output path already exists.</p>
+<h3 id="-help"><code>--help</code></h3>
+<p>Prints usage help and exits successfully.</p>
+<div class="highlight"><pre><span></span><code>--help
+</code></pre></div>
+<p>The short form <code>-h</code> is also supported.</p>
+<h2 id="reduction-modes-in-practice">Reduction modes in practice</h2>
+<p>Reduction mode is not only a storage decision. It also influences what semantics are preserved when the mutable trie is compiled into its canonical read-only form.</p>
+<h3 id="ranked-getall-equivalence">Ranked <code>getAll()</code> equivalence</h3>
+<p><code>MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS</code> merges subtrees whose <code>getAll()</code> results remain equivalent for every reachable key suffix and whose local result ordering is the same.</p>
+<p>This is the best general-purpose choice when result ordering and ambiguity handling matter. It preserves ranked multi-result semantics while still achieving useful structural reduction.</p>
+<p>This is the recommended default for most users.</p>
+<h3 id="unordered-getall-equivalence">Unordered <code>getAll()</code> equivalence</h3>
+<p><code>MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS</code> also uses <code>getAll()</code>-level equivalence, but it ignores local ordering differences in addition to absolute frequencies.</p>
+<p>This can yield stronger reduction, but it also weakens the precision of ordered multi-result semantics.</p>
+<p>Choose this mode only when the application does not depend on the ordering of alternative results.</p>
+<h3 id="dominant-get-equivalence">Dominant <code>get()</code> equivalence</h3>
+<p><code>MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS</code> focuses on preserving preferred-result semantics for <code>get()</code>, subject to dominance thresholds.</p>
+<p>If a node does not satisfy the configured dominance constraints, compilation falls back to ranked <code>getAll()</code> semantics for that node to avoid unsafe over-reduction.</p>
+<p>This mode is most suitable when the application primarily consumes the preferred result and does not rely on preserving richer ambiguity information.</p>
+<h2 id="recommended-usage-patterns">Recommended usage patterns</h2>
+<h3 id="use-offline-preparation">Use offline preparation</h3>
+<p>The CLI is best used as a preparation step during packaging, deployment, or controlled artifact generation. This keeps compilation outside the runtime startup path and allows services to load only the finished binary trie.</p>
+<h3 id="treat-compiled-files-as-versioned-assets">Treat compiled files as versioned assets</h3>
+<p>A <code>.radixor.gz</code> file should be handled as a versioned output artifact. It represents a specific dictionary state, a specific reduction mode, and, where relevant, specific dominant-result thresholds.</p>
+<h3 id="choose-reduction-mode-deliberately">Choose reduction mode deliberately</h3>
+<p>The ranked <code>getAll()</code> mode is the safest default. The unordered and dominant modes should be chosen only when their trade-offs are acceptable for the consuming application.</p>
+<h3 id="expect-memory-pressure-during-preparation-not-runtime">Expect memory pressure during preparation, not runtime</h3>
+<p>Compilation is usually a one-time step and is generally fast. The more important operational consideration is memory usage during preparation, because the dictionary-derived mutable structure exists before reduction compacts it into the final read-only trie. This is especially relevant for very large source dictionaries.</p>
 <h2 id="example-workflow">Example workflow</h2>
-<h3 id="1-prepare-dictionary">1. Prepare dictionary</h3>
+<h3 id="1-prepare-a-dictionary">1. Prepare a dictionary</h3>
 <div class="highlight"><pre><span></span><code>run running runs ran
 connect connected connecting
 </code></pre></div>
-<h3 id="2-compile">2. Compile</h3>
+<h3 id="2-compile-it">2. Compile it</h3>
 <div class="highlight"><pre><span></span><code>java<span class="w"> </span>org.egothor.stemmer.Compile<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--input<span class="w"> </span>./data/stemmer.txt<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--output<span class="w"> </span>./build/english.radixor.gz<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--reduction-mode<span class="w"> </span>MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--store-original
+<span class="w">    </span>--input<span class="w"> </span>./data/stemmer.txt<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--output<span class="w"> </span>./build/english.radixor.gz<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--reduction-mode<span class="w"> </span>MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--store-original
 </code></pre></div>
-<h3 id="3-use-in-application">3. Use in application</h3>
-<div class="highlight"><pre><span></span><code><span class="n">FrequencyTrie</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">trie</span><span class="w"> </span><span class="o">=</span>
-<span class="w">    </span><span class="n">StemmerPatchTrieLoader</span><span class="p">.</span><span class="na">loadBinary</span><span class="p">(</span><span class="s">&quot;english.radixor.gz&quot;</span><span class="p">);</span>
+<h3 id="3-load-it-in-an-application">3. Load it in an application</h3>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">org.egothor.stemmer.FrequencyTrie</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.egothor.stemmer.StemmerPatchTrieLoader</span><span class="p">;</span>
+
+<span class="kd">final</span><span class="w"> </span><span class="n">FrequencyTrie</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">trie</span><span class="w"> </span><span class="o">=</span>
+<span class="w">        </span><span class="n">StemmerPatchTrieLoader</span><span class="p">.</span><span class="na">loadBinary</span><span class="p">(</span><span class="s">&quot;english.radixor.gz&quot;</span><span class="p">);</span>
 </code></pre></div>
-<h2 id="error-handling">Error handling</h2>
-<p>The CLI reports:</p>
+<h2 id="exit-codes-and-error-handling">Exit codes and error handling</h2>
+<p>The CLI uses three exit outcomes:</p>
 <ul>
-<li>missing input file</li>
-<li>invalid arguments</li>
-<li>I/O failures</li>
-<li>parsing errors</li>
+<li><code>0</code> for success,</li>
+<li><code>1</code> for processing failures such as I/O or compilation errors,</li>
+<li><code>2</code> for invalid command-line usage.</li>
 </ul>
-<p>Typical exit codes:</p>
+<p>When argument parsing fails, the CLI prints the error message, prints the usage summary, and exits with usage error status.</p>
+<p>When compilation fails during processing, the CLI prints a <code>Compilation failed: ...</code> message to standard error and exits with processing error status.</p>
+<p>Examples of failure conditions include:</p>
 <ul>
-<li><code>0</code> – success</li>
-<li>non-zero – failure</li>
+<li>missing required arguments,</li>
+<li>unknown arguments,</li>
+<li>invalid integer values for dominant thresholds,</li>
+<li>missing input files,</li>
+<li>unreadable input,</li>
+<li>existing output file without <code>--overwrite</code>,</li>
+<li>general I/O failures during reading or writing.</li>
 </ul>
-<p>Error details are printed to standard error.</p>
-<h2 id="performance-considerations">Performance considerations</h2>
-<h3 id="compilation">Compilation</h3>
-<ul>
-<li>typically CPU-bound</li>
-<li>depends on dictionary size and reduction mode</li>
-</ul>
-<h3 id="output-size">Output size</h3>
-<ul>
-<li>
-<p>depends on:</p>
-</li>
-<li>
-<p>dictionary completeness</p>
-</li>
-<li>reduction strategy</li>
-<li>can vary significantly between modes</li>
-</ul>
-<h3 id="runtime-impact">Runtime impact</h3>
-<ul>
-<li>
-<p>compiled tries are optimized for:</p>
-</li>
-<li>
-<p>fast lookup</p>
-</li>
-<li>low allocation</li>
-<li>predictable latency</li>
-</ul>
-<h2 id="best-practices">Best practices</h2>
-<h3 id="use-offline-compilation">Use offline compilation</h3>
-<ul>
-<li>compile dictionaries during build or deployment</li>
-<li>do not compile on application startup</li>
-</ul>
-<h3 id="version-your-artifacts">Version your artifacts</h3>
-<ul>
-<li>treat <code>.radixor.gz</code> files as versioned assets</li>
-<li>store them alongside application releases</li>
-</ul>
-<h3 id="choose-reduction-mode-deliberately">Choose reduction mode deliberately</h3>
-<ul>
-<li>use <strong>ranked</strong> for correctness</li>
-<li>use <strong>dominant</strong> only if you fully understand the trade-offs</li>
-</ul>
-<h3 id="keep-dictionaries-clean">Keep dictionaries clean</h3>
-<ul>
-<li>better input → better compiled output</li>
-<li>avoid noise and inconsistencies</li>
-</ul>
-<h2 id="integration-tips">Integration tips</h2>
-<ul>
-<li>store compiled files under <code>resources/</code> or a dedicated directory</li>
-<li>load them once and reuse the trie instance</li>
-<li>avoid repeated loading in frequently executed code paths (for example, per-request processing)</li>
-</ul>
+<h2 id="relation-to-programmatic-usage">Relation to programmatic usage</h2>
+<p>The CLI and the programmatic API implement the same conceptual preparation step. The CLI is the operationally convenient choice when you want a ready-made binary artifact. The programmatic API is the better fit when compilation must be integrated directly into custom Java workflows.</p>
 <h2 id="next-steps">Next steps</h2>
 <ul>
 <li><a href="../dictionary-format/">Dictionary format</a></li>
-<li><a href="../programmatic-usage/">Programmatic usage</a></li>
 <li><a href="../quick-start/">Quick start</a></li>
+<li><a href="../programmatic-usage/">Programmatic usage</a></li>
+<li><a href="../architecture-and-reduction/">Architecture and reduction</a></li>
 </ul>
-<h2 id="summary">Summary</h2>
-<p>The <code>Compile</code> CLI is the bridge between:</p>
-<ul>
-<li>human-readable dictionary data</li>
-<li>optimized runtime stemmer tables</li>
-</ul>
-<p>It enables a clean separation between:</p>
-<ul>
-<li>data preparation</li>
-<li>runtime execution</li>
-</ul>
-<p>and is the preferred way to prepare Radixor for production use.</p>
 
 
 

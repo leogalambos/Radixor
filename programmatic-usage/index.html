@@ -16,7 +16,7 @@
         <link rel="prev" href="../cli-compilation/">
       
       
-        <link rel="next" href="../built-in-languages/">
+        <link rel="next" href="../programmatic-loading-and-building/">
       
       
         
@@ -27,7 +27,7 @@
     
     
       
-        <title>Programmatic Usage - Radixor</title>
+        <title>Overview - Radixor</title>
       
     
     
@@ -52,6 +52,8 @@
         <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
       
     
+    
+      <link rel="stylesheet" href="../assets/stylesheets/extra.css">
     
     <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
@@ -114,7 +116,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Programmatic Usage
+              Overview
             
           </span>
         </div>
@@ -274,6 +276,58 @@
   
   
   
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
     <li class="md-nav__item">
       <a href="../quick-start/" class="md-nav__link">
         
@@ -294,9 +348,38 @@
     </li>
   
 
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../built-in-languages/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     
-      
-      
+  
+    Built-in Languages
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
   
   
   
@@ -321,9 +404,10 @@
     </li>
   
 
-    
-      
-      
+              
+            
+              
+                
   
   
   
@@ -348,9 +432,71 @@
     </li>
   
 
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
     
       
       
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Programmatic Usage
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Programmatic Usage
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
   
   
     
@@ -372,7 +518,7 @@
   <span class="md-ellipsis">
     
   
-    Programmatic Usage
+    Overview
   
 
     
@@ -390,7 +536,7 @@
   <span class="md-ellipsis">
     
   
-    Programmatic Usage
+    Overview
   
 
     
@@ -416,10 +562,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
+  <a href="#conceptual-model" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Overview
+        Conceptual model
       
     </span>
   </a>
@@ -427,10 +573,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#building-a-trie-programmatically" class="md-nav__link">
+  <a href="#documentation-map" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Building a trie programmatically
+        Documentation map
       
     </span>
   </a>
@@ -438,10 +584,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#loading-from-dictionary-files" class="md-nav__link">
+  <a href="#core-types" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Loading from dictionary files
+        Core types
       
     </span>
   </a>
@@ -449,268 +595,13 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#loading-a-compiled-binary-trie" class="md-nav__link">
+  <a href="#recommended-reading-order" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Loading a compiled binary trie
+        Recommended reading order
       
     </span>
   </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#querying-for-stems" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Querying for stems
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Querying for stems">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#preferred-result" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Preferred result
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#all-candidates" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        All candidates
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#accessing-value-frequencies" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Accessing value frequencies
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#using-bundled-language-resources" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Using bundled language resources
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#persisting-a-compiled-trie" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Persisting a compiled trie
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#modifying-an-existing-trie" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Modifying an existing trie
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#thread-safety" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Thread safety
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#performance-characteristics" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Performance characteristics
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Performance characteristics">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#querying" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Querying
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#loading" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Loading
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#building" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Building
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#best-practices" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Best practices
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Best practices">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#reuse-compiled-trie-instances" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Reuse compiled trie instances
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#prefer-binary-loading-in-production" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Prefer binary loading in production
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#use-getall-only-when-needed" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Use getAll() only when needed
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#keep-builders-short-lived" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Keep builders short-lived
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#integration-patterns" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Integration patterns
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Integration patterns">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#search-systems" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Search systems
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#text-normalization-pipelines" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Text normalization pipelines
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#domain-adaptation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Domain adaptation
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -725,17 +616,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#summary" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Summary
-      
-    </span>
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -743,22 +623,23 @@
     </li>
   
 
-    
-      
-      
+              
+            
+              
+                
   
   
   
   
     <li class="md-nav__item">
-      <a href="../built-in-languages/" class="md-nav__link">
+      <a href="../programmatic-loading-and-building/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Built-in Languages
+    Loading and Building Stemmers
   
 
     
@@ -770,9 +651,125 @@
     </li>
   
 
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../programmatic-querying-and-ambiguity/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Querying and Ambiguity Handling
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../programmatic-extending-and-persistence/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Extending and Persisting Compiled Tries
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
     
       
       
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture and Semantics
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture and Semantics
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
   
   
   
@@ -785,7 +782,7 @@
   <span class="md-ellipsis">
     
   
-    Architecture and Reduction
+    Overview
   
 
     
@@ -797,9 +794,240 @@
     </li>
   
 
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reduction-semantics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reduction Semantics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../compatibility-and-guarantees/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compatibility and Guarantees
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
     
       
       
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dictionaries
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Dictionaries
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing-dictionaries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing Dictionaries
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quality and Operations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Quality and Operations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
   
   
   
@@ -824,9 +1052,10 @@
     </li>
   
 
-    
-      
-      
+              
+            
+              
+                
   
   
   
@@ -851,9 +1080,10 @@
     </li>
   
 
-    
-      
-      
+              
+            
+              
+                
   
   
   
@@ -866,7 +1096,7 @@
   <span class="md-ellipsis">
     
   
-    CI Reports
+    Reports
   
 
     
@@ -875,6 +1105,14 @@
   
 
       </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -906,10 +1144,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
+  <a href="#conceptual-model" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Overview
+        Conceptual model
       
     </span>
   </a>
@@ -917,10 +1155,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#building-a-trie-programmatically" class="md-nav__link">
+  <a href="#documentation-map" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Building a trie programmatically
+        Documentation map
       
     </span>
   </a>
@@ -928,10 +1166,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#loading-from-dictionary-files" class="md-nav__link">
+  <a href="#core-types" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Loading from dictionary files
+        Core types
       
     </span>
   </a>
@@ -939,268 +1177,13 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#loading-a-compiled-binary-trie" class="md-nav__link">
+  <a href="#recommended-reading-order" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Loading a compiled binary trie
+        Recommended reading order
       
     </span>
   </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#querying-for-stems" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Querying for stems
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Querying for stems">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#preferred-result" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Preferred result
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#all-candidates" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        All candidates
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#accessing-value-frequencies" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Accessing value frequencies
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#using-bundled-language-resources" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Using bundled language resources
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#persisting-a-compiled-trie" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Persisting a compiled trie
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#modifying-an-existing-trie" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Modifying an existing trie
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#thread-safety" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Thread safety
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#performance-characteristics" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Performance characteristics
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Performance characteristics">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#querying" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Querying
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#loading" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Loading
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#building" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Building
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#best-practices" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Best practices
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Best practices">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#reuse-compiled-trie-instances" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Reuse compiled trie instances
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#prefer-binary-loading-in-production" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Prefer binary loading in production
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#use-getall-only-when-needed" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Use getAll() only when needed
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#keep-builders-short-lived" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Keep builders short-lived
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#integration-patterns" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Integration patterns
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Integration patterns">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#search-systems" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Search systems
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#text-normalization-pipelines" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Text normalization pipelines
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#domain-adaptation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Domain adaptation
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -1209,17 +1192,6 @@
     <span class="md-ellipsis">
       
         Next steps
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#summary" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Summary
       
     </span>
   </a>
@@ -1247,262 +1219,53 @@
 
 
 <h1 id="programmatic-usage">Programmatic Usage</h1>
-<p>This document describes how to use <strong>Radixor</strong> programmatically from Java.</p>
-<p>It covers:</p>
-<ul>
-<li>building a trie from dictionary data</li>
-<li>compiling it into an immutable structure</li>
-<li>loading compiled stemmers</li>
-<li>querying for stems</li>
-<li>working with multiple candidates</li>
-<li>modifying existing compiled stemmers</li>
-</ul>
-<h2 id="overview">Overview</h2>
-<p>Radixor separates the stemming lifecycle into three stages:</p>
+<p>This document provides the programmatic entry point to <strong>Radixor</strong>.</p>
+<p>Radixor follows a clear lifecycle:</p>
 <ol>
-<li><strong>Build</strong> – collect word–stem mappings in a mutable structure  </li>
-<li><strong>Compile</strong> – reduce and convert to an immutable trie  </li>
-<li><strong>Query</strong> – perform fast runtime lookups  </li>
+<li>acquire a compiled stemmer,</li>
+<li>query it for patch commands,</li>
+<li>apply those commands to produce stems,</li>
+<li>reopen and extend the compiled structure when needed.</li>
 </ol>
-<p>These stages are represented by:</p>
+<h2 id="conceptual-model">Conceptual model</h2>
+<p>Radixor is dictionary-driven, but runtime stemming does not operate by scanning raw dictionary files. A source dictionary is parsed as a sequence of canonical stems and their known variants. Each variant is converted into a compact patch command that transforms the variant into the stem, while the stem itself may optionally be stored as a canonical no-op patch. The mutable trie is then reduced into a compiled read-only structure that stores ordered values and their counts at addressed nodes.</p>
+<p>Two consequences matter for developers:</p>
 <ul>
-<li><code>FrequencyTrie.Builder</code> (mutable)</li>
-<li><code>FrequencyTrie</code> (immutable, compiled)</li>
-<li><code>StemmerPatchTrieLoader</code> / <code>StemmerPatchTrieBinaryIO</code> (I/O)</li>
+<li>the quality and coverage of stemming behavior depend on dictionary richness,</li>
+<li>runtime usage is based on compiled patch-command lookup rather than on direct dictionary traversal.</li>
 </ul>
-<h2 id="building-a-trie-programmatically">Building a trie programmatically</h2>
-<p>You can construct a trie directly without using the CLI.</p>
-<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">org.egothor.stemmer.*</span><span class="p">;</span>
-
-<span class="kd">public</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kd">class</span> <span class="nc">BuildExample</span><span class="w"> </span><span class="p">{</span>
-
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">String</span><span class="o">[]</span><span class="w"> </span><span class="n">args</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="n">ReductionSettings</span><span class="w"> </span><span class="n">settings</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ReductionSettings</span><span class="p">.</span><span class="na">withDefaults</span><span class="p">(</span>
-<span class="w">                </span><span class="n">ReductionMode</span><span class="p">.</span><span class="na">MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS</span>
-<span class="w">        </span><span class="p">);</span>
-
-<span class="w">        </span><span class="n">FrequencyTrie</span><span class="p">.</span><span class="na">Builder</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">builder</span><span class="w"> </span><span class="o">=</span>
-<span class="w">                </span><span class="k">new</span><span class="w"> </span><span class="n">FrequencyTrie</span><span class="p">.</span><span class="na">Builder</span><span class="o">&lt;&gt;</span><span class="p">(</span><span class="n">String</span><span class="o">[]</span><span class="p">::</span><span class="k">new</span><span class="p">,</span><span class="w"> </span><span class="n">settings</span><span class="p">);</span>
-
-<span class="w">        </span><span class="n">PatchCommandEncoder</span><span class="w"> </span><span class="n">encoder</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">PatchCommandEncoder</span><span class="p">();</span>
-
-<span class="w">        </span><span class="n">builder</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">&quot;running&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">encoder</span><span class="p">.</span><span class="na">encode</span><span class="p">(</span><span class="s">&quot;running&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;run&quot;</span><span class="p">));</span>
-<span class="w">        </span><span class="n">builder</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">&quot;runs&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">encoder</span><span class="p">.</span><span class="na">encode</span><span class="p">(</span><span class="s">&quot;runs&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;run&quot;</span><span class="p">));</span>
-<span class="w">        </span><span class="n">builder</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">&quot;ran&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">encoder</span><span class="p">.</span><span class="na">encode</span><span class="p">(</span><span class="s">&quot;ran&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;run&quot;</span><span class="p">));</span>
-
-<span class="w">        </span><span class="n">FrequencyTrie</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">trie</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">builder</span><span class="p">.</span><span class="na">build</span><span class="p">();</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div>
-<h2 id="loading-from-dictionary-files">Loading from dictionary files</h2>
-<p>To parse dictionary files directly:</p>
-<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">java.io.IOException</span><span class="p">;</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">java.nio.file.Path</span><span class="p">;</span>
-
-<span class="kn">import</span><span class="w"> </span><span class="nn">org.egothor.stemmer.*</span><span class="p">;</span>
-
-<span class="kd">public</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kd">class</span> <span class="nc">LoadFromDictionaryExample</span><span class="w"> </span><span class="p">{</span>
-
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">String</span><span class="o">[]</span><span class="w"> </span><span class="n">args</span><span class="p">)</span><span class="w"> </span><span class="kd">throws</span><span class="w"> </span><span class="n">IOException</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="n">FrequencyTrie</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">trie</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">StemmerPatchTrieLoader</span><span class="p">.</span><span class="na">load</span><span class="p">(</span>
-<span class="w">                </span><span class="n">Path</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="s">&quot;data/stemmer.txt&quot;</span><span class="p">),</span>
-<span class="w">                </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">                </span><span class="n">ReductionSettings</span><span class="p">.</span><span class="na">withDefaults</span><span class="p">(</span>
-<span class="w">                        </span><span class="n">ReductionMode</span><span class="p">.</span><span class="na">MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS</span>
-<span class="w">                </span><span class="p">)</span>
-<span class="w">        </span><span class="p">);</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div>
-<h2 id="loading-a-compiled-binary-trie">Loading a compiled binary trie</h2>
-<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">java.io.IOException</span><span class="p">;</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">java.nio.file.Path</span><span class="p">;</span>
-
-<span class="kn">import</span><span class="w"> </span><span class="nn">org.egothor.stemmer.*</span><span class="p">;</span>
-
-<span class="kd">public</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kd">class</span> <span class="nc">LoadBinaryExample</span><span class="w"> </span><span class="p">{</span>
-
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">String</span><span class="o">[]</span><span class="w"> </span><span class="n">args</span><span class="p">)</span><span class="w"> </span><span class="kd">throws</span><span class="w"> </span><span class="n">IOException</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="n">FrequencyTrie</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">trie</span><span class="w"> </span><span class="o">=</span>
-<span class="w">                </span><span class="n">StemmerPatchTrieLoader</span><span class="p">.</span><span class="na">loadBinary</span><span class="p">(</span><span class="n">Path</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="s">&quot;english.radixor.gz&quot;</span><span class="p">));</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div>
-<p>This is the <strong>preferred production approach</strong>.</p>
-<h2 id="querying-for-stems">Querying for stems</h2>
-<h3 id="preferred-result">Preferred result</h3>
-<div class="highlight"><pre><span></span><code><span class="n">String</span><span class="w"> </span><span class="n">word</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;running&quot;</span><span class="p">;</span>
-<span class="n">String</span><span class="w"> </span><span class="n">patch</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">trie</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">word</span><span class="p">);</span>
-<span class="n">String</span><span class="w"> </span><span class="n">stem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PatchCommandEncoder</span><span class="p">.</span><span class="na">apply</span><span class="p">(</span><span class="n">word</span><span class="p">,</span><span class="w"> </span><span class="n">patch</span><span class="p">);</span>
-</code></pre></div>
-<h3 id="all-candidates">All candidates</h3>
-<div class="highlight"><pre><span></span><code><span class="n">String</span><span class="o">[]</span><span class="w"> </span><span class="n">patches</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">trie</span><span class="p">.</span><span class="na">getAll</span><span class="p">(</span><span class="n">word</span><span class="p">);</span>
-
-<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">patch</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">patches</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">String</span><span class="w"> </span><span class="n">stem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PatchCommandEncoder</span><span class="p">.</span><span class="na">apply</span><span class="p">(</span><span class="n">word</span><span class="p">,</span><span class="w"> </span><span class="n">patch</span><span class="p">);</span>
-<span class="p">}</span>
-</code></pre></div>
-<h2 id="accessing-value-frequencies">Accessing value frequencies</h2>
-<p>For diagnostic or advanced use cases:</p>
-<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">org.egothor.stemmer.ValueCount</span><span class="p">;</span>
-
-<span class="n">java</span><span class="p">.</span><span class="na">util</span><span class="p">.</span><span class="na">List</span><span class="o">&lt;</span><span class="n">ValueCount</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">entries</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">trie</span><span class="p">.</span><span class="na">getEntries</span><span class="p">(</span><span class="s">&quot;axes&quot;</span><span class="p">);</span>
-
-<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">ValueCount</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">entry</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">entries</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">String</span><span class="w"> </span><span class="n">patch</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">entry</span><span class="p">.</span><span class="na">value</span><span class="p">();</span>
-<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">entry</span><span class="p">.</span><span class="na">count</span><span class="p">();</span>
-<span class="p">}</span>
-</code></pre></div>
-<p>This allows:</p>
+<p>This is why Radixor can generalize beyond explicitly listed forms and why compiled artifacts are well suited for deployment.</p>
+<h2 id="documentation-map">Documentation map</h2>
+<p>The programmatic API is easier to understand when split by developer task:</p>
 <ul>
-<li>inspecting ambiguity</li>
-<li>understanding ranking decisions</li>
-<li>debugging dictionary quality</li>
+<li><a href="../programmatic-loading-and-building/">Loading and Building Stemmers</a> explains how to acquire a compiled stemmer from bundled resources, textual dictionaries, binary artifacts, or direct builder usage.</li>
+<li><a href="../programmatic-querying-and-ambiguity/">Querying and Ambiguity Handling</a> explains <code>get(...)</code>, <code>getAll(...)</code>, <code>getEntries(...)</code>, patch application, and the practical meaning of reduction modes.</li>
+<li><a href="../programmatic-extending-and-persistence/">Extending and Persisting Compiled Tries</a> explains how to reopen compiled tries, add new lexical data, rebuild them, and store them as binary artifacts.</li>
 </ul>
-<h2 id="using-bundled-language-resources">Using bundled language resources</h2>
-<div class="highlight"><pre><span></span><code><span class="n">FrequencyTrie</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">trie</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">StemmerPatchTrieLoader</span><span class="p">.</span><span class="na">load</span><span class="p">(</span>
-<span class="w">        </span><span class="n">StemmerPatchTrieLoader</span><span class="p">.</span><span class="na">Language</span><span class="p">.</span><span class="na">US_UK_PROFI</span><span class="p">,</span>
-<span class="w">        </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">        </span><span class="n">ReductionMode</span><span class="p">.</span><span class="na">MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS</span>
-<span class="p">);</span>
-</code></pre></div>
-<p>Bundled dictionaries are useful for:</p>
+<h2 id="core-types">Core types</h2>
+<p>The main types involved in programmatic usage are:</p>
 <ul>
-<li>quick integration</li>
-<li>testing</li>
-<li>reference behavior</li>
+<li><code>FrequencyTrie.Builder&lt;V&gt;</code> for mutable construction and extension,</li>
+<li><code>FrequencyTrie&lt;V&gt;</code> for the compiled read-only trie,</li>
+<li><code>PatchCommandEncoder</code> for creating and applying patch commands,</li>
+<li><code>StemmerPatchTrieLoader</code> for loading bundled or textual dictionaries,</li>
+<li><code>StemmerPatchTrieBinaryIO</code> for reading and writing compressed binary artifacts,</li>
+<li><code>FrequencyTrieBuilders</code> for reconstructing a mutable builder from a compiled trie,</li>
+<li><code>ReductionMode</code> and <code>ReductionSettings</code> for controlling compilation semantics.</li>
 </ul>
-<h2 id="persisting-a-compiled-trie">Persisting a compiled trie</h2>
-<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">java.io.IOException</span><span class="p">;</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">java.nio.file.Path</span><span class="p">;</span>
-
-<span class="kn">import</span><span class="w"> </span><span class="nn">org.egothor.stemmer.*</span><span class="p">;</span>
-
-<span class="kd">public</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kd">class</span> <span class="nc">SaveExample</span><span class="w"> </span><span class="p">{</span>
-
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">String</span><span class="o">[]</span><span class="w"> </span><span class="n">args</span><span class="p">)</span><span class="w"> </span><span class="kd">throws</span><span class="w"> </span><span class="n">IOException</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="n">StemmerPatchTrieBinaryIO</span><span class="p">.</span><span class="na">write</span><span class="p">(</span><span class="n">trie</span><span class="p">,</span><span class="w"> </span><span class="n">Path</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="s">&quot;english.radixor.gz&quot;</span><span class="p">));</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div>
-<h2 id="modifying-an-existing-trie">Modifying an existing trie</h2>
-<p>A compiled trie can be reopened into a builder, extended, and rebuilt.</p>
-<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">java.io.IOException</span><span class="p">;</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">java.nio.file.Path</span><span class="p">;</span>
-
-<span class="kn">import</span><span class="w"> </span><span class="nn">org.egothor.stemmer.*</span><span class="p">;</span>
-
-<span class="kd">public</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kd">class</span> <span class="nc">ModifyExample</span><span class="w"> </span><span class="p">{</span>
-
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">String</span><span class="o">[]</span><span class="w"> </span><span class="n">args</span><span class="p">)</span><span class="w"> </span><span class="kd">throws</span><span class="w"> </span><span class="n">IOException</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="n">FrequencyTrie</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">compiled</span><span class="w"> </span><span class="o">=</span>
-<span class="w">                </span><span class="n">StemmerPatchTrieBinaryIO</span><span class="p">.</span><span class="na">read</span><span class="p">(</span><span class="n">Path</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="s">&quot;english.radixor.gz&quot;</span><span class="p">));</span>
-
-<span class="w">        </span><span class="n">ReductionSettings</span><span class="w"> </span><span class="n">settings</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ReductionSettings</span><span class="p">.</span><span class="na">withDefaults</span><span class="p">(</span>
-<span class="w">                </span><span class="n">ReductionMode</span><span class="p">.</span><span class="na">MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS</span>
-<span class="w">        </span><span class="p">);</span>
-
-<span class="w">        </span><span class="n">FrequencyTrie</span><span class="p">.</span><span class="na">Builder</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">builder</span><span class="w"> </span><span class="o">=</span>
-<span class="w">                </span><span class="n">FrequencyTrieBuilders</span><span class="p">.</span><span class="na">copyOf</span><span class="p">(</span><span class="n">compiled</span><span class="p">,</span><span class="w"> </span><span class="n">String</span><span class="o">[]</span><span class="p">::</span><span class="k">new</span><span class="p">,</span><span class="w"> </span><span class="n">settings</span><span class="p">);</span>
-
-<span class="w">        </span><span class="n">builder</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">&quot;microservices&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">PatchCommandEncoder</span><span class="p">.</span><span class="na">NOOP_PATCH</span><span class="p">);</span>
-
-<span class="w">        </span><span class="n">FrequencyTrie</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">updated</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">builder</span><span class="p">.</span><span class="na">build</span><span class="p">();</span>
-
-<span class="w">        </span><span class="n">StemmerPatchTrieBinaryIO</span><span class="p">.</span><span class="na">write</span><span class="p">(</span><span class="n">updated</span><span class="p">,</span>
-<span class="w">                </span><span class="n">Path</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="s">&quot;english-custom.radixor.gz&quot;</span><span class="p">));</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div>
-<h2 id="thread-safety">Thread safety</h2>
-<ul>
-<li>
-<p><code>FrequencyTrie</code> (compiled):</p>
-</li>
-<li>
-<p><strong>thread-safe</strong></p>
-</li>
-<li>
-<p>safe for concurrent reads</p>
-</li>
-<li>
-<p><code>FrequencyTrie.Builder</code>:</p>
-</li>
-<li>
-<p><strong>not thread-safe</strong></p>
-</li>
-<li>intended for single-threaded construction</li>
-</ul>
-<h2 id="performance-characteristics">Performance characteristics</h2>
-<h3 id="querying">Querying</h3>
-<ul>
-<li>O(length of word)</li>
-<li>minimal allocations</li>
-<li>suitable for high-throughput pipelines</li>
-</ul>
-<h3 id="loading">Loading</h3>
-<ul>
-<li>binary loading is fast</li>
-<li>no preprocessing required</li>
-</ul>
-<h3 id="building">Building</h3>
-<ul>
-<li>depends on dictionary size</li>
-<li>reduction phase may be CPU-intensive</li>
-</ul>
-<h2 id="best-practices">Best practices</h2>
-<h3 id="reuse-compiled-trie-instances">Reuse compiled trie instances</h3>
-<ul>
-<li>load once</li>
-<li>share across threads</li>
-</ul>
-<h3 id="prefer-binary-loading-in-production">Prefer binary loading in production</h3>
-<ul>
-<li>avoid rebuilding at runtime</li>
-<li>treat compiled files as deployable artifacts</li>
-</ul>
-<h3 id="use-getall-only-when-needed">Use <code>getAll()</code> only when needed</h3>
-<ul>
-<li><code>get()</code> is faster and sufficient for most use cases</li>
-</ul>
-<h3 id="keep-builders-short-lived">Keep builders short-lived</h3>
-<ul>
-<li>build → compile → discard</li>
-</ul>
-<h2 id="integration-patterns">Integration patterns</h2>
-<h3 id="search-systems">Search systems</h3>
-<ul>
-<li>apply stemming during indexing and querying</li>
-<li>ensure consistent dictionary usage</li>
-</ul>
-<h3 id="text-normalization-pipelines">Text normalization pipelines</h3>
-<ul>
-<li>integrate as a transformation step</li>
-<li>combine with tokenization and filtering</li>
-</ul>
-<h3 id="domain-adaptation">Domain adaptation</h3>
-<ul>
-<li>extend dictionaries with domain-specific vocabulary</li>
-<li>rebuild compiled artifacts</li>
-</ul>
+<h2 id="recommended-reading-order">Recommended reading order</h2>
+<p>For most developers, the best order is:</p>
+<ol>
+<li><a href="../programmatic-loading-and-building/">Loading and Building Stemmers</a></li>
+<li><a href="../programmatic-querying-and-ambiguity/">Querying and Ambiguity Handling</a></li>
+<li><a href="../programmatic-extending-and-persistence/">Extending and Persisting Compiled Tries</a></li>
+</ol>
 <h2 id="next-steps">Next steps</h2>
 <ul>
-<li><a href="../dictionary-format/">Dictionary format</a></li>
+<li><a href="../quick-start/">Quick Start</a></li>
 <li><a href="../cli-compilation/">CLI compilation</a></li>
+<li><a href="../dictionary-format/">Dictionary format</a></li>
 <li><a href="../architecture-and-reduction/">Architecture and reduction</a></li>
-</ul>
-<h2 id="summary">Summary</h2>
-<p>Programmatic usage of Radixor follows a clear pattern:</p>
-<ul>
-<li>build or load a trie</li>
-<li>query using patch commands</li>
-<li>apply transformations</li>
-</ul>
-<p>The API is intentionally simple at the surface, while providing deeper control when needed for:</p>
-<ul>
-<li>ambiguity handling</li>
-<li>diagnostics</li>
-<li>dictionary evolution</li>
 </ul>
 
 

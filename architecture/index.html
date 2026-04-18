@@ -1,0 +1,1799 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="High-performance multi-language stemming toolkit for Java">
+      
+      
+      
+        <link rel="canonical" href="https://leogalambos.github.io/Radixor/architecture/">
+      
+      
+        <link rel="prev" href="../architecture-and-reduction/">
+      
+      
+        <link rel="next" href="../reduction-semantics/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Architecture - Radixor</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#architecture" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Radixor" class="md-header__button md-logo" aria-label="Radixor" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Radixor
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Architecture
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/leogalambos/Radixor" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    leogalambos/Radixor
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Radixor" class="md-nav__button md-logo" aria-label="Radixor" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Radixor
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/leogalambos/Radixor" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    leogalambos/Radixor
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quick-start/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../built-in-languages/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Built-in Languages
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dictionary-format/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dictionary Format
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli-compilation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Compilation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Programmatic Usage
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Programmatic Usage
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../programmatic-usage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../programmatic-loading-and-building/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Loading and Building Stemmers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../programmatic-querying-and-ambiguity/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Querying and Ambiguity Handling
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../programmatic-extending-and-persistence/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Extending and Persisting Compiled Tries
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture and Semantics
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture and Semantics
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture-and-reduction/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#the-central-idea" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The central idea
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#end-to-end-build-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        End-to-end build flow
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="End-to-end build flow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dictionary-input" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dictionary input
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#patch-command-generation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Patch-command generation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mutable-trie-construction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mutable trie construction
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reduction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reduction
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#compilation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Compilation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#why-a-trie-is-used" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why a trie is used
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#stage-1-mutable-construction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage 1: Mutable construction
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Stage 1: Mutable construction">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-the-build-time-form-is-mutable" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why the build-time form is mutable
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-a-compiled-node-contains" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What a compiled node contains
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#runtime-lookup-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Runtime lookup model
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#get-and-getall" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get() and getAll()
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="get() and getAll()">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#get" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get()
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#getall" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        getAll()
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#why-multiple-results-can-exist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why multiple results can exist
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#why-compiled-artifacts-are-compact" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why compiled artifacts are compact
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#why-preparation-can-still-use-more-memory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why preparation can still use more memory
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#determinism-as-a-design-principle" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Determinism as a design principle
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#continue-with" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Continue with
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reduction-semantics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reduction Semantics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../compatibility-and-guarantees/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compatibility and Guarantees
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dictionaries
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Dictionaries
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing-dictionaries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing Dictionaries
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quality and Operations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Quality and Operations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quality-and-operations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quality and Operations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarking/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Benchmarking
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reports/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reports
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#the-central-idea" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The central idea
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#end-to-end-build-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        End-to-end build flow
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="End-to-end build flow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dictionary-input" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dictionary input
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#patch-command-generation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Patch-command generation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mutable-trie-construction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mutable trie construction
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reduction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reduction
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#compilation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Compilation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#why-a-trie-is-used" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why a trie is used
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#stage-1-mutable-construction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage 1: Mutable construction
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Stage 1: Mutable construction">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-the-build-time-form-is-mutable" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why the build-time form is mutable
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-a-compiled-node-contains" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What a compiled node contains
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#runtime-lookup-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Runtime lookup model
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#get-and-getall" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get() and getAll()
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="get() and getAll()">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#get" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get()
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#getall" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        getAll()
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#why-multiple-results-can-exist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why multiple results can exist
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#why-compiled-artifacts-are-compact" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why compiled artifacts are compact
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#why-preparation-can-still-use-more-memory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why preparation can still use more memory
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#determinism-as-a-design-principle" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Determinism as a design principle
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#continue-with" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Continue with
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="architecture">Architecture</h1>
+<p>This document explains the structural architecture of <strong>Radixor</strong>: what data is stored, how it flows through the build pipeline, and how runtime lookup works once a compiled trie has been produced.</p>
+<h2 id="the-central-idea">The central idea</h2>
+<p>Radixor does not store final stems directly as a large flat lookup table. Instead, it stores <strong>patch commands</strong> that describe how a word form should be transformed into a canonical stem.</p>
+<p>For example, if a dictionary states that <code>running</code> should reduce to <code>run</code>, the final runtime artifact does not need to store a full redundant <code>running -&gt; run</code> output string entry in the simplest possible form. It can store a compact transformation command that expresses how to turn the source form into the target form.</p>
+<p>That matters because many words share similar transformation patterns. Once those mappings are organized in a trie and compiled into a canonical structure, the result is much smaller and more reusable than a naive direct-output table.</p>
+<h2 id="end-to-end-build-flow">End-to-end build flow</h2>
+<p>The full build-time flow is:</p>
+<div class="highlight"><pre><span></span><code>Dictionary -&gt; Mutable trie -&gt; Reduced trie -&gt; Compiled trie
+</code></pre></div>
+<p>Each stage has a different purpose.</p>
+<h3 id="dictionary-input">Dictionary input</h3>
+<p>The textual dictionary groups known word forms under a canonical stem:</p>
+<div class="highlight"><pre><span></span><code>run running runs ran
+connect connected connecting connection
+</code></pre></div>
+<p>The first token is the canonical stem. The following tokens are known variants.</p>
+<h3 id="patch-command-generation">Patch-command generation</h3>
+<p>Each variant is converted into a patch command that transforms the variant into the stem.</p>
+<p>Conceptually:</p>
+<div class="highlight"><pre><span></span><code>running -&gt; &lt;patch&gt; -&gt; run
+runs    -&gt; &lt;patch&gt; -&gt; run
+ran     -&gt; &lt;patch&gt; -&gt; run
+</code></pre></div>
+<p>If <code>storeOriginal</code> is enabled, the stem itself is also inserted using a canonical no-op patch.</p>
+<h3 id="mutable-trie-construction">Mutable trie construction</h3>
+<p>Those patch-command values are inserted into a mutable trie keyed by the source surface form.</p>
+<h3 id="reduction">Reduction</h3>
+<p>Equivalent subtrees are merged into canonical reduced nodes.</p>
+<h3 id="compilation">Compilation</h3>
+<p>The reduced structure is frozen into an immutable compiled trie optimized for runtime lookup.</p>
+<h2 id="why-a-trie-is-used">Why a trie is used</h2>
+<p>A trie is useful because many word forms share structural fragments. Instead of storing each word independently, the trie reuses paths and organizes lookup by character traversal.</p>
+<p>A trie node can contain:</p>
+<ul>
+<li>outgoing edges,</li>
+<li>one or more ordered values,</li>
+<li>counts aligned with those values.</li>
+</ul>
+<p>This is why the structure can represent both:</p>
+<ul>
+<li>a single preferred result,</li>
+<li>multiple competing results for the same key.</li>
+</ul>
+<h2 id="stage-1-mutable-construction">Stage 1: Mutable construction</h2>
+<p>The mutable build-time structure is created by <code>FrequencyTrie.Builder</code>.</p>
+<p>This stage is optimized for insertion rather than runtime lookup. As dictionary data is added, the builder accumulates:</p>
+<ul>
+<li>child edges,</li>
+<li>local values,</li>
+<li>local frequencies of those values.</li>
+</ul>
+<p>Those frequencies are not incidental metadata. They later influence both result ordering and, depending on reduction mode, the semantic identity of subtrees during reduction.</p>
+<h3 id="why-the-build-time-form-is-mutable">Why the build-time form is mutable</h3>
+<p>The builder must be easy to extend and easy to aggregate into. That is the opposite of what a runtime lookup structure needs.</p>
+<p>Build-time priorities are:</p>
+<ul>
+<li>flexibility,</li>
+<li>accumulation of counts,</li>
+<li>structural growth.</li>
+</ul>
+<p>Runtime priorities are:</p>
+<ul>
+<li>compactness,</li>
+<li>immutability,</li>
+<li>fast lookup.</li>
+</ul>
+<p>Radixor therefore keeps construction and runtime representation strictly separate.</p>
+<h2 id="what-a-compiled-node-contains">What a compiled node contains</h2>
+<p>After reduction and freezing, the runtime structure uses immutable compiled nodes.</p>
+<p>A compiled node stores:</p>
+<ul>
+<li><code>char[] edgeLabels</code></li>
+<li>child-node references aligned with those labels</li>
+<li>ordered value arrays</li>
+<li>aligned count arrays</li>
+</ul>
+<p>This array-based form is compact and efficient for lookup.</p>
+<h2 id="runtime-lookup-model">Runtime lookup model</h2>
+<p>At runtime, lookup is conceptually simple:</p>
+<ol>
+<li>traverse the compiled trie by the input key,</li>
+<li>reach the node addressed by that key,</li>
+<li>retrieve one or more stored patch commands,</li>
+<li>apply the chosen patch command to the original word.</li>
+</ol>
+<p>The trie itself does not create the final stem string. It selects the stored transformation command. <code>PatchCommandEncoder.apply(...)</code> then performs the actual transformation.</p>
+<p>That separation is architecturally important:</p>
+<ul>
+<li>the trie is responsible for <strong>selection</strong>,</li>
+<li>patch application is responsible for <strong>transformation</strong>.</li>
+</ul>
+<h2 id="get-and-getall"><code>get()</code> and <code>getAll()</code></h2>
+<p>The runtime API exposes two complementary views of the addressed node.</p>
+<h3 id="get"><code>get()</code></h3>
+<p><code>get()</code> returns the locally preferred value stored at that node.</p>
+<p>Preference is deterministic:</p>
+<ol>
+<li>higher local frequency wins,</li>
+<li>shorter textual representation wins,</li>
+<li>lexicographically lower textual representation wins,</li>
+<li>stable first-seen order acts as the final tie-breaker.</li>
+</ol>
+<h3 id="getall"><code>getAll()</code></h3>
+<p><code>getAll()</code> returns all locally stored values in deterministic ranked order.</p>
+<p>This is what allows Radixor to preserve ambiguity explicitly instead of forcing every key into a single answer.</p>
+<h2 id="why-multiple-results-can-exist">Why multiple results can exist</h2>
+<p>Some stemming systems discard ambiguity early because they insist on returning exactly one answer.</p>
+<p>Radixor does not require that simplification. If multiple plausible patch commands exist for a key, the compiled trie can preserve them and the runtime API can expose them.</p>
+<p>That is useful when downstream logic wants to:</p>
+<ul>
+<li>inspect ambiguity,</li>
+<li>preserve alternatives for retrieval,</li>
+<li>apply later ranking or domain-specific selection.</li>
+</ul>
+<h2 id="why-compiled-artifacts-are-compact">Why compiled artifacts are compact</h2>
+<p>The final compiled trie can be much smaller than the original dictionary for several reasons working together:</p>
+<ul>
+<li>patch commands are compact,</li>
+<li>trie paths reuse shared structure,</li>
+<li>reduction merges equivalent subtrees,</li>
+<li>binary persistence stores the already reduced form,</li>
+<li>GZip compression is applied on top of the binary format.</li>
+</ul>
+<p>This is why a very large dictionary can still produce a manageable deployable runtime artifact.</p>
+<h2 id="why-preparation-can-still-use-more-memory">Why preparation can still use more memory</h2>
+<p>The compactness of the final artifact should not be confused with the memory usage of preparation.</p>
+<p>Before reduction has completed, the mutable build-time structure must exist in memory. For large dictionaries, that temporary preparation cost can be noticeably higher than the size of the final persisted artifact or the loaded compiled trie.</p>
+<p>That is why the preferred operational model is usually:</p>
+<ul>
+<li>compile offline,</li>
+<li>persist the compiled artifact,</li>
+<li>load the finished artifact in runtime services.</li>
+</ul>
+<h2 id="determinism-as-a-design-principle">Determinism as a design principle</h2>
+<p>Radixor favors deterministic behavior throughout the pipeline.</p>
+<p>This appears in:</p>
+<ul>
+<li>lowercased dictionary parsing,</li>
+<li>stable value ordering,</li>
+<li>sorted child descriptors,</li>
+<li>canonical reduction signatures,</li>
+<li>reproducible compiled lookup behavior.</li>
+</ul>
+<p>Determinism matters not only for tests, but also for operational trust. It makes stemming behavior explainable and reproducible across builds and environments.</p>
+<h2 id="continue-with">Continue with</h2>
+<ul>
+<li><a href="../reduction-semantics/">Reduction Semantics</a></li>
+<li><a href="../programmatic-usage/">Programmatic usage</a></li>
+<li><a href="../cli-compilation/">CLI compilation</a></li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      &copy; 2026 Egothor. Licensed under <a href='https://github.com/leogalambos/Radixor/blob/main/LICENSE'>BSD-3-Clause</a>.
+    </div>
+  
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.instant", "navigation.sections", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

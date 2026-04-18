@@ -13,7 +13,7 @@
         <link rel="canonical" href="https://leogalambos.github.io/Radixor/dictionary-format/">
       
       
-        <link rel="prev" href="../quick-start/">
+        <link rel="prev" href="../built-in-languages/">
       
       
         <link rel="next" href="../cli-compilation/">
@@ -52,6 +52,8 @@
         <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
       
     
+    
+      <link rel="stylesheet" href="../assets/stylesheets/extra.css">
     
     <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
@@ -272,6 +274,60 @@
       
   
   
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
   
   
     <li class="md-nav__item">
@@ -294,9 +350,38 @@
     </li>
   
 
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../built-in-languages/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     
-      
-      
+  
+    Built-in Languages
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
   
   
     
@@ -362,10 +447,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
+  <a href="#core-structure" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Overview
+        Core structure
       
     </span>
   </a>
@@ -373,10 +458,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#basic-example" class="md-nav__link">
+  <a href="#how-the-loader-interprets-a-line" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Basic example
+        How the loader interprets a line
       
     </span>
   </a>
@@ -384,22 +469,110 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#syntax-rules" class="md-nav__link">
+  <a href="#minimal-valid-lines" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Syntax rules
+        Minimal valid lines
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Syntax rules">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#whitespace-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Whitespace rules
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#empty-lines" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Empty lines
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#remarks-and-comments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Remarks and comments
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#case-normalization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Case normalization
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#character-set-and-practical-convention" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Character set and practical convention
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#distinct-stem-and-variant-semantics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Distinct stem and variant semantics
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#duplicate-forms-and-repeated-entries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Duplicate forms and repeated entries
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#practical-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Practical examples
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Practical examples">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#1-tokenization" class="md-nav__link">
+  <a href="#simple-english-example" class="md-nav__link">
     <span class="md-ellipsis">
       
-        1. Tokenization
+        Simple English example
       
     </span>
   </a>
@@ -407,10 +580,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#2-first-token-is-the-stem" class="md-nav__link">
+  <a href="#dictionary-with-remarks" class="md-nav__link">
     <span class="md-ellipsis">
       
-        2. First token is the stem
+        Dictionary with remarks
       
     </span>
   </a>
@@ -418,10 +591,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#3-case-normalization" class="md-nav__link">
+  <a href="#stem-only-entries" class="md-nav__link">
     <span class="md-ellipsis">
       
-        3. Case normalization
+        Stem-only entries
       
     </span>
   </a>
@@ -429,21 +602,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#4-empty-lines" class="md-nav__link">
+  <a href="#mixed-case-input" class="md-nav__link">
     <span class="md-ellipsis">
       
-        4. Empty lines
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#5-duplicate-variants" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        5. Duplicate variants
+        Mixed case input
       
     </span>
   </a>
@@ -456,60 +618,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#remarks-comments" class="md-nav__link">
+  <a href="#format-limitations" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Remarks (comments)
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Remarks (comments)">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#supported-remark-markers" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Supported remark markers
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#examples" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Examples
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#important-note" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Important note
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#storing-the-original-form" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Storing the original form
+        Format limitations
       
     </span>
   </a>
@@ -517,10 +629,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#frequency-and-ordering" class="md-nav__link">
+  <a href="#authoring-guidance" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Frequency and ordering
+        Authoring guidance
       
     </span>
   </a>
@@ -528,176 +640,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#ambiguity-and-multiple-stems" class="md-nav__link">
+  <a href="#relationship-to-other-documentation" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Ambiguity and multiple stems
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#design-guidelines" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Design guidelines
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Design guidelines">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#keep-stems-consistent" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Keep stems consistent
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#avoid-noise" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Avoid noise
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#prefer-completeness-over-clever-rules" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Prefer completeness over clever rules
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#handle-domain-specific-vocabulary" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Handle domain-specific vocabulary
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#example-minimal-dictionary" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Example: minimal dictionary
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#example-domain-specific-extension" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Example: domain-specific extension
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#common-pitfalls" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Common pitfalls
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Common pitfalls">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#mixing-cases" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Mixing cases
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#multiple-stems-on-one-line" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Multiple stems on one line
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#hidden-comments" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Hidden comments
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#when-to-use-this-format" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        When to use this format
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#next-steps" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Next steps
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#summary" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Summary
+        Relationship to other documentation
       
     </span>
   </a>
@@ -711,9 +657,10 @@
     </li>
   
 
-    
-      
-      
+              
+            
+              
+                
   
   
   
@@ -738,6 +685,14 @@
     </li>
   
 
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
     
       
       
@@ -745,9 +700,25 @@
   
   
   
-    <li class="md-nav__item">
-      <a href="../programmatic-usage/" class="md-nav__link">
+    
+    
+    
+    
+      
         
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
   
   
   <span class="md-ellipsis">
@@ -761,26 +732,35 @@
   
   
 
-      </a>
-    </li>
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Programmatic Usage
   
 
-    
-      
-      
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
   
   
   
   
     <li class="md-nav__item">
-      <a href="../built-in-languages/" class="md-nav__link">
+      <a href="../programmatic-usage/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Built-in Languages
+    Overview
   
 
     
@@ -792,9 +772,153 @@
     </li>
   
 
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../programmatic-loading-and-building/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Loading and Building Stemmers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../programmatic-querying-and-ambiguity/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Querying and Ambiguity Handling
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../programmatic-extending-and-persistence/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Extending and Persisting Compiled Tries
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
     
       
       
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture and Semantics
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture and Semantics
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
   
   
   
@@ -807,7 +931,7 @@
   <span class="md-ellipsis">
     
   
-    Architecture and Reduction
+    Overview
   
 
     
@@ -819,9 +943,240 @@
     </li>
   
 
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reduction-semantics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reduction Semantics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../compatibility-and-guarantees/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compatibility and Guarantees
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
     
       
       
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dictionaries
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Dictionaries
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing-dictionaries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing Dictionaries
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quality and Operations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Quality and Operations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
   
   
   
@@ -846,9 +1201,10 @@
     </li>
   
 
-    
-      
-      
+              
+            
+              
+                
   
   
   
@@ -873,9 +1229,10 @@
     </li>
   
 
-    
-      
-      
+              
+            
+              
+                
   
   
   
@@ -888,7 +1245,7 @@
   <span class="md-ellipsis">
     
   
-    CI Reports
+    Reports
   
 
     
@@ -897,6 +1254,14 @@
   
 
       </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -928,10 +1293,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
+  <a href="#core-structure" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Overview
+        Core structure
       
     </span>
   </a>
@@ -939,10 +1304,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#basic-example" class="md-nav__link">
+  <a href="#how-the-loader-interprets-a-line" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Basic example
+        How the loader interprets a line
       
     </span>
   </a>
@@ -950,22 +1315,110 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#syntax-rules" class="md-nav__link">
+  <a href="#minimal-valid-lines" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Syntax rules
+        Minimal valid lines
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Syntax rules">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#whitespace-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Whitespace rules
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#empty-lines" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Empty lines
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#remarks-and-comments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Remarks and comments
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#case-normalization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Case normalization
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#character-set-and-practical-convention" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Character set and practical convention
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#distinct-stem-and-variant-semantics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Distinct stem and variant semantics
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#duplicate-forms-and-repeated-entries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Duplicate forms and repeated entries
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#practical-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Practical examples
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Practical examples">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#1-tokenization" class="md-nav__link">
+  <a href="#simple-english-example" class="md-nav__link">
     <span class="md-ellipsis">
       
-        1. Tokenization
+        Simple English example
       
     </span>
   </a>
@@ -973,10 +1426,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#2-first-token-is-the-stem" class="md-nav__link">
+  <a href="#dictionary-with-remarks" class="md-nav__link">
     <span class="md-ellipsis">
       
-        2. First token is the stem
+        Dictionary with remarks
       
     </span>
   </a>
@@ -984,10 +1437,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#3-case-normalization" class="md-nav__link">
+  <a href="#stem-only-entries" class="md-nav__link">
     <span class="md-ellipsis">
       
-        3. Case normalization
+        Stem-only entries
       
     </span>
   </a>
@@ -995,21 +1448,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#4-empty-lines" class="md-nav__link">
+  <a href="#mixed-case-input" class="md-nav__link">
     <span class="md-ellipsis">
       
-        4. Empty lines
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#5-duplicate-variants" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        5. Duplicate variants
+        Mixed case input
       
     </span>
   </a>
@@ -1022,60 +1464,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#remarks-comments" class="md-nav__link">
+  <a href="#format-limitations" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Remarks (comments)
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Remarks (comments)">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#supported-remark-markers" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Supported remark markers
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#examples" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Examples
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#important-note" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Important note
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#storing-the-original-form" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Storing the original form
+        Format limitations
       
     </span>
   </a>
@@ -1083,10 +1475,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#frequency-and-ordering" class="md-nav__link">
+  <a href="#authoring-guidance" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Frequency and ordering
+        Authoring guidance
       
     </span>
   </a>
@@ -1094,176 +1486,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#ambiguity-and-multiple-stems" class="md-nav__link">
+  <a href="#relationship-to-other-documentation" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Ambiguity and multiple stems
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#design-guidelines" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Design guidelines
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Design guidelines">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#keep-stems-consistent" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Keep stems consistent
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#avoid-noise" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Avoid noise
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#prefer-completeness-over-clever-rules" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Prefer completeness over clever rules
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#handle-domain-specific-vocabulary" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Handle domain-specific vocabulary
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#example-minimal-dictionary" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Example: minimal dictionary
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#example-domain-specific-extension" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Example: domain-specific extension
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#common-pitfalls" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Common pitfalls
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Common pitfalls">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#mixing-cases" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Mixing cases
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#multiple-stems-on-one-line" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Multiple stems on one line
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#hidden-comments" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Hidden comments
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#when-to-use-this-format" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        When to use this format
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#next-steps" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Next steps
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#summary" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Summary
+        Relationship to other documentation
       
     </span>
   </a>
@@ -1291,210 +1517,148 @@
 
 
 <h1 id="dictionary-format">Dictionary Format</h1>
-<p>Radixor uses a simple, line-oriented dictionary format to define mappings between <strong>word forms</strong> and their <strong>canonical stems</strong>.</p>
-<p>This format is intentionally minimal, language-agnostic, and easy to generate from existing linguistic resources or corpora.</p>
-<h2 id="overview">Overview</h2>
-<p>Each logical line defines:</p>
-<ul>
-<li>one <strong>canonical stem</strong></li>
-<li>zero or more <strong>word variants</strong> belonging to that stem</li>
-</ul>
-<div class="highlight"><pre><span></span><code>stem variant1 variant2 variant3 ...
+<p>Radixor uses a simple line-oriented dictionary format designed for practical stemming workflows.</p>
+<p>Each logical line describes one canonical stem and zero or more known word variants that should reduce to that stem. The format is intentionally lightweight, easy to maintain in source control, and directly consumable both by the programmatic loader and by the CLI compiler.</p>
+<h2 id="core-structure">Core structure</h2>
+<p>Each non-empty logical line has the following shape:</p>
+<div class="highlight"><pre><span></span><code>&lt;stem&gt; &lt;variant1&gt; &lt;variant2&gt; &lt;variant3&gt; ...
 </code></pre></div>
-<p>At compile time:</p>
-<ul>
-<li>each variant is converted into a <strong>patch command</strong> transforming the variant into the stem</li>
-<li>the stem itself may optionally be stored as a <strong>no-op mapping</strong></li>
-</ul>
-<h2 id="basic-example">Basic example</h2>
+<p>The first token is interpreted as the <strong>canonical stem</strong>. Every following token on the same line is interpreted as a <strong>known variant</strong> belonging to that stem.</p>
+<p>Example:</p>
 <div class="highlight"><pre><span></span><code>run running runs ran
 connect connected connecting connection
-analyze analyzing analysed analyses
 </code></pre></div>
-<p>This defines:</p>
-<table>
-<thead>
-<tr>
-<th>Stem</th>
-<th>Variants</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>run</td>
-<td>running, runs, ran</td>
-</tr>
-<tr>
-<td>connect</td>
-<td>connected, connecting, connection</td>
-</tr>
-<tr>
-<td>analyze</td>
-<td>analyzing, analysed, analyses</td>
-</tr>
-</tbody>
-</table>
-<h2 id="syntax-rules">Syntax rules</h2>
-<h3 id="1-tokenization">1. Tokenization</h3>
+<p>In this example:</p>
 <ul>
-<li>Tokens are separated by <strong>whitespace</strong></li>
-<li>Multiple spaces and tabs are treated as a single separator</li>
-<li>Leading and trailing whitespace is ignored</li>
+<li><code>run</code> is the canonical stem for <code>running</code>, <code>runs</code>, and <code>ran</code>,</li>
+<li><code>connect</code> is the canonical stem for <code>connected</code>, <code>connecting</code>, and <code>connection</code>.</li>
 </ul>
-<h3 id="2-first-token-is-the-stem">2. First token is the stem</h3>
+<h2 id="how-the-loader-interprets-a-line">How the loader interprets a line</h2>
+<p>When a dictionary is loaded through <code>StemmerPatchTrieLoader</code>, the loader processes each parsed line as follows:</p>
+<ol>
+<li>the first token becomes the canonical stem,</li>
+<li>every following token is treated as a variant,</li>
+<li>each variant is converted into a patch command that transforms the variant into the stem,</li>
+<li>if <code>storeOriginal</code> is enabled, the stem itself is also inserted using the canonical no-op patch command.</li>
+</ol>
+<p>This means the textual dictionary is not used directly at runtime. Instead, it is transformed into patch-command data and compiled into a reduced read-only trie.</p>
+<h2 id="minimal-valid-lines">Minimal valid lines</h2>
+<p>A line may consist of the stem only:</p>
+<div class="highlight"><pre><span></span><code>run
+</code></pre></div>
+<p>This is syntactically valid. It defines a stem entry with no explicit variants on that line.</p>
+<p>Whether such a line is operationally useful depends on how the dictionary is loaded:</p>
 <ul>
-<li>The <strong>first token</strong> on each line is always the canonical stem</li>
-<li>All following tokens are treated as variants of that stem</li>
+<li>if <code>storeOriginal</code> is enabled, the stem itself is inserted as a no-op mapping,</li>
+<li>if <code>storeOriginal</code> is disabled, the line contributes no explicit variant mappings.</li>
 </ul>
-<h3 id="3-case-normalization">3. Case normalization</h3>
-<ul>
-<li>All input is normalized to <strong>lowercase using <code>Locale.ROOT</code></strong></li>
-<li>Dictionaries should ideally already be lowercase to avoid ambiguity</li>
-</ul>
-<h3 id="4-empty-lines">4. Empty lines</h3>
-<ul>
-<li>Empty lines are ignored</li>
-</ul>
-<h3 id="5-duplicate-variants">5. Duplicate variants</h3>
-<ul>
-<li>Duplicate variants are allowed but have no additional effect</li>
-<li>Frequency is determined by occurrence across the entire dataset</li>
-</ul>
-<h2 id="remarks-comments">Remarks (comments)</h2>
+<h2 id="whitespace-rules">Whitespace rules</h2>
+<p>Tokens are separated by whitespace. Leading and trailing whitespace is ignored.</p>
+<p>These lines are equivalent:</p>
+<div class="highlight"><pre><span></span><code>run running runs ran
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>   run   running   runs   ran
+</code></pre></div>
+<p>Tabs and repeated spaces are both accepted because tokenization is whitespace-based.</p>
+<h2 id="empty-lines">Empty lines</h2>
+<p>Empty lines are ignored.</p>
+<p>Example:</p>
+<div class="highlight"><pre><span></span><code>run running runs ran
+
+connect connected connecting
+</code></pre></div>
+<p>The blank line between entries has no effect.</p>
+<h2 id="remarks-and-comments">Remarks and comments</h2>
 <p>The parser supports both full-line and trailing remarks.</p>
-<h3 id="supported-remark-markers">Supported remark markers</h3>
+<p>Two remark markers are recognized:</p>
 <ul>
 <li><code>#</code></li>
 <li><code>//</code></li>
 </ul>
-<h3 id="examples">Examples</h3>
-<div class="highlight"><pre><span></span><code>run running runs ran   # English verb forms
-connect connected connecting  // basic forms
+<p>The earliest occurrence of either marker terminates the logical content of the line, and the remainder of that line is ignored.</p>
+<p>Examples:</p>
+<div class="highlight"><pre><span></span><code>run running runs ran # English verb forms
+connect connected connecting // Common derived forms
 </code></pre></div>
-<p>Everything after the first occurrence of a remark marker is ignored.</p>
-<h3 id="important-note">Important note</h3>
-<p>Remark markers are not escaped. If <code>#</code> or <code>//</code> appear in a token, they will terminate the line.</p>
-<h2 id="storing-the-original-form">Storing the original form</h2>
-<p>When compiling, you may enable:</p>
-<div class="highlight"><pre><span></span><code>--store-original
+<p>This is also valid:</p>
+<div class="highlight"><pre><span></span><code># This line is ignored completely
+// This line is also ignored completely
 </code></pre></div>
-<p>This causes the stem itself to be stored using a <strong>no-op patch command</strong>.</p>
+<h2 id="case-normalization">Case normalization</h2>
+<p>Input lines are normalized to lower case using <code>Locale.ROOT</code> before tokenization is processed into dictionary entries.</p>
+<p>That means dictionary authors should treat the format as <strong>case-insensitive at load time</strong>. If a file contains uppercase or mixed-case tokens, they will be normalized during parsing.</p>
 <p>Example:</p>
-<div class="highlight"><pre><span></span><code>run running runs
+<div class="highlight"><pre><span></span><code>Run Running Runs Ran
 </code></pre></div>
-<p>With <code>--store-original</code>, this implicitly includes:</p>
-<div class="highlight"><pre><span></span><code>run -&gt; run
+<p>is processed the same way as:</p>
+<div class="highlight"><pre><span></span><code>run running runs ran
 </code></pre></div>
-<p>This is useful when:</p>
-<ul>
-<li>the input may already be normalized</li>
-<li>you want stable identity mappings</li>
-<li>you want to avoid missing entries for canonical forms</li>
-</ul>
-<h2 id="frequency-and-ordering">Frequency and ordering</h2>
-<p>Radixor tracks <strong>local frequencies</strong> of values.</p>
-<p>Frequency is determined by:</p>
-<ul>
-<li>how many times a mapping appears during construction</li>
-<li>merging behavior during reduction</li>
-</ul>
-<p>When multiple stems exist for a word:</p>
-<ul>
-<li>results are ordered by <strong>descending frequency</strong></li>
-<li>ties are resolved deterministically:</li>
-<li>shorter textual representation wins</li>
-<li>lexicographically smaller value wins</li>
-<li>earlier insertion order wins</li>
-</ul>
-<p>This guarantees <strong>stable and reproducible results</strong>.</p>
-<h2 id="ambiguity-and-multiple-stems">Ambiguity and multiple stems</h2>
-<p>A word may legitimately map to more than one stem:</p>
-<div class="highlight"><pre><span></span><code>axes ax axe
+<h2 id="character-set-and-practical-convention">Character set and practical convention</h2>
+<p>Dictionary files are read as UTF-8 text.</p>
+<p>From the perspective of the parser and the stemming algorithm, the format is not restricted to plain ASCII tokens. The parser accepts ordinary Java <code>String</code> data, and the trie itself works with general character sequences rather than with an ASCII-only internal model. In principle, this means the system could process diacritic and non-diacritic forms alike, and it could also store forms with inconsistently used diacritics.</p>
+<p>In practice, however, the format is currently best understood as <strong>primarily intended for classical basic ASCII lexical input</strong>, especially in the traditional stemming style where language data is normalized into plain characters in the ASCII range up to character code 127. This convention is particularly relevant for languages whose original orthography includes diacritics but whose stemming dictionaries are commonly maintained in normalized non-diacritic form.</p>
+<p>Future versions may expand the documentation and operational guidance for dictionaries that intentionally preserve diacritics. At present, that workflow is not the primary documented use case, not because the algorithm fundamentally forbids it, but because a concrete project requirement for such support has not yet emerged.</p>
+<h2 id="distinct-stem-and-variant-semantics">Distinct stem and variant semantics</h2>
+<p>The format expresses a one-line grouping of forms under a canonical stem. It does not encode linguistic metadata, part-of-speech information, weights, or explicit ambiguity markers.</p>
+<p>For example:</p>
+<div class="highlight"><pre><span></span><code>axis axes
+axe axes
 </code></pre></div>
-<p>This allows Radixor to represent ambiguity explicitly.</p>
-<p>At runtime:</p>
-<ul>
-<li><code>get(word)</code> returns the <strong>preferred result</strong></li>
-<li><code>getAll(word)</code> returns <strong>all candidates</strong></li>
-</ul>
-<h2 id="design-guidelines">Design guidelines</h2>
-<h3 id="keep-stems-consistent">Keep stems consistent</h3>
-<p>Use a single canonical form:</p>
-<ul>
-<li><code>run</code> instead of mixing <code>run</code> / <code>running</code></li>
-<li><code>analyze</code> vs <code>analyse</code> — pick one convention</li>
-</ul>
-<h3 id="avoid-noise">Avoid noise</h3>
-<p>Do not include:</p>
-<ul>
-<li>typos</li>
-<li>extremely rare forms (unless required)</li>
-<li>inconsistent normalization</li>
-</ul>
-<h3 id="prefer-completeness-over-clever-rules">Prefer completeness over clever rules</h3>
-<p>Radixor is data-driven:</p>
-<ul>
-<li>more complete dictionaries → better results</li>
-<li>no hidden rule system compensates for missing entries</li>
-</ul>
-<h3 id="handle-domain-specific-vocabulary">Handle domain-specific vocabulary</h3>
-<p>You can extend dictionaries with:</p>
-<ul>
-<li>product names</li>
-<li>technical terms</li>
-<li>organization-specific terminology</li>
-</ul>
-<h2 id="example-minimal-dictionary">Example: minimal dictionary</h2>
-<div class="highlight"><pre><span></span><code>go goes going went
-be is are was were being
-have has having had
+<p>These are simply two independent lines. If both contribute mappings for the same surface form, the compiled trie may later expose one or more candidate patch commands depending on the accumulated local counts and the selected reduction mode.</p>
+<p>In other words, the dictionary format itself is deliberately simple. Richer behavior such as preferred-result ranking or multiple candidate results emerges during trie construction and reduction rather than through extra syntax in the dictionary file.</p>
+<h2 id="duplicate-forms-and-repeated-entries">Duplicate forms and repeated entries</h2>
+<p>The format does not reserve any special syntax for duplicates. If the same mapping is inserted multiple times through repeated dictionary content, the builder accumulates local counts for the stored value at the addressed key.</p>
+<p>This matters because compiled tries preserve local value frequencies and use them to determine preferred ordering for <code>get(...)</code>, <code>getAll(...)</code>, and <code>getEntries(...)</code>.</p>
+<p>As a result, repeating the same mapping is not just redundant text. It can influence the ranking behavior of the compiled trie.</p>
+<h2 id="practical-examples">Practical examples</h2>
+<h3 id="simple-english-example">Simple English example</h3>
+<div class="highlight"><pre><span></span><code>run running runs ran
+connect connected connecting connection
+build building builds built
 </code></pre></div>
-<h2 id="example-domain-specific-extension">Example: domain-specific extension</h2>
-<div class="highlight"><pre><span></span><code>microservice microservices
-container containers containerized
-kubernetes kubernetes
+<h3 id="dictionary-with-remarks">Dictionary with remarks</h3>
+<div class="highlight"><pre><span></span><code>run running runs ran # canonical verb family
+connect connected connecting // derived forms
+build building builds built
 </code></pre></div>
-<h2 id="common-pitfalls">Common pitfalls</h2>
-<h3 id="mixing-cases">Mixing cases</h3>
-<div class="highlight"><pre><span></span><code>Run running Runs   ❌
+<h3 id="stem-only-entries">Stem-only entries</h3>
+<div class="highlight"><pre><span></span><code>run
+connect connected connecting
+build
 </code></pre></div>
-<p>→ normalized to lowercase, but inconsistent input is error-prone</p>
-<h3 id="multiple-stems-on-one-line">Multiple stems on one line</h3>
-<div class="highlight"><pre><span></span><code>run running connect   ❌
+<h3 id="mixed-case-input">Mixed case input</h3>
+<div class="highlight"><pre><span></span><code>Run Running Runs Ran
+CONNECT Connected Connecting
 </code></pre></div>
-<p>→ <code>connect</code> becomes a variant of <code>run</code>, which is incorrect</p>
-<h3 id="hidden-comments">Hidden comments</h3>
-<div class="highlight"><pre><span></span><code>run running //comment runs   ❌
-</code></pre></div>
-<p>→ everything after <code>//</code> is ignored</p>
-<h2 id="when-to-use-this-format">When to use this format</h2>
-<p>This format is suitable for:</p>
+<p>This is accepted, but it is normalized to lower case during parsing.</p>
+<h2 id="format-limitations">Format limitations</h2>
+<p>The current dictionary format intentionally stays minimal:</p>
 <ul>
-<li>curated linguistic datasets</li>
-<li>exported morphological dictionaries</li>
-<li>domain-specific vocabularies</li>
-<li>generated <code>(word, stem)</code> pairs from corpora</li>
+<li>no quoted tokens,</li>
+<li>no escaping rules,</li>
+<li>no multi-word entries,</li>
+<li>no inline weighting syntax,</li>
+<li>no explicit ambiguity syntax,</li>
+<li>no sectioning or nested structure.</li>
 </ul>
-<h2 id="next-steps">Next steps</h2>
+<p>Each token is simply a whitespace-delimited word form after remark stripping and lowercasing.</p>
+<h2 id="authoring-guidance">Authoring guidance</h2>
+<p>For reliable results, keep dictionaries:</p>
+<ul>
+<li>consistent in normalization,</li>
+<li>free of accidental duplicates unless repeated weighting is intentional,</li>
+<li>focused on meaningful stem-to-variant groupings,</li>
+<li>encoded in UTF-8,</li>
+<li>easy to audit in plain text form.</li>
+</ul>
+<p>For most current deployments, it is sensible to keep dictionary content in normalized basic ASCII form unless there is a clear requirement to preserve diacritics end-to-end.</p>
+<h2 id="relationship-to-other-documentation">Relationship to other documentation</h2>
+<p>This page describes only the textual source format.</p>
+<p>To understand how those dictionary lines are transformed into compiled runtime artifacts, continue with:</p>
 <ul>
 <li><a href="../cli-compilation/">CLI compilation</a></li>
 <li><a href="../programmatic-usage/">Programmatic usage</a></li>
-<li><a href="../quick-start/">Quick start</a></li>
-</ul>
-<h2 id="summary">Summary</h2>
-<p>Radixor dictionaries are intentionally simple:</p>
-<ul>
-<li>one line per stem</li>
-<li>whitespace-separated tokens</li>
-<li>optional remarks</li>
-<li>no embedded rules</li>
-</ul>
-<p>This simplicity enables:</p>
-<ul>
-<li>easy generation</li>
-<li>fast parsing</li>
-<li>deterministic behavior</li>
-<li>efficient compilation into compact patch-command tries</li>
+<li><a href="../architecture-and-reduction/">Architecture and reduction</a></li>
 </ul>
 
 
