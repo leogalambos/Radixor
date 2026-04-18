@@ -626,15 +626,17 @@
 
 <h1 id="radixor">Radixor</h1>
 <p><strong>Radixor</strong> is a high-performance, multi-language stemmer for Java, designed for production-grade search and text-processing systems.</p>
-<p>It modernizes the proven Egothor patch-command trie approach and delivers:</p>
+<p>It modernizes the proven Egothor patch-command trie approach while introducing an important practical enhancement: compiled dictionaries are no longer treated as a final, closed artifact. Instead, they can be extended through additional transformation layers, allowing existing lexical assets to be refined and evolved without full recompilation from source dictionaries.</p>
+<p>Radixor delivers:</p>
 <ul>
 <li><strong>Fast runtime stemming</strong> with compact lookup structures</li>
 <li><strong>Multi-language adaptability</strong> through dictionary-driven compilation</li>
+<li><strong>Incremental extensibility of compiled dictionaries</strong> through additional transformation layers</li>
 <li><strong>Deterministic behavior</strong> suitable for reproducible processing pipelines</li>
 <li><strong>Flexible integration paths</strong>, including CLI-based and programmatic workflows</li>
-<li><strong>Operational transparency</strong> via continuously published quality and benchmark reports</li>
+<li><strong>Operational transparency</strong> through continuously published quality and benchmark reports</li>
 </ul>
-<p>Radixor is built for teams that need consistent stemming quality at scale without sacrificing maintainability or deployment efficiency.</p>
+<p>Radixor is intended for teams that require consistent stemming quality at scale without compromising maintainability, deployment efficiency, or the long-term evolvability of compiled lexical resources.</p>
 <h2 id="start-here">Start here</h2>
 <ul>
 <li>Read <a href="quick-start/">Quick Start</a> for immediate implementation guidance.</li>
