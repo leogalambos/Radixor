@@ -156,15 +156,6 @@ jobs:
           test -f gradle.properties
           test -f gradle/verification-metadata.xml
 
-      - name: Generate release changelog for tagged builds
-        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/release@')
-        shell: bash
-        run: |
-          set -euo pipefail
-          chmod +x ./tools/generate-release-notes.sh
-          mkdir -p build/generated/release-notes
-          ./tools/generate-release-notes.sh "${GITHUB_REF_NAME}" > build/generated/release-notes/CHANGELOG.md
-
       - name: Build release inputs, signed Maven bundle, and SBOM
         env:
           SIGNING_KEY: ${{ secrets.SIGNING_KEY }}

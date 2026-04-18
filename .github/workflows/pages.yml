@@ -19,6 +19,7 @@ on:
       - 'gradlew'
       - 'gradlew.bat'
       - '.github/workflows/pages.yml'
+      - '.github/workflows/benchmarks.yml'
       - 'tools/generate-pages-badges.py'
   workflow_dispatch:
 
