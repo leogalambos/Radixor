@@ -23,6 +23,9 @@ theme:
 extra: 
   generator: false
 
+extra_css:
+  - assets/stylesheets/extra.css
+
 markdown_extensions:
   - admonition
   - attr_list
@@ -34,12 +37,29 @@ markdown_extensions:
 
 nav:
   - Home: index.md
-  - Quick Start: quick-start.md
-  - Dictionary Format: dictionary-format.md
-  - CLI Compilation: cli-compilation.md
-  - Programmatic Usage: programmatic-usage.md
-  - Built-in Languages: built-in-languages.md
-  - Architecture and Reduction: architecture-and-reduction.md
-  - Quality and Operations: quality-and-operations.md
-  - Benchmarking: benchmarking.md
-  - CI Reports: reports.md
+
+  - Getting Started:
+     - Quick Start: quick-start.md
+     - Built-in Languages: built-in-languages.md
+     - Dictionary Format: dictionary-format.md
+     - CLI Compilation: cli-compilation.md
+
+  - Programmatic Usage:
+     - Overview: programmatic-usage.md
+     - Loading and Building Stemmers: programmatic-loading-and-building.md
+     - Querying and Ambiguity Handling: programmatic-querying-and-ambiguity.md
+     - Extending and Persisting Compiled Tries: programmatic-extending-and-persistence.md
+
+  - Architecture and Semantics:
+     - Overview: architecture-and-reduction.md
+     - Architecture: architecture.md
+     - Reduction Semantics: reduction-semantics.md
+     - Compatibility and Guarantees: compatibility-and-guarantees.md
+
+  - Dictionaries:
+     - Contributing Dictionaries: contributing-dictionaries.md
+
+  - Quality and Operations:
+     - Quality and Operations: quality-and-operations.md
+     - Benchmarking: benchmarking.md
+     - Reports: reports.md

@@ -11,53 +11,61 @@
 [![License](https://img.shields.io/github/license/leogalambos/Radixor)](LICENSE)
 [![Java](https://img.shields.io/badge/Java-21%2B-brightgreen)](#)
 
-*Fast algorithmic stemming with compact patch-command tries — measured at about 4× to 6× the throughput of the Snowball Porter stemmer family on the current English benchmark workload.*
+*Fast, deterministic, multi-language stemming for Java, built around compact patch-command tries and measured at roughly 4× to 6× the throughput of the Snowball Porter stemmer family on the current English benchmark workload.*
 
-**Radixor** is a fast, algorithmic stemming toolkit for Java, built around compact **patch-command tries** in the tradition of the original **Egothor** stemmer.
+**Radixor** is a modern multi-language stemming toolkit for Java in the tradition of the original **Egothor** approach. It learns compact word-to-stem transformations from dictionary data, stores them in compiled patch-command tries, and exposes a runtime model designed for speed, determinism, and operational simplicity. Unlike a closed-form dictionary lookup stemmer, Radixor can also generalize beyond explicitly listed word forms.
 
-On the current JMH English comparison benchmark, Radixor with bundled `US_UK_PROFI`
-reaches approximately **31 to 32 million tokens per second**, compared with about
-**8 million tokens per second** for Snowball original Porter and about
-**5 to 5.5 million tokens per second** for Snowball English (Porter2).
+It is particularly well suited to systems that need stemming which is:
 
-That means the current Radixor implementation is approximately:
+- fast at runtime,
+- compact in memory and on disk,
+- deterministic in behavior,
+- adaptable through dictionary data rather than hardcoded language rules,
+- practical to compile, persist, version, extend, and deploy.
 
-- **4× faster** than Snowball original Porter
-- **6× faster** than Snowball English (Porter2)
-
-It is designed for production search and text-processing systems that need stemming which is:
-
-- fast at runtime
-- compact in memory and on disk
-- deterministic in behavior
-- driven by dictionary data rather than hardcoded language rules
-- practical to maintain, extend, and test
-
-Radixor keeps the valuable core of the original Egothor idea, modernizes the implementation, and adds capabilities that make it more useful in real software systems today.
+It also retains the operational advantages of a compiled artifact model: predictable runtime behavior, direct binary loading, and clear separation between preparation-time compilation and live request processing.
 
 ## Table of Contents
 
 - [Why Radixor](#why-radixor)
+- [Performance](#performance)
 - [Heritage](#heritage)
 - [What Radixor adds](#what-radixor-adds)
 - [Key features](#key-features)
-- [Performance](#performance)
 - [Documentation](#documentation)
 - [Project philosophy](#project-philosophy)
 - [Historical note](#historical-note)
 
 ## Why Radixor
 
-The central idea behind Radixor is simple: learn how to transform a word form into its stem, encode that transformation as a compact patch command, store it in a trie, and make runtime lookup extremely fast.
+The central idea behind Radixor is simple: learn how to transform a word form into its stem, encode that transformation as a compact patch command, store it in a trie, and make the runtime path as small and direct as possible.
 
-This gives you a stemmer that is:
+That produces a stemmer that is:
 
-- data-driven rather than rule-hardcoded
-- reusable across languages
-- compact enough for deployment-friendly binary artifacts
-- suitable for both offline compilation and runtime loading
+- data-driven rather than rule-hardcoded,
+- applicable across languages through compiled transformation models learned from dictionary data,
+- compact enough for deployment-friendly binary artifacts,
+- suitable for both offline compilation and direct runtime loading,
+- capable of exposing either a preferred result or multiple candidate results when ambiguity matters.
 
-Radixor is especially attractive when you want something more adaptable than simple suffix stripping, but much smaller and easier to operate than a full morphological analyzer. In the current English benchmark comparison against the Snowball Porter stemmer family, it also delivers a substantial throughput advantage.
+Radixor is especially attractive when you want something more adaptable than simple suffix stripping, but much smaller and easier to operate than a full morphological analyzer.
+
+## Performance
+
+Radixor includes a JMH benchmark suite for both its own algorithmic core and a side-by-side English comparison against the Snowball Porter stemmer family.
+
+On the current English comparison workload, Radixor with bundled `US_UK_PROFI` reaches approximately **31 to 32 million tokens per second**. Snowball original Porter reaches approximately **8 million tokens per second**, and Snowball English (Porter2) approximately **5 to 5.5 million tokens per second**.
+
+That places Radixor at approximately:
+
+- **4× the throughput of Snowball original Porter**
+- **6× the throughput of Snowball English (Porter2)**
+
+on the current benchmark workload.
+
+This is a throughput comparison on the same deterministic token stream. It is **not** a claim that the compared stemmers are linguistically equivalent or interchangeable.
+
+For benchmark scope, workload design, environment, commands, report locations, and interpretation guidance, see [Benchmarking](docs/benchmarking.md).
 
 ## Heritage
 
@@ -69,44 +77,47 @@ Useful historical references:
 
 - [Egothor project](http://www.egothor.org/)
 - [Stempel overview](https://www.getopt.org/stempel/)
+- [Leo Galambos, *Lemmatizer for Document Information Retrieval Systems in JAVA* (SOFSEM 2001)](https://www.researchgate.net/publication/221512865_Lemmatizer_for_Document_Information_Retrieval_Systems_in_JAVA)
 - [Lucene Stempel overview](https://lucene.apache.org/core/5_3_0/analyzers-stempel/index.html)
 - [Elasticsearch Stempel plugin](https://www.elastic.co/docs/reference/elasticsearch/plugins/analysis-stempel)
 
-Radixor is not just a repackaging of legacy code. It is a practical modernization of the approach for current Java development and long-term maintainability.
+The Galambos paper is a useful historical reference for the semi-automatic, transformation-based stemming idea that later informed the Egothor lineage and, in turn, the conceptual background of Radixor. It should be read as research and heritage context rather than as a description of Radixor's present-day implementation.
+
+Radixor is not a repackaging of legacy code. It is a modern implementation that preserves the valuable core idea while reworking the engineering around maintainability, testing, persistence, and long-term operational use.
 
 ## What Radixor adds
 
-Radixor keeps the patch-command trie model, but improves the engineering around it.
+Radixor keeps the patch-command trie model, but improves the engineering around it in ways that matter in real software systems.
 
 Compared with the historical baseline, Radixor emphasizes:
 
-- **simplification to the most practical core**  
-  The implementation focuses on the parts of the original approach that are most useful in production.
+- **a focused practical core**  
+  The implementation concentrates on the parts of the original approach that are most useful in production.
 
 - **immutable compiled tries**  
   Runtime lookup uses compact read-only structures optimized for efficient access.
 
 - **support for more than one stemming result**  
-  Radixor can expose both a preferred result and multiple candidate results where the data is ambiguous.
+  Radixor can expose both a preferred result and multiple candidate results when the underlying data is ambiguous.
 
 - **frequency-aware deterministic ordering**  
   Candidate results are ordered consistently and reproducibly.
 
 - **practical subtree reduction modes**  
-  Reduction can be tuned toward stronger compression or more conservative behavioral preservation.
+  Reduction can be tuned toward stronger compression or more conservative semantic preservation.
 
-- **reconstruction of writable builders from compiled tables**  
+- **reconstruction of writable builders from compiled artifacts**  
   Existing compiled stemmer tables can be reopened, modified, and compiled again.
 
-- **better tests and implementation stability**  
-  Stronger coverage improves confidence during refactoring and further development.
+- **strong validation discipline**  
+  Coverage, mutation testing, benchmark visibility, and published reports are treated as part of the engineering standard rather than optional project decoration.
 
 ## Key features
 
 - Fast algorithmic stemming
 - Compact compiled binary artifacts
 - Patch-command based transformation model
-- Dictionary-driven language adaptation
+- Multi-language stemming through compiled transformation models
 - Single-result and multi-result lookup
 - Deterministic result ordering
 - Compressed binary persistence
@@ -114,57 +125,69 @@ Compared with the historical baseline, Radixor emphasizes:
 - CLI compilation tool
 - Bundled language resources
 - Support for extending compiled stemmer tables
-
-## Performance
-
-Radixor includes a JMH benchmark suite for both its own algorithmic core and a
-side-by-side comparison against the Snowball Porter stemmer family.
-
-On the current English comparison workload, Radixor with bundled `US_UK_PROFI`
-reaches approximately **31 to 32 million tokens per second**. Snowball original
-Porter reaches approximately **8 million tokens per second**, and Snowball
-English (Porter2) approximately **5 to 5.5 million tokens per second**.
-
-That places Radixor at approximately **4× the throughput of Snowball original Porter**
-and approximately **6× the throughput of Snowball English (Porter2)**
-on the current benchmark workload.
-
-This is a throughput comparison on the same deterministic token stream. It is
-not a claim that the compared stemmers are linguistically equivalent or
-interchangeable.
-
-For benchmark scope, workload design, environment, commands, report locations,
-and interpretation guidance, see [Benchmarking](docs/benchmarking.md).
+- Reproducible and auditable engineering posture
 
 ## Documentation
 
 The repository keeps the front page concise and places detailed documentation under `docs/`.
 
-Start here:
+### Getting Started
 
 - [Quick Start](docs/quick-start.md)  
   A practical first guide to loading, compiling, and using Radixor.
 
+- [Built-in Languages](docs/built-in-languages.md)  
+  Overview of bundled language resources such as `US_UK` and `US_UK_PROFI`.
+
 - [Dictionary Format](docs/dictionary-format.md)  
-  How to write stemming dictionaries.
+  How to write and normalize stemming dictionaries.
 
 - [Compilation (CLI tool)](docs/cli-compilation.md)  
-  How to compile dictionaries with the `Compile` CLI.
+  How to compile dictionaries into deployable binary artifacts.
 
-- [Programmatic Usage](docs/programmatic-usage.md)  
-  How to build, load, modify, and query Radixor from Java code.
+### Programmatic Usage
 
-- [Built-in Languages](docs/built-in-languages.md)  
-  How to use integrated language resources such as `US_UK_PROFI`.
+- [Programmatic Usage Overview](docs/programmatic-usage.md)  
+  Entry point to the Java API and the overall usage model.
 
-- [Architecture and Reduction](docs/architecture-and-reduction.md)  
-  Internal model, compiled trie design, and reduction strategies.
+- [Loading and Building Stemmers](docs/programmatic-loading-and-building.md)  
+  Loading bundled resources, textual dictionaries, binary artifacts, and direct builder usage.
+
+- [Querying and Ambiguity Handling](docs/programmatic-querying-and-ambiguity.md)  
+  `get()`, `getAll()`, `getEntries()`, patch application, and ambiguity behavior.
+
+- [Extending and Persisting Compiled Tries](docs/programmatic-extending-and-persistence.md)  
+  Reopening compiled tries, rebuilding them, and writing binary artifacts.
+
+### Concepts and Internals
+
+- [Architecture and Reduction Overview](docs/architecture-and-reduction.md)  
+  High-level explanation of the build pipeline and compiled trie model.
+
+- [Architecture](docs/architecture.md)  
+  Structural model, data flow, and runtime lookup behavior.
+
+- [Reduction Semantics](docs/reduction-semantics.md)  
+  Ranked, unordered, and dominant reduction behavior.
+
+- [Compatibility and Guarantees](docs/compatibility-and-guarantees.md)  
+  Supported public API, internal API boundaries, and compatibility expectations.
+
+### Dictionaries and Language Resources
+
+- [Contributing Dictionaries](docs/contributing-dictionaries.md)  
+  Guidance for high-quality lexical resource contributions.
+
+### Quality and Operations
 
 - [Quality and Operations](docs/quality-and-operations.md)  
-  Testing, persistence, deployment, and operational guidance.
+  Engineering standards, validation posture, auditability, and operational model.
 
 - [Benchmarking](docs/benchmarking.md)  
-  JMH benchmark design, Snowball comparison, execution, and interpretation.
+  JMH benchmark methodology, Porter comparison, and result interpretation.
+
+- [Published Reports](docs/reports.md)  
+  Entry points to CI-published reports and GitHub Pages artifacts.
 
 ## Project philosophy
 
@@ -172,19 +195,20 @@ Radixor does not preserve historical complexity for its own sake.
 
 It preserves the valuable idea:
 
-- compact learned transformations
-- trie-based lookup
-- language-data driven stemming
-- practical runtime speed
+- compact learned transformations,
+- trie-based lookup,
+- language-data driven stemming,
+- practical runtime speed.
 
 Then it improves the parts modern users care about:
 
-- maintainability
-- testability
-- modification workflows
-- persistence
-- determinism
-- clearer APIs
+- maintainability,
+- testability,
+- modification workflows,
+- persistence,
+- determinism,
+- clearer APIs,
+- explicit quality evidence.
 
 The goal is to keep the Egothor/Stempel lineage useful as a serious contemporary software component.
 

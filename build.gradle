@@ -207,14 +207,7 @@ distributions {
 
             from('docs') {
                 into 'docs'
-                include 'quick-start.md'
-                include 'cli-compilation.md'
-                include 'dictionary-format.md'
-                include 'built-in-languages.md'
-                include 'programmatic-usage.md'
-                include 'architecture-and-reduction.md'
-                include 'quality-and-operations.md'
-                include 'benchmarking.md'
+                include '**/*.md'
             }
             
             from(layout.buildDirectory.dir('generated/release-notes')) {

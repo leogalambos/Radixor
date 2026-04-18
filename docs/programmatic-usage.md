@@ -1,320 +1,56 @@
 # Programmatic Usage
 
-This document describes how to use **Radixor** programmatically from Java.
+This document provides the programmatic entry point to **Radixor**.
 
-It covers:
+Radixor follows a clear lifecycle:
 
-- building a trie from dictionary data
-- compiling it into an immutable structure
-- loading compiled stemmers
-- querying for stems
-- working with multiple candidates
-- modifying existing compiled stemmers
+1. acquire a compiled stemmer,
+2. query it for patch commands,
+3. apply those commands to produce stems,
+4. reopen and extend the compiled structure when needed.
 
+## Conceptual model
 
+Radixor is dictionary-driven, but runtime stemming does not operate by scanning raw dictionary files. A source dictionary is parsed as a sequence of canonical stems and their known variants. Each variant is converted into a compact patch command that transforms the variant into the stem, while the stem itself may optionally be stored as a canonical no-op patch. The mutable trie is then reduced into a compiled read-only structure that stores ordered values and their counts at addressed nodes.
 
-## Overview
+Two consequences matter for developers:
 
-Radixor separates the stemming lifecycle into three stages:
+- the quality and coverage of stemming behavior depend on dictionary richness,
+- runtime usage is based on compiled patch-command lookup rather than on direct dictionary traversal.
 
-1. **Build** – collect word–stem mappings in a mutable structure  
-2. **Compile** – reduce and convert to an immutable trie  
-3. **Query** – perform fast runtime lookups  
+This is why Radixor can generalize beyond explicitly listed forms and why compiled artifacts are well suited for deployment.
 
-These stages are represented by:
+## Documentation map
 
-- `FrequencyTrie.Builder` (mutable)
-- `FrequencyTrie` (immutable, compiled)
-- `StemmerPatchTrieLoader` / `StemmerPatchTrieBinaryIO` (I/O)
+The programmatic API is easier to understand when split by developer task:
 
+- [Loading and Building Stemmers](programmatic-loading-and-building.md) explains how to acquire a compiled stemmer from bundled resources, textual dictionaries, binary artifacts, or direct builder usage.
+- [Querying and Ambiguity Handling](programmatic-querying-and-ambiguity.md) explains `get(...)`, `getAll(...)`, `getEntries(...)`, patch application, and the practical meaning of reduction modes.
+- [Extending and Persisting Compiled Tries](programmatic-extending-and-persistence.md) explains how to reopen compiled tries, add new lexical data, rebuild them, and store them as binary artifacts.
 
+## Core types
 
-## Building a trie programmatically
+The main types involved in programmatic usage are:
 
-You can construct a trie directly without using the CLI.
+- `FrequencyTrie.Builder<V>` for mutable construction and extension,
+- `FrequencyTrie<V>` for the compiled read-only trie,
+- `PatchCommandEncoder` for creating and applying patch commands,
+- `StemmerPatchTrieLoader` for loading bundled or textual dictionaries,
+- `StemmerPatchTrieBinaryIO` for reading and writing compressed binary artifacts,
+- `FrequencyTrieBuilders` for reconstructing a mutable builder from a compiled trie,
+- `ReductionMode` and `ReductionSettings` for controlling compilation semantics.
 
-```java
-import org.egothor.stemmer.*;
+## Recommended reading order
 
-public final class BuildExample {
+For most developers, the best order is:
 
-    public static void main(String[] args) {
-        ReductionSettings settings = ReductionSettings.withDefaults(
-                ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS
-        );
-
-        FrequencyTrie.Builder<String> builder =
-                new FrequencyTrie.Builder<>(String[]::new, settings);
-
-        PatchCommandEncoder encoder = new PatchCommandEncoder();
-
-        builder.put("running", encoder.encode("running", "run"));
-        builder.put("runs", encoder.encode("runs", "run"));
-        builder.put("ran", encoder.encode("ran", "run"));
-
-        FrequencyTrie<String> trie = builder.build();
-    }
-}
-```
-
-
-
-## Loading from dictionary files
-
-To parse dictionary files directly:
-
-```java
-import java.io.IOException;
-import java.nio.file.Path;
-
-import org.egothor.stemmer.*;
-
-public final class LoadFromDictionaryExample {
-
-    public static void main(String[] args) throws IOException {
-        FrequencyTrie<String> trie = StemmerPatchTrieLoader.load(
-                Path.of("data/stemmer.txt"),
-                true,
-                ReductionSettings.withDefaults(
-                        ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS
-                )
-        );
-    }
-}
-```
-
-
-
-## Loading a compiled binary trie
-
-```java
-import java.io.IOException;
-import java.nio.file.Path;
-
-import org.egothor.stemmer.*;
-
-public final class LoadBinaryExample {
-
-    public static void main(String[] args) throws IOException {
-        FrequencyTrie<String> trie =
-                StemmerPatchTrieLoader.loadBinary(Path.of("english.radixor.gz"));
-    }
-}
-```
-
-This is the **preferred production approach**.
-
-
-
-## Querying for stems
-
-### Preferred result
-
-```java
-String word = "running";
-String patch = trie.get(word);
-String stem = PatchCommandEncoder.apply(word, patch);
-```
-
-### All candidates
-
-```java
-String[] patches = trie.getAll(word);
-
-for (String patch : patches) {
-    String stem = PatchCommandEncoder.apply(word, patch);
-}
-```
-
-
-
-## Accessing value frequencies
-
-For diagnostic or advanced use cases:
-
-```java
-import org.egothor.stemmer.ValueCount;
-
-java.util.List<ValueCount<String>> entries = trie.getEntries("axes");
-
-for (ValueCount<String> entry : entries) {
-    String patch = entry.value();
-    int count = entry.count();
-}
-```
-
-This allows:
-
-* inspecting ambiguity
-* understanding ranking decisions
-* debugging dictionary quality
-
-
-
-## Using bundled language resources
-
-```java
-FrequencyTrie<String> trie = StemmerPatchTrieLoader.load(
-        StemmerPatchTrieLoader.Language.US_UK_PROFI,
-        true,
-        ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS
-);
-```
-
-Bundled dictionaries are useful for:
-
-* quick integration
-* testing
-* reference behavior
-
-
-
-## Persisting a compiled trie
-
-```java
-import java.io.IOException;
-import java.nio.file.Path;
-
-import org.egothor.stemmer.*;
-
-public final class SaveExample {
-
-    public static void main(String[] args) throws IOException {
-        StemmerPatchTrieBinaryIO.write(trie, Path.of("english.radixor.gz"));
-    }
-}
-```
-
-
-
-## Modifying an existing trie
-
-A compiled trie can be reopened into a builder, extended, and rebuilt.
-
-```java
-import java.io.IOException;
-import java.nio.file.Path;
-
-import org.egothor.stemmer.*;
-
-public final class ModifyExample {
-
-    public static void main(String[] args) throws IOException {
-        FrequencyTrie<String> compiled =
-                StemmerPatchTrieBinaryIO.read(Path.of("english.radixor.gz"));
-
-        ReductionSettings settings = ReductionSettings.withDefaults(
-                ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS
-        );
-
-        FrequencyTrie.Builder<String> builder =
-                FrequencyTrieBuilders.copyOf(compiled, String[]::new, settings);
-
-        builder.put("microservices", PatchCommandEncoder.NOOP_PATCH);
-
-        FrequencyTrie<String> updated = builder.build();
-
-        StemmerPatchTrieBinaryIO.write(updated,
-                Path.of("english-custom.radixor.gz"));
-    }
-}
-```
-
-
-
-## Thread safety
-
-* `FrequencyTrie` (compiled):
-
-  * **thread-safe**
-  * safe for concurrent reads
-
-* `FrequencyTrie.Builder`:
-
-  * **not thread-safe**
-  * intended for single-threaded construction
-
-
-
-## Performance characteristics
-
-### Querying
-
-* O(length of word)
-* minimal allocations
-* suitable for high-throughput pipelines
-
-### Loading
-
-* binary loading is fast
-* no preprocessing required
-
-### Building
-
-* depends on dictionary size
-* reduction phase may be CPU-intensive
-
-
-
-## Best practices
-
-### Reuse compiled trie instances
-
-* load once
-* share across threads
-
-### Prefer binary loading in production
-
-* avoid rebuilding at runtime
-* treat compiled files as deployable artifacts
-
-### Use `getAll()` only when needed
-
-* `get()` is faster and sufficient for most use cases
-
-### Keep builders short-lived
-
-* build → compile → discard
-
-
-
-## Integration patterns
-
-### Search systems
-
-* apply stemming during indexing and querying
-* ensure consistent dictionary usage
-
-### Text normalization pipelines
-
-* integrate as a transformation step
-* combine with tokenization and filtering
-
-### Domain adaptation
-
-* extend dictionaries with domain-specific vocabulary
-* rebuild compiled artifacts
-
-
+1. [Loading and Building Stemmers](programmatic-loading-and-building.md)
+2. [Querying and Ambiguity Handling](programmatic-querying-and-ambiguity.md)
+3. [Extending and Persisting Compiled Tries](programmatic-extending-and-persistence.md)
 
 ## Next steps
 
-* [Dictionary format](dictionary-format.md)
-* [CLI compilation](cli-compilation.md)
-* [Architecture and reduction](architecture-and-reduction.md)
-
-
-
-## Summary
-
-Programmatic usage of Radixor follows a clear pattern:
-
-* build or load a trie
-* query using patch commands
-* apply transformations
-
-The API is intentionally simple at the surface, while providing deeper control when needed for:
-
-* ambiguity handling
-* diagnostics
-* dictionary evolution
+- [Quick Start](quick-start.md)
+- [CLI compilation](cli-compilation.md)
+- [Dictionary format](dictionary-format.md)
+- [Architecture and reduction](architecture-and-reduction.md)

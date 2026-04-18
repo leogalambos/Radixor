@@ -1,253 +1,229 @@
 # Dictionary Format
 
-Radixor uses a simple, line-oriented dictionary format to define mappings between **word forms** and their **canonical stems**.
+Radixor uses a simple line-oriented dictionary format designed for practical stemming workflows.
 
-This format is intentionally minimal, language-agnostic, and easy to generate from existing linguistic resources or corpora.
+Each logical line describes one canonical stem and zero or more known word variants that should reduce to that stem. The format is intentionally lightweight, easy to maintain in source control, and directly consumable both by the programmatic loader and by the CLI compiler.
 
-## Overview
+## Core structure
 
-Each logical line defines:
+Each non-empty logical line has the following shape:
 
-- one **canonical stem**
-- zero or more **word variants** belonging to that stem
-
-```
-stem variant1 variant2 variant3 ...
+```text
+<stem> <variant1> <variant2> <variant3> ...
 ```
 
-At compile time:
+The first token is interpreted as the **canonical stem**. Every following token on the same line is interpreted as a **known variant** belonging to that stem.
 
-- each variant is converted into a **patch command** transforming the variant into the stem
-- the stem itself may optionally be stored as a **no-op mapping**
+Example:
 
-## Basic example
-
-```
+```text
 run running runs ran
 connect connected connecting connection
-analyze analyzing analysed analyses
 ```
 
-This defines:
+In this example:
 
-| Stem     | Variants                              |
-|----------|----------------------------------------|
-| run      | running, runs, ran                     |
-| connect  | connected, connecting, connection      |
-| analyze  | analyzing, analysed, analyses          |
+- `run` is the canonical stem for `running`, `runs`, and `ran`,
+- `connect` is the canonical stem for `connected`, `connecting`, and `connection`.
 
-## Syntax rules
+## How the loader interprets a line
 
-### 1. Tokenization
+When a dictionary is loaded through `StemmerPatchTrieLoader`, the loader processes each parsed line as follows:
 
-- Tokens are separated by **whitespace**
-- Multiple spaces and tabs are treated as a single separator
-- Leading and trailing whitespace is ignored
+1. the first token becomes the canonical stem,
+2. every following token is treated as a variant,
+3. each variant is converted into a patch command that transforms the variant into the stem,
+4. if `storeOriginal` is enabled, the stem itself is also inserted using the canonical no-op patch command.
 
-### 2. First token is the stem
+This means the textual dictionary is not used directly at runtime. Instead, it is transformed into patch-command data and compiled into a reduced read-only trie.
 
-- The **first token** on each line is always the canonical stem
-- All following tokens are treated as variants of that stem
+## Minimal valid lines
 
-### 3. Case normalization
+A line may consist of the stem only:
 
-- All input is normalized to **lowercase using `Locale.ROOT`**
-- Dictionaries should ideally already be lowercase to avoid ambiguity
+```text
+run
+```
 
-### 4. Empty lines
+This is syntactically valid. It defines a stem entry with no explicit variants on that line.
 
-- Empty lines are ignored
+Whether such a line is operationally useful depends on how the dictionary is loaded:
 
-### 5. Duplicate variants
+- if `storeOriginal` is enabled, the stem itself is inserted as a no-op mapping,
+- if `storeOriginal` is disabled, the line contributes no explicit variant mappings.
 
-- Duplicate variants are allowed but have no additional effect
-- Frequency is determined by occurrence across the entire dataset
+## Whitespace rules
 
-## Remarks (comments)
+Tokens are separated by whitespace. Leading and trailing whitespace is ignored.
+
+These lines are equivalent:
+
+```text
+run running runs ran
+```
+
+```text
+   run   running   runs   ran
+```
+
+Tabs and repeated spaces are both accepted because tokenization is whitespace-based.
+
+## Empty lines
+
+Empty lines are ignored.
+
+Example:
+
+```text
+run running runs ran
+
+connect connected connecting
+```
+
+The blank line between entries has no effect.
+
+## Remarks and comments
 
 The parser supports both full-line and trailing remarks.
 
-### Supported remark markers
+Two remark markers are recognized:
 
 - `#`
 - `//`
 
-### Examples
+The earliest occurrence of either marker terminates the logical content of the line, and the remainder of that line is ignored.
 
-```
-run running runs ran   # English verb forms
-connect connected connecting  // basic forms
-```
+Examples:
 
-Everything after the first occurrence of a remark marker is ignored.
-
-### Important note
-
-Remark markers are not escaped. If `#` or `//` appear in a token, they will terminate the line.
-
-## Storing the original form
-
-When compiling, you may enable:
-
-```
---store-original
+```text
+run running runs ran # English verb forms
+connect connected connecting // Common derived forms
 ```
 
-This causes the stem itself to be stored using a **no-op patch command**.
+This is also valid:
+
+```text
+# This line is ignored completely
+// This line is also ignored completely
+```
+
+## Case normalization
+
+Input lines are normalized to lower case using `Locale.ROOT` before tokenization is processed into dictionary entries.
+
+That means dictionary authors should treat the format as **case-insensitive at load time**. If a file contains uppercase or mixed-case tokens, they will be normalized during parsing.
 
 Example:
 
-```
-run running runs
-```
-
-With `--store-original`, this implicitly includes:
-
-```
-run -> run
+```text
+Run Running Runs Ran
 ```
 
-This is useful when:
+is processed the same way as:
 
-- the input may already be normalized
-- you want stable identity mappings
-- you want to avoid missing entries for canonical forms
-
-## Frequency and ordering
-
-Radixor tracks **local frequencies** of values.
-
-Frequency is determined by:
-
-- how many times a mapping appears during construction
-- merging behavior during reduction
-
-When multiple stems exist for a word:
-
-- results are ordered by **descending frequency**
-- ties are resolved deterministically:
-  1. shorter textual representation wins
-  2. lexicographically smaller value wins
-  3. earlier insertion order wins
-
-This guarantees **stable and reproducible results**.
-
-## Ambiguity and multiple stems
-
-A word may legitimately map to more than one stem:
-
-```
-axes ax axe
+```text
+run running runs ran
 ```
 
-This allows Radixor to represent ambiguity explicitly.
+## Character set and practical convention
 
-At runtime:
+Dictionary files are read as UTF-8 text.
 
-- `get(word)` returns the **preferred result**
-- `getAll(word)` returns **all candidates**
+From the perspective of the parser and the stemming algorithm, the format is not restricted to plain ASCII tokens. The parser accepts ordinary Java `String` data, and the trie itself works with general character sequences rather than with an ASCII-only internal model. In principle, this means the system could process diacritic and non-diacritic forms alike, and it could also store forms with inconsistently used diacritics.
 
-## Design guidelines
+In practice, however, the format is currently best understood as **primarily intended for classical basic ASCII lexical input**, especially in the traditional stemming style where language data is normalized into plain characters in the ASCII range up to character code 127. This convention is particularly relevant for languages whose original orthography includes diacritics but whose stemming dictionaries are commonly maintained in normalized non-diacritic form.
 
-### Keep stems consistent
+Future versions may expand the documentation and operational guidance for dictionaries that intentionally preserve diacritics. At present, that workflow is not the primary documented use case, not because the algorithm fundamentally forbids it, but because a concrete project requirement for such support has not yet emerged.
 
-Use a single canonical form:
+## Distinct stem and variant semantics
 
-- `run` instead of mixing `run` / `running`
-- `analyze` vs `analyse` — pick one convention
+The format expresses a one-line grouping of forms under a canonical stem. It does not encode linguistic metadata, part-of-speech information, weights, or explicit ambiguity markers.
 
-### Avoid noise
+For example:
 
-Do not include:
-
-- typos
-- extremely rare forms (unless required)
-- inconsistent normalization
-
-### Prefer completeness over clever rules
-
-Radixor is data-driven:
-
-- more complete dictionaries → better results
-- no hidden rule system compensates for missing entries
-
-### Handle domain-specific vocabulary
-
-You can extend dictionaries with:
-
-- product names
-- technical terms
-- organization-specific terminology
-
-## Example: minimal dictionary
-
-```
-go goes going went
-be is are was were being
-have has having had
+```text
+axis axes
+axe axes
 ```
 
-## Example: domain-specific extension
+These are simply two independent lines. If both contribute mappings for the same surface form, the compiled trie may later expose one or more candidate patch commands depending on the accumulated local counts and the selected reduction mode.
 
-```
-microservice microservices
-container containers containerized
-kubernetes kubernetes
-```
+In other words, the dictionary format itself is deliberately simple. Richer behavior such as preferred-result ranking or multiple candidate results emerges during trie construction and reduction rather than through extra syntax in the dictionary file.
 
-## Common pitfalls
+## Duplicate forms and repeated entries
 
-### Mixing cases
+The format does not reserve any special syntax for duplicates. If the same mapping is inserted multiple times through repeated dictionary content, the builder accumulates local counts for the stored value at the addressed key.
 
-```
-Run running Runs   ❌
-```
+This matters because compiled tries preserve local value frequencies and use them to determine preferred ordering for `get(...)`, `getAll(...)`, and `getEntries(...)`.
 
-→ normalized to lowercase, but inconsistent input is error-prone
+As a result, repeating the same mapping is not just redundant text. It can influence the ranking behavior of the compiled trie.
 
-### Multiple stems on one line
+## Practical examples
 
-```
-run running connect   ❌
+### Simple English example
+
+```text
+run running runs ran
+connect connected connecting connection
+build building builds built
 ```
 
-→ `connect` becomes a variant of `run`, which is incorrect
+### Dictionary with remarks
 
-### Hidden comments
-
+```text
+run running runs ran # canonical verb family
+connect connected connecting // derived forms
+build building builds built
 ```
-run running //comment runs   ❌
+
+### Stem-only entries
+
+```text
+run
+connect connected connecting
+build
 ```
 
-→ everything after `//` is ignored
+### Mixed case input
 
-## When to use this format
+```text
+Run Running Runs Ran
+CONNECT Connected Connecting
+```
 
-This format is suitable for:
+This is accepted, but it is normalized to lower case during parsing.
 
-- curated linguistic datasets
-- exported morphological dictionaries
-- domain-specific vocabularies
-- generated `(word, stem)` pairs from corpora
+## Format limitations
 
-## Next steps
+The current dictionary format intentionally stays minimal:
+
+- no quoted tokens,
+- no escaping rules,
+- no multi-word entries,
+- no inline weighting syntax,
+- no explicit ambiguity syntax,
+- no sectioning or nested structure.
+
+Each token is simply a whitespace-delimited word form after remark stripping and lowercasing.
+
+## Authoring guidance
+
+For reliable results, keep dictionaries:
+
+- consistent in normalization,
+- free of accidental duplicates unless repeated weighting is intentional,
+- focused on meaningful stem-to-variant groupings,
+- encoded in UTF-8,
+- easy to audit in plain text form.
+
+For most current deployments, it is sensible to keep dictionary content in normalized basic ASCII form unless there is a clear requirement to preserve diacritics end-to-end.
+
+## Relationship to other documentation
+
+This page describes only the textual source format.
+
+To understand how those dictionary lines are transformed into compiled runtime artifacts, continue with:
 
 - [CLI compilation](cli-compilation.md)
 - [Programmatic usage](programmatic-usage.md)
-- [Quick start](quick-start.md)
-
-## Summary
-
-Radixor dictionaries are intentionally simple:
-
-- one line per stem
-- whitespace-separated tokens
-- optional remarks
-- no embedded rules
-
-This simplicity enables:
-
-- easy generation
-- fast parsing
-- deterministic behavior
-- efficient compilation into compact patch-command tries
+- [Architecture and reduction](architecture-and-reduction.md)

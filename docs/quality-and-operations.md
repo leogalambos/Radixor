@@ -1,315 +1,239 @@
 # Quality and Operations
 
-This document describes quality, testing, and operational practices for **Radixor**.
+This document describes the engineering standards, quality posture, and operational model of **Radixor**.
 
-It focuses on:
+It is intentionally broader than a test checklist. The purpose of the project is not only to provide a fast stemmer, but to provide one whose behavior is explainable, measurable, reproducible, and straightforward to audit. That objective influences both the implementation style and the surrounding operational practices.
 
-- reliability and determinism
-- testing strategies
-- deployment patterns
-- performance considerations
-- lifecycle management of stemmer data
+## Engineering position
 
+Radixor is developed with a strong preference for objective quality signals over informal confidence.
 
+In practical terms, that means the project emphasizes:
 
-## Overview
+- deterministic behavior,
+- reproducible compiled artifacts,
+- very high structural test coverage,
+- very high mutation resistance,
+- explicit benchmark methodology,
+- minimal operational ambiguity in deployment.
 
-Radixor is designed to separate:
+This is not treated as a cosmetic quality layer added after the implementation. It is part of the design goal of the project itself.
 
-- **data preparation** (dictionary construction and compilation)
-- **runtime execution** (lookup and patch application)
+## Why quality discipline matters here
 
-This separation enables:
+A stemmer can appear deceptively simple from the outside. In practice, however, correctness depends on several interacting layers:
 
-- predictable runtime behavior
-- reproducible builds
-- controlled evolution of stemming data
+- dictionary parsing,
+- patch-command generation,
+- trie construction,
+- reduction semantics,
+- binary persistence,
+- runtime lookup behavior.
 
+A defect in any one of these layers can produce subtle and difficult-to-detect errors, including silent ranking drift, loss of ambiguity information, reconstruction inconsistencies, or incorrect stemming outcomes under only a narrow subset of inputs.
 
+For that reason, Radixor aims to be validated not only by example-based tests, but by a broader quality model that combines functional testing, mutation testing, coverage analysis, benchmark visibility, and artifact publication.
 
 ## Determinism and reproducibility
 
-Radixor emphasizes deterministic behavior.
+Determinism is a foundational property of the project.
 
-### Deterministic outputs
+Given the same dictionary input and the same reduction settings, the project aims to produce:
 
-Given:
+- the same compiled trie semantics,
+- the same local value ordering,
+- the same observable `get()` and `getAll()` behavior,
+- the same persisted binary output structure in semantic terms.
 
-- the same dictionary input
-- the same reduction settings
+This matters for more than technical elegance. It enables:
 
-Radixor guarantees:
+- stable search behavior across deployments,
+- reproducible build outputs,
+- reliable regression analysis,
+- explainable differences when a dictionary or reduction setting changes.
 
-- identical compiled trie structure
-- identical value ordering
-- identical lookup results
+A deterministic system is easier to test, easier to reason about, and safer to integrate into production pipelines.
 
-### Why this matters
+## Test strategy
 
-- stable search behavior across deployments
-- reproducible builds
-- easier debugging and regression analysis
+The project is intended to maintain very high confidence in both core correctness and behavioral stability.
 
+### Structural coverage
 
+High code coverage is treated as a useful signal, but not as a sufficient goal on its own. Coverage is valuable only when the covered scenarios actually pressure the implementation in meaningful ways.
 
-## Testing strategy
+In Radixor, strong coverage is expected across areas such as:
 
-### Unit testing
+- patch encoding and application,
+- mutable trie construction,
+- subtree reduction,
+- compiled trie lookup,
+- binary serialization and deserialization,
+- reconstruction from compiled state,
+- dictionary parsing and CLI behavior.
 
-Core components should be tested independently:
+### Mutation resistance
 
-- patch encoding and decoding
-- trie construction
-- reduction behavior
-- binary serialization and deserialization
+Mutation testing is especially important for this project because it helps distinguish superficial test execution from genuinely discriminating tests.
 
-### Dictionary validation tests
+A project can report high line or branch coverage while still failing to detect semantically dangerous implementation drift. Mutation testing provides a stronger objective signal: whether the test suite actually notices meaningful behavioral changes.
 
-A recommended pattern:
+For Radixor, very high mutation scores are therefore part of the intended engineering standard, not an optional vanity metric.
 
-1. load dictionary input
-2. compile trie
-3. re-apply all word → stem mappings
-4. verify that:
+### Boundary and negative-path validation
 
-- expected stem is present in `getAll()`
-- preferred result (`get()`) is correct when deterministic
+The project also benefits from extensive negative and edge-case testing, for example around:
 
-This ensures:
+- malformed patch commands,
+- missing or corrupt binary data,
+- invalid CLI arguments,
+- ambiguous mappings,
+- dominance-threshold edge conditions,
+- reconstruction of reduced compiled tries,
+- empty inputs and short words.
 
-- no data loss during reduction
-- correctness of patch encoding
+These cases are important because many real integration failures occur at the boundary conditions, not in the central happy path.
 
+## Quality signals and published evidence
 
+The project publishes durable quality artifacts through GitHub Pages so that important signals remain externally inspectable rather than existing only as transient CI output.
 
-## Regression testing
+Those published surfaces include:
 
-Maintain a stable test dataset:
+- unit test results,
+- coverage reports,
+- mutation testing reports,
+- static analysis reports,
+- benchmark outputs,
+- software composition artifacts.
 
-- representative vocabulary
-- edge cases (short words, long words, ambiguous forms)
+This publication model improves transparency and makes it easier to inspect the project’s quality posture without having to reconstruct the CI environment locally.
 
-Use it to:
+## Operational model
 
-- detect unintended changes
-- verify behavior after refactoring
-- validate reduction mode changes
+Radixor is designed around a clean separation between preparation-time work and runtime execution.
 
+### Preparation phase
 
+Preparation includes:
 
-## Performance testing
+- creating or refining dictionary data,
+- compiling the dictionary into a reduced read-only trie,
+- validating the resulting artifact,
+- persisting it as a deployable binary stemmer.
 
-Performance should be evaluated in terms of:
+### Runtime phase
 
-### Throughput
+Runtime usage is intentionally simpler:
 
-- words processed per second
+- load the compiled artifact,
+- reuse the resulting trie,
+- perform fast lookups and patch application,
+- avoid rebuilding or reparsing during live request handling.
 
-### Latency
+This separation reduces startup unpredictability, keeps runtime behavior stable, and makes deployment artifacts explicit.
 
-- time per lookup
+## Production posture
 
-### Memory footprint
+For production use, the preferred model is straightforward:
 
-- size of compiled trie
-- runtime memory usage
+1. prepare or refine the lexical resource,
+2. compile it offline,
+3. validate the resulting artifact,
+4. deploy the compiled binary,
+5. load it once and reuse it.
 
-Benchmark with:
+This model has several advantages:
 
-- realistic token streams
-- production-like dictionaries
+- no runtime compilation cost,
+- no repeated parsing overhead,
+- clear versioning of stemming behavior,
+- better reproducibility across environments,
+- simpler operational diagnosis when results change.
 
+## Auditability and dependency posture
 
+Radixor deliberately avoids external runtime dependencies.
 
-## Deployment model
+That choice serves a practical engineering goal: the project should be easy to audit from both a correctness and a security perspective, without forcing downstream users to reason through a large dependency graph or a complex software supply chain for core functionality.
 
-### Recommended workflow
+A dependency-free core does not make a project automatically secure, but it does simplify several important activities:
 
-1. prepare dictionary data
-2. compile using CLI
-3. store `.radixor.gz` artifact
-4. deploy artifact with application
-5. load using `loadBinary(...)`
+- source review,
+- behavioral auditing,
+- release inspection,
+- software composition analysis,
+- long-term maintenance.
 
-### Why this model
+In operational terms, this means there is less hidden behavior outside the project’s own codebase and less need to evaluate third-party runtime libraries for the core implementation path.
 
-- avoids runtime compilation overhead
-- reduces startup latency
-- ensures consistent behavior across environments
+## Security-minded operational guidance
 
+The project’s operational simplicity should be preserved in deployment practice.
 
+Recommended principles include:
 
-## Artifact management
+- treat source dictionaries as controlled inputs,
+- generate compiled artifacts in known build environments,
+- version compiled artifacts explicitly,
+- avoid loading untrusted binary stemmer files,
+- keep benchmark, test, and quality outputs attached to the same revision that produced the artifact.
 
-Compiled stemmers should be treated as versioned assets.
+These practices support traceability and reduce ambiguity about what exactly is running in production.
 
-### Versioning
+## Performance as a quality concern
 
-- include version in filename or metadata
-- track dictionary source and reduction settings
+Performance is not isolated from quality; for Radixor, it is part of the project’s engineering contract.
 
-Example:
+The benchmark suite exists to make throughput behavior measurable and historically visible. At the same time, benchmark interpretation must remain disciplined. Absolute numbers can vary by environment, especially when published through shared CI infrastructure. Sustained relative behavior and reproducible local benchmark methodology are more meaningful than one-off raw figures.
 
-```
-english-v1.2-ranked.radixor.gz
-```
+This is why benchmarking belongs alongside testing and reporting rather than outside the quality discussion altogether.
 
-### Storage
+## Operational observability
 
-- store in repository or artifact storage
-- ensure consistent distribution across environments
+Radixor itself is intentionally small and does not attempt to become an observability framework. Instead, integrations should provide the surrounding operational visibility that production systems require.
 
+Typical integration-level observability includes:
 
+- reporting load failures,
+- monitoring startup artifact loading,
+- measuring lookup throughput in the host application,
+- tracking memory usage of loaded compiled tries,
+- optionally sampling ambiguity-heavy cases when `getAll()` is part of the application logic.
 
-## Runtime usage
+The project’s role is to remain deterministic and inspectable enough that such operational signals are meaningful.
 
-### Loading
+## What feedback is most valuable
 
-- load once during application startup
-- reuse `FrequencyTrie` instance
+Feedback is especially valuable when it improves the objectivity or professional rigor of the project.
 
-### Thread safety
+That includes, for example:
 
-- compiled trie is safe for concurrent access
-- no synchronization required for reads
+- defects in behavioral correctness,
+- weaknesses in reduction semantics or edge-case handling,
+- benchmark methodology issues,
+- gaps in tests or mutation resistance,
+- ambiguities in published reports,
+- opportunities to improve auditability, reproducibility, or operational clarity.
 
-### Avoid repeated loading
+Project feedback is most useful when it helps strengthen the project as an implementation that can be trusted, reviewed, and maintained at a professional standard.
 
-Do not:
+## Practical summary
 
-- load trie per request
-- rebuild trie at runtime
+Radixor aims to combine:
 
+- strong algorithmic performance,
+- deterministic behavior,
+- very high validation standards,
+- transparent published quality evidence,
+- low operational ambiguity,
+- easy auditability of the core implementation.
 
+That combination is central to the identity of the project. The goal is not merely to be fast, but to be fast in a way that remains explainable, testable, reproducible, and professionally defensible.
 
-## Memory considerations
+## Related documentation
 
-- compiled tries are compact but not negligible
-- size depends on:
-  - dictionary size
-  - reduction mode
-
-Recommendations:
-
-- monitor memory usage in production
-- choose reduction mode appropriately
-
-
-
-## Reduction mode in production
-
-Default recommendation:
-
-- use **ranked mode**
-
-Switch to other modes only when:
-
-- memory constraints are strict
-- multiple candidate results are not required
-
-Always validate behavior after changing reduction mode.
-
-
-
-## Dictionary lifecycle
-
-### Updating dictionaries
-
-When dictionary data changes:
-
-1. update source file
-2. recompile
-3. run validation tests
-4. deploy new artifact
-
-### Backward compatibility
-
-- changes in dictionary may affect stemming results
-- evaluate impact on search relevance
-
-
-
-## Observability
-
-Radixor itself does not provide observability features; integration should provide:
-
-- logging for loading failures
-- metrics for lookup throughput
-- monitoring of memory usage
-
-Optional:
-
-- sampling of ambiguous results (`getAll()`)
-
-
-
-## Error handling
-
-### During compilation
-
-Handle:
-
-- invalid dictionary format
-- I/O failures
-- invalid arguments
-
-### During runtime
-
-Handle:
-
-- missing dictionary files
-- corrupted binary artifacts
-
-Fail fast on initialization errors.
-
-
-
-## Operational best practices
-
-- compile dictionaries offline
-- version compiled artifacts
-- test before deployment
-- load once and reuse
-- monitor performance and memory
-- document reduction settings used
-
-
-
-## Security considerations
-
-- treat dictionary input as trusted data
-- validate external sources before compilation
-- avoid loading unverified binary artifacts
-
-
-
-## Integration checklist
-
-Before production deployment:
-
-- dictionary validated
-- compiled artifact generated
-- reduction mode documented
-- performance tested
-- memory usage verified
-- regression tests passing
-
-
-
-## Next steps
-
-- [Quick start](quick-start.md)
+- [Benchmarking](benchmarking.md)
+- [Reports](reports.md)
 - [CLI compilation](cli-compilation.md)
 - [Programmatic usage](programmatic-usage.md)
-
-
-
-## Summary
-
-Radixor is designed for:
-
-- deterministic behavior
-- efficient runtime execution
-- controlled data-driven evolution
-
-By separating compilation from runtime and following proper operational practices, it can be reliably integrated into production-grade systems.

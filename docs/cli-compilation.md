@@ -1,303 +1,248 @@
 # CLI Compilation
 
-Radixor provides a command-line tool for compiling dictionary files into compact, production-ready binary stemmer tables.
+Radixor provides a command-line compiler for turning line-oriented dictionary files into compact binary stemmer artifacts.
 
-This is the recommended workflow for deployment environments, as it separates:
+This is the preferred preparation workflow when stemming should run against an already compiled artifact rather than against raw dictionary input. The CLI reads the dictionary, derives patch commands, builds a mutable trie, applies the selected subtree reduction strategy, and writes the final compiled trie in the project binary format under GZip compression. The result is a deployment-ready `.radixor.gz` file that can be loaded directly by application code.
 
-- dictionary preparation (offline)
-- stemming execution (runtime)
+## What the CLI does
 
+The `Compile` tool performs the following steps:
 
+1. reads the input dictionary in the standard Radixor stemmer format,
+2. parses each line into a canonical stem and its known variants,
+3. converts variants into patch commands,
+4. builds a mutable trie of patch-command values,
+5. applies the configured reduction mode,
+6. writes the compiled trie as a GZip-compressed binary artifact.
 
-## Overview
-
-The `Compile` tool:
-
-1. reads a line-oriented dictionary file
-2. converts word–stem pairs into patch commands
-3. builds a trie structure
-4. applies subtree reduction
-5. writes a compressed binary artifact
-
-The output is a `.radixor.gz` file suitable for fast runtime loading.
-
-
+This workflow is intentionally aligned with the same dictionary semantics used elsewhere in the library. Remarks introduced by `#` or `//` are supported through the shared dictionary parser.
 
 ## Basic usage
 
 ```bash
 java org.egothor.stemmer.Compile \
-  --input ./data/stemmer.txt \
-  --output ./build/english.radixor.gz \
-  --reduction-mode MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS \
-  --store-original \
-  --overwrite
+    --input ./data/stemmer.txt \
+    --output ./build/english.radixor.gz \
+    --reduction-mode MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS \
+    --store-original \
+    --overwrite
 ```
 
+## Supported arguments
 
+The CLI supports the following arguments:
 
-## Required arguments
+```text
+--input <file>
+--output <file>
+--reduction-mode <mode>
+[--store-original]
+[--dominant-winner-min-percent <1..100>]
+[--dominant-winner-over-second-ratio <1..n>]
+[--overwrite]
+[--help]
+```
 
-### `--input`
+### `--input <file>`
 
 Path to the source dictionary file.
 
-* must be in the [dictionary format](dictionary-format.md)
-* must be readable
-* UTF-8 encoding is expected
-
-```
---input ./data/stemmer.txt
-```
-
-### `--output`
-
-Path to the output binary file.
-
-* parent directories are created automatically
-* output is written as **GZip-compressed binary**
-
-```
---output ./build/english.radixor.gz
-```
-
-
-
-## Optional arguments
-
-### `--reduction-mode`
-
-Controls how aggressively the trie is reduced during compilation.
-
-Available values:
-
-* `MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS`
-* `MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS`
-* `MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS`
+The file must use the standard line-oriented dictionary format. Each non-empty logical line starts with the canonical stem and may contain zero or more variants. The parser expects UTF-8 input, lowercases it using `Locale.ROOT`, and ignores trailing remarks introduced by `#` or `//`.
 
 Example:
 
+```text
+--input ./data/stemmer.txt
 ```
+
+### `--output <file>`
+
+Path to the output binary artifact.
+
+The output file is written as a GZip-compressed binary trie. Parent directories are created automatically when needed.
+
+Example:
+
+```text
+--output ./build/english.radixor.gz
+```
+
+### `--reduction-mode <mode>`
+
+Selects the subtree reduction strategy used during compilation.
+
+Supported values are:
+
+- `MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS`
+- `MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS`
+- `MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS`
+
+Example:
+
+```text
 --reduction-mode MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS
 ```
 
-#### Recommendation
-
-Use:
-
-```
-MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS
-```
-
-This provides:
-
-* safe behavior
-* deterministic ordering
-* good compression
-
-
+This argument is required.
 
 ### `--store-original`
 
-Stores the stem itself as a no-op mapping.
+When this flag is present, the canonical stem itself is inserted using the no-op patch command.
 
-```
+```text
 --store-original
 ```
 
-Effect:
+This is usually a sensible default for real dictionaries because it ensures that canonical forms are directly representable in the compiled trie rather than relying only on their variants.
 
-* ensures that canonical forms are always resolvable
-* improves robustness in real-world inputs
+### `--dominant-winner-min-percent <1..100>`
 
-Recommended for most use cases.
+Sets the minimum winner percentage used by dominant-result reduction settings.
 
+Example:
 
+```text
+--dominant-winner-min-percent 75
+```
+
+This option matters primarily when `--reduction-mode` is `MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS`. The default value is `75`.
+
+### `--dominant-winner-over-second-ratio <1..n>`
+
+Sets the minimum winner-over-second ratio used by dominant-result reduction settings.
+
+Example:
+
+```text
+--dominant-winner-over-second-ratio 3
+```
+
+This option also matters primarily for `MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS`. The default value is `3`.
 
 ### `--overwrite`
 
-Allows overwriting an existing output file.
+Allows the CLI to replace an already existing output file.
 
-```
+```text
 --overwrite
 ```
 
-Without this flag:
+Without this flag, compilation fails when the output path already exists.
 
-* compilation fails if the output file already exists
+### `--help`
 
+Prints usage help and exits successfully.
 
+```text
+--help
+```
 
-## Reduction strategy explained
+The short form `-h` is also supported.
 
-Reduction merges semantically equivalent subtrees to reduce memory and file size.
+## Reduction modes in practice
 
-Trade-offs:
+Reduction mode is not only a storage decision. It also influences what semantics are preserved when the mutable trie is compiled into its canonical read-only form.
 
-| Mode      | Compression | Behavioral fidelity |
-| --------- | ----------- | ------------------- |
-| Ranked    | Medium      | High                |
-| Unordered | High        | Medium              |
-| Dominant  | Highest     | Lower (heuristic)   |
+### Ranked `getAll()` equivalence
 
-### Ranked (recommended)
+`MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS` merges subtrees whose `getAll()` results remain equivalent for every reachable key suffix and whose local result ordering is the same.
 
-* preserves full `getAll()` ordering
-* safest and most predictable
+This is the best general-purpose choice when result ordering and ambiguity handling matter. It preserves ranked multi-result semantics while still achieving useful structural reduction.
 
-### Unordered
+This is the recommended default for most users.
 
-* ignores ordering differences
-* higher compression, but less precise semantics
+### Unordered `getAll()` equivalence
 
-### Dominant
+`MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS` also uses `getAll()`-level equivalence, but it ignores local ordering differences in addition to absolute frequencies.
 
-* focuses on the most frequent result
-* useful when only `get()` is relevant
-* may lose secondary candidates
+This can yield stronger reduction, but it also weakens the precision of ordered multi-result semantics.
 
+Choose this mode only when the application does not depend on the ordering of alternative results.
 
+### Dominant `get()` equivalence
 
-## Output format
+`MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS` focuses on preserving preferred-result semantics for `get()`, subject to dominance thresholds.
 
-The compiled file:
+If a node does not satisfy the configured dominance constraints, compilation falls back to ranked `getAll()` semantics for that node to avoid unsafe over-reduction.
 
-* is a binary representation of the trie
-* uses **GZip compression**
-* is optimized for:
+This mode is most suitable when the application primarily consumes the preferred result and does not rely on preserving richer ambiguity information.
 
-  * fast loading
-  * minimal memory footprint
+## Recommended usage patterns
 
-Typical properties:
+### Use offline preparation
 
-* small file size
-* fast deserialization
-* no runtime preprocessing required
+The CLI is best used as a preparation step during packaging, deployment, or controlled artifact generation. This keeps compilation outside the runtime startup path and allows services to load only the finished binary trie.
 
+### Treat compiled files as versioned assets
 
+A `.radixor.gz` file should be handled as a versioned output artifact. It represents a specific dictionary state, a specific reduction mode, and, where relevant, specific dominant-result thresholds.
+
+### Choose reduction mode deliberately
+
+The ranked `getAll()` mode is the safest default. The unordered and dominant modes should be chosen only when their trade-offs are acceptable for the consuming application.
+
+### Expect memory pressure during preparation, not runtime
+
+Compilation is usually a one-time step and is generally fast. The more important operational consideration is memory usage during preparation, because the dictionary-derived mutable structure exists before reduction compacts it into the final read-only trie. This is especially relevant for very large source dictionaries.
 
 ## Example workflow
 
-### 1. Prepare dictionary
+### 1. Prepare a dictionary
 
-```
+```text
 run running runs ran
 connect connected connecting
 ```
 
-### 2. Compile
+### 2. Compile it
 
 ```bash
 java org.egothor.stemmer.Compile \
-  --input ./data/stemmer.txt \
-  --output ./build/english.radixor.gz \
-  --reduction-mode MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS \
-  --store-original
+    --input ./data/stemmer.txt \
+    --output ./build/english.radixor.gz \
+    --reduction-mode MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS \
+    --store-original
 ```
 
-### 3. Use in application
+### 3. Load it in an application
 
 ```java
-FrequencyTrie<String> trie =
-    StemmerPatchTrieLoader.loadBinary("english.radixor.gz");
+import org.egothor.stemmer.FrequencyTrie;
+import org.egothor.stemmer.StemmerPatchTrieLoader;
+
+final FrequencyTrie<String> trie =
+        StemmerPatchTrieLoader.loadBinary("english.radixor.gz");
 ```
 
+## Exit codes and error handling
 
+The CLI uses three exit outcomes:
 
-## Error handling
+- `0` for success,
+- `1` for processing failures such as I/O or compilation errors,
+- `2` for invalid command-line usage.
 
-The CLI reports:
+When argument parsing fails, the CLI prints the error message, prints the usage summary, and exits with usage error status.
 
-* missing input file
-* invalid arguments
-* I/O failures
-* parsing errors
+When compilation fails during processing, the CLI prints a `Compilation failed: ...` message to standard error and exits with processing error status.
 
-Typical exit codes:
+Examples of failure conditions include:
 
-* `0` – success
-* non-zero – failure
+- missing required arguments,
+- unknown arguments,
+- invalid integer values for dominant thresholds,
+- missing input files,
+- unreadable input,
+- existing output file without `--overwrite`,
+- general I/O failures during reading or writing.
 
-Error details are printed to standard error.
+## Relation to programmatic usage
 
-
-
-## Performance considerations
-
-### Compilation
-
-* typically CPU-bound
-* depends on dictionary size and reduction mode
-
-### Output size
-
-* depends on:
-
-  * dictionary completeness
-  * reduction strategy
-* can vary significantly between modes
-
-### Runtime impact
-
-* compiled tries are optimized for:
-
-  * fast lookup
-  * low allocation
-  * predictable latency
-
-
-
-## Best practices
-
-### Use offline compilation
-
-* compile dictionaries during build or deployment
-* do not compile on application startup
-
-### Version your artifacts
-
-* treat `.radixor.gz` files as versioned assets
-* store them alongside application releases
-
-### Choose reduction mode deliberately
-
-* use **ranked** for correctness
-* use **dominant** only if you fully understand the trade-offs
-
-### Keep dictionaries clean
-
-* better input → better compiled output
-* avoid noise and inconsistencies
-
-
-
-## Integration tips
-
-* store compiled files under `resources/` or a dedicated directory
-* load them once and reuse the trie instance
-* avoid repeated loading in frequently executed code paths (for example, per-request processing)
-
-
+The CLI and the programmatic API implement the same conceptual preparation step. The CLI is the operationally convenient choice when you want a ready-made binary artifact. The programmatic API is the better fit when compilation must be integrated directly into custom Java workflows.
 
 ## Next steps
 
-* [Dictionary format](dictionary-format.md)
-* [Programmatic usage](programmatic-usage.md)
-* [Quick start](quick-start.md)
-
-
-
-## Summary
-
-The `Compile` CLI is the bridge between:
-
-* human-readable dictionary data
-* optimized runtime stemmer tables
-
-It enables a clean separation between:
-
-* data preparation
-* runtime execution
-
-and is the preferred way to prepare Radixor for production use.
+- [Dictionary format](dictionary-format.md)
+- [Quick start](quick-start.md)
+- [Programmatic usage](programmatic-usage.md)
+- [Architecture and reduction](architecture-and-reduction.md)
