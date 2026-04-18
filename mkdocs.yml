@@ -1,0 +1,42 @@
+site_name: Radixor
+site_description: High-performance multi-language stemming toolkit for Java
+site_url: https://leogalambos.github.io/Radixor/
+repo_url: https://github.com/leogalambos/Radixor
+repo_name: leogalambos/Radixor
+copyright: "&copy; ${year} Egothor. Licensed under <a href='https://github.com/leogalambos/Radixor/blob/main/LICENSE'>BSD-3-Clause</a>."
+
+theme:
+  name: material
+  language: en
+  features:
+    - navigation.instant
+    - navigation.sections
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - pymdownx.details
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - tables
+
+nav:
+  - Home: index.md
+  - Quick Start: quick-start.md
+  - Dictionary Format: dictionary-format.md
+  - CLI Compilation: cli-compilation.md
+  - Programmatic Usage: programmatic-usage.md
+  - Built-in Languages: built-in-languages.md
+  - Architecture and Reduction: architecture-and-reduction.md
+  - Quality and Operations: quality-and-operations.md
+  - Benchmarking: benchmarking.md
+  - CI Reports: reports.md

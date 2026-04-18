@@ -1,7 +1,5 @@
 # Quality and Operations
 
-> ← Back to [README.md](../README.md)
-
 This document describes quality, testing, and operational practices for **Radixor**.
 
 It focuses on:

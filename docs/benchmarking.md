@@ -1,7 +1,5 @@
 # Benchmarking
 
-> ← Back to [README.md](../README.md)
-
 Radixor includes a JMH benchmark suite for both the internal algorithmic core and a side-by-side English comparison against the Snowball Porter stemmer family.
 
 This document explains what is benchmarked, how to run it, and how to interpret the results responsibly.

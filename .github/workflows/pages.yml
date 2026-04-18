@@ -5,6 +5,8 @@ on:
     branches:
       - main
     paths:
+      - 'docs/**'
+      - 'mkdocs.yml'
       - 'src/main/**'
       - 'src/test/**'
       - 'src/jmh/**'
@@ -49,6 +51,14 @@ jobs:
 
       - name: Set up Gradle caching and instrumentation
         uses: gradle/actions/setup-gradle@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install MkDocs Material
+        run: python -m pip install --upgrade pip mkdocs-material
 
       - name: Verify reproducibility inputs
         shell: bash
@@ -111,12 +121,17 @@ jobs:
           JMH_CSV_LINK=''
           JMH_TXT_LATEST_LINK=''
           JMH_CSV_LATEST_LINK=''
+          JMH_TXT_REPORT_MD='- Benchmark results (TXT): not currently available'
+          JMH_CSV_REPORT_MD='- Benchmark results (CSV): not currently available'
           DEPENDENCY_CHECK_LINK=''
           DEPENDENCY_CHECK_LATEST_LINK=''
+          DEPENDENCY_CHECK_REPORT_MD='- Dependency vulnerability report: not currently available'
           SBOM_JSON_LINK=''
           SBOM_XML_LINK=''
           SBOM_JSON_LATEST_LINK=''
           SBOM_XML_LATEST_LINK=''
+          SBOM_JSON_REPORT_MD='- SBOM (JSON): not currently available'
+          SBOM_XML_REPORT_MD='- SBOM (XML): not currently available'
 
           if [ -d "build/reports/jmh" ]; then
             cp -R build/reports/jmh "${RUN_DIR}/jmh"
@@ -125,10 +140,12 @@ jobs:
             if [ -f "${RUN_DIR}/jmh/jmh-results.txt" ]; then
               JMH_TXT_LINK='<li><a href="./jmh/jmh-results.txt">Benchmark Results (TXT)</a></li>'
               JMH_TXT_LATEST_LINK='<li><a href="./builds/latest/jmh/jmh-results.txt">Benchmark Results (TXT)</a></li>'
+              JMH_TXT_REPORT_MD='- [JMH benchmark results (TXT)](../builds/latest/jmh/jmh-results.txt)'
             fi
             if [ -f "${RUN_DIR}/jmh/jmh-results.csv" ]; then
               JMH_CSV_LINK='<li><a href="./jmh/jmh-results.csv">Benchmark Results (CSV)</a></li>'
               JMH_CSV_LATEST_LINK='<li><a href="./builds/latest/jmh/jmh-results.csv">Benchmark Results (CSV)</a></li>'
+              JMH_CSV_REPORT_MD='- [JMH benchmark results (CSV)](../builds/latest/jmh/jmh-results.csv)'
             fi
 
             HAS_JMH="true"
@@ -143,6 +160,7 @@ jobs:
             if [ -f "${RUN_DIR}/dependency-check/dependency-check-report.html" ]; then
               DEPENDENCY_CHECK_LINK='<li><a href="./dependency-check/dependency-check-report.html">Dependency Vulnerability Report</a></li>'
               DEPENDENCY_CHECK_LATEST_LINK='<li><a href="./builds/latest/dependency-check/dependency-check-report.html">Dependency Vulnerability Report</a></li>'
+              DEPENDENCY_CHECK_REPORT_MD='- [Dependency vulnerability report](../builds/latest/dependency-check/dependency-check-report.html)'
             fi
           fi
 
@@ -153,6 +171,8 @@ jobs:
             SBOM_XML_LINK='<li><a href="./sbom/radixor-sbom.xml">SBOM (XML)</a></li>'
             SBOM_JSON_LATEST_LINK='<li><a href="./builds/latest/sbom/radixor-sbom.json">SBOM (JSON)</a></li>'
             SBOM_XML_LATEST_LINK='<li><a href="./builds/latest/sbom/radixor-sbom.xml">SBOM (XML)</a></li>'
+            SBOM_JSON_REPORT_MD='- [SBOM (JSON)](../builds/latest/sbom/radixor-sbom.json)'
+            SBOM_XML_REPORT_MD='- [SBOM (XML)](../builds/latest/sbom/radixor-sbom.xml)'
           fi
 
           python3 \
@@ -169,10 +189,22 @@ jobs:
           MUTATION_BADGE_LATEST_LINK='<li><a href="./builds/latest/metrics/pitest-badge.json">Mutation Badge Metadata</a></li>'
           JMH_BADGE_LINK='<li><a href="./metrics/jmh-badge.json">Benchmark Badge Metadata</a></li>'
           JMH_BADGE_LATEST_LINK='<li><a href="./builds/latest/metrics/jmh-badge.json">Benchmark Badge Metadata</a></li>'
+          COVERAGE_BADGE_REPORT_MD='- [Coverage badge metadata](../builds/latest/metrics/coverage-badge.json)'
+          MUTATION_BADGE_REPORT_MD='- [Mutation badge metadata](../builds/latest/metrics/pitest-badge.json)'
+          JMH_BADGE_REPORT_MD='- [Benchmark badge metadata](../builds/latest/metrics/jmh-badge.json)'
 
           if [ ! -f "${RUN_METRICS_DIR}/coverage-badge.json" ]; then
             COVERAGE_BADGE_LINK='<li>Coverage Badge Metadata: not available</li>'
             COVERAGE_BADGE_LATEST_LINK='<li>Coverage Badge Metadata: not available</li>'
+            COVERAGE_BADGE_REPORT_MD='- Coverage badge metadata: not currently available'
+          fi
+
+          if [ ! -f "${RUN_METRICS_DIR}/pitest-badge.json" ]; then
+            MUTATION_BADGE_REPORT_MD='- Mutation badge metadata: not currently available'
+          fi
+
+          if [ ! -f "${RUN_METRICS_DIR}/jmh-badge.json" ]; then
+            JMH_BADGE_REPORT_MD='- Benchmark badge metadata: not currently available'
           fi
 
           cat > "${RUN_DIR}/index.html" <<EOF
@@ -221,65 +253,43 @@ jobs:
           cat > "${SITE_DIR}/.nojekyll" <<EOF
           EOF
 
-          BUILD_LIST=$(find "${SITE_DIR}/builds" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | grep -E '^[0-9]+$' | sort -nr | head -20)
+          cat > docs/reports.md <<EOF
+          # CI Reports
 
-          {
-            cat <<EOF
-          <!doctype html>
-          <html lang="en">
-          <head>
-            <meta charset="utf-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1">
-            <title>Radixor Reports</title>
-            <style>
-              body { font-family: Arial, sans-serif; max-width: 1000px; margin: 2rem auto; padding: 0 1rem; line-height: 1.5; }
-              h1, h2 { margin-bottom: 0.5rem; }
-              ul { padding-left: 1.25rem; }
-              code { background: #f4f4f4; padding: 0.1rem 0.3rem; }
-              .meta { color: #555; }
-            </style>
-          </head>
-          <body>
-            <h1>Radixor Published Reports</h1>
-            <p class="meta">Durable CI reports published from GitHub Actions to the <code>gh-pages</code> branch.</p>
+          Radixor publishes durable CI artifacts to GitHub Pages on every qualifying run of \`.github/workflows/pages.yml\`.
 
-            <h2>Latest</h2>
-            <ul>
-              <li><a href="./builds/latest/">Latest build summary</a></li>
-              <li><a href="./builds/latest/javadoc/">Javadoc</a></li>
-              <li><a href="./builds/latest/test/">Test Report</a></li>
-              <li><a href="./builds/latest/pmd/main.html">PMD Report</a></li>
-              <li><a href="./builds/latest/coverage/">Coverage Report</a></li>
-              ${DEPENDENCY_CHECK_LATEST_LINK:-<li>Dependency Vulnerability Report: not currently available</li>}
-              ${SBOM_JSON_LATEST_LINK:-<li>SBOM (JSON): not available</li>}
-              ${SBOM_XML_LATEST_LINK:-<li>SBOM (XML): not available</li>}
-              ${COVERAGE_BADGE_LATEST_LINK}
-              ${MUTATION_BADGE_LATEST_LINK}
-              ${JMH_BADGE_LATEST_LINK}
-              <li><a href="./builds/latest/pitest/">Mutation Testing Report</a></li>
-              $(
-                [ "${HAS_JMH}" = "true" ] && { echo "${JMH_TXT_LATEST_LINK:-<li>Benchmark Results (TXT): not available</li>}"; echo "${JMH_CSV_LATEST_LINK:-<li>Benchmark Results (CSV): not available</li>}"; } \
-                || echo '<li>Benchmark results: not currently available</li>'
-              )
+          ## Primary report entry points
+
+          - [Latest build summary](../builds/latest/)
+          - [Javadoc](../builds/latest/javadoc/)
+          - [Unit test report](../builds/latest/test/)
+          - [PMD report](../builds/latest/pmd/main.html)
+          - [JaCoCo coverage report](../builds/latest/coverage/)
+          - [PIT mutation testing report](../builds/latest/pitest/)
+          ${DEPENDENCY_CHECK_REPORT_MD}
+          ${SBOM_JSON_REPORT_MD}
+          ${SBOM_XML_REPORT_MD}
+
+          ## Benchmark and badge metadata
+
+          ${JMH_TXT_REPORT_MD}
+          ${JMH_CSV_REPORT_MD}
+          ${COVERAGE_BADGE_REPORT_MD}
+          ${MUTATION_BADGE_REPORT_MD}
+          ${JMH_BADGE_REPORT_MD}
+
+          ## Historical runs
+
+          - [Browse historical build reports](../builds/)
           EOF
 
-            cat <<EOF
-            </ul>
-
-            <h2>Recent historical builds</h2>
-            <ul>
-          EOF
-
-            for build in ${BUILD_LIST}; do
-              echo "      <li><a href=\"./builds/${build}/\">Build ${build}</a></li>"
-            done
-
-            cat <<EOF
-            </ul>
-          </body>
-          </html>
-          EOF
-          } > "${SITE_DIR}/index.html"
+      - name: Build documentation site (MkDocs Material)
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdocs build --strict --site-dir .mkdocs-site
+          rsync -a --delete --exclude 'builds/' .mkdocs-site/ .gh-pages/
+          rm -rf .mkdocs-site
 
       - name: Commit and push gh-pages
         shell: bash

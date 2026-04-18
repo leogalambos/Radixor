@@ -1,7 +1,5 @@
 # Programmatic Usage
 
-> ← Back to [README.md](../README.md)
-
 This document describes how to use **Radixor** programmatically from Java.
 
 It covers:

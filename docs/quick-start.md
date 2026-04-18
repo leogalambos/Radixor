@@ -1,7 +1,5 @@
 # Quick Start
 
-> ← Back to [README.md](../README.md)
-
 This guide shows the fastest way to start using **Radixor** and the most common next steps.
 
 ## Hello world

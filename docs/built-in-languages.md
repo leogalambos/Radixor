@@ -1,7 +1,5 @@
 # Built-in Languages
 
-> ← Back to [README.md](../README.md)
-
 Radixor provides a set of **bundled stemmer dictionaries** that can be loaded directly without preparing custom data.
 
 These built-in resources are useful for:

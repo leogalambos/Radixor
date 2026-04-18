@@ -1,7 +1,5 @@
 # Architecture and Reduction
 
-> ← Back to [README.md](../README.md)
-
 This document describes the internal architecture of **Radixor** and the principles behind its **trie compilation and reduction model**.
 
 It explains:

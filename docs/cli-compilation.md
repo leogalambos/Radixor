@@ -1,7 +1,5 @@
 # CLI Compilation
 
-> ← Back to [README.md](../README.md)
-
 Radixor provides a command-line tool for compiling dictionary files into compact, production-ready binary stemmer tables.
 
 This is the recommended workflow for deployment environments, as it separates:

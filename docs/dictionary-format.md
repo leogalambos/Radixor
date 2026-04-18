@@ -1,7 +1,5 @@
 # Dictionary Format
 
-> ← Back to [README.md](../README.md)
-
 Radixor uses a simple, line-oriented dictionary format to define mappings between **word forms** and their **canonical stems**.
 
 This format is intentionally minimal, language-agnostic, and easy to generate from existing linguistic resources or corpora.
