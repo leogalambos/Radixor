@@ -314,6 +314,22 @@ class PatchCommandEncoderTest {
     class EncodeTests {
 
         /**
+         * Verifies that trailing SKIP instructions are omitted from the generated patch
+         * command because they do not affect reconstruction.
+         */
+        @Test
+        @DisplayName("does not emit trailing SKIP instructions into patch command")
+        void shouldNotEmitTrailingSkipInstructionsIntoPatchCommand() {
+            PatchCommandEncoder encoder = new PatchCommandEncoder();
+
+            String patch = encoder.encode("abcd", "ab");
+
+            assertAll(() -> assertNotNull(patch), () -> assertEquals("Db", patch),
+                    () -> assertEquals("ab", PatchCommandEncoder.apply("abcd", patch)), () -> assertEquals(-1,
+                            patch.indexOf('-'), () -> "Patch must not contain a trailing SKIP instruction: " + patch));
+        }
+
+        /**
          * Verifies that a null source yields a null patch.
          */
         @Test
