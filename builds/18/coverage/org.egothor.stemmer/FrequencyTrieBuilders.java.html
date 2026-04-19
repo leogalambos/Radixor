@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FrequencyTrieBuilders.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Radixor</a> &gt; <a href="index.source.html" class="el_package">org.egothor.stemmer</a> &gt; <span class="el_source">FrequencyTrieBuilders.java</span></div><h1>FrequencyTrieBuilders.java</h1><pre class="source lang-java linenums">/*******************************************************************************
+ * Copyright (C) 2026, Leo Galambos
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * 
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ * 
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ * 
+ * 3. Neither the name of the copyright holder nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&quot;
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ ******************************************************************************/
+package org.egothor.stemmer;
+
+import java.util.Objects;
+import java.util.function.IntFunction;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.egothor.stemmer.trie.CompiledNode;
+
+/**
+ * Factory utilities related to {@link FrequencyTrie.Builder}.
+ *
+ * &lt;p&gt;
+ * This helper reconstructs writable builders from compiled read-only tries. The
+ * reconstruction preserves the semantics and local counts of the compiled trie
+ * as currently stored, which makes it suitable for subsequent modifications
+ * followed by recompilation.
+ *
+ * &lt;p&gt;
+ * Reconstruction operates on the compiled form. Therefore, if the compiled trie
+ * was produced using a reduction mode that merged semantically equivalent
+ * subtrees, the recreated builder reflects that reduced compiled state rather
+ * than the exact original unreduced insertion history.
+ */
+public final class FrequencyTrieBuilders {
+
+    /**
+     * Logger of this class.
+     */
+<span class="fc" id="L60">    private static final Logger LOGGER = Logger.getLogger(FrequencyTrieBuilders.class.getName());</span>
+
+    /**
+     * Utility class.
+     */
+<span class="fc" id="L65">    private FrequencyTrieBuilders() {</span>
+<span class="fc" id="L66">        throw new AssertionError(&quot;No instances.&quot;);</span>
+    }
+
+    /**
+     * Reconstructs a new writable builder from a compiled read-only trie.
+     *
+     * &lt;p&gt;
+     * The returned builder contains the same key-local value counts as the supplied
+     * compiled trie. Callers may continue modifying the returned builder and then
+     * compile a new {@link FrequencyTrie} instance.
+     *
+     * @param source            source compiled trie
+     * @param arrayFactory      array factory for the reconstructed builder
+     * @param reductionSettings reduction settings to associate with the new builder
+     * @param &lt;V&gt;               value type
+     * @return reconstructed writable builder
+     * @throws NullPointerException if any argument is {@code null}
+     */
+    public static &lt;V&gt; FrequencyTrie.Builder&lt;V&gt; copyOf(final FrequencyTrie&lt;V&gt; source,
+            final IntFunction&lt;V[]&gt; arrayFactory, final ReductionSettings reductionSettings) {
+<span class="fc" id="L86">        Objects.requireNonNull(source, &quot;source&quot;);</span>
+<span class="fc" id="L87">        Objects.requireNonNull(arrayFactory, &quot;arrayFactory&quot;);</span>
+<span class="fc" id="L88">        Objects.requireNonNull(reductionSettings, &quot;reductionSettings&quot;);</span>
+
+<span class="fc" id="L90">        final FrequencyTrie.Builder&lt;V&gt; builder = new FrequencyTrie.Builder&lt;&gt;(arrayFactory, reductionSettings);</span>
+<span class="fc" id="L91">        final StringBuilder keyBuilder = new StringBuilder(64);</span>
+
+<span class="fc" id="L93">        copyNode(source.root(), keyBuilder, builder);</span>
+
+<span class="fc" id="L95">        LOGGER.log(Level.FINE, &quot;Reconstructed writable builder from compiled trie.&quot;);</span>
+<span class="fc" id="L96">        return builder;</span>
+    }
+
+    /**
+     * Reconstructs a new writable builder from a compiled read-only trie using
+     * default settings for the supplied reduction mode.
+     *
+     * @param source        source compiled trie
+     * @param arrayFactory  array factory for the reconstructed builder
+     * @param reductionMode reduction mode to associate with the new builder
+     * @param &lt;V&gt;           value type
+     * @return reconstructed writable builder
+     * @throws NullPointerException if any argument is {@code null}
+     */
+    public static &lt;V&gt; FrequencyTrie.Builder&lt;V&gt; copyOf(final FrequencyTrie&lt;V&gt; source,
+            final IntFunction&lt;V[]&gt; arrayFactory, final ReductionMode reductionMode) {
+<span class="fc" id="L112">        Objects.requireNonNull(reductionMode, &quot;reductionMode&quot;);</span>
+<span class="fc" id="L113">        return copyOf(source, arrayFactory, ReductionSettings.withDefaults(reductionMode));</span>
+    }
+
+    /**
+     * Copies one compiled node and all reachable descendants into the target
+     * builder.
+     *
+     * @param node       current compiled node
+     * @param keyBuilder current key builder
+     * @param builder    target mutable builder
+     * @param &lt;V&gt;        value type
+     */
+    private static &lt;V&gt; void copyNode(final CompiledNode&lt;V&gt; node, final StringBuilder keyBuilder,
+            final FrequencyTrie.Builder&lt;V&gt; builder) {
+<span class="fc bfc" id="L127" title="All 2 branches covered.">        for (int valueIndex = 0; valueIndex &lt; node.orderedValues().length; valueIndex++) {</span>
+<span class="fc" id="L128">            builder.put(keyBuilder.toString(), node.orderedValues()[valueIndex], node.orderedCounts()[valueIndex]);</span>
+        }
+
+<span class="fc bfc" id="L131" title="All 2 branches covered.">        for (int childIndex = 0; childIndex &lt; node.edgeLabels().length; childIndex++) {</span>
+<span class="fc" id="L132">            keyBuilder.append(node.edgeLabels()[childIndex]);</span>
+<span class="fc" id="L133">            copyNode(node.children()[childIndex], keyBuilder, builder);</span>
+<span class="fc" id="L134">            keyBuilder.setLength(keyBuilder.length() - 1);</span>
+        }
+<span class="fc" id="L136">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
