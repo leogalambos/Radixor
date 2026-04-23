@@ -61,6 +61,7 @@ import java.util.logging.Logger;
  * --output &lt;file&gt;
  * --reduction-mode &lt;mode&gt;
  * [--store-original]
+ * [--case-processing-mode <mode>]
  * [--dominant-winner-min-percent &lt;1..100&gt;]
  * [--dominant-winner-over-second-ratio &lt;1..n&gt;]
  * [--overwrite]
@@ -152,7 +153,7 @@ public final class Compile {
         final WordTraversalDirection traversalDirection = arguments.rightToLeft() ? WordTraversalDirection.FORWARD
                 : WordTraversalDirection.BACKWARD;
         final FrequencyTrie<String> trie = StemmerPatchTrieLoader.load(arguments.inputFile(), arguments.storeOriginal(),
-                reductionSettings, traversalDirection);
+                reductionSettings, traversalDirection, arguments.caseProcessingMode());
 
         final Path outputFile = arguments.outputFile();
         final Path parent = outputFile.toAbsolutePath().getParent();
@@ -168,10 +169,10 @@ public final class Compile {
 
         if (LOGGER.isLoggable(Level.INFO)) {
             LOGGER.log(Level.INFO,
-                    "Compiled dictionary {0} to {1} using mode {2}, storeOriginal={3}, rightToLeft={4}, dominantWinnerMinPercent={5}, dominantWinnerOverSecondRatio={6}.",
+                    "Compiled dictionary {0} to {1} using mode {2}, storeOriginal={3}, rightToLeft={4}, caseProcessingMode={5}, dominantWinnerMinPercent={6}, dominantWinnerOverSecondRatio={7}.",
                     new Object[] { arguments.inputFile().toAbsolutePath().toString(),
                             arguments.outputFile().toAbsolutePath().toString(), arguments.reductionMode().name(),
-                            arguments.storeOriginal(), arguments.rightToLeft(),
+                            arguments.storeOriginal(), arguments.rightToLeft(), arguments.caseProcessingMode(),
                             arguments.dominantWinnerMinPercent(), arguments.dominantWinnerOverSecondRatio() });
         }
     }
@@ -186,6 +187,7 @@ public final class Compile {
         System.err.println("      --output <file> \\");
         System.err.println("      --reduction-mode <mode> \\");
         System.err.println("      [--store-original] \\");
+        System.err.println("      [--case-processing-mode <mode>] \\");
         System.err.println("      [--dominant-winner-min-percent <1..100>] \\");
         System.err.println("      [--dominant-winner-over-second-ratio <1..n>] \\");
         System.err.println("      [--overwrite]");
@@ -199,6 +201,13 @@ public final class Compile {
         System.err.println("      of the stored word form and patch commands are encoded likewise.");
         System.err.println("  --overwrite");
         System.err.println("      Replaces the target file when it already exists.");
+        System.err.println("  --case-processing-mode");
+        System.err.println("      Controls whether dictionary input is lowercased or preserved as-is.");
+        System.err.println();
+        System.err.println("Supported case processing modes:");
+        for (CaseProcessingMode mode : CaseProcessingMode.values()) {
+            System.err.println("  " + mode.name());
+        }
         System.err.println();
         System.err.println("Supported reduction modes:");
         for (ReductionMode mode : ReductionMode.values()) {
@@ -256,14 +265,15 @@ public final class Compile {
      *                                      forward traversal on stored word forms
      * @param dominantWinnerMinPercent      dominant winner minimum percent
      * @param dominantWinnerOverSecondRatio dominant winner over second ratio
+     * @param caseProcessingMode            dictionary case processing mode
      * @param overwrite                     whether an existing output may be
      *                                      replaced
      * @param help                          whether usage help was requested
      */
     @SuppressWarnings("PMD.LongVariable")
     private record Arguments(Path inputFile, Path outputFile, ReductionMode reductionMode, boolean storeOriginal,
-            boolean rightToLeft, int dominantWinnerMinPercent, int dominantWinnerOverSecondRatio, boolean overwrite,
-            boolean help) {
+            boolean rightToLeft, int dominantWinnerMinPercent, int dominantWinnerOverSecondRatio,
+            CaseProcessingMode caseProcessingMode, boolean overwrite, boolean help) {
 
         /**
          * Parses raw command-line arguments.
@@ -282,6 +292,7 @@ public final class Compile {
             boolean rightToLeft = false;
             boolean overwrite = false;
             boolean help = false;
+            CaseProcessingMode caseProcessingMode = CaseProcessingMode.LOWERCASE_WITH_LOCALE_ROOT;
             int dominantWinnerMinPercent = ReductionSettings.DEFAULT_DOMINANT_WINNER_MIN_PERCENT;
             int dominantWinnerOverSecondRatio = ReductionSettings.DEFAULT_DOMINANT_WINNER_OVER_SECOND_RATIO;
 
@@ -330,6 +341,11 @@ public final class Compile {
                                 requireValue(arguments, ++index, "--dominant-winner-over-second-ratio"),
                                 "--dominant-winner-over-second-ratio");
                         break;
+                    case "--case-processing-mode":
+                        caseProcessingMode = CaseProcessingMode
+                                .valueOf(requireValue(arguments, ++index, "--case-processing-mode")
+                                        .toUpperCase(Locale.ROOT));
+                        break;
 
                     default:
                         throw new IllegalArgumentException("Unknown argument: " + argument);
@@ -338,7 +354,7 @@ public final class Compile {
 
             if (help) {
                 return new Arguments(inputFile, outputFile, reductionMode, storeOriginal, rightToLeft,
-                        dominantWinnerMinPercent, dominantWinnerOverSecondRatio, overwrite, true);
+                        dominantWinnerMinPercent, dominantWinnerOverSecondRatio, caseProcessingMode, overwrite, true);
             }
 
             if (inputFile == null) {
@@ -352,7 +368,7 @@ public final class Compile {
             }
 
             return new Arguments(inputFile, outputFile, reductionMode, storeOriginal, rightToLeft,
-                    dominantWinnerMinPercent, dominantWinnerOverSecondRatio, overwrite, false);
+                    dominantWinnerMinPercent, dominantWinnerOverSecondRatio, caseProcessingMode, overwrite, false);
         }
 
         /**

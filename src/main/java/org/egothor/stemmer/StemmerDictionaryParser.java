@@ -53,8 +53,8 @@ import java.util.logging.Logger;
  * to that stem.
  *
  * <p>
- * Input lines are normalized to lower case using {@link Locale#ROOT}. Leading
- * and trailing whitespace around each column is ignored.
+ * Input line case normalization is controlled by {@link CaseProcessingMode}.
+ * Leading and trailing whitespace around each column is ignored.
  *
  * <p>
  * The parser supports line remarks and trailing remarks. The remark markers
@@ -113,11 +113,27 @@ public final class StemmerDictionaryParser {
      * @throws IOException          if reading fails
      */
     public static ParseStatistics parse(final Path path, final EntryHandler entryHandler) throws IOException {
+        return parse(path, CaseProcessingMode.LOWERCASE_WITH_LOCALE_ROOT, entryHandler);
+    }
+
+    /**
+     * Parses a dictionary file from a filesystem path.
+     *
+     * @param path               dictionary file path
+     * @param caseProcessingMode case processing mode
+     * @param entryHandler       handler receiving parsed entries
+     * @return parsing statistics
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IOException          if reading fails
+     */
+    public static ParseStatistics parse(final Path path, final CaseProcessingMode caseProcessingMode,
+            final EntryHandler entryHandler) throws IOException {
         Objects.requireNonNull(path, "path");
+        Objects.requireNonNull(caseProcessingMode, "caseProcessingMode");
         Objects.requireNonNull(entryHandler, "entryHandler");
 
         try (BufferedReader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
-            return parse(reader, path.toAbsolutePath().toString(), entryHandler);
+            return parse(reader, path.toAbsolutePath().toString(), caseProcessingMode, entryHandler);
         }
     }
 
@@ -132,7 +148,23 @@ public final class StemmerDictionaryParser {
      */
     public static ParseStatistics parse(final String fileName, final EntryHandler entryHandler) throws IOException {
         Objects.requireNonNull(fileName, "fileName");
-        return parse(Path.of(fileName), entryHandler);
+        return parse(Path.of(fileName), CaseProcessingMode.LOWERCASE_WITH_LOCALE_ROOT, entryHandler);
+    }
+
+    /**
+     * Parses a dictionary file from a path string.
+     *
+     * @param fileName           dictionary file name or path string
+     * @param caseProcessingMode case processing mode
+     * @param entryHandler       handler receiving parsed entries
+     * @return parsing statistics
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IOException          if reading fails
+     */
+    public static ParseStatistics parse(final String fileName, final CaseProcessingMode caseProcessingMode,
+            final EntryHandler entryHandler) throws IOException {
+        Objects.requireNonNull(fileName, "fileName");
+        return parse(Path.of(fileName), caseProcessingMode, entryHandler);
     }
 
     /**
@@ -147,8 +179,25 @@ public final class StemmerDictionaryParser {
      */
     public static ParseStatistics parse(final Reader reader, final String sourceDescription,
             final EntryHandler entryHandler) throws IOException {
+        return parse(reader, sourceDescription, CaseProcessingMode.LOWERCASE_WITH_LOCALE_ROOT, entryHandler);
+    }
+
+    /**
+     * Parses a dictionary from a reader.
+     *
+     * @param reader             source reader
+     * @param sourceDescription  logical source description for diagnostics
+     * @param caseProcessingMode case processing mode
+     * @param entryHandler       handler receiving parsed entries
+     * @return parsing statistics
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IOException          if reading or handler processing fails
+     */
+    public static ParseStatistics parse(final Reader reader, final String sourceDescription,
+            final CaseProcessingMode caseProcessingMode, final EntryHandler entryHandler) throws IOException {
         Objects.requireNonNull(reader, "reader");
         Objects.requireNonNull(sourceDescription, "sourceDescription");
+        Objects.requireNonNull(caseProcessingMode, "caseProcessingMode");
         Objects.requireNonNull(entryHandler, "entryHandler");
 
         final BufferedReader bufferedReader = reader instanceof BufferedReader ? (BufferedReader) reader
@@ -161,7 +210,7 @@ public final class StemmerDictionaryParser {
         for (String line = bufferedReader.readLine(); line != null; line = bufferedReader.readLine()) {
             lineNumber++;
 
-            final String normalizedLine = stripRemark(line).trim().toLowerCase(Locale.ROOT);
+            final String normalizedLine = normalizeLineCase(stripRemark(line).trim(), caseProcessingMode);
             if (normalizedLine.isEmpty()) {
                 ignoredLineCount++;
                 continue;
@@ -224,6 +273,20 @@ public final class StemmerDictionaryParser {
         }
 
         return statistics;
+    }
+
+    /**
+     * Applies case normalization to one line according to the selected mode.
+     *
+     * @param line               line to normalize
+     * @param caseProcessingMode case processing mode
+     * @return normalized line
+     */
+    private static String normalizeLineCase(final String line, final CaseProcessingMode caseProcessingMode) {
+        if (caseProcessingMode == CaseProcessingMode.LOWERCASE_WITH_LOCALE_ROOT) {
+            return line.toLowerCase(Locale.ROOT);
+        }
+        return line;
     }
 
     /**

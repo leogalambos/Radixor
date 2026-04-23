@@ -69,7 +69,7 @@ public final class LoadBinaryStemmerExample {
 
 ### Build or extend a stemmer from dictionary data
 
-Radixor can also build a compiled trie from a custom dictionary. Dictionary lines consist of a canonical stem followed by zero or more variants. The parser lowercases input with `Locale.ROOT`, ignores leading and trailing whitespace, and supports line remarks introduced by `#` or `//`.
+Radixor can also build a compiled trie from a custom dictionary. Dictionary lines consist of a canonical stem followed by zero or more variants. The parser applies `CaseProcessingMode` (default: `LOWERCASE_WITH_LOCALE_ROOT`), ignores leading and trailing whitespace, and supports line remarks introduced by `#` or `//`.
 
 This path is also relevant when you extend an existing compiled stemmer with additional domain-specific entries and rebuild a new compact artifact.
 
@@ -206,4 +206,4 @@ Dictionary compilation is usually a one-time preparation step and is generally f
 
 ## Persisted trie metadata
 
-Every compiled trie artifact stores a `TrieMetadata` descriptor together with the immutable trie payload. That metadata currently records the binary format version, the `WordTraversalDirection`, the `ReductionSettings` used during compilation, and the declared `DiacriticProcessingMode`. Even when a given release does not yet actively branch on every field at query time, persisting the full descriptor keeps artifacts self-describing and prepares the format for future matching strategies without relying on side-channel configuration.
+Every compiled trie artifact stores a `TrieMetadata` descriptor together with the immutable trie payload. That metadata currently records the binary format version, the `WordTraversalDirection`, the `ReductionSettings` used during compilation, the declared `DiacriticProcessingMode`, and the selected `CaseProcessingMode`. The traversal and case-processing settings are applied during runtime lookup (`get`, `getAll`), while persisting the full descriptor keeps artifacts self-describing and prepares the format for future matching strategies without relying on side-channel configuration.

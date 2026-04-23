@@ -54,9 +54,12 @@ import java.util.Objects;
  * @param reductionSettings       reduction settings used during compilation
  * @param diacriticProcessingMode diacritic processing strategy associated with
  *                                the artifact
+ * @param caseProcessingMode      case processing strategy associated with the
+ *                                artifact
  */
 public record TrieMetadata(int formatVersion, WordTraversalDirection traversalDirection,
-        ReductionSettings reductionSettings, DiacriticProcessingMode diacriticProcessingMode) {
+        ReductionSettings reductionSettings, DiacriticProcessingMode diacriticProcessingMode,
+        CaseProcessingMode caseProcessingMode) {
 
     /**
      * Creates a new metadata instance.
@@ -66,9 +69,11 @@ public record TrieMetadata(int formatVersion, WordTraversalDirection traversalDi
      * @param traversalDirection      logical key traversal direction
      * @param reductionSettings       reduction settings used during compilation
      * @param diacriticProcessingMode diacritic processing strategy
+     * @param caseProcessingMode      case processing strategy
      */
     public TrieMetadata(final int formatVersion, final WordTraversalDirection traversalDirection,
-            final ReductionSettings reductionSettings, final DiacriticProcessingMode diacriticProcessingMode) {
+            final ReductionSettings reductionSettings, final DiacriticProcessingMode diacriticProcessingMode,
+            final CaseProcessingMode caseProcessingMode) {
         if (formatVersion < 1) { // NOPMD
             throw new IllegalArgumentException("formatVersion must be at least 1.");
         }
@@ -76,6 +81,7 @@ public record TrieMetadata(int formatVersion, WordTraversalDirection traversalDi
         this.traversalDirection = Objects.requireNonNull(traversalDirection, "traversalDirection");
         this.reductionSettings = Objects.requireNonNull(reductionSettings, "reductionSettings");
         this.diacriticProcessingMode = Objects.requireNonNull(diacriticProcessingMode, "diacriticProcessingMode");
+        this.caseProcessingMode = Objects.requireNonNull(caseProcessingMode, "caseProcessingMode");
     }
 
     /**
@@ -89,7 +95,8 @@ public record TrieMetadata(int formatVersion, WordTraversalDirection traversalDi
      */
     public static TrieMetadata current(final int formatVersion, final WordTraversalDirection traversalDirection,
             final ReductionSettings reductionSettings) {
-        return new TrieMetadata(formatVersion, traversalDirection, reductionSettings, DiacriticProcessingMode.AS_IS);
+        return new TrieMetadata(formatVersion, traversalDirection, reductionSettings, DiacriticProcessingMode.AS_IS,
+                CaseProcessingMode.LOWERCASE_WITH_LOCALE_ROOT);
     }
 
     /**
@@ -104,6 +111,6 @@ public record TrieMetadata(int formatVersion, WordTraversalDirection traversalDi
     public static TrieMetadata legacy(final int formatVersion, final WordTraversalDirection traversalDirection) {
         return new TrieMetadata(formatVersion, traversalDirection,
                 ReductionSettings.withDefaults(ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS),
-                DiacriticProcessingMode.AS_IS);
+                DiacriticProcessingMode.AS_IS, CaseProcessingMode.LOWERCASE_WITH_LOCALE_ROOT);
     }
 }

@@ -32,7 +32,7 @@ The `storeOriginal` flag controls whether the canonical stem is inserted as a no
 
 ## Load a textual dictionary
 
-Loading from a dictionary file follows the same preparation model as bundled resources, but the source comes from your own file or path. The textual format is tab-separated values, meaning that columns are separated by the tab character. Each non-empty logical line starts with the stem column and may contain zero or more variant columns. Input is normalized to lower case using `Locale.ROOT`, trailing remarks introduced by `#` or `//` are ignored, and dictionary items containing embedded whitespace are currently ignored with warning-level diagnostics.
+Loading from a dictionary file follows the same preparation model as bundled resources, but the source comes from your own file or path. The textual format is tab-separated values, meaning that columns are separated by the tab character. Each non-empty logical line starts with the stem column and may contain zero or more variant columns. Input case normalization is controlled by `CaseProcessingMode` (default: `LOWERCASE_WITH_LOCALE_ROOT`), trailing remarks introduced by `#` or `//` are ignored, and dictionary items containing embedded whitespace are currently ignored with warning-level diagnostics.
 
 ```java
 import java.io.IOException;

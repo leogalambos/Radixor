@@ -41,6 +41,7 @@ import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.IntFunction;
@@ -101,7 +102,7 @@ public final class FrequencyTrie<V> {
     /**
      * Binary format version.
      */
-    private static final int STREAM_VERSION = 3;
+    private static final int STREAM_VERSION = 4;
 
     /**
      * Factory used to create correctly typed arrays for {@link #getAll(String)}.
@@ -142,6 +143,10 @@ public final class FrequencyTrie<V> {
      * selected deterministically by shorter {@code toString()} value first, then by
      * lexicographically lower {@code toString()}, and finally by stable first-seen
      * order.
+     *
+     * <p>
+     * The supplied key is normalized according to persisted
+     * {@link TrieMetadata#caseProcessingMode()} before traversal.
      * 
      * @param key key to resolve
      * @return most frequent value, or {@code null} if the key does not exist or no
@@ -150,7 +155,7 @@ public final class FrequencyTrie<V> {
      */
     public V get(final String key) {
         Objects.requireNonNull(key, "key");
-        final CompiledNode<V> node = findNode(key);
+        final CompiledNode<V> node = findNode(normalizeLookupKey(key));
         if (node == null || node.orderedValues().length == 0) {
             return null;
         }
@@ -170,6 +175,10 @@ public final class FrequencyTrie<V> {
      * <p>
      * The returned array is a defensive copy.
      *
+     * <p>
+     * The supplied key is normalized according to persisted
+     * {@link TrieMetadata#caseProcessingMode()} before traversal.
+     *
      * @param key key to resolve
      * @return all values stored at the addressed node, ordered by descending
      *         frequency; returns an empty array if the key does not exist or no
@@ -178,7 +187,7 @@ public final class FrequencyTrie<V> {
      */
     public V[] getAll(final String key) {
         Objects.requireNonNull(key, "key");
-        final CompiledNode<V> node = findNode(key);
+        final CompiledNode<V> node = findNode(normalizeLookupKey(key));
         if (node == null || node.orderedValues().length == 0) {
             return this.arrayFactory.apply(0);
         }
@@ -336,7 +345,7 @@ public final class FrequencyTrie<V> {
         }
 
         final int version = dataInput.readInt();
-        if (version != 1 && version != STREAM_VERSION) {
+        if (version != 1 && version != 3 && version != STREAM_VERSION) {
             throw new IOException("Unsupported trie stream version: " + version);
         }
 
@@ -376,6 +385,7 @@ public final class FrequencyTrie<V> {
         dataOutput.writeInt(metadata.reductionSettings().dominantWinnerMinPercent());
         dataOutput.writeInt(metadata.reductionSettings().dominantWinnerOverSecondRatio());
         dataOutput.writeInt(metadata.diacriticProcessingMode().ordinal());
+        dataOutput.writeInt(metadata.caseProcessingMode().ordinal());
     }
 
     /**
@@ -419,10 +429,22 @@ public final class FrequencyTrie<V> {
             throw new IOException("Invalid diacritic processing mode ordinal: " + diacriticProcessingModeOrdinal);
         }
 
-        return new TrieMetadata(
-                version, traversalDirection, new ReductionSettings(reductionModes[reductionModeOrdinal],
-                        dominantWinnerMinPercent, dominantWinnerOverSecondRatio),
-                diacriticProcessingModes[diacriticProcessingModeOrdinal]);
+        final CaseProcessingMode caseProcessingMode;
+        if (version >= 4) { // NOPMD
+            final CaseProcessingMode[] caseProcessingModes = CaseProcessingMode.values();
+            final int caseProcessingModeOrdinal = dataInput.readInt();
+            if (caseProcessingModeOrdinal < 0 || caseProcessingModeOrdinal >= caseProcessingModes.length) {
+                throw new IOException("Invalid case processing mode ordinal: " + caseProcessingModeOrdinal);
+            }
+            caseProcessingMode = caseProcessingModes[caseProcessingModeOrdinal];
+        } else {
+            caseProcessingMode = CaseProcessingMode.LOWERCASE_WITH_LOCALE_ROOT;
+        }
+
+        return new TrieMetadata(version, traversalDirection,
+                new ReductionSettings(reductionModes[reductionModeOrdinal], dominantWinnerMinPercent,
+                        dominantWinnerOverSecondRatio),
+                diacriticProcessingModes[diacriticProcessingModeOrdinal], caseProcessingMode);
     }
 
     /**
@@ -598,7 +620,7 @@ public final class FrequencyTrie<V> {
     /**
      * Locates the compiled node for the supplied key.
      *
-     * @param key key to resolve
+     * @param key already-normalized key to resolve
      * @return compiled node, or {@code null} if the path does not exist
      */
     private CompiledNode<V> findNode(final String key) {
@@ -611,6 +633,19 @@ public final class FrequencyTrie<V> {
             }
         }
         return current;
+    }
+
+    /**
+     * Applies lookup-time case normalization according to persisted metadata.
+     *
+     * @param key lookup key
+     * @return normalized key for trie traversal
+     */
+    private String normalizeLookupKey(final String key) {
+        if (this.metadata.caseProcessingMode() == CaseProcessingMode.LOWERCASE_WITH_LOCALE_ROOT) {
+            return key.toLowerCase(Locale.ROOT);
+        }
+        return key;
     }
 
     /**
@@ -648,6 +683,11 @@ public final class FrequencyTrie<V> {
         private final WordTraversalDirection traversalDirection;
 
         /**
+         * Dictionary case processing mode associated with this builder.
+         */
+        private final CaseProcessingMode caseProcessingMode;
+
+        /**
          * Mutable root node.
          */
         private final MutableNode<V> root;
@@ -679,9 +719,25 @@ public final class FrequencyTrie<V> {
          */
         public Builder(final IntFunction<V[]> arrayFactory, final ReductionSettings reductionSettings,
                 final WordTraversalDirection traversalDirection) {
+            this(arrayFactory, reductionSettings, traversalDirection, CaseProcessingMode.LOWERCASE_WITH_LOCALE_ROOT);
+        }
+
+        /**
+         * Creates a new builder with the provided settings, explicit traversal
+         * direction, and explicit case processing mode.
+         *
+         * @param arrayFactory       array factory
+         * @param reductionSettings  reduction configuration
+         * @param traversalDirection logical key traversal direction
+         * @param caseProcessingMode dictionary case processing mode
+         * @throws NullPointerException if any argument is {@code null}
+         */
+        public Builder(final IntFunction<V[]> arrayFactory, final ReductionSettings reductionSettings,
+                final WordTraversalDirection traversalDirection, final CaseProcessingMode caseProcessingMode) {
             this.arrayFactory = Objects.requireNonNull(arrayFactory, "arrayFactory");
             this.reductionSettings = Objects.requireNonNull(reductionSettings, "reductionSettings");
             this.traversalDirection = Objects.requireNonNull(traversalDirection, "traversalDirection");
+            this.caseProcessingMode = Objects.requireNonNull(caseProcessingMode, "caseProcessingMode");
             this.root = new MutableNode<>();
         }
 
@@ -753,8 +809,8 @@ public final class FrequencyTrie<V> {
                         reductionContext.canonicalNodeCount());
             }
 
-            final TrieMetadata metadata = TrieMetadata.current(STREAM_VERSION, this.traversalDirection,
-                    this.reductionSettings);
+            final TrieMetadata metadata = new TrieMetadata(STREAM_VERSION, this.traversalDirection,
+                    this.reductionSettings, DiacriticProcessingMode.AS_IS, this.caseProcessingMode);
             return new FrequencyTrie<>(this.arrayFactory, compiledRoot, metadata);
         }
 

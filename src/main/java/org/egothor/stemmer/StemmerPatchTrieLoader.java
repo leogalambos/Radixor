@@ -283,7 +283,8 @@ public final class StemmerPatchTrieLoader {
         try (InputStream inputStream = openBundledResource(resourcePath);
                 BufferedReader reader = new BufferedReader(
                         new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
-            return load(reader, resourcePath, storeOriginal, reductionSettings, traversalDirectionOf(language));
+            return load(reader, resourcePath, storeOriginal, reductionSettings, traversalDirectionOf(language),
+                    CaseProcessingMode.LOWERCASE_WITH_LOCALE_ROOT);
         }
     }
 
@@ -318,7 +319,8 @@ public final class StemmerPatchTrieLoader {
      */
     public static FrequencyTrie<String> load(final Path path, final boolean storeOriginal,
             final ReductionSettings reductionSettings) throws IOException {
-        return load(path, storeOriginal, reductionSettings, WordTraversalDirection.BACKWARD);
+        return load(path, storeOriginal, reductionSettings, WordTraversalDirection.BACKWARD,
+                CaseProcessingMode.LOWERCASE_WITH_LOCALE_ROOT);
     }
 
     /**
@@ -338,14 +340,37 @@ public final class StemmerPatchTrieLoader {
     public static FrequencyTrie<String> load(final Path path, final boolean storeOriginal,
             final ReductionSettings reductionSettings, final WordTraversalDirection traversalDirection)
             throws IOException {
+        return load(path, storeOriginal, reductionSettings, traversalDirection,
+                CaseProcessingMode.LOWERCASE_WITH_LOCALE_ROOT);
+    }
+
+    /**
+     * Loads a dictionary from a filesystem path using explicit reduction settings,
+     * explicit traversal direction, and explicit case processing mode.
+     *
+     * @param path               path to the dictionary file
+     * @param storeOriginal      whether the stem itself should be inserted using the
+     *                           canonical no-op patch command
+     * @param reductionSettings  reduction settings
+     * @param traversalDirection traversal direction used for both trie keys and
+     *                           patch commands
+     * @param caseProcessingMode case processing mode used during dictionary parsing
+     * @return compiled patch-command trie
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IOException          if the file cannot be opened or read
+     */
+    public static FrequencyTrie<String> load(final Path path, final boolean storeOriginal,
+            final ReductionSettings reductionSettings, final WordTraversalDirection traversalDirection,
+            final CaseProcessingMode caseProcessingMode) throws IOException {
         Objects.requireNonNull(path, "path");
         Objects.requireNonNull(reductionSettings, "reductionSettings");
         Objects.requireNonNull(traversalDirection, "traversalDirection");
+        Objects.requireNonNull(caseProcessingMode, "caseProcessingMode");
 
         try (InputStream inputStream = openDictionaryInputStream(path);
                 BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
             return load(reader, path.toAbsolutePath().toString(), storeOriginal, reductionSettings,
-                    traversalDirection);
+                    traversalDirection, caseProcessingMode);
         }
     }
 
@@ -403,7 +428,30 @@ public final class StemmerPatchTrieLoader {
             final ReductionSettings reductionSettings, final WordTraversalDirection traversalDirection)
             throws IOException {
         Objects.requireNonNull(fileName, "fileName");
-        return load(Path.of(fileName), storeOriginal, reductionSettings, traversalDirection);
+        return load(Path.of(fileName), storeOriginal, reductionSettings, traversalDirection,
+                CaseProcessingMode.LOWERCASE_WITH_LOCALE_ROOT);
+    }
+
+    /**
+     * Loads a dictionary from a filesystem path string using explicit reduction
+     * settings, explicit traversal direction, and explicit case processing mode.
+     *
+     * @param fileName           file name or path string
+     * @param storeOriginal      whether the stem itself should be inserted using the
+     *                           canonical no-op patch command
+     * @param reductionSettings  reduction settings
+     * @param traversalDirection traversal direction used for both trie keys and
+     *                           patch commands
+     * @param caseProcessingMode case processing mode used during dictionary parsing
+     * @return compiled patch-command trie
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IOException          if the file cannot be opened or read
+     */
+    public static FrequencyTrie<String> load(final String fileName, final boolean storeOriginal,
+            final ReductionSettings reductionSettings, final WordTraversalDirection traversalDirection,
+            final CaseProcessingMode caseProcessingMode) throws IOException {
+        Objects.requireNonNull(fileName, "fileName");
+        return load(Path.of(fileName), storeOriginal, reductionSettings, traversalDirection, caseProcessingMode);
     }
 
     /**
@@ -437,14 +485,15 @@ public final class StemmerPatchTrieLoader {
      */
     private static FrequencyTrie<String> load(final BufferedReader reader, final String sourceDescription,
             final boolean storeOriginal, final ReductionSettings reductionSettings,
-            final WordTraversalDirection traversalDirection) throws IOException {
+            final WordTraversalDirection traversalDirection, final CaseProcessingMode caseProcessingMode)
+            throws IOException {
         final FrequencyTrie.Builder<String> builder = new FrequencyTrie.Builder<>(String[]::new, reductionSettings,
-                traversalDirection);
+                traversalDirection, caseProcessingMode);
         final PatchCommandEncoder patchCommandEncoder = new PatchCommandEncoder(traversalDirection);
         final int[] insertedMappings = new int[1];
 
         final StemmerDictionaryParser.ParseStatistics statistics = StemmerDictionaryParser.parse(reader,
-                sourceDescription, (stem, variants, lineNumber) -> {
+                sourceDescription, caseProcessingMode, (stem, variants, lineNumber) -> {
                     if (storeOriginal) {
                         builder.put(stem, NOOP_PATCH_COMMAND);
                         insertedMappings[0]++;

@@ -60,7 +60,9 @@
  * non-empty logical line starts with a canonical stem followed by known surface
  * variants in subsequent tab-separated columns.
  * Parsing is delegated to {@link org.egothor.stemmer.StemmerDictionaryParser},
- * which normalizes input to lower case using {@link java.util.Locale#ROOT},
+ * which applies configurable case processing through
+ * {@link org.egothor.stemmer.CaseProcessingMode} (default:
+ * {@link org.egothor.stemmer.CaseProcessingMode#LOWERCASE_WITH_LOCALE_ROOT}),
  * supports whole-line as well as trailing remarks introduced by {@code #} or
  * {@code //}, and currently ignores dictionary items containing Unicode
  * whitespace characters while reporting them through warning-level diagnostics.

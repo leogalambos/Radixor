@@ -47,7 +47,7 @@ The CLI supports the following arguments:
 
 Path to the source dictionary file.
 
-The file must use the standard line-oriented tab-separated values dictionary format, meaning that columns are separated by the tab character. Each non-empty logical line starts with the canonical stem column and may contain zero or more variant columns. The parser expects UTF-8 input, lowercases it using `Locale.ROOT`, ignores trailing remarks introduced by `#` or `//`, and currently ignores dictionary items containing embedded whitespace while reporting them through warning-level log entries.
+The file must use the standard line-oriented tab-separated values dictionary format, meaning that columns are separated by the tab character. Each non-empty logical line starts with the canonical stem column and may contain zero or more variant columns. The parser expects UTF-8 input, processes case according to `CaseProcessingMode` (default: `LOWERCASE_WITH_LOCALE_ROOT`), ignores trailing remarks introduced by `#` or `//`, and currently ignores dictionary items containing embedded whitespace while reporting them through warning-level log entries.
 
 Example:
 

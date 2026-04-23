@@ -64,7 +64,7 @@ import org.junit.jupiter.api.io.TempDir;
  * </p>
  * <ul>
  * <li>parsing through all public overloads,</li>
- * <li>normalization to lower case,</li>
+ * <li>case processing according to the selected mode,</li>
  * <li>handling of empty lines and remarks,</li>
  * <li>correct entry emission including line numbers,</li>
  * <li>propagation of I/O failures from the handler and file system,</li>
@@ -281,6 +281,22 @@ class StemmerDictionaryParserTest {
         }
 
         @Test
+        @DisplayName("should preserve character case when AS_IS mode is selected")
+        void shouldPreserveCharacterCaseWhenAsIsModeIsSelected() throws IOException {
+            final String input = "Root\tRunning\tRuns\tRUNNER\n";
+            final List<CapturedEntry> entries = new ArrayList<CapturedEntry>();
+
+            final StemmerDictionaryParser.ParseStatistics statistics = StemmerDictionaryParser.parse(
+                    new StringReader(input), "case-as-is", CaseProcessingMode.AS_IS, collectingHandler(entries));
+
+            assertAll("Statistics", () -> assertEquals(1, statistics.lineCount()),
+                    () -> assertEquals(1, statistics.entryCount()), () -> assertEquals(0, statistics.ignoredLineCount()));
+            assertEquals(1, entries.size(), "Exactly one entry should be emitted.");
+            assertAll("Entry", () -> assertEquals("Root", entries.get(0).stem()),
+                    () -> assertArrayEquals(new String[] { "Running", "Runs", "RUNNER" }, entries.get(0).variants()));
+        }
+
+        @Test
         @DisplayName("should reject null reader")
         void shouldRejectNullReader() {
             assertThrows(NullPointerException.class,
@@ -294,6 +310,15 @@ class StemmerDictionaryParserTest {
         void shouldRejectNullSourceDescription() {
             assertThrows(NullPointerException.class,
                     () -> StemmerDictionaryParser.parse(new StringReader("a b"), null, (stem, variants, lineNumber) -> {
+                        // no-op
+                    }));
+        }
+
+        @Test
+        @DisplayName("should reject null case processing mode")
+        void shouldRejectNullCaseProcessingMode() {
+            assertThrows(NullPointerException.class, () -> StemmerDictionaryParser.parse(new StringReader("a b"),
+                    "source", null, (stem, variants, lineNumber) -> {
                         // no-op
                     }));
         }

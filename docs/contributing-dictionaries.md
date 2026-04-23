@@ -41,7 +41,7 @@ The parser:
 
 - reads UTF-8 text,
 - interprets each line as tab-separated values,
-- normalizes input to lower case using `Locale.ROOT`,
+- applies configurable case processing through `CaseProcessingMode` (default: `LOWERCASE_WITH_LOCALE_ROOT`),
 - ignores empty lines,
 - supports remarks introduced by `#` or `//`,
 - currently ignores dictionary items containing embedded whitespace and reports them through warning-level log entries.

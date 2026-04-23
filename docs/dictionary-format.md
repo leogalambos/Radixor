@@ -111,7 +111,7 @@ This is also valid:
 
 ## Case normalization
 
-Input lines are normalized to lower case using `Locale.ROOT` before tab-separated columns are processed into dictionary entries.
+Input-line case normalization is controlled by `CaseProcessingMode`; by default the parser uses `LOWERCASE_WITH_LOCALE_ROOT` before tab-separated columns are processed into dictionary entries.
 
 That means dictionary authors should treat the format as **case-insensitive at load time**. If a file contains uppercase or mixed-case tokens, they will be normalized during parsing.
 
@@ -193,7 +193,7 @@ Run	Running	Runs	Ran
 CONNECT	Connected	Connecting
 ```
 
-This is accepted, but it is normalized to lower case during parsing.
+This is accepted. Under the default `LOWERCASE_WITH_LOCALE_ROOT` mode it is normalized to lower case during parsing; under `AS_IS` it is preserved.
 
 ## Format limitations
 

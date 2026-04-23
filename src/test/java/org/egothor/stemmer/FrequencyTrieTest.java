@@ -202,6 +202,43 @@ class FrequencyTrieTest {
     }
 
     /**
+     * Verifies that lookup-time key normalization follows persisted case processing
+     * metadata.
+     */
+    @Test
+    @DisplayName("Lookup applies lowercase normalization when metadata requires it")
+    void lookupAppliesLowercaseNormalizationWhenMetadataRequiresIt() {
+        final FrequencyTrie.Builder<String> builder = new FrequencyTrie.Builder<>(String[]::new,
+                ReductionSettings.withDefaults(ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS),
+                WordTraversalDirection.BACKWARD, CaseProcessingMode.LOWERCASE_WITH_LOCALE_ROOT);
+        builder.put("house", "noun");
+        builder.put("house", "verb");
+
+        final FrequencyTrie<String> trie = builder.build();
+
+        assertAll(() -> assertEquals("noun", trie.get("HOUSE")),
+                () -> assertArrayEquals(new String[] { "noun", "verb" }, trie.getAll("HoUsE")));
+    }
+
+    /**
+     * Verifies that lookup preserves casing when metadata uses AS_IS mode.
+     */
+    @Test
+    @DisplayName("Lookup keeps case-sensitive behavior when metadata is AS_IS")
+    void lookupKeepsCaseSensitiveBehaviorWhenMetadataIsAsIs() {
+        final FrequencyTrie.Builder<String> builder = new FrequencyTrie.Builder<>(String[]::new,
+                ReductionSettings.withDefaults(ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS),
+                WordTraversalDirection.BACKWARD, CaseProcessingMode.AS_IS);
+        builder.put("House", "noun");
+
+        final FrequencyTrie<String> trie = builder.build();
+
+        assertAll(() -> assertEquals("noun", trie.get("House")), () -> assertNull(trie.get("house")),
+                () -> assertArrayEquals(new String[] { "noun" }, trie.getAll("House")),
+                () -> assertArrayEquals(new String[0], trie.getAll("HOUSE")));
+    }
+
+    /**
      * Verifies that a missing path below an existing prefix returns empty results.
      */
     @Test
