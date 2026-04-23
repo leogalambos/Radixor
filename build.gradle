@@ -193,7 +193,17 @@ pitest {
         'org.egothor.stemmer.trie.*Test'
     ]
 
-    excludedClasses = ['org.egothor.stemmer.Compile']
+    excludedClasses = [
+        'org.egothor.stemmer.Compile*',
+        'org.egothor.stemmer.StemmerPatchTrieLoader*',
+        'org.egothor.stemmer.StemmerKnowledgeExperiment*',
+        'org.egothor.stemmer.StemmerKnowledgeExperimentCli*'
+    ]
+    excludedTestClasses = [
+        'org.egothor.stemmer.CompileIntegrationTest',
+        'org.egothor.stemmer.StemmerPatchTrieLoaderTest',
+        'org.egothor.stemmer.StemmerKnowledgeExperimentTest'
+    ]
     outputFormats = ['XML', 'HTML']
     timestampedReports = false
     exportLineCoverage = true
