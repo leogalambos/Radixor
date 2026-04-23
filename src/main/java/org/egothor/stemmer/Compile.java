@@ -149,8 +149,10 @@ public final class Compile {
         final ReductionSettings reductionSettings = new ReductionSettings(arguments.reductionMode(),
                 arguments.dominantWinnerMinPercent(), arguments.dominantWinnerOverSecondRatio());
 
+        final WordTraversalDirection traversalDirection = arguments.rightToLeft() ? WordTraversalDirection.FORWARD
+                : WordTraversalDirection.BACKWARD;
         final FrequencyTrie<String> trie = StemmerPatchTrieLoader.load(arguments.inputFile(), arguments.storeOriginal(),
-                reductionSettings);
+                reductionSettings, traversalDirection);
 
         final Path outputFile = arguments.outputFile();
         final Path parent = outputFile.toAbsolutePath().getParent();
@@ -166,11 +168,11 @@ public final class Compile {
 
         if (LOGGER.isLoggable(Level.INFO)) {
             LOGGER.log(Level.INFO,
-                    "Compiled dictionary {0} to {1} using mode {2}, storeOriginal={3}, dominantWinnerMinPercent={4}, dominantWinnerOverSecondRatio={5}.",
+                    "Compiled dictionary {0} to {1} using mode {2}, storeOriginal={3}, rightToLeft={4}, dominantWinnerMinPercent={5}, dominantWinnerOverSecondRatio={6}.",
                     new Object[] { arguments.inputFile().toAbsolutePath().toString(),
                             arguments.outputFile().toAbsolutePath().toString(), arguments.reductionMode().name(),
-                            arguments.storeOriginal(), arguments.dominantWinnerMinPercent(),
-                            arguments.dominantWinnerOverSecondRatio() });
+                            arguments.storeOriginal(), arguments.rightToLeft(),
+                            arguments.dominantWinnerMinPercent(), arguments.dominantWinnerOverSecondRatio() });
         }
     }
 
@@ -187,6 +189,16 @@ public final class Compile {
         System.err.println("      [--dominant-winner-min-percent <1..100>] \\");
         System.err.println("      [--dominant-winner-over-second-ratio <1..n>] \\");
         System.err.println("      [--overwrite]");
+        System.err.println();
+        System.err.println("Options:");
+        System.err.println("  --store-original");
+        System.err.println("      Inserts each canonical stem itself using the no-operation patch.");
+        System.err.println("  --right-to-left");
+        System.err.println("      Uses forward word traversal for right-to-left languages.");
+        System.err.println("      In this mode, trie keys are constructed from the logical beginning");
+        System.err.println("      of the stored word form and patch commands are encoded likewise.");
+        System.err.println("  --overwrite");
+        System.err.println("      Replaces the target file when it already exists.");
         System.err.println();
         System.err.println("Supported reduction modes:");
         for (ReductionMode mode : ReductionMode.values()) {
@@ -240,6 +252,8 @@ public final class Compile {
      * @param outputFile                    output compressed trie file
      * @param reductionMode                 subtree reduction mode
      * @param storeOriginal                 whether original stems are stored
+     * @param rightToLeft                   whether dictionary compilation should use
+     *                                      forward traversal on stored word forms
      * @param dominantWinnerMinPercent      dominant winner minimum percent
      * @param dominantWinnerOverSecondRatio dominant winner over second ratio
      * @param overwrite                     whether an existing output may be
@@ -248,7 +262,8 @@ public final class Compile {
      */
     @SuppressWarnings("PMD.LongVariable")
     private record Arguments(Path inputFile, Path outputFile, ReductionMode reductionMode, boolean storeOriginal,
-            int dominantWinnerMinPercent, int dominantWinnerOverSecondRatio, boolean overwrite, boolean help) {
+            boolean rightToLeft, int dominantWinnerMinPercent, int dominantWinnerOverSecondRatio, boolean overwrite,
+            boolean help) {
 
         /**
          * Parses raw command-line arguments.
@@ -264,6 +279,7 @@ public final class Compile {
             Path outputFile = null;
             ReductionMode reductionMode = null;
             boolean storeOriginal = false;
+            boolean rightToLeft = false;
             boolean overwrite = false;
             boolean help = false;
             int dominantWinnerMinPercent = ReductionSettings.DEFAULT_DOMINANT_WINNER_MIN_PERCENT;
@@ -284,6 +300,10 @@ public final class Compile {
 
                     case "--overwrite":
                         overwrite = true;
+                        break;
+
+                    case "--right-to-left":
+                        rightToLeft = true;
                         break;
 
                     case "--input":
@@ -317,8 +337,8 @@ public final class Compile {
             }
 
             if (help) {
-                return new Arguments(inputFile, outputFile, reductionMode, storeOriginal, dominantWinnerMinPercent,
-                        dominantWinnerOverSecondRatio, overwrite, true);
+                return new Arguments(inputFile, outputFile, reductionMode, storeOriginal, rightToLeft,
+                        dominantWinnerMinPercent, dominantWinnerOverSecondRatio, overwrite, true);
             }
 
             if (inputFile == null) {
@@ -331,8 +351,8 @@ public final class Compile {
                 throw new IllegalArgumentException("Missing required argument --reduction-mode.");
             }
 
-            return new Arguments(inputFile, outputFile, reductionMode, storeOriginal, dominantWinnerMinPercent,
-                    dominantWinnerOverSecondRatio, overwrite, false);
+            return new Arguments(inputFile, outputFile, reductionMode, storeOriginal, rightToLeft,
+                    dominantWinnerMinPercent, dominantWinnerOverSecondRatio, overwrite, false);
         }
 
         /**

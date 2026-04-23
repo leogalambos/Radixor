@@ -31,11 +31,11 @@
 package org.egothor.stemmer;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.LinkedHashSet;
@@ -56,9 +56,8 @@ import org.junit.jupiter.params.provider.MethodSource;
  *
  * <p>
  * This suite protects the binary persistence contract of compiled tries by
- * comparing freshly compiled artifacts against checked-in golden GZip outputs.
- * It also verifies SHA-256 digests and representative semantic probes after
- * loading the produced artifact back.
+ * validating committed golden GZip outputs and verifying representative
+ * semantic probes after loading both historical and freshly compiled artifacts.
  *
  * <p>
  * The goal is to catch unintended changes in:
@@ -67,8 +66,8 @@ import org.junit.jupiter.params.provider.MethodSource;
  * <li>canonical subtree reduction</li>
  * <li>child ordering and node numbering</li>
  * <li>value ordering and frequency handling</li>
- * <li>stream layout and binary format stability</li>
- * <li>compressed artifact reproducibility</li>
+ * <li>stream layout backward readability</li>
+ * <li>compressed artifact reproducibility within the active format version</li>
  * </ul>
  */
 @Tag("unit")
@@ -127,37 +126,26 @@ final class CompiledTrieArtifactRegressionTest {
     }
 
     /**
-     * Verifies that a newly compiled artifact matches the committed golden file,
-     * matches the committed hash, and remains semantically valid when loaded back.
+     * Verifies that each committed golden artifact remains internally consistent,
+     * matches its committed digest, and can still be read by the current binary
+     * loader.
      *
      * @param artifactCase regression case
      * @throws IOException if test I/O fails
      */
     @ParameterizedTest(name = "{0}")
     @MethodSource("artifactCases")
-    @DisplayName("Compiled trie artifact must remain byte-for-byte stable")
-    void shouldMatchGoldenArtifactAndExpectedHash(final ArtifactCase artifactCase) throws IOException {
-        final Path sourcePath = RegressionArtifactSupport.copyResourceToFile(artifactCase.sourceResource(),
-                this.tempDir.resolve(artifactCase.id() + ".stemmer"));
-
-        final Path actualArtifactPath = this.tempDir.resolve(artifactCase.id() + ".gz");
-        final byte[] actualArtifactBytes = RegressionArtifactSupport.compileToArtifact(sourcePath,
-                artifactCase.storeOriginal(), artifactCase.reductionSettings(), actualArtifactPath);
-
+    @DisplayName("Committed golden artifacts must remain readable and hash-stable")
+    void shouldKeepGoldenArtifactReadableAndHashStable(final ArtifactCase artifactCase) throws IOException {
         final byte[] goldenArtifactBytes = RegressionArtifactSupport
                 .readResourceBytes(artifactCase.goldenArtifactResource());
         final String expectedSha256 = RegressionArtifactSupport.readSha256Resource(artifactCase.sha256Resource());
+        final FrequencyTrie<String> trie = StemmerPatchTrieBinaryIO.read(new ByteArrayInputStream(goldenArtifactBytes));
 
         assertAll(
-                () -> assertArrayEquals(goldenArtifactBytes, actualArtifactBytes,
-                        RegressionArtifactSupport.mismatchMessage(artifactCase.id(), expectedSha256,
-                                RegressionArtifactSupport.sha256Hex(actualArtifactBytes), actualArtifactPath)),
-
-                () -> assertEquals(expectedSha256, RegressionArtifactSupport.sha256Hex(actualArtifactBytes),
-                        "Freshly compiled artifact SHA-256 must match the committed regression hash."),
-
                 () -> assertEquals(expectedSha256, RegressionArtifactSupport.sha256Hex(goldenArtifactBytes),
-                        "Golden artifact SHA-256 must match its committed sidecar hash."));
+                        "Golden artifact SHA-256 must match its committed sidecar hash."),
+                () -> assertGoldenArtifactSemanticProbes(trie, artifactCase));
     }
 
     /**
@@ -181,7 +169,7 @@ final class CompiledTrieArtifactRegressionTest {
         final byte[] secondArtifactBytes = RegressionArtifactSupport.compileToArtifactBytes(sourcePath,
                 artifactCase.storeOriginal(), artifactCase.reductionSettings());
 
-        assertArrayEquals(firstArtifactBytes, secondArtifactBytes,
+        org.junit.jupiter.api.Assertions.assertArrayEquals(firstArtifactBytes, secondArtifactBytes,
                 "Two consecutive compilations of the same source must produce identical artifact bytes.");
     }
 
@@ -209,8 +197,8 @@ final class CompiledTrieArtifactRegressionTest {
             final String[] allPatchCommands = trie.getAll(probe.word());
             final String preferredPatchCommand = trie.get(probe.word());
             final String preferredStem = preferredPatchCommand == null ? null
-                    : PatchCommandEncoder.apply(probe.word(), preferredPatchCommand);
-            final Set<String> allStems = reconstructStemCandidates(probe.word(), allPatchCommands);
+                    : PatchCommandEncoder.apply(probe.word(), preferredPatchCommand, trie.traversalDirection());
+            final Set<String> allStems = reconstructStemCandidates(trie, probe.word(), allPatchCommands);
 
             assertAll(
                     () -> assertFalse(allPatchCommands.length == 0,
@@ -233,7 +221,8 @@ final class CompiledTrieArtifactRegressionTest {
      * @param patchCommands serialized patch commands
      * @return reconstructed stem candidates
      */
-    private static Set<String> reconstructStemCandidates(final String word, final String[] patchCommands) {
+    private static Set<String> reconstructStemCandidates(final FrequencyTrie<String> trie, final String word,
+            final String[] patchCommands) {
         final Set<String> stems = new LinkedHashSet<String>();
 
         if (patchCommands == null) {
@@ -241,10 +230,36 @@ final class CompiledTrieArtifactRegressionTest {
         }
 
         for (String patchCommand : patchCommands) {
-            stems.add(PatchCommandEncoder.apply(word, patchCommand));
+            stems.add(PatchCommandEncoder.apply(word, patchCommand, trie.traversalDirection()));
         }
 
         return stems;
+    }
+
+    /**
+     * Verifies representative semantic probes against one already loaded trie.
+     *
+     * @param trie         trie to inspect
+     * @param artifactCase regression case providing the expected probes
+     */
+    private static void assertGoldenArtifactSemanticProbes(final FrequencyTrie<String> trie,
+            final ArtifactCase artifactCase) {
+        for (ProbeExpectation probe : artifactCase.probes()) {
+            final String[] allPatchCommands = trie.getAll(probe.word());
+            final String preferredPatchCommand = trie.get(probe.word());
+            final String preferredStem = preferredPatchCommand == null ? null
+                    : PatchCommandEncoder.apply(probe.word(), preferredPatchCommand, trie.traversalDirection());
+            final Set<String> allStems = reconstructStemCandidates(trie, probe.word(), allPatchCommands);
+
+            assertAll(
+                    () -> assertFalse(allPatchCommands.length == 0,
+                            "Representative probe must produce at least one result for word: " + probe.word()),
+                    () -> assertEquals(probe.preferredStem(), preferredStem,
+                            "Preferred stem mismatch for representative probe word: " + probe.word()),
+                    () -> assertTrue(allStems.containsAll(probe.acceptableStems()),
+                            "All acceptable stems must be present in getAll() for representative probe word: "
+                                    + probe.word()));
+        }
     }
 
     /**

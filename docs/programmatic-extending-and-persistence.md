@@ -87,3 +87,20 @@ This model works especially well when domain-specific extensions are added in la
 
 - [Loading and Building Stemmers](programmatic-loading-and-building.md)
 - [Querying and Ambiguity Handling](programmatic-querying-and-ambiguity.md)
+
+
+## Inspecting persisted metadata
+
+After loading a compiled artifact, applications can inspect the persisted build descriptor directly:
+
+```java
+final FrequencyTrie<String> trie = StemmerPatchTrieLoader.loadBinary("build/stemmers/cs_cz.dat.gz");
+final TrieMetadata metadata = trie.metadata();
+
+System.out.println(metadata.formatVersion());
+System.out.println(metadata.traversalDirection());
+System.out.println(metadata.reductionSettings().reductionMode());
+System.out.println(metadata.diacriticProcessingMode());
+```
+
+This is especially useful when a deployment manages multiple artifacts compiled under different traversal or reduction regimes.

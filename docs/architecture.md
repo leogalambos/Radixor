@@ -25,11 +25,11 @@ Each stage has a different purpose.
 The textual dictionary groups known word forms under a canonical stem:
 
 ```text
-run running runs ran
-connect connected connecting connection
+run	running	runs	ran
+connect	connected	connecting	connection
 ```
 
-The first token is the canonical stem. The following tokens are known variants.
+The first column is the canonical stem. The following tab-separated columns are known variants.
 
 ### Patch-command generation
 

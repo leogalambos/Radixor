@@ -32,7 +32,7 @@ The `storeOriginal` flag controls whether the canonical stem is inserted as a no
 
 ## Load a textual dictionary
 
-Loading from a dictionary file follows the same preparation model as bundled resources, but the source comes from your own file or path. Each non-empty logical line starts with the stem and may contain zero or more variants. Input is normalized to lower case using `Locale.ROOT`, and trailing remarks introduced by `#` or `//` are ignored.
+Loading from a dictionary file follows the same preparation model as bundled resources, but the source comes from your own file or path. The textual format is tab-separated values, meaning that columns are separated by the tab character. Each non-empty logical line starts with the stem column and may contain zero or more variant columns. Input is normalized to lower case using `Locale.ROOT`, trailing remarks introduced by `#` or `//` are ignored, and dictionary items containing embedded whitespace are currently ignored with warning-level diagnostics.
 
 ```java
 import java.io.IOException;
@@ -51,7 +51,7 @@ public final class LoadTextDictionaryExample {
 
     public static void main(final String[] arguments) throws IOException {
         final FrequencyTrie<String> trie = StemmerPatchTrieLoader.load(
-                Path.of("data", "stemmer.txt"),
+                Path.of("data", "stemmer.tsv"),
                 true,
                 ReductionSettings.withDefaults(
                         ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS));

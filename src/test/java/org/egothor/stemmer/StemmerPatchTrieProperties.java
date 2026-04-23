@@ -82,10 +82,10 @@ class StemmerPatchTrieProperties extends PropertyBasedTestSupport {
             assertTrue(preferredPatch != null && !preferredPatch.isEmpty(),
                     "preferred patch must exist for an observed word.");
             assertTrue(allPatches.length >= 1, "at least one patch must exist for an observed word.");
-            assertTrue(acceptableStems.contains(PatchCommandEncoder.apply(observedWord, preferredPatch)),
+            assertTrue(acceptableStems.contains(PatchCommandEncoder.apply(observedWord, preferredPatch, trie.traversalDirection())),
                     "preferred patch reconstructed an unexpected stem.");
 
-            final Set<String> producedStems = applyAll(observedWord, allPatches);
+            final Set<String> producedStems = applyAll(trie, observedWord, allPatches);
             assertTrue(acceptableStems.containsAll(producedStems),
                     "getAll() must not expose a patch that reconstructs an undeclared stem.");
 
@@ -125,10 +125,10 @@ class StemmerPatchTrieProperties extends PropertyBasedTestSupport {
      * @param patches returned patches
      * @return decoded stem set
      */
-    private static Set<String> applyAll(final String source, final String[] patches) {
+    private static Set<String> applyAll(final FrequencyTrie<String> trie, final String source, final String[] patches) {
         final LinkedHashSet<String> stems = new LinkedHashSet<>();
         for (String patch : patches) {
-            stems.add(PatchCommandEncoder.apply(source, patch));
+            stems.add(PatchCommandEncoder.apply(source, patch, trie.traversalDirection()));
         }
         return stems;
     }

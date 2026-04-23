@@ -15,7 +15,7 @@ A compiled stemmer can be obtained in three common ways.
 
 ### Use a bundled language dictionary
 
-Radixor ships with bundled dictionaries for a set of supported languages. These resources are line-oriented dictionaries stored with the library and compiled into a `FrequencyTrie<String>` when loaded. The loader can also store the canonical stem itself as a no-op patch command.
+Radixor ships with bundled dictionaries for a set of supported languages. These resources are line-oriented dictionaries stored with the library and compiled into a `FrequencyTrie<String>` when loaded. The loader can also store the canonical stem itself as a no-op patch command. Compiled trie artifacts now persist self-describing metadata, including the traversal direction and compilation reduction settings used to build the artifact.
 
 ```java
 import java.io.IOException;
@@ -202,3 +202,8 @@ Dictionary compilation is usually a one-time preparation step and is generally f
 - [CLI compilation](cli-compilation.md)
 - [Built-in languages](built-in-languages.md)
 - [Architecture and reduction](architecture-and-reduction.md)
+
+
+## Persisted trie metadata
+
+Every compiled trie artifact stores a `TrieMetadata` descriptor together with the immutable trie payload. That metadata currently records the binary format version, the `WordTraversalDirection`, the `ReductionSettings` used during compilation, and the declared `DiacriticProcessingMode`. Even when a given release does not yet actively branch on every field at query time, persisting the full descriptor keeps artifacts self-describing and prepares the format for future matching strategies without relying on side-channel configuration.

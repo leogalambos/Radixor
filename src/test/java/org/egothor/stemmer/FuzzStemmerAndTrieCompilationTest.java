@@ -161,10 +161,10 @@ class FuzzStemmerAndTrieCompilationTest {
                                     describeScenario("preferred patch must exist", reductionMode, scenario, word)),
                             () -> assertTrue(allPatches.length >= 1,
                                     describeScenario("at least one patch must exist", reductionMode, scenario, word)),
-                            () -> assertTrue(acceptableStems.contains(PatchCommandEncoder.apply(word, preferredPatch)),
+                            () -> assertTrue(acceptableStems.contains(PatchCommandEncoder.apply(word, preferredPatch, trie.traversalDirection())),
                                     describeScenario("preferred patch reconstructed an unexpected stem",
                                             reductionMode, scenario, word)),
-                            () -> assertTrue(allPatchesProduceOnlyAcceptableStems(word, allPatches, acceptableStems),
+                            () -> assertTrue(allPatchesProduceOnlyAcceptableStems(trie, word, allPatches, acceptableStems),
                                     describeScenario("getAll() contained a patch outside the accepted stem set",
                                             reductionMode, scenario, word)));
                 }
@@ -276,10 +276,10 @@ class FuzzStemmerAndTrieCompilationTest {
      * @param acceptableStems acceptable stems
      * @return {@code true} when all patches are acceptable
      */
-    private static boolean allPatchesProduceOnlyAcceptableStems(final String word, final String[] patches,
-            final Set<String> acceptableStems) {
+    private static boolean allPatchesProduceOnlyAcceptableStems(final FrequencyTrie<String> trie,
+            final String word, final String[] patches, final Set<String> acceptableStems) {
         for (String patch : patches) {
-            if (!acceptableStems.contains(PatchCommandEncoder.apply(word, patch))) {
+            if (!acceptableStems.contains(PatchCommandEncoder.apply(word, patch, trie.traversalDirection()))) {
                 return false;
             }
         }

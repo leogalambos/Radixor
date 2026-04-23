@@ -9,7 +9,7 @@ This is the preferred preparation workflow when stemming should run against an a
 The `Compile` tool performs the following steps:
 
 1. reads the input dictionary in the standard Radixor stemmer format,
-2. parses each line into a canonical stem and its known variants,
+2. parses each line into a canonical stem column and its known variant columns,
 3. converts variants into patch commands,
 4. builds a mutable trie of patch-command values,
 5. applies the configured reduction mode,
@@ -21,7 +21,7 @@ This workflow is intentionally aligned with the same dictionary semantics used e
 
 ```bash
 java org.egothor.stemmer.Compile \
-    --input ./data/stemmer.txt \
+    --input ./data/stemmer.tsv \
     --output ./build/english.radixor.gz \
     --reduction-mode MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS \
     --store-original \
@@ -47,12 +47,12 @@ The CLI supports the following arguments:
 
 Path to the source dictionary file.
 
-The file must use the standard line-oriented dictionary format. Each non-empty logical line starts with the canonical stem and may contain zero or more variants. The parser expects UTF-8 input, lowercases it using `Locale.ROOT`, and ignores trailing remarks introduced by `#` or `//`.
+The file must use the standard line-oriented tab-separated values dictionary format, meaning that columns are separated by the tab character. Each non-empty logical line starts with the canonical stem column and may contain zero or more variant columns. The parser expects UTF-8 input, lowercases it using `Locale.ROOT`, ignores trailing remarks introduced by `#` or `//`, and currently ignores dictionary items containing embedded whitespace while reporting them through warning-level log entries.
 
 Example:
 
 ```text
---input ./data/stemmer.txt
+--input ./data/stemmer.tsv
 ```
 
 ### `--output <file>`
@@ -190,15 +190,15 @@ Compilation is usually a one-time step and is generally fast. The more important
 ### 1. Prepare a dictionary
 
 ```text
-run running runs ran
-connect connected connecting
+run	running	runs	ran
+connect	connected	connecting
 ```
 
 ### 2. Compile it
 
 ```bash
 java org.egothor.stemmer.Compile \
-    --input ./data/stemmer.txt \
+    --input ./data/stemmer.tsv \
     --output ./build/english.radixor.gz \
     --reduction-mode MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS \
     --store-original

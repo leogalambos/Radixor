@@ -37,6 +37,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -46,12 +47,15 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
+import java.util.zip.GZIPInputStream;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -77,6 +81,7 @@ import org.junit.jupiter.params.provider.MethodSource;
  * <li>comment-aware parsing delegated to {@link StemmerDictionaryParser}</li>
  * <li>preservation of all valid stem candidates returned by
  * {@link FrequencyTrie#getAll(String)}</li>
+ * <li>the current bundled language set, including right-to-left metadata</li>
  * </ul>
  */
 @Tag("unit")
@@ -98,125 +103,50 @@ final class StemmerPatchTrieLoaderTest {
     private static final ReductionMode DEFAULT_REDUCTION_MODE = ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS;
 
     /**
+     * Representative number of bundled words used for overload consistency checks.
+     */
+    private static final int REPRESENTATIVE_BUNDLED_WORD_COUNT = 25;
+
+    /**
      * Provides arguments for bundled dictionary verification across both supported
      * getAll-preserving reduction modes.
+     *
+     * <p>
+     * The stream is derived directly from the current {@link Language} enum so the
+     * test suite follows the supported bundled language set automatically.
+     * </p>
      *
      * @return parameter stream
      */
     static Stream<Arguments> bundledDictionaryCases() {
-        return Stream.of(
-                // 01
-                Arguments.of("01-da_dk-ranked", StemmerPatchTrieLoader.Language.DA_DK,
-                        ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS),
+        final ReductionMode[] reductionModes = new ReductionMode[] {
+                ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS,
+                ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS };
 
-                // 02
-                Arguments.of("02-de_de-ranked", StemmerPatchTrieLoader.Language.DE_DE,
-                        ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS),
-
-                // 03
-                Arguments.of("03-es_es-ranked", StemmerPatchTrieLoader.Language.ES_ES,
-                        ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS),
-
-                // 04
-                Arguments.of("04-fr_fr-ranked", StemmerPatchTrieLoader.Language.FR_FR,
-                        ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS),
-
-                // 05
-                Arguments.of("05-it_it-ranked", StemmerPatchTrieLoader.Language.IT_IT,
-                        ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS),
-
-                // 06
-                Arguments.of("06-nl_nl-ranked", StemmerPatchTrieLoader.Language.NL_NL,
-                        ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS),
-
-                // 07
-                Arguments.of("07-no_no-ranked", StemmerPatchTrieLoader.Language.NO_NO,
-                        ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS),
-
-                // 08
-                Arguments.of("08-pt_pt-ranked", StemmerPatchTrieLoader.Language.PT_PT,
-                        ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS),
-
-                // 09
-                Arguments.of("09-ru_ru-ranked", StemmerPatchTrieLoader.Language.RU_RU,
-                        ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS),
-
-                // 10
-                Arguments.of("10-sv_se-ranked", StemmerPatchTrieLoader.Language.SV_SE,
-                        ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS),
-
-                // 11
-                Arguments.of("11-us_uk-ranked", StemmerPatchTrieLoader.Language.US_UK,
-                        ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS),
-
-                // 12
-                Arguments.of("12-us_uk_profi-ranked", StemmerPatchTrieLoader.Language.US_UK_PROFI,
-                        ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS),
-
-                // 13
-                Arguments.of("13-da_dk-unordered", StemmerPatchTrieLoader.Language.DA_DK,
-                        ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS),
-
-                // 14
-                Arguments.of("14-de_de-unordered", StemmerPatchTrieLoader.Language.DE_DE,
-                        ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS),
-
-                // 15
-                Arguments.of("15-es_es-unordered", StemmerPatchTrieLoader.Language.ES_ES,
-                        ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS),
-
-                // 16
-                Arguments.of("16-fr_fr-unordered", StemmerPatchTrieLoader.Language.FR_FR,
-                        ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS),
-
-                // 17
-                Arguments.of("17-it_it-unordered", StemmerPatchTrieLoader.Language.IT_IT,
-                        ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS),
-
-                // 18
-                Arguments.of("18-nl_nl-unordered", StemmerPatchTrieLoader.Language.NL_NL,
-                        ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS),
-
-                // 19
-                Arguments.of("19-no_no-unordered", StemmerPatchTrieLoader.Language.NO_NO,
-                        ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS),
-
-                // 20
-                Arguments.of("20-pt_pt-unordered", StemmerPatchTrieLoader.Language.PT_PT,
-                        ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS),
-
-                // 21
-                Arguments.of("21-ru_ru-unordered", StemmerPatchTrieLoader.Language.RU_RU,
-                        ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS),
-
-                // 22
-                Arguments.of("22-sv_se-unordered", StemmerPatchTrieLoader.Language.SV_SE,
-                        ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS),
-
-                // 23
-                Arguments.of("23-us_uk-unordered", StemmerPatchTrieLoader.Language.US_UK,
-                        ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS),
-
-                // 24
-                Arguments.of("24-us_uk_profi-unordered", StemmerPatchTrieLoader.Language.US_UK_PROFI,
-                        ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS));
+        return Arrays.stream(StemmerPatchTrieLoader.Language.values()).flatMap(language -> IntStream
+                .range(0, reductionModes.length)
+                .mapToObj(index -> Arguments.of(
+                        String.format("%02d-%s-%s", index + 1, language.name().toLowerCase(),
+                                reductionModes[index].name().toLowerCase()),
+                        language, reductionModes[index])));
     }
 
     /**
      * Provides representative bundled languages for overload consistency checks.
      *
+     * <p>
+     * The sample intentionally covers both traversal directions.
+     * </p>
+     *
      * @return parameter stream
      */
     static Stream<Arguments> bundledLanguageSamples() {
         return Stream.of(
-                // 01
                 Arguments.of("01-us_uk", StemmerPatchTrieLoader.Language.US_UK),
-
-                // 02
                 Arguments.of("02-de_de", StemmerPatchTrieLoader.Language.DE_DE),
-
-                // 03
-                Arguments.of("03-fr_fr", StemmerPatchTrieLoader.Language.FR_FR));
+                Arguments.of("03-fa_ir", StemmerPatchTrieLoader.Language.FA_IR),
+                Arguments.of("04-he_il", StemmerPatchTrieLoader.Language.HE_IL),
+                Arguments.of("05-yi", StemmerPatchTrieLoader.Language.YI));
     }
 
     /**
@@ -230,101 +160,64 @@ final class StemmerPatchTrieLoaderTest {
                 .put("running", new PatchCommandEncoder().encode("running", "run")).build();
 
         return Stream.of(
-                // 01
                 Arguments.of("01-load-language-settings",
                         (ExecutableOperation) () -> StemmerPatchTrieLoader.load((StemmerPatchTrieLoader.Language) null,
                                 true, settings),
                         "language"),
-
-                // 02
                 Arguments.of("02-load-language-mode",
                         (ExecutableOperation) () -> StemmerPatchTrieLoader.load((StemmerPatchTrieLoader.Language) null,
                                 true, DEFAULT_REDUCTION_MODE),
                         "language"),
-
-                // 03
                 Arguments.of("03-load-language-null-settings",
                         (ExecutableOperation) () -> StemmerPatchTrieLoader.load(StemmerPatchTrieLoader.Language.US_UK,
                                 true, (ReductionSettings) null),
                         "reductionSettings"),
-
-                // 04
                 Arguments.of("04-load-language-null-mode",
                         (ExecutableOperation) () -> StemmerPatchTrieLoader.load(StemmerPatchTrieLoader.Language.US_UK,
                                 true, (ReductionMode) null),
                         "reductionMode"),
-
-                // 05
                 Arguments.of("05-load-path-settings",
                         (ExecutableOperation) () -> StemmerPatchTrieLoader.load((Path) null, true, settings), "path"),
-
-                // 06
                 Arguments.of("06-load-path-mode",
                         (ExecutableOperation) () -> StemmerPatchTrieLoader.load((Path) null, true,
                                 DEFAULT_REDUCTION_MODE),
                         "path"),
-
-                // 07
                 Arguments.of("07-load-path-null-settings",
                         (ExecutableOperation) () -> StemmerPatchTrieLoader.load(tempPath(), true,
                                 (ReductionSettings) null),
                         "reductionSettings"),
-
-                // 08
                 Arguments.of("08-load-path-null-mode",
                         (ExecutableOperation) () -> StemmerPatchTrieLoader.load(tempPath(), true, (ReductionMode) null),
                         "reductionMode"),
-
-                // 09
                 Arguments.of("09-load-string-settings",
                         (ExecutableOperation) () -> StemmerPatchTrieLoader.load((String) null, true, settings),
                         "fileName"),
-
-                // 10
                 Arguments.of("10-load-string-mode",
                         (ExecutableOperation) () -> StemmerPatchTrieLoader.load((String) null, true,
                                 DEFAULT_REDUCTION_MODE),
                         "fileName"),
-
-                // 11
                 Arguments.of("11-load-string-null-settings",
                         (ExecutableOperation) () -> StemmerPatchTrieLoader.load(tempPath().toString(), true,
                                 (ReductionSettings) null),
                         "reductionSettings"),
-
-                // 12
                 Arguments.of("12-load-string-null-mode",
                         (ExecutableOperation) () -> StemmerPatchTrieLoader.load(tempPath().toString(), true,
                                 (ReductionMode) null),
                         "reductionMode"),
-
-                // 13
                 Arguments.of("13-load-binary-path",
                         (ExecutableOperation) () -> StemmerPatchTrieLoader.loadBinary((Path) null), "path"),
-
-                // 14
                 Arguments.of("14-load-binary-string",
                         (ExecutableOperation) () -> StemmerPatchTrieLoader.loadBinary((String) null), "fileName"),
-
-                // 15
                 Arguments.of("15-load-binary-stream",
                         (ExecutableOperation) () -> StemmerPatchTrieLoader.loadBinary((InputStream) null),
                         "inputStream"),
-
-                // 16
                 Arguments.of("16-save-binary-null-trie-path",
                         (ExecutableOperation) () -> StemmerPatchTrieLoader.saveBinary(null, tempPath()), "trie"),
-
-                // 17
                 Arguments.of("17-save-binary-null-path",
                         (ExecutableOperation) () -> StemmerPatchTrieLoader.saveBinary(trie, (Path) null), "path"),
-
-                // 18
                 Arguments.of("18-save-binary-null-trie-string",
                         (ExecutableOperation) () -> StemmerPatchTrieLoader.saveBinary(null, tempPath().toString()),
                         "trie"),
-
-                // 19
                 Arguments.of("19-save-binary-null-string",
                         (ExecutableOperation) () -> StemmerPatchTrieLoader.saveBinary(trie, (String) null),
                         "fileName"));
@@ -409,9 +302,9 @@ final class StemmerPatchTrieLoaderTest {
         @DisplayName("Path and String overloads must load equivalent tries")
         void shouldLoadEquivalentTrieFromPathAndStringOverloads() throws IOException {
             final Path dictionaryFile = writeDictionary("""
-                    run running runs runner
-                    play playing played plays
-                    city cities
+                    run	running	runs	runner
+                    play	playing	played	plays
+                    city	cities
                     """);
 
             final ReductionSettings settings = ReductionSettings.withDefaults(DEFAULT_REDUCTION_MODE);
@@ -425,9 +318,10 @@ final class StemmerPatchTrieLoaderTest {
             final FrequencyTrie<String> fromStringWithMode = StemmerPatchTrieLoader.load(dictionaryFile.toString(),
                     true, DEFAULT_REDUCTION_MODE);
 
-            assertTriePatchSemanticsEqual(fromPathWithSettings, fromPathWithMode, "running", "played", "cities", "run");
-            assertTriePatchSemanticsEqual(fromPathWithSettings, fromStringWithSettings, "running", "played", "cities",
+            assertTriePatchSemanticsEqual(fromPathWithSettings, fromPathWithMode, "running", "played", "cities",
                     "run");
+            assertTriePatchSemanticsEqual(fromPathWithSettings, fromStringWithSettings, "running", "played",
+                    "cities", "run");
             assertTriePatchSemanticsEqual(fromPathWithSettings, fromStringWithMode, "running", "played", "cities",
                     "run");
         }
@@ -442,7 +336,7 @@ final class StemmerPatchTrieLoaderTest {
         @DisplayName("storeOriginal=true must make the stem itself resolvable through the no-op patch")
         void shouldStoreOriginalStemWhenRequested() throws IOException {
             final Path dictionaryFile = writeDictionary("""
-                    run running runs
+                    run	running	runs
                     """);
 
             final FrequencyTrie<String> trie = StemmerPatchTrieLoader.load(dictionaryFile, true,
@@ -467,8 +361,8 @@ final class StemmerPatchTrieLoaderTest {
         @DisplayName("storeOriginal=false must not insert the stem itself unless present as a variant elsewhere")
         void shouldNotStoreOriginalStemWhenDisabled() throws IOException {
             final Path dictionaryFile = writeDictionary("""
-                    run running runs
-                    play playing played plays
+                    run	running	runs
+                    play	playing	played	plays
                     """);
 
             final FrequencyTrie<String> trie = StemmerPatchTrieLoader.load(dictionaryFile, false,
@@ -478,6 +372,29 @@ final class StemmerPatchTrieLoaderTest {
                     "Stem itself must not be resolvable when storeOriginal is disabled and the stem is not a variant.");
             assertEquals(Set.of("run"), reconstructAllStemCandidates(trie, "running"),
                     "Variants must still reconstruct the proper stem.");
+        }
+
+        /**
+         * Verifies that the loader honors forward traversal for right-to-left
+         * dictionaries loaded from filesystem overloads.
+         *
+         * @throws IOException if the test file cannot be written or read
+         */
+        @Test
+        @DisplayName("Explicit right-to-left loading must use forward traversal semantics")
+        void shouldUseForwardTraversalForExplicitRightToLeftLoading() throws IOException {
+            final Path dictionaryFile = writeDictionary("""
+                    كتب	كتابة	كتاب
+                    """);
+
+            final ReductionSettings settings = ReductionSettings.withDefaults(DEFAULT_REDUCTION_MODE);
+            final FrequencyTrie<String> trie = StemmerPatchTrieLoader.load(dictionaryFile, true, settings,
+                    WordTraversalDirection.FORWARD);
+
+            assertEquals(WordTraversalDirection.FORWARD, trie.traversalDirection(),
+                    "Right-to-left loading must produce a forward-traversed trie.");
+            assertEquals(Set.of("كتب"), reconstructAllStemCandidates(trie, "كتابة"),
+                    "Patch reconstruction must use the trie traversal direction.");
         }
 
         /**
@@ -492,10 +409,10 @@ final class StemmerPatchTrieLoaderTest {
             final Path dictionaryFile = writeDictionary("""
                     # full-line hash comment
                     // full-line slash comment
-                    run running runs // inline slash comment
-                    play playing played # inline hash comment
+                    run	running	runs // inline slash comment
+                    play	playing	played # inline hash comment
 
-                    city cities
+                    city	cities
                     """);
 
             final FrequencyTrie<String> trie = StemmerPatchTrieLoader.load(dictionaryFile, true,
@@ -518,9 +435,9 @@ final class StemmerPatchTrieLoaderTest {
         @DisplayName("Binary save and load overloads must preserve trie semantics")
         void shouldRoundTripBinaryTrieAcrossAllBinaryOverloads() throws IOException {
             final Path dictionaryFile = writeDictionary("""
-                    run running runs runner
-                    city cities
-                    study studies studying
+                    run	running	runs	runner
+                    city	cities
+                    study	studies	studying
                     """);
             final Path binaryFile = tempDir.resolve("stemmer-trie.bin.gz");
 
@@ -535,9 +452,12 @@ final class StemmerPatchTrieLoaderTest {
             try (InputStream inputStream = new ByteArrayInputStream(binaryBytes)) {
                 final FrequencyTrie<String> fromStream = StemmerPatchTrieLoader.loadBinary(inputStream);
 
-                assertTriePatchSemanticsEqual(original, fromPath, "run", "running", "runner", "cities", "studying");
-                assertTriePatchSemanticsEqual(original, fromString, "run", "running", "runner", "cities", "studying");
-                assertTriePatchSemanticsEqual(original, fromStream, "run", "running", "runner", "cities", "studying");
+                assertTriePatchSemanticsEqual(original, fromPath, "run", "running", "runner", "cities",
+                        "studying");
+                assertTriePatchSemanticsEqual(original, fromString, "run", "running", "runner", "cities",
+                        "studying");
+                assertTriePatchSemanticsEqual(original, fromStream, "run", "running", "runner", "cities",
+                        "studying");
             }
         }
 
@@ -563,6 +483,54 @@ final class StemmerPatchTrieLoaderTest {
     final class BundledDictionaryTests {
 
         /**
+         * Verifies that the current language enumeration exactly matches the bundled
+         * language set expected by this project revision.
+         */
+        @Test
+        @DisplayName("Language enum must expose the current bundled language set")
+        void shouldExposeCurrentBundledLanguageSet() {
+            final Set<StemmerPatchTrieLoader.Language> expectedLanguages = new LinkedHashSet<StemmerPatchTrieLoader.Language>(
+                    Arrays.asList(StemmerPatchTrieLoader.Language.CS_CZ, StemmerPatchTrieLoader.Language.DA_DK,
+                            StemmerPatchTrieLoader.Language.DE_DE, StemmerPatchTrieLoader.Language.ES_ES,
+                            StemmerPatchTrieLoader.Language.FA_IR, StemmerPatchTrieLoader.Language.FI_FI,
+                            StemmerPatchTrieLoader.Language.FR_FR, StemmerPatchTrieLoader.Language.HE_IL,
+                            StemmerPatchTrieLoader.Language.HU_HU, StemmerPatchTrieLoader.Language.IT_IT,
+                            StemmerPatchTrieLoader.Language.NB_NO, StemmerPatchTrieLoader.Language.NL_NL,
+                            StemmerPatchTrieLoader.Language.NN_NO, StemmerPatchTrieLoader.Language.PL_PL,
+                            StemmerPatchTrieLoader.Language.PT_PT, StemmerPatchTrieLoader.Language.RU_RU,
+                            StemmerPatchTrieLoader.Language.SV_SE, StemmerPatchTrieLoader.Language.UK_UA,
+                            StemmerPatchTrieLoader.Language.US_UK, StemmerPatchTrieLoader.Language.YI));
+
+            final Set<StemmerPatchTrieLoader.Language> actualLanguages = new LinkedHashSet<StemmerPatchTrieLoader.Language>(
+                    Arrays.asList(StemmerPatchTrieLoader.Language.values()));
+
+            assertEquals(expectedLanguages, actualLanguages,
+                    "The bundled language enum must match the project's supported language set exactly.");
+        }
+
+        /**
+         * Verifies that the right-to-left metadata is correctly assigned for the
+         * currently supported bundled languages.
+         */
+        @Test
+        @DisplayName("Language enum must mark right-to-left bundled languages correctly")
+        void shouldExposeCorrectRightToLeftMetadata() {
+            final Set<StemmerPatchTrieLoader.Language> expectedRightToLeftLanguages = Set.of(
+                    StemmerPatchTrieLoader.Language.FA_IR, StemmerPatchTrieLoader.Language.HE_IL,
+                    StemmerPatchTrieLoader.Language.YI);
+
+            for (StemmerPatchTrieLoader.Language language : StemmerPatchTrieLoader.Language.values()) {
+                if (expectedRightToLeftLanguages.contains(language)) {
+                    assertTrue(language.isRightToLeft(),
+                            () -> language.name() + " must be marked as right-to-left.");
+                } else {
+                    assertFalse(language.isRightToLeft(),
+                            () -> language.name() + " must not be marked as right-to-left.");
+                }
+            }
+        }
+
+        /**
          * Verifies that each bundled dictionary compiles into a trie whose
          * {@link FrequencyTrie#getAll(String)} results still reconstruct exactly the
          * same set of stems as the source dictionary.
@@ -586,6 +554,8 @@ final class StemmerPatchTrieLoaderTest {
 
             assertNotNull(trie, "Compiled trie must be created.");
             assertFalse(expectedStemsByWord.isEmpty(), "Bundled dictionary must not be empty.");
+            assertEquals(language.isRightToLeft() ? WordTraversalDirection.FORWARD : WordTraversalDirection.BACKWARD,
+                    trie.traversalDirection(), "Trie traversal direction must match language metadata.");
 
             for (Map.Entry<String, Set<String>> entry : expectedStemsByWord.entrySet()) {
                 final String word = entry.getKey();
@@ -595,8 +565,9 @@ final class StemmerPatchTrieLoaderTest {
                 assertFalse(actualStems.isEmpty(),
                         () -> "No patch candidates returned for word '" + word + "' in scenario " + scenario + ".");
 
-                assertEquals(expectedStems, actualStems, () -> "Reconstructed stem candidates differ for word '" + word
-                        + "' in scenario " + scenario + "'. Expected: " + expectedStems + ", actual: " + actualStems);
+                assertEquals(expectedStems, actualStems,
+                        () -> "Reconstructed stem candidates differ for word '" + word + "' in scenario " + scenario
+                                + "'. Expected: " + expectedStems + ", actual: " + actualStems);
             }
         }
 
@@ -619,13 +590,12 @@ final class StemmerPatchTrieLoaderTest {
             final FrequencyTrie<String> viaMode = StemmerPatchTrieLoader.load(language, true, DEFAULT_REDUCTION_MODE);
 
             final Map<String, Set<String>> expectedStemsByWord = readExpectedStems(language);
-            final int verifiedWords = 25;
             int counter = 0;
 
             for (Map.Entry<String, Set<String>> entry : expectedStemsByWord.entrySet()) {
                 assertTriePatchSemanticsEqual(viaSettings, viaMode, entry.getKey());
                 counter++;
-                if (counter >= verifiedWords) {
+                if (counter >= REPRESENTATIVE_BUNDLED_WORD_COUNT) {
                     break;
                 }
             }
@@ -704,7 +674,7 @@ final class StemmerPatchTrieLoaderTest {
         }
 
         for (String patchCommand : patchCommands) {
-            stems.add(PatchCommandEncoder.apply(word, patchCommand));
+            stems.add(PatchCommandEncoder.apply(word, patchCommand, trie.traversalDirection()));
         }
 
         return stems;
@@ -743,7 +713,7 @@ final class StemmerPatchTrieLoaderTest {
         if (inputStream == null) {
             throw new IOException("Bundled stemmer resource not found: " + resourcePath);
         }
-        return inputStream;
+        return new GZIPInputStream(inputStream);
     }
 
     /**

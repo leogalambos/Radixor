@@ -1,0 +1,29 @@
+Stemmer data licensing
+
+The software source code in this repository is licensed separately under
+the BSD 3-Clause License.
+
+Stemmer dictionary and morphology data files are not covered by
+the BSD 3-Clause License unless explicitly stated otherwise.
+
+This repository contains adapted data derived from the UniMorph project:
+https://unimorph.github.io/
+
+Only stemmer data derived from sources that permit commercial use are included
+in the main distribution of this repository.
+
+Accepted upstream licenses for distributed stemmer data in this repository:
+- CC BY-SA 3.0
+- CC BY-SA 4.0
+- CC BY 4.0
+
+Sources under non-commercial licenses, including CC BY-NC-SA 4.0, are excluded
+from the main distribution.
+
+Modifications in this repository may include cleaning, normalization,
+deduplication, filtering, conversion, and reformatting.
+
+Copyright (c) 2026 Leo Galambos for the modifications, to the extent permitted
+by the applicable upstream license terms.
+
+Per-file licensing is stated in the header of each generated stemmer data file.

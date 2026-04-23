@@ -56,12 +56,15 @@
  * <p>
  * Dictionary loading is provided by
  * {@link org.egothor.stemmer.StemmerPatchTrieLoader}, which reads the
- * traditional line-oriented stemmer resource format in which each non-empty
- * logical line starts with a canonical stem followed by known surface variants.
+ * traditional line-oriented tab-separated values resource format in which each
+ * non-empty logical line starts with a canonical stem followed by known surface
+ * variants in subsequent tab-separated columns.
  * Parsing is delegated to {@link org.egothor.stemmer.StemmerDictionaryParser},
- * which normalizes input to lower case using {@link java.util.Locale#ROOT} and
+ * which normalizes input to lower case using {@link java.util.Locale#ROOT},
  * supports whole-line as well as trailing remarks introduced by {@code #} or
- * {@code //}. During loading, each variant is converted into a patch command
+ * {@code //}, and currently ignores dictionary items containing Unicode
+ * whitespace characters while reporting them through warning-level diagnostics.
+ * During loading, each variant is converted into a patch command
  * targeting the canonical stem, and the stem itself may optionally be stored
  * under the canonical no-operation patch.
  * </p>

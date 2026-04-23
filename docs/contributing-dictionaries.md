@@ -22,27 +22,29 @@ In practice, dictionary quality matters more than dictionary size. A smaller but
 
 ## Preferred dictionary shape
 
-Radixor uses a simple line-oriented format:
+Radixor uses a simple line-oriented tab-separated values format, meaning that columns are separated by the tab character:
 
 ```text
-<stem> <variant1> <variant2> <variant3> ...
+<stem>	<variant1>	<variant2>	<variant3> ...
 ```
 
-The first token on a line is the canonical stem. All following tokens on that line are known variants that should reduce to that stem.
+The first column on a line is the canonical stem. All following tab-separated columns on that line are known variants that should reduce to that stem.
 
 Example:
 
 ```text
-run running runs ran
-connect connected connecting connection
+run	running	runs	ran
+connect	connected	connecting	connection
 ```
 
 The parser:
 
 - reads UTF-8 text,
+- interprets each line as tab-separated values,
 - normalizes input to lower case using `Locale.ROOT`,
 - ignores empty lines,
-- supports remarks introduced by `#` or `//`.
+- supports remarks introduced by `#` or `//`,
+- currently ignores dictionary items containing embedded whitespace and reports them through warning-level log entries.
 
 For full format details, see [Dictionary format](dictionary-format.md).
 

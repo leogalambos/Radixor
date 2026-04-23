@@ -36,9 +36,10 @@ import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -46,19 +47,26 @@ import java.util.logging.Logger;
  * Parser of line-oriented stemmer dictionary files.
  *
  * <p>
- * Each non-empty logical line consists of a stem followed by zero or more known
- * word variants separated by whitespace. The first token is interpreted as the
- * canonical stem, and every following token on the same line is interpreted as
- * a variant belonging to that stem.
+ * Each non-empty logical line uses a tab-separated values layout. The first
+ * column is interpreted as the canonical stem, and every following
+ * tab-separated column on the same line is interpreted as a variant belonging
+ * to that stem.
  *
  * <p>
  * Input lines are normalized to lower case using {@link Locale#ROOT}. Leading
- * and trailing whitespace is ignored.
+ * and trailing whitespace around each column is ignored.
  *
  * <p>
  * The parser supports line remarks and trailing remarks. The remark markers
  * {@code #} and {@code //} terminate the logical content of the line, and the
  * remainder of that line is ignored.
+ *
+ * <p>
+ * Dictionary items containing any Unicode whitespace character are currently
+ * not supported. Such items are ignored and reported through a single
+ * {@link Level#WARNING warning}-level log entry per physical line together with
+ * the source line number, the normalized stem column, and the list of ignored
+ * items from that line.
  *
  * <p>
  * This class is intentionally stateless and allocation-light so it can be used
@@ -159,20 +167,50 @@ public final class StemmerDictionaryParser {
                 continue;
             }
 
-            final StringTokenizer tokenizer = new StringTokenizer(normalizedLine); // NOPMD
-            if (!tokenizer.hasMoreTokens()) {
+            final String[] rawColumns = normalizedLine.split("\t", -1);
+            if (rawColumns.length == 0) {
                 ignoredLineCount++;
                 continue;
             }
 
-            final String stem = tokenizer.nextToken();
-            final String[] variants = new String[tokenizer.countTokens()]; // NOPMD
+            final String stem = rawColumns[0].strip();
+            final List<String> acceptedVariants = new ArrayList<String>(Math.max(0, rawColumns.length - 1)); // NOPMD
 
-            for (int index = 0; index < variants.length; index++) {
-                variants[index] = tokenizer.nextToken();
+            if (stem.isEmpty()) {
+                ignoredLineCount++;
+                continue;
             }
 
-            entryHandler.onEntry(stem, variants, lineNumber);
+            if (containsWhitespaceCharacter(stem)) {
+                if (LOGGER.isLoggable(Level.WARNING)) {
+                    LOGGER.log(Level.WARNING,
+                            "Ignoring dictionary line containing whitespace in source {0} at line {1}, stem {2}.",
+                            new Object[] { sourceDescription, lineNumber, stem }); // NOPMD
+                }
+                continue;
+            }
+
+            int ignored = 0;
+
+            for (int index = 1; index < rawColumns.length; index++) {
+                final String variant = rawColumns[index].strip();
+                if (variant.isEmpty()) {
+                    continue;
+                }
+                if (containsWhitespaceCharacter(variant)) {
+                    ignored++;
+                    continue;
+                }
+                acceptedVariants.add(variant);
+            }
+
+            if (ignored > 0 && LOGGER.isLoggable(Level.WARNING)) {
+                LOGGER.log(Level.WARNING,
+                        "Ignoring dictionary items containing whitespace in source {0} at line {1}, stem {2}, ignored {3}:{4}.",
+                        new Object[] { sourceDescription, lineNumber, stem, ignored, rawColumns.length }); // NOPMD
+            }
+
+            entryHandler.onEntry(stem, acceptedVariants.toArray(String[]::new), lineNumber);
             logicalEntryCount++;
         }
 
@@ -186,6 +224,22 @@ public final class StemmerDictionaryParser {
         }
 
         return statistics;
+    }
+
+    /**
+     * Determines whether one dictionary item contains any Unicode whitespace
+     * character.
+     *
+     * @param item dictionary item to inspect
+     * @return {@code true} when the item contains at least one whitespace character
+     */
+    private static boolean containsWhitespaceCharacter(final String item) {
+        for (int index = 0; index < item.length(); index++) {
+            if (Character.isWhitespace(item.charAt(index))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

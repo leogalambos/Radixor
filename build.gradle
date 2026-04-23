@@ -116,6 +116,14 @@ tasks.withType(Test).configureEach {
         jvmArgs "-javaagent:${configurations.mockitoAgent.singleFile}"
     }
 
+    /*
+     * Bundled dictionary integration tests compile and reload large real-world
+     * stemming dictionaries, including large language resources such as es_es.
+     * The default Gradle test executor heap is too small for this workload.
+     */
+    minHeapSize = '1g'
+    maxHeapSize = '4g'
+
     finalizedBy(tasks.named('jacocoTestReport'))
 
     reports {
@@ -190,6 +198,13 @@ application {
     mainClass = 'org.egothor.stemmer.Compile'
     applicationName = 'radixor'
     executableDir = 'bin'
+}
+
+tasks.register('stemmerKnowledgeExperiment', JavaExec) {
+    group = 'application'
+    description = 'Runs the stemmer knowledge evaluation experiment.'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'org.egothor.stemmer.StemmerKnowledgeExperimentCli'
 }
 
 distributions {

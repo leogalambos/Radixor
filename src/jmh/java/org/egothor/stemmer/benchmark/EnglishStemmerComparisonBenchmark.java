@@ -59,8 +59,7 @@ import org.tartarus.snowball.ext.porterStemmer;
  * The benchmark processes the same deterministic token array with:
  * </p>
  * <ul>
- * <li>Radixor using bundled
- * {@link StemmerPatchTrieLoader.Language#US_UK_PROFI}</li>
+ * <li>Radixor using bundled {@link StemmerPatchTrieLoader.Language#US_UK}</li>
  * <li>Snowball original Porter stemmer</li>
  * <li>Snowball English stemmer, commonly referred to as Porter2</li>
  * </ul>
@@ -106,7 +105,7 @@ public class EnglishStemmerComparisonBenchmark {
         @Setup(Level.Trial)
         public void setUp() throws IOException {
             this.tokens = EnglishComparisonCorpus.createTokens(this.familyCount);
-            this.radixorTrie = StemmerPatchTrieLoader.load(StemmerPatchTrieLoader.Language.US_UK_PROFI, true,
+            this.radixorTrie = StemmerPatchTrieLoader.load(StemmerPatchTrieLoader.Language.US_UK, true,
                     ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS);
         }
     }

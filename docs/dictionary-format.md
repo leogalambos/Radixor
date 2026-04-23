@@ -1,6 +1,6 @@
 # Dictionary Format
 
-Radixor uses a simple line-oriented dictionary format designed for practical stemming workflows.
+Radixor uses a simple line-oriented dictionary format designed for practical stemming workflows. The textual source format is tab-separated values, meaning that columns are separated by the tab character.
 
 Each logical line describes one canonical stem and zero or more known word variants that should reduce to that stem. The format is intentionally lightweight, easy to maintain in source control, and directly consumable both by the programmatic loader and by the CLI compiler.
 
@@ -9,16 +9,16 @@ Each logical line describes one canonical stem and zero or more known word varia
 Each non-empty logical line has the following shape:
 
 ```text
-<stem> <variant1> <variant2> <variant3> ...
+<stem>	<variant1>	<variant2>	<variant3> ...
 ```
 
-The first token is interpreted as the **canonical stem**. Every following token on the same line is interpreted as a **known variant** belonging to that stem.
+The first column is interpreted as the **canonical stem**. Every following token on the same line is interpreted as a **known variant** belonging to that stem.
 
 Example:
 
 ```text
-run running runs ran
-connect connected connecting connection
+run	running	runs	ran
+connect	connected	connecting	connection
 ```
 
 In this example:
@@ -30,7 +30,7 @@ In this example:
 
 When a dictionary is loaded through `StemmerPatchTrieLoader`, the loader processes each parsed line as follows:
 
-1. the first token becomes the canonical stem,
+1. the first column becomes the canonical stem,
 2. every following token is treated as a variant,
 3. each variant is converted into a patch command that transforms the variant into the stem,
 4. if `storeOriginal` is enabled, the stem itself is also inserted using the canonical no-op patch command.
@@ -52,21 +52,23 @@ Whether such a line is operationally useful depends on how the dictionary is loa
 - if `storeOriginal` is enabled, the stem itself is inserted as a no-op mapping,
 - if `storeOriginal` is disabled, the line contributes no explicit variant mappings.
 
-## Whitespace rules
+## Column and whitespace rules
 
-Tokens are separated by whitespace. Leading and trailing whitespace is ignored.
+Columns are separated by the tab character. Leading and trailing whitespace around each column is ignored.
 
-These lines are equivalent:
-
-```text
-run running runs ran
-```
+This is the canonical form:
 
 ```text
-   run   running   runs   ran
+run	running	runs	ran
 ```
 
-Tabs and repeated spaces are both accepted because tokenization is whitespace-based.
+This is also accepted because the surrounding padding is removed before the item is processed:
+
+```text
+  run	 running 	 runs	 ran  
+```
+
+Embedded whitespace inside one dictionary item is currently not supported. A stem or variant such as `new york` therefore cannot yet be represented as one usable dictionary item in the textual source format. Such items are ignored during parsing and reported through a warning-level log entry together with the physical line number, the stem, and the ignored items from that line.
 
 ## Empty lines
 
@@ -75,9 +77,9 @@ Empty lines are ignored.
 Example:
 
 ```text
-run running runs ran
+run	running	runs	ran
 
-connect connected connecting
+connect	connected	connecting
 ```
 
 The blank line between entries has no effect.
@@ -96,8 +98,8 @@ The earliest occurrence of either marker terminates the logical content of the l
 Examples:
 
 ```text
-run running runs ran # English verb forms
-connect connected connecting // Common derived forms
+run	running	runs	ran # English verb forms
+connect	connected	connecting // Common derived forms
 ```
 
 This is also valid:
@@ -109,20 +111,20 @@ This is also valid:
 
 ## Case normalization
 
-Input lines are normalized to lower case using `Locale.ROOT` before tokenization is processed into dictionary entries.
+Input lines are normalized to lower case using `Locale.ROOT` before tab-separated columns are processed into dictionary entries.
 
 That means dictionary authors should treat the format as **case-insensitive at load time**. If a file contains uppercase or mixed-case tokens, they will be normalized during parsing.
 
 Example:
 
 ```text
-Run Running Runs Ran
+Run	Running	Runs	Ran
 ```
 
 is processed the same way as:
 
 ```text
-run running runs ran
+run	running	runs	ran
 ```
 
 ## Character set and practical convention
@@ -142,8 +144,8 @@ The format expresses a one-line grouping of forms under a canonical stem. It doe
 For example:
 
 ```text
-axis axes
-axe axes
+axis	axes
+axe	axes
 ```
 
 These are simply two independent lines. If both contribute mappings for the same surface form, the compiled trie may later expose one or more candidate patch commands depending on the accumulated local counts and the selected reduction mode.
@@ -163,32 +165,32 @@ As a result, repeating the same mapping is not just redundant text. It can influ
 ### Simple English example
 
 ```text
-run running runs ran
-connect connected connecting connection
-build building builds built
+run	running	runs	ran
+connect	connected	connecting	connection
+build	building	builds	built
 ```
 
 ### Dictionary with remarks
 
 ```text
-run running runs ran # canonical verb family
-connect connected connecting // derived forms
-build building builds built
+run	running	runs	ran # canonical verb family
+connect	connected	connecting // derived forms
+build	building	builds	built
 ```
 
 ### Stem-only entries
 
 ```text
 run
-connect connected connecting
+connect	connected	connecting
 build
 ```
 
 ### Mixed case input
 
 ```text
-Run Running Runs Ran
-CONNECT Connected Connecting
+Run	Running	Runs	Ran
+CONNECT	Connected	Connecting
 ```
 
 This is accepted, but it is normalized to lower case during parsing.
@@ -204,7 +206,7 @@ The current dictionary format intentionally stays minimal:
 - no explicit ambiguity syntax,
 - no sectioning or nested structure.
 
-Each token is simply a whitespace-delimited word form after remark stripping and lowercasing.
+Each dictionary item is simply one tab-separated word form after remark stripping and lowercasing.
 
 ## Authoring guidance
 

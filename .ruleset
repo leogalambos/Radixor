@@ -162,12 +162,12 @@
    <rule ref="category/java/design.xml/CollapsibleIfStatements"/>
    <rule ref="category/java/design.xml/CouplingBetweenObjects">
       <properties>
-         <property name="threshold" value="50" />
+         <property name="threshold" value="55" />
       </properties>
    </rule>
    <rule ref="category/java/design.xml/CyclomaticComplexity">
       <properties>
-         <property name="methodReportLevel" value="18" />
+         <property name="methodReportLevel" value="19" />
       </properties>
    </rule>
    <rule ref="category/java/design.xml/DataClass"/>

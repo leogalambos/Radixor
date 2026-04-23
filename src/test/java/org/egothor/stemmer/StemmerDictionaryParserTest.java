@@ -35,6 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -44,6 +45,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -90,6 +95,43 @@ class StemmerDictionaryParserTest {
     }
 
     /**
+     * Log handler capturing parser diagnostics for assertions.
+     */
+    private static final class CapturedLogHandler extends Handler {
+
+        /**
+         * Captured log records.
+         */
+        private final List<LogRecord> records = new ArrayList<LogRecord>();
+
+        @Override
+        public void publish(final LogRecord record) {
+            if (record != null) {
+                this.records.add(record);
+            }
+        }
+
+        @Override
+        public void flush() {
+            // No buffered state.
+        }
+
+        @Override
+        public void close() {
+            this.records.clear();
+        }
+
+        /**
+         * Returns the captured records.
+         *
+         * @return captured records
+         */
+        private List<LogRecord> records() {
+            return this.records;
+        }
+    }
+
+    /**
      * Creates a handler that collects all parser callbacks into the supplied list.
      *
      * @param entries target entry list
@@ -121,8 +163,8 @@ class StemmerDictionaryParserTest {
         @DisplayName("should parse normalized entries and collect accurate statistics")
         void shouldParseNormalizedEntriesAndCollectAccurateStatistics() throws IOException {
             final String input = "# full line remark\n" + "   \n"
-                    + "Root Running Runs RUNNER   # trailing hash remark\n"
-                    + "House HOUSEHOLD houseS // trailing slash remark\n" + "SingleStem\n"
+                    + "Root	Running	Runs	RUNNER   # trailing hash remark\n"
+                    + "House	HOUSEHOLD	houseS // trailing slash remark\n" + "SingleStem\n"
                     + "// full line slash remark\n";
 
             final List<CapturedEntry> entries = new ArrayList<CapturedEntry>();
@@ -158,10 +200,53 @@ class StemmerDictionaryParserTest {
         }
 
         @Test
+        @DisplayName("should ignore whitespace-containing items and emit one warning per physical line")
+        void shouldIgnoreWhitespaceContainingItemsAndLogOneWarningPerLine() throws IOException {
+            final String input = "root\trunning form\truns\tnew\u2003term\n" + "compound stem\talpha\tbeta\tvalue\n";
+
+            final List<CapturedEntry> entries = new ArrayList<CapturedEntry>();
+            final Logger logger = Logger.getLogger(StemmerDictionaryParser.class.getName());
+            final Level previousLevel = logger.getLevel();
+            final boolean previousUseParentHandlers = logger.getUseParentHandlers();
+            final CapturedLogHandler handler = new CapturedLogHandler();
+
+            logger.setUseParentHandlers(false);
+            logger.setLevel(Level.WARNING);
+            logger.addHandler(handler);
+            try {
+                final StemmerDictionaryParser.ParseStatistics statistics = StemmerDictionaryParser
+                        .parse(new StringReader(input), "whitespace-source", collectingHandler(entries));
+
+                assertAll("Statistics", () -> assertEquals(2, statistics.lineCount()),
+                        () -> assertEquals(1, statistics.entryCount()),
+                        () -> assertEquals(0, statistics.ignoredLineCount()));
+                assertEquals(1, entries.size(), "Only the valid TSV row must be emitted.");
+                assertAll("Parsed entry", () -> assertEquals("root", entries.get(0).stem()),
+                        () -> assertArrayEquals(new String[] { "runs" }, entries.get(0).variants()),
+                        () -> assertEquals(1, entries.get(0).lineNumber()));
+                assertEquals(2, handler.records().size(), "Exactly one warning must be emitted per physical line.");
+                assertAll("First warning", () -> assertEquals(Level.WARNING, handler.records().get(0).getLevel()),
+                        () -> assertTrue(handler.records().get(0).getMessage()
+                                .contains("Ignoring dictionary items containing whitespace")),
+                        () -> assertEquals("whitespace-source", handler.records().get(0).getParameters()[0]),
+                        () -> assertEquals(Integer.valueOf(1), handler.records().get(0).getParameters()[1]),
+                        () -> assertEquals("root", handler.records().get(0).getParameters()[2]),
+                        () -> assertEquals(Integer.valueOf(2), handler.records().get(0).getParameters()[3]));
+                assertAll("Second warning",
+                        () -> assertEquals(Integer.valueOf(2), handler.records().get(1).getParameters()[1]),
+                        () -> assertEquals("compound stem", handler.records().get(1).getParameters()[2]));
+            } finally {
+                logger.removeHandler(handler);
+                logger.setUseParentHandlers(previousUseParentHandlers);
+                logger.setLevel(previousLevel);
+            }
+        }
+
+        @Test
         @DisplayName("should prefer earliest remark marker regardless of marker type")
         void shouldPreferEarliestRemarkMarkerRegardlessOfMarkerType() throws IOException {
-            final String input = "alpha beta // slash remark before # hash remark # ignored\n"
-                    + "gamma delta # hash remark before // slash remark // ignored\n";
+            final String input = "alpha	beta // slash remark before # hash remark # ignored\n"
+                    + "gamma	delta # hash remark before // slash remark // ignored\n";
 
             final List<CapturedEntry> entries = new ArrayList<CapturedEntry>();
 
@@ -185,7 +270,7 @@ class StemmerDictionaryParserTest {
         @DisplayName("should propagate handler IOException without swallowing it")
         void shouldPropagateHandlerIOExceptionWithoutSwallowingIt() {
             final IOException expected = new IOException("Simulated handler failure.");
-            final Reader reader = new StringReader("stem variant\n");
+            final Reader reader = new StringReader("stem	variant\n");
 
             final IOException exception = assertThrows(IOException.class,
                     () -> StemmerDictionaryParser.parse(reader, "failing-handler", (stem, variants, lineNumber) -> {
@@ -228,7 +313,7 @@ class StemmerDictionaryParserTest {
         @Test
         @DisplayName("should parse same content through path and string overloads")
         void shouldParseSameContentThroughPathAndStringOverloads() throws IOException {
-            final String content = "walk walking walked\n" + "run running\n" + "\n" + "# ignored\n";
+            final String content = "walk	walking	walked\n" + "run	running\n" + "\n" + "# ignored\n";
 
             final Path file = createFile("dictionary.txt", content);
 

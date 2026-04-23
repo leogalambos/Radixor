@@ -1,8 +1,8 @@
 # full-line remark
 // full-line slash remark
 
-run running runs runner // trailing remark
-walk walking walks walked
-city cities
-café cafés
-play playing played # trailing remark
+run	running	runs	runner	// trailing remark
+walk	walking	walks	walked
+city	cities
+café	cafés
+play	playing	played # trailing remark

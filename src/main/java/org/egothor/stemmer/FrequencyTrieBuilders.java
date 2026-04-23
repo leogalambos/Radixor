@@ -87,10 +87,11 @@ public final class FrequencyTrieBuilders {
         Objects.requireNonNull(arrayFactory, "arrayFactory");
         Objects.requireNonNull(reductionSettings, "reductionSettings");
 
-        final FrequencyTrie.Builder<V> builder = new FrequencyTrie.Builder<>(arrayFactory, reductionSettings);
+        final FrequencyTrie.Builder<V> builder = new FrequencyTrie.Builder<>(arrayFactory, reductionSettings,
+                source.traversalDirection());
         final StringBuilder keyBuilder = new StringBuilder(64);
 
-        copyNode(source.root(), keyBuilder, builder);
+        copyNode(source.root(), keyBuilder, builder, source.traversalDirection());
 
         LOGGER.log(Level.FINE, "Reconstructed writable builder from compiled trie.");
         return builder;
@@ -119,18 +120,20 @@ public final class FrequencyTrieBuilders {
      *
      * @param node       current compiled node
      * @param keyBuilder current key builder
-     * @param builder    target mutable builder
-     * @param <V>        value type
+     * @param builder            target mutable builder
+     * @param traversalDirection logical key traversal direction used by the source
+     * @param <V>                 value type
      */
     private static <V> void copyNode(final CompiledNode<V> node, final StringBuilder keyBuilder,
-            final FrequencyTrie.Builder<V> builder) {
+            final FrequencyTrie.Builder<V> builder, final WordTraversalDirection traversalDirection) {
+        final String logicalKey = traversalDirection.traversalPathToLogicalKey(keyBuilder);
         for (int valueIndex = 0; valueIndex < node.orderedValues().length; valueIndex++) {
-            builder.put(keyBuilder.toString(), node.orderedValues()[valueIndex], node.orderedCounts()[valueIndex]);
+            builder.put(logicalKey, node.orderedValues()[valueIndex], node.orderedCounts()[valueIndex]);
         }
 
         for (int childIndex = 0; childIndex < node.edgeLabels().length; childIndex++) {
             keyBuilder.append(node.edgeLabels()[childIndex]);
-            copyNode(node.children()[childIndex], keyBuilder, builder);
+            copyNode(node.children()[childIndex], keyBuilder, builder, traversalDirection);
             keyBuilder.setLength(keyBuilder.length() - 1);
         }
     }

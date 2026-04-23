@@ -342,8 +342,8 @@ class CompileTest {
     private Path createMinimalDictionaryFile(final String fileName) throws Exception {
         final Path inputFile = temporaryDirectory.resolve(fileName);
 
-        final String content = "" + "# minimal dictionary for CLI tests\n" + "run running runs runner\n"
-                + "walk walking walks walked\n";
+        final String content = "" + "# minimal dictionary for CLI tests\n" + "run	running	runs	runner\n"
+                + "walk	walking	walks	walked\n";
 
         Files.writeString(inputFile, content, StandardCharsets.UTF_8);
         return inputFile;

@@ -158,7 +158,7 @@ final class FuzzTestSupport {
 
             dictionary.append(stem);
             for (String variant : variants) {
-                dictionary.append(' ').append(variant);
+                dictionary.append('\t').append(variant);
                 expectedStemsByWord.computeIfAbsent(variant, ignored -> new LinkedHashSet<>()).add(stem);
             }
             dictionary.append("  # entry ").append(index).append('\n');
@@ -181,18 +181,19 @@ final class FuzzTestSupport {
     private static String createVariant(final Random random, final String stem) {
         final int mode = random.nextInt(6);
         switch (mode) {
-        case 0:
-            return stem + suffix(random);
-        case 1:
-            return prefix(random) + stem;
-        case 2:
-            return stem.length() > 1 ? stem.substring(0, stem.length() - 1) + nextLetter(random) : stem + nextLetter(random);
-        case 3:
-            return stem + nextLetter(random) + nextLetter(random);
-        case 4:
-            return stem.length() > 2 ? stem.substring(0, stem.length() - 2) : stem;
-        default:
-            return new StringBuilder(stem).reverse().append(nextLetter(random)).toString();
+            case 0:
+                return stem + suffix(random);
+            case 1:
+                return prefix(random) + stem;
+            case 2:
+                return stem.length() > 1 ? stem.substring(0, stem.length() - 1) + nextLetter(random)
+                        : stem + nextLetter(random);
+            case 3:
+                return stem + nextLetter(random) + nextLetter(random);
+            case 4:
+                return stem.length() > 2 ? stem.substring(0, stem.length() - 2) : stem;
+            default:
+                return new StringBuilder(stem).reverse().append(nextLetter(random)).toString();
         }
     }
 
@@ -317,7 +318,8 @@ final class FuzzTestSupport {
      * @param dictionaryContent   generated dictionary content
      * @param expectedStemsByWord acceptable stems for each generated word
      */
-    record StemmerDictionaryScenario(long seed, String dictionaryContent, Map<String, Set<String>> expectedStemsByWord) {
+    record StemmerDictionaryScenario(long seed, String dictionaryContent,
+            Map<String, Set<String>> expectedStemsByWord) {
 
         /**
          * Creates a validated scenario.

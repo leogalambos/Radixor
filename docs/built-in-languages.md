@@ -1,41 +1,49 @@
 # Built-in Languages
 
-Radixor provides a set of bundled stemmer dictionaries that can be loaded directly without preparing custom lexical data first.
-
-These resources are intended as practical default dictionaries for common use. They provide a solid starting point for evaluation, integration, and general-purpose stemming workloads, while still fitting naturally into workflows where the bundled baseline is later refined, extended, or replaced by a custom dictionary.
+Radixor ships with a curated set of bundled stemmer dictionaries that can be loaded directly from the library distribution. These resources are intended to provide an immediately usable baseline for evaluation, prototyping, integration, and general-purpose stemming workloads, while still fitting naturally into workflows where the bundled baseline is later refined, extended, or replaced with custom lexical data.
 
 ## Overview
 
 Bundled dictionaries are exposed through:
 
 ```java
-StemmerPatchTrieLoader.Language
+org.egothor.stemmer.StemmerPatchTrieLoader.Language
 ```
 
-They are packaged with the library as text resources and compiled into a `FrequencyTrie<String>` when loaded.
+Each bundled dictionary is packaged with the library as a compressed UTF-8 text resource. When loaded, the resource is parsed by `StemmerDictionaryParser`, transformed into patch-command mappings, and compiled into a read-only `FrequencyTrie<String>` by `StemmerPatchTrieLoader`.
 
-## Supported languages
+The bundled language definition also carries a language-level right-to-left flag. That flag is used by the loader to derive the `WordTraversalDirection` used for both trie-key construction and patch-command generation. In practice, left-to-right bundled languages use historical backward Egothor traversal, while right-to-left bundled languages use forward traversal over the stored form.
+
+## Supported bundled languages
 
 The following bundled language identifiers are currently available:
 
-| Language | Enum constant | Notes |
-|---|---|---|
-| Danish | `DA_DK` | Bundled general-purpose dictionary |
-| German | `DE_DE` | Bundled general-purpose dictionary |
-| Spanish | `ES_ES` | Bundled general-purpose dictionary |
-| French | `FR_FR` | Bundled general-purpose dictionary |
-| Italian | `IT_IT` | Bundled general-purpose dictionary |
-| Dutch | `NL_NL` | Bundled general-purpose dictionary |
-| Norwegian | `NO_NO` | Bundled general-purpose dictionary |
-| Portuguese | `PT_PT` | Bundled general-purpose dictionary |
-| Russian | `RU_RU` | Currently supplied in normalized transliterated form |
-| Swedish | `SV_SE` | Bundled general-purpose dictionary |
-| English | `US_UK` | Standard English dictionary |
-| English | `US_UK_PROFI` | Extended English dictionary |
+| Language | Enum constant | Writing direction | Notes |
+|---|---|---:|---|
+| Czech | `CS_CZ` | LTR | Bundled general-purpose dictionary |
+| Danish | `DA_DK` | LTR | Bundled general-purpose dictionary |
+| German | `DE_DE` | LTR | Bundled general-purpose dictionary |
+| Spanish | `ES_ES` | LTR | Bundled general-purpose dictionary |
+| Persian | `FA_IR` | RTL | Bundled dictionary uses forward traversal over the stored form |
+| Finnish | `FI_FI` | LTR | Bundled general-purpose dictionary |
+| French | `FR_FR` | LTR | Bundled general-purpose dictionary |
+| Hebrew | `HE_IL` | RTL | Bundled dictionary uses forward traversal over the stored form |
+| Hungarian | `HU_HU` | LTR | Bundled general-purpose dictionary |
+| Italian | `IT_IT` | LTR | Bundled general-purpose dictionary |
+| Norwegian Bokmål | `NB_NO` | LTR | Bundled general-purpose dictionary |
+| Dutch | `NL_NL` | LTR | Bundled general-purpose dictionary |
+| Norwegian Nynorsk | `NN_NO` | LTR | Bundled general-purpose dictionary |
+| Polish | `PL_PL` | LTR | Bundled general-purpose dictionary |
+| Portuguese | `PT_PT` | LTR | Bundled general-purpose dictionary |
+| Russian | `RU_RU` | LTR | Bundled general-purpose dictionary |
+| Swedish | `SV_SE` | LTR | Bundled general-purpose dictionary |
+| Ukrainian | `UK_UA` | LTR | Bundled general-purpose dictionary |
+| English | `US_UK` | LTR | Bundled general-purpose dictionary |
+| Yiddish | `YI` | RTL | Bundled dictionary uses forward traversal over the stored form |
 
 ## Basic usage
 
-Load a bundled stemmer like this:
+Load a bundled dictionary like this:
 
 ```java
 import java.io.IOException;
@@ -52,16 +60,18 @@ public final class BuiltInExample {
 
     public static void main(final String[] arguments) throws IOException {
         final FrequencyTrie<String> trie = StemmerPatchTrieLoader.load(
-                StemmerPatchTrieLoader.Language.US_UK_PROFI,
+                StemmerPatchTrieLoader.Language.US_UK,
                 true,
                 ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS);
+
+        System.out.println(trie.traversalDirection());
     }
 }
 ```
 
-The loader reads the bundled dictionary resource, parses the textual entries, derives patch-command mappings, and compiles the result into a read-only trie.
+This call loads the bundled dictionary resource for the selected language, parses its lexical entries, derives patch-command mappings, and compiles the result into a read-only trie.
 
-## Example: stemming with `US_UK_PROFI`
+## Example: stemming with a bundled dictionary
 
 ```java
 import java.io.IOException;
@@ -79,44 +89,49 @@ public final class EnglishExample {
 
     public static void main(final String[] arguments) throws IOException {
         final FrequencyTrie<String> trie = StemmerPatchTrieLoader.load(
-                StemmerPatchTrieLoader.Language.US_UK_PROFI,
+                StemmerPatchTrieLoader.Language.US_UK,
                 true,
                 ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS);
 
         final String word = "running";
         final String patch = trie.get(word);
-        final String stem = PatchCommandEncoder.apply(word, patch);
+        final String stem = PatchCommandEncoder.apply(word, patch, trie.traversalDirection());
 
         System.out.println(word + " -> " + stem);
     }
 }
 ```
 
-## `US_UK` and `US_UK_PROFI`
+Passing `trie.traversalDirection()` to `PatchCommandEncoder.apply(...)` is the correct general contract. It ensures that the patch is applied using the same logical traversal model that was used when the trie and its patch commands were produced.
 
-Radixor currently provides two bundled English variants.
+## Traversal behavior and right-to-left languages
 
-### `US_UK`
+Bundled dictionaries are not all processed identically.
 
-`US_UK` is the lighter-weight bundled English resource. It is suitable where a smaller default dictionary is preferred and maximal lexical coverage is not the primary goal.
+For traditional left-to-right suffix-oriented resources, Radixor preserves historical Egothor behavior and traverses logical word characters backward. That means trie paths are constructed from the logical end of the stored word toward its beginning, and patch commands are interpreted with the same backward traversal model.
 
-### `US_UK_PROFI`
+For bundled right-to-left languages such as Persian, Hebrew, and Yiddish, Radixor uses forward traversal over the stored form. In those cases:
 
-`US_UK_PROFI` is the more extensive bundled English resource. It offers broader lexical coverage and is the better default for most applications that want stronger out-of-the-box behavior.
+- trie keys are traversed from the logical beginning of the stored form,
+- patch commands are generated in that same forward direction,
+- patch application must use `WordTraversalDirection.FORWARD`, which is naturally obtained from `trie.traversalDirection()`.
 
-### Recommendation
+This design keeps the traversal policy explicit and consistent across dictionary loading, trie lookup, binary persistence, builder reconstruction, and patch application.
 
-For most English-language deployments, prefer:
+## Reduction behavior
 
-```text
-US_UK_PROFI
-```
+Bundled dictionaries can be compiled using any supported `ReductionMode`. The reduction configuration controls how semantically equivalent subtrees are merged during trie compilation, while preserving the contract of the selected mode.
 
-Use `US_UK` when a smaller bundled baseline is more appropriate.
+Typical entry points are:
+
+- `StemmerPatchTrieLoader.load(language, storeOriginal, reductionMode)`
+- `StemmerPatchTrieLoader.load(language, storeOriginal, reductionSettings)`
+
+For most users, `ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS` is the most conservative general-purpose choice because it preserves ranked `getAll(...)` behavior.
 
 ## Intended role of bundled dictionaries
 
-Bundled dictionaries should be understood as **general-purpose default resources**.
+Bundled dictionaries should be understood as practical default resources.
 
 They are a good fit when:
 
@@ -125,15 +140,18 @@ They are a good fit when:
 - a reasonable baseline is sufficient,
 - the goal is evaluation, prototyping, or straightforward integration.
 
-They are also well suited to staged refinement workflows in which the bundled base is loaded first, then extended with domain-specific vocabulary, and finally persisted as a custom binary artifact.
+They are also well suited to staged refinement workflows in which a bundled base is loaded first, then extended with domain-specific vocabulary, and finally persisted as a custom binary artifact.
 
 ## Character representation
 
-The current bundled resources follow a pragmatic normalization convention.
+Bundled dictionaries are ordinary UTF-8 lexical resources. The parser reads them as text, the trie stores standard Java strings, and the patch-command model operates on general character sequences.
 
-At present, bundled dictionaries are supplied in normalized plain-ASCII form. For some languages, this is simply a lightweight maintenance convention. For others, especially languages commonly written in another script, it reflects a transliterated lexical resource. Russian is the clearest example in the current bundled set.
+This is important for two reasons:
 
-This convention belongs to the supplied dictionary resources, not to the core stemming model. The parser reads UTF-8 text, the dictionary model works with ordinary Java strings, and the trie and patch-command mechanism operate on general character sequences. In practical terms, the architecture is compatible with native-script dictionaries when suitable lexical resources are available.
+1. the built-in resources are not limited to ASCII-only processing,
+2. the traversal model is orthogonal to character encoding and script choice.
+
+In other words, right-to-left handling in the loader is about logical traversal strategy, not about introducing a separate character model.
 
 ## When to prefer custom dictionaries
 
@@ -141,8 +159,8 @@ A custom dictionary is usually the better choice when:
 
 - domain-specific vocabulary materially affects stemming quality,
 - lexical coverage must be controlled more precisely,
-- a stronger language resource is available than the bundled baseline,
-- native-script support is needed beyond the currently bundled resources.
+- a stronger lexical resource is available than the bundled baseline,
+- operational requirements demand an explicitly curated, versioned artifact.
 
 Typical examples include:
 
@@ -150,7 +168,7 @@ Typical examples include:
 - biomedical language,
 - legal or financial vocabulary,
 - organization-specific product and process names,
-- language resources maintained in native scripts.
+- dictionaries maintained with project-specific validation rules.
 
 ## Production recommendation
 
@@ -158,11 +176,11 @@ For production systems, the most robust workflow is usually:
 
 1. start from a bundled dictionary when it is suitable,
 2. extend it with domain-specific forms if needed,
-3. compile or rebuild it into a binary `.radixor.gz` artifact,
-4. deploy that compiled artifact,
-5. load it at runtime using `loadBinary(...)`.
+3. rebuild it into a binary artifact,
+4. deploy that compiled binary artifact,
+5. load it at runtime through `loadBinary(...)`.
 
-This avoids repeated startup parsing and makes the deployed stemming behavior explicit and versionable.
+This avoids repeated startup parsing and makes the deployed stemming behavior explicit, reproducible, and versionable.
 
 ## Example refinement workflow
 
@@ -185,7 +203,7 @@ public final class BundledRefinementExample {
 
     public static void main(final String[] arguments) throws IOException {
         final FrequencyTrie<String> base = StemmerPatchTrieLoader.load(
-                StemmerPatchTrieLoader.Language.US_UK_PROFI,
+                StemmerPatchTrieLoader.Language.US_UK,
                 true,
                 ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS);
 
@@ -204,11 +222,27 @@ public final class BundledRefinementExample {
 }
 ```
 
+The reconstructed builder preserves the traversal direction of the source trie, so refinements remain semantically aligned with the original bundled dictionary.
+
 ## Extending language support
 
-The built-in set is intentionally a practical baseline rather than a closed catalog. High-quality dictionaries for additional languages, improved language coverage, and stronger native-script resources are all natural extension paths for the project.
+The built-in set is intentionally a practical baseline rather than a closed catalog. Additional languages, stronger lexical coverage, and improved dictionaries for currently supported languages are all natural extension paths.
 
-What matters most is not only the number of entries, but the quality, consistency, and operational usefulness of the lexical resource being added.
+What matters most is not only the number of entries, but the quality, consistency, maintainability, and operational usefulness of the lexical resource being added.
+
+## Related API surface
+
+The following types are typically involved when working with bundled dictionaries:
+
+- `StemmerPatchTrieLoader`
+- `StemmerPatchTrieLoader.Language`
+- `FrequencyTrie`
+- `PatchCommandEncoder`
+- `WordTraversalDirection`
+- `ReductionMode`
+- `ReductionSettings`
+- `StemmerPatchTrieBinaryIO`
+- `FrequencyTrieBuilders`
 
 ## Next steps
 
@@ -219,4 +253,4 @@ What matters most is not only the number of entries, but the quality, consistenc
 
 ## Summary
 
-Radixor’s built-in language support provides immediate usability, practical default dictionaries, and a strong starting point for custom refinement. The current bundled resources follow a pragmatic normalization convention, while the underlying architecture remains well suited to richer language resources and future extensions.
+Radixor’s built-in language support provides immediate usability, a professionally defined baseline API, and a practical starting point for custom refinement. The bundled set now includes both left-to-right and right-to-left languages, and the library models that distinction explicitly through `WordTraversalDirection` so that trie construction, lookup, and patch application remain consistent.

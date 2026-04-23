@@ -30,6 +30,7 @@
  ******************************************************************************/
 package org.egothor.stemmer;
 
+import java.util.Objects;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -37,10 +38,19 @@ import java.util.concurrent.locks.ReentrantLock;
  * and applies such commands back to source words.
  *
  * <p>
- * The generated patch command follows the historical Egothor convention:
- * instructions are serialized so that they are applied from the end of the
- * source word toward its beginning. This keeps the command stream compact and
- * matches the behavior expected by existing stemming data.
+ * The historical Egothor patch language is defined for backward traversal, that
+ * is, from the logical end of a word toward its beginning. This implementation
+ * preserves that proven opcode semantics as the single internal representation.
+ * Forward traversal is implemented by translating source and target words to
+ * the equivalent reversed logical form at the API boundary and then delegating
+ * to the same backward encoder and decoder.
+ * </p>
+ *
+ * <p>
+ * This design keeps the patch language stable, avoids maintaining two distinct
+ * opcode interpreters, and guarantees that forward traversal is semantically
+ * equivalent to running the historical algorithm on the reversed logical word
+ * form.
  * </p>
  *
  * <p>
@@ -57,6 +67,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * instance can still be used safely when needed.
  * </p>
  */
+@SuppressWarnings("PMD.CyclomaticComplexity")
 public final class PatchCommandEncoder {
 
     /**
@@ -87,12 +98,6 @@ public final class PatchCommandEncoder {
 
     /**
      * Serialized opcode for a canonical no-operation patch.
-     *
-     * <p>
-     * This opcode represents an identity transform of the whole source word. It is
-     * used to ensure that equal source and target words always produce the same
-     * serialized patch command.
-     * </p>
      */
     private static final char NOOP_OPCODE = 'N';
 
@@ -103,11 +108,6 @@ public final class PatchCommandEncoder {
 
     /**
      * Canonical serialized no-operation patch.
-     *
-     * <p>
-     * This constant is returned by {@link #encode(String, String)} whenever source
-     * and target are equal.
-     * </p>
      */
     /* default */ static final String NOOP_PATCH = String.valueOf(new char[] { NOOP_OPCODE, NOOP_ARGUMENT });
 
@@ -118,13 +118,6 @@ public final class PatchCommandEncoder {
 
     /**
      * Extra matrix headroom reserved beyond the immediately required dimensions.
-     *
-     * <p>
-     * A small fixed margin reduces repeated reallocation when a caller encodes many
-     * similarly sized terms in sequence. The value is intentionally modest: large
-     * enough to absorb minor size fluctuations, yet small enough to avoid
-     * materially over-allocating the reused dynamic-programming matrices.
-     * </p>
      */
     private static final int CAPACITY_MARGIN = 8;
 
@@ -147,6 +140,12 @@ public final class PatchCommandEncoder {
      * Cost of keeping one matching character unchanged.
      */
     private final int matchCost;
+
+    /**
+     * Direction in which words are traversed during both patch serialization and
+     * patch application.
+     */
+    private final WordTraversalDirection traversalDirection;
 
     /**
      * Currently allocated source dimension of reusable matrices.
@@ -178,24 +177,16 @@ public final class PatchCommandEncoder {
      */
     private enum Trace {
 
-        /**
-         * Deletes one character from the source sequence.
-         */
+        /** Deletes one character from the source sequence. */
         DELETE,
 
-        /**
-         * Inserts one character from the target sequence.
-         */
+        /** Inserts one character from the target sequence. */
         INSERT,
 
-        /**
-         * Replaces one source character with one target character.
-         */
+        /** Replaces one source character with one target character. */
         REPLACE,
 
-        /**
-         * Keeps one matching character unchanged.
-         */
+        /** Keeps one matching character unchanged. */
         MATCH
     }
 
@@ -204,7 +195,17 @@ public final class PatchCommandEncoder {
      * delete = 1, replace = 1, match = 0.
      */
     public PatchCommandEncoder() {
-        this(1, 1, 1, 0);
+        this(WordTraversalDirection.BACKWARD, 1, 1, 1, 0);
+    }
+
+    /**
+     * Creates an encoder with the traditional Egothor cost model and explicit
+     * traversal direction.
+     *
+     * @param traversalDirection traversal direction
+     */
+    public PatchCommandEncoder(final WordTraversalDirection traversalDirection) {
+        this(traversalDirection, 1, 1, 1, 0);
     }
 
     /**
@@ -215,7 +216,22 @@ public final class PatchCommandEncoder {
      * @param replaceCost cost of replacing one character
      * @param matchCost   cost of keeping one equal character unchanged
      */
-    public PatchCommandEncoder(int insertCost, int deleteCost, int replaceCost, int matchCost) {
+    public PatchCommandEncoder(final int insertCost, final int deleteCost, final int replaceCost, final int matchCost) {
+        this(WordTraversalDirection.BACKWARD, insertCost, deleteCost, replaceCost, matchCost);
+    }
+
+    /**
+     * Creates an encoder with explicit operation costs and traversal direction.
+     *
+     * @param traversalDirection traversal direction
+     * @param insertCost         cost of inserting one character
+     * @param deleteCost         cost of deleting one character
+     * @param replaceCost        cost of replacing one character
+     * @param matchCost          cost of keeping one equal character unchanged
+     */
+    public PatchCommandEncoder(final WordTraversalDirection traversalDirection, final int insertCost,
+            final int deleteCost, final int replaceCost, final int matchCost) {
+        this.traversalDirection = Objects.requireNonNull(traversalDirection, "traversalDirection");
         if (insertCost < 0) {
             throw new IllegalArgumentException("insertCost must be non-negative.");
         }
@@ -248,25 +264,78 @@ public final class PatchCommandEncoder {
      * @return compact patch command, or {@code null} when any argument is
      *         {@code null}
      */
-    public String encode(String source, String target) {
+    public String encode(final String source, final String target) {
         if (source == null || target == null) {
             return null;
         }
-
         if (source.equals(target)) {
             return NOOP_PATCH;
         }
 
-        int sourceLength = source.length();
-        int targetLength = target.length();
+        final String effectiveSource = toLegacyWordForm(source, this.traversalDirection);
+        final String effectiveTarget = toLegacyWordForm(target, this.traversalDirection);
+        return encodeBackward(effectiveSource, effectiveTarget);
+    }
+
+    /**
+     * Applies a compact patch command to the supplied source word using the
+     * historical backward traversal direction.
+     *
+     * @param source       original source word
+     * @param patchCommand compact patch command
+     * @return transformed word, or {@code null} when {@code source} is {@code null}
+     */
+    public static String apply(final String source, final String patchCommand) {
+        return apply(source, patchCommand, WordTraversalDirection.BACKWARD);
+    }
+
+    /**
+     * Applies a compact patch command to the supplied source word using the
+     * specified traversal direction.
+     *
+     * <p>
+     * Forward traversal is implemented by transforming the source word to the
+     * equivalent legacy backward form, applying the proven historical decoder, and
+     * reversing the transformed result back to the logical word form.
+     * </p>
+     *
+     * @param source             original source word
+     * @param patchCommand       compact patch command
+     * @param traversalDirection traversal direction used by the patch command
+     * @return transformed word, or {@code null} when {@code source} is {@code null}
+     */
+    public static String apply(final String source, final String patchCommand,
+            final WordTraversalDirection traversalDirection) {
+        Objects.requireNonNull(traversalDirection, "traversalDirection");
+        if (source == null) {
+            return null;
+        }
+        if (traversalDirection == WordTraversalDirection.BACKWARD) {
+            return applyBackward(source, patchCommand);
+        }
+        final String transformedSource = reverse(source);
+        final String transformedResult = applyBackward(transformedSource, patchCommand);
+        return reverse(transformedResult);
+    }
+
+    /**
+     * Encodes a patch command using the historical backward Egothor semantics.
+     *
+     * @param source source word form in legacy backward logical space
+     * @param target target word form in legacy backward logical space
+     * @return compact patch command
+     */
+    private String encodeBackward(final String source, final String target) {
+        final int sourceLength = source.length();
+        final int targetLength = target.length();
 
         lock.lock();
         try {
             ensureCapacity(sourceLength + 1, targetLength + 1);
             initializeBoundaryConditions(sourceLength, targetLength);
 
-            char[] sourceCharacters = source.toCharArray();
-            char[] targetCharacters = target.toCharArray();
+            final char[] sourceCharacters = source.toCharArray();
+            final char[] targetCharacters = target.toCharArray();
 
             fillMatrices(sourceCharacters, targetCharacters, sourceLength, targetLength);
 
@@ -277,26 +346,14 @@ public final class PatchCommandEncoder {
     }
 
     /**
-     * Applies a compact patch command to the supplied source word.
+     * Applies a patch command using the historical backward Egothor semantics.
      *
-     * <p>
-     * This method operates directly on serialized opcodes rather than mapping them
-     * to another representation. That keeps the hot path small and avoids
-     * unnecessary indirection during patch application.
-     * </p>
-     *
-     * <p>
-     * For compatibility with the historical behavior, malformed patch input that
-     * causes index failures results in the original source word being returned
-     * unchanged.
-     * </p>
-     *
-     * @param source       original source word
+     * @param source       original source word in legacy backward logical space
      * @param patchCommand compact patch command
      * @return transformed word, or {@code null} when {@code source} is {@code null}
      */
     @SuppressWarnings({ "PMD.CyclomaticComplexity", "PMD.AvoidLiteralsInIfCondition" })
-    public static String apply(String source, String patchCommand) {
+    private static String applyBackward(final String source, final String patchCommand) {
         if (source == null) {
             return null;
         }
@@ -306,24 +363,21 @@ public final class PatchCommandEncoder {
         if (NOOP_PATCH.equals(patchCommand)) {
             return source;
         }
-
         if ((patchCommand.length() & 1) != 0) {
             return source;
         }
 
-        StringBuilder result = new StringBuilder(source);
-
+        final StringBuilder result = new StringBuilder(source);
         if (result.isEmpty()) {
-            return applyToEmptySource(result, patchCommand);
+            return applyBackwardToEmptySource(result, patchCommand);
         }
 
         int position = result.length() - 1;
 
         try {
             for (int patchIndex = 0, patchLength = patchCommand.length(); patchIndex < patchLength; patchIndex += 2) { // NOPMD
-
-                char opcode = patchCommand.charAt(patchIndex);
-                char argument = patchCommand.charAt(patchIndex + 1);
+                final char opcode = patchCommand.charAt(patchIndex);
+                final char argument = patchCommand.charAt(patchIndex + 1);
 
                 switch (opcode) {
                     case SKIP_OPCODE:
@@ -343,7 +397,7 @@ public final class PatchCommandEncoder {
                         if (deleteCount < 1) {
                             return source;
                         }
-                        int deleteEndExclusive = position + 1;
+                        final int deleteEndExclusive = position + 1;
                         position -= deleteCount - 1;
                         result.delete(position, deleteEndExclusive);
                         break;
@@ -373,27 +427,7 @@ public final class PatchCommandEncoder {
     }
 
     /**
-     * Decodes a compact count argument used by skip and delete instructions.
-     *
-     * <p>
-     * Valid encoded counts start at {@code 'a'} for one affected character. Values
-     * below {@code 'a'} are malformed and are reported to callers via the
-     * compatibility fallback path rather than by throwing a dedicated exception.
-     * </p>
-     *
-     * @param argument serialized count argument
-     * @return decoded positive count, or {@code -1} when the argument is malformed
-     */
-    @SuppressWarnings("PMD.AvoidLiteralsInIfCondition")
-    private static int decodeEncodedCount(final char argument) {
-        if (argument < 'a') {
-            return -1;
-        }
-        return argument - 'a' + 1;
-    }
-
-    /**
-     * Applies a patch command to an empty source word.
+     * Applies a backward patch command to an empty source word.
      *
      * <p>
      * Only insertion instructions are meaningful for an empty source. Skip,
@@ -407,12 +441,11 @@ public final class PatchCommandEncoder {
      * @return transformed word, or the original empty word when the patch is
      *         malformed
      */
-    private static String applyToEmptySource(StringBuilder result, String patchCommand) {
+    private static String applyBackwardToEmptySource(final StringBuilder result, final String patchCommand) {
         try {
             for (int patchIndex = 0, patchLength = patchCommand.length(); patchIndex < patchLength; patchIndex += 2) { // NOPMD
-
-                char opcode = patchCommand.charAt(patchIndex);
-                char argument = patchCommand.charAt(patchIndex + 1);
+                final char opcode = patchCommand.charAt(patchIndex);
+                final char argument = patchCommand.charAt(patchIndex + 1);
 
                 switch (opcode) {
                     case INSERT_OPCODE:
@@ -442,22 +475,58 @@ public final class PatchCommandEncoder {
     }
 
     /**
+     * Converts a logical word to the equivalent word form expected by the legacy
+     * backward encoder.
+     *
+     * @param word               logical word form
+     * @param traversalDirection requested traversal direction
+     * @return word form suitable for the legacy backward algorithm
+     */
+    private static String toLegacyWordForm(final String word, final WordTraversalDirection traversalDirection) {
+        return traversalDirection == WordTraversalDirection.BACKWARD ? word : reverse(word);
+    }
+
+    /**
+     * Reverses the supplied word.
+     *
+     * @param word source word
+     * @return reversed word
+     */
+    private static String reverse(final String word) {
+        return new StringBuilder(word).reverse().toString();
+    }
+
+    /**
+     * Decodes a compact count argument used by skip and delete instructions.
+     *
+     * @param argument serialized count argument
+     * @return decoded positive count, or {@code -1} when the argument is malformed
+     */
+    @SuppressWarnings("PMD.AvoidLiteralsInIfCondition")
+    private static int decodeEncodedCount(final char argument) {
+        if (argument < 'a') {
+            return -1;
+        }
+        return argument - 'a' + 1;
+    }
+
+    /**
      * Ensures that internal matrices are large enough for the requested input
      * dimensions.
      *
      * @param requiredSourceCapacity required source dimension
      * @param requiredTargetCapacity required target dimension
      */
-    private void ensureCapacity(int requiredSourceCapacity, int requiredTargetCapacity) {
-        if (requiredSourceCapacity <= sourceCapacity && requiredTargetCapacity <= targetCapacity) {
+    private void ensureCapacity(final int requiredSourceCapacity, final int requiredTargetCapacity) {
+        if (requiredSourceCapacity <= this.sourceCapacity && requiredTargetCapacity <= this.targetCapacity) {
             return;
         }
 
-        sourceCapacity = Math.max(sourceCapacity, requiredSourceCapacity) + CAPACITY_MARGIN;
-        targetCapacity = Math.max(targetCapacity, requiredTargetCapacity) + CAPACITY_MARGIN;
+        this.sourceCapacity = Math.max(this.sourceCapacity, requiredSourceCapacity) + CAPACITY_MARGIN;
+        this.targetCapacity = Math.max(this.targetCapacity, requiredTargetCapacity) + CAPACITY_MARGIN;
 
-        costMatrix = new int[sourceCapacity][targetCapacity];
-        traceMatrix = new Trace[sourceCapacity][targetCapacity];
+        this.costMatrix = new int[this.sourceCapacity][this.targetCapacity];
+        this.traceMatrix = new Trace[this.sourceCapacity][this.targetCapacity];
     }
 
     /**
@@ -467,18 +536,18 @@ public final class PatchCommandEncoder {
      * @param sourceLength length of the source word
      * @param targetLength length of the target word
      */
-    private void initializeBoundaryConditions(int sourceLength, int targetLength) {
-        costMatrix[0][0] = 0;
-        traceMatrix[0][0] = Trace.MATCH;
+    private void initializeBoundaryConditions(final int sourceLength, final int targetLength) {
+        this.costMatrix[0][0] = 0;
+        this.traceMatrix[0][0] = Trace.MATCH;
 
         for (int sourceIndex = 1; sourceIndex <= sourceLength; sourceIndex++) {
-            costMatrix[sourceIndex][0] = sourceIndex * deleteCost;
-            traceMatrix[sourceIndex][0] = Trace.DELETE;
+            this.costMatrix[sourceIndex][0] = sourceIndex * this.deleteCost;
+            this.traceMatrix[sourceIndex][0] = Trace.DELETE;
         }
 
         for (int targetIndex = 1; targetIndex <= targetLength; targetIndex++) {
-            costMatrix[0][targetIndex] = targetIndex * insertCost;
-            traceMatrix[0][targetIndex] = Trace.INSERT;
+            this.costMatrix[0][targetIndex] = targetIndex * this.insertCost;
+            this.traceMatrix[0][targetIndex] = Trace.INSERT;
         }
     }
 
@@ -491,19 +560,20 @@ public final class PatchCommandEncoder {
      * @param sourceLength     source length
      * @param targetLength     target length
      */
-    private void fillMatrices(char[] sourceCharacters, char[] targetCharacters, int sourceLength, int targetLength) {
+    private void fillMatrices(final char[] sourceCharacters, final char[] targetCharacters, final int sourceLength,
+            final int targetLength) {
 
         for (int sourceIndex = 1; sourceIndex <= sourceLength; sourceIndex++) {
-            char sourceCharacter = sourceCharacters[sourceIndex - 1];
+            final char sourceCharacter = sourceCharacters[sourceIndex - 1];
 
             for (int targetIndex = 1; targetIndex <= targetLength; targetIndex++) {
-                char targetCharacter = targetCharacters[targetIndex - 1];
+                final char targetCharacter = targetCharacters[targetIndex - 1];
 
-                int deleteCandidate = costMatrix[sourceIndex - 1][targetIndex] + deleteCost;
-                int insertCandidate = costMatrix[sourceIndex][targetIndex - 1] + insertCost;
-                int replaceCandidate = costMatrix[sourceIndex - 1][targetIndex - 1] + replaceCost;
-                int matchCandidate = costMatrix[sourceIndex - 1][targetIndex - 1]
-                        + (sourceCharacter == targetCharacter ? matchCost : MISMATCH_PENALTY);
+                final int deleteCandidate = this.costMatrix[sourceIndex - 1][targetIndex] + this.deleteCost;
+                final int insertCandidate = this.costMatrix[sourceIndex][targetIndex - 1] + this.insertCost;
+                final int replaceCandidate = this.costMatrix[sourceIndex - 1][targetIndex - 1] + this.replaceCost;
+                final int matchCandidate = this.costMatrix[sourceIndex - 1][targetIndex - 1]
+                        + (sourceCharacter == targetCharacter ? this.matchCost : MISMATCH_PENALTY);
 
                 int bestCost = matchCandidate;
                 Trace bestTrace = Trace.MATCH;
@@ -521,8 +591,8 @@ public final class PatchCommandEncoder {
                     bestTrace = Trace.REPLACE;
                 }
 
-                costMatrix[sourceIndex][targetIndex] = bestCost;
-                traceMatrix[sourceIndex][targetIndex] = bestTrace;
+                this.costMatrix[sourceIndex][targetIndex] = bestCost;
+                this.traceMatrix[sourceIndex][targetIndex] = bestTrace;
             }
         }
     }
@@ -536,9 +606,8 @@ public final class PatchCommandEncoder {
      * @param targetLength     target length
      * @return compact patch command
      */
-    private String buildPatchCommand(char[] targetCharacters, int sourceLength, int targetLength) {
-
-        StringBuilder patchBuilder = new StringBuilder(sourceLength + targetLength);
+    private String buildPatchCommand(final char[] targetCharacters, final int sourceLength, final int targetLength) {
+        final StringBuilder patchBuilder = new StringBuilder(sourceLength + targetLength);
 
         char pendingDeletes = COUNT_SENTINEL;
         char pendingSkips = COUNT_SENTINEL;
@@ -547,7 +616,7 @@ public final class PatchCommandEncoder {
         int targetIndex = targetLength;
 
         while (sourceIndex != 0 || targetIndex != 0) {
-            Trace trace = traceMatrix[sourceIndex][targetIndex];
+            final Trace trace = this.traceMatrix[sourceIndex][targetIndex];
 
             switch (trace) {
                 case DELETE:
@@ -612,7 +681,7 @@ public final class PatchCommandEncoder {
      * @param opcode       single-character instruction opcode
      * @param argument     encoded instruction argument
      */
-    private static void appendInstruction(StringBuilder patchBuilder, char opcode, char argument) {
+    private static void appendInstruction(final StringBuilder patchBuilder, final char opcode, final char argument) {
         patchBuilder.append(opcode).append(argument);
     }
 }

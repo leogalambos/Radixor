@@ -101,7 +101,7 @@ public final class FrequencyTrie<V> {
     /**
      * Binary format version.
      */
-    private static final int STREAM_VERSION = 1;
+    private static final int STREAM_VERSION = 3;
 
     /**
      * Factory used to create correctly typed arrays for {@link #getAll(String)}.
@@ -114,15 +114,23 @@ public final class FrequencyTrie<V> {
     private final CompiledNode<V> root;
 
     /**
+     * Metadata persisted together with this trie.
+     */
+    private final TrieMetadata metadata;
+
+    /**
      * Creates a new compiled trie instance.
      *
-     * @param arrayFactory array factory
-     * @param root         compiled root node
+     * @param arrayFactory       array factory
+     * @param root               compiled root node
+     * @param traversalDirection logical key traversal direction
      * @throws NullPointerException if any argument is {@code null}
      */
-    private FrequencyTrie(final IntFunction<V[]> arrayFactory, final CompiledNode<V> root) {
+    private FrequencyTrie(final IntFunction<V[]> arrayFactory, final CompiledNode<V> root,
+            final TrieMetadata metadata) {
         this.arrayFactory = Objects.requireNonNull(arrayFactory, "arrayFactory");
         this.root = Objects.requireNonNull(root, "root");
+        this.metadata = Objects.requireNonNull(metadata, "metadata");
     }
 
     /**
@@ -214,6 +222,29 @@ public final class FrequencyTrie<V> {
     }
 
     /**
+     * Returns the logical key traversal direction used by this trie.
+     *
+     * <p>
+     * The same direction must be used when reconstructing mutable builders or when
+     * applying patch commands that were generated against keys stored in this trie.
+     * </p>
+     *
+     * @return logical key traversal direction
+     */
+    public WordTraversalDirection traversalDirection() {
+        return this.metadata.traversalDirection();
+    }
+
+    /**
+     * Returns immutable persisted metadata associated with this trie.
+     *
+     * @return trie metadata
+     */
+    public TrieMetadata metadata() {
+        return this.metadata;
+    }
+
+    /**
      * Returns the root node mainly for diagnostics and tests within the package.
      *
      * @return compiled root node
@@ -262,6 +293,7 @@ public final class FrequencyTrie<V> {
         dataOutput.writeInt(STREAM_VERSION);
         dataOutput.writeInt(orderedNodes.size());
         dataOutput.writeInt(nodeIds.get(this.root));
+        writeMetadata(dataOutput, this.metadata);
 
         for (CompiledNode<V> node : orderedNodes) {
             writeNode(dataOutput, valueCodec, node, nodeIds);
@@ -304,7 +336,7 @@ public final class FrequencyTrie<V> {
         }
 
         final int version = dataInput.readInt();
-        if (version != STREAM_VERSION) {
+        if (version != 1 && version != STREAM_VERSION) {
             throw new IOException("Unsupported trie stream version: " + version);
         }
 
@@ -318,6 +350,8 @@ public final class FrequencyTrie<V> {
             throw new IOException("Invalid root node id: " + rootNodeId);
         }
 
+        final TrieMetadata metadata = readMetadata(dataInput, version);
+
         final CompiledNode<V>[] nodes = readNodes(dataInput, arrayFactory, valueCodec, nodeCount);
         final CompiledNode<V> rootNode = nodes[rootNodeId];
 
@@ -325,7 +359,70 @@ public final class FrequencyTrie<V> {
             LOGGER.log(Level.FINE, "Read compiled trie with {0} canonical nodes.", nodeCount);
         }
 
-        return new FrequencyTrie<>(arrayFactory, rootNode);
+        return new FrequencyTrie<>(arrayFactory, rootNode, metadata);
+    }
+
+    /**
+     * Writes persisted trie metadata.
+     *
+     * @param dataOutput output stream
+     * @param metadata   metadata to serialize
+     * @throws IOException if writing fails
+     */
+    private static void writeMetadata(final DataOutputStream dataOutput, final TrieMetadata metadata)
+            throws IOException {
+        dataOutput.writeInt(metadata.traversalDirection().ordinal());
+        dataOutput.writeInt(metadata.reductionSettings().reductionMode().ordinal());
+        dataOutput.writeInt(metadata.reductionSettings().dominantWinnerMinPercent());
+        dataOutput.writeInt(metadata.reductionSettings().dominantWinnerOverSecondRatio());
+        dataOutput.writeInt(metadata.diacriticProcessingMode().ordinal());
+    }
+
+    /**
+     * Reads persisted trie metadata while remaining backward compatible with
+     * earlier stream versions.
+     *
+     * @param dataInput input stream
+     * @param version   persisted stream version
+     * @return deserialized metadata
+     * @throws IOException if the metadata section is invalid
+     */
+    private static TrieMetadata readMetadata(final DataInputStream dataInput, final int version) throws IOException {
+        final WordTraversalDirection traversalDirection;
+        if (version >= 2) { // NOPMD
+            final int traversalDirectionOrdinal = dataInput.readInt();
+            final WordTraversalDirection[] traversalDirections = WordTraversalDirection.values();
+            if (traversalDirectionOrdinal < 0 || traversalDirectionOrdinal >= traversalDirections.length) {
+                throw new IOException("Invalid traversal direction ordinal: " + traversalDirectionOrdinal);
+            }
+            traversalDirection = traversalDirections[traversalDirectionOrdinal];
+        } else {
+            traversalDirection = WordTraversalDirection.BACKWARD;
+        }
+
+        if (version < 3) { // NOPMD
+            return TrieMetadata.legacy(version, traversalDirection);
+        }
+
+        final ReductionMode[] reductionModes = ReductionMode.values();
+        final int reductionModeOrdinal = dataInput.readInt();
+        if (reductionModeOrdinal < 0 || reductionModeOrdinal >= reductionModes.length) {
+            throw new IOException("Invalid reduction mode ordinal: " + reductionModeOrdinal);
+        }
+
+        final int dominantWinnerMinPercent = dataInput.readInt();
+        final int dominantWinnerOverSecondRatio = dataInput.readInt(); // NOPMD
+
+        final DiacriticProcessingMode[] diacriticProcessingModes = DiacriticProcessingMode.values();
+        final int diacriticProcessingModeOrdinal = dataInput.readInt(); // NOPMD
+        if (diacriticProcessingModeOrdinal < 0 || diacriticProcessingModeOrdinal >= diacriticProcessingModes.length) {
+            throw new IOException("Invalid diacritic processing mode ordinal: " + diacriticProcessingModeOrdinal);
+        }
+
+        return new TrieMetadata(
+                version, traversalDirection, new ReductionSettings(reductionModes[reductionModeOrdinal],
+                        dominantWinnerMinPercent, dominantWinnerOverSecondRatio),
+                diacriticProcessingModes[diacriticProcessingModeOrdinal]);
     }
 
     /**
@@ -506,8 +603,9 @@ public final class FrequencyTrie<V> {
      */
     private CompiledNode<V> findNode(final String key) {
         CompiledNode<V> current = this.root;
-        for (int index = 0; index < key.length(); index++) {
-            current = current.findChild(key.charAt(index));
+        for (int traversalOffset = 0; traversalOffset < key.length(); traversalOffset++) {
+            current = current.findChild(
+                    key.charAt(this.metadata.traversalDirection().logicalIndex(key.length(), traversalOffset)));
             if (current == null) {
                 return null;
             }
@@ -545,6 +643,11 @@ public final class FrequencyTrie<V> {
         private final ReductionSettings reductionSettings;
 
         /**
+         * Logical key traversal direction used by this builder.
+         */
+        private final WordTraversalDirection traversalDirection;
+
+        /**
          * Mutable root node.
          */
         private final MutableNode<V> root;
@@ -552,13 +655,33 @@ public final class FrequencyTrie<V> {
         /**
          * Creates a new builder with the provided settings.
          *
+         * <p>
+         * This constructor preserves the historical Egothor behavior and therefore
+         * traverses logical keys from their end toward their beginning.
+         * </p>
+         *
          * @param arrayFactory      array factory
          * @param reductionSettings reduction configuration
          * @throws NullPointerException if any argument is {@code null}
          */
         public Builder(final IntFunction<V[]> arrayFactory, final ReductionSettings reductionSettings) {
+            this(arrayFactory, reductionSettings, WordTraversalDirection.BACKWARD);
+        }
+
+        /**
+         * Creates a new builder with the provided settings and explicit traversal
+         * direction.
+         *
+         * @param arrayFactory       array factory
+         * @param reductionSettings  reduction configuration
+         * @param traversalDirection logical key traversal direction
+         * @throws NullPointerException if any argument is {@code null}
+         */
+        public Builder(final IntFunction<V[]> arrayFactory, final ReductionSettings reductionSettings,
+                final WordTraversalDirection traversalDirection) {
             this.arrayFactory = Objects.requireNonNull(arrayFactory, "arrayFactory");
             this.reductionSettings = Objects.requireNonNull(reductionSettings, "reductionSettings");
+            this.traversalDirection = Objects.requireNonNull(traversalDirection, "traversalDirection");
             this.root = new MutableNode<>();
         }
 
@@ -566,12 +689,31 @@ public final class FrequencyTrie<V> {
          * Creates a new builder using default thresholds for the supplied reduction
          * mode.
          *
+         * <p>
+         * This constructor preserves the historical Egothor behavior and therefore
+         * traverses logical keys from their end toward their beginning.
+         * </p>
+         *
          * @param arrayFactory  array factory
          * @param reductionMode reduction mode
          * @throws NullPointerException if any argument is {@code null}
          */
         public Builder(final IntFunction<V[]> arrayFactory, final ReductionMode reductionMode) {
-            this(arrayFactory, ReductionSettings.withDefaults(reductionMode));
+            this(arrayFactory, ReductionSettings.withDefaults(reductionMode), WordTraversalDirection.BACKWARD);
+        }
+
+        /**
+         * Creates a new builder using default thresholds for the supplied reduction
+         * mode and explicit traversal direction.
+         *
+         * @param arrayFactory       array factory
+         * @param reductionMode      reduction mode
+         * @param traversalDirection logical key traversal direction
+         * @throws NullPointerException if any argument is {@code null}
+         */
+        public Builder(final IntFunction<V[]> arrayFactory, final ReductionMode reductionMode,
+                final WordTraversalDirection traversalDirection) {
+            this(arrayFactory, ReductionSettings.withDefaults(reductionMode), traversalDirection);
         }
 
         /**
@@ -611,7 +753,9 @@ public final class FrequencyTrie<V> {
                         reductionContext.canonicalNodeCount());
             }
 
-            return new FrequencyTrie<>(this.arrayFactory, compiledRoot);
+            final TrieMetadata metadata = TrieMetadata.current(STREAM_VERSION, this.traversalDirection,
+                    this.reductionSettings);
+            return new FrequencyTrie<>(this.arrayFactory, compiledRoot, metadata);
         }
 
         /**
@@ -646,8 +790,8 @@ public final class FrequencyTrie<V> {
             }
 
             MutableNode<V> current = this.root;
-            for (int index = 0; index < key.length(); index++) {
-                final Character edge = key.charAt(index);
+            for (int traversalOffset = 0; traversalOffset < key.length(); traversalOffset++) {
+                final Character edge = key.charAt(this.traversalDirection.logicalIndex(key.length(), traversalOffset));
                 MutableNode<V> child = current.children().get(edge);
                 if (child == null) {
                     child = new MutableNode<>(); // NOPMD
@@ -677,6 +821,15 @@ public final class FrequencyTrie<V> {
          */
         /* default */ int buildTimeSize() {
             return countMutableNodes(this.root);
+        }
+
+        /**
+         * Returns the logical key traversal direction used by this builder.
+         *
+         * @return logical key traversal direction
+         */
+        /* default */ WordTraversalDirection traversalDirection() {
+            return this.traversalDirection;
         }
 
         /**
