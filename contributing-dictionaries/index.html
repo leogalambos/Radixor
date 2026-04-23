@@ -1532,20 +1532,22 @@
 </ul>
 <p>In practice, dictionary quality matters more than dictionary size. A smaller but coherent and carefully normalized dictionary is often more valuable than a larger resource that mixes conventions, contains noisy forms, or introduces accidental ambiguity.</p>
 <h2 id="preferred-dictionary-shape">Preferred dictionary shape</h2>
-<p>Radixor uses a simple line-oriented format:</p>
-<div class="highlight"><pre><span></span><code>&lt;stem&gt; &lt;variant1&gt; &lt;variant2&gt; &lt;variant3&gt; ...
+<p>Radixor uses a simple line-oriented tab-separated values format, meaning that columns are separated by the tab character:</p>
+<div class="highlight"><pre><span></span><code>&lt;stem&gt;  &lt;variant1&gt;  &lt;variant2&gt;  &lt;variant3&gt; ...
 </code></pre></div>
-<p>The first token on a line is the canonical stem. All following tokens on that line are known variants that should reduce to that stem.</p>
+<p>The first column on a line is the canonical stem. All following tab-separated columns on that line are known variants that should reduce to that stem.</p>
 <p>Example:</p>
-<div class="highlight"><pre><span></span><code>run running runs ran
-connect connected connecting connection
+<div class="highlight"><pre><span></span><code>run running runs    ran
+connect connected   connecting  connection
 </code></pre></div>
 <p>The parser:</p>
 <ul>
 <li>reads UTF-8 text,</li>
-<li>normalizes input to lower case using <code>Locale.ROOT</code>,</li>
+<li>interprets each line as tab-separated values,</li>
+<li>applies configurable case processing through <code>CaseProcessingMode</code> (default: <code>LOWERCASE_WITH_LOCALE_ROOT</code>),</li>
 <li>ignores empty lines,</li>
-<li>supports remarks introduced by <code>#</code> or <code>//</code>.</li>
+<li>supports remarks introduced by <code>#</code> or <code>//</code>,</li>
+<li>currently ignores dictionary items containing embedded whitespace and reports them through warning-level log entries.</li>
 </ul>
 <p>For full format details, see <a href="../dictionary-format/">Dictionary format</a>.</p>
 <h2 id="contribution-priorities">Contribution priorities</h2>

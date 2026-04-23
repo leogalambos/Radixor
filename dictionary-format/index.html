@@ -480,10 +480,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#whitespace-rules" class="md-nav__link">
+  <a href="#column-and-whitespace-rules" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Whitespace rules
+        Column and whitespace rules
       
     </span>
   </a>
@@ -1326,10 +1326,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#whitespace-rules" class="md-nav__link">
+  <a href="#column-and-whitespace-rules" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Whitespace rules
+        Column and whitespace rules
       
     </span>
   </a>
@@ -1517,16 +1517,16 @@
 
 
 <h1 id="dictionary-format">Dictionary Format</h1>
-<p>Radixor uses a simple line-oriented dictionary format designed for practical stemming workflows.</p>
+<p>Radixor uses a simple line-oriented dictionary format designed for practical stemming workflows. The textual source format is tab-separated values, meaning that columns are separated by the tab character.</p>
 <p>Each logical line describes one canonical stem and zero or more known word variants that should reduce to that stem. The format is intentionally lightweight, easy to maintain in source control, and directly consumable both by the programmatic loader and by the CLI compiler.</p>
 <h2 id="core-structure">Core structure</h2>
 <p>Each non-empty logical line has the following shape:</p>
-<div class="highlight"><pre><span></span><code>&lt;stem&gt; &lt;variant1&gt; &lt;variant2&gt; &lt;variant3&gt; ...
+<div class="highlight"><pre><span></span><code>&lt;stem&gt;  &lt;variant1&gt;  &lt;variant2&gt;  &lt;variant3&gt; ...
 </code></pre></div>
-<p>The first token is interpreted as the <strong>canonical stem</strong>. Every following token on the same line is interpreted as a <strong>known variant</strong> belonging to that stem.</p>
+<p>The first column is interpreted as the <strong>canonical stem</strong>. Every following token on the same line is interpreted as a <strong>known variant</strong> belonging to that stem.</p>
 <p>Example:</p>
-<div class="highlight"><pre><span></span><code>run running runs ran
-connect connected connecting connection
+<div class="highlight"><pre><span></span><code>run running runs    ran
+connect connected   connecting  connection
 </code></pre></div>
 <p>In this example:</p>
 <ul>
@@ -1536,7 +1536,7 @@ connect connected connecting connection
 <h2 id="how-the-loader-interprets-a-line">How the loader interprets a line</h2>
 <p>When a dictionary is loaded through <code>StemmerPatchTrieLoader</code>, the loader processes each parsed line as follows:</p>
 <ol>
-<li>the first token becomes the canonical stem,</li>
+<li>the first column becomes the canonical stem,</li>
 <li>every following token is treated as a variant,</li>
 <li>each variant is converted into a patch command that transforms the variant into the stem,</li>
 <li>if <code>storeOriginal</code> is enabled, the stem itself is also inserted using the canonical no-op patch command.</li>
@@ -1552,20 +1552,21 @@ connect connected connecting connection
 <li>if <code>storeOriginal</code> is enabled, the stem itself is inserted as a no-op mapping,</li>
 <li>if <code>storeOriginal</code> is disabled, the line contributes no explicit variant mappings.</li>
 </ul>
-<h2 id="whitespace-rules">Whitespace rules</h2>
-<p>Tokens are separated by whitespace. Leading and trailing whitespace is ignored.</p>
-<p>These lines are equivalent:</p>
-<div class="highlight"><pre><span></span><code>run running runs ran
+<h2 id="column-and-whitespace-rules">Column and whitespace rules</h2>
+<p>Columns are separated by the tab character. Leading and trailing whitespace around each column is ignored.</p>
+<p>This is the canonical form:</p>
+<div class="highlight"><pre><span></span><code>run running runs    ran
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>   run   running   runs   ran
+<p>This is also accepted because the surrounding padding is removed before the item is processed:</p>
+<div class="highlight"><pre><span></span><code>  run    running     runs    ran  
 </code></pre></div>
-<p>Tabs and repeated spaces are both accepted because tokenization is whitespace-based.</p>
+<p>Embedded whitespace inside one dictionary item is currently not supported. A stem or variant such as <code>new york</code> therefore cannot yet be represented as one usable dictionary item in the textual source format. Such items are ignored during parsing and reported through a warning-level log entry together with the physical line number, the stem, and the ignored items from that line.</p>
 <h2 id="empty-lines">Empty lines</h2>
 <p>Empty lines are ignored.</p>
 <p>Example:</p>
-<div class="highlight"><pre><span></span><code>run running runs ran
+<div class="highlight"><pre><span></span><code>run running runs    ran
 
-connect connected connecting
+connect connected   connecting
 </code></pre></div>
 <p>The blank line between entries has no effect.</p>
 <h2 id="remarks-and-comments">Remarks and comments</h2>
@@ -1577,21 +1578,21 @@ connect connected connecting
 </ul>
 <p>The earliest occurrence of either marker terminates the logical content of the line, and the remainder of that line is ignored.</p>
 <p>Examples:</p>
-<div class="highlight"><pre><span></span><code>run running runs ran # English verb forms
-connect connected connecting // Common derived forms
+<div class="highlight"><pre><span></span><code>run running runs    ran # English verb forms
+connect connected   connecting // Common derived forms
 </code></pre></div>
 <p>This is also valid:</p>
 <div class="highlight"><pre><span></span><code># This line is ignored completely
 // This line is also ignored completely
 </code></pre></div>
 <h2 id="case-normalization">Case normalization</h2>
-<p>Input lines are normalized to lower case using <code>Locale.ROOT</code> before tokenization is processed into dictionary entries.</p>
+<p>Input-line case normalization is controlled by <code>CaseProcessingMode</code>; by default the parser uses <code>LOWERCASE_WITH_LOCALE_ROOT</code> before tab-separated columns are processed into dictionary entries.</p>
 <p>That means dictionary authors should treat the format as <strong>case-insensitive at load time</strong>. If a file contains uppercase or mixed-case tokens, they will be normalized during parsing.</p>
 <p>Example:</p>
-<div class="highlight"><pre><span></span><code>Run Running Runs Ran
+<div class="highlight"><pre><span></span><code>Run Running Runs    Ran
 </code></pre></div>
 <p>is processed the same way as:</p>
-<div class="highlight"><pre><span></span><code>run running runs ran
+<div class="highlight"><pre><span></span><code>run running runs    ran
 </code></pre></div>
 <h2 id="character-set-and-practical-convention">Character set and practical convention</h2>
 <p>Dictionary files are read as UTF-8 text.</p>
@@ -1601,7 +1602,7 @@ connect connected connecting // Common derived forms
 <h2 id="distinct-stem-and-variant-semantics">Distinct stem and variant semantics</h2>
 <p>The format expresses a one-line grouping of forms under a canonical stem. It does not encode linguistic metadata, part-of-speech information, weights, or explicit ambiguity markers.</p>
 <p>For example:</p>
-<div class="highlight"><pre><span></span><code>axis axes
+<div class="highlight"><pre><span></span><code>axis    axes
 axe axes
 </code></pre></div>
 <p>These are simply two independent lines. If both contribute mappings for the same surface form, the compiled trie may later expose one or more candidate patch commands depending on the accumulated local counts and the selected reduction mode.</p>
@@ -1612,25 +1613,25 @@ axe axes
 <p>As a result, repeating the same mapping is not just redundant text. It can influence the ranking behavior of the compiled trie.</p>
 <h2 id="practical-examples">Practical examples</h2>
 <h3 id="simple-english-example">Simple English example</h3>
-<div class="highlight"><pre><span></span><code>run running runs ran
-connect connected connecting connection
-build building builds built
+<div class="highlight"><pre><span></span><code>run running runs    ran
+connect connected   connecting  connection
+build   building    builds  built
 </code></pre></div>
 <h3 id="dictionary-with-remarks">Dictionary with remarks</h3>
-<div class="highlight"><pre><span></span><code>run running runs ran # canonical verb family
-connect connected connecting // derived forms
-build building builds built
+<div class="highlight"><pre><span></span><code>run running runs    ran # canonical verb family
+connect connected   connecting // derived forms
+build   building    builds  built
 </code></pre></div>
 <h3 id="stem-only-entries">Stem-only entries</h3>
 <div class="highlight"><pre><span></span><code>run
-connect connected connecting
+connect connected   connecting
 build
 </code></pre></div>
 <h3 id="mixed-case-input">Mixed case input</h3>
-<div class="highlight"><pre><span></span><code>Run Running Runs Ran
-CONNECT Connected Connecting
+<div class="highlight"><pre><span></span><code>Run Running Runs    Ran
+CONNECT Connected   Connecting
 </code></pre></div>
-<p>This is accepted, but it is normalized to lower case during parsing.</p>
+<p>This is accepted. Under the default <code>LOWERCASE_WITH_LOCALE_ROOT</code> mode it is normalized to lower case during parsing; under <code>AS_IS</code> it is preserved.</p>
 <h2 id="format-limitations">Format limitations</h2>
 <p>The current dictionary format intentionally stays minimal:</p>
 <ul>
@@ -1641,7 +1642,7 @@ CONNECT Connected Connecting
 <li>no explicit ambiguity syntax,</li>
 <li>no sectioning or nested structure.</li>
 </ul>
-<p>Each token is simply a whitespace-delimited word form after remark stripping and lowercasing.</p>
+<p>Each dictionary item is simply one tab-separated word form after remark stripping and lowercasing.</p>
 <h2 id="authoring-guidance">Authoring guidance</h2>
 <p>For reliable results, keep dictionaries:</p>
 <ul>

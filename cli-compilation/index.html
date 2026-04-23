@@ -553,6 +553,28 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#-right-to-left" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --right-to-left
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-case-processing-mode-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --case-processing-mode &lt;mode&gt;
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#-dominant-winner-min-percent-1100" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1488,6 +1510,28 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#-right-to-left" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --right-to-left
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-case-processing-mode-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --case-processing-mode &lt;mode&gt;
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#-dominant-winner-min-percent-1100" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1757,7 +1801,7 @@
 <p>The <code>Compile</code> tool performs the following steps:</p>
 <ol>
 <li>reads the input dictionary in the standard Radixor stemmer format,</li>
-<li>parses each line into a canonical stem and its known variants,</li>
+<li>parses each line into a canonical stem column and its known variant columns,</li>
 <li>converts variants into patch commands,</li>
 <li>builds a mutable trie of patch-command values,</li>
 <li>applies the configured reduction mode,</li>
@@ -1766,9 +1810,10 @@
 <p>This workflow is intentionally aligned with the same dictionary semantics used elsewhere in the library. Remarks introduced by <code>#</code> or <code>//</code> are supported through the shared dictionary parser.</p>
 <h2 id="basic-usage">Basic usage</h2>
 <div class="highlight"><pre><span></span><code>java<span class="w"> </span>org.egothor.stemmer.Compile<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--input<span class="w"> </span>./data/stemmer.txt<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--input<span class="w"> </span>./data/stemmer.tsv<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--output<span class="w"> </span>./build/english.radixor.gz<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--reduction-mode<span class="w"> </span>MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--case-processing-mode<span class="w"> </span>LOWERCASE_WITH_LOCALE_ROOT<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--store-original<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--overwrite
 </code></pre></div>
@@ -1778,6 +1823,8 @@
 --output &lt;file&gt;
 --reduction-mode &lt;mode&gt;
 [--store-original]
+[--right-to-left]
+[--case-processing-mode &lt;mode&gt;]
 [--dominant-winner-min-percent &lt;1..100&gt;]
 [--dominant-winner-over-second-ratio &lt;1..n&gt;]
 [--overwrite]
@@ -1785,9 +1832,9 @@
 </code></pre></div>
 <h3 id="-input-file"><code>--input &lt;file&gt;</code></h3>
 <p>Path to the source dictionary file.</p>
-<p>The file must use the standard line-oriented dictionary format. Each non-empty logical line starts with the canonical stem and may contain zero or more variants. The parser expects UTF-8 input, lowercases it using <code>Locale.ROOT</code>, and ignores trailing remarks introduced by <code>#</code> or <code>//</code>.</p>
+<p>The file must use the standard line-oriented tab-separated values dictionary format, meaning that columns are separated by the tab character. Each non-empty logical line starts with the canonical stem column and may contain zero or more variant columns. The parser expects UTF-8 input, processes case according to <code>CaseProcessingMode</code> (default: <code>LOWERCASE_WITH_LOCALE_ROOT</code>), ignores trailing remarks introduced by <code>#</code> or <code>//</code>, and currently ignores dictionary items containing embedded whitespace while reporting them through warning-level log entries.</p>
 <p>Example:</p>
-<div class="highlight"><pre><span></span><code>--input ./data/stemmer.txt
+<div class="highlight"><pre><span></span><code>--input ./data/stemmer.tsv
 </code></pre></div>
 <h3 id="-output-file"><code>--output &lt;file&gt;</code></h3>
 <p>Path to the output binary artifact.</p>
@@ -1812,6 +1859,21 @@
 <div class="highlight"><pre><span></span><code>--store-original
 </code></pre></div>
 <p>This is usually a sensible default for real dictionaries because it ensures that canonical forms are directly representable in the compiled trie rather than relying only on their variants.</p>
+<h3 id="-right-to-left"><code>--right-to-left</code></h3>
+<p>When present, compilation uses forward traversal (<code>WordTraversalDirection.FORWARD</code>) so stored forms are processed from their logical beginning.</p>
+<div class="highlight"><pre><span></span><code>--right-to-left
+</code></pre></div>
+<p>This option is intended for right-to-left languages where affix behavior should operate on the written form without externally reversing words.</p>
+<h3 id="-case-processing-mode-mode"><code>--case-processing-mode &lt;mode&gt;</code></h3>
+<p>Controls dictionary key normalization during compilation and lookup.</p>
+<p>Supported values are:</p>
+<ul>
+<li><code>LOWERCASE_WITH_LOCALE_ROOT</code> (default)</li>
+<li><code>AS_IS</code></li>
+</ul>
+<p>Example:</p>
+<div class="highlight"><pre><span></span><code>--case-processing-mode AS_IS
+</code></pre></div>
 <h3 id="-dominant-winner-min-percent-1100"><code>--dominant-winner-min-percent &lt;1..100&gt;</code></h3>
 <p>Sets the minimum winner percentage used by dominant-result reduction settings.</p>
 <p>Example:</p>
@@ -1853,18 +1915,19 @@
 <p>The CLI is best used as a preparation step during packaging, deployment, or controlled artifact generation. This keeps compilation outside the runtime startup path and allows services to load only the finished binary trie.</p>
 <h3 id="treat-compiled-files-as-versioned-assets">Treat compiled files as versioned assets</h3>
 <p>A <code>.radixor.gz</code> file should be handled as a versioned output artifact. It represents a specific dictionary state, a specific reduction mode, and, where relevant, specific dominant-result thresholds.</p>
+<p>Compiled tries also persist a human-readable metadata block (<code>key=value</code> lines) that includes traversal direction, RTL indicator, reduction mode, case-processing mode, and dominant thresholds. After decompression, you can inspect this block directly to identify what dictionary/trie configuration the artifact contains.</p>
 <h3 id="choose-reduction-mode-deliberately">Choose reduction mode deliberately</h3>
 <p>The ranked <code>getAll()</code> mode is the safest default. The unordered and dominant modes should be chosen only when their trade-offs are acceptable for the consuming application.</p>
 <h3 id="expect-memory-pressure-during-preparation-not-runtime">Expect memory pressure during preparation, not runtime</h3>
 <p>Compilation is usually a one-time step and is generally fast. The more important operational consideration is memory usage during preparation, because the dictionary-derived mutable structure exists before reduction compacts it into the final read-only trie. This is especially relevant for very large source dictionaries.</p>
 <h2 id="example-workflow">Example workflow</h2>
 <h3 id="1-prepare-a-dictionary">1. Prepare a dictionary</h3>
-<div class="highlight"><pre><span></span><code>run running runs ran
-connect connected connecting
+<div class="highlight"><pre><span></span><code>run running runs    ran
+connect connected   connecting
 </code></pre></div>
 <h3 id="2-compile-it">2. Compile it</h3>
 <div class="highlight"><pre><span></span><code>java<span class="w"> </span>org.egothor.stemmer.Compile<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--input<span class="w"> </span>./data/stemmer.txt<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--input<span class="w"> </span>./data/stemmer.tsv<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--output<span class="w"> </span>./build/english.radixor.gz<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--reduction-mode<span class="w"> </span>MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--store-original

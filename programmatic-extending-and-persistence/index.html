@@ -689,6 +689,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#inspecting-persisted-metadata" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Inspecting persisted metadata
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1176,6 +1187,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#inspecting-persisted-metadata" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Inspecting persisted metadata
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1274,6 +1296,17 @@
 <li><a href="../programmatic-loading-and-building/">Loading and Building Stemmers</a></li>
 <li><a href="../programmatic-querying-and-ambiguity/">Querying and Ambiguity Handling</a></li>
 </ul>
+<h2 id="inspecting-persisted-metadata">Inspecting persisted metadata</h2>
+<p>After loading a compiled artifact, applications can inspect the persisted build descriptor directly:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">final</span><span class="w"> </span><span class="n">FrequencyTrie</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">trie</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">StemmerPatchTrieLoader</span><span class="p">.</span><span class="na">loadBinary</span><span class="p">(</span><span class="s">&quot;build/stemmers/cs_cz.dat.gz&quot;</span><span class="p">);</span>
+<span class="kd">final</span><span class="w"> </span><span class="n">TrieMetadata</span><span class="w"> </span><span class="n">metadata</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">trie</span><span class="p">.</span><span class="na">metadata</span><span class="p">();</span>
+
+<span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="n">metadata</span><span class="p">.</span><span class="na">formatVersion</span><span class="p">());</span>
+<span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="n">metadata</span><span class="p">.</span><span class="na">traversalDirection</span><span class="p">());</span>
+<span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="n">metadata</span><span class="p">.</span><span class="na">reductionSettings</span><span class="p">().</span><span class="na">reductionMode</span><span class="p">());</span>
+<span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="n">metadata</span><span class="p">.</span><span class="na">diacriticProcessingMode</span><span class="p">());</span>
+</code></pre></div>
+<p>This is especially useful when a deployment manages multiple artifacts compiled under different traversal or reduction regimes.</p>
 
 
 

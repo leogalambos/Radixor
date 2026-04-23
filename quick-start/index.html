@@ -523,6 +523,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#persisted-trie-metadata" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Persisted trie metadata
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1354,6 +1365,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#persisted-trie-metadata" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Persisted trie metadata
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1385,7 +1407,7 @@
 <h2 id="1-obtain-a-compiled-stemmer">1. Obtain a compiled stemmer</h2>
 <p>A compiled stemmer can be obtained in three common ways.</p>
 <h3 id="use-a-bundled-language-dictionary">Use a bundled language dictionary</h3>
-<p>Radixor ships with bundled dictionaries for a set of supported languages. These resources are line-oriented dictionaries stored with the library and compiled into a <code>FrequencyTrie&lt;String&gt;</code> when loaded. The loader can also store the canonical stem itself as a no-op patch command.</p>
+<p>Radixor ships with bundled dictionaries for a set of supported languages. These resources are line-oriented dictionaries stored with the library and compiled into a <code>FrequencyTrie&lt;String&gt;</code> when loaded. The loader can also store the canonical stem itself as a no-op patch command. Compiled trie artifacts now persist self-describing metadata, including the traversal direction and compilation reduction settings used to build the artifact.</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">java.io.IOException</span><span class="p">;</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">org.egothor.stemmer.FrequencyTrie</span><span class="p">;</span>
@@ -1431,7 +1453,7 @@
 <span class="p">}</span>
 </code></pre></div>
 <h3 id="build-or-extend-a-stemmer-from-dictionary-data">Build or extend a stemmer from dictionary data</h3>
-<p>Radixor can also build a compiled trie from a custom dictionary. Dictionary lines consist of a canonical stem followed by zero or more variants. The parser lowercases input with <code>Locale.ROOT</code>, ignores leading and trailing whitespace, and supports line remarks introduced by <code>#</code> or <code>//</code>.</p>
+<p>Radixor can also build a compiled trie from a custom dictionary. Dictionary lines consist of a canonical stem followed by zero or more variants. The parser applies <code>CaseProcessingMode</code> (default: <code>LOWERCASE_WITH_LOCALE_ROOT</code>), ignores leading and trailing whitespace, and supports line remarks introduced by <code>#</code> or <code>//</code>.</p>
 <p>This path is also relevant when you extend an existing compiled stemmer with additional domain-specific entries and rebuild a new compact artifact.</p>
 <p>A dedicated CLI compilation workflow deserves its own focused page and should remain separate from Quick Start, but conceptually it is simply another way to prepare the compiled artifact before runtime use.</p>
 <h2 id="2-use-the-compiled-stemmer">2. Use the compiled stemmer</h2>
@@ -1542,6 +1564,9 @@
 <li><a href="../built-in-languages/">Built-in languages</a></li>
 <li><a href="../architecture-and-reduction/">Architecture and reduction</a></li>
 </ul>
+<h2 id="persisted-trie-metadata">Persisted trie metadata</h2>
+<p>Every compiled trie artifact stores a <code>TrieMetadata</code> descriptor together with the immutable trie payload. That metadata currently records the binary format version, the <code>WordTraversalDirection</code>, the <code>ReductionSettings</code> used during compilation, the declared <code>DiacriticProcessingMode</code>, and the selected <code>CaseProcessingMode</code>. Traversal, case processing, and diacritic processing are applied during runtime lookup (<code>get</code>, <code>getAll</code>), and case/diacritic processing are also applied during dictionary insertion when a trie is built.</p>
+<p><code>DiacriticProcessingMode.AS_IS</code> keeps dictionary keys and lookup keys unchanged. <code>DiacriticProcessingMode.REMOVE</code> strips diacritics from dictionary keys and lookup keys (for Czech diacritics and broad European Latin-script variants). <code>DiacriticProcessingMode.AS_IS_AND_STRIPPED_FALLBACK</code> is currently not supported and raises an <code>UnsupportedOperationException</code>.</p>
 
 
 

@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TrieMetadata.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Radixor</a> &gt; <a href="index.source.html" class="el_package">org.egothor.stemmer</a> &gt; <span class="el_source">TrieMetadata.java</span></div><h1>TrieMetadata.java</h1><pre class="source lang-java linenums">/*******************************************************************************
+ * Copyright (C) 2026, Leo Galambos
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * 
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ * 
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ * 
+ * 3. Neither the name of the copyright holder nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&quot;
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ ******************************************************************************/
+package org.egothor.stemmer;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+
+/**
+ * Immutable metadata persisted together with a compiled trie artifact.
+ *
+ * &lt;p&gt;
+ * The metadata captures the semantic build configuration required to interpret
+ * the compiled trie correctly after it is reloaded. Persisting the metadata as
+ * part of the artifact makes the binary format self-describing and avoids
+ * coupling runtime consumers to external side-channel configuration.
+ * &lt;/p&gt;
+ *
+ * &lt;p&gt;
+ * The record is intentionally extensible. It already models traversal
+ * direction, reduction settings, and diacritic processing strategy, even though
+ * not every field necessarily influences all current code paths yet.
+ * &lt;/p&gt;
+ *
+ * @param formatVersion           persisted binary format version of the trie
+ *                                artifact
+ * @param traversalDirection      logical key traversal direction
+ * @param reductionSettings       reduction settings used during compilation
+ * @param diacriticProcessingMode diacritic processing strategy associated with
+ *                                the artifact
+ * @param caseProcessingMode      case processing strategy associated with the
+ *                                artifact
+ */
+public record TrieMetadata(int formatVersion, WordTraversalDirection traversalDirection,
+        ReductionSettings reductionSettings, DiacriticProcessingMode diacriticProcessingMode,
+        CaseProcessingMode caseProcessingMode) {
+    /**
+     * Header identifying the human-readable metadata block layout.
+     */
+    private static final String TEXT_BLOCK_HEADER = &quot;radixor.metadata.v1&quot;;
+
+    /**
+     * Creates a new metadata instance.
+     *
+     * @param formatVersion           persisted binary format version, must be at
+     *                                least {@code 1}
+     * @param traversalDirection      logical key traversal direction
+     * @param reductionSettings       reduction settings used during compilation
+     * @param diacriticProcessingMode diacritic processing strategy
+     * @param caseProcessingMode      case processing strategy
+     */
+    public TrieMetadata(final int formatVersion, final WordTraversalDirection traversalDirection,
+            final ReductionSettings reductionSettings, final DiacriticProcessingMode diacriticProcessingMode,
+<span class="fc" id="L82">            final CaseProcessingMode caseProcessingMode) {</span>
+<span class="pc bpc" id="L83" title="1 of 2 branches missed.">        if (formatVersion &lt; 1) { // NOPMD</span>
+<span class="nc" id="L84">            throw new IllegalArgumentException(&quot;formatVersion must be at least 1.&quot;);</span>
+        }
+<span class="fc" id="L86">        this.formatVersion = formatVersion;</span>
+<span class="fc" id="L87">        this.traversalDirection = Objects.requireNonNull(traversalDirection, &quot;traversalDirection&quot;);</span>
+<span class="fc" id="L88">        this.reductionSettings = Objects.requireNonNull(reductionSettings, &quot;reductionSettings&quot;);</span>
+<span class="fc" id="L89">        this.diacriticProcessingMode = Objects.requireNonNull(diacriticProcessingMode, &quot;diacriticProcessingMode&quot;);</span>
+<span class="fc" id="L90">        this.caseProcessingMode = Objects.requireNonNull(caseProcessingMode, &quot;caseProcessingMode&quot;);</span>
+<span class="fc" id="L91">    }</span>
+
+    /**
+     * Creates metadata populated with current-format defaults for freshly compiled
+     * tries.
+     *
+     * @param formatVersion      persisted binary format version
+     * @param traversalDirection logical key traversal direction
+     * @param reductionSettings  reduction settings used during compilation
+     * @return metadata initialized with current defaults
+     */
+    public static TrieMetadata current(final int formatVersion, final WordTraversalDirection traversalDirection,
+            final ReductionSettings reductionSettings) {
+<span class="nc" id="L104">        return new TrieMetadata(formatVersion, traversalDirection, reductionSettings, DiacriticProcessingMode.AS_IS,</span>
+                CaseProcessingMode.LOWERCASE_WITH_LOCALE_ROOT);
+    }
+
+    /**
+     * Creates metadata compatible with a legacy artifact version that did not store
+     * the full configuration explicitly.
+     *
+     * @param formatVersion      legacy persisted binary format version
+     * @param traversalDirection logical key traversal direction reconstructed from
+     *                           the legacy stream
+     * @return metadata reconstructed with conservative compatibility defaults
+     */
+    public static TrieMetadata legacy(final int formatVersion, final WordTraversalDirection traversalDirection) {
+<span class="fc" id="L118">        return new TrieMetadata(formatVersion, traversalDirection,</span>
+<span class="fc" id="L119">                ReductionSettings.withDefaults(ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS),</span>
+                DiacriticProcessingMode.AS_IS, CaseProcessingMode.LOWERCASE_WITH_LOCALE_ROOT);
+    }
+
+    /**
+     * Returns metadata encoded as a deterministic human-readable text block.
+     *
+     * &lt;p&gt;
+     * The format intentionally uses plain {@code key=value} lines so users can
+     * inspect metadata quickly from a decompressed trie payload without additional
+     * dependencies.
+     * &lt;/p&gt;
+     *
+     * @return persisted metadata text block
+     */
+    @SuppressWarnings(&quot;PMD.ConsecutiveLiteralAppends&quot;)
+    public String toTextBlock() {
+<span class="fc" id="L136">        final StringBuilder textBlockBuilder = new StringBuilder(1024);</span>
+<span class="fc" id="L137">        textBlockBuilder.append(TEXT_BLOCK_HEADER).append('\n')</span>
+                //
+<span class="fc" id="L139">                .append(&quot;formatVersion=&quot;).append(this.formatVersion).append('\n')</span>
+                //
+<span class="fc" id="L141">                .append(&quot;traversalDirection=&quot;).append(this.traversalDirection.name()).append('\n')</span>
+                //
+<span class="fc bfc" id="L143" title="All 2 branches covered.">                .append(&quot;rightToLeft=&quot;).append(this.traversalDirection == WordTraversalDirection.FORWARD).append('\n')</span>
+                //
+<span class="fc" id="L145">                .append(&quot;reductionMode=&quot;).append(this.reductionSettings.reductionMode().name()).append('\n')</span>
+                //
+<span class="fc" id="L147">                .append(&quot;dominantWinnerMinPercent=&quot;).append(this.reductionSettings.dominantWinnerMinPercent())</span>
+<span class="fc" id="L148">                .append('\n')</span>
+                //
+<span class="fc" id="L150">                .append(&quot;dominantWinnerOverSecondRatio=&quot;).append(this.reductionSettings.dominantWinnerOverSecondRatio())</span>
+<span class="fc" id="L151">                .append('\n')</span>
+                //
+<span class="fc" id="L153">                .append(&quot;diacriticProcessingMode=&quot;).append(this.diacriticProcessingMode.name()).append('\n')</span>
+                //
+<span class="fc" id="L155">                .append(&quot;caseProcessingMode=&quot;).append(this.caseProcessingMode.name()).append('\n');</span>
+<span class="fc" id="L156">        return textBlockBuilder.toString();</span>
+    }
+
+    /**
+     * Parses metadata from a text block produced by {@link #toTextBlock()}.
+     *
+     * @param formatVersion persisted binary format version
+     * @param textBlock     metadata text block
+     * @return parsed metadata
+     */
+    public static TrieMetadata fromTextBlock(final int formatVersion, final String textBlock) {
+<span class="fc" id="L167">        Objects.requireNonNull(textBlock, &quot;textBlock&quot;);</span>
+
+<span class="fc" id="L169">        final String[] lines = textBlock.split(&quot;\\R&quot;);</span>
+<span class="pc bpc" id="L170" title="1 of 4 branches missed.">        if (lines.length == 0 || !TEXT_BLOCK_HEADER.equals(lines[0])) {</span>
+<span class="fc" id="L171">            throw new IllegalArgumentException(&quot;Unsupported metadata block header.&quot;);</span>
+        }
+
+<span class="fc" id="L174">        final Map&lt;String, String&gt; entries = new HashMap&lt;&gt;();</span>
+<span class="fc bfc" id="L175" title="All 2 branches covered.">        for (int index = 1; index &lt; lines.length; index++) {</span>
+<span class="fc" id="L176">            final String line = lines[index];</span>
+<span class="pc bpc" id="L177" title="1 of 2 branches missed.">            if (line.isBlank()) {</span>
+<span class="nc" id="L178">                continue;</span>
+            }
+<span class="fc" id="L180">            final int delimiterIndex = line.indexOf('=');</span>
+<span class="pc bpc" id="L181" title="1 of 4 branches missed.">            if (delimiterIndex &lt;= 0 || delimiterIndex == line.length() - 1) {</span>
+<span class="fc" id="L182">                throw new IllegalArgumentException(&quot;Invalid metadata line: &quot; + line);</span>
+            }
+<span class="fc" id="L184">            entries.put(line.substring(0, delimiterIndex), line.substring(delimiterIndex + 1));</span>
+        }
+
+<span class="fc" id="L187">        final WordTraversalDirection traversalDirection = WordTraversalDirection</span>
+<span class="fc" id="L188">                .valueOf(requireEntry(entries, &quot;traversalDirection&quot;));</span>
+<span class="fc" id="L189">        final ReductionMode reductionMode = ReductionMode.valueOf(requireEntry(entries, &quot;reductionMode&quot;));</span>
+<span class="fc" id="L190">        final int dominantWinnerMinPercent = Integer.parseInt(requireEntry(entries, &quot;dominantWinnerMinPercent&quot;));</span>
+<span class="fc" id="L191">        final int dominantWinnerOverSecondRatio = Integer // NOPMD</span>
+<span class="fc" id="L192">                .parseInt(requireEntry(entries, &quot;dominantWinnerOverSecondRatio&quot;));</span>
+<span class="fc" id="L193">        final DiacriticProcessingMode diacriticProcessingMode = DiacriticProcessingMode</span>
+<span class="fc" id="L194">                .valueOf(requireEntry(entries, &quot;diacriticProcessingMode&quot;));</span>
+<span class="fc" id="L195">        final CaseProcessingMode caseProcessingMode = CaseProcessingMode</span>
+<span class="fc" id="L196">                .valueOf(requireEntry(entries, &quot;caseProcessingMode&quot;));</span>
+
+<span class="fc" id="L198">        return new TrieMetadata(formatVersion, traversalDirection,</span>
+                new ReductionSettings(reductionMode, dominantWinnerMinPercent, dominantWinnerOverSecondRatio),
+                diacriticProcessingMode, caseProcessingMode);
+    }
+
+    private static String requireEntry(final Map&lt;String, String&gt; entries, final String key) {
+<span class="fc" id="L204">        final String value = entries.get(key);</span>
+<span class="pc bpc" id="L205" title="1 of 4 branches missed.">        if (value == null || value.isBlank()) {</span>
+<span class="fc" id="L206">            throw new IllegalArgumentException(&quot;Missing metadata entry: &quot; + key);</span>
+        }
+<span class="fc" id="L208">        return value;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
