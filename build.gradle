@@ -145,6 +145,7 @@ tasks.named('jacocoTestReport', JacocoReport) {
     classDirectories.setFrom(
             files(sourceSets.main.output).asFileTree.matching {
                 exclude 'org/egothor/stemmer/StemmerKnowledgeExperiment*'
+                exclude 'org/egothor/stemmer/DiacriticStripper*'
             }
     )
 

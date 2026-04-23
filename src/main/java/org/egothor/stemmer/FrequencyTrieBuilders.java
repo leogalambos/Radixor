@@ -88,7 +88,8 @@ public final class FrequencyTrieBuilders {
         Objects.requireNonNull(reductionSettings, "reductionSettings");
 
         final FrequencyTrie.Builder<V> builder = new FrequencyTrie.Builder<>(arrayFactory, reductionSettings,
-                source.traversalDirection());
+                source.traversalDirection(), source.metadata().caseProcessingMode(),
+                source.metadata().diacriticProcessingMode());
         final StringBuilder keyBuilder = new StringBuilder(64);
 
         copyNode(source.root(), keyBuilder, builder, source.traversalDirection());

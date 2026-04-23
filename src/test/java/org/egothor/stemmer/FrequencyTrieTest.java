@@ -221,6 +221,47 @@ class FrequencyTrieTest {
     }
 
     /**
+     * Verifies that REMOVE mode strips diacritics both at build time and at lookup
+     * time and composes independently with case normalization.
+     */
+    @Test
+    @DisplayName("Diacritic REMOVE mode strips dictionary and lookup keys")
+    void diacriticRemoveModeStripsDictionaryAndLookupKeys() {
+        final FrequencyTrie.Builder<String> builder = new FrequencyTrie.Builder<>(String[]::new,
+                ReductionSettings.withDefaults(ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS),
+                WordTraversalDirection.BACKWARD, CaseProcessingMode.LOWERCASE_WITH_LOCALE_ROOT,
+                DiacriticProcessingMode.REMOVE);
+        builder.put("Příliš", "cz");
+        builder.put("žluťoučký", "cz2");
+        builder.put("Smørrebrød", "da");
+
+        final FrequencyTrie<String> trie = builder.build();
+
+        assertAll(
+                () -> assertEquals("cz", trie.get("PRILIS")),
+                () -> assertEquals("cz", trie.get("příliš")),
+                () -> assertEquals("cz2", trie.get("zlutoucky")),
+                () -> assertEquals("da", trie.get("SMORREBROD")),
+                () -> assertArrayEquals(new String[] { "cz" }, trie.getAll("prilis")));
+    }
+
+    /**
+     * Verifies that fallback diacritic mode is explicitly rejected for now.
+     */
+    @Test
+    @DisplayName("AS_IS_AND_STRIPPED_FALLBACK mode is not supported yet")
+    void fallbackDiacriticModeIsNotSupportedYet() {
+        final FrequencyTrie.Builder<String> builder = new FrequencyTrie.Builder<>(String[]::new,
+                ReductionSettings.withDefaults(ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS),
+                WordTraversalDirection.BACKWARD, CaseProcessingMode.AS_IS,
+                DiacriticProcessingMode.AS_IS_AND_STRIPPED_FALLBACK);
+
+        final UnsupportedOperationException exception = assertThrows(UnsupportedOperationException.class,
+                () -> builder.put("kůň", "horse"));
+        assertTrue(exception.getMessage().contains("not supported yet"));
+    }
+
+    /**
      * Verifies that lookup preserves casing when metadata uses AS_IS mode.
      */
     @Test

@@ -34,28 +34,33 @@ package org.egothor.stemmer;
  * Defines how dictionary loading and trie traversal should treat diacritics.
  *
  * <p>
- * The current implementation preserves the original stored form only, but the
- * enum is intentionally modeled as persisted metadata so that future compiled
- * trie artifacts can explicitly declare whether they were built with exact
- * diacritic matching, normalized matching, or a dual-path fallback strategy.
+ * The selected mode is applied independently from other normalization modes
+ * (for example {@link CaseProcessingMode}). This means case normalization and
+ * diacritic normalization can be combined freely and each keeps its own
+ * semantics.
  * </p>
  */
 public enum DiacriticProcessingMode {
 
     /**
-     * Preserves the original stored form exactly as provided by the source
-     * dictionary.
+     * Preserves dictionary entries and lookup keys exactly as provided.
      */
     AS_IS,
 
     /**
-     * Indicates that diacritics were removed before trie construction.
+     * Removes diacritics from dictionary entries before trie construction and
+     * removes diacritics from lookup keys before traversal.
      */
     REMOVE,
 
     /**
-     * Indicates that lookup may continue along both the original diacritic edge and
-     * a normalized non-diacritic alternative.
+     * Planned dual-path mode where lookup may continue along both the original
+     * diacritic edge and a normalized non-diacritic alternative.
+     *
+     * <p>
+     * This mode is currently not supported and using it triggers
+     * {@link UnsupportedOperationException}.
+     * </p>
      */
     AS_IS_AND_STRIPPED_FALLBACK
 }

@@ -219,7 +219,7 @@ public final class FrequencyTrie<V> {
      */
     public List<ValueCount<V>> getEntries(final String key) {
         Objects.requireNonNull(key, "key");
-        final CompiledNode<V> node = findNode(key);
+        final CompiledNode<V> node = findNode(normalizeLookupKey(key));
         if (node == null || node.orderedValues().length == 0) {
             return List.of();
         }
@@ -646,10 +646,20 @@ public final class FrequencyTrie<V> {
      * @return normalized key for trie traversal
      */
     private String normalizeLookupKey(final String key) {
+        String normalized = key;
+
         if (this.metadata.caseProcessingMode() == CaseProcessingMode.LOWERCASE_WITH_LOCALE_ROOT) {
-            return key.toLowerCase(Locale.ROOT);
+            normalized = normalized.toLowerCase(Locale.ROOT);
         }
-        return key;
+
+        if (this.metadata.diacriticProcessingMode() == DiacriticProcessingMode.REMOVE) {
+            normalized = DiacriticStripper.strip(normalized);
+        } else if (this.metadata.diacriticProcessingMode() == DiacriticProcessingMode.AS_IS_AND_STRIPPED_FALLBACK) {
+            throw new UnsupportedOperationException(
+                    "Diacritic processing mode AS_IS_AND_STRIPPED_FALLBACK is not supported yet.");
+        }
+
+        return normalized;
     }
 
     /**
@@ -690,6 +700,11 @@ public final class FrequencyTrie<V> {
          * Dictionary case processing mode associated with this builder.
          */
         private final CaseProcessingMode caseProcessingMode;
+
+        /**
+         * Dictionary diacritic processing mode associated with this builder.
+         */
+        private final DiacriticProcessingMode diacriticProcessingMode;
 
         /**
          * Mutable root node.
@@ -738,10 +753,29 @@ public final class FrequencyTrie<V> {
          */
         public Builder(final IntFunction<V[]> arrayFactory, final ReductionSettings reductionSettings,
                 final WordTraversalDirection traversalDirection, final CaseProcessingMode caseProcessingMode) {
+            this(arrayFactory, reductionSettings, traversalDirection, caseProcessingMode, DiacriticProcessingMode.AS_IS);
+        }
+
+        /**
+         * Creates a new builder with the provided settings, explicit traversal
+         * direction, explicit case processing mode, and explicit diacritic
+         * processing mode.
+         *
+         * @param arrayFactory            array factory
+         * @param reductionSettings       reduction configuration
+         * @param traversalDirection      logical key traversal direction
+         * @param caseProcessingMode      dictionary case processing mode
+         * @param diacriticProcessingMode dictionary diacritic processing mode
+         * @throws NullPointerException if any argument is {@code null}
+         */
+        public Builder(final IntFunction<V[]> arrayFactory, final ReductionSettings reductionSettings,
+                final WordTraversalDirection traversalDirection, final CaseProcessingMode caseProcessingMode,
+                final DiacriticProcessingMode diacriticProcessingMode) {
             this.arrayFactory = Objects.requireNonNull(arrayFactory, "arrayFactory");
             this.reductionSettings = Objects.requireNonNull(reductionSettings, "reductionSettings");
             this.traversalDirection = Objects.requireNonNull(traversalDirection, "traversalDirection");
             this.caseProcessingMode = Objects.requireNonNull(caseProcessingMode, "caseProcessingMode");
+            this.diacriticProcessingMode = Objects.requireNonNull(diacriticProcessingMode, "diacriticProcessingMode");
             this.root = new MutableNode<>();
         }
 
@@ -814,7 +848,7 @@ public final class FrequencyTrie<V> {
             }
 
             final TrieMetadata metadata = new TrieMetadata(STREAM_VERSION, this.traversalDirection,
-                    this.reductionSettings, DiacriticProcessingMode.AS_IS, this.caseProcessingMode);
+                    this.reductionSettings, this.diacriticProcessingMode, this.caseProcessingMode);
             return new FrequencyTrie<>(this.arrayFactory, compiledRoot, metadata);
         }
 
@@ -849,9 +883,12 @@ public final class FrequencyTrie<V> {
                 throw new IllegalArgumentException("count must be at least 1.");
             }
 
+            final String normalizedKey = normalizeDictionaryKey(key);
+
             MutableNode<V> current = this.root;
-            for (int traversalOffset = 0; traversalOffset < key.length(); traversalOffset++) {
-                final Character edge = key.charAt(this.traversalDirection.logicalIndex(key.length(), traversalOffset));
+            for (int traversalOffset = 0; traversalOffset < normalizedKey.length(); traversalOffset++) {
+                final Character edge = normalizedKey
+                        .charAt(this.traversalDirection.logicalIndex(normalizedKey.length(), traversalOffset));
                 MutableNode<V> child = current.children().get(edge);
                 if (child == null) {
                     child = new MutableNode<>(); // NOPMD
@@ -867,6 +904,23 @@ public final class FrequencyTrie<V> {
                 current.valueCounts().put(value, previous + count);
             }
             return this;
+        }
+
+        private String normalizeDictionaryKey(final String key) {
+            String normalized = key;
+
+            if (this.caseProcessingMode == CaseProcessingMode.LOWERCASE_WITH_LOCALE_ROOT) {
+                normalized = normalized.toLowerCase(Locale.ROOT);
+            }
+
+            if (this.diacriticProcessingMode == DiacriticProcessingMode.REMOVE) {
+                normalized = DiacriticStripper.strip(normalized);
+            } else if (this.diacriticProcessingMode == DiacriticProcessingMode.AS_IS_AND_STRIPPED_FALLBACK) {
+                throw new UnsupportedOperationException(
+                        "Diacritic processing mode AS_IS_AND_STRIPPED_FALLBACK is not supported yet.");
+            }
+
+            return normalized;
         }
 
         /**
