@@ -34,8 +34,8 @@ import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PushbackInputStream;
 import java.io.InputStreamReader;
+import java.io.PushbackInputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -69,6 +69,8 @@ import java.util.zip.GZIPInputStream;
  * aggregated warning log records.
  */
 public final class StemmerPatchTrieLoader {
+
+    /* default */ static final String FILENAME_REQUIRED = "fileName required";
 
     /**
      * Logger of this class.
@@ -328,8 +330,8 @@ public final class StemmerPatchTrieLoader {
      * and explicit traversal direction.
      *
      * @param path               path to the dictionary file
-     * @param storeOriginal      whether the stem itself should be inserted using the
-     *                           canonical no-op patch command
+     * @param storeOriginal      whether the stem itself should be inserted using
+     *                           the canonical no-op patch command
      * @param reductionSettings  reduction settings
      * @param traversalDirection traversal direction used for both trie keys and
      *                           patch commands
@@ -349,8 +351,8 @@ public final class StemmerPatchTrieLoader {
      * explicit traversal direction, and explicit case processing mode.
      *
      * @param path               path to the dictionary file
-     * @param storeOriginal      whether the stem itself should be inserted using the
-     *                           canonical no-op patch command
+     * @param storeOriginal      whether the stem itself should be inserted using
+     *                           the canonical no-op patch command
      * @param reductionSettings  reduction settings
      * @param traversalDirection traversal direction used for both trie keys and
      *                           patch commands
@@ -368,9 +370,10 @@ public final class StemmerPatchTrieLoader {
         Objects.requireNonNull(caseProcessingMode, "caseProcessingMode");
 
         try (InputStream inputStream = openDictionaryInputStream(path);
-                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
-            return load(reader, path.toAbsolutePath().toString(), storeOriginal, reductionSettings,
-                    traversalDirection, caseProcessingMode);
+                BufferedReader reader = new BufferedReader(
+                        new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+            return load(reader, path.toAbsolutePath().toString(), storeOriginal, reductionSettings, traversalDirection,
+                    caseProcessingMode);
         }
     }
 
@@ -406,7 +409,7 @@ public final class StemmerPatchTrieLoader {
      */
     public static FrequencyTrie<String> load(final String fileName, final boolean storeOriginal,
             final ReductionSettings reductionSettings) throws IOException {
-        Objects.requireNonNull(fileName, "fileName");
+        Objects.requireNonNull(fileName, FILENAME_REQUIRED);
         return load(Path.of(fileName), storeOriginal, reductionSettings);
     }
 
@@ -415,8 +418,8 @@ public final class StemmerPatchTrieLoader {
      * settings and explicit traversal direction.
      *
      * @param fileName           file name or path string
-     * @param storeOriginal      whether the stem itself should be inserted using the
-     *                           canonical no-op patch command
+     * @param storeOriginal      whether the stem itself should be inserted using
+     *                           the canonical no-op patch command
      * @param reductionSettings  reduction settings
      * @param traversalDirection traversal direction used for both trie keys and
      *                           patch commands
@@ -427,7 +430,7 @@ public final class StemmerPatchTrieLoader {
     public static FrequencyTrie<String> load(final String fileName, final boolean storeOriginal,
             final ReductionSettings reductionSettings, final WordTraversalDirection traversalDirection)
             throws IOException {
-        Objects.requireNonNull(fileName, "fileName");
+        Objects.requireNonNull(fileName, FILENAME_REQUIRED);
         return load(Path.of(fileName), storeOriginal, reductionSettings, traversalDirection,
                 CaseProcessingMode.LOWERCASE_WITH_LOCALE_ROOT);
     }
@@ -437,8 +440,8 @@ public final class StemmerPatchTrieLoader {
      * settings, explicit traversal direction, and explicit case processing mode.
      *
      * @param fileName           file name or path string
-     * @param storeOriginal      whether the stem itself should be inserted using the
-     *                           canonical no-op patch command
+     * @param storeOriginal      whether the stem itself should be inserted using
+     *                           the canonical no-op patch command
      * @param reductionSettings  reduction settings
      * @param traversalDirection traversal direction used for both trie keys and
      *                           patch commands
@@ -450,7 +453,7 @@ public final class StemmerPatchTrieLoader {
     public static FrequencyTrie<String> load(final String fileName, final boolean storeOriginal,
             final ReductionSettings reductionSettings, final WordTraversalDirection traversalDirection,
             final CaseProcessingMode caseProcessingMode) throws IOException {
-        Objects.requireNonNull(fileName, "fileName");
+        Objects.requireNonNull(fileName, FILENAME_REQUIRED);
         return load(Path.of(fileName), storeOriginal, reductionSettings, traversalDirection, caseProcessingMode);
     }
 
@@ -468,7 +471,7 @@ public final class StemmerPatchTrieLoader {
      */
     public static FrequencyTrie<String> load(final String fileName, final boolean storeOriginal,
             final ReductionMode reductionMode) throws IOException {
-        Objects.requireNonNull(fileName, "fileName");
+        Objects.requireNonNull(fileName, FILENAME_REQUIRED);
         return load(Path.of(fileName), storeOriginal, reductionMode);
     }
 
@@ -517,7 +520,6 @@ public final class StemmerPatchTrieLoader {
         return builder.build();
     }
 
-
     /**
      * Resolves the traversal direction implied by a bundled language definition.
      *
@@ -553,7 +555,7 @@ public final class StemmerPatchTrieLoader {
      *                              read
      */
     public static FrequencyTrie<String> loadBinary(final String fileName) throws IOException {
-        Objects.requireNonNull(fileName, "fileName");
+        Objects.requireNonNull(fileName, FILENAME_REQUIRED);
         return StemmerPatchTrieBinaryIO.read(fileName);
     }
 
@@ -594,10 +596,9 @@ public final class StemmerPatchTrieLoader {
      */
     public static void saveBinary(final FrequencyTrie<String> trie, final String fileName) throws IOException {
         Objects.requireNonNull(trie, "trie");
-        Objects.requireNonNull(fileName, "fileName");
+        Objects.requireNonNull(fileName, FILENAME_REQUIRED);
         StemmerPatchTrieBinaryIO.write(trie, fileName);
     }
-
 
     /**
      * Opens one filesystem dictionary input stream.

@@ -24,6 +24,7 @@ java org.egothor.stemmer.Compile \
     --input ./data/stemmer.tsv \
     --output ./build/english.radixor.gz \
     --reduction-mode MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS \
+    --case-processing-mode LOWERCASE_WITH_LOCALE_ROOT \
     --store-original \
     --overwrite
 ```
@@ -37,6 +38,8 @@ The CLI supports the following arguments:
 --output <file>
 --reduction-mode <mode>
 [--store-original]
+[--right-to-left]
+[--case-processing-mode <mode>]
 [--dominant-winner-min-percent <1..100>]
 [--dominant-winner-over-second-ratio <1..n>]
 [--overwrite]
@@ -94,6 +97,31 @@ When this flag is present, the canonical stem itself is inserted using the no-op
 ```
 
 This is usually a sensible default for real dictionaries because it ensures that canonical forms are directly representable in the compiled trie rather than relying only on their variants.
+
+### `--right-to-left`
+
+When present, compilation uses forward traversal (`WordTraversalDirection.FORWARD`) so stored forms are processed from their logical beginning.
+
+```text
+--right-to-left
+```
+
+This option is intended for right-to-left languages where affix behavior should operate on the written form without externally reversing words.
+
+### `--case-processing-mode <mode>`
+
+Controls dictionary key normalization during compilation and lookup.
+
+Supported values are:
+
+- `LOWERCASE_WITH_LOCALE_ROOT` (default)
+- `AS_IS`
+
+Example:
+
+```text
+--case-processing-mode AS_IS
+```
 
 ### `--dominant-winner-min-percent <1..100>`
 
@@ -176,6 +204,8 @@ The CLI is best used as a preparation step during packaging, deployment, or cont
 ### Treat compiled files as versioned assets
 
 A `.radixor.gz` file should be handled as a versioned output artifact. It represents a specific dictionary state, a specific reduction mode, and, where relevant, specific dominant-result thresholds.
+
+Compiled tries also persist a human-readable metadata block (`key=value` lines) that includes traversal direction, RTL indicator, reduction mode, case-processing mode, and dominant thresholds. After decompression, you can inspect this block directly to identify what dictionary/trie configuration the artifact contains.
 
 ### Choose reduction mode deliberately
 

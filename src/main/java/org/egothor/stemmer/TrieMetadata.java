@@ -30,6 +30,8 @@
  ******************************************************************************/
 package org.egothor.stemmer;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -60,6 +62,10 @@ import java.util.Objects;
 public record TrieMetadata(int formatVersion, WordTraversalDirection traversalDirection,
         ReductionSettings reductionSettings, DiacriticProcessingMode diacriticProcessingMode,
         CaseProcessingMode caseProcessingMode) {
+    /**
+     * Header identifying the human-readable metadata block layout.
+     */
+    private static final String TEXT_BLOCK_HEADER = "radixor.metadata.v1";
 
     /**
      * Creates a new metadata instance.
@@ -112,5 +118,93 @@ public record TrieMetadata(int formatVersion, WordTraversalDirection traversalDi
         return new TrieMetadata(formatVersion, traversalDirection,
                 ReductionSettings.withDefaults(ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS),
                 DiacriticProcessingMode.AS_IS, CaseProcessingMode.LOWERCASE_WITH_LOCALE_ROOT);
+    }
+
+    /**
+     * Returns metadata encoded as a deterministic human-readable text block.
+     *
+     * <p>
+     * The format intentionally uses plain {@code key=value} lines so users can
+     * inspect metadata quickly from a decompressed trie payload without additional
+     * dependencies.
+     * </p>
+     *
+     * @return persisted metadata text block
+     */
+    @SuppressWarnings("PMD.ConsecutiveLiteralAppends")
+    public String toTextBlock() {
+        final StringBuilder textBlockBuilder = new StringBuilder(1024);
+        textBlockBuilder.append(TEXT_BLOCK_HEADER).append('\n')
+                //
+                .append("formatVersion=").append(this.formatVersion).append('\n')
+                //
+                .append("traversalDirection=").append(this.traversalDirection.name()).append('\n')
+                //
+                .append("rightToLeft=").append(this.traversalDirection == WordTraversalDirection.FORWARD).append('\n')
+                //
+                .append("reductionMode=").append(this.reductionSettings.reductionMode().name()).append('\n')
+                //
+                .append("dominantWinnerMinPercent=").append(this.reductionSettings.dominantWinnerMinPercent())
+                .append('\n')
+                //
+                .append("dominantWinnerOverSecondRatio=").append(this.reductionSettings.dominantWinnerOverSecondRatio())
+                .append('\n')
+                //
+                .append("diacriticProcessingMode=").append(this.diacriticProcessingMode.name()).append('\n')
+                //
+                .append("caseProcessingMode=").append(this.caseProcessingMode.name()).append('\n');
+        return textBlockBuilder.toString();
+    }
+
+    /**
+     * Parses metadata from a text block produced by {@link #toTextBlock()}.
+     *
+     * @param formatVersion persisted binary format version
+     * @param textBlock     metadata text block
+     * @return parsed metadata
+     */
+    public static TrieMetadata fromTextBlock(final int formatVersion, final String textBlock) {
+        Objects.requireNonNull(textBlock, "textBlock");
+
+        final String[] lines = textBlock.split("\\R");
+        if (lines.length == 0 || !TEXT_BLOCK_HEADER.equals(lines[0])) {
+            throw new IllegalArgumentException("Unsupported metadata block header.");
+        }
+
+        final Map<String, String> entries = new HashMap<>();
+        for (int index = 1; index < lines.length; index++) {
+            final String line = lines[index];
+            if (line.isBlank()) {
+                continue;
+            }
+            final int delimiterIndex = line.indexOf('=');
+            if (delimiterIndex <= 0 || delimiterIndex == line.length() - 1) {
+                throw new IllegalArgumentException("Invalid metadata line: " + line);
+            }
+            entries.put(line.substring(0, delimiterIndex), line.substring(delimiterIndex + 1));
+        }
+
+        final WordTraversalDirection traversalDirection = WordTraversalDirection
+                .valueOf(requireEntry(entries, "traversalDirection"));
+        final ReductionMode reductionMode = ReductionMode.valueOf(requireEntry(entries, "reductionMode"));
+        final int dominantWinnerMinPercent = Integer.parseInt(requireEntry(entries, "dominantWinnerMinPercent"));
+        final int dominantWinnerOverSecondRatio = Integer // NOPMD
+                .parseInt(requireEntry(entries, "dominantWinnerOverSecondRatio"));
+        final DiacriticProcessingMode diacriticProcessingMode = DiacriticProcessingMode
+                .valueOf(requireEntry(entries, "diacriticProcessingMode"));
+        final CaseProcessingMode caseProcessingMode = CaseProcessingMode
+                .valueOf(requireEntry(entries, "caseProcessingMode"));
+
+        return new TrieMetadata(formatVersion, traversalDirection,
+                new ReductionSettings(reductionMode, dominantWinnerMinPercent, dominantWinnerOverSecondRatio),
+                diacriticProcessingMode, caseProcessingMode);
+    }
+
+    private static String requireEntry(final Map<String, String> entries, final String key) {
+        final String value = entries.get(key);
+        if (value == null || value.isBlank()) {
+            throw new IllegalArgumentException("Missing metadata entry: " + key);
+        }
+        return value;
     }
 }

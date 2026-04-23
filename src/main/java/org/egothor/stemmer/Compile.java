@@ -61,7 +61,7 @@ import java.util.logging.Logger;
  * --output &lt;file&gt;
  * --reduction-mode &lt;mode&gt;
  * [--store-original]
- * [--case-processing-mode <mode>]
+ * [--case-processing-mode &lt;mode&gt;]
  * [--dominant-winner-min-percent &lt;1..100&gt;]
  * [--dominant-winner-over-second-ratio &lt;1..n&gt;]
  * [--overwrite]
@@ -261,8 +261,9 @@ public final class Compile {
      * @param outputFile                    output compressed trie file
      * @param reductionMode                 subtree reduction mode
      * @param storeOriginal                 whether original stems are stored
-     * @param rightToLeft                   whether dictionary compilation should use
-     *                                      forward traversal on stored word forms
+     * @param rightToLeft                   whether dictionary compilation should
+     *                                      use forward traversal on stored word
+     *                                      forms
      * @param dominantWinnerMinPercent      dominant winner minimum percent
      * @param dominantWinnerOverSecondRatio dominant winner over second ratio
      * @param caseProcessingMode            dictionary case processing mode
@@ -342,9 +343,8 @@ public final class Compile {
                                 "--dominant-winner-over-second-ratio");
                         break;
                     case "--case-processing-mode":
-                        caseProcessingMode = CaseProcessingMode
-                                .valueOf(requireValue(arguments, ++index, "--case-processing-mode")
-                                        .toUpperCase(Locale.ROOT));
+                        caseProcessingMode = CaseProcessingMode.valueOf(
+                                requireValue(arguments, ++index, "--case-processing-mode").toUpperCase(Locale.ROOT));
                         break;
 
                     default:

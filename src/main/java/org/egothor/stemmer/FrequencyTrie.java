@@ -87,6 +87,7 @@ import org.egothor.stemmer.trie.ReductionSignature;
  *
  * @param <V> value type
  */
+@SuppressWarnings("PMD.CyclomaticComplexity")
 public final class FrequencyTrie<V> {
 
     /**
@@ -102,7 +103,7 @@ public final class FrequencyTrie<V> {
     /**
      * Binary format version.
      */
-    private static final int STREAM_VERSION = 4;
+    private static final int STREAM_VERSION = 5;
 
     /**
      * Factory used to create correctly typed arrays for {@link #getAll(String)}.
@@ -345,7 +346,7 @@ public final class FrequencyTrie<V> {
         }
 
         final int version = dataInput.readInt();
-        if (version != 1 && version != 3 && version != STREAM_VERSION) {
+        if (version != 1 && version != 3 && version != 4 && version != STREAM_VERSION) {
             throw new IOException("Unsupported trie stream version: " + version);
         }
 
@@ -380,12 +381,7 @@ public final class FrequencyTrie<V> {
      */
     private static void writeMetadata(final DataOutputStream dataOutput, final TrieMetadata metadata)
             throws IOException {
-        dataOutput.writeInt(metadata.traversalDirection().ordinal());
-        dataOutput.writeInt(metadata.reductionSettings().reductionMode().ordinal());
-        dataOutput.writeInt(metadata.reductionSettings().dominantWinnerMinPercent());
-        dataOutput.writeInt(metadata.reductionSettings().dominantWinnerOverSecondRatio());
-        dataOutput.writeInt(metadata.diacriticProcessingMode().ordinal());
-        dataOutput.writeInt(metadata.caseProcessingMode().ordinal());
+        dataOutput.writeUTF(metadata.toTextBlock());
     }
 
     /**
@@ -398,6 +394,14 @@ public final class FrequencyTrie<V> {
      * @throws IOException if the metadata section is invalid
      */
     private static TrieMetadata readMetadata(final DataInputStream dataInput, final int version) throws IOException {
+        if (version >= 5) { // NOPMD
+            try {
+                return TrieMetadata.fromTextBlock(version, dataInput.readUTF());
+            } catch (IllegalArgumentException exception) {
+                throw new IOException("Invalid metadata block.", exception);
+            }
+        }
+
         final WordTraversalDirection traversalDirection;
         if (version >= 2) { // NOPMD
             final int traversalDirectionOrdinal = dataInput.readInt();

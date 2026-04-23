@@ -142,6 +142,12 @@ tasks.withType(Pmd).configureEach {
 tasks.named('jacocoTestReport', JacocoReport) {
     dependsOn(tasks.named('test'))
 
+    classDirectories.setFrom(
+            files(sourceSets.main.output).asFileTree.matching {
+                exclude 'org/egothor/stemmer/StemmerKnowledgeExperiment*'
+            }
+    )
+
     reports {
         xml.required = true
         csv.required = false

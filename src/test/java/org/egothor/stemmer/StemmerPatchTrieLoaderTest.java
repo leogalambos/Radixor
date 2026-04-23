@@ -57,6 +57,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
 
+import org.egothor.stemmer.StemmerPatchTrieLoader.Language;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
@@ -123,12 +124,13 @@ final class StemmerPatchTrieLoaderTest {
                 ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS,
                 ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS };
 
-        return Arrays.stream(StemmerPatchTrieLoader.Language.values()).flatMap(language -> IntStream
-                .range(0, reductionModes.length)
-                .mapToObj(index -> Arguments.of(
-                        String.format("%02d-%s-%s", index + 1, language.name().toLowerCase(),
-                                reductionModes[index].name().toLowerCase()),
-                        language, reductionModes[index])));
+        return Arrays.stream(StemmerPatchTrieLoader.Language.values())
+                .flatMap(
+                        language -> IntStream.range(0, reductionModes.length)
+                                .mapToObj(index -> Arguments.of(
+                                        String.format("%02d-%s-%s", index + 1, language.name().toLowerCase(),
+                                                reductionModes[index].name().toLowerCase()),
+                                        language, reductionModes[index])));
     }
 
     /**
@@ -141,8 +143,7 @@ final class StemmerPatchTrieLoaderTest {
      * @return parameter stream
      */
     static Stream<Arguments> bundledLanguageSamples() {
-        return Stream.of(
-                Arguments.of("01-us_uk", StemmerPatchTrieLoader.Language.US_UK),
+        return Stream.of(Arguments.of("01-us_uk", StemmerPatchTrieLoader.Language.US_UK),
                 Arguments.of("02-de_de", StemmerPatchTrieLoader.Language.DE_DE),
                 Arguments.of("03-fa_ir", StemmerPatchTrieLoader.Language.FA_IR),
                 Arguments.of("04-he_il", StemmerPatchTrieLoader.Language.HE_IL),
@@ -191,11 +192,11 @@ final class StemmerPatchTrieLoaderTest {
                         "reductionMode"),
                 Arguments.of("09-load-string-settings",
                         (ExecutableOperation) () -> StemmerPatchTrieLoader.load((String) null, true, settings),
-                        "fileName"),
+                        StemmerPatchTrieLoader.FILENAME_REQUIRED),
                 Arguments.of("10-load-string-mode",
                         (ExecutableOperation) () -> StemmerPatchTrieLoader.load((String) null, true,
                                 DEFAULT_REDUCTION_MODE),
-                        "fileName"),
+                        StemmerPatchTrieLoader.FILENAME_REQUIRED),
                 Arguments.of("11-load-string-null-settings",
                         (ExecutableOperation) () -> StemmerPatchTrieLoader.load(tempPath().toString(), true,
                                 (ReductionSettings) null),
@@ -207,7 +208,8 @@ final class StemmerPatchTrieLoaderTest {
                 Arguments.of("13-load-binary-path",
                         (ExecutableOperation) () -> StemmerPatchTrieLoader.loadBinary((Path) null), "path"),
                 Arguments.of("14-load-binary-string",
-                        (ExecutableOperation) () -> StemmerPatchTrieLoader.loadBinary((String) null), "fileName"),
+                        (ExecutableOperation) () -> StemmerPatchTrieLoader.loadBinary((String) null),
+                        StemmerPatchTrieLoader.FILENAME_REQUIRED),
                 Arguments.of("15-load-binary-stream",
                         (ExecutableOperation) () -> StemmerPatchTrieLoader.loadBinary((InputStream) null),
                         "inputStream"),
@@ -220,7 +222,7 @@ final class StemmerPatchTrieLoaderTest {
                         "trie"),
                 Arguments.of("19-save-binary-null-string",
                         (ExecutableOperation) () -> StemmerPatchTrieLoader.saveBinary(trie, (String) null),
-                        "fileName"));
+                        StemmerPatchTrieLoader.FILENAME_REQUIRED));
     }
 
     /**
@@ -318,10 +320,9 @@ final class StemmerPatchTrieLoaderTest {
             final FrequencyTrie<String> fromStringWithMode = StemmerPatchTrieLoader.load(dictionaryFile.toString(),
                     true, DEFAULT_REDUCTION_MODE);
 
-            assertTriePatchSemanticsEqual(fromPathWithSettings, fromPathWithMode, "running", "played", "cities",
+            assertTriePatchSemanticsEqual(fromPathWithSettings, fromPathWithMode, "running", "played", "cities", "run");
+            assertTriePatchSemanticsEqual(fromPathWithSettings, fromStringWithSettings, "running", "played", "cities",
                     "run");
-            assertTriePatchSemanticsEqual(fromPathWithSettings, fromStringWithSettings, "running", "played",
-                    "cities", "run");
             assertTriePatchSemanticsEqual(fromPathWithSettings, fromStringWithMode, "running", "played", "cities",
                     "run");
         }
@@ -452,12 +453,9 @@ final class StemmerPatchTrieLoaderTest {
             try (InputStream inputStream = new ByteArrayInputStream(binaryBytes)) {
                 final FrequencyTrie<String> fromStream = StemmerPatchTrieLoader.loadBinary(inputStream);
 
-                assertTriePatchSemanticsEqual(original, fromPath, "run", "running", "runner", "cities",
-                        "studying");
-                assertTriePatchSemanticsEqual(original, fromString, "run", "running", "runner", "cities",
-                        "studying");
-                assertTriePatchSemanticsEqual(original, fromStream, "run", "running", "runner", "cities",
-                        "studying");
+                assertTriePatchSemanticsEqual(original, fromPath, "run", "running", "runner", "cities", "studying");
+                assertTriePatchSemanticsEqual(original, fromString, "run", "running", "runner", "cities", "studying");
+                assertTriePatchSemanticsEqual(original, fromStream, "run", "running", "runner", "cities", "studying");
             }
         }
 
@@ -521,8 +519,7 @@ final class StemmerPatchTrieLoaderTest {
 
             for (StemmerPatchTrieLoader.Language language : StemmerPatchTrieLoader.Language.values()) {
                 if (expectedRightToLeftLanguages.contains(language)) {
-                    assertTrue(language.isRightToLeft(),
-                            () -> language.name() + " must be marked as right-to-left.");
+                    assertTrue(language.isRightToLeft(), () -> language.name() + " must be marked as right-to-left.");
                 } else {
                     assertFalse(language.isRightToLeft(),
                             () -> language.name() + " must not be marked as right-to-left.");
@@ -565,9 +562,8 @@ final class StemmerPatchTrieLoaderTest {
                 assertFalse(actualStems.isEmpty(),
                         () -> "No patch candidates returned for word '" + word + "' in scenario " + scenario + ".");
 
-                assertEquals(expectedStems, actualStems,
-                        () -> "Reconstructed stem candidates differ for word '" + word + "' in scenario " + scenario
-                                + "'. Expected: " + expectedStems + ", actual: " + actualStems);
+                assertEquals(expectedStems, actualStems, () -> "Reconstructed stem candidates differ for word '" + word
+                        + "' in scenario " + scenario + "'. Expected: " + expectedStems + ", actual: " + actualStems);
             }
         }
 
