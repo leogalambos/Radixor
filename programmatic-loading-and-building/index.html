@@ -1266,7 +1266,7 @@
 </code></pre></div>
 <p>The <code>storeOriginal</code> flag controls whether the canonical stem is inserted as a no-op patch entry for the stem itself.</p>
 <h2 id="load-a-textual-dictionary">Load a textual dictionary</h2>
-<p>Loading from a dictionary file follows the same preparation model as bundled resources, but the source comes from your own file or path. The textual format is tab-separated values, meaning that columns are separated by the tab character. Each non-empty logical line starts with the stem column and may contain zero or more variant columns. Input case normalization is controlled by <code>CaseProcessingMode</code> (default: <code>LOWERCASE_WITH_LOCALE_ROOT</code>), trailing remarks introduced by <code>#</code> or <code>//</code> are ignored, and dictionary items containing embedded whitespace are currently ignored with warning-level diagnostics.</p>
+<p>Loading from a dictionary file follows the same preparation model as bundled resources, but the source comes from your own file or path. The input may be plain UTF-8 text or GZip-compressed UTF-8 text; the loader detects GZip data from the stream header. The textual format is tab-separated values, meaning that columns are separated by the tab character. Each non-empty logical line starts with the stem column and may contain zero or more variant columns. Input case normalization is controlled by <code>CaseProcessingMode</code> (default: <code>LOWERCASE_WITH_LOCALE_ROOT</code>), trailing remarks introduced by <code>#</code> or <code>//</code> are ignored, and dictionary items containing embedded whitespace are currently ignored with warning-level diagnostics.</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">java.io.IOException</span><span class="p">;</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">java.nio.file.Path</span><span class="p">;</span>
 
@@ -1290,6 +1290,7 @@
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
+<p>Additional <code>StemmerPatchTrieLoader.load(...)</code> overloads let callers provide explicit <code>WordTraversalDirection</code>, <code>CaseProcessingMode</code>, <code>DiacriticProcessingMode</code>, or a complete <code>TrieMetadata</code> instance. Use those overloads when a custom dictionary must be compiled with forward traversal for right-to-left languages, case-sensitive keys, or diacritic stripping.</p>
 <h2 id="load-a-compiled-binary-artifact">Load a compiled binary artifact</h2>
 <p>Binary loading is typically the preferred runtime path because it avoids reparsing the textual source and skips the preparation step entirely.</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">java.io.IOException</span><span class="p">;</span>
@@ -1310,7 +1311,7 @@
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
-<p>The binary format is the native <code>FrequencyTrie</code> serialization wrapped in GZip compression.</p>
+<p>The binary format is the native <code>FrequencyTrie</code> serialization wrapped in GZip compression. It includes persisted <code>TrieMetadata</code>, so lookup after loading uses the traversal, case-processing, diacritic-processing, and reduction settings captured when the trie was compiled.</p>
 <h2 id="build-directly-with-a-mutable-builder">Build directly with a mutable builder</h2>
 <p>A <code>FrequencyTrie.Builder&lt;V&gt;</code> accepts repeated <code>put(key, value)</code> calls and compiles the final read-only trie through <code>build()</code>. Compilation performs bottom-up reduction and produces the compact immutable runtime representation.</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">org.egothor.stemmer.FrequencyTrie</span><span class="p">;</span>
@@ -1331,7 +1332,7 @@
 <span class="w">        </span><span class="kd">final</span><span class="w"> </span><span class="n">FrequencyTrie</span><span class="p">.</span><span class="na">Builder</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">builder</span><span class="w"> </span><span class="o">=</span>
 <span class="w">                </span><span class="k">new</span><span class="w"> </span><span class="n">FrequencyTrie</span><span class="p">.</span><span class="na">Builder</span><span class="o">&lt;&gt;</span><span class="p">(</span><span class="n">String</span><span class="o">[]</span><span class="p">::</span><span class="k">new</span><span class="p">,</span><span class="w"> </span><span class="n">settings</span><span class="p">);</span>
 
-<span class="w">        </span><span class="kd">final</span><span class="w"> </span><span class="n">PatchCommandEncoder</span><span class="w"> </span><span class="n">encoder</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">PatchCommandEncoder</span><span class="p">();</span>
+<span class="w">        </span><span class="kd">final</span><span class="w"> </span><span class="n">PatchCommandEncoder</span><span class="w"> </span><span class="n">encoder</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PatchCommandEncoder</span><span class="p">.</span><span class="na">builder</span><span class="p">().</span><span class="na">build</span><span class="p">();</span>
 
 <span class="w">        </span><span class="n">builder</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">&quot;running&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">encoder</span><span class="p">.</span><span class="na">encode</span><span class="p">(</span><span class="s">&quot;running&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;run&quot;</span><span class="p">));</span>
 <span class="w">        </span><span class="n">builder</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">&quot;runs&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">encoder</span><span class="p">.</span><span class="na">encode</span><span class="p">(</span><span class="s">&quot;runs&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;run&quot;</span><span class="p">));</span>

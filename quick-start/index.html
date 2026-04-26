@@ -1453,7 +1453,7 @@
 <span class="p">}</span>
 </code></pre></div>
 <h3 id="build-or-extend-a-stemmer-from-dictionary-data">Build or extend a stemmer from dictionary data</h3>
-<p>Radixor can also build a compiled trie from a custom dictionary. Dictionary lines consist of a canonical stem followed by zero or more variants. The parser applies <code>CaseProcessingMode</code> (default: <code>LOWERCASE_WITH_LOCALE_ROOT</code>), ignores leading and trailing whitespace, and supports line remarks introduced by <code>#</code> or <code>//</code>.</p>
+<p>Radixor can also build a compiled trie from a custom dictionary. Dictionary lines consist of a canonical stem followed by zero or more variants. The input may be plain UTF-8 text or GZip-compressed UTF-8 text when loaded from a filesystem path. The parser applies <code>CaseProcessingMode</code> (default: <code>LOWERCASE_WITH_LOCALE_ROOT</code>), ignores leading and trailing whitespace around columns, supports line remarks introduced by <code>#</code> or <code>//</code>, and skips dictionary items that contain embedded whitespace.</p>
 <p>This path is also relevant when you extend an existing compiled stemmer with additional domain-specific entries and rebuild a new compact artifact.</p>
 <p>A dedicated CLI compilation workflow deserves its own focused page and should remain separate from Quick Start, but conceptually it is simply another way to prepare the compiled artifact before runtime use.</p>
 <h2 id="2-use-the-compiled-stemmer">2. Use the compiled stemmer</h2>

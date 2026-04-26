@@ -1,0 +1,912 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StemmerPatchTrieLoader.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Radixor</a> &gt; <a href="index.source.html" class="el_package">org.egothor.stemmer</a> &gt; <span class="el_source">StemmerPatchTrieLoader.java</span></div><h1>StemmerPatchTrieLoader.java</h1><pre class="source lang-java linenums">/*******************************************************************************
+ * Copyright (C) 2026, Leo Galambos
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * 
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ * 
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ * 
+ * 3. Neither the name of the copyright holder nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&quot;
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ ******************************************************************************/
+package org.egothor.stemmer;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PushbackInputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Objects;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.zip.GZIPInputStream;
+
+/**
+ * Loader of patch-command tries from bundled stemmer dictionaries.
+ *
+ * &lt;p&gt;
+ * Each dictionary is line-oriented and uses a tab-separated values layout. The
+ * first column on a line is interpreted as the stem, and all following
+ * tab-separated columns are treated as known variants of that stem.
+ *
+ * &lt;p&gt;
+ * For each line, the loader inserts:
+ * &lt;ul&gt;
+ * &lt;li&gt;the stem itself mapped to the canonical no-op patch command
+ * {@link PatchCommandEncoder#NOOP_PATCH}, when requested by the caller&lt;/li&gt;
+ * &lt;li&gt;every distinct variant mapped to the patch command transforming that
+ * variant to the stem using the traversal direction implied by the selected
+ * language or loader overload&lt;/li&gt;
+ * &lt;/ul&gt;
+ *
+ * &lt;p&gt;
+ * Parsing is delegated to {@link StemmerDictionaryParser}, which also supports
+ * line remarks introduced by {@code #} or {@code //} and ignores dictionary
+ * items containing Unicode whitespace characters while reporting them through
+ * aggregated warning log records.
+ */
+public final class StemmerPatchTrieLoader {
+
+    /* default */ static final String FILENAME_REQUIRED = &quot;fileName required&quot;;
+
+    /**
+     * Logger of this class.
+     */
+<span class="fc" id="L78">    private static final Logger LOGGER = Logger.getLogger(StemmerPatchTrieLoader.class.getName());</span>
+
+    /**
+     * Canonical no-op patch command used when the source and target are equal.
+     */
+<span class="fc" id="L83">    private static final String NOOP_PATCH_COMMAND = PatchCommandEncoder.NOOP_PATCH;</span>
+
+    /**
+     * Utility class.
+     */
+<span class="nc" id="L88">    private StemmerPatchTrieLoader() {</span>
+<span class="nc" id="L89">        throw new AssertionError(&quot;No instances.&quot;);</span>
+    }
+
+    /**
+     * Supported bundled stemmer dictionaries.
+     *
+     * &lt;p&gt;
+     * Each language constant defines:
+     * &lt;/p&gt;
+     * &lt;ul&gt;
+     * &lt;li&gt;the resource directory name used under the bundled resources tree&lt;/li&gt;
+     * &lt;li&gt;whether the language is written right-to-left&lt;/li&gt;
+     * &lt;/ul&gt;
+     *
+     * &lt;p&gt;
+     * The right-to-left flag is intended for consumers that need to decide whether
+     * affix-oriented processing should conceptually traverse words from the visual
+     * end or from the logical beginning of the stored form.
+     * &lt;/p&gt;
+     */
+<span class="fc" id="L109">    public enum Language {</span>
+
+        /**
+         * Czech.
+         */
+<span class="fc" id="L114">        CS_CZ(&quot;cs_cz&quot;, false),</span>
+
+        /**
+         * Danish.
+         */
+<span class="fc" id="L119">        DA_DK(&quot;da_dk&quot;, false),</span>
+
+        /**
+         * German.
+         */
+<span class="fc" id="L124">        DE_DE(&quot;de_de&quot;, false),</span>
+
+        /**
+         * Spanish.
+         */
+<span class="fc" id="L129">        ES_ES(&quot;es_es&quot;, false),</span>
+
+        /**
+         * Persian.
+         */
+<span class="fc" id="L134">        FA_IR(&quot;fa_ir&quot;, true),</span>
+
+        /**
+         * Finnish.
+         */
+<span class="fc" id="L139">        FI_FI(&quot;fi_fi&quot;, false),</span>
+
+        /**
+         * French.
+         */
+<span class="fc" id="L144">        FR_FR(&quot;fr_fr&quot;, false),</span>
+
+        /**
+         * Hebrew.
+         */
+<span class="fc" id="L149">        HE_IL(&quot;he_il&quot;, true),</span>
+
+        /**
+         * Hungarian.
+         */
+<span class="fc" id="L154">        HU_HU(&quot;hu_hu&quot;, false),</span>
+
+        /**
+         * Italian.
+         */
+<span class="fc" id="L159">        IT_IT(&quot;it_it&quot;, false),</span>
+
+        /**
+         * Norwegian Bokmål.
+         */
+<span class="fc" id="L164">        NB_NO(&quot;nb_no&quot;, false),</span>
+
+        /**
+         * Dutch.
+         */
+<span class="fc" id="L169">        NL_NL(&quot;nl_nl&quot;, false),</span>
+
+        /**
+         * Norwegian Nynorsk.
+         */
+<span class="fc" id="L174">        NN_NO(&quot;nn_no&quot;, false),</span>
+
+        /**
+         * Polish.
+         */
+<span class="fc" id="L179">        PL_PL(&quot;pl_pl&quot;, false),</span>
+
+        /**
+         * Portuguese.
+         */
+<span class="fc" id="L184">        PT_PT(&quot;pt_pt&quot;, false),</span>
+
+        /**
+         * Russian.
+         */
+<span class="fc" id="L189">        RU_RU(&quot;ru_ru&quot;, false),</span>
+
+        /**
+         * Swedish.
+         */
+<span class="fc" id="L194">        SV_SE(&quot;sv_se&quot;, false),</span>
+
+        /**
+         * Ukrainian.
+         */
+<span class="fc" id="L199">        UK_UA(&quot;uk_ua&quot;, false),</span>
+
+        /**
+         * English.
+         */
+<span class="fc" id="L204">        US_UK(&quot;us_uk&quot;, false),</span>
+
+        /**
+         * Yiddish.
+         */
+<span class="fc" id="L209">        YI(&quot;yi&quot;, true);</span>
+
+        /**
+         * Resource directory name.
+         */
+        private final String resourceDirectory;
+
+        /**
+         * Whether the language is written right-to-left.
+         */
+        private final boolean rightToLeft;
+
+        /**
+         * Creates a language constant.
+         *
+         * @param resourceDirectory resource directory name
+         * @param rightToLeft       whether the language is written right-to-left
+         */
+<span class="fc" id="L227">        Language(final String resourceDirectory, final boolean rightToLeft) {</span>
+<span class="fc" id="L228">            this.resourceDirectory = resourceDirectory;</span>
+<span class="fc" id="L229">            this.rightToLeft = rightToLeft;</span>
+<span class="fc" id="L230">        }</span>
+
+        /**
+         * Returns the classpath resource path of the bundled stemmer dictionary.
+         *
+         * @return classpath resource path
+         */
+        public String resourcePath() {
+<span class="fc" id="L238">            return this.resourceDirectory + &quot;/stemmer.gz&quot;;</span>
+        }
+
+        /**
+         * Returns the resource directory name.
+         *
+         * @return resource directory name
+         */
+        public String resourceDirectory() {
+<span class="nc" id="L247">            return this.resourceDirectory;</span>
+        }
+
+        /**
+         * Returns whether the language is written right-to-left.
+         *
+         * &lt;p&gt;
+         * This flag can be used by trie-building and lookup logic to decide whether
+         * suffix-oriented traversal should operate on the stored word form as-is rather
+         * than by reversing the logical character sequence.
+         * &lt;/p&gt;
+         *
+         * @return {@code true} when the language is written right-to-left, otherwise
+         *         {@code false}
+         */
+        public boolean isRightToLeft() {
+<span class="fc" id="L263">            return this.rightToLeft;</span>
+        }
+    }
+
+    /**
+     * Loads a bundled dictionary using explicit reduction settings.
+     *
+     * &lt;p&gt;
+     * This overload applies the following implicit compilation defaults in addition
+     * to the supplied {@code reductionSettings}:
+     * &lt;/p&gt;
+     * &lt;ul&gt;
+     * &lt;li&gt;traversal direction is derived from {@link Language#isRightToLeft()}
+     * ({@link WordTraversalDirection#FORWARD} for right-to-left languages,
+     * {@link WordTraversalDirection#BACKWARD} otherwise)&lt;/li&gt;
+     * &lt;li&gt;case processing mode is
+     * {@link CaseProcessingMode#LOWERCASE_WITH_LOCALE_ROOT}&lt;/li&gt;
+     * &lt;li&gt;diacritic processing mode is {@link DiacriticProcessingMode#AS_IS}&lt;/li&gt;
+     * &lt;/ul&gt;
+     *
+     * &lt;p&gt;
+     * The resolved settings are persisted into {@link TrieMetadata} of the
+     * resulting trie.
+     * &lt;/p&gt;
+     *
+     * @param language          bundled language dictionary
+     * @param storeOriginal     whether the stem itself should be inserted using the
+     *                          canonical no-op patch command
+     * @param reductionSettings reduction settings
+     * @return compiled patch-command trie
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IOException          if the dictionary cannot be found or read
+     */
+    public static FrequencyTrie&lt;String&gt; load(final Language language, final boolean storeOriginal,
+            final ReductionSettings reductionSettings) throws IOException {
+<span class="fc" id="L298">        Objects.requireNonNull(language, &quot;language&quot;);</span>
+<span class="fc" id="L299">        Objects.requireNonNull(reductionSettings, &quot;reductionSettings&quot;);</span>
+<span class="fc" id="L300">        final TrieMetadata metadata = metadataForCompilation(traversalDirectionOf(language), reductionSettings,</span>
+                CaseProcessingMode.LOWERCASE_WITH_LOCALE_ROOT, DiacriticProcessingMode.AS_IS);
+<span class="fc" id="L302">        return load(language, storeOriginal, metadata);</span>
+    }
+
+    /**
+     * Loads a bundled dictionary using explicit trie compilation metadata.
+     *
+     * &lt;p&gt;
+     * All semantic compilation settings (reduction mode and thresholds, traversal
+     * direction, case processing mode, and diacritic processing mode) are taken
+     * from the supplied metadata object and are persisted unchanged in the
+     * resulting trie.
+     * &lt;/p&gt;
+     *
+     * @param language      bundled language dictionary
+     * @param storeOriginal whether the stem itself should be inserted using the
+     *                      canonical no-op patch command
+     * @param metadata      trie metadata describing the compilation configuration
+     * @return compiled patch-command trie
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IOException          if the dictionary cannot be found or read
+     */
+    public static FrequencyTrie&lt;String&gt; load(final Language language, final boolean storeOriginal,
+            final TrieMetadata metadata) throws IOException {
+<span class="fc" id="L325">        Objects.requireNonNull(language, &quot;language&quot;);</span>
+<span class="fc" id="L326">        Objects.requireNonNull(metadata, &quot;metadata&quot;);</span>
+
+<span class="fc" id="L328">        final String resourcePath = language.resourcePath();</span>
+
+<span class="fc" id="L330">        try (InputStream inputStream = openBundledResource(resourcePath);</span>
+<span class="fc" id="L331">                BufferedReader reader = new BufferedReader(</span>
+                        new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+<span class="fc" id="L333">            return load(reader, resourcePath, storeOriginal, metadata);</span>
+        }
+    }
+
+    /**
+     * Loads a bundled dictionary using default settings for the supplied reduction
+     * mode.
+     *
+     * &lt;p&gt;
+     * This overload is equivalent to calling
+     * {@link #load(Language, boolean, ReductionSettings)} with
+     * {@link ReductionSettings#withDefaults(ReductionMode)} and therefore uses the
+     * same implicit defaults for traversal direction, case processing mode, and
+     * diacritic processing mode.
+     * &lt;/p&gt;
+     *
+     * @param language      bundled language dictionary
+     * @param storeOriginal whether the stem itself should be inserted using the
+     *                      canonical no-op patch command
+     * @param reductionMode reduction mode
+     * @return compiled patch-command trie
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IOException          if the dictionary cannot be found or read
+     */
+    public static FrequencyTrie&lt;String&gt; load(final Language language, final boolean storeOriginal,
+            final ReductionMode reductionMode) throws IOException {
+<span class="fc" id="L359">        Objects.requireNonNull(reductionMode, &quot;reductionMode&quot;);</span>
+<span class="fc" id="L360">        return load(language, storeOriginal, ReductionSettings.withDefaults(reductionMode));</span>
+    }
+
+    /**
+     * Loads a dictionary from a filesystem path using explicit reduction settings.
+     *
+     * &lt;p&gt;
+     * This overload applies historical Egothor-compatible implicit defaults:
+     * {@link WordTraversalDirection#BACKWARD},
+     * {@link CaseProcessingMode#LOWERCASE_WITH_LOCALE_ROOT}, and
+     * {@link DiacriticProcessingMode#AS_IS}. These settings are persisted in
+     * resulting trie metadata.
+     * &lt;/p&gt;
+     *
+     * @param path              path to the dictionary file
+     * @param storeOriginal     whether the stem itself should be inserted using the
+     *                          canonical no-op patch command
+     * @param reductionSettings reduction settings
+     * @return compiled patch-command trie
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IOException          if the file cannot be opened or read
+     */
+    public static FrequencyTrie&lt;String&gt; load(final Path path, final boolean storeOriginal,
+            final ReductionSettings reductionSettings) throws IOException {
+<span class="fc" id="L384">        return load(path, storeOriginal, reductionSettings, WordTraversalDirection.BACKWARD,</span>
+                CaseProcessingMode.LOWERCASE_WITH_LOCALE_ROOT, DiacriticProcessingMode.AS_IS);
+    }
+
+    /**
+     * Loads a dictionary from a filesystem path using explicit reduction settings
+     * and explicit traversal direction.
+     *
+     * &lt;p&gt;
+     * Implicit defaults still apply for unspecified dimensions:
+     * {@link CaseProcessingMode#LOWERCASE_WITH_LOCALE_ROOT} and
+     * {@link DiacriticProcessingMode#AS_IS}.
+     * &lt;/p&gt;
+     *
+     * @param path               path to the dictionary file
+     * @param storeOriginal      whether the stem itself should be inserted using
+     *                           the canonical no-op patch command
+     * @param reductionSettings  reduction settings
+     * @param traversalDirection traversal direction used for both trie keys and
+     *                           patch commands
+     * @return compiled patch-command trie
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IOException          if the file cannot be opened or read
+     */
+    public static FrequencyTrie&lt;String&gt; load(final Path path, final boolean storeOriginal,
+            final ReductionSettings reductionSettings, final WordTraversalDirection traversalDirection)
+            throws IOException {
+<span class="fc" id="L411">        return load(path, storeOriginal, reductionSettings, traversalDirection,</span>
+                CaseProcessingMode.LOWERCASE_WITH_LOCALE_ROOT, DiacriticProcessingMode.AS_IS);
+    }
+
+    /**
+     * Loads a dictionary from a filesystem path using explicit reduction settings,
+     * explicit traversal direction, and explicit case processing mode.
+     *
+     * &lt;p&gt;
+     * This overload still defaults diacritic processing to
+     * {@link DiacriticProcessingMode#AS_IS}.
+     * &lt;/p&gt;
+     *
+     * @param path               path to the dictionary file
+     * @param storeOriginal      whether the stem itself should be inserted using
+     *                           the canonical no-op patch command
+     * @param reductionSettings  reduction settings
+     * @param traversalDirection traversal direction used for both trie keys and
+     *                           patch commands
+     * @param caseProcessingMode case processing mode used during dictionary parsing
+     * @return compiled patch-command trie
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IOException          if the file cannot be opened or read
+     */
+    public static FrequencyTrie&lt;String&gt; load(final Path path, final boolean storeOriginal,
+            final ReductionSettings reductionSettings, final WordTraversalDirection traversalDirection,
+            final CaseProcessingMode caseProcessingMode) throws IOException {
+<span class="fc" id="L438">        return load(path, storeOriginal, reductionSettings, traversalDirection, caseProcessingMode,</span>
+                DiacriticProcessingMode.AS_IS);
+    }
+
+    /**
+     * Loads a dictionary from a filesystem path using explicit reduction settings,
+     * traversal direction, case processing mode, and diacritic processing mode.
+     *
+     * @param path                    path to the dictionary file
+     * @param storeOriginal           whether the stem itself should be inserted
+     *                                using the canonical no-op patch command
+     * @param reductionSettings       reduction settings
+     * @param traversalDirection      traversal direction used for both trie keys
+     *                                and patch commands
+     * @param caseProcessingMode      case processing mode used during dictionary
+     *                                parsing
+     * @param diacriticProcessingMode diacritic processing mode used during
+     *                                dictionary parsing
+     * @return compiled patch-command trie
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IOException          if the file cannot be opened or read
+     */
+    public static FrequencyTrie&lt;String&gt; load(final Path path, final boolean storeOriginal,
+            final ReductionSettings reductionSettings, final WordTraversalDirection traversalDirection,
+            final CaseProcessingMode caseProcessingMode, final DiacriticProcessingMode diacriticProcessingMode)
+            throws IOException {
+<span class="fc" id="L464">        Objects.requireNonNull(path, &quot;path&quot;);</span>
+<span class="fc" id="L465">        final TrieMetadata metadata = metadataForCompilation(traversalDirection, reductionSettings, caseProcessingMode,</span>
+                diacriticProcessingMode);
+<span class="fc" id="L467">        return load(path, storeOriginal, metadata);</span>
+    }
+
+    /**
+     * Loads a dictionary from a filesystem path using explicit trie compilation
+     * metadata.
+     *
+     * &lt;p&gt;
+     * The supplied metadata is the authoritative source of trie compilation
+     * semantics. Callers should ensure metadata matches how they expect to query
+     * the trie (for example, with or without lowercasing or diacritic stripping).
+     * &lt;/p&gt;
+     *
+     * @param path          path to the dictionary file
+     * @param storeOriginal whether the stem itself should be inserted using the
+     *                      canonical no-op patch command
+     * @param metadata      trie metadata describing the compilation configuration
+     * @return compiled patch-command trie
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IOException          if the file cannot be opened or read
+     */
+    public static FrequencyTrie&lt;String&gt; load(final Path path, final boolean storeOriginal, final TrieMetadata metadata)
+            throws IOException {
+<span class="fc" id="L490">        Objects.requireNonNull(path, &quot;path&quot;);</span>
+<span class="fc" id="L491">        Objects.requireNonNull(metadata, &quot;metadata&quot;);</span>
+
+<span class="fc" id="L493">        try (InputStream inputStream = openDictionaryInputStream(path);</span>
+<span class="fc" id="L494">                BufferedReader reader = new BufferedReader(</span>
+                        new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+<span class="fc" id="L496">            return load(reader, path.toAbsolutePath().toString(), storeOriginal, metadata);</span>
+        }
+    }
+
+    /**
+     * Loads a dictionary from a filesystem path using default settings for the
+     * supplied reduction mode.
+     *
+     * &lt;p&gt;
+     * This overload is equivalent to calling
+     * {@link #load(Path, boolean, ReductionSettings)} with
+     * {@link ReductionSettings#withDefaults(ReductionMode)} and therefore uses
+     * implicit defaults ({@link WordTraversalDirection#BACKWARD},
+     * {@link CaseProcessingMode#LOWERCASE_WITH_LOCALE_ROOT},
+     * {@link DiacriticProcessingMode#AS_IS}).
+     * &lt;/p&gt;
+     *
+     * @param path          path to the dictionary file
+     * @param storeOriginal whether the stem itself should be inserted using the
+     *                      canonical no-op patch command
+     * @param reductionMode reduction mode
+     * @return compiled patch-command trie
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IOException          if the file cannot be opened or read
+     */
+    public static FrequencyTrie&lt;String&gt; load(final Path path, final boolean storeOriginal,
+            final ReductionMode reductionMode) throws IOException {
+<span class="fc" id="L523">        Objects.requireNonNull(reductionMode, &quot;reductionMode&quot;);</span>
+<span class="fc" id="L524">        return load(path, storeOriginal, ReductionSettings.withDefaults(reductionMode));</span>
+    }
+
+    /**
+     * Loads a dictionary from a filesystem path string using explicit reduction
+     * settings.
+     *
+     * &lt;p&gt;
+     * Same semantics as {@link #load(Path, boolean, ReductionSettings)} including
+     * implicit defaults ({@link WordTraversalDirection#BACKWARD},
+     * {@link CaseProcessingMode#LOWERCASE_WITH_LOCALE_ROOT},
+     * {@link DiacriticProcessingMode#AS_IS}).
+     * &lt;/p&gt;
+     *
+     * @param fileName          file name or path string
+     * @param storeOriginal     whether the stem itself should be inserted using the
+     *                          canonical no-op patch command
+     * @param reductionSettings reduction settings
+     * @return compiled patch-command trie
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IOException          if the file cannot be opened or read
+     */
+    public static FrequencyTrie&lt;String&gt; load(final String fileName, final boolean storeOriginal,
+            final ReductionSettings reductionSettings) throws IOException {
+<span class="fc" id="L548">        Objects.requireNonNull(fileName, FILENAME_REQUIRED);</span>
+<span class="fc" id="L549">        return load(Path.of(fileName), storeOriginal, reductionSettings);</span>
+    }
+
+    /**
+     * Loads a dictionary from a filesystem path string using explicit reduction
+     * settings and explicit traversal direction.
+     *
+     * &lt;p&gt;
+     * Same semantics as
+     * {@link #load(Path, boolean, ReductionSettings, WordTraversalDirection)}.
+     * Implicit defaults remain
+     * {@link CaseProcessingMode#LOWERCASE_WITH_LOCALE_ROOT} and
+     * {@link DiacriticProcessingMode#AS_IS}.
+     * &lt;/p&gt;
+     *
+     * @param fileName           file name or path string
+     * @param storeOriginal      whether the stem itself should be inserted using
+     *                           the canonical no-op patch command
+     * @param reductionSettings  reduction settings
+     * @param traversalDirection traversal direction used for both trie keys and
+     *                           patch commands
+     * @return compiled patch-command trie
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IOException          if the file cannot be opened or read
+     */
+    public static FrequencyTrie&lt;String&gt; load(final String fileName, final boolean storeOriginal,
+            final ReductionSettings reductionSettings, final WordTraversalDirection traversalDirection)
+            throws IOException {
+<span class="nc" id="L577">        Objects.requireNonNull(fileName, FILENAME_REQUIRED);</span>
+<span class="nc" id="L578">        return load(Path.of(fileName), storeOriginal, reductionSettings, traversalDirection,</span>
+                CaseProcessingMode.LOWERCASE_WITH_LOCALE_ROOT);
+    }
+
+    /**
+     * Loads a dictionary from a filesystem path string using explicit reduction
+     * settings, explicit traversal direction, and explicit case processing mode.
+     *
+     * &lt;p&gt;
+     * Same semantics as
+     * {@link #load(Path, boolean, ReductionSettings, WordTraversalDirection, CaseProcessingMode)}.
+     * Implicit default remains {@link DiacriticProcessingMode#AS_IS}.
+     * &lt;/p&gt;
+     *
+     * @param fileName           file name or path string
+     * @param storeOriginal      whether the stem itself should be inserted using
+     *                           the canonical no-op patch command
+     * @param reductionSettings  reduction settings
+     * @param traversalDirection traversal direction used for both trie keys and
+     *                           patch commands
+     * @param caseProcessingMode case processing mode used during dictionary parsing
+     * @return compiled patch-command trie
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IOException          if the file cannot be opened or read
+     */
+    public static FrequencyTrie&lt;String&gt; load(final String fileName, final boolean storeOriginal,
+            final ReductionSettings reductionSettings, final WordTraversalDirection traversalDirection,
+            final CaseProcessingMode caseProcessingMode) throws IOException {
+<span class="nc" id="L606">        Objects.requireNonNull(fileName, FILENAME_REQUIRED);</span>
+<span class="nc" id="L607">        return load(Path.of(fileName), storeOriginal, reductionSettings, traversalDirection, caseProcessingMode,</span>
+                DiacriticProcessingMode.AS_IS);
+    }
+
+    /**
+     * Loads a dictionary from a filesystem path string using explicit reduction
+     * settings, explicit traversal direction, explicit case processing mode, and
+     * explicit diacritic processing mode.
+     *
+     * @param fileName                file name or path string
+     * @param storeOriginal           whether the stem itself should be inserted
+     *                                using the canonical no-op patch command
+     * @param reductionSettings       reduction settings
+     * @param traversalDirection      traversal direction used for both trie keys
+     *                                and patch commands
+     * @param caseProcessingMode      case processing mode used during dictionary
+     *                                parsing
+     * @param diacriticProcessingMode diacritic processing mode used during
+     *                                dictionary parsing
+     * @return compiled patch-command trie
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IOException          if the file cannot be opened or read
+     */
+    public static FrequencyTrie&lt;String&gt; load(final String fileName, final boolean storeOriginal,
+            final ReductionSettings reductionSettings, final WordTraversalDirection traversalDirection,
+            final CaseProcessingMode caseProcessingMode, final DiacriticProcessingMode diacriticProcessingMode)
+            throws IOException {
+<span class="nc" id="L634">        Objects.requireNonNull(fileName, FILENAME_REQUIRED);</span>
+<span class="nc" id="L635">        return load(Path.of(fileName), storeOriginal, reductionSettings, traversalDirection, caseProcessingMode,</span>
+                diacriticProcessingMode);
+    }
+
+    /**
+     * Loads a dictionary from a filesystem path string using explicit trie
+     * compilation metadata.
+     *
+     * &lt;p&gt;
+     * Same semantics as {@link #load(Path, boolean, TrieMetadata)}.
+     * &lt;/p&gt;
+     *
+     * @param fileName      file name or path string
+     * @param storeOriginal whether the stem itself should be inserted using the
+     *                      canonical no-op patch command
+     * @param metadata      trie metadata describing the compilation configuration
+     * @return compiled patch-command trie
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IOException          if the file cannot be opened or read
+     */
+    public static FrequencyTrie&lt;String&gt; load(final String fileName, final boolean storeOriginal,
+            final TrieMetadata metadata) throws IOException {
+<span class="fc" id="L657">        Objects.requireNonNull(fileName, FILENAME_REQUIRED);</span>
+<span class="nc" id="L658">        return load(Path.of(fileName), storeOriginal, metadata);</span>
+    }
+
+    /**
+     * Loads a dictionary from a filesystem path string using default settings for
+     * the supplied reduction mode.
+     *
+     * &lt;p&gt;
+     * Equivalent to {@link #load(Path, boolean, ReductionMode)} and therefore uses
+     * implicit defaults ({@link WordTraversalDirection#BACKWARD},
+     * {@link CaseProcessingMode#LOWERCASE_WITH_LOCALE_ROOT},
+     * {@link DiacriticProcessingMode#AS_IS}).
+     * &lt;/p&gt;
+     *
+     * @param fileName      file name or path string
+     * @param storeOriginal whether the stem itself should be inserted using the
+     *                      canonical no-op patch command
+     * @param reductionMode reduction mode
+     * @return compiled patch-command trie
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IOException          if the file cannot be opened or read
+     */
+    public static FrequencyTrie&lt;String&gt; load(final String fileName, final boolean storeOriginal,
+            final ReductionMode reductionMode) throws IOException {
+<span class="fc" id="L682">        Objects.requireNonNull(fileName, FILENAME_REQUIRED);</span>
+<span class="fc" id="L683">        return load(Path.of(fileName), storeOriginal, reductionMode);</span>
+    }
+
+    /**
+     * Parses one dictionary and builds the compiled trie.
+     *
+     * @param reader            dictionary reader
+     * @param sourceDescription logical source description used for diagnostics
+     * @param storeOriginal     whether the stem itself should be inserted using the
+     *                          canonical no-op patch command
+     * @param metadata          trie metadata used to drive all compilation settings
+     * @return compiled patch-command trie
+     * @throws IOException if parsing fails
+     */
+    private static FrequencyTrie&lt;String&gt; load(final BufferedReader reader, final String sourceDescription,
+            final boolean storeOriginal, final TrieMetadata metadata) throws IOException {
+<span class="fc" id="L699">        final FrequencyTrie.Builder&lt;String&gt; builder = new FrequencyTrie.Builder&lt;&gt;(String[]::new,</span>
+<span class="fc" id="L700">                metadata.reductionSettings(), metadata.traversalDirection(), metadata.caseProcessingMode(),</span>
+<span class="fc" id="L701">                metadata.diacriticProcessingMode());</span>
+<span class="fc" id="L702">        final PatchCommandEncoder patchCommandEncoder = PatchCommandEncoder.builder()</span>
+<span class="fc" id="L703">                .traversalDirection(metadata.traversalDirection()).build();</span>
+<span class="fc" id="L704">        final int[] insertedMappings = new int[1];</span>
+
+<span class="fc" id="L706">        final StemmerDictionaryParser.ParseStatistics statistics = StemmerDictionaryParser.parse(reader,</span>
+<span class="fc" id="L707">                sourceDescription, metadata.caseProcessingMode(), (stem, variants, lineNumber) -&gt; {</span>
+<span class="fc bfc" id="L708" title="All 2 branches covered.">                    if (storeOriginal) {</span>
+<span class="fc" id="L709">                        builder.put(stem, NOOP_PATCH_COMMAND);</span>
+<span class="fc" id="L710">                        insertedMappings[0]++;</span>
+                    }
+
+<span class="fc bfc" id="L713" title="All 2 branches covered.">                    for (String variant : variants) {</span>
+<span class="fc bfc" id="L714" title="All 2 branches covered.">                        if (!variant.equals(stem)) {</span>
+<span class="fc" id="L715">                            builder.put(variant, patchCommandEncoder.encode(variant, stem));</span>
+<span class="fc" id="L716">                            insertedMappings[0]++;</span>
+                        }
+                    }
+<span class="fc" id="L719">                });</span>
+
+<span class="pc bpc" id="L721" title="1 of 2 branches missed.">        if (LOGGER.isLoggable(Level.FINE)) {</span>
+<span class="nc" id="L722">            LOGGER.log(Level.FINE,</span>
+                    &quot;Loaded stemmer dictionary from {0}; insertedMappings={1}, lines={2}, entries={3}, ignoredLines={4}, metadata={5}.&quot;,
+<span class="nc" id="L724">                    new Object[] { sourceDescription, insertedMappings[0], statistics.lineCount(),</span>
+<span class="nc" id="L725">                            statistics.entryCount(), statistics.ignoredLineCount(), metadata.toTextBlock() });</span>
+        }
+
+<span class="fc" id="L728">        return builder.build();</span>
+    }
+
+    private static TrieMetadata metadataForCompilation(final WordTraversalDirection traversalDirection,
+            final ReductionSettings reductionSettings, final CaseProcessingMode caseProcessingMode,
+            final DiacriticProcessingMode diacriticProcessingMode) {
+<span class="fc" id="L734">        Objects.requireNonNull(traversalDirection, &quot;traversalDirection&quot;);</span>
+<span class="fc" id="L735">        Objects.requireNonNull(reductionSettings, &quot;reductionSettings&quot;);</span>
+<span class="fc" id="L736">        Objects.requireNonNull(caseProcessingMode, &quot;caseProcessingMode&quot;);</span>
+<span class="fc" id="L737">        Objects.requireNonNull(diacriticProcessingMode, &quot;diacriticProcessingMode&quot;);</span>
+<span class="fc" id="L738">        return TrieMetadata.forCompilation(traversalDirection, reductionSettings, diacriticProcessingMode,</span>
+                caseProcessingMode);
+    }
+
+    /**
+     * Resolves the traversal direction implied by a bundled language definition.
+     *
+     * @param language bundled language
+     * @return traversal direction to use for that language
+     */
+    private static WordTraversalDirection traversalDirectionOf(final Language language) {
+<span class="fc bfc" id="L749" title="All 2 branches covered.">        return language.isRightToLeft() ? WordTraversalDirection.FORWARD : WordTraversalDirection.BACKWARD;</span>
+    }
+
+    /**
+     * Loads a GZip-compressed binary patch-command trie from a filesystem path.
+     *
+     * @param path path to the compressed binary trie file
+     * @return compiled patch-command trie
+     * @throws NullPointerException if {@code path} is {@code null}
+     * @throws IOException          if the file cannot be opened, decompressed, or
+     *                              read
+     */
+    public static FrequencyTrie&lt;String&gt; loadBinary(final Path path) throws IOException {
+<span class="fc" id="L762">        Objects.requireNonNull(path, &quot;path&quot;);</span>
+<span class="fc" id="L763">        return StemmerPatchTrieBinaryIO.read(path);</span>
+    }
+
+    /**
+     * Loads a GZip-compressed binary patch-command trie from a filesystem path
+     * string.
+     *
+     * @param fileName file name or path string
+     * @return compiled patch-command trie
+     * @throws NullPointerException if {@code fileName} is {@code null}
+     * @throws IOException          if the file cannot be opened, decompressed, or
+     *                              read
+     */
+    public static FrequencyTrie&lt;String&gt; loadBinary(final String fileName) throws IOException {
+<span class="fc" id="L777">        Objects.requireNonNull(fileName, FILENAME_REQUIRED);</span>
+<span class="fc" id="L778">        return StemmerPatchTrieBinaryIO.read(fileName);</span>
+    }
+
+    /**
+     * Loads a GZip-compressed binary patch-command trie from an input stream.
+     *
+     * @param inputStream source input stream
+     * @return compiled patch-command trie
+     * @throws NullPointerException if {@code inputStream} is {@code null}
+     * @throws IOException          if the stream cannot be decompressed or read
+     */
+    public static FrequencyTrie&lt;String&gt; loadBinary(final InputStream inputStream) throws IOException {
+<span class="fc" id="L790">        Objects.requireNonNull(inputStream, &quot;inputStream&quot;);</span>
+<span class="fc" id="L791">        return StemmerPatchTrieBinaryIO.read(inputStream);</span>
+    }
+
+    /**
+     * Loads only persisted metadata from a GZip-compressed binary patch-command
+     * trie file.
+     *
+     * @param path path to the compressed binary trie file
+     * @return persisted trie metadata
+     * @throws NullPointerException if {@code path} is {@code null}
+     * @throws IOException          if the file cannot be opened, decompressed, or
+     *                              read
+     */
+    public static TrieMetadata loadBinaryMetadata(final Path path) throws IOException {
+<span class="fc" id="L805">        Objects.requireNonNull(path, &quot;path&quot;);</span>
+<span class="fc" id="L806">        return StemmerPatchTrieBinaryIO.readMetadata(path);</span>
+    }
+
+    /**
+     * Loads only persisted metadata from a GZip-compressed binary patch-command
+     * trie file.
+     *
+     * @param fileName file name or path string
+     * @return persisted trie metadata
+     * @throws NullPointerException if {@code fileName} is {@code null}
+     * @throws IOException          if the file cannot be opened, decompressed, or
+     *                              read
+     */
+    public static TrieMetadata loadBinaryMetadata(final String fileName) throws IOException {
+<span class="fc" id="L820">        Objects.requireNonNull(fileName, FILENAME_REQUIRED);</span>
+<span class="fc" id="L821">        return StemmerPatchTrieBinaryIO.readMetadata(fileName);</span>
+    }
+
+    /**
+     * Loads only persisted metadata from a GZip-compressed binary patch-command
+     * trie stream.
+     *
+     * @param inputStream source input stream
+     * @return persisted trie metadata
+     * @throws NullPointerException if {@code inputStream} is {@code null}
+     * @throws IOException          if the stream cannot be decompressed or read
+     */
+    public static TrieMetadata loadBinaryMetadata(final InputStream inputStream) throws IOException {
+<span class="fc" id="L834">        Objects.requireNonNull(inputStream, &quot;inputStream&quot;);</span>
+<span class="fc" id="L835">        return StemmerPatchTrieBinaryIO.readMetadata(inputStream);</span>
+    }
+
+    /**
+     * Saves a compiled patch-command trie as a GZip-compressed binary file.
+     *
+     * @param trie compiled trie
+     * @param path target file
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IOException          if writing fails
+     */
+    public static void saveBinary(final FrequencyTrie&lt;String&gt; trie, final Path path) throws IOException {
+<span class="fc" id="L847">        Objects.requireNonNull(trie, &quot;trie&quot;);</span>
+<span class="fc" id="L848">        Objects.requireNonNull(path, &quot;path&quot;);</span>
+<span class="fc" id="L849">        StemmerPatchTrieBinaryIO.write(trie, path);</span>
+<span class="fc" id="L850">    }</span>
+
+    /**
+     * Saves a compiled patch-command trie as a GZip-compressed binary file.
+     *
+     * @param trie     compiled trie
+     * @param fileName target file name or path string
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IOException          if writing fails
+     */
+    public static void saveBinary(final FrequencyTrie&lt;String&gt; trie, final String fileName) throws IOException {
+<span class="fc" id="L861">        Objects.requireNonNull(trie, &quot;trie&quot;);</span>
+<span class="nc" id="L862">        Objects.requireNonNull(fileName, FILENAME_REQUIRED);</span>
+<span class="nc" id="L863">        StemmerPatchTrieBinaryIO.write(trie, fileName);</span>
+<span class="nc" id="L864">    }</span>
+
+    /**
+     * Opens one filesystem dictionary input stream.
+     *
+     * &lt;p&gt;
+     * Plain-text dictionaries are returned as-is. GZip-compressed dictionaries are
+     * detected from the stream header rather than from the file extension so that
+     * callers may provide arbitrary temporary file names without changing the
+     * loading contract.
+     * &lt;/p&gt;
+     *
+     * @param path dictionary file path
+     * @return opened dictionary stream, transparently decompressing GZip inputs
+     * @throws IOException if the file cannot be opened
+     */
+    private static InputStream openDictionaryInputStream(final Path path) throws IOException {
+<span class="fc" id="L881">        final PushbackInputStream pushbackInputStream = new PushbackInputStream(</span>
+<span class="fc" id="L882">                new BufferedInputStream(Files.newInputStream(path)), 2);</span>
+<span class="fc" id="L883">        final byte[] header = pushbackInputStream.readNBytes(2);</span>
+
+<span class="pc bpc" id="L885" title="1 of 2 branches missed.">        if (header.length &gt; 0) {</span>
+<span class="fc" id="L886">            pushbackInputStream.unread(header);</span>
+        }
+
+<span class="pc bpc" id="L889" title="2 of 6 branches missed.">        if (header.length == 2 &amp;&amp; (header[0] &amp; 0xFF) == 0x1F &amp;&amp; (header[1] &amp; 0xFF) == 0x8B) {</span>
+<span class="fc" id="L890">            return new GZIPInputStream(pushbackInputStream);</span>
+        }
+
+<span class="fc" id="L893">        return pushbackInputStream;</span>
+    }
+
+    /**
+     * Opens a bundled resource from the classpath.
+     *
+     * @param resourcePath classpath resource path
+     * @return opened input stream
+     * @throws IOException if the resource cannot be found
+     */
+    /* default */ static InputStream openBundledResource(final String resourcePath) throws IOException {
+<span class="fc" id="L904">        final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();</span>
+<span class="fc" id="L905">        final InputStream inputStream = classLoader.getResourceAsStream(resourcePath);</span>
+<span class="pc bpc" id="L906" title="1 of 2 branches missed.">        if (inputStream == null) {</span>
+<span class="nc" id="L907">            throw new IOException(&quot;Stemmer resource not found: &quot; + resourcePath);</span>
+        }
+<span class="fc" id="L909">        return new GZIPInputStream(inputStream);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

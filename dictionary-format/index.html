@@ -524,10 +524,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#character-set-and-practical-convention" class="md-nav__link">
+  <a href="#character-set-compression-and-normalization" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Character set and practical convention
+        Character set, compression, and normalization
       
     </span>
   </a>
@@ -1370,10 +1370,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#character-set-and-practical-convention" class="md-nav__link">
+  <a href="#character-set-compression-and-normalization" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Character set and practical convention
+        Character set, compression, and normalization
       
     </span>
   </a>
@@ -1594,11 +1594,17 @@ connect connected   connecting // Common derived forms
 <p>is processed the same way as:</p>
 <div class="highlight"><pre><span></span><code>run running runs    ran
 </code></pre></div>
-<h2 id="character-set-and-practical-convention">Character set and practical convention</h2>
-<p>Dictionary files are read as UTF-8 text.</p>
-<p>From the perspective of the parser and the stemming algorithm, the format is not restricted to plain ASCII tokens. The parser accepts ordinary Java <code>String</code> data, and the trie itself works with general character sequences rather than with an ASCII-only internal model. In principle, this means the system could process diacritic and non-diacritic forms alike, and it could also store forms with inconsistently used diacritics.</p>
-<p>In practice, however, the format is currently best understood as <strong>primarily intended for classical basic ASCII lexical input</strong>, especially in the traditional stemming style where language data is normalized into plain characters in the ASCII range up to character code 127. This convention is particularly relevant for languages whose original orthography includes diacritics but whose stemming dictionaries are commonly maintained in normalized non-diacritic form.</p>
-<p>Future versions may expand the documentation and operational guidance for dictionaries that intentionally preserve diacritics. At present, that workflow is not the primary documented use case, not because the algorithm fundamentally forbids it, but because a concrete project requirement for such support has not yet emerged.</p>
+<h2 id="character-set-compression-and-normalization">Character set, compression, and normalization</h2>
+<p>Dictionary files are read as UTF-8 text. Files loaded through <code>StemmerPatchTrieLoader.load(Path, ...)</code> may be either plain UTF-8 text or GZip-compressed UTF-8 text; the loader detects GZip input from the stream header instead of relying on the file extension. Bundled dictionaries are stored as GZip resources and are decoded as UTF-8 after decompression.</p>
+<p>The parser and trie are not restricted to ASCII. Dictionary items are ordinary Java <code>String</code> values, and trie traversal works over Java <code>char</code> sequences. This supports Latin-script data with diacritics, Cyrillic data, Hebrew, Persian, Yiddish, and other scripts represented in UTF-8, subject to the normal Java <code>String</code> model and the project’s traversal configuration.</p>
+<p>Case normalization is controlled by <code>CaseProcessingMode</code>. The default <code>LOWERCASE_WITH_LOCALE_ROOT</code> mode lowercases the line before columns are split into dictionary items. <code>AS_IS</code> preserves the original casing.</p>
+<p>Diacritic normalization is controlled at trie-build and lookup time by <code>DiacriticProcessingMode</code>:</p>
+<ul>
+<li><code>AS_IS</code> preserves dictionary and lookup keys exactly after case handling,</li>
+<li><code>REMOVE</code> strips supported diacritics and common Latin ligatures on both insertion and lookup paths,</li>
+<li><code>AS_IS_AND_STRIPPED_FALLBACK</code> is declared in the public model but is not implemented yet and raises <code>UnsupportedOperationException</code>.</li>
+</ul>
+<p>For reliable production behavior, choose one normalization policy deliberately and apply it consistently. Normalized ASCII dictionaries remain a practical convention for some legacy stemming data, but they are not a format requirement.</p>
 <h2 id="distinct-stem-and-variant-semantics">Distinct stem and variant semantics</h2>
 <p>The format expresses a one-line grouping of forms under a canonical stem. It does not encode linguistic metadata, part-of-speech information, weights, or explicit ambiguity markers.</p>
 <p>For example:</p>
@@ -1642,7 +1648,7 @@ CONNECT Connected   Connecting
 <li>no explicit ambiguity syntax,</li>
 <li>no sectioning or nested structure.</li>
 </ul>
-<p>Each dictionary item is simply one tab-separated word form after remark stripping and lowercasing.</p>
+<p>Each dictionary item is simply one tab-separated word form after remark stripping and the configured case and diacritic normalization.</p>
 <h2 id="authoring-guidance">Authoring guidance</h2>
 <p>For reliable results, keep dictionaries:</p>
 <ul>
@@ -1652,7 +1658,7 @@ CONNECT Connected   Connecting
 <li>encoded in UTF-8,</li>
 <li>easy to audit in plain text form.</li>
 </ul>
-<p>For most current deployments, it is sensible to keep dictionary content in normalized basic ASCII form unless there is a clear requirement to preserve diacritics end-to-end.</p>
+<p>For most deployments, it is sensible to choose either preserved UTF-8 forms or a normalized ASCII/diacritic-stripped convention and keep that choice consistent across dictionary authoring, compilation, and runtime lookup.</p>
 <h2 id="relationship-to-other-documentation">Relationship to other documentation</h2>
 <p>This page describes only the textual source format.</p>
 <p>To understand how those dictionary lines are transformed into compiled runtime artifacts, continue with:</p>

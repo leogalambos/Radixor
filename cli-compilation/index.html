@@ -1800,7 +1800,7 @@
 <h2 id="what-the-cli-does">What the CLI does</h2>
 <p>The <code>Compile</code> tool performs the following steps:</p>
 <ol>
-<li>reads the input dictionary in the standard Radixor stemmer format,</li>
+<li>reads the input dictionary in the standard Radixor stemmer format, accepting either plain UTF-8 text or GZip-compressed UTF-8 text,</li>
 <li>parses each line into a canonical stem column and its known variant columns,</li>
 <li>converts variants into patch commands,</li>
 <li>builds a mutable trie of patch-command values,</li>
@@ -1832,7 +1832,7 @@
 </code></pre></div>
 <h3 id="-input-file"><code>--input &lt;file&gt;</code></h3>
 <p>Path to the source dictionary file.</p>
-<p>The file must use the standard line-oriented tab-separated values dictionary format, meaning that columns are separated by the tab character. Each non-empty logical line starts with the canonical stem column and may contain zero or more variant columns. The parser expects UTF-8 input, processes case according to <code>CaseProcessingMode</code> (default: <code>LOWERCASE_WITH_LOCALE_ROOT</code>), ignores trailing remarks introduced by <code>#</code> or <code>//</code>, and currently ignores dictionary items containing embedded whitespace while reporting them through warning-level log entries.</p>
+<p>The file must use the standard line-oriented tab-separated values dictionary format, meaning that columns are separated by the tab character. Each non-empty logical line starts with the canonical stem column and may contain zero or more variant columns. The input may be plain UTF-8 text or GZip-compressed UTF-8 text; compression is detected from the stream header rather than the file extension. The parser processes case according to <code>CaseProcessingMode</code> (default: <code>LOWERCASE_WITH_LOCALE_ROOT</code>), ignores trailing remarks introduced by <code>#</code> or <code>//</code>, and currently ignores dictionary items containing embedded whitespace while reporting them through warning-level log entries.</p>
 <p>Example:</p>
 <div class="highlight"><pre><span></span><code>--input ./data/stemmer.tsv
 </code></pre></div>
@@ -1865,7 +1865,7 @@
 </code></pre></div>
 <p>This option is intended for right-to-left languages where affix behavior should operate on the written form without externally reversing words.</p>
 <h3 id="-case-processing-mode-mode"><code>--case-processing-mode &lt;mode&gt;</code></h3>
-<p>Controls dictionary key normalization during compilation and lookup.</p>
+<p>Controls dictionary key normalization during compilation and lookup. The setting is stored in persisted trie metadata and is therefore available to runtime lookup after binary loading.</p>
 <p>Supported values are:</p>
 <ul>
 <li><code>LOWERCASE_WITH_LOCALE_ROOT</code> (default)</li>
@@ -1915,7 +1915,7 @@
 <p>The CLI is best used as a preparation step during packaging, deployment, or controlled artifact generation. This keeps compilation outside the runtime startup path and allows services to load only the finished binary trie.</p>
 <h3 id="treat-compiled-files-as-versioned-assets">Treat compiled files as versioned assets</h3>
 <p>A <code>.radixor.gz</code> file should be handled as a versioned output artifact. It represents a specific dictionary state, a specific reduction mode, and, where relevant, specific dominant-result thresholds.</p>
-<p>Compiled tries also persist a human-readable metadata block (<code>key=value</code> lines) that includes traversal direction, RTL indicator, reduction mode, case-processing mode, and dominant thresholds. After decompression, you can inspect this block directly to identify what dictionary/trie configuration the artifact contains.</p>
+<p>Compiled tries also persist a human-readable metadata block (<code>key=value</code> lines) that includes format version, traversal direction, RTL indicator, reduction mode, dominant thresholds, diacritic-processing mode, and case-processing mode. After decompression, you can inspect this block directly to identify what dictionary/trie configuration the artifact contains. The current CLI uses <code>DiacriticProcessingMode.AS_IS</code>; custom diacritic stripping is available through the programmatic builder and loader APIs rather than through a CLI flag.</p>
 <h3 id="choose-reduction-mode-deliberately">Choose reduction mode deliberately</h3>
 <p>The ranked <code>getAll()</code> mode is the safest default. The unordered and dominant modes should be chosen only when their trade-offs are acceptable for the consuming application.</p>
 <h3 id="expect-memory-pressure-during-preparation-not-runtime">Expect memory pressure during preparation, not runtime</h3>

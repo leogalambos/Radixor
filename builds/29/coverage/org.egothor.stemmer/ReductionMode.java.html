@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ReductionMode.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Radixor</a> &gt; <a href="index.source.html" class="el_package">org.egothor.stemmer</a> &gt; <span class="el_source">ReductionMode.java</span></div><h1>ReductionMode.java</h1><pre class="source lang-java linenums">/*******************************************************************************
+ * Copyright (C) 2026, Leo Galambos
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * 
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ * 
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ * 
+ * 3. Neither the name of the copyright holder nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&quot;
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ ******************************************************************************/
+package org.egothor.stemmer;
+
+/**
+ * Defines the subtree reduction strategy applied during trie compilation.
+ *
+ * &lt;p&gt;
+ * All reduction modes operate on the full subtree semantics, not only on the
+ * local content of a single node. This is important because trie values may be
+ * stored on both internal nodes and leaf nodes.
+ */
+<span class="fc" id="L41">@SuppressWarnings(&quot;PMD.LongVariable&quot;)</span>
+public enum ReductionMode {
+
+    /**
+     * Merges subtrees whose {@code getAll()} results are equivalent for every
+     * reachable key suffix and whose local result ordering is the same.
+     *
+     * &lt;p&gt;
+     * This mode ignores absolute frequencies when comparing subtree signatures, but
+     * preserves the value order returned by {@code getAll()}.
+     */
+<span class="fc" id="L52">    MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS,</span>
+
+    /**
+     * Merges subtrees whose {@code getAll()} results are equivalent for every
+     * reachable key suffix, regardless of the local ordering of values.
+     *
+     * &lt;p&gt;
+     * This mode ignores both absolute frequencies and local result ordering when
+     * comparing subtree signatures.
+     */
+<span class="fc" id="L62">    MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS,</span>
+
+    /**
+     * Merges subtrees whose preferred {@code get()} results are equivalent for
+     * every reachable key suffix, provided that the locally dominant winner
+     * satisfies the configured dominance constraints.
+     *
+     * &lt;p&gt;
+     * If a node does not satisfy the dominance constraints, the implementation
+     * falls back to ranked {@code getAll()} semantics for that node in order to
+     * avoid unsafe over-reduction.
+     */
+<span class="fc" id="L74">    MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
