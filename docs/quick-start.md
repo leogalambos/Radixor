@@ -32,7 +32,7 @@ public final class BundledStemmerExample {
 
     public static void main(final String[] arguments) throws IOException {
         final FrequencyTrie<String> trie = StemmerPatchTrieLoader.load(
-                StemmerPatchTrieLoader.Language.US_UK_PROFI,
+                StemmerPatchTrieLoader.Language.US_UK,
                 true,
                 ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS);
 
@@ -104,7 +104,7 @@ public final class SingleStemExample {
 
     public static void main(final String[] arguments) throws IOException {
         final FrequencyTrie<String> trie = StemmerPatchTrieLoader.load(
-                StemmerPatchTrieLoader.Language.US_UK_PROFI,
+                StemmerPatchTrieLoader.Language.US_UK,
                 true,
                 ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS);
 

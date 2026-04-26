@@ -13,7 +13,7 @@ The benchmark suite currently covers two categories:
 
 The comparison benchmark processes the same deterministic English token stream through:
 
-- Radixor with bundled `US_UK_PROFI`,
+- Radixor with bundled `US_UK` (older benchmark snapshots used the now-retired `US_UK_PROFI` resource),
 - Snowball original Porter,
 - Snowball English, commonly referred to as Porter2.
 
@@ -37,7 +37,7 @@ For that reason, the published badge values should be treated primarily as a com
 
 A recent JMH run on JDK 21.0.10 with JMH 1.37, one thread, three warmup iterations, and five measurement iterations produced the following approximate throughput ranges:
 
-| Workload | Radixor `US_UK_PROFI` | Snowball Porter | Snowball English |
+| Workload | Radixor `US_UK` *(historical runs: `US_UK_PROFI`)* | Snowball Porter | Snowball English |
 | --- | ---: | ---: | ---: |
 | About 12,000 generated tokens | 30.99 M tokens/s | 8.21 M tokens/s | 5.46 M tokens/s |
 | About 60,000 generated tokens | 32.25 M tokens/s | 8.02 M tokens/s | 5.11 M tokens/s |
@@ -83,7 +83,7 @@ The workload intentionally mixes:
 - simple inflections,
 - common derivational forms,
 - US and UK spelling families,
-- lexical forms appropriate for `US_UK_PROFI`.
+- lexical forms appropriate for the current bundled `US_UK` resource (with historical continuity from earlier `US_UK_PROFI` runs).
 
 This design keeps runs reproducible across environments and avoids accidental drift caused by changing external corpora.
 

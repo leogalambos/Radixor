@@ -54,7 +54,7 @@ Radixor is especially attractive when you want something more adaptable than sim
 
 Radixor includes a JMH benchmark suite for both its own algorithmic core and a side-by-side English comparison against the Snowball Porter stemmer family.
 
-On the current English comparison workload, Radixor with bundled `US_UK_PROFI` reaches approximately **31 to 32 million tokens per second**. Snowball original Porter reaches approximately **8 million tokens per second**, and Snowball English (Porter2) approximately **5 to 5.5 million tokens per second**.
+On the current English comparison workload, Radixor with bundled `US_UK` reaches approximately **31 to 32 million tokens per second**. Snowball original Porter reaches approximately **8 million tokens per second**, and Snowball English (Porter2) approximately **5 to 5.5 million tokens per second**.
 
 That places Radixor at approximately:
 
@@ -137,7 +137,7 @@ The repository keeps the front page concise and places detailed documentation un
   A practical first guide to loading, compiling, and using Radixor.
 
 - [Built-in Languages](docs/built-in-languages.md)  
-  Overview of bundled language resources such as `US_UK` and `US_UK_PROFI`.
+  Overview of bundled language resources such as `US_UK`.
 
 - [Dictionary Format](docs/dictionary-format.md)  
   How to write and normalize stemming dictionaries.
