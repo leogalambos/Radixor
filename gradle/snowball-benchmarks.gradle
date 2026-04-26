@@ -1,10 +1,27 @@
+import org.gradle.plugins.ide.eclipse.model.SourceFolder
+
+
 def snowballVersion = '3.0.1'
 def snowballArchiveName = "libstemmer_java-${snowballVersion}.tar.gz"
+def snowballDistributionDirectoryName = "libstemmer_java-${snowballVersion}"
+def snowballRootRelativePath = 'third-party/snowball'
+def snowballSourceRelativePath = "${snowballRootRelativePath}/source"
+def snowballJavaSourceRelativePath = "${snowballSourceRelativePath}/${snowballDistributionDirectoryName}/java"
 def snowballDownloadUrl = "https://snowballstem.org/dist/${snowballArchiveName}"
-def snowballDownloadFile = layout.buildDirectory.file("third-party/snowball/${snowballArchiveName}")
-def snowballExtractDirectory = layout.buildDirectory.dir('third-party/snowball/source')
-def snowballJavaSourceDirectory = layout.buildDirectory.dir(
-        "third-party/snowball/source/libstemmer_java-${snowballVersion}/java")
+def snowballDownloadFile = layout.buildDirectory.file("${snowballRootRelativePath}/${snowballArchiveName}")
+def snowballExtractDirectory = layout.buildDirectory.dir(snowballSourceRelativePath)
+def snowballJavaSourceDirectory = layout.buildDirectory.dir(snowballJavaSourceRelativePath)
+def snowballJavaSourceClasspathPath = provider {
+    project.relativePath(snowballJavaSourceDirectory.get().asFile)
+}
+def snowballEclipseClasspathAttributes = [
+        gradle_scope        : 'jmh',
+        gradle_used_by_scope: 'jmh',
+        test                : 'true'
+]
+def isAbsoluteClasspathPath = { String path ->
+    path.startsWith('/') || path ==~ /^[A-Za-z]:[\\\/].*/
+}
 
 tasks.register('downloadSnowballJava') {
     group = 'build setup'
@@ -46,4 +63,31 @@ sourceSets {
 
 tasks.named('compileJmhJava') {
     dependsOn(tasks.named('extractSnowballJava'))
+}
+
+eclipse {
+    classpath {
+        file {
+            whenMerged { classpath ->
+                String generatedSnowballPath = snowballJavaSourceClasspathPath.get()
+                String modelSnowballPath = snowballJavaSourceRelativePath
+
+                classpath.entries.removeAll { entry ->
+                    entry.hasProperty('path') && (
+                            entry.path == generatedSnowballPath ||
+                            entry.path == modelSnowballPath ||
+                            isAbsoluteClasspathPath(entry.path)
+                    )
+                }
+
+                SourceFolder snowballEntry = new SourceFolder(generatedSnowballPath, null)
+                snowballEntry.output = 'bin/jmh'
+                snowballEclipseClasspathAttributes.each { String name, String value ->
+                    snowballEntry.entryAttributes[name] = value
+                }
+
+                classpath.entries.add(snowballEntry)
+            }
+        }
+    }
 }
