@@ -1,0 +1,405 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Compile.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Radixor</a> &gt; <a href="index.source.html" class="el_package">org.egothor.stemmer</a> &gt; <span class="el_source">Compile.java</span></div><h1>Compile.java</h1><pre class="source lang-java linenums">/*******************************************************************************
+ * Copyright (C) 2026, Leo Galambos
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * 
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ * 
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ * 
+ * 3. Neither the name of the copyright holder nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&quot;
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ ******************************************************************************/
+package org.egothor.stemmer;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Locale;
+import java.util.Objects;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+/**
+ * Command-line compiler of stemmer dictionary files into compressed binary
+ * {@link FrequencyTrie} artifacts.
+ *
+ * &lt;p&gt;
+ * The CLI reads an input file in the same syntax as the project's stemmer
+ * resource files, compiles it into a read-only {@link FrequencyTrie} of patch
+ * commands, applies the selected subtree reduction strategy, and writes the
+ * resulting trie in the project binary format under GZip compression.
+ *
+ * &lt;p&gt;
+ * Remarks introduced by {@code #} or {@code //} are supported through
+ * {@link StemmerDictionaryParser}.
+ *
+ * &lt;p&gt;
+ * Supported arguments:
+ * &lt;/p&gt;
+ *
+ * &lt;pre&gt;
+ * --input &amp;lt;file&amp;gt;
+ * --output &amp;lt;file&amp;gt;
+ * --reduction-mode &amp;lt;mode&amp;gt;
+ * [--store-original]
+ * [--case-processing-mode &amp;lt;mode&amp;gt;]
+ * [--dominant-winner-min-percent &amp;lt;1..100&amp;gt;]
+ * [--dominant-winner-over-second-ratio &amp;lt;1..n&amp;gt;]
+ * [--overwrite]
+ * [--help]
+ * &lt;/pre&gt;
+ */
+public final class Compile {
+
+    /**
+     * Logger of this class.
+     */
+<span class="fc" id="L76">    private static final Logger LOGGER = Logger.getLogger(Compile.class.getName());</span>
+
+    /**
+     * Exit status indicating success.
+     */
+    private static final int EXIT_SUCCESS = 0;
+
+    /**
+     * Exit status indicating invalid command-line usage.
+     */
+    private static final int EXIT_USAGE_ERROR = 2;
+
+    /**
+     * Exit status indicating processing failure.
+     */
+    private static final int EXIT_PROCESSING_ERROR = 1;
+
+    /**
+     * Utility class.
+     */
+<span class="fc" id="L96">    private Compile() {</span>
+<span class="fc" id="L97">        throw new AssertionError(&quot;No instances.&quot;);</span>
+    }
+
+    /**
+     * CLI entry point.
+     *
+     * @param arguments command-line arguments
+     */
+    public static void main(final String[] arguments) {
+<span class="nc" id="L106">        final int exitCode = run(arguments);</span>
+<span class="nc bnc" id="L107" title="All 2 branches missed.">        if (exitCode != EXIT_SUCCESS) {</span>
+<span class="nc" id="L108">            System.exit(exitCode);</span>
+        }
+<span class="nc" id="L110">    }</span>
+
+    /**
+     * Executes the CLI.
+     *
+     * @param arguments command-line arguments
+     * @return process exit code
+     */
+    /* default */ static int run(final String... arguments) {
+        try {
+<span class="fc" id="L120">            final Arguments parsedArguments = Arguments.parse(arguments);</span>
+<span class="fc bfc" id="L121" title="All 2 branches covered.">            if (parsedArguments.help()) {</span>
+<span class="fc" id="L122">                printUsage();</span>
+<span class="fc" id="L123">                return EXIT_SUCCESS;</span>
+            }
+
+<span class="fc" id="L126">            compile(parsedArguments);</span>
+<span class="fc" id="L127">            return EXIT_SUCCESS;</span>
+<span class="fc" id="L128">        } catch (IllegalArgumentException exception) {</span>
+<span class="fc" id="L129">            System.err.println(exception.getMessage());</span>
+<span class="fc" id="L130">            System.err.println();</span>
+<span class="fc" id="L131">            printUsage();</span>
+<span class="fc" id="L132">            return EXIT_USAGE_ERROR;</span>
+<span class="fc" id="L133">        } catch (IOException exception) {</span>
+<span class="pc bpc" id="L134" title="1 of 2 branches missed.">            if (LOGGER.isLoggable(Level.SEVERE)) {</span>
+<span class="fc" id="L135">                LOGGER.log(Level.SEVERE, &quot;CLI compilation failed for input {0} and output {1}.&quot;,</span>
+<span class="fc" id="L136">                        new Object[] { safeInput(arguments), safeOutput(arguments) });</span>
+            }
+<span class="fc" id="L138">            System.err.println(&quot;Compilation failed: &quot; + exception.getMessage());</span>
+<span class="fc" id="L139">            return EXIT_PROCESSING_ERROR;</span>
+        }
+    }
+
+    /**
+     * Compiles the input dictionary and writes the compressed binary trie.
+     *
+     * @param arguments parsed command-line arguments
+     * @throws IOException if compilation or output writing fails
+     */
+    private static void compile(final Arguments arguments) throws IOException {
+<span class="fc" id="L150">        final ReductionSettings reductionSettings = new ReductionSettings(arguments.reductionMode(),</span>
+<span class="fc" id="L151">                arguments.dominantWinnerMinPercent(), arguments.dominantWinnerOverSecondRatio());</span>
+
+<span class="pc bpc" id="L153" title="1 of 2 branches missed.">        final WordTraversalDirection traversalDirection = arguments.rightToLeft() ? WordTraversalDirection.FORWARD</span>
+<span class="fc" id="L154">                : WordTraversalDirection.BACKWARD;</span>
+<span class="fc" id="L155">        final FrequencyTrie&lt;String&gt; trie = StemmerPatchTrieLoader.load(arguments.inputFile(), arguments.storeOriginal(),</span>
+<span class="fc" id="L156">                reductionSettings, traversalDirection, arguments.caseProcessingMode());</span>
+
+<span class="fc" id="L158">        final Path outputFile = arguments.outputFile();</span>
+<span class="fc" id="L159">        final Path parent = outputFile.toAbsolutePath().getParent();</span>
+<span class="pc bpc" id="L160" title="1 of 2 branches missed.">        if (parent != null) {</span>
+<span class="fc" id="L161">            Files.createDirectories(parent);</span>
+        }
+
+<span class="fc bfc" id="L164" title="All 4 branches covered.">        if (Files.exists(outputFile) &amp;&amp; !arguments.overwrite()) {</span>
+<span class="fc" id="L165">            throw new IOException(&quot;Output file already exists: &quot; + outputFile.toAbsolutePath());</span>
+        }
+
+<span class="fc" id="L168">        StemmerPatchTrieBinaryIO.write(trie, outputFile);</span>
+
+<span class="pc bpc" id="L170" title="1 of 2 branches missed.">        if (LOGGER.isLoggable(Level.INFO)) {</span>
+<span class="fc" id="L171">            LOGGER.log(Level.INFO,</span>
+                    &quot;Compiled dictionary {0} to {1} using mode {2}, storeOriginal={3}, rightToLeft={4}, caseProcessingMode={5}, dominantWinnerMinPercent={6}, dominantWinnerOverSecondRatio={7}.&quot;,
+<span class="fc" id="L173">                    new Object[] { arguments.inputFile().toAbsolutePath().toString(),</span>
+<span class="fc" id="L174">                            arguments.outputFile().toAbsolutePath().toString(), arguments.reductionMode().name(),</span>
+<span class="fc" id="L175">                            arguments.storeOriginal(), arguments.rightToLeft(), arguments.caseProcessingMode(),</span>
+<span class="fc" id="L176">                            arguments.dominantWinnerMinPercent(), arguments.dominantWinnerOverSecondRatio() });</span>
+        }
+<span class="fc" id="L178">    }</span>
+
+    /**
+     * Prints CLI usage help.
+     */
+    private static void printUsage() {
+<span class="fc" id="L184">        System.err.println(&quot;Usage:&quot;);</span>
+<span class="fc" id="L185">        System.err.println(&quot;  java org.egothor.stemmer.Compile \\&quot;);</span>
+<span class="fc" id="L186">        System.err.println(&quot;      --input &lt;file&gt; \\&quot;);</span>
+<span class="fc" id="L187">        System.err.println(&quot;      --output &lt;file&gt; \\&quot;);</span>
+<span class="fc" id="L188">        System.err.println(&quot;      --reduction-mode &lt;mode&gt; \\&quot;);</span>
+<span class="fc" id="L189">        System.err.println(&quot;      [--store-original] \\&quot;);</span>
+<span class="fc" id="L190">        System.err.println(&quot;      [--case-processing-mode &lt;mode&gt;] \\&quot;);</span>
+<span class="fc" id="L191">        System.err.println(&quot;      [--dominant-winner-min-percent &lt;1..100&gt;] \\&quot;);</span>
+<span class="fc" id="L192">        System.err.println(&quot;      [--dominant-winner-over-second-ratio &lt;1..n&gt;] \\&quot;);</span>
+<span class="fc" id="L193">        System.err.println(&quot;      [--overwrite]&quot;);</span>
+<span class="fc" id="L194">        System.err.println();</span>
+<span class="fc" id="L195">        System.err.println(&quot;Options:&quot;);</span>
+<span class="fc" id="L196">        System.err.println(&quot;  --store-original&quot;);</span>
+<span class="fc" id="L197">        System.err.println(&quot;      Inserts each canonical stem itself using the no-operation patch.&quot;);</span>
+<span class="fc" id="L198">        System.err.println(&quot;  --right-to-left&quot;);</span>
+<span class="fc" id="L199">        System.err.println(&quot;      Uses forward word traversal for right-to-left languages.&quot;);</span>
+<span class="fc" id="L200">        System.err.println(&quot;      In this mode, trie keys are constructed from the logical beginning&quot;);</span>
+<span class="fc" id="L201">        System.err.println(&quot;      of the stored word form and patch commands are encoded likewise.&quot;);</span>
+<span class="fc" id="L202">        System.err.println(&quot;  --overwrite&quot;);</span>
+<span class="fc" id="L203">        System.err.println(&quot;      Replaces the target file when it already exists.&quot;);</span>
+<span class="fc" id="L204">        System.err.println(&quot;  --case-processing-mode&quot;);</span>
+<span class="fc" id="L205">        System.err.println(&quot;      Controls whether dictionary input is lowercased or preserved as-is.&quot;);</span>
+<span class="fc" id="L206">        System.err.println();</span>
+<span class="fc" id="L207">        System.err.println(&quot;Supported case processing modes:&quot;);</span>
+<span class="fc bfc" id="L208" title="All 2 branches covered.">        for (CaseProcessingMode mode : CaseProcessingMode.values()) {</span>
+<span class="fc" id="L209">            System.err.println(&quot;  &quot; + mode.name());</span>
+        }
+<span class="fc" id="L211">        System.err.println();</span>
+<span class="fc" id="L212">        System.err.println(&quot;Supported reduction modes:&quot;);</span>
+<span class="fc bfc" id="L213" title="All 2 branches covered.">        for (ReductionMode mode : ReductionMode.values()) {</span>
+<span class="fc" id="L214">            System.err.println(&quot;  &quot; + mode.name());</span>
+        }
+<span class="fc" id="L216">    }</span>
+
+    /**
+     * Returns a best-effort input value for diagnostic logging.
+     *
+     * @param arguments raw command-line arguments
+     * @return input value if present, otherwise {@code &quot;&lt;unknown&gt;&quot;}
+     */
+    private static String safeInput(final String... arguments) {
+<span class="fc" id="L225">        return safeOptionValue(arguments, &quot;--input&quot;);</span>
+    }
+
+    /**
+     * Returns a best-effort output value for diagnostic logging.
+     *
+     * @param arguments raw command-line arguments
+     * @return output value if present, otherwise {@code &quot;&lt;unknown&gt;&quot;}
+     */
+    private static String safeOutput(final String... arguments) {
+<span class="fc" id="L235">        return safeOptionValue(arguments, &quot;--output&quot;);</span>
+    }
+
+    /**
+     * Returns a best-effort option value from raw arguments.
+     *
+     * @param arguments raw command-line arguments
+     * @param option    option name
+     * @return option value if present, otherwise {@code &quot;&lt;unknown&gt;&quot;}
+     */
+    private static String safeOptionValue(final String[] arguments, final String option) {
+<span class="pc bpc" id="L246" title="1 of 2 branches missed.">        if (arguments == null) {</span>
+<span class="nc" id="L247">            return &quot;&lt;unknown&gt;&quot;;</span>
+        }
+<span class="pc bpc" id="L249" title="1 of 2 branches missed.">        for (int index = 0; index &lt; arguments.length - 1; index++) {</span>
+<span class="fc bfc" id="L250" title="All 2 branches covered.">            if (option.equals(arguments[index])) {</span>
+<span class="fc" id="L251">                return arguments[index + 1];</span>
+            }
+        }
+<span class="nc" id="L254">        return &quot;&lt;unknown&gt;&quot;;</span>
+    }
+
+    /**
+     * Immutable parsed CLI arguments.
+     *
+     * @param inputFile                     input dictionary file
+     * @param outputFile                    output compressed trie file
+     * @param reductionMode                 subtree reduction mode
+     * @param storeOriginal                 whether original stems are stored
+     * @param rightToLeft                   whether dictionary compilation should
+     *                                      use forward traversal on stored word
+     *                                      forms
+     * @param dominantWinnerMinPercent      dominant winner minimum percent
+     * @param dominantWinnerOverSecondRatio dominant winner over second ratio
+     * @param caseProcessingMode            dictionary case processing mode
+     * @param overwrite                     whether an existing output may be
+     *                                      replaced
+     * @param help                          whether usage help was requested
+     */
+    @SuppressWarnings(&quot;PMD.LongVariable&quot;)
+<span class="fc" id="L275">    private record Arguments(Path inputFile, Path outputFile, ReductionMode reductionMode, boolean storeOriginal,</span>
+            boolean rightToLeft, int dominantWinnerMinPercent, int dominantWinnerOverSecondRatio,
+            CaseProcessingMode caseProcessingMode, boolean overwrite, boolean help) {
+
+        /**
+         * Parses raw command-line arguments.
+         *
+         * @param arguments raw command-line arguments
+         * @return parsed arguments
+         */
+        @SuppressWarnings({ &quot;PMD.AvoidReassigningLoopVariables&quot;, &quot;PMD.CyclomaticComplexity&quot; })
+        private static Arguments parse(final String... arguments) {
+<span class="fc" id="L287">            Objects.requireNonNull(arguments, &quot;arguments&quot;);</span>
+
+<span class="fc" id="L289">            Path inputFile = null;</span>
+<span class="fc" id="L290">            Path outputFile = null;</span>
+<span class="fc" id="L291">            ReductionMode reductionMode = null;</span>
+<span class="fc" id="L292">            boolean storeOriginal = false;</span>
+<span class="fc" id="L293">            boolean rightToLeft = false;</span>
+<span class="fc" id="L294">            boolean overwrite = false;</span>
+<span class="fc" id="L295">            boolean help = false;</span>
+<span class="fc" id="L296">            CaseProcessingMode caseProcessingMode = CaseProcessingMode.LOWERCASE_WITH_LOCALE_ROOT;</span>
+<span class="fc" id="L297">            int dominantWinnerMinPercent = ReductionSettings.DEFAULT_DOMINANT_WINNER_MIN_PERCENT;</span>
+<span class="fc" id="L298">            int dominantWinnerOverSecondRatio = ReductionSettings.DEFAULT_DOMINANT_WINNER_OVER_SECOND_RATIO;</span>
+
+<span class="fc bfc" id="L300" title="All 2 branches covered.">            for (int index = 0; index &lt; arguments.length; index++) {</span>
+<span class="fc" id="L301">                final String argument = arguments[index];</span>
+
+<span class="pc bpc" id="L303" title="2 of 11 branches missed.">                switch (argument) {</span>
+                    case &quot;--help&quot;:
+                    case &quot;-h&quot;:
+<span class="fc" id="L306">                        help = true;</span>
+<span class="fc" id="L307">                        break;</span>
+
+                    case &quot;--store-original&quot;:
+<span class="fc" id="L310">                        storeOriginal = true;</span>
+<span class="fc" id="L311">                        break;</span>
+
+                    case &quot;--overwrite&quot;:
+<span class="fc" id="L314">                        overwrite = true;</span>
+<span class="fc" id="L315">                        break;</span>
+
+                    case &quot;--right-to-left&quot;:
+<span class="nc" id="L318">                        rightToLeft = true;</span>
+<span class="nc" id="L319">                        break;</span>
+
+                    case &quot;--input&quot;:
+<span class="fc" id="L322">                        inputFile = Path.of(requireValue(arguments, ++index, &quot;--input&quot;));</span>
+<span class="fc" id="L323">                        break;</span>
+
+                    case &quot;--output&quot;:
+<span class="fc" id="L326">                        outputFile = Path.of(requireValue(arguments, ++index, &quot;--output&quot;));</span>
+<span class="fc" id="L327">                        break;</span>
+
+                    case &quot;--reduction-mode&quot;:
+<span class="fc" id="L330">                        reductionMode = ReductionMode</span>
+<span class="fc" id="L331">                                .valueOf(requireValue(arguments, ++index, &quot;--reduction-mode&quot;).toUpperCase(Locale.ROOT));</span>
+<span class="fc" id="L332">                        break;</span>
+
+                    case &quot;--dominant-winner-min-percent&quot;:
+<span class="pc" id="L335">                        dominantWinnerMinPercent = parseInteger(</span>
+<span class="fc" id="L336">                                requireValue(arguments, ++index, &quot;--dominant-winner-min-percent&quot;),</span>
+                                &quot;--dominant-winner-min-percent&quot;);
+<span class="nc" id="L338">                        break;</span>
+
+                    case &quot;--dominant-winner-over-second-ratio&quot;:
+<span class="pc" id="L341">                        dominantWinnerOverSecondRatio = parseInteger(</span>
+<span class="fc" id="L342">                                requireValue(arguments, ++index, &quot;--dominant-winner-over-second-ratio&quot;),</span>
+                                &quot;--dominant-winner-over-second-ratio&quot;);
+<span class="nc" id="L344">                        break;</span>
+                    case &quot;--case-processing-mode&quot;:
+<span class="nc" id="L346">                        caseProcessingMode = CaseProcessingMode.valueOf(</span>
+<span class="nc" id="L347">                                requireValue(arguments, ++index, &quot;--case-processing-mode&quot;).toUpperCase(Locale.ROOT));</span>
+<span class="nc" id="L348">                        break;</span>
+
+                    default:
+<span class="fc" id="L351">                        throw new IllegalArgumentException(&quot;Unknown argument: &quot; + argument);</span>
+                }
+            }
+
+<span class="fc bfc" id="L355" title="All 2 branches covered.">            if (help) {</span>
+<span class="fc" id="L356">                return new Arguments(inputFile, outputFile, reductionMode, storeOriginal, rightToLeft,</span>
+                        dominantWinnerMinPercent, dominantWinnerOverSecondRatio, caseProcessingMode, overwrite, true);
+            }
+
+<span class="fc bfc" id="L360" title="All 2 branches covered.">            if (inputFile == null) {</span>
+<span class="fc" id="L361">                throw new IllegalArgumentException(&quot;Missing required argument --input.&quot;);</span>
+            }
+<span class="fc bfc" id="L363" title="All 2 branches covered.">            if (outputFile == null) {</span>
+<span class="fc" id="L364">                throw new IllegalArgumentException(&quot;Missing required argument --output.&quot;);</span>
+            }
+<span class="fc bfc" id="L366" title="All 2 branches covered.">            if (reductionMode == null) {</span>
+<span class="fc" id="L367">                throw new IllegalArgumentException(&quot;Missing required argument --reduction-mode.&quot;);</span>
+            }
+
+<span class="fc" id="L370">            return new Arguments(inputFile, outputFile, reductionMode, storeOriginal, rightToLeft,</span>
+                    dominantWinnerMinPercent, dominantWinnerOverSecondRatio, caseProcessingMode, overwrite, false);
+        }
+
+        /**
+         * Returns the required value of an option.
+         *
+         * @param arguments raw arguments
+         * @param index     value index
+         * @param option    option name
+         * @return option value
+         */
+        private static String requireValue(final String[] arguments, final int index, final String option) {
+<span class="fc bfc" id="L383" title="All 2 branches covered.">            if (index &gt;= arguments.length) {</span>
+<span class="fc" id="L384">                throw new IllegalArgumentException(&quot;Missing value for &quot; + option + &quot;.&quot;);</span>
+            }
+<span class="fc" id="L386">            return arguments[index];</span>
+        }
+
+        /**
+         * Parses an integer option value.
+         *
+         * @param value      raw value
+         * @param optionName option name
+         * @return parsed integer
+         */
+        private static int parseInteger(final String value, final String optionName) {
+            try {
+<span class="nc" id="L398">                return Integer.parseInt(value);</span>
+<span class="fc" id="L399">            } catch (NumberFormatException exception) {</span>
+<span class="fc" id="L400">                throw new IllegalArgumentException(&quot;Invalid integer for &quot; + optionName + &quot;: &quot; + value, exception);</span>
+            }
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
