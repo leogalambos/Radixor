@@ -1,0 +1,688 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PatchCommandEncoder.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Radixor</a> &gt; <a href="index.source.html" class="el_package">org.egothor.stemmer</a> &gt; <span class="el_source">PatchCommandEncoder.java</span></div><h1>PatchCommandEncoder.java</h1><pre class="source lang-java linenums">/*******************************************************************************
+ * Copyright (C) 2026, Leo Galambos
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * 
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ * 
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ * 
+ * 3. Neither the name of the copyright holder nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&quot;
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ ******************************************************************************/
+package org.egothor.stemmer;
+
+import java.util.Objects;
+import java.util.concurrent.locks.ReentrantLock;
+
+/**
+ * Encodes a compact patch command that transforms one word form into another
+ * and applies such commands back to source words.
+ *
+ * &lt;p&gt;
+ * The historical Egothor patch language is defined for backward traversal, that
+ * is, from the logical end of a word toward its beginning. This implementation
+ * preserves that proven opcode semantics as the single internal representation.
+ * Forward traversal is implemented by translating source and target words to
+ * the equivalent reversed logical form at the API boundary and then delegating
+ * to the same backward encoder and decoder.
+ * &lt;/p&gt;
+ *
+ * &lt;p&gt;
+ * This design keeps the patch language stable, avoids maintaining two distinct
+ * opcode interpreters, and guarantees that forward traversal is semantically
+ * equivalent to running the historical algorithm on the reversed logical word
+ * form.
+ * &lt;/p&gt;
+ *
+ * &lt;p&gt;
+ * The encoder computes a minimum-cost edit script using weighted insert,
+ * delete, replace, and match transitions. The resulting trace is then
+ * serialized into the compact patch language.
+ * &lt;/p&gt;
+ *
+ * &lt;p&gt;
+ * This class is stateful and reuses internal dynamic-programming matrices
+ * across invocations to reduce allocation pressure during repeated use.
+ * Instances are therefore not suitable for unsynchronized concurrent access.
+ * The {@link #encode(String, String)} method is synchronized so that a shared
+ * instance can still be used safely when needed.
+ * &lt;/p&gt;
+ */
+@SuppressWarnings(&quot;PMD.CyclomaticComplexity&quot;)
+public final class PatchCommandEncoder {
+
+    /**
+     * Serialized opcode for deleting one or more characters.
+     */
+    private static final char DELETE_OPCODE = 'D';
+
+    /**
+     * Serialized opcode for inserting one character.
+     */
+    private static final char INSERT_OPCODE = 'I';
+
+    /**
+     * Serialized opcode for replacing one character.
+     */
+    private static final char REPLACE_OPCODE = 'R';
+
+    /**
+     * Serialized opcode for skipping one or more unchanged characters.
+     */
+    private static final char SKIP_OPCODE = '-';
+
+    /**
+     * Sentinel placed immediately before {@code 'a'} and used to accumulate compact
+     * counts in the patch format.
+     */
+    private static final char COUNT_SENTINEL = (char) ('a' - 1);
+
+    /**
+     * Serialized opcode for a canonical no-operation patch.
+     */
+    private static final char NOOP_OPCODE = 'N';
+
+    /**
+     * Canonical argument used by the serialized no-operation patch.
+     */
+    private static final char NOOP_ARGUMENT = 'a';
+
+    /**
+     * Canonical serialized no-operation patch.
+     */
+<span class="fc" id="L112">    /* default */ static final String NOOP_PATCH = String.valueOf(new char[] { NOOP_OPCODE, NOOP_ARGUMENT });</span>
+
+    /**
+     * Safety penalty used to prevent a mismatch from being selected as a match.
+     */
+    private static final int MISMATCH_PENALTY = 100;
+
+    /**
+     * Extra matrix headroom reserved beyond the immediately required dimensions.
+     */
+    private static final int CAPACITY_MARGIN = 8;
+
+    /**
+     * Cost of inserting one character.
+     */
+    private final int insertCost;
+
+    /**
+     * Cost of deleting one character.
+     */
+    private final int deleteCost;
+
+    /**
+     * Cost of replacing one character.
+     */
+    private final int replaceCost;
+
+    /**
+     * Cost of keeping one matching character unchanged.
+     */
+    private final int matchCost;
+
+    /**
+     * Direction in which words are traversed during both patch serialization and
+     * patch application.
+     */
+    private final WordTraversalDirection traversalDirection;
+
+    /**
+     * Currently allocated source dimension of reusable matrices.
+     */
+    private int sourceCapacity;
+
+    /**
+     * Currently allocated target dimension of reusable matrices.
+     */
+    private int targetCapacity;
+
+    /**
+     * Dynamic-programming matrix containing cumulative minimum costs.
+     */
+    private int[][] costMatrix;
+
+    /**
+     * Matrix storing the chosen transition for each dynamic-programming cell.
+     */
+    private Trace[][] traceMatrix;
+
+    /**
+     * Reentrant lock for {@link #encode(String, String)} exclusive operation.
+     */
+<span class="fc" id="L173">    private final ReentrantLock lock = new ReentrantLock();</span>
+
+    /**
+     * Internal dynamic-programming transition selected for one matrix cell.
+     */
+<span class="fc" id="L178">    private enum Trace {</span>
+
+        /** Deletes one character from the source sequence. */
+<span class="fc" id="L181">        DELETE,</span>
+
+        /** Inserts one character from the target sequence. */
+<span class="fc" id="L184">        INSERT,</span>
+
+        /** Replaces one source character with one target character. */
+<span class="fc" id="L187">        REPLACE,</span>
+
+        /** Keeps one matching character unchanged. */
+<span class="fc" id="L190">        MATCH</span>
+    }
+
+    /**
+     * Creates an encoder with the traditional Egothor cost model: insert = 1,
+     * delete = 1, replace = 1, match = 0.
+     */
+    public PatchCommandEncoder() {
+<span class="fc" id="L198">        this(WordTraversalDirection.BACKWARD, 1, 1, 1, 0);</span>
+<span class="fc" id="L199">    }</span>
+
+    /**
+     * Creates an encoder with the traditional Egothor cost model and explicit
+     * traversal direction.
+     *
+     * @param traversalDirection traversal direction
+     */
+    public PatchCommandEncoder(final WordTraversalDirection traversalDirection) {
+<span class="fc" id="L208">        this(traversalDirection, 1, 1, 1, 0);</span>
+<span class="fc" id="L209">    }</span>
+
+    /**
+     * Creates an encoder with explicit operation costs.
+     *
+     * @param insertCost  cost of inserting one character
+     * @param deleteCost  cost of deleting one character
+     * @param replaceCost cost of replacing one character
+     * @param matchCost   cost of keeping one equal character unchanged
+     */
+    public PatchCommandEncoder(final int insertCost, final int deleteCost, final int replaceCost, final int matchCost) {
+<span class="fc" id="L220">        this(WordTraversalDirection.BACKWARD, insertCost, deleteCost, replaceCost, matchCost);</span>
+<span class="fc" id="L221">    }</span>
+
+    /**
+     * Creates an encoder with explicit operation costs and traversal direction.
+     *
+     * @param traversalDirection traversal direction
+     * @param insertCost         cost of inserting one character
+     * @param deleteCost         cost of deleting one character
+     * @param replaceCost        cost of replacing one character
+     * @param matchCost          cost of keeping one equal character unchanged
+     */
+    public PatchCommandEncoder(final WordTraversalDirection traversalDirection, final int insertCost,
+<span class="fc" id="L233">            final int deleteCost, final int replaceCost, final int matchCost) {</span>
+<span class="fc" id="L234">        this.traversalDirection = Objects.requireNonNull(traversalDirection, &quot;traversalDirection&quot;);</span>
+<span class="fc bfc" id="L235" title="All 2 branches covered.">        if (insertCost &lt; 0) {</span>
+<span class="fc" id="L236">            throw new IllegalArgumentException(&quot;insertCost must be non-negative.&quot;);</span>
+        }
+<span class="fc bfc" id="L238" title="All 2 branches covered.">        if (deleteCost &lt; 0) {</span>
+<span class="fc" id="L239">            throw new IllegalArgumentException(&quot;deleteCost must be non-negative.&quot;);</span>
+        }
+<span class="fc bfc" id="L241" title="All 2 branches covered.">        if (replaceCost &lt; 0) {</span>
+<span class="fc" id="L242">            throw new IllegalArgumentException(&quot;replaceCost must be non-negative.&quot;);</span>
+        }
+<span class="fc bfc" id="L244" title="All 2 branches covered.">        if (matchCost &lt; 0) {</span>
+<span class="fc" id="L245">            throw new IllegalArgumentException(&quot;matchCost must be non-negative.&quot;);</span>
+        }
+
+<span class="fc" id="L248">        this.insertCost = insertCost;</span>
+<span class="fc" id="L249">        this.deleteCost = deleteCost;</span>
+<span class="fc" id="L250">        this.replaceCost = replaceCost;</span>
+<span class="fc" id="L251">        this.matchCost = matchCost;</span>
+<span class="fc" id="L252">        this.sourceCapacity = 0;</span>
+<span class="fc" id="L253">        this.targetCapacity = 0;</span>
+<span class="fc" id="L254">        this.costMatrix = new int[0][0];</span>
+<span class="fc" id="L255">        this.traceMatrix = new Trace[0][0];</span>
+<span class="fc" id="L256">    }</span>
+
+    /**
+     * Produces a compact patch command that transforms {@code source} into
+     * {@code target}.
+     *
+     * @param source source word form
+     * @param target target word form
+     * @return compact patch command, or {@code null} when any argument is
+     *         {@code null}
+     */
+    public String encode(final String source, final String target) {
+<span class="fc bfc" id="L268" title="All 4 branches covered.">        if (source == null || target == null) {</span>
+<span class="fc" id="L269">            return null;</span>
+        }
+<span class="fc bfc" id="L271" title="All 2 branches covered.">        if (source.equals(target)) {</span>
+<span class="fc" id="L272">            return NOOP_PATCH;</span>
+        }
+
+<span class="fc" id="L275">        final String effectiveSource = toLegacyWordForm(source, this.traversalDirection);</span>
+<span class="fc" id="L276">        final String effectiveTarget = toLegacyWordForm(target, this.traversalDirection);</span>
+<span class="fc" id="L277">        return encodeBackward(effectiveSource, effectiveTarget);</span>
+    }
+
+    /**
+     * Applies a compact patch command to the supplied source word using the
+     * historical backward traversal direction.
+     *
+     * @param source       original source word
+     * @param patchCommand compact patch command
+     * @return transformed word, or {@code null} when {@code source} is {@code null}
+     */
+    public static String apply(final String source, final String patchCommand) {
+<span class="fc" id="L289">        return apply(source, patchCommand, WordTraversalDirection.BACKWARD);</span>
+    }
+
+    /**
+     * Applies a compact patch command to the supplied source word using the
+     * specified traversal direction.
+     *
+     * &lt;p&gt;
+     * Forward traversal is implemented by transforming the source word to the
+     * equivalent legacy backward form, applying the proven historical decoder, and
+     * reversing the transformed result back to the logical word form.
+     * &lt;/p&gt;
+     *
+     * @param source             original source word
+     * @param patchCommand       compact patch command
+     * @param traversalDirection traversal direction used by the patch command
+     * @return transformed word, or {@code null} when {@code source} is {@code null}
+     */
+    public static String apply(final String source, final String patchCommand,
+            final WordTraversalDirection traversalDirection) {
+<span class="fc" id="L309">        Objects.requireNonNull(traversalDirection, &quot;traversalDirection&quot;);</span>
+<span class="fc bfc" id="L310" title="All 2 branches covered.">        if (source == null) {</span>
+<span class="fc" id="L311">            return null;</span>
+        }
+<span class="fc bfc" id="L313" title="All 2 branches covered.">        if (traversalDirection == WordTraversalDirection.BACKWARD) {</span>
+<span class="fc" id="L314">            return applyBackward(source, patchCommand);</span>
+        }
+<span class="fc" id="L316">        final String transformedSource = reverse(source);</span>
+<span class="fc" id="L317">        final String transformedResult = applyBackward(transformedSource, patchCommand);</span>
+<span class="fc" id="L318">        return reverse(transformedResult);</span>
+    }
+
+    /**
+     * Encodes a patch command using the historical backward Egothor semantics.
+     *
+     * @param source source word form in legacy backward logical space
+     * @param target target word form in legacy backward logical space
+     * @return compact patch command
+     */
+    private String encodeBackward(final String source, final String target) {
+<span class="fc" id="L329">        final int sourceLength = source.length();</span>
+<span class="fc" id="L330">        final int targetLength = target.length();</span>
+
+<span class="fc" id="L332">        lock.lock();</span>
+        try {
+<span class="fc" id="L334">            ensureCapacity(sourceLength + 1, targetLength + 1);</span>
+<span class="fc" id="L335">            initializeBoundaryConditions(sourceLength, targetLength);</span>
+
+<span class="fc" id="L337">            final char[] sourceCharacters = source.toCharArray();</span>
+<span class="fc" id="L338">            final char[] targetCharacters = target.toCharArray();</span>
+
+<span class="fc" id="L340">            fillMatrices(sourceCharacters, targetCharacters, sourceLength, targetLength);</span>
+
+<span class="fc" id="L342">            return buildPatchCommand(targetCharacters, sourceLength, targetLength);</span>
+        } finally {
+<span class="fc" id="L344">            lock.unlock();</span>
+        }
+    }
+
+    /**
+     * Applies a patch command using the historical backward Egothor semantics.
+     *
+     * @param source       original source word in legacy backward logical space
+     * @param patchCommand compact patch command
+     * @return transformed word, or {@code null} when {@code source} is {@code null}
+     */
+    @SuppressWarnings({ &quot;PMD.CyclomaticComplexity&quot;, &quot;PMD.AvoidLiteralsInIfCondition&quot; })
+    private static String applyBackward(final String source, final String patchCommand) {
+<span class="pc bpc" id="L357" title="1 of 2 branches missed.">        if (source == null) {</span>
+<span class="nc" id="L358">            return null;</span>
+        }
+<span class="fc bfc" id="L360" title="All 4 branches covered.">        if (patchCommand == null || patchCommand.isEmpty()) {</span>
+<span class="fc" id="L361">            return source;</span>
+        }
+<span class="fc bfc" id="L363" title="All 2 branches covered.">        if (NOOP_PATCH.equals(patchCommand)) {</span>
+<span class="fc" id="L364">            return source;</span>
+        }
+<span class="fc bfc" id="L366" title="All 2 branches covered.">        if ((patchCommand.length() &amp; 1) != 0) {</span>
+<span class="fc" id="L367">            return source;</span>
+        }
+
+<span class="fc" id="L370">        final StringBuilder result = new StringBuilder(source);</span>
+<span class="fc bfc" id="L371" title="All 2 branches covered.">        if (result.isEmpty()) {</span>
+<span class="fc" id="L372">            return applyBackwardToEmptySource(result, patchCommand);</span>
+        }
+
+<span class="fc" id="L375">        int position = result.length() - 1;</span>
+
+        try {
+<span class="fc bfc" id="L378" title="All 2 branches covered.">            for (int patchIndex = 0, patchLength = patchCommand.length(); patchIndex &lt; patchLength; patchIndex += 2) { // NOPMD</span>
+<span class="fc" id="L379">                final char opcode = patchCommand.charAt(patchIndex);</span>
+<span class="fc" id="L380">                final char argument = patchCommand.charAt(patchIndex + 1);</span>
+
+<span class="fc bfc" id="L382" title="All 6 branches covered.">                switch (opcode) {</span>
+                    case SKIP_OPCODE:
+<span class="fc" id="L384">                        final int skipCount = decodeEncodedCount(argument);</span>
+<span class="fc bfc" id="L385" title="All 2 branches covered.">                        if (skipCount &lt; 1) {</span>
+<span class="fc" id="L386">                            return source;</span>
+                        }
+<span class="fc" id="L388">                        position = position - skipCount + 1;</span>
+<span class="fc" id="L389">                        break;</span>
+
+                    case REPLACE_OPCODE:
+<span class="fc" id="L392">                        result.setCharAt(position, argument);</span>
+<span class="fc" id="L393">                        break;</span>
+
+                    case DELETE_OPCODE:
+<span class="fc" id="L396">                        final int deleteCount = decodeEncodedCount(argument);</span>
+<span class="fc bfc" id="L397" title="All 2 branches covered.">                        if (deleteCount &lt; 1) {</span>
+<span class="fc" id="L398">                            return source;</span>
+                        }
+<span class="fc" id="L400">                        final int deleteEndExclusive = position + 1;</span>
+<span class="fc" id="L401">                        position -= deleteCount - 1;</span>
+<span class="fc" id="L402">                        result.delete(position, deleteEndExclusive);</span>
+<span class="fc" id="L403">                        break;</span>
+
+                    case INSERT_OPCODE:
+<span class="fc" id="L406">                        result.insert(position + 1, argument);</span>
+<span class="fc" id="L407">                        position++;</span>
+<span class="fc" id="L408">                        break;</span>
+
+                    case NOOP_OPCODE:
+<span class="pc bpc" id="L411" title="1 of 2 branches missed.">                        if (argument != NOOP_ARGUMENT) {</span>
+<span class="fc" id="L412">                            throw new IllegalArgumentException(&quot;Unsupported NOOP patch argument: &quot; + argument);</span>
+                        }
+<span class="nc" id="L414">                        return source;</span>
+
+                    default:
+<span class="fc" id="L417">                        throw new IllegalArgumentException(&quot;Unsupported patch opcode: &quot; + opcode);</span>
+                }
+
+<span class="fc" id="L420">                position--;</span>
+            }
+<span class="fc" id="L422">        } catch (IndexOutOfBoundsException exception) {</span>
+<span class="fc" id="L423">            return source;</span>
+<span class="fc" id="L424">        }</span>
+
+<span class="fc" id="L426">        return result.toString();</span>
+    }
+
+    /**
+     * Applies a backward patch command to an empty source word.
+     *
+     * &lt;p&gt;
+     * Only insertion instructions are meaningful for an empty source. Skip,
+     * replace, and delete instructions are treated as malformed and therefore cause
+     * the original source to be preserved, consistent with the historical fallback
+     * behavior for index-invalid commands.
+     * &lt;/p&gt;
+     *
+     * @param result       empty result builder
+     * @param patchCommand compact patch command
+     * @return transformed word, or the original empty word when the patch is
+     *         malformed
+     */
+    private static String applyBackwardToEmptySource(final StringBuilder result, final String patchCommand) {
+        try {
+<span class="fc bfc" id="L446" title="All 2 branches covered.">            for (int patchIndex = 0, patchLength = patchCommand.length(); patchIndex &lt; patchLength; patchIndex += 2) { // NOPMD</span>
+<span class="fc" id="L447">                final char opcode = patchCommand.charAt(patchIndex);</span>
+<span class="fc" id="L448">                final char argument = patchCommand.charAt(patchIndex + 1);</span>
+
+<span class="pc bpc" id="L450" title="2 of 4 branches missed.">                switch (opcode) {</span>
+                    case INSERT_OPCODE:
+<span class="fc" id="L452">                        result.insert(0, argument);</span>
+<span class="fc" id="L453">                        break;</span>
+
+                    case SKIP_OPCODE:
+                    case REPLACE_OPCODE:
+                    case DELETE_OPCODE:
+<span class="fc" id="L458">                        return &quot;&quot;;</span>
+
+                    case NOOP_OPCODE:
+<span class="nc bnc" id="L461" title="All 2 branches missed.">                        if (argument != NOOP_ARGUMENT) {</span>
+<span class="nc" id="L462">                            throw new IllegalArgumentException(&quot;Unsupported NOOP patch argument: &quot; + argument);</span>
+                        }
+<span class="nc" id="L464">                        return &quot;&quot;;</span>
+
+                    default:
+<span class="nc" id="L467">                        throw new IllegalArgumentException(&quot;Unsupported patch opcode: &quot; + opcode);</span>
+                }
+            }
+<span class="nc" id="L470">        } catch (IndexOutOfBoundsException exception) {</span>
+<span class="nc" id="L471">            return &quot;&quot;;</span>
+<span class="fc" id="L472">        }</span>
+
+<span class="fc" id="L474">        return result.toString();</span>
+    }
+
+    /**
+     * Converts a logical word to the equivalent word form expected by the legacy
+     * backward encoder.
+     *
+     * @param word               logical word form
+     * @param traversalDirection requested traversal direction
+     * @return word form suitable for the legacy backward algorithm
+     */
+    private static String toLegacyWordForm(final String word, final WordTraversalDirection traversalDirection) {
+<span class="fc bfc" id="L486" title="All 2 branches covered.">        return traversalDirection == WordTraversalDirection.BACKWARD ? word : reverse(word);</span>
+    }
+
+    /**
+     * Reverses the supplied word.
+     *
+     * @param word source word
+     * @return reversed word
+     */
+    private static String reverse(final String word) {
+<span class="fc" id="L496">        return new StringBuilder(word).reverse().toString();</span>
+    }
+
+    /**
+     * Decodes a compact count argument used by skip and delete instructions.
+     *
+     * @param argument serialized count argument
+     * @return decoded positive count, or {@code -1} when the argument is malformed
+     */
+    @SuppressWarnings(&quot;PMD.AvoidLiteralsInIfCondition&quot;)
+    private static int decodeEncodedCount(final char argument) {
+<span class="fc bfc" id="L507" title="All 2 branches covered.">        if (argument &lt; 'a') {</span>
+<span class="fc" id="L508">            return -1;</span>
+        }
+<span class="fc" id="L510">        return argument - 'a' + 1;</span>
+    }
+
+    /**
+     * Ensures that internal matrices are large enough for the requested input
+     * dimensions.
+     *
+     * @param requiredSourceCapacity required source dimension
+     * @param requiredTargetCapacity required target dimension
+     */
+    private void ensureCapacity(final int requiredSourceCapacity, final int requiredTargetCapacity) {
+<span class="fc bfc" id="L521" title="All 4 branches covered.">        if (requiredSourceCapacity &lt;= this.sourceCapacity &amp;&amp; requiredTargetCapacity &lt;= this.targetCapacity) {</span>
+<span class="fc" id="L522">            return;</span>
+        }
+
+<span class="fc" id="L525">        this.sourceCapacity = Math.max(this.sourceCapacity, requiredSourceCapacity) + CAPACITY_MARGIN;</span>
+<span class="fc" id="L526">        this.targetCapacity = Math.max(this.targetCapacity, requiredTargetCapacity) + CAPACITY_MARGIN;</span>
+
+<span class="fc" id="L528">        this.costMatrix = new int[this.sourceCapacity][this.targetCapacity];</span>
+<span class="fc" id="L529">        this.traceMatrix = new Trace[this.sourceCapacity][this.targetCapacity];</span>
+<span class="fc" id="L530">    }</span>
+
+    /**
+     * Initializes the first row and first column of the dynamic-programming
+     * matrices.
+     *
+     * @param sourceLength length of the source word
+     * @param targetLength length of the target word
+     */
+    private void initializeBoundaryConditions(final int sourceLength, final int targetLength) {
+<span class="fc" id="L540">        this.costMatrix[0][0] = 0;</span>
+<span class="fc" id="L541">        this.traceMatrix[0][0] = Trace.MATCH;</span>
+
+<span class="fc bfc" id="L543" title="All 2 branches covered.">        for (int sourceIndex = 1; sourceIndex &lt;= sourceLength; sourceIndex++) {</span>
+<span class="fc" id="L544">            this.costMatrix[sourceIndex][0] = sourceIndex * this.deleteCost;</span>
+<span class="fc" id="L545">            this.traceMatrix[sourceIndex][0] = Trace.DELETE;</span>
+        }
+
+<span class="fc bfc" id="L548" title="All 2 branches covered.">        for (int targetIndex = 1; targetIndex &lt;= targetLength; targetIndex++) {</span>
+<span class="fc" id="L549">            this.costMatrix[0][targetIndex] = targetIndex * this.insertCost;</span>
+<span class="fc" id="L550">            this.traceMatrix[0][targetIndex] = Trace.INSERT;</span>
+        }
+<span class="fc" id="L552">    }</span>
+
+    /**
+     * Fills dynamic-programming matrices for the supplied source and target
+     * character sequences.
+     *
+     * @param sourceCharacters source characters
+     * @param targetCharacters target characters
+     * @param sourceLength     source length
+     * @param targetLength     target length
+     */
+    private void fillMatrices(final char[] sourceCharacters, final char[] targetCharacters, final int sourceLength,
+            final int targetLength) {
+
+<span class="fc bfc" id="L566" title="All 2 branches covered.">        for (int sourceIndex = 1; sourceIndex &lt;= sourceLength; sourceIndex++) {</span>
+<span class="fc" id="L567">            final char sourceCharacter = sourceCharacters[sourceIndex - 1];</span>
+
+<span class="fc bfc" id="L569" title="All 2 branches covered.">            for (int targetIndex = 1; targetIndex &lt;= targetLength; targetIndex++) {</span>
+<span class="fc" id="L570">                final char targetCharacter = targetCharacters[targetIndex - 1];</span>
+
+<span class="fc" id="L572">                final int deleteCandidate = this.costMatrix[sourceIndex - 1][targetIndex] + this.deleteCost;</span>
+<span class="fc" id="L573">                final int insertCandidate = this.costMatrix[sourceIndex][targetIndex - 1] + this.insertCost;</span>
+<span class="fc" id="L574">                final int replaceCandidate = this.costMatrix[sourceIndex - 1][targetIndex - 1] + this.replaceCost;</span>
+<span class="fc" id="L575">                final int matchCandidate = this.costMatrix[sourceIndex - 1][targetIndex - 1]</span>
+<span class="fc bfc" id="L576" title="All 2 branches covered.">                        + (sourceCharacter == targetCharacter ? this.matchCost : MISMATCH_PENALTY);</span>
+
+<span class="fc" id="L578">                int bestCost = matchCandidate;</span>
+<span class="fc" id="L579">                Trace bestTrace = Trace.MATCH;</span>
+
+<span class="fc bfc" id="L581" title="All 2 branches covered.">                if (deleteCandidate &lt;= bestCost) {</span>
+<span class="fc" id="L582">                    bestCost = deleteCandidate;</span>
+<span class="fc" id="L583">                    bestTrace = Trace.DELETE;</span>
+                }
+<span class="fc bfc" id="L585" title="All 2 branches covered.">                if (insertCandidate &lt; bestCost) {</span>
+<span class="fc" id="L586">                    bestCost = insertCandidate;</span>
+<span class="fc" id="L587">                    bestTrace = Trace.INSERT;</span>
+                }
+<span class="fc bfc" id="L589" title="All 2 branches covered.">                if (replaceCandidate &lt; bestCost) {</span>
+<span class="fc" id="L590">                    bestCost = replaceCandidate;</span>
+<span class="fc" id="L591">                    bestTrace = Trace.REPLACE;</span>
+                }
+
+<span class="fc" id="L594">                this.costMatrix[sourceIndex][targetIndex] = bestCost;</span>
+<span class="fc" id="L595">                this.traceMatrix[sourceIndex][targetIndex] = bestTrace;</span>
+            }
+        }
+<span class="fc" id="L598">    }</span>
+
+    /**
+     * Reconstructs the compact patch command by traversing the trace matrix from
+     * the final cell back to the origin.
+     *
+     * @param targetCharacters target characters
+     * @param sourceLength     source length
+     * @param targetLength     target length
+     * @return compact patch command
+     */
+    private String buildPatchCommand(final char[] targetCharacters, final int sourceLength, final int targetLength) {
+<span class="fc" id="L610">        final StringBuilder patchBuilder = new StringBuilder(sourceLength + targetLength);</span>
+
+<span class="fc" id="L612">        char pendingDeletes = COUNT_SENTINEL;</span>
+<span class="fc" id="L613">        char pendingSkips = COUNT_SENTINEL;</span>
+
+<span class="fc" id="L615">        int sourceIndex = sourceLength;</span>
+<span class="fc" id="L616">        int targetIndex = targetLength;</span>
+
+<span class="fc bfc" id="L618" title="All 4 branches covered.">        while (sourceIndex != 0 || targetIndex != 0) {</span>
+<span class="fc" id="L619">            final Trace trace = this.traceMatrix[sourceIndex][targetIndex];</span>
+
+<span class="pc bpc" id="L621" title="1 of 5 branches missed.">            switch (trace) {</span>
+                case DELETE:
+<span class="fc bfc" id="L623" title="All 2 branches covered.">                    if (pendingSkips != COUNT_SENTINEL) {</span>
+<span class="fc" id="L624">                        appendInstruction(patchBuilder, SKIP_OPCODE, pendingSkips);</span>
+<span class="fc" id="L625">                        pendingSkips = COUNT_SENTINEL;</span>
+                    }
+<span class="fc" id="L627">                    pendingDeletes++;</span>
+<span class="fc" id="L628">                    sourceIndex--;</span>
+<span class="fc" id="L629">                    break;</span>
+
+                case INSERT:
+<span class="pc bpc" id="L632" title="1 of 2 branches missed.">                    if (pendingDeletes != COUNT_SENTINEL) {</span>
+<span class="nc" id="L633">                        appendInstruction(patchBuilder, DELETE_OPCODE, pendingDeletes);</span>
+<span class="nc" id="L634">                        pendingDeletes = COUNT_SENTINEL;</span>
+                    }
+<span class="fc bfc" id="L636" title="All 2 branches covered.">                    if (pendingSkips != COUNT_SENTINEL) {</span>
+<span class="fc" id="L637">                        appendInstruction(patchBuilder, SKIP_OPCODE, pendingSkips);</span>
+<span class="fc" id="L638">                        pendingSkips = COUNT_SENTINEL;</span>
+                    }
+<span class="fc" id="L640">                    targetIndex--;</span>
+<span class="fc" id="L641">                    appendInstruction(patchBuilder, INSERT_OPCODE, targetCharacters[targetIndex]);</span>
+<span class="fc" id="L642">                    break;</span>
+
+                case REPLACE:
+<span class="fc bfc" id="L645" title="All 2 branches covered.">                    if (pendingDeletes != COUNT_SENTINEL) {</span>
+<span class="fc" id="L646">                        appendInstruction(patchBuilder, DELETE_OPCODE, pendingDeletes);</span>
+<span class="fc" id="L647">                        pendingDeletes = COUNT_SENTINEL;</span>
+                    }
+<span class="fc bfc" id="L649" title="All 2 branches covered.">                    if (pendingSkips != COUNT_SENTINEL) {</span>
+<span class="fc" id="L650">                        appendInstruction(patchBuilder, SKIP_OPCODE, pendingSkips);</span>
+<span class="fc" id="L651">                        pendingSkips = COUNT_SENTINEL;</span>
+                    }
+<span class="fc" id="L653">                    targetIndex--;</span>
+<span class="fc" id="L654">                    sourceIndex--;</span>
+<span class="fc" id="L655">                    appendInstruction(patchBuilder, REPLACE_OPCODE, targetCharacters[targetIndex]);</span>
+<span class="fc" id="L656">                    break;</span>
+
+                case MATCH:
+<span class="fc bfc" id="L659" title="All 2 branches covered.">                    if (pendingDeletes != COUNT_SENTINEL) {</span>
+<span class="fc" id="L660">                        appendInstruction(patchBuilder, DELETE_OPCODE, pendingDeletes);</span>
+<span class="fc" id="L661">                        pendingDeletes = COUNT_SENTINEL;</span>
+                    }
+<span class="fc" id="L663">                    pendingSkips++;</span>
+<span class="fc" id="L664">                    sourceIndex--;</span>
+<span class="fc" id="L665">                    targetIndex--;</span>
+                    break;
+            }
+<span class="fc" id="L668">        }</span>
+
+<span class="fc bfc" id="L670" title="All 2 branches covered.">        if (pendingDeletes != COUNT_SENTINEL) {</span>
+<span class="fc" id="L671">            appendInstruction(patchBuilder, DELETE_OPCODE, pendingDeletes);</span>
+        }
+
+<span class="fc" id="L674">        return patchBuilder.toString();</span>
+    }
+
+    /**
+     * Appends one serialized instruction to the patch command builder.
+     *
+     * @param patchBuilder patch command builder
+     * @param opcode       single-character instruction opcode
+     * @param argument     encoded instruction argument
+     */
+    private static void appendInstruction(final StringBuilder patchBuilder, final char opcode, final char argument) {
+<span class="fc" id="L685">        patchBuilder.append(opcode).append(argument);</span>
+<span class="fc" id="L686">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
