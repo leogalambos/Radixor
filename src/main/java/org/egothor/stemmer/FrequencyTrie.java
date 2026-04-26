@@ -96,16 +96,6 @@ public final class FrequencyTrie<V> {
     private static final Logger LOGGER = Logger.getLogger(FrequencyTrie.class.getName());
 
     /**
-     * Binary format magic header.
-     */
-    private static final int STREAM_MAGIC = 0x45475452;
-
-    /**
-     * Binary format version.
-     */
-    private static final int STREAM_VERSION = 5;
-
-    /**
      * Factory used to create correctly typed arrays for {@link #getAll(String)}.
      */
     private final IntFunction<V[]> arrayFactory;
@@ -119,6 +109,31 @@ public final class FrequencyTrie<V> {
      * Metadata persisted together with this trie.
      */
     private final TrieMetadata metadata;
+
+    /**
+     * Binary format magic header.
+     */
+    private static final int STREAM_MAGIC = 0x45475452;
+
+    /**
+     * Binary format version.
+     */
+    private static final int STREAM_VERSION = 5;
+
+    /**
+     * Returns the current persisted binary stream format version.
+     *
+     * <p>
+     * This method exists so other components can construct {@link TrieMetadata}
+     * instances aligned with the currently written binary format without
+     * duplicating constants.
+     * </p>
+     *
+     * @return current trie stream format version
+     */
+    public static int currentFormatVersion() {
+        return STREAM_VERSION;
+    }
 
     /**
      * Creates a new compiled trie instance.
@@ -753,13 +768,14 @@ public final class FrequencyTrie<V> {
          */
         public Builder(final IntFunction<V[]> arrayFactory, final ReductionSettings reductionSettings,
                 final WordTraversalDirection traversalDirection, final CaseProcessingMode caseProcessingMode) {
-            this(arrayFactory, reductionSettings, traversalDirection, caseProcessingMode, DiacriticProcessingMode.AS_IS);
+            this(arrayFactory, reductionSettings, traversalDirection, caseProcessingMode,
+                    DiacriticProcessingMode.AS_IS);
         }
 
         /**
          * Creates a new builder with the provided settings, explicit traversal
-         * direction, explicit case processing mode, and explicit diacritic
-         * processing mode.
+         * direction, explicit case processing mode, and explicit diacritic processing
+         * mode.
          *
          * @param arrayFactory            array factory
          * @param reductionSettings       reduction configuration
@@ -847,8 +863,8 @@ public final class FrequencyTrie<V> {
                         reductionContext.canonicalNodeCount());
             }
 
-            final TrieMetadata metadata = new TrieMetadata(STREAM_VERSION, this.traversalDirection,
-                    this.reductionSettings, this.diacriticProcessingMode, this.caseProcessingMode);
+            final TrieMetadata metadata = TrieMetadata.forCompilation(this.traversalDirection, this.reductionSettings,
+                    this.diacriticProcessingMode, this.caseProcessingMode);
             return new FrequencyTrie<>(this.arrayFactory, compiledRoot, metadata);
         }
 

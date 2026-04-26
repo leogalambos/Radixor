@@ -133,6 +133,48 @@ public final class StemmerPatchTrieBinaryIO {
     }
 
     /**
+     * Reads only metadata from a GZip-compressed binary patch-command trie stored
+     * at a filesystem path.
+     *
+     * @param path source file
+     * @return deserialized trie metadata
+     * @throws NullPointerException if {@code path} is {@code null}
+     * @throws IOException          if reading or decompression fails
+     */
+    public static TrieMetadata readMetadata(final Path path) throws IOException {
+        Objects.requireNonNull(path, "path");
+        return read(path).metadata();
+    }
+
+    /**
+     * Reads only metadata from a GZip-compressed binary patch-command trie stored
+     * at a filesystem path string.
+     *
+     * @param fileName source file name or path string
+     * @return deserialized trie metadata
+     * @throws NullPointerException if {@code fileName} is {@code null}
+     * @throws IOException          if reading or decompression fails
+     */
+    public static TrieMetadata readMetadata(final String fileName) throws IOException {
+        Objects.requireNonNull(fileName, "fileName");
+        return readMetadata(Path.of(fileName));
+    }
+
+    /**
+     * Reads only metadata from a GZip-compressed binary patch-command trie from an
+     * input stream.
+     *
+     * @param inputStream source stream
+     * @return deserialized trie metadata
+     * @throws NullPointerException if {@code inputStream} is {@code null}
+     * @throws IOException          if reading or decompression fails
+     */
+    public static TrieMetadata readMetadata(final InputStream inputStream) throws IOException {
+        Objects.requireNonNull(inputStream, "inputStream");
+        return read(inputStream).metadata();
+    }
+
+    /**
      * Writes a GZip-compressed binary patch-command trie to a filesystem path.
      *
      * @param trie trie to persist

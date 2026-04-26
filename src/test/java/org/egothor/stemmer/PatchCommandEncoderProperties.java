@@ -63,7 +63,7 @@ class PatchCommandEncoderProperties extends PropertyBasedTestSupport {
     @Label("encode followed by apply should reconstruct the target word")
     void encodeFollowedByApplyShouldReconstructTheTargetWord(@ForAll("words") final String source,
             @ForAll("words") final String target) {
-        final PatchCommandEncoder encoder = new PatchCommandEncoder();
+        final PatchCommandEncoder encoder = PatchCommandEncoder.builder().build();
         final String patch = encoder.encode(source, target);
 
         assertNotNull(patch, "patch generation must succeed for non-null inputs.");
@@ -82,10 +82,10 @@ class PatchCommandEncoderProperties extends PropertyBasedTestSupport {
     @Label("encode should be deterministic for one source-target pair")
     void encodeShouldBeDeterministicForOneSourceTargetPair(@ForAll("words") final String source,
             @ForAll("words") final String target) {
-        final PatchCommandEncoder sharedEncoder = new PatchCommandEncoder();
+        final PatchCommandEncoder sharedEncoder = PatchCommandEncoder.builder().build();
         final String first = sharedEncoder.encode(source, target);
         final String second = sharedEncoder.encode(source, target);
-        final String fresh = new PatchCommandEncoder().encode(source, target);
+        final String fresh = PatchCommandEncoder.builder().build().encode(source, target);
 
         assertEquals(first, second, "one encoder instance must produce stable output.");
         assertEquals(first, fresh, "fresh encoder instances must produce the same patch output.");

@@ -106,6 +106,23 @@ public record TrieMetadata(int formatVersion, WordTraversalDirection traversalDi
     }
 
     /**
+     * Creates metadata for a newly compiled trie using the currently persisted
+     * binary stream format version.
+     *
+     * @param traversalDirection      logical key traversal direction
+     * @param reductionSettings       reduction settings used during compilation
+     * @param diacriticProcessingMode diacritic processing strategy
+     * @param caseProcessingMode      case processing strategy
+     * @return metadata aligned with the current persisted stream format
+     */
+    public static TrieMetadata forCompilation(final WordTraversalDirection traversalDirection,
+            final ReductionSettings reductionSettings, final DiacriticProcessingMode diacriticProcessingMode,
+            final CaseProcessingMode caseProcessingMode) {
+        return new TrieMetadata(FrequencyTrie.currentFormatVersion(), traversalDirection, reductionSettings,
+                diacriticProcessingMode, caseProcessingMode);
+    }
+
+    /**
      * Creates metadata compatible with a legacy artifact version that did not store
      * the full configuration explicitly.
      *

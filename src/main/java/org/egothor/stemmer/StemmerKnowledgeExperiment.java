@@ -103,7 +103,7 @@ public final class StemmerKnowledgeExperiment {
      * Creates a new experiment harness.
      */
     public StemmerKnowledgeExperiment() {
-        this.patchCommandEncoder = new PatchCommandEncoder();
+        this.patchCommandEncoder = PatchCommandEncoder.builder().build();
     }
 
     /**

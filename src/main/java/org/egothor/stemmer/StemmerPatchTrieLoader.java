@@ -267,6 +267,24 @@ public final class StemmerPatchTrieLoader {
     /**
      * Loads a bundled dictionary using explicit reduction settings.
      *
+     * <p>
+     * This overload applies the following implicit compilation defaults in addition
+     * to the supplied {@code reductionSettings}:
+     * </p>
+     * <ul>
+     * <li>traversal direction is derived from {@link Language#isRightToLeft()}
+     * ({@link WordTraversalDirection#FORWARD} for right-to-left languages,
+     * {@link WordTraversalDirection#BACKWARD} otherwise)</li>
+     * <li>case processing mode is
+     * {@link CaseProcessingMode#LOWERCASE_WITH_LOCALE_ROOT}</li>
+     * <li>diacritic processing mode is {@link DiacriticProcessingMode#AS_IS}</li>
+     * </ul>
+     *
+     * <p>
+     * The resolved settings are persisted into {@link TrieMetadata} of the
+     * resulting trie.
+     * </p>
+     *
      * @param language          bundled language dictionary
      * @param storeOriginal     whether the stem itself should be inserted using the
      *                          canonical no-op patch command
@@ -279,20 +297,54 @@ public final class StemmerPatchTrieLoader {
             final ReductionSettings reductionSettings) throws IOException {
         Objects.requireNonNull(language, "language");
         Objects.requireNonNull(reductionSettings, "reductionSettings");
+        final TrieMetadata metadata = metadataForCompilation(traversalDirectionOf(language), reductionSettings,
+                CaseProcessingMode.LOWERCASE_WITH_LOCALE_ROOT, DiacriticProcessingMode.AS_IS);
+        return load(language, storeOriginal, metadata);
+    }
+
+    /**
+     * Loads a bundled dictionary using explicit trie compilation metadata.
+     *
+     * <p>
+     * All semantic compilation settings (reduction mode and thresholds, traversal
+     * direction, case processing mode, and diacritic processing mode) are taken
+     * from the supplied metadata object and are persisted unchanged in the
+     * resulting trie.
+     * </p>
+     *
+     * @param language      bundled language dictionary
+     * @param storeOriginal whether the stem itself should be inserted using the
+     *                      canonical no-op patch command
+     * @param metadata      trie metadata describing the compilation configuration
+     * @return compiled patch-command trie
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IOException          if the dictionary cannot be found or read
+     */
+    public static FrequencyTrie<String> load(final Language language, final boolean storeOriginal,
+            final TrieMetadata metadata) throws IOException {
+        Objects.requireNonNull(language, "language");
+        Objects.requireNonNull(metadata, "metadata");
 
         final String resourcePath = language.resourcePath();
 
         try (InputStream inputStream = openBundledResource(resourcePath);
                 BufferedReader reader = new BufferedReader(
                         new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
-            return load(reader, resourcePath, storeOriginal, reductionSettings, traversalDirectionOf(language),
-                    CaseProcessingMode.LOWERCASE_WITH_LOCALE_ROOT);
+            return load(reader, resourcePath, storeOriginal, metadata);
         }
     }
 
     /**
      * Loads a bundled dictionary using default settings for the supplied reduction
      * mode.
+     *
+     * <p>
+     * This overload is equivalent to calling
+     * {@link #load(Language, boolean, ReductionSettings)} with
+     * {@link ReductionSettings#withDefaults(ReductionMode)} and therefore uses the
+     * same implicit defaults for traversal direction, case processing mode, and
+     * diacritic processing mode.
+     * </p>
      *
      * @param language      bundled language dictionary
      * @param storeOriginal whether the stem itself should be inserted using the
@@ -311,6 +363,14 @@ public final class StemmerPatchTrieLoader {
     /**
      * Loads a dictionary from a filesystem path using explicit reduction settings.
      *
+     * <p>
+     * This overload applies historical Egothor-compatible implicit defaults:
+     * {@link WordTraversalDirection#BACKWARD},
+     * {@link CaseProcessingMode#LOWERCASE_WITH_LOCALE_ROOT}, and
+     * {@link DiacriticProcessingMode#AS_IS}. These settings are persisted in
+     * resulting trie metadata.
+     * </p>
+     *
      * @param path              path to the dictionary file
      * @param storeOriginal     whether the stem itself should be inserted using the
      *                          canonical no-op patch command
@@ -322,12 +382,18 @@ public final class StemmerPatchTrieLoader {
     public static FrequencyTrie<String> load(final Path path, final boolean storeOriginal,
             final ReductionSettings reductionSettings) throws IOException {
         return load(path, storeOriginal, reductionSettings, WordTraversalDirection.BACKWARD,
-                CaseProcessingMode.LOWERCASE_WITH_LOCALE_ROOT);
+                CaseProcessingMode.LOWERCASE_WITH_LOCALE_ROOT, DiacriticProcessingMode.AS_IS);
     }
 
     /**
      * Loads a dictionary from a filesystem path using explicit reduction settings
      * and explicit traversal direction.
+     *
+     * <p>
+     * Implicit defaults still apply for unspecified dimensions:
+     * {@link CaseProcessingMode#LOWERCASE_WITH_LOCALE_ROOT} and
+     * {@link DiacriticProcessingMode#AS_IS}.
+     * </p>
      *
      * @param path               path to the dictionary file
      * @param storeOriginal      whether the stem itself should be inserted using
@@ -343,12 +409,17 @@ public final class StemmerPatchTrieLoader {
             final ReductionSettings reductionSettings, final WordTraversalDirection traversalDirection)
             throws IOException {
         return load(path, storeOriginal, reductionSettings, traversalDirection,
-                CaseProcessingMode.LOWERCASE_WITH_LOCALE_ROOT);
+                CaseProcessingMode.LOWERCASE_WITH_LOCALE_ROOT, DiacriticProcessingMode.AS_IS);
     }
 
     /**
      * Loads a dictionary from a filesystem path using explicit reduction settings,
      * explicit traversal direction, and explicit case processing mode.
+     *
+     * <p>
+     * This overload still defaults diacritic processing to
+     * {@link DiacriticProcessingMode#AS_IS}.
+     * </p>
      *
      * @param path               path to the dictionary file
      * @param storeOriginal      whether the stem itself should be inserted using
@@ -364,22 +435,80 @@ public final class StemmerPatchTrieLoader {
     public static FrequencyTrie<String> load(final Path path, final boolean storeOriginal,
             final ReductionSettings reductionSettings, final WordTraversalDirection traversalDirection,
             final CaseProcessingMode caseProcessingMode) throws IOException {
+        return load(path, storeOriginal, reductionSettings, traversalDirection, caseProcessingMode,
+                DiacriticProcessingMode.AS_IS);
+    }
+
+    /**
+     * Loads a dictionary from a filesystem path using explicit reduction settings,
+     * traversal direction, case processing mode, and diacritic processing mode.
+     *
+     * @param path                    path to the dictionary file
+     * @param storeOriginal           whether the stem itself should be inserted
+     *                                using the canonical no-op patch command
+     * @param reductionSettings       reduction settings
+     * @param traversalDirection      traversal direction used for both trie keys
+     *                                and patch commands
+     * @param caseProcessingMode      case processing mode used during dictionary
+     *                                parsing
+     * @param diacriticProcessingMode diacritic processing mode used during
+     *                                dictionary parsing
+     * @return compiled patch-command trie
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IOException          if the file cannot be opened or read
+     */
+    public static FrequencyTrie<String> load(final Path path, final boolean storeOriginal,
+            final ReductionSettings reductionSettings, final WordTraversalDirection traversalDirection,
+            final CaseProcessingMode caseProcessingMode, final DiacriticProcessingMode diacriticProcessingMode)
+            throws IOException {
         Objects.requireNonNull(path, "path");
-        Objects.requireNonNull(reductionSettings, "reductionSettings");
-        Objects.requireNonNull(traversalDirection, "traversalDirection");
-        Objects.requireNonNull(caseProcessingMode, "caseProcessingMode");
+        final TrieMetadata metadata = metadataForCompilation(traversalDirection, reductionSettings, caseProcessingMode,
+                diacriticProcessingMode);
+        return load(path, storeOriginal, metadata);
+    }
+
+    /**
+     * Loads a dictionary from a filesystem path using explicit trie compilation
+     * metadata.
+     *
+     * <p>
+     * The supplied metadata is the authoritative source of trie compilation
+     * semantics. Callers should ensure metadata matches how they expect to query
+     * the trie (for example, with or without lowercasing or diacritic stripping).
+     * </p>
+     *
+     * @param path          path to the dictionary file
+     * @param storeOriginal whether the stem itself should be inserted using the
+     *                      canonical no-op patch command
+     * @param metadata      trie metadata describing the compilation configuration
+     * @return compiled patch-command trie
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IOException          if the file cannot be opened or read
+     */
+    public static FrequencyTrie<String> load(final Path path, final boolean storeOriginal, final TrieMetadata metadata)
+            throws IOException {
+        Objects.requireNonNull(path, "path");
+        Objects.requireNonNull(metadata, "metadata");
 
         try (InputStream inputStream = openDictionaryInputStream(path);
                 BufferedReader reader = new BufferedReader(
                         new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
-            return load(reader, path.toAbsolutePath().toString(), storeOriginal, reductionSettings, traversalDirection,
-                    caseProcessingMode);
+            return load(reader, path.toAbsolutePath().toString(), storeOriginal, metadata);
         }
     }
 
     /**
      * Loads a dictionary from a filesystem path using default settings for the
      * supplied reduction mode.
+     *
+     * <p>
+     * This overload is equivalent to calling
+     * {@link #load(Path, boolean, ReductionSettings)} with
+     * {@link ReductionSettings#withDefaults(ReductionMode)} and therefore uses
+     * implicit defaults ({@link WordTraversalDirection#BACKWARD},
+     * {@link CaseProcessingMode#LOWERCASE_WITH_LOCALE_ROOT},
+     * {@link DiacriticProcessingMode#AS_IS}).
+     * </p>
      *
      * @param path          path to the dictionary file
      * @param storeOriginal whether the stem itself should be inserted using the
@@ -399,6 +528,13 @@ public final class StemmerPatchTrieLoader {
      * Loads a dictionary from a filesystem path string using explicit reduction
      * settings.
      *
+     * <p>
+     * Same semantics as {@link #load(Path, boolean, ReductionSettings)} including
+     * implicit defaults ({@link WordTraversalDirection#BACKWARD},
+     * {@link CaseProcessingMode#LOWERCASE_WITH_LOCALE_ROOT},
+     * {@link DiacriticProcessingMode#AS_IS}).
+     * </p>
+     *
      * @param fileName          file name or path string
      * @param storeOriginal     whether the stem itself should be inserted using the
      *                          canonical no-op patch command
@@ -416,6 +552,14 @@ public final class StemmerPatchTrieLoader {
     /**
      * Loads a dictionary from a filesystem path string using explicit reduction
      * settings and explicit traversal direction.
+     *
+     * <p>
+     * Same semantics as
+     * {@link #load(Path, boolean, ReductionSettings, WordTraversalDirection)}.
+     * Implicit defaults remain
+     * {@link CaseProcessingMode#LOWERCASE_WITH_LOCALE_ROOT} and
+     * {@link DiacriticProcessingMode#AS_IS}.
+     * </p>
      *
      * @param fileName           file name or path string
      * @param storeOriginal      whether the stem itself should be inserted using
@@ -439,6 +583,12 @@ public final class StemmerPatchTrieLoader {
      * Loads a dictionary from a filesystem path string using explicit reduction
      * settings, explicit traversal direction, and explicit case processing mode.
      *
+     * <p>
+     * Same semantics as
+     * {@link #load(Path, boolean, ReductionSettings, WordTraversalDirection, CaseProcessingMode)}.
+     * Implicit default remains {@link DiacriticProcessingMode#AS_IS}.
+     * </p>
+     *
      * @param fileName           file name or path string
      * @param storeOriginal      whether the stem itself should be inserted using
      *                           the canonical no-op patch command
@@ -454,12 +604,70 @@ public final class StemmerPatchTrieLoader {
             final ReductionSettings reductionSettings, final WordTraversalDirection traversalDirection,
             final CaseProcessingMode caseProcessingMode) throws IOException {
         Objects.requireNonNull(fileName, FILENAME_REQUIRED);
-        return load(Path.of(fileName), storeOriginal, reductionSettings, traversalDirection, caseProcessingMode);
+        return load(Path.of(fileName), storeOriginal, reductionSettings, traversalDirection, caseProcessingMode,
+                DiacriticProcessingMode.AS_IS);
+    }
+
+    /**
+     * Loads a dictionary from a filesystem path string using explicit reduction
+     * settings, explicit traversal direction, explicit case processing mode, and
+     * explicit diacritic processing mode.
+     *
+     * @param fileName                file name or path string
+     * @param storeOriginal           whether the stem itself should be inserted
+     *                                using the canonical no-op patch command
+     * @param reductionSettings       reduction settings
+     * @param traversalDirection      traversal direction used for both trie keys
+     *                                and patch commands
+     * @param caseProcessingMode      case processing mode used during dictionary
+     *                                parsing
+     * @param diacriticProcessingMode diacritic processing mode used during
+     *                                dictionary parsing
+     * @return compiled patch-command trie
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IOException          if the file cannot be opened or read
+     */
+    public static FrequencyTrie<String> load(final String fileName, final boolean storeOriginal,
+            final ReductionSettings reductionSettings, final WordTraversalDirection traversalDirection,
+            final CaseProcessingMode caseProcessingMode, final DiacriticProcessingMode diacriticProcessingMode)
+            throws IOException {
+        Objects.requireNonNull(fileName, FILENAME_REQUIRED);
+        return load(Path.of(fileName), storeOriginal, reductionSettings, traversalDirection, caseProcessingMode,
+                diacriticProcessingMode);
+    }
+
+    /**
+     * Loads a dictionary from a filesystem path string using explicit trie
+     * compilation metadata.
+     *
+     * <p>
+     * Same semantics as {@link #load(Path, boolean, TrieMetadata)}.
+     * </p>
+     *
+     * @param fileName      file name or path string
+     * @param storeOriginal whether the stem itself should be inserted using the
+     *                      canonical no-op patch command
+     * @param metadata      trie metadata describing the compilation configuration
+     * @return compiled patch-command trie
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IOException          if the file cannot be opened or read
+     */
+    public static FrequencyTrie<String> load(final String fileName, final boolean storeOriginal,
+            final TrieMetadata metadata) throws IOException {
+        Objects.requireNonNull(fileName, FILENAME_REQUIRED);
+        return load(Path.of(fileName), storeOriginal, metadata);
     }
 
     /**
      * Loads a dictionary from a filesystem path string using default settings for
      * the supplied reduction mode.
+     *
+     * <p>
+     * Equivalent to {@link #load(Path, boolean, ReductionMode)} and therefore uses
+     * implicit defaults ({@link WordTraversalDirection#BACKWARD},
+     * {@link CaseProcessingMode#LOWERCASE_WITH_LOCALE_ROOT},
+     * {@link DiacriticProcessingMode#AS_IS}).
+     * </p>
      *
      * @param fileName      file name or path string
      * @param storeOriginal whether the stem itself should be inserted using the
@@ -482,21 +690,21 @@ public final class StemmerPatchTrieLoader {
      * @param sourceDescription logical source description used for diagnostics
      * @param storeOriginal     whether the stem itself should be inserted using the
      *                          canonical no-op patch command
-     * @param reductionSettings reduction settings
+     * @param metadata          trie metadata used to drive all compilation settings
      * @return compiled patch-command trie
      * @throws IOException if parsing fails
      */
     private static FrequencyTrie<String> load(final BufferedReader reader, final String sourceDescription,
-            final boolean storeOriginal, final ReductionSettings reductionSettings,
-            final WordTraversalDirection traversalDirection, final CaseProcessingMode caseProcessingMode)
-            throws IOException {
-        final FrequencyTrie.Builder<String> builder = new FrequencyTrie.Builder<>(String[]::new, reductionSettings,
-                traversalDirection, caseProcessingMode);
-        final PatchCommandEncoder patchCommandEncoder = new PatchCommandEncoder(traversalDirection);
+            final boolean storeOriginal, final TrieMetadata metadata) throws IOException {
+        final FrequencyTrie.Builder<String> builder = new FrequencyTrie.Builder<>(String[]::new,
+                metadata.reductionSettings(), metadata.traversalDirection(), metadata.caseProcessingMode(),
+                metadata.diacriticProcessingMode());
+        final PatchCommandEncoder patchCommandEncoder = PatchCommandEncoder.builder()
+                .traversalDirection(metadata.traversalDirection()).build();
         final int[] insertedMappings = new int[1];
 
         final StemmerDictionaryParser.ParseStatistics statistics = StemmerDictionaryParser.parse(reader,
-                sourceDescription, caseProcessingMode, (stem, variants, lineNumber) -> {
+                sourceDescription, metadata.caseProcessingMode(), (stem, variants, lineNumber) -> {
                     if (storeOriginal) {
                         builder.put(stem, NOOP_PATCH_COMMAND);
                         insertedMappings[0]++;
@@ -512,12 +720,23 @@ public final class StemmerPatchTrieLoader {
 
         if (LOGGER.isLoggable(Level.FINE)) {
             LOGGER.log(Level.FINE,
-                    "Loaded stemmer dictionary from {0}; insertedMappings={1}, lines={2}, entries={3}, ignoredLines={4}, traversalDirection={5}.",
+                    "Loaded stemmer dictionary from {0}; insertedMappings={1}, lines={2}, entries={3}, ignoredLines={4}, metadata={5}.",
                     new Object[] { sourceDescription, insertedMappings[0], statistics.lineCount(),
-                            statistics.entryCount(), statistics.ignoredLineCount(), traversalDirection });
+                            statistics.entryCount(), statistics.ignoredLineCount(), metadata.toTextBlock() });
         }
 
         return builder.build();
+    }
+
+    private static TrieMetadata metadataForCompilation(final WordTraversalDirection traversalDirection,
+            final ReductionSettings reductionSettings, final CaseProcessingMode caseProcessingMode,
+            final DiacriticProcessingMode diacriticProcessingMode) {
+        Objects.requireNonNull(traversalDirection, "traversalDirection");
+        Objects.requireNonNull(reductionSettings, "reductionSettings");
+        Objects.requireNonNull(caseProcessingMode, "caseProcessingMode");
+        Objects.requireNonNull(diacriticProcessingMode, "diacriticProcessingMode");
+        return TrieMetadata.forCompilation(traversalDirection, reductionSettings, diacriticProcessingMode,
+                caseProcessingMode);
     }
 
     /**
@@ -570,6 +789,50 @@ public final class StemmerPatchTrieLoader {
     public static FrequencyTrie<String> loadBinary(final InputStream inputStream) throws IOException {
         Objects.requireNonNull(inputStream, "inputStream");
         return StemmerPatchTrieBinaryIO.read(inputStream);
+    }
+
+    /**
+     * Loads only persisted metadata from a GZip-compressed binary patch-command
+     * trie file.
+     *
+     * @param path path to the compressed binary trie file
+     * @return persisted trie metadata
+     * @throws NullPointerException if {@code path} is {@code null}
+     * @throws IOException          if the file cannot be opened, decompressed, or
+     *                              read
+     */
+    public static TrieMetadata loadBinaryMetadata(final Path path) throws IOException {
+        Objects.requireNonNull(path, "path");
+        return StemmerPatchTrieBinaryIO.readMetadata(path);
+    }
+
+    /**
+     * Loads only persisted metadata from a GZip-compressed binary patch-command
+     * trie file.
+     *
+     * @param fileName file name or path string
+     * @return persisted trie metadata
+     * @throws NullPointerException if {@code fileName} is {@code null}
+     * @throws IOException          if the file cannot be opened, decompressed, or
+     *                              read
+     */
+    public static TrieMetadata loadBinaryMetadata(final String fileName) throws IOException {
+        Objects.requireNonNull(fileName, FILENAME_REQUIRED);
+        return StemmerPatchTrieBinaryIO.readMetadata(fileName);
+    }
+
+    /**
+     * Loads only persisted metadata from a GZip-compressed binary patch-command
+     * trie stream.
+     *
+     * @param inputStream source input stream
+     * @return persisted trie metadata
+     * @throws NullPointerException if {@code inputStream} is {@code null}
+     * @throws IOException          if the stream cannot be decompressed or read
+     */
+    public static TrieMetadata loadBinaryMetadata(final InputStream inputStream) throws IOException {
+        Objects.requireNonNull(inputStream, "inputStream");
+        return StemmerPatchTrieBinaryIO.readMetadata(inputStream);
     }
 
     /**

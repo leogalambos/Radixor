@@ -250,10 +250,26 @@ class PatchCommandEncoderTest {
         @Test
         @DisplayName("creates encoder with default cost model")
         void shouldCreateEncoderWithDefaultCostModel() {
-            PatchCommandEncoder encoder = new PatchCommandEncoder();
+            PatchCommandEncoder encoder = PatchCommandEncoder.builder().build();
 
             assertNotNull(encoder);
             assertEquals("teach", PatchCommandEncoder.apply("teacher", encoder.encode("teacher", "teach")));
+        }
+
+        /**
+         * Verifies fluent builder construction with explicit forward traversal.
+         */
+        @Test
+        @DisplayName("builds direction-specialized encoder via builder")
+        void shouldBuildDirectionSpecializedEncoderViaBuilder() {
+            PatchCommandEncoder encoder = PatchCommandEncoder.builder()
+                    .traversalDirection(WordTraversalDirection.FORWARD)
+                    .build();
+
+            String patch = encoder.encode("running", "run");
+
+            assertAll(() -> assertNotNull(encoder), () -> assertNotNull(patch),
+                    () -> assertEquals("run", encoder.applyWithConfiguredDirection("running", patch)));
         }
 
         /**
@@ -263,7 +279,7 @@ class PatchCommandEncoderTest {
         @DisplayName("rejects negative insert cost")
         void shouldRejectNegativeInsertCost() {
             IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                    () -> new PatchCommandEncoder(-1, 1, 1, 0));
+                    () -> PatchCommandEncoder.builder().insertCost(-1).deleteCost(1).replaceCost(1).matchCost(0).build());
 
             assertEquals("insertCost must be non-negative.", exception.getMessage());
         }
@@ -275,7 +291,7 @@ class PatchCommandEncoderTest {
         @DisplayName("rejects negative delete cost")
         void shouldRejectNegativeDeleteCost() {
             IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                    () -> new PatchCommandEncoder(1, -1, 1, 0));
+                    () -> PatchCommandEncoder.builder().insertCost(1).deleteCost(-1).replaceCost(1).matchCost(0).build());
 
             assertEquals("deleteCost must be non-negative.", exception.getMessage());
         }
@@ -287,7 +303,7 @@ class PatchCommandEncoderTest {
         @DisplayName("rejects negative replace cost")
         void shouldRejectNegativeReplaceCost() {
             IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                    () -> new PatchCommandEncoder(1, 1, -1, 0));
+                    () -> PatchCommandEncoder.builder().insertCost(1).deleteCost(1).replaceCost(-1).matchCost(0).build());
 
             assertEquals("replaceCost must be non-negative.", exception.getMessage());
         }
@@ -299,7 +315,7 @@ class PatchCommandEncoderTest {
         @DisplayName("rejects negative match cost")
         void shouldRejectNegativeMatchCost() {
             IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                    () -> new PatchCommandEncoder(1, 1, 1, -1));
+                    () -> PatchCommandEncoder.builder().insertCost(1).deleteCost(1).replaceCost(1).matchCost(-1).build());
 
             assertEquals("matchCost must be non-negative.", exception.getMessage());
         }
@@ -320,7 +336,7 @@ class PatchCommandEncoderTest {
         @Test
         @DisplayName("does not emit trailing SKIP instructions into patch command")
         void shouldNotEmitTrailingSkipInstructionsIntoPatchCommand() {
-            PatchCommandEncoder encoder = new PatchCommandEncoder();
+            PatchCommandEncoder encoder = PatchCommandEncoder.builder().build();
 
             String patch = encoder.encode("abcd", "ab");
 
@@ -335,7 +351,7 @@ class PatchCommandEncoderTest {
         @Test
         @DisplayName("returns null when source is null")
         void shouldReturnNullWhenSourceIsNull() {
-            PatchCommandEncoder encoder = new PatchCommandEncoder();
+            PatchCommandEncoder encoder = PatchCommandEncoder.builder().build();
 
             String patch = encoder.encode(null, "target");
 
@@ -348,7 +364,7 @@ class PatchCommandEncoderTest {
         @Test
         @DisplayName("returns null when target is null")
         void shouldReturnNullWhenTargetIsNull() {
-            PatchCommandEncoder encoder = new PatchCommandEncoder();
+            PatchCommandEncoder encoder = PatchCommandEncoder.builder().build();
 
             String patch = encoder.encode("source", null);
 
@@ -361,7 +377,7 @@ class PatchCommandEncoderTest {
         @Test
         @DisplayName("returns canonical NOOP patch for equal words")
         void shouldReturnCanonicalNoopPatchForEqualWords() {
-            PatchCommandEncoder encoder = new PatchCommandEncoder();
+            PatchCommandEncoder encoder = PatchCommandEncoder.builder().build();
 
             String patch = encoder.encode("teacher", "teacher");
 
@@ -375,7 +391,7 @@ class PatchCommandEncoderTest {
         @Test
         @DisplayName("returns canonical NOOP patch for equal empty words")
         void shouldReturnCanonicalNoopPatchForEqualEmptyWords() {
-            PatchCommandEncoder encoder = new PatchCommandEncoder();
+            PatchCommandEncoder encoder = PatchCommandEncoder.builder().build();
 
             String patch = encoder.encode("", "");
 
@@ -394,7 +410,7 @@ class PatchCommandEncoderTest {
         @MethodSource("org.egothor.stemmer.PatchCommandEncoderTest#provideRoundTripPairs")
         @DisplayName("produces patches that reconstruct the target")
         void shouldReconstructTargetForRoundTripPairs(int caseId, String source, String target) {
-            PatchCommandEncoder encoder = new PatchCommandEncoder();
+            PatchCommandEncoder encoder = PatchCommandEncoder.builder().build();
 
             String patch = encoder.encode(source, target);
             String reconstructed = PatchCommandEncoder.apply(source, patch);
@@ -414,7 +430,7 @@ class PatchCommandEncoderTest {
         @Test
         @DisplayName("remains correct when reused across different input sizes")
         void shouldRemainCorrectWhenReusedAcrossDifferentInputSizes() {
-            PatchCommandEncoder encoder = new PatchCommandEncoder();
+            PatchCommandEncoder encoder = PatchCommandEncoder.builder().build();
 
             assertAll(
                     () -> assertEquals("transformation",
@@ -430,7 +446,7 @@ class PatchCommandEncoderTest {
         @Test
         @DisplayName("supports custom operation costs")
         void shouldSupportCustomOperationCosts() {
-            PatchCommandEncoder encoder = new PatchCommandEncoder(1, 1, 2, 0);
+            PatchCommandEncoder encoder = PatchCommandEncoder.builder().insertCost(1).deleteCost(1).replaceCost(2).matchCost(0).build();
 
             String patch = encoder.encode("teacher", "teach");
             String reconstructed = PatchCommandEncoder.apply("teacher", patch);
@@ -487,6 +503,36 @@ class PatchCommandEncoderTest {
             String source = "teacher";
 
             assertSame(source, PatchCommandEncoder.apply(source, PatchCommandEncoder.NOOP_PATCH));
+        }
+
+        /**
+         * Verifies that instance-level application follows encoder traversal
+         * direction.
+         */
+        @Test
+        @DisplayName("applies patch via instance-level direction-specialized fast path")
+        void shouldApplyPatchViaInstanceLevelDirectionSpecializedFastPath() {
+            PatchCommandEncoder encoder = PatchCommandEncoder.builder()
+                    .traversalDirection(WordTraversalDirection.FORWARD)
+                    .build();
+
+            String patch = encoder.encode("transformation", "transform");
+
+            assertEquals("transform", encoder.applyWithConfiguredDirection("transformation", patch));
+        }
+
+        /**
+         * Verifies dedicated forward traversal encode/apply round trip.
+         */
+        @Test
+        @DisplayName("reconstructs target with forward traversal encoder and static apply")
+        void shouldReconstructTargetWithForwardTraversalEncoderAndStaticApply() {
+            PatchCommandEncoder encoder = PatchCommandEncoder.builder()
+                    .traversalDirection(WordTraversalDirection.FORWARD)
+                    .build();
+            String patch = encoder.encode("cities", "city");
+
+            assertEquals("city", PatchCommandEncoder.apply("cities", patch, WordTraversalDirection.FORWARD));
         }
 
         /**
@@ -560,7 +606,7 @@ class PatchCommandEncoderTest {
         @Test
         @DisplayName("handles deletion-heavy suffix stripping")
         void shouldHandleDeletionHeavySuffixStripping() {
-            PatchCommandEncoder encoder = new PatchCommandEncoder();
+            PatchCommandEncoder encoder = PatchCommandEncoder.builder().build();
 
             String patch = encoder.encode("teacher", "teach");
 
@@ -573,7 +619,7 @@ class PatchCommandEncoderTest {
         @Test
         @DisplayName("handles plural to singular transformation")
         void shouldHandlePluralToSingularTransformation() {
-            PatchCommandEncoder encoder = new PatchCommandEncoder();
+            PatchCommandEncoder encoder = PatchCommandEncoder.builder().build();
 
             String patch = encoder.encode("cities", "city");
 
@@ -586,7 +632,7 @@ class PatchCommandEncoderTest {
         @Test
         @DisplayName("handles derivational reduction to a shorter stem")
         void shouldHandleDerivationalReductionToShorterStem() {
-            PatchCommandEncoder encoder = new PatchCommandEncoder();
+            PatchCommandEncoder encoder = PatchCommandEncoder.builder().build();
 
             String patch = encoder.encode("stemming", "stem");
 
@@ -599,7 +645,7 @@ class PatchCommandEncoderTest {
         @Test
         @DisplayName("handles single-character replacement")
         void shouldHandleSingleCharacterReplacement() {
-            PatchCommandEncoder encoder = new PatchCommandEncoder();
+            PatchCommandEncoder encoder = PatchCommandEncoder.builder().build();
 
             String patch = encoder.encode("a", "z");
 
@@ -626,7 +672,7 @@ class PatchCommandEncoderTest {
         @MethodSource("org.egothor.stemmer.PatchCommandEncoderTest#provideReversedRoundTripPairs")
         @DisplayName("reconstructs reversed targets from reversed sources")
         void shouldReconstructReversedTargetsFromReversedSources(int caseId, String source, String target) {
-            PatchCommandEncoder encoder = new PatchCommandEncoder();
+            PatchCommandEncoder encoder = PatchCommandEncoder.builder().build();
 
             String reversedSource = reverse(source);
             String reversedTarget = reverse(target);
@@ -649,7 +695,7 @@ class PatchCommandEncoderTest {
         @Test
         @DisplayName("handles mirrored stemming transformations")
         void shouldHandleMirroredStemmingTransformations() {
-            PatchCommandEncoder encoder = new PatchCommandEncoder();
+            PatchCommandEncoder encoder = PatchCommandEncoder.builder().build();
 
             assertAll(
                     () -> assertEquals(reverse("teach"),
@@ -671,7 +717,7 @@ class PatchCommandEncoderTest {
         @Test
         @DisplayName("remains correct when reused on reversed words of different sizes")
         void shouldRemainCorrectWhenReusedOnReversedWordsOfDifferentSizes() {
-            PatchCommandEncoder encoder = new PatchCommandEncoder();
+            PatchCommandEncoder encoder = PatchCommandEncoder.builder().build();
 
             assertAll(
                     () -> assertEquals(reverse("transformation"),
@@ -699,7 +745,7 @@ class PatchCommandEncoderTest {
     @MethodSource("org.egothor.stemmer.PatchCommandEncoderTest#provideReversedRoundTripPairs")
     @DisplayName("preserves correctness under mirrored input orientation")
     void shouldPreserveCorrectnessUnderMirroredInputOrientation(int caseId, String source, String target) {
-        PatchCommandEncoder encoder = new PatchCommandEncoder();
+        PatchCommandEncoder encoder = PatchCommandEncoder.builder().build();
 
         String normalPatch = encoder.encode(source, target);
         String normalResult = PatchCommandEncoder.apply(source, normalPatch);

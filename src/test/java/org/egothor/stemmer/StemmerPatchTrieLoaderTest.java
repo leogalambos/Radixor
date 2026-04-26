@@ -158,7 +158,7 @@ final class StemmerPatchTrieLoaderTest {
     static Stream<Arguments> nullContractCases() {
         final ReductionSettings settings = ReductionSettings.withDefaults(DEFAULT_REDUCTION_MODE);
         final FrequencyTrie<String> trie = new FrequencyTrie.Builder<String>(String[]::new, settings)
-                .put("running", new PatchCommandEncoder().encode("running", "run")).build();
+                .put("running", PatchCommandEncoder.builder().build().encode("running", "run")).build();
 
         return Stream.of(
                 Arguments.of("01-load-language-settings",
@@ -222,7 +222,26 @@ final class StemmerPatchTrieLoaderTest {
                         "trie"),
                 Arguments.of("19-save-binary-null-string",
                         (ExecutableOperation) () -> StemmerPatchTrieLoader.saveBinary(trie, (String) null),
-                        StemmerPatchTrieLoader.FILENAME_REQUIRED));
+                        StemmerPatchTrieLoader.FILENAME_REQUIRED),
+                Arguments.of("20-load-language-null-metadata",
+                        (ExecutableOperation) () -> StemmerPatchTrieLoader.load(StemmerPatchTrieLoader.Language.US_UK,
+                                true, (TrieMetadata) null),
+                        "metadata"),
+                Arguments.of("21-load-path-null-metadata",
+                        (ExecutableOperation) () -> StemmerPatchTrieLoader.load(tempPath(), true, (TrieMetadata) null),
+                        "metadata"),
+                Arguments.of("22-load-string-null-metadata",
+                        (ExecutableOperation) () -> StemmerPatchTrieLoader.load(tempPath().toString(), true,
+                                (TrieMetadata) null),
+                        "metadata"),
+                Arguments.of("23-load-binary-metadata-path-null",
+                        (ExecutableOperation) () -> StemmerPatchTrieLoader.loadBinaryMetadata((Path) null), "path"),
+                Arguments.of("24-load-binary-metadata-string-null",
+                        (ExecutableOperation) () -> StemmerPatchTrieLoader.loadBinaryMetadata((String) null),
+                        StemmerPatchTrieLoader.FILENAME_REQUIRED),
+                Arguments.of("25-load-binary-metadata-stream-null",
+                        (ExecutableOperation) () -> StemmerPatchTrieLoader.loadBinaryMetadata((InputStream) null),
+                        "inputStream"));
     }
 
     /**
@@ -325,6 +344,31 @@ final class StemmerPatchTrieLoaderTest {
                     "run");
             assertTriePatchSemanticsEqual(fromPathWithSettings, fromStringWithMode, "running", "played", "cities",
                     "run");
+        }
+
+        /**
+         * Verifies that metadata-driven loading keeps all configuration dimensions in
+         * one explicit object and applies them during compilation.
+         *
+         * @throws IOException if the test file cannot be written or read
+         */
+        @Test
+        @DisplayName("Metadata overload must drive case and diacritic normalization")
+        void shouldLoadUsingExplicitMetadataConfiguration() throws IOException {
+            final Path dictionaryFile = writeDictionary("""
+                    mÁma	mamA	mámě
+                    """);
+            final TrieMetadata metadata = TrieMetadata.forCompilation(WordTraversalDirection.BACKWARD,
+                    ReductionSettings.withDefaults(DEFAULT_REDUCTION_MODE), DiacriticProcessingMode.REMOVE,
+                    CaseProcessingMode.LOWERCASE_WITH_LOCALE_ROOT);
+
+            final FrequencyTrie<String> trie = StemmerPatchTrieLoader.load(dictionaryFile, true, metadata);
+
+            assertAll(() -> assertEquals(DiacriticProcessingMode.REMOVE, trie.metadata().diacriticProcessingMode()),
+                    () -> assertEquals(CaseProcessingMode.LOWERCASE_WITH_LOCALE_ROOT,
+                            trie.metadata().caseProcessingMode()),
+                    () -> assertNotNull(trie.get("MÁMĚ")),
+                    () -> assertNotNull(trie.get("mame")));
         }
 
         /**
@@ -456,6 +500,15 @@ final class StemmerPatchTrieLoaderTest {
                 assertTriePatchSemanticsEqual(original, fromPath, "run", "running", "runner", "cities", "studying");
                 assertTriePatchSemanticsEqual(original, fromString, "run", "running", "runner", "cities", "studying");
                 assertTriePatchSemanticsEqual(original, fromStream, "run", "running", "runner", "cities", "studying");
+            }
+
+            final TrieMetadata metadataFromPath = StemmerPatchTrieLoader.loadBinaryMetadata(binaryFile);
+            final TrieMetadata metadataFromString = StemmerPatchTrieLoader.loadBinaryMetadata(binaryFile.toString());
+            try (InputStream metadataInputStream = new ByteArrayInputStream(binaryBytes)) {
+                final TrieMetadata metadataFromStream = StemmerPatchTrieLoader.loadBinaryMetadata(metadataInputStream);
+                assertAll(() -> assertEquals(original.metadata(), metadataFromPath),
+                        () -> assertEquals(original.metadata(), metadataFromString),
+                        () -> assertEquals(original.metadata(), metadataFromStream));
             }
         }
 

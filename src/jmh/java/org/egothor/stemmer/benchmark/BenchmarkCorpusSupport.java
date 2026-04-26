@@ -149,7 +149,7 @@ final class BenchmarkCorpusSupport {
         Objects.requireNonNull(reductionSettings, "reductionSettings");
 
         final FrequencyTrie.Builder<String> builder = new FrequencyTrie.Builder<>(String[]::new, reductionSettings);
-        final PatchCommandEncoder encoder = new PatchCommandEncoder();
+        final PatchCommandEncoder encoder = PatchCommandEncoder.builder().build();
 
         StemmerDictionaryParser.parse(
                 new StringReader(corpusText),

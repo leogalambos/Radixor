@@ -151,7 +151,7 @@ abstract class PropertyBasedTestSupport {
         Objects.requireNonNull(reductionMode, "reductionMode");
 
         final FrequencyTrie.Builder<String> builder = new FrequencyTrie.Builder<>(STRING_ARRAY_FACTORY, reductionMode);
-        final PatchCommandEncoder encoder = new PatchCommandEncoder();
+        final PatchCommandEncoder encoder = PatchCommandEncoder.builder().build();
 
         for (StemmerEntry entry : scenario.entries()) {
             if (storeOriginal) {
