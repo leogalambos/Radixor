@@ -67,11 +67,23 @@ import java.util.Set;
         return new UnorderedLocalDescriptor(Collections.unmodifiableSet(distinct));
     }
 
+    /**
+     * Returns a hash code consistent with descriptor equality.
+     *
+     * @return descriptor hash code
+     */
     @Override
     public int hashCode() {
         return this.distinctValues.hashCode();
     }
 
+    /**
+     * Compares this descriptor with another object.
+     *
+     * @param other object to compare with
+     * @return {@code true} when both descriptors represent the same semantic
+     *         reduction identity
+     */
     @Override
     public boolean equals(final Object other) {
         if (this == other) {

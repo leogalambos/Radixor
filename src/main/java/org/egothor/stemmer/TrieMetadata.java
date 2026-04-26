@@ -217,6 +217,14 @@ public record TrieMetadata(int formatVersion, WordTraversalDirection traversalDi
                 diacriticProcessingMode, caseProcessingMode);
     }
 
+    /**
+     * Returns a required metadata entry from a parsed text block.
+     *
+     * @param entries parsed metadata entries
+     * @param key     required entry key
+     * @return non-blank entry value
+     * @throws IllegalArgumentException if the entry is absent or blank
+     */
     private static String requireEntry(final Map<String, String> entries, final String key) {
         final String value = entries.get(key);
         if (value == null || value.isBlank()) {

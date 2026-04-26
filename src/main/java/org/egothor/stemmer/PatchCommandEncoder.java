@@ -737,6 +737,7 @@ public final class PatchCommandEncoder {
      * @param targetCharacters target characters
      * @param sourceLength     source length
      * @param targetLength     target length
+     * @param direction        traversal direction used to compare characters
      */
     private void fillMatrices(final char[] sourceCharacters, final char[] targetCharacters, final int sourceLength,
             final int targetLength, final WordTraversalDirection direction) {
@@ -989,6 +990,14 @@ public final class PatchCommandEncoder {
         private int matchCost; // = 0
 
         /**
+         * Creates a builder initialized with the default Egothor-compatible cost model
+         * and backward traversal.
+         */
+        public Builder() {
+            // Default values are assigned in field initializers.
+        }
+
+        /**
          * Sets traversal direction used by the created encoder.
          *
          * @param value traversal direction
@@ -1011,7 +1020,7 @@ public final class PatchCommandEncoder {
         }
 
         /**
-         * Sets cost of an delete operation.
+         * Sets cost of a delete operation.
          * 
          * @param value cost of the operation
          * @return this builder
@@ -1022,7 +1031,7 @@ public final class PatchCommandEncoder {
         }
 
         /**
-         * Sets cost of an replace operation.
+         * Sets cost of a replace operation.
          * 
          * @param value cost of the operation
          * @return this builder
@@ -1033,7 +1042,7 @@ public final class PatchCommandEncoder {
         }
 
         /**
-         * Sets cost of an skip operation.
+         * Sets cost of a match operation.
          * 
          * @param value cost of the operation
          * @return this builder

@@ -65,11 +65,23 @@ import java.util.List;
                 Collections.unmodifiableList(Arrays.asList(Arrays.copyOf(orderedValues, orderedValues.length))));
     }
 
+    /**
+     * Returns a hash code consistent with descriptor equality.
+     *
+     * @return descriptor hash code
+     */
     @Override
     public int hashCode() {
         return this.orderedValues.hashCode();
     }
 
+    /**
+     * Compares this descriptor with another object.
+     *
+     * @param other object to compare with
+     * @return {@code true} when both descriptors represent the same semantic
+     *         reduction identity
+     */
     @Override
     public boolean equals(final Object other) {
         if (this == other) {

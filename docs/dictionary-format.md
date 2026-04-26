@@ -127,15 +127,21 @@ is processed the same way as:
 run	running	runs	ran
 ```
 
-## Character set and practical convention
+## Character set, compression, and normalization
 
-Dictionary files are read as UTF-8 text.
+Dictionary files are read as UTF-8 text. Files loaded through `StemmerPatchTrieLoader.load(Path, ...)` may be either plain UTF-8 text or GZip-compressed UTF-8 text; the loader detects GZip input from the stream header instead of relying on the file extension. Bundled dictionaries are stored as GZip resources and are decoded as UTF-8 after decompression.
 
-From the perspective of the parser and the stemming algorithm, the format is not restricted to plain ASCII tokens. The parser accepts ordinary Java `String` data, and the trie itself works with general character sequences rather than with an ASCII-only internal model. In principle, this means the system could process diacritic and non-diacritic forms alike, and it could also store forms with inconsistently used diacritics.
+The parser and trie are not restricted to ASCII. Dictionary items are ordinary Java `String` values, and trie traversal works over Java `char` sequences. This supports Latin-script data with diacritics, Cyrillic data, Hebrew, Persian, Yiddish, and other scripts represented in UTF-8, subject to the normal Java `String` model and the project’s traversal configuration.
 
-In practice, however, the format is currently best understood as **primarily intended for classical basic ASCII lexical input**, especially in the traditional stemming style where language data is normalized into plain characters in the ASCII range up to character code 127. This convention is particularly relevant for languages whose original orthography includes diacritics but whose stemming dictionaries are commonly maintained in normalized non-diacritic form.
+Case normalization is controlled by `CaseProcessingMode`. The default `LOWERCASE_WITH_LOCALE_ROOT` mode lowercases the line before columns are split into dictionary items. `AS_IS` preserves the original casing.
 
-Future versions may expand the documentation and operational guidance for dictionaries that intentionally preserve diacritics. At present, that workflow is not the primary documented use case, not because the algorithm fundamentally forbids it, but because a concrete project requirement for such support has not yet emerged.
+Diacritic normalization is controlled at trie-build and lookup time by `DiacriticProcessingMode`:
+
+- `AS_IS` preserves dictionary and lookup keys exactly after case handling,
+- `REMOVE` strips supported diacritics and common Latin ligatures on both insertion and lookup paths,
+- `AS_IS_AND_STRIPPED_FALLBACK` is declared in the public model but is not implemented yet and raises `UnsupportedOperationException`.
+
+For reliable production behavior, choose one normalization policy deliberately and apply it consistently. Normalized ASCII dictionaries remain a practical convention for some legacy stemming data, but they are not a format requirement.
 
 ## Distinct stem and variant semantics
 
@@ -206,7 +212,7 @@ The current dictionary format intentionally stays minimal:
 - no explicit ambiguity syntax,
 - no sectioning or nested structure.
 
-Each dictionary item is simply one tab-separated word form after remark stripping and lowercasing.
+Each dictionary item is simply one tab-separated word form after remark stripping and the configured case and diacritic normalization.
 
 ## Authoring guidance
 
@@ -218,7 +224,7 @@ For reliable results, keep dictionaries:
 - encoded in UTF-8,
 - easy to audit in plain text form.
 
-For most current deployments, it is sensible to keep dictionary content in normalized basic ASCII form unless there is a clear requirement to preserve diacritics end-to-end.
+For most deployments, it is sensible to choose either preserved UTF-8 forms or a normalized ASCII/diacritic-stripped convention and keep that choice consistent across dictionary authoring, compilation, and runtime lookup.
 
 ## Relationship to other documentation
 

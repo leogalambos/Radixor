@@ -60,11 +60,23 @@ import java.util.Objects;
         this.childSignature = childSignature;
     }
 
+    /**
+     * Returns a hash code consistent with descriptor equality.
+     *
+     * @return descriptor hash code
+     */
     @Override
     public int hashCode() {
         return Objects.hash(this.edge, this.childSignature);
     }
 
+    /**
+     * Compares this descriptor with another object.
+     *
+     * @param other object to compare with
+     * @return {@code true} when both descriptors represent the same semantic
+     *         reduction identity
+     */
     @Override
     public boolean equals(final Object other) {
         if (this == other) {

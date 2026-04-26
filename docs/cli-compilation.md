@@ -8,7 +8,7 @@ This is the preferred preparation workflow when stemming should run against an a
 
 The `Compile` tool performs the following steps:
 
-1. reads the input dictionary in the standard Radixor stemmer format,
+1. reads the input dictionary in the standard Radixor stemmer format, accepting either plain UTF-8 text or GZip-compressed UTF-8 text,
 2. parses each line into a canonical stem column and its known variant columns,
 3. converts variants into patch commands,
 4. builds a mutable trie of patch-command values,
@@ -50,7 +50,7 @@ The CLI supports the following arguments:
 
 Path to the source dictionary file.
 
-The file must use the standard line-oriented tab-separated values dictionary format, meaning that columns are separated by the tab character. Each non-empty logical line starts with the canonical stem column and may contain zero or more variant columns. The parser expects UTF-8 input, processes case according to `CaseProcessingMode` (default: `LOWERCASE_WITH_LOCALE_ROOT`), ignores trailing remarks introduced by `#` or `//`, and currently ignores dictionary items containing embedded whitespace while reporting them through warning-level log entries.
+The file must use the standard line-oriented tab-separated values dictionary format, meaning that columns are separated by the tab character. Each non-empty logical line starts with the canonical stem column and may contain zero or more variant columns. The input may be plain UTF-8 text or GZip-compressed UTF-8 text; compression is detected from the stream header rather than the file extension. The parser processes case according to `CaseProcessingMode` (default: `LOWERCASE_WITH_LOCALE_ROOT`), ignores trailing remarks introduced by `#` or `//`, and currently ignores dictionary items containing embedded whitespace while reporting them through warning-level log entries.
 
 Example:
 
@@ -110,7 +110,7 @@ This option is intended for right-to-left languages where affix behavior should 
 
 ### `--case-processing-mode <mode>`
 
-Controls dictionary key normalization during compilation and lookup.
+Controls dictionary key normalization during compilation and lookup. The setting is stored in persisted trie metadata and is therefore available to runtime lookup after binary loading.
 
 Supported values are:
 
@@ -205,7 +205,7 @@ The CLI is best used as a preparation step during packaging, deployment, or cont
 
 A `.radixor.gz` file should be handled as a versioned output artifact. It represents a specific dictionary state, a specific reduction mode, and, where relevant, specific dominant-result thresholds.
 
-Compiled tries also persist a human-readable metadata block (`key=value` lines) that includes traversal direction, RTL indicator, reduction mode, case-processing mode, and dominant thresholds. After decompression, you can inspect this block directly to identify what dictionary/trie configuration the artifact contains.
+Compiled tries also persist a human-readable metadata block (`key=value` lines) that includes format version, traversal direction, RTL indicator, reduction mode, dominant thresholds, diacritic-processing mode, and case-processing mode. After decompression, you can inspect this block directly to identify what dictionary/trie configuration the artifact contains. The current CLI uses `DiacriticProcessingMode.AS_IS`; custom diacritic stripping is available through the programmatic builder and loader APIs rather than through a CLI flag.
 
 ### Choose reduction mode deliberately
 

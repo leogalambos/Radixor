@@ -138,9 +138,9 @@ public final class FrequencyTrie<V> {
     /**
      * Creates a new compiled trie instance.
      *
-     * @param arrayFactory       array factory
-     * @param root               compiled root node
-     * @param traversalDirection logical key traversal direction
+     * @param arrayFactory array factory
+     * @param root         compiled root node
+     * @param metadata     trie metadata describing lookup and persistence semantics
      * @throws NullPointerException if any argument is {@code null}
      */
     private FrequencyTrie(final IntFunction<V[]> arrayFactory, final CompiledNode<V> root,
@@ -922,6 +922,13 @@ public final class FrequencyTrie<V> {
             return this;
         }
 
+        /**
+         * Applies build-time dictionary-key normalization according to the builder
+         * configuration.
+         *
+         * @param key dictionary key
+         * @return normalized key for trie insertion
+         */
         private String normalizeDictionaryKey(final String key) {
             String normalized = key;
 

@@ -61,6 +61,7 @@ import java.util.logging.Logger;
  * --output &lt;file&gt;
  * --reduction-mode &lt;mode&gt;
  * [--store-original]
+ * [--right-to-left]
  * [--case-processing-mode &lt;mode&gt;]
  * [--dominant-winner-min-percent &lt;1..100&gt;]
  * [--dominant-winner-over-second-ratio &lt;1..n&gt;]

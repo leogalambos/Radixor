@@ -85,10 +85,25 @@ final class DiacriticStripper {
         registerSingle("Þ", 'T');
     }
 
+    /**
+     * Utility class.
+     */
     private DiacriticStripper() {
         throw new AssertionError("No instances.");
     }
 
+    /**
+     * Removes supported diacritic marks and common Latin ligatures from the supplied
+     * text.
+     *
+     * <p>
+     * The method returns the original {@link String} instance when no replacement is
+     * required, avoiding an unnecessary allocation on the common ASCII path.
+     * </p>
+     *
+     * @param input text to normalize
+     * @return normalized text, or {@code input} itself when it is already unchanged
+     */
     /* default */ static String strip(final String input) {
         StringBuilder normalized = null;
 
@@ -116,6 +131,13 @@ final class DiacriticStripper {
         return normalized.toString();
     }
 
+    /**
+     * Returns the replacement text for one non-ASCII character.
+     *
+     * @param source source character
+     * @return replacement text, or {@code null} when the character should be kept
+     *         unchanged
+     */
     @SuppressWarnings("PMD.AvoidLiteralsInIfCondition")
     private static String replacementFor(final char source) {
         if (source <= 0x007F) {
@@ -161,6 +183,12 @@ final class DiacriticStripper {
         return ascii.toString();
     }
 
+    /**
+     * Registers one-character replacements for a set of source characters.
+     *
+     * @param sourceCharacters characters to replace
+     * @param replacement      replacement character
+     */
     private static void registerSingle(final String sourceCharacters, final char replacement) {
         for (int index = 0; index < sourceCharacters.length(); index++) {
             DIRECT_REPLACEMENTS[sourceCharacters.charAt(index)] = replacement;

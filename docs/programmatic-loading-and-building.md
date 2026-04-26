@@ -32,7 +32,7 @@ The `storeOriginal` flag controls whether the canonical stem is inserted as a no
 
 ## Load a textual dictionary
 
-Loading from a dictionary file follows the same preparation model as bundled resources, but the source comes from your own file or path. The textual format is tab-separated values, meaning that columns are separated by the tab character. Each non-empty logical line starts with the stem column and may contain zero or more variant columns. Input case normalization is controlled by `CaseProcessingMode` (default: `LOWERCASE_WITH_LOCALE_ROOT`), trailing remarks introduced by `#` or `//` are ignored, and dictionary items containing embedded whitespace are currently ignored with warning-level diagnostics.
+Loading from a dictionary file follows the same preparation model as bundled resources, but the source comes from your own file or path. The input may be plain UTF-8 text or GZip-compressed UTF-8 text; the loader detects GZip data from the stream header. The textual format is tab-separated values, meaning that columns are separated by the tab character. Each non-empty logical line starts with the stem column and may contain zero or more variant columns. Input case normalization is controlled by `CaseProcessingMode` (default: `LOWERCASE_WITH_LOCALE_ROOT`), trailing remarks introduced by `#` or `//` are ignored, and dictionary items containing embedded whitespace are currently ignored with warning-level diagnostics.
 
 ```java
 import java.io.IOException;
@@ -59,6 +59,8 @@ public final class LoadTextDictionaryExample {
 }
 ```
 
+Additional `StemmerPatchTrieLoader.load(...)` overloads let callers provide explicit `WordTraversalDirection`, `CaseProcessingMode`, `DiacriticProcessingMode`, or a complete `TrieMetadata` instance. Use those overloads when a custom dictionary must be compiled with forward traversal for right-to-left languages, case-sensitive keys, or diacritic stripping.
+
 ## Load a compiled binary artifact
 
 Binary loading is typically the preferred runtime path because it avoids reparsing the textual source and skips the preparation step entirely.
@@ -83,7 +85,7 @@ public final class LoadBinaryExample {
 }
 ```
 
-The binary format is the native `FrequencyTrie` serialization wrapped in GZip compression.
+The binary format is the native `FrequencyTrie` serialization wrapped in GZip compression. It includes persisted `TrieMetadata`, so lookup after loading uses the traversal, case-processing, diacritic-processing, and reduction settings captured when the trie was compiled.
 
 ## Build directly with a mutable builder
 
@@ -108,7 +110,7 @@ public final class BuilderExample {
         final FrequencyTrie.Builder<String> builder =
                 new FrequencyTrie.Builder<>(String[]::new, settings);
 
-        final PatchCommandEncoder encoder = new PatchCommandEncoder();
+        final PatchCommandEncoder encoder = PatchCommandEncoder.builder().build();
 
         builder.put("running", encoder.encode("running", "run"));
         builder.put("runs", encoder.encode("runs", "run"));

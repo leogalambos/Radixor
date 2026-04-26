@@ -69,7 +69,7 @@ public final class LoadBinaryStemmerExample {
 
 ### Build or extend a stemmer from dictionary data
 
-Radixor can also build a compiled trie from a custom dictionary. Dictionary lines consist of a canonical stem followed by zero or more variants. The parser applies `CaseProcessingMode` (default: `LOWERCASE_WITH_LOCALE_ROOT`), ignores leading and trailing whitespace, and supports line remarks introduced by `#` or `//`.
+Radixor can also build a compiled trie from a custom dictionary. Dictionary lines consist of a canonical stem followed by zero or more variants. The input may be plain UTF-8 text or GZip-compressed UTF-8 text when loaded from a filesystem path. The parser applies `CaseProcessingMode` (default: `LOWERCASE_WITH_LOCALE_ROOT`), ignores leading and trailing whitespace around columns, supports line remarks introduced by `#` or `//`, and skips dictionary items that contain embedded whitespace.
 
 This path is also relevant when you extend an existing compiled stemmer with additional domain-specific entries and rebuild a new compact artifact.
 
