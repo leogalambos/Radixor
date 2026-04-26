@@ -1417,7 +1417,7 @@
 </ul>
 <p>The comparison benchmark processes the same deterministic English token stream through:</p>
 <ul>
-<li>Radixor with bundled <code>US_UK_PROFI</code>,</li>
+<li>Radixor with bundled <code>US_UK</code> (older benchmark snapshots used the now-retired <code>US_UK_PROFI</code> resource),</li>
 <li>Snowball original Porter,</li>
 <li>Snowball English, commonly referred to as Porter2.</li>
 </ul>
@@ -1435,7 +1435,7 @@
 <thead>
 <tr>
 <th>Workload</th>
-<th style="text-align: right;">Radixor <code>US_UK_PROFI</code></th>
+<th style="text-align: right;">Radixor <code>US_UK</code> <em>(historical runs: <code>US_UK_PROFI</code>)</em></th>
 <th style="text-align: right;">Snowball Porter</th>
 <th style="text-align: right;">Snowball English</th>
 </tr>
@@ -1486,7 +1486,7 @@
 <li>simple inflections,</li>
 <li>common derivational forms,</li>
 <li>US and UK spelling families,</li>
-<li>lexical forms appropriate for <code>US_UK_PROFI</code>.</li>
+<li>lexical forms appropriate for the current bundled <code>US_UK</code> resource (with historical continuity from earlier <code>US_UK_PROFI</code> runs).</li>
 </ul>
 <p>This design keeps runs reproducible across environments and avoids accidental drift caused by changing external corpora.</p>
 <h2 id="running-benchmarks">Running benchmarks</h2>
