@@ -13,6 +13,12 @@ def pomScmDeveloperConnection = providers.gradleProperty('pomScmDeveloperConnect
 def pomLicenseName = providers.gradleProperty('pomLicenseName').orNull
 def pomLicenseUrl = providers.gradleProperty('pomLicenseUrl').orNull
 def pomLicenseDistribution = providers.gradleProperty('pomLicenseDistribution').orElse('repo').get()
+def pomStemmerDataLicenseName = providers.gradleProperty('pomStemmerDataLicenseName')
+        .orElse('Stemmer Data License Policy')
+        .get()
+def pomStemmerDataLicenseUrl = providers.gradleProperty('pomStemmerDataLicenseUrl')
+        .orElse('https://github.com/leogalambos/Radixor/blob/main/LICENSE-stemmer-data')
+        .get()
 def pomDeveloperId = providers.gradleProperty('pomDeveloperId').orElse('egothor').get()
 def pomDeveloperName = providers.gradleProperty('pomDeveloperName').orElse('Leo Galambos').get()
 def pomDeveloperEmail = providers.gradleProperty('pomDeveloperEmail').orElse('egothor@gmail.com').get()
@@ -43,6 +49,11 @@ publishing {
                     license {
                         name = pomLicenseName
                         url = pomLicenseUrl
+                        distribution = pomLicenseDistribution
+                    }
+                    license {
+                        name = pomStemmerDataLicenseName
+                        url = pomStemmerDataLicenseUrl
                         distribution = pomLicenseDistribution
                     }
                 }
@@ -93,6 +104,8 @@ tasks.register('validateReleaseMetadata') {
         if (pomScmDeveloperConnection == null || pomScmDeveloperConnection.isBlank()) missing.add('pomScmDeveloperConnection')
         if (pomLicenseName == null || pomLicenseName.isBlank()) missing.add('pomLicenseName')
         if (pomLicenseUrl == null || pomLicenseUrl.isBlank()) missing.add('pomLicenseUrl')
+        if (pomStemmerDataLicenseName == null || pomStemmerDataLicenseName.isBlank()) missing.add('pomStemmerDataLicenseName')
+        if (pomStemmerDataLicenseUrl == null || pomStemmerDataLicenseUrl.isBlank()) missing.add('pomStemmerDataLicenseUrl')
         if (signingKey == null || signingKey.isBlank()) missing.add('pomSigningKey / SIGNING_KEY')
         if (signingPassword == null || signingPassword.isBlank()) missing.add('pomSigningPassword / SIGNING_PASSWORD')
 

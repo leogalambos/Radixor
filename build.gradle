@@ -237,6 +237,10 @@ distributions {
                 into ''
             }
 
+            from('LICENSE-stemmer-data') {
+                into ''
+            }
+
             from('docs') {
                 into 'docs'
                 include '**/*.md'
