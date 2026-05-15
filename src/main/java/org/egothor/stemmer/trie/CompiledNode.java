@@ -53,6 +53,11 @@ import java.util.Objects;
 public record CompiledNode<V>(char[] edgeLabels, CompiledNode<V>[] children, V[] orderedValues, int... orderedCounts) {
 
     /**
+     * Number of child edges where linear scan is cheaper than binary search.
+     */
+    private static final int LINEAR_CHILD_COUNT_THRESHOLD = 4;
+
+    /**
      * Creates one validated compiled node.
      *
      * @throws NullPointerException     if any array argument is {@code null}
@@ -140,6 +145,19 @@ public record CompiledNode<V>(char[] edgeLabels, CompiledNode<V>[] children, V[]
      * @return child node, or {@code null} if absent
      */
     public CompiledNode<V> findChild(final char edge) {
+        final int childCount = this.edgeLabels.length;
+        if (childCount == 0) {
+            return null;
+        }
+        if (childCount <= LINEAR_CHILD_COUNT_THRESHOLD) {
+            for (int index = 0; index < childCount; index++) {
+                if (this.edgeLabels[index] == edge) {
+                    return this.children[index];
+                }
+            }
+            return null;
+        }
+
         final int index = Arrays.binarySearch(this.edgeLabels, edge);
         if (index < 0) {
             return null;

@@ -96,11 +96,6 @@ public final class FrequencyTrie<V> {
     private static final Logger LOGGER = Logger.getLogger(FrequencyTrie.class.getName());
 
     /**
-     * Factory used to create correctly typed arrays for {@link #getAll(String)}.
-     */
-    private final IntFunction<V[]> arrayFactory;
-
-    /**
      * Root node of the compiled read-only trie.
      */
     private final CompiledNode<V> root;
@@ -109,6 +104,26 @@ public final class FrequencyTrie<V> {
      * Metadata persisted together with this trie.
      */
     private final TrieMetadata metadata;
+
+    /**
+     * Cached traversal direction used for key lookup.
+     */
+    private final WordTraversalDirection lookupTraversalDirection;
+
+    /**
+     * Whether lookups require lowercase normalization.
+     */
+    private final boolean lowercasesLookupKeys;
+
+    /**
+     * Whether lookups require diacritic stripping.
+     */
+    private final boolean removeDiacritics;
+
+    /**
+     * Shared empty array instance for empty lookup results from {@link #getAll(String)}.
+     */
+    private final V[] emptyValues;
 
     /**
      * Binary format magic header.
@@ -145,9 +160,12 @@ public final class FrequencyTrie<V> {
      */
     private FrequencyTrie(final IntFunction<V[]> arrayFactory, final CompiledNode<V> root,
             final TrieMetadata metadata) {
-        this.arrayFactory = Objects.requireNonNull(arrayFactory, "arrayFactory");
         this.root = Objects.requireNonNull(root, "root");
         this.metadata = Objects.requireNonNull(metadata, "metadata");
+        this.lookupTraversalDirection = metadata.traversalDirection();
+        this.lowercasesLookupKeys = metadata.caseProcessingMode() == CaseProcessingMode.LOWERCASE_WITH_LOCALE_ROOT;
+        this.removeDiacritics = metadata.diacriticProcessingMode() == DiacriticProcessingMode.REMOVE;
+        this.emptyValues = arrayFactory.apply(0);
     }
 
     /**
@@ -172,10 +190,14 @@ public final class FrequencyTrie<V> {
     public V get(final String key) {
         Objects.requireNonNull(key, "key");
         final CompiledNode<V> node = findNode(normalizeLookupKey(key));
-        if (node == null || node.orderedValues().length == 0) {
+        if (node == null) {
             return null;
         }
-        return node.orderedValues()[0];
+        final V[] orderedValues = node.orderedValues();
+        if (orderedValues.length == 0) {
+            return null;
+        }
+        return orderedValues[0];
     }
 
     /**
@@ -201,13 +223,18 @@ public final class FrequencyTrie<V> {
      *         value is stored at the addressed node
      * @throws NullPointerException if {@code key} is {@code null}
      */
+    @SuppressWarnings("PMD.MethodReturnsInternalArray")
     public V[] getAll(final String key) {
         Objects.requireNonNull(key, "key");
         final CompiledNode<V> node = findNode(normalizeLookupKey(key));
-        if (node == null || node.orderedValues().length == 0) {
-            return this.arrayFactory.apply(0);
+        if (node == null) {
+            return this.emptyValues;
         }
-        return Arrays.copyOf(node.orderedValues(), node.orderedValues().length);
+        final V[] orderedValues = node.orderedValues();
+        if (orderedValues.length == 0) {
+            return this.emptyValues;
+        }
+        return Arrays.copyOf(orderedValues, orderedValues.length);
     }
 
     /**
@@ -232,16 +259,28 @@ public final class FrequencyTrie<V> {
      *         if the key does not exist or no value is stored at the addressed node
      * @throws NullPointerException if {@code key} is {@code null}
      */
+    @SuppressWarnings("PMD.AvoidLiteralsInIfCondition")
     public List<ValueCount<V>> getEntries(final String key) {
         Objects.requireNonNull(key, "key");
         final CompiledNode<V> node = findNode(normalizeLookupKey(key));
-        if (node == null || node.orderedValues().length == 0) {
+        if (node == null) {
             return List.of();
         }
 
-        final List<ValueCount<V>> entries = new ArrayList<>(node.orderedValues().length);
-        for (int index = 0; index < node.orderedValues().length; index++) {
-            entries.add(new ValueCount<>(node.orderedValues()[index], node.orderedCounts()[index]));
+        final V[] orderedValues = node.orderedValues();
+        final int valueCount = orderedValues.length;
+        if (valueCount == 0) {
+            return List.of();
+        }
+
+        if (valueCount == 1) {
+            return List.of(new ValueCount<>(orderedValues[0], node.orderedCounts()[0]));
+        }
+
+        final int[] orderedCounts = node.orderedCounts();
+        final List<ValueCount<V>> entries = new ArrayList<>(valueCount);
+        for (int index = 0; index < valueCount; index++) {
+            entries.add(new ValueCount<>(orderedValues[index], orderedCounts[index]));
         }
         return Collections.unmodifiableList(entries);
     }
@@ -644,9 +683,18 @@ public final class FrequencyTrie<V> {
      */
     private CompiledNode<V> findNode(final String key) {
         CompiledNode<V> current = this.root;
+        if (this.lookupTraversalDirection == WordTraversalDirection.BACKWARD) {
+            for (int traversalOffset = key.length() - 1; traversalOffset >= 0; traversalOffset--) {
+                current = current.findChild(key.charAt(traversalOffset));
+                if (current == null) {
+                    return null;
+                }
+            }
+            return current;
+        }
+
         for (int traversalOffset = 0; traversalOffset < key.length(); traversalOffset++) {
-            current = current.findChild(
-                    key.charAt(this.metadata.traversalDirection().logicalIndex(key.length(), traversalOffset)));
+            current = current.findChild(key.charAt(traversalOffset));
             if (current == null) {
                 return null;
             }
@@ -661,13 +709,15 @@ public final class FrequencyTrie<V> {
      * @return normalized key for trie traversal
      */
     private String normalizeLookupKey(final String key) {
-        String normalized = key;
-
-        if (this.metadata.caseProcessingMode() == CaseProcessingMode.LOWERCASE_WITH_LOCALE_ROOT) {
-            normalized = normalized.toLowerCase(Locale.ROOT);
+        if (!this.lowercasesLookupKeys && !this.removeDiacritics) {
+            return key;
         }
 
-        if (this.metadata.diacriticProcessingMode() == DiacriticProcessingMode.REMOVE) {
+        String normalized = key;
+        if (this.lowercasesLookupKeys) {
+            normalized = normalized.toLowerCase(Locale.ROOT);
+        }
+        if (this.removeDiacritics) {
             normalized = DiacriticStripper.strip(normalized);
         } else if (this.metadata.diacriticProcessingMode() == DiacriticProcessingMode.AS_IS_AND_STRIPPED_FALLBACK) {
             throw new UnsupportedOperationException(

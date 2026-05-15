@@ -33,6 +33,9 @@ configurations {
 java {
     withSourcesJar()
     withJavadocJar()
+
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 }
 
 tasks.withType(AbstractArchiveTask).configureEach {
@@ -51,18 +54,14 @@ pmd {
     ruleSetFiles = files(rootProject.file(".ruleset"))
 }
 
-tasks.withType(JavaCompile).configureEach {
-    options.release = 21
-}
-
 dependencyLocking {
     lockAllConfigurations()
 
-	lockMode = LockMode.STRICT
+    lockMode = LockMode.STRICT
 }
 
 dependencies {
-	jmhImplementation sourceSets.main.output
+    jmhImplementation sourceSets.main.output
 
     testImplementation platform(libs.junit.bom)
     testImplementation libs.junit.jupiter
@@ -71,7 +70,7 @@ dependencies {
     testImplementation libs.mockito.core
     testImplementation libs.mockito.junit.jupiter
     testImplementation libs.jqwik
-    
+
     mockitoAgent(libs.mockito.core) {
         transitive = false
     }
@@ -102,12 +101,12 @@ dependencyCheck {
         delay = nvdApiKey != null ? 3500 : 8000
         validForHours = 4
     }
-    
+
     if (dependencyCheckSuppressionFile.exists()) {
         suppressionFile = dependencyCheckSuppressionFile.absolutePath
         failBuildOnUnusedSuppressionRule = true
     }
-} 
+}
 
 tasks.withType(Test).configureEach {
     useJUnitPlatform()
@@ -245,7 +244,7 @@ distributions {
                 into 'docs'
                 include '**/*.md'
             }
-            
+
             from(layout.buildDirectory.dir('generated/release-notes')) {
                 into ''
                 include 'CHANGELOG.md'

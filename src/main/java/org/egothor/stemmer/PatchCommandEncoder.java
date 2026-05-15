@@ -122,6 +122,16 @@ public final class PatchCommandEncoder {
     /* default */ static final String NOOP_PATCH = String.valueOf(new char[] { NOOP_OPCODE, NOOP_ARGUMENT });
 
     /**
+     * Prefix used in unsupported NOOP patch argument exceptions.
+     */
+    private static final String MSG_NOOP = "Unsupported NOOP patch argument: ";
+
+    /**
+     * Prefix used in unsupported patch opcode exceptions.
+     */
+    private static final String MSG_OPCODE = "Unsupported patch opcode: ";
+
+    /**
      * Safety penalty used to prevent a mismatch from being selected as a match.
      */
     private static final int MISMATCH_PENALTY = 100;
@@ -413,6 +423,9 @@ public final class PatchCommandEncoder {
         if ((patchCommand.length() & 1) != 0) {
             return source;
         }
+        if (patchCommand.length() == 2) {
+            return applySingleBackwardInstruction(source, patchCommand.charAt(0), patchCommand.charAt(1));
+        }
 
         final StringBuilder result = new StringBuilder(source);
         if (result.isEmpty()) {
@@ -494,6 +507,9 @@ public final class PatchCommandEncoder {
         if ((patchCommand.length() & 1) != 0) {
             return source;
         }
+        if (patchCommand.length() == 2) {
+            return applySingleForwardInstruction(source, patchCommand.charAt(0), patchCommand.charAt(1));
+        }
 
         final StringBuilder result = new StringBuilder(source);
         if (result.isEmpty()) {
@@ -550,6 +566,102 @@ public final class PatchCommandEncoder {
         }
 
         return result.toString();
+    }
+
+    /**
+     * Applies a single backward-direction patch instruction.
+     *
+     * @param source   original source word
+     * @param opcode   patch opcode
+     * @param argument encoded patch argument
+     * @return transformed source after one instruction
+     */
+    private static String applySingleBackwardInstruction(final String source, final char opcode, final char argument) {
+        final int sourceLength = source.length();
+        final int encodedValue;
+
+        switch (opcode) {
+            case DELETE_OPCODE:
+                encodedValue = decodeEncodedCount(argument);
+                if (encodedValue < 1 || encodedValue > sourceLength) {
+                    return source;
+                }
+                return source.substring(0, sourceLength - encodedValue);
+
+            case INSERT_OPCODE:
+                final char[] insertTarget = new char[sourceLength + 1];
+                source.getChars(0, sourceLength, insertTarget, 0);
+                insertTarget[sourceLength] = argument;
+                return new String(insertTarget);
+
+            case REPLACE_OPCODE:
+                if (sourceLength == 0) {
+                    return source;
+                }
+                final char[] replaceTarget = source.toCharArray();
+                replaceTarget[sourceLength - 1] = argument;
+                return new String(replaceTarget);
+
+            case SKIP_OPCODE:
+                return source;
+
+            case NOOP_OPCODE:
+                if (argument != NOOP_ARGUMENT) {
+                    throw new IllegalArgumentException(MSG_NOOP + argument);
+                }
+                return source;
+
+            default:
+                throw new IllegalArgumentException(MSG_OPCODE + opcode);
+        }
+    }
+
+    /**
+     * Applies a single forward-direction patch instruction.
+     *
+     * @param source   original source word
+     * @param opcode   patch opcode
+     * @param argument encoded patch argument
+     * @return transformed source after one instruction
+     */
+    private static String applySingleForwardInstruction(final String source, final char opcode, final char argument) {
+        final int sourceLength = source.length();
+        final int encodedValue;
+
+        switch (opcode) {
+            case DELETE_OPCODE:
+                encodedValue = decodeEncodedCount(argument);
+                if (encodedValue < 1 || encodedValue > sourceLength) {
+                    return source;
+                }
+                return source.substring(encodedValue);
+
+            case INSERT_OPCODE:
+                final char[] insertTarget = new char[sourceLength + 1];
+                insertTarget[0] = argument;
+                source.getChars(0, sourceLength, insertTarget, 1);
+                return new String(insertTarget);
+
+            case REPLACE_OPCODE:
+                if (sourceLength == 0) {
+                    return source;
+                }
+                final char[] replaceTarget = source.toCharArray();
+                replaceTarget[0] = argument;
+                return new String(replaceTarget);
+
+            case SKIP_OPCODE:
+                return source;
+
+            case NOOP_OPCODE:
+                if (argument != NOOP_ARGUMENT) {
+                    throw new IllegalArgumentException(MSG_NOOP + argument);
+                }
+                return source;
+
+            default:
+                throw new IllegalArgumentException(MSG_OPCODE + opcode);
+        }
     }
 
     /**
