@@ -84,7 +84,7 @@ publishing {
 }
 
 signing {
-    required { !version.toString().endsWith('-SNAPSHOT') }
+    required = !version.toString().endsWith('-SNAPSHOT')
     if (signingKey != null && !signingKey.isBlank()) {
         useInMemoryPgpKeys(signingKey, signingPassword)
         sign publishing.publications.mavenJava

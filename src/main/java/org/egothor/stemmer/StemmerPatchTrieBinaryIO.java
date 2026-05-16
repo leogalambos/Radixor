@@ -96,6 +96,29 @@ public final class StemmerPatchTrieBinaryIO {
 
     /**
      * Reads a GZip-compressed binary patch-command trie from a filesystem path
+     * with an optional dense child lookup span override.
+     * <p>
+     * This is a runtime-only tuning parameter. The dense-span setting is not
+     * persisted in the file and does not change the compiled metadata.
+     * </p>
+     *
+     * @param path             source file
+     * @param maxExpandedIndex dense lookup span override; negative values use
+     *                         {@link FrequencyTrie#DEFAULT_MAX_EXPANDED_INDEX}
+     * @return deserialized trie
+     * @throws NullPointerException if {@code path} is {@code null}
+     * @throws IOException          if reading or decompression fails
+     */
+    public static FrequencyTrie<String> read(final Path path, final int maxExpandedIndex) throws IOException {
+        Objects.requireNonNull(path, "path");
+
+        try (InputStream fileInputStream = Files.newInputStream(path)) {
+            return read(fileInputStream, maxExpandedIndex);
+        }
+    }
+
+    /**
+     * Reads a GZip-compressed binary patch-command trie from a filesystem path
      * string.
      *
      * @param fileName source file name or path string
@@ -106,6 +129,26 @@ public final class StemmerPatchTrieBinaryIO {
     public static FrequencyTrie<String> read(final String fileName) throws IOException {
         Objects.requireNonNull(fileName, "fileName");
         return read(Path.of(fileName));
+    }
+
+    /**
+     * Reads a GZip-compressed binary patch-command trie from a filesystem path
+     * string with an optional dense child lookup span override.
+     * <p>
+     * This is a runtime-only tuning parameter. The dense-span setting is not
+     * persisted in the file and does not change the compiled metadata.
+     * </p>
+     *
+     * @param fileName         source file name or path string
+     * @param maxExpandedIndex dense lookup span override; negative values use
+     *                         {@link FrequencyTrie#DEFAULT_MAX_EXPANDED_INDEX}
+     * @return deserialized trie
+     * @throws NullPointerException if {@code fileName} is {@code null}
+     * @throws IOException          if reading or decompression fails
+     */
+    public static FrequencyTrie<String> read(final String fileName, final int maxExpandedIndex) throws IOException {
+        Objects.requireNonNull(fileName, "fileName");
+        return read(Path.of(fileName), maxExpandedIndex);
     }
 
     /**
@@ -126,6 +169,34 @@ public final class StemmerPatchTrieBinaryIO {
         try (GZIPInputStream gzipInputStream = new GZIPInputStream(new BufferedInputStream(inputStream));
                 DataInputStream dataInputStream = new DataInputStream(gzipInputStream)) {
             final FrequencyTrie<String> trie = FrequencyTrie.readFrom(dataInputStream, String[]::new, STRING_CODEC);
+
+            LOGGER.log(Level.FINE, "Read compressed binary stemmer trie.");
+            return trie;
+        }
+    }
+
+    /**
+     * Reads a GZip-compressed binary patch-command trie from an input stream with
+     * an optional dense child lookup span override.
+     * <p>
+     * This is a runtime-only tuning parameter. The dense-span setting is not
+     * persisted in the file and does not change the compiled metadata.
+     * </p>
+     *
+     * @param inputStream     source stream
+     * @param maxExpandedIndex dense lookup span override; negative values use
+     *                         {@link FrequencyTrie#DEFAULT_MAX_EXPANDED_INDEX}
+     * @return deserialized trie
+     * @throws NullPointerException if {@code inputStream} is {@code null}
+     * @throws IOException          if reading or decompression fails
+     */
+    public static FrequencyTrie<String> read(final InputStream inputStream, final int maxExpandedIndex) throws IOException {
+        Objects.requireNonNull(inputStream, "inputStream");
+
+        try (GZIPInputStream gzipInputStream = new GZIPInputStream(new BufferedInputStream(inputStream));
+                DataInputStream dataInputStream = new DataInputStream(gzipInputStream)) {
+            final FrequencyTrie<String> trie = FrequencyTrie.readFrom(dataInputStream, String[]::new, STRING_CODEC,
+                    maxExpandedIndex);
 
             LOGGER.log(Level.FINE, "Read compressed binary stemmer trie.");
             return trie;

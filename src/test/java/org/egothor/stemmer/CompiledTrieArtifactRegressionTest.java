@@ -70,10 +70,11 @@ import org.junit.jupiter.params.provider.MethodSource;
  * <li>compressed artifact reproducibility within the active format version</li>
  * </ul>
  */
-@Tag("unit")
+@Tag("compat")
 @Tag("regression")
 @Tag("determinism")
 @Tag("serialization")
+@Tag("trie")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 final class CompiledTrieArtifactRegressionTest {
 

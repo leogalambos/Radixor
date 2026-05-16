@@ -44,7 +44,7 @@ import java.util.Set;
 import net.jqwik.api.ForAll;
 import net.jqwik.api.Label;
 import net.jqwik.api.Property;
-import net.jqwik.api.Tag;
+import org.junit.jupiter.api.Tag;
 
 /**
  * Property-based tests for patch-command stemmer tries.
@@ -56,9 +56,8 @@ import net.jqwik.api.Tag;
  * persistence must not alter that behavior.
  */
 @Label("Stemmer patch trie properties")
-@Tag("unit")
 @Tag("property")
-@Tag("stemming")
+@Tag("stemmer")
 class StemmerPatchTrieProperties extends PropertyBasedTestSupport {
 
     /**

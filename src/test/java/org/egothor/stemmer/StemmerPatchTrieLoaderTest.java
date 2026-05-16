@@ -85,9 +85,10 @@ import org.junit.jupiter.params.provider.MethodSource;
  * <li>the current bundled language set, including right-to-left metadata</li>
  * </ul>
  */
-@Tag("unit")
 @Tag("integration")
 @Tag("stemmer")
+@Tag("io")
+@Tag("parser")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 final class StemmerPatchTrieLoaderTest {
 
@@ -210,36 +211,43 @@ final class StemmerPatchTrieLoaderTest {
                 Arguments.of("14-load-binary-string",
                         (ExecutableOperation) () -> StemmerPatchTrieLoader.loadBinary((String) null),
                         StemmerPatchTrieLoader.FILENAME_REQUIRED),
-                Arguments.of("15-load-binary-stream",
+                Arguments.of("15-load-binary-path-override",
+                        (ExecutableOperation) () -> StemmerPatchTrieLoader.loadBinary((Path) null, FrequencyTrie.DEFAULT_MAX_EXPANDED_INDEX),
+                        "path"),
+                Arguments.of("16-load-binary-string-override",
+                        (ExecutableOperation) () -> StemmerPatchTrieLoader.loadBinary((String) null,
+                                FrequencyTrie.DEFAULT_MAX_EXPANDED_INDEX),
+                        StemmerPatchTrieLoader.FILENAME_REQUIRED),
+                Arguments.of("17-load-binary-stream",
                         (ExecutableOperation) () -> StemmerPatchTrieLoader.loadBinary((InputStream) null),
                         "inputStream"),
-                Arguments.of("16-save-binary-null-trie-path",
+                Arguments.of("18-save-binary-null-trie-path",
                         (ExecutableOperation) () -> StemmerPatchTrieLoader.saveBinary(null, tempPath()), "trie"),
-                Arguments.of("17-save-binary-null-path",
+                Arguments.of("19-save-binary-null-path",
                         (ExecutableOperation) () -> StemmerPatchTrieLoader.saveBinary(trie, (Path) null), "path"),
-                Arguments.of("18-save-binary-null-trie-string",
+                Arguments.of("20-save-binary-null-trie-string",
                         (ExecutableOperation) () -> StemmerPatchTrieLoader.saveBinary(null, tempPath().toString()),
                         "trie"),
-                Arguments.of("19-save-binary-null-string",
+                Arguments.of("21-save-binary-null-string",
                         (ExecutableOperation) () -> StemmerPatchTrieLoader.saveBinary(trie, (String) null),
                         StemmerPatchTrieLoader.FILENAME_REQUIRED),
-                Arguments.of("20-load-language-null-metadata",
+                Arguments.of("22-load-language-null-metadata",
                         (ExecutableOperation) () -> StemmerPatchTrieLoader.load(StemmerPatchTrieLoader.Language.US_UK,
                                 true, (TrieMetadata) null),
                         "metadata"),
-                Arguments.of("21-load-path-null-metadata",
+                Arguments.of("23-load-path-null-metadata",
                         (ExecutableOperation) () -> StemmerPatchTrieLoader.load(tempPath(), true, (TrieMetadata) null),
                         "metadata"),
-                Arguments.of("22-load-string-null-metadata",
+                Arguments.of("24-load-string-null-metadata",
                         (ExecutableOperation) () -> StemmerPatchTrieLoader.load(tempPath().toString(), true,
                                 (TrieMetadata) null),
                         "metadata"),
-                Arguments.of("23-load-binary-metadata-path-null",
+                Arguments.of("25-load-binary-metadata-path-null",
                         (ExecutableOperation) () -> StemmerPatchTrieLoader.loadBinaryMetadata((Path) null), "path"),
-                Arguments.of("24-load-binary-metadata-string-null",
+                Arguments.of("26-load-binary-metadata-string-null",
                         (ExecutableOperation) () -> StemmerPatchTrieLoader.loadBinaryMetadata((String) null),
                         StemmerPatchTrieLoader.FILENAME_REQUIRED),
-                Arguments.of("25-load-binary-metadata-stream-null",
+                Arguments.of("27-load-binary-metadata-stream-null",
                         (ExecutableOperation) () -> StemmerPatchTrieLoader.loadBinaryMetadata((InputStream) null),
                         "inputStream"));
     }
@@ -513,6 +521,44 @@ final class StemmerPatchTrieLoaderTest {
         }
 
         /**
+         * Verifies that binary load overloads with an explicit dense lookup span
+         * preserve trie semantics while honoring the dense-layout override.
+         */
+        @Test
+        @DisplayName("Binary dense-span override overloads should load equivalent tries")
+        void shouldLoadBinaryWithDenseSpanOverrideOverloads() throws IOException {
+            final Path dictionaryFile = writeDictionary("""
+                    run	running	runs	runner
+                    city	cities
+                    study	studies	studying
+                    """);
+            final Path binaryFile = tempDir.resolve("stemmer-trie-overrides.bin.gz");
+
+            final FrequencyTrie<String> original = StemmerPatchTrieLoader.load(dictionaryFile, true,
+                    DEFAULT_REDUCTION_MODE);
+
+            StemmerPatchTrieLoader.saveBinary(original, binaryFile);
+
+            final FrequencyTrie<String> fromPathDefault = StemmerPatchTrieLoader.loadBinary(binaryFile);
+            final FrequencyTrie<String> fromPathDefaultByNegative = StemmerPatchTrieLoader.loadBinary(binaryFile,
+                    FrequencyTrie.DEFAULT_MAX_EXPANDED_INDEX);
+            final FrequencyTrie<String> fromPathNoDense = StemmerPatchTrieLoader.loadBinary(binaryFile, 0);
+            final FrequencyTrie<String> fromStringNoDense = StemmerPatchTrieLoader.loadBinary(binaryFile.toString(), 0);
+
+            assertTriePatchSemanticsEqual(original, fromPathDefault, "run", "running", "runner", "cities", "studying");
+            assertTriePatchSemanticsEqual(original, fromPathDefaultByNegative, "run", "running", "runner", "cities",
+                    "studying");
+            assertTriePatchSemanticsEqual(original, fromPathNoDense, "run", "running", "runner", "cities", "studying");
+            assertTriePatchSemanticsEqual(original, fromStringNoDense, "run", "running", "runner", "cities",
+                    "studying");
+
+            assertFalse(fromPathNoDense.root().hasDenseLookup(),
+                    "Zero span should disable dense lookup on the loaded root.");
+            assertFalse(fromStringNoDense.root().hasDenseLookup(),
+                    "Zero span should disable dense lookup on the loaded root.");
+        }
+
+        /**
          * Writes a dictionary file into the temporary directory.
          *
          * @param content dictionary content
@@ -530,6 +576,7 @@ final class StemmerPatchTrieLoaderTest {
      * Bundled dictionary integration tests.
      */
     @Nested
+    @Tag("slow")
     @DisplayName("Bundled dictionaries")
     final class BundledDictionaryTests {
 

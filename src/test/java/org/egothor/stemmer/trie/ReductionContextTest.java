@@ -47,7 +47,7 @@ import org.junit.jupiter.api.Test;
  * Unit tests for {@link ReductionContext}.
  */
 @Tag("unit")
-@Tag("fast")
+@Tag("trie")
 @DisplayName("ReductionContext")
 class ReductionContextTest {
 

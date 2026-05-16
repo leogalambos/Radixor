@@ -87,6 +87,43 @@ public final class LoadBinaryExample {
 
 The binary format is the native `FrequencyTrie` serialization wrapped in GZip compression. It includes persisted `TrieMetadata`, so lookup after loading uses the traversal, case-processing, diacritic-processing, and reduction settings captured when the trie was compiled.
 
+## Tune child lookup density when loading binaries
+
+To optimize hot-path latency, you can tune direct child indexing by passing `maxExpandedIndex`
+at load time. This does not change persisted metadata, only the materialized in-memory form.
+
+```java
+import java.io.IOException;
+import java.nio.file.Path;
+
+import org.egothor.stemmer.FrequencyTrie;
+import org.egothor.stemmer.StemmerPatchTrieLoader;
+
+public final class LoadBinaryWithDenseLookupExample {
+
+    private LoadBinaryWithDenseLookupExample() {
+        throw new AssertionError("No instances.");
+    }
+
+    public static void main(final String[] arguments) throws IOException {
+        final FrequencyTrie<String> balanced = StemmerPatchTrieLoader.loadBinary(
+                Path.of("stemmers", "english.radixor.gz"));
+
+        final FrequencyTrie<String> fast = StemmerPatchTrieLoader.loadBinary(
+                Path.of("stemmers", "english.radixor.gz"),
+                1024);
+
+        final FrequencyTrie<String> compact = StemmerPatchTrieLoader.loadBinary(
+                Path.of("stemmers", "english.radixor.gz"),
+                0);
+    }
+}
+```
+
+Negative values still use `FrequencyTrie.DEFAULT_MAX_EXPANDED_INDEX`.
+
+[Lookup Edge Optimization](lookup-edge-optimization.md) describes the trade-off in detail and examples for build-time tuning as well.
+
 ## Build directly with a mutable builder
 
 A `FrequencyTrie.Builder<V>` accepts repeated `put(key, value)` calls and compiles the final read-only trie through `build()`. Compilation performs bottom-up reduction and produces the compact immutable runtime representation.

@@ -58,6 +58,27 @@ A deterministic system is easier to test, easier to reason about, and safer to i
 
 The project is intended to maintain very high confidence in both core correctness and behavioral stability.
 
+The recommended execution strategy is defined by the tagged test profiles in [Test taxonomy and execution filtering](test-taxonomy-and-filtering.md). In practice, teams can execute profile tasks directly:
+
+- `./gradlew ciSmoke`: fast local/PR safety checks (`unit`, excluding `slow`; additionally excludes
+  `CompileIntegrationTest` as a defensive safeguard).
+- `./gradlew ciSlow`: enterprise heavy gate for all tests marked with `slow` (typically
+  production dictionary and large corpus verification). This should be used for scheduled/manual
+  hardening gates and not in standard release build.
+- `./gradlew ciCore`: behavioral coverage of trie and frequency-trie paths (`unit` + `property` where applicable)
+- `./gradlew ciIntegration`: pipeline and CLI integration path checks
+- `./gradlew ciCompat`: compatibility and regression verification for persisted artifacts
+- `./gradlew ciRelease`: full non-slow suite for release-confidence runs (all test tags except `slow`,
+  plus explicit name-based exclusion of `CompileIntegrationTest*` and
+  `StemmerPatchTrieLoaderTest$BundledDictionaryTests*` as additional guardrails)
+- `./gradlew ciNightly`: extended fuzz profile for robustness hardening
+- `./gradlew ci`: umbrella profile depending on smoke/core/integration/compat
+
+## Test taxonomy and execution filtering
+
+The full tag taxonomy and executable filter examples are documented in
+[Test taxonomy and execution filtering](test-taxonomy-and-filtering.md).
+
 ### Structural coverage
 
 High code coverage is treated as a useful signal, but not as a sufficient goal on its own. Coverage is valuable only when the covered scenarios actually pressure the implementation in meaningful ways.

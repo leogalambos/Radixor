@@ -50,7 +50,7 @@ import org.junit.jupiter.api.Test;
  * Unit tests for {@link LocalValueSummary}.
  */
 @Tag("unit")
-@Tag("fast")
+@Tag("trie")
 @DisplayName("LocalValueSummary")
 class LocalValueSummaryTest {
 

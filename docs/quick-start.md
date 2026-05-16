@@ -67,6 +67,36 @@ public final class LoadBinaryStemmerExample {
 }
 ```
 
+You can tune in-memory child lookup density at load time without changing the artifact:
+
+```java
+import java.io.IOException;
+import java.nio.file.Path;
+
+import org.egothor.stemmer.FrequencyTrie;
+import org.egothor.stemmer.StemmerPatchTrieLoader;
+
+public final class LoadBinaryStemmerExampleTuned {
+
+    private LoadBinaryStemmerExampleTuned() {
+        throw new AssertionError("No instances.");
+    }
+
+    public static void main(final String[] arguments) throws IOException {
+        final FrequencyTrie<String> fast = StemmerPatchTrieLoader.loadBinary(
+                Path.of("stemmers", "english.radixor.gz"),
+                1024);
+        final FrequencyTrie<String> compact = StemmerPatchTrieLoader.loadBinary(
+                Path.of("stemmers", "english.radixor.gz"),
+                128);
+
+        System.out.println("fast=" + fast.size() + ", compact=" + compact.size());
+    }
+}
+```
+
+For the trade-off details, see [Lookup Edge Optimization](lookup-edge-optimization.md).
+
 ### Build or extend a stemmer from dictionary data
 
 Radixor can also build a compiled trie from a custom dictionary. Dictionary lines consist of a canonical stem followed by zero or more variants. The input may be plain UTF-8 text or GZip-compressed UTF-8 text when loaded from a filesystem path. The parser applies `CaseProcessingMode` (default: `LOWERCASE_WITH_LOCALE_ROOT`), ignores leading and trailing whitespace around columns, supports line remarks introduced by `#` or `//`, and skips dictionary items that contain embedded whitespace.

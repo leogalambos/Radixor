@@ -33,6 +33,7 @@ package org.egothor.stemmer;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -377,6 +378,24 @@ class FrequencyTrieTest {
         final List<ValueCount<String>> entries = trie.getEntries("alpha");
 
         assertThrows(UnsupportedOperationException.class, () -> entries.add(new ValueCount<String>("z", 1)));
+    }
+
+    /**
+     * Verifies that {@link FrequencyTrie#getEntries(String)} short-circuits to a one-item immutable list.
+     */
+    @Test
+    @DisplayName("getEntries returns a one-item list for single stored values")
+    void getEntriesReturnsSingleItemListForSingleStoredValue() {
+        final FrequencyTrie.Builder<String> builder = rankedBuilder();
+
+        builder.put("gamma", "only");
+
+        final FrequencyTrie<String> trie = builder.build();
+
+        final List<ValueCount<String>> entries = trie.getEntries("gamma");
+
+        assertAll(() -> assertEquals(List.of(new ValueCount<String>("only", 1)), entries),
+                () -> assertThrows(UnsupportedOperationException.class, () -> entries.add(new ValueCount<String>("z", 1))));
     }
 
     /**
@@ -756,6 +775,115 @@ class FrequencyTrieTest {
     }
 
     /**
+     * Verifies that reading a compiled trie with a negative max-expanded override
+     * smaller than -1 is rejected.
+     */
+    @Test
+    @Tag("persistence")
+    @DisplayName("readFrom rejects invalid maxExpandedIndex override")
+    void readFromRejectsInvalidMaxExpandedIndexOverride() {
+        final byte[] bytes = createSerializedStream(0x45475452, 1, 1, 0, new NodeWriter[] { dataOutput -> {
+            dataOutput.writeInt(0);
+            dataOutput.writeInt(0);
+        } });
+
+        final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> FrequencyTrie.readFrom(new ByteArrayInputStream(bytes), String[]::new, STRING_CODEC, -2));
+
+        assertEquals("maxExpandedIndex must be >= -1.", exception.getMessage());
+    }
+
+    /**
+     * Verifies that the max-expanded override controls dense lookup materialization
+     * while preserving lookup semantics.
+     */
+    @Test
+    @Tag("persistence")
+    @DisplayName("readFrom respects dense lookup max-expanded index override")
+    void readFromRespectsDenseLookupMaxExpandedIndexOverride() throws IOException {
+        final FrequencyTrie.Builder<String> builder = rankedBuilder();
+
+        builder.put("a", "a");
+        builder.put("b", "b");
+        builder.put("c", "c");
+        builder.put("d", "d");
+
+        final FrequencyTrie<String> original = builder.build();
+        final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        original.writeTo(outputStream, STRING_CODEC);
+        final byte[] serializedTrie = outputStream.toByteArray();
+
+        final FrequencyTrie<String> defaultDense = FrequencyTrie.readFrom(new ByteArrayInputStream(serializedTrie), String[]::new,
+                STRING_CODEC);
+        final FrequencyTrie<String> defaultDenseByNegative = FrequencyTrie.readFrom(new ByteArrayInputStream(serializedTrie),
+                String[]::new, STRING_CODEC, -1);
+        final FrequencyTrie<String> disabledDense = FrequencyTrie.readFrom(new ByteArrayInputStream(serializedTrie), String[]::new,
+                STRING_CODEC, 0);
+
+        assertAll(
+                () -> assertTrue(defaultDense.root().hasDenseLookup(),
+                        "Default read should enable dense lookup for compact first-level edges."),
+                () -> assertTrue(defaultDenseByNegative.root().hasDenseLookup(),
+                        "Negative override should use the default dense lookup span."),
+                () -> assertFalse(disabledDense.root().hasDenseLookup(),
+                        "Zero override should disable dense lookup tables."),
+                () -> assertEquals(original.get("a"), disabledDense.get("a")),
+                () -> assertEquals(original.get("b"), disabledDense.get("b")),
+                () -> assertEquals(original.get("c"), disabledDense.get("c")),
+                () -> assertEquals(original.get("d"), disabledDense.get("d")),
+                () -> assertEquals(original.get("z"), disabledDense.get("z")));
+    }
+
+    /**
+     * Verifies that cyclic serialized node references are rejected as invalid
+     * serialization.
+     */
+    @Test
+    @Tag("persistence")
+    @DisplayName("readFrom rejects cyclic serialized node references")
+    void readFromRejectsCyclicSerializedNodeReferences() {
+        final byte[] bytes = createSerializedStream(0x45475452, 1, 2, 0, new NodeWriter[] {
+                dataOutput -> {
+                    dataOutput.writeInt(1);
+                    dataOutput.writeChar('b');
+                    dataOutput.writeInt(1);
+                    dataOutput.writeInt(0);
+                },
+                dataOutput -> {
+                    dataOutput.writeInt(1);
+                    dataOutput.writeChar('a');
+                    dataOutput.writeInt(0);
+                    dataOutput.writeInt(0);
+                } });
+
+        final IOException exception = assertThrows(IOException.class,
+                () -> FrequencyTrie.readFrom(new ByteArrayInputStream(bytes), String[]::new, STRING_CODEC));
+
+        assertTrue(exception.getMessage().contains("cyclic reference detected"));
+    }
+
+    /**
+     * Verifies that child node references outside the valid serialized range are
+     * rejected.
+     */
+    @Test
+    @Tag("persistence")
+    @DisplayName("readFrom rejects invalid child node identifiers")
+    void readFromRejectsInvalidChildNodeId() {
+        final byte[] bytes = createSerializedStream(0x45475452, 1, 1, 0, new NodeWriter[] { dataOutput -> {
+            dataOutput.writeInt(1);
+            dataOutput.writeChar('a');
+            dataOutput.writeInt(3);
+            dataOutput.writeInt(0);
+        } });
+
+        final IOException exception = assertThrows(IOException.class,
+                () -> FrequencyTrie.readFrom(new ByteArrayInputStream(bytes), String[]::new, STRING_CODEC));
+
+        assertTrue(exception.getMessage().contains("Invalid child node id"));
+    }
+
+    /**
      * Verifies that deserialization rejects an invalid stream magic header.
      */
     @Test
@@ -783,6 +911,27 @@ class FrequencyTrieTest {
                 () -> FrequencyTrie.readFrom(new ByteArrayInputStream(bytes), String[]::new, STRING_CODEC));
 
         assertTrue(exception.getMessage().contains("Unsupported trie stream version"));
+    }
+
+    /**
+     * Verifies that the latest stream version validates textual metadata blocks.
+     */
+    @Test
+    @Tag("persistence")
+    @DisplayName("readFrom rejects invalid textual metadata block")
+    void readFromRejectsInvalidTextualMetadataBlock() {
+        final int version = FrequencyTrie.currentFormatVersion();
+        final byte[] bytes = createSerializedStream(0x45475452, version, 1, 0, dataOutput -> {
+            dataOutput.writeUTF("not valid metadata");
+        }, new NodeWriter[] { dataOutput -> {
+            dataOutput.writeInt(0);
+            dataOutput.writeInt(0);
+        } });
+
+        final IOException exception = assertThrows(IOException.class,
+                () -> FrequencyTrie.readFrom(new ByteArrayInputStream(bytes), String[]::new, STRING_CODEC));
+
+        assertTrue(exception.getMessage().contains("Invalid metadata block"));
     }
 
     /**
@@ -863,6 +1012,129 @@ class FrequencyTrieTest {
     }
 
     /**
+     * Verifies that legacy version 1 metadata uses compatibility defaults.
+     */
+    @Test
+    @Tag("persistence")
+    @DisplayName("readFrom supports legacy version 1 metadata")
+    void readFromSupportsLegacyVersionOneMetadata() throws IOException {
+        final byte[] bytes = createSerializedStream(0x45475452, 1, 1, 0, new NodeWriter[] { dataOutput -> {
+            dataOutput.writeInt(0);
+            dataOutput.writeInt(0);
+        } });
+
+        final FrequencyTrie<String> trie = FrequencyTrie.readFrom(new ByteArrayInputStream(bytes), String[]::new, STRING_CODEC);
+
+        assertEquals(TrieMetadata.legacy(1, WordTraversalDirection.BACKWARD), trie.metadata());
+    }
+
+    /**
+     * Verifies that legacy version 2 metadata stores traversal direction and uses
+     * compatibility defaults for other values.
+     */
+    @Test
+    @Tag("persistence")
+    @DisplayName("readFrom supports legacy version 2 metadata")
+    void readFromSupportsLegacyVersionTwoMetadata() throws IOException {
+        final byte[] bytes = createSerializedStream(0x45475452, 2, 1, 0,
+                dataOutput -> dataOutput.writeInt(WordTraversalDirection.FORWARD.ordinal()), new NodeWriter[] { dataOutput -> {
+                    dataOutput.writeInt(0);
+                    dataOutput.writeInt(0);
+                } });
+
+        final FrequencyTrie<String> trie = FrequencyTrie.readFrom(new ByteArrayInputStream(bytes), String[]::new, STRING_CODEC);
+
+        assertEquals(TrieMetadata.legacy(2, WordTraversalDirection.FORWARD), trie.metadata());
+    }
+
+    /**
+     * Verifies that version 3 metadata includes reduction and diacritic
+     * processing settings.
+     */
+    @Test
+    @Tag("persistence")
+    @DisplayName("readFrom parses version 3 metadata")
+    void readFromParsesVersionThreeMetadata() throws IOException {
+        final ReductionSettings reductionSettings = new ReductionSettings(
+                ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS, 81, 4);
+
+        final byte[] bytes = createSerializedStream(0x45475452, 3, 1, 0,
+                dataOutput -> {
+                    dataOutput.writeInt(WordTraversalDirection.BACKWARD.ordinal());
+                    dataOutput.writeInt(reductionSettings.reductionMode().ordinal());
+                    dataOutput.writeInt(reductionSettings.dominantWinnerMinPercent());
+                    dataOutput.writeInt(reductionSettings.dominantWinnerOverSecondRatio());
+                    dataOutput.writeInt(DiacriticProcessingMode.REMOVE.ordinal());
+                },
+                new NodeWriter[] { dataOutput -> {
+                    dataOutput.writeInt(0);
+                    dataOutput.writeInt(0);
+                } });
+
+        final FrequencyTrie<String> trie = FrequencyTrie.readFrom(new ByteArrayInputStream(bytes), String[]::new, STRING_CODEC);
+        final TrieMetadata metadata = trie.metadata();
+
+        assertAll(() -> assertEquals(3, metadata.formatVersion()),
+                () -> assertEquals(WordTraversalDirection.BACKWARD, metadata.traversalDirection()),
+                () -> assertEquals(reductionSettings, metadata.reductionSettings()),
+                () -> assertEquals(DiacriticProcessingMode.REMOVE, metadata.diacriticProcessingMode()),
+                () -> assertEquals(CaseProcessingMode.LOWERCASE_WITH_LOCALE_ROOT, metadata.caseProcessingMode()));
+    }
+
+    /**
+     * Verifies that version 4 metadata additionally stores case-processing mode.
+     */
+    @Test
+    @Tag("persistence")
+    @DisplayName("readFrom parses version 4 case processing metadata")
+    void readFromParsesVersionFourCaseMetadata() throws IOException {
+        final ReductionSettings reductionSettings = new ReductionSettings(
+                ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS, 75, 3);
+
+        final byte[] bytes = createSerializedStream(0x45475452, 4, 1, 0,
+                dataOutput -> {
+                    dataOutput.writeInt(WordTraversalDirection.FORWARD.ordinal());
+                    dataOutput.writeInt(reductionSettings.reductionMode().ordinal());
+                    dataOutput.writeInt(reductionSettings.dominantWinnerMinPercent());
+                    dataOutput.writeInt(reductionSettings.dominantWinnerOverSecondRatio());
+                    dataOutput.writeInt(DiacriticProcessingMode.AS_IS.ordinal());
+                    dataOutput.writeInt(CaseProcessingMode.AS_IS.ordinal());
+                },
+                new NodeWriter[] { dataOutput -> {
+                    dataOutput.writeInt(0);
+                    dataOutput.writeInt(0);
+                } });
+
+        final FrequencyTrie<String> trie = FrequencyTrie.readFrom(new ByteArrayInputStream(bytes), String[]::new, STRING_CODEC);
+        final TrieMetadata metadata = trie.metadata();
+
+        assertAll(() -> assertEquals(4, metadata.formatVersion()),
+                () -> assertEquals(WordTraversalDirection.FORWARD, metadata.traversalDirection()),
+                () -> assertEquals(reductionSettings, metadata.reductionSettings()),
+                () -> assertEquals(DiacriticProcessingMode.AS_IS, metadata.diacriticProcessingMode()),
+                () -> assertEquals(CaseProcessingMode.AS_IS, metadata.caseProcessingMode()));
+    }
+
+    /**
+     * Verifies that invalid legacy metadata ordinals are rejected by validation.
+     */
+    @Test
+    @Tag("persistence")
+    @DisplayName("readFrom rejects invalid metadata ordinal in legacy stream")
+    void readFromRejectsInvalidLegacyMetadataOrdinal() {
+        final byte[] bytes = createSerializedStream(0x45475452, 2, 1, 0,
+                dataOutput -> dataOutput.writeInt(999), new NodeWriter[] { dataOutput -> {
+                    dataOutput.writeInt(0);
+                    dataOutput.writeInt(0);
+                } });
+
+        final IOException exception = assertThrows(IOException.class,
+                () -> FrequencyTrie.readFrom(new ByteArrayInputStream(bytes), String[]::new, STRING_CODEC));
+
+        assertTrue(exception.getMessage().contains("Invalid traversal direction ordinal"));
+    }
+
+    /**
      * Writes one node body into a synthetic serialized trie stream.
      */
     @FunctionalInterface
@@ -889,6 +1161,24 @@ class FrequencyTrieTest {
      */
     private static byte[] createSerializedStream(final int magic, final int version, final int nodeCount,
             final int rootNodeId, final NodeWriter[] nodes) {
+        return createSerializedStream(magic, version, nodeCount, rootNodeId, dataOutput -> {
+            // legacy and text-based versions write their metadata differently.
+        }, nodes);
+    }
+
+    /**
+     * Writes a synthetic serialized trie stream with a metadata writer hook.
+     *
+     * @param magic      stream magic
+     * @param version    stream version
+     * @param nodeCount  declared node count
+     * @param rootNodeId declared root node identifier
+     * @param metadata   version-specific metadata writer
+     * @param nodes      node body writers
+     * @return serialized bytes
+     */
+    private static byte[] createSerializedStream(final int magic, final int version, final int nodeCount,
+            final int rootNodeId, final MetadataWriter metadata, final NodeWriter[] nodes) {
         try {
             final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             final DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
@@ -897,6 +1187,7 @@ class FrequencyTrieTest {
             dataOutputStream.writeInt(version);
             dataOutputStream.writeInt(nodeCount);
             dataOutputStream.writeInt(rootNodeId);
+            metadata.write(dataOutputStream);
 
             for (NodeWriter node : nodes) {
                 node.write(dataOutputStream);
@@ -907,5 +1198,20 @@ class FrequencyTrieTest {
         } catch (IOException exception) {
             throw new IllegalStateException("Unexpected I/O while building synthetic trie stream.", exception);
         }
+    }
+
+    /**
+     * Writes one synthetic metadata block.
+     */
+    @FunctionalInterface
+    private interface MetadataWriter {
+
+        /**
+         * Writes metadata bytes for one stream version.
+         *
+         * @param dataOutput output stream
+         * @throws IOException if writing fails
+         */
+        void write(DataOutputStream dataOutput) throws IOException;
     }
 }

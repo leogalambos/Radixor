@@ -41,7 +41,7 @@ import org.junit.jupiter.api.Test;
  * Unit tests for {@link UnorderedLocalDescriptor}.
  */
 @Tag("unit")
-@Tag("fast")
+@Tag("trie")
 @DisplayName("UnorderedLocalDescriptor")
 class UnorderedLocalDescriptorTest {
 

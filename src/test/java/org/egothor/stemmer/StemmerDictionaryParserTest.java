@@ -75,6 +75,7 @@ import org.junit.jupiter.api.io.TempDir;
 @DisplayName("StemmerDictionaryParser")
 @Tag("unit")
 @Tag("parser")
+@Tag("stemmer")
 class StemmerDictionaryParserTest {
 
     /**

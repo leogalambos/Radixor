@@ -44,7 +44,7 @@ import org.junit.jupiter.api.Test;
  * Unit tests for {@link MutableNode}.
  */
 @Tag("unit")
-@Tag("fast")
+@Tag("trie")
 @DisplayName("MutableNode")
 class MutableNodeTest {
 

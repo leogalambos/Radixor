@@ -59,7 +59,7 @@ import org.junit.jupiter.api.Test;
  */
 @DisplayName("FrequencyTrieBuilders")
 @Tag("unit")
-@Tag("builder")
+@Tag("construction")
 @Tag("frequency-trie")
 class FrequencyTrieBuildersTest {
 

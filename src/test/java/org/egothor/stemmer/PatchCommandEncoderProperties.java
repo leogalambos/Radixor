@@ -36,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import net.jqwik.api.ForAll;
 import net.jqwik.api.Label;
 import net.jqwik.api.Property;
-import net.jqwik.api.Tag;
+import org.junit.jupiter.api.Tag;
 
 /**
  * Property-based tests for {@link PatchCommandEncoder}.
@@ -47,9 +47,9 @@ import net.jqwik.api.Tag;
  * reconstruct the exact requested target.
  */
 @Label("PatchCommandEncoder properties")
-@Tag("unit")
 @Tag("property")
 @Tag("patch")
+@Tag("stemmer")
 class PatchCommandEncoderProperties extends PropertyBasedTestSupport {
 
     /**

@@ -241,7 +241,7 @@ class PatchCommandEncoderTest {
      */
     @Nested
     @DisplayName("construction")
-    @Tag("constructor")
+    @Tag("construction")
     class ConstructionTests {
 
         /**
@@ -326,7 +326,7 @@ class PatchCommandEncoderTest {
      */
     @Nested
     @DisplayName("encode(String, String)")
-    @Tag("encode")
+    @Tag("encoding")
     class EncodeTests {
 
         /**
@@ -658,7 +658,7 @@ class PatchCommandEncoderTest {
      */
     @Nested
     @DisplayName("reversed-word processing")
-    @Tag("reverse")
+    @Tag("normalization")
     class ReversedWordProcessingTests {
 
         /**

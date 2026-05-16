@@ -23,7 +23,7 @@ These reports are primarily useful when reviewing the published API surface and 
 
 These reports describe the outcome of core verification and static-analysis stages for the latest published build:
 
-- [Unit test report](https://leogalambos.github.io/Radixor/builds/latest/test/)
+- [Release verification test report (ciRelease)](https://leogalambos.github.io/Radixor/builds/latest/test/)
 - [PMD report](https://leogalambos.github.io/Radixor/builds/latest/pmd/main.html)
 - [JaCoCo coverage report](https://leogalambos.github.io/Radixor/builds/latest/coverage/)
 - [PIT mutation testing report](https://leogalambos.github.io/Radixor/builds/latest/pitest/)

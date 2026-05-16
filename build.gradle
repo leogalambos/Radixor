@@ -108,9 +108,19 @@ dependencyCheck {
     }
 }
 
-tasks.withType(Test).configureEach {
-    useJUnitPlatform()
+def cliIncludeTags = project.findProperty('includeTags')?.toString() ?: System.getProperty('includeTags')
+def cliExcludeTags = project.findProperty('excludeTags')?.toString() ?: System.getProperty('excludeTags')
 
+def splitTagExpression = { String tagsExpr ->
+    if (tagsExpr == null || tagsExpr.isBlank()) {
+        return []
+    }
+    return tagsExpr.split(',')
+            .collect { it.trim() }
+            .findAll { it != null && !it.isBlank() }
+}
+
+tasks.withType(Test).configureEach {
     doFirst {
         jvmArgs "-javaagent:${configurations.mockitoAgent.singleFile}"
     }
@@ -123,12 +133,125 @@ tasks.withType(Test).configureEach {
     minHeapSize = '1g'
     maxHeapSize = '4g'
 
-    finalizedBy(tasks.named('jacocoTestReport'))
-
     reports {
         junitXml.required = true
         html.required = true
     }
+}
+
+def configureJUnitPlatformTags = { Test task, String includeTagsExpr, String excludeTagsExpr ->
+    task.useJUnitPlatform {
+        final def includes = splitTagExpression(includeTagsExpr)
+        final def excludes = splitTagExpression(excludeTagsExpr)
+
+        if (!includes.isEmpty()) {
+            includeTags(*includes.toArray(new String[0]))
+        }
+        if (!excludes.isEmpty()) {
+            excludeTags(*excludes.toArray(new String[0]))
+        }
+    }
+}
+
+tasks.named('test', Test) {
+    configureJUnitPlatformTags(it, cliIncludeTags, cliExcludeTags)
+    finalizedBy(tasks.named('jacocoTestReport'))
+}
+
+def configureTaggedTestProfile = { String taskName, String includeTagsExpr, String excludeTagsExpr = null,
+                                   String taskDescription = null, String testNameExcludePatterns = null ->
+    tasks.register(taskName, Test) {
+        group = 'verification'
+        description = taskDescription
+
+        configureJUnitPlatformTags(delegate as Test, includeTagsExpr, excludeTagsExpr)
+        testClassesDirs = sourceSets.test.output.classesDirs
+        classpath = sourceSets.test.runtimeClasspath
+        dependsOn(tasks.named('compileTestJava'))
+
+        doFirst {
+            jvmArgs "-javaagent:${configurations.mockitoAgent.singleFile}"
+        }
+
+        if (testNameExcludePatterns != null && !testNameExcludePatterns.isBlank()) {
+            filter {
+                testNameExcludePatterns.split(',').each { String pattern ->
+                    final def trimmedPattern = pattern.trim()
+                    if (!trimmedPattern.isEmpty()) {
+                        excludeTestsMatching(trimmedPattern)
+                    }
+                }
+            }
+        }
+
+        minHeapSize = '1g'
+        maxHeapSize = '4g'
+
+        reports {
+            junitXml.required = true
+            html.required = true
+        }
+    }
+}
+
+configureTaggedTestProfile(
+        'ciSmoke',
+        'unit',
+        'slow',
+        'Fast feedback profile for unit tests with slow tests explicitly excluded.',
+        'org.egothor.stemmer.CompileIntegrationTest*'
+)
+
+configureTaggedTestProfile(
+        'ciCore',
+        'unit,trie,frequency-trie,property',
+        null,
+        'Focused profile for core trie behavior and trie-specific property checks.'
+)
+
+configureTaggedTestProfile(
+        'ciIntegration',
+        'integration',
+        'slow',
+        'Integration pipeline profile (loader/parser/CLI/IO end-to-end flows) excluding slow integration paths.'
+)
+
+configureTaggedTestProfile(
+        'ciSlow',
+        'slow',
+        null,
+        'Targeted profile for all slow tests (large dictionaries, long-running corpus validation, and heavy integration checks).'
+)
+
+configureTaggedTestProfile(
+        'ciCompat',
+        'compat,regression',
+        null,
+        'Compatibility profile guarding persisted artifact and compatibility regressions.'
+)
+
+configureTaggedTestProfile(
+        'ciRelease',
+        null,
+        'slow',
+        'Release-profile validation of all non-slow tests.',
+        'org.egothor.stemmer.CompileIntegrationTest*,org.egothor.stemmer.StemmerPatchTrieLoaderTest$BundledDictionaryTests*'
+)
+
+configureTaggedTestProfile(
+        'ciNightly',
+        'fuzz',
+        null,
+        'Nightly robustness profile with fuzz testing emphasis.'
+)
+
+tasks.register('ci') {
+    group = 'verification'
+    description = 'Runs the full enterprise CI profile set in sequence.'
+    dependsOn(tasks.named('ciSmoke'))
+    dependsOn(tasks.named('ciCore'))
+    dependsOn(tasks.named('ciIntegration'))
+    dependsOn(tasks.named('ciCompat'))
 }
 
 tasks.withType(Pmd).configureEach {
@@ -154,6 +277,36 @@ tasks.named('jacocoTestReport', JacocoReport) {
         html.required = true
     }
 }
+
+def registerJacocoProfileReport = { String reportTaskName, String sourceTaskName ->
+    tasks.register(reportTaskName, JacocoReport) {
+        group = 'verification'
+        description = "Generates Jacoco report for ${sourceTaskName} execution."
+
+        dependsOn(tasks.named(sourceTaskName))
+
+        classDirectories.setFrom(
+                files(sourceSets.main.output).asFileTree.matching {
+                    exclude 'org/egothor/stemmer/StemmerKnowledgeExperiment*'
+                    exclude 'org/egothor/stemmer/DiacriticStripper*'
+                }
+        )
+
+        executionData.setFrom(
+                fileTree(layout.buildDirectory.dir('jacoco')) {
+                    include "${sourceTaskName}.exec"
+                }
+        )
+
+        reports {
+            xml.required = true
+            csv.required = false
+            html.required = true
+        }
+    }
+}
+
+registerJacocoProfileReport('jacocoCiReleaseReport', 'ciRelease')
 
 tasks.named('check') {
     dependsOn(tasks.named('jacocoTestReport'))

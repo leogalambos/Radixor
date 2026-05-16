@@ -38,6 +38,8 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
@@ -91,6 +93,8 @@ import org.mockito.MockedStatic;
 @Tag("unit")
 @Tag("io")
 @Tag("persistence")
+@Tag("serialization")
+@Tag("trie")
 @DisplayName("StemmerPatchTrieBinaryIO")
 class StemmerPatchTrieBinaryIOTest {
 
@@ -300,8 +304,18 @@ class StemmerPatchTrieBinaryIOTest {
                     () -> assertThrows(NullPointerException.class, () -> StemmerPatchTrieBinaryIO.read((String) null),
                             "read(String) must reject null file name."),
                     () -> assertThrows(NullPointerException.class,
+                            () -> StemmerPatchTrieBinaryIO.read((Path) null, FrequencyTrie.DEFAULT_MAX_EXPANDED_INDEX),
+                            "read(Path, int) must reject null path."),
+                    () -> assertThrows(NullPointerException.class,
+                            () -> StemmerPatchTrieBinaryIO.read((String) null,
+                                    FrequencyTrie.DEFAULT_MAX_EXPANDED_INDEX),
+                            "read(String, int) must reject null file name."),
+                    () -> assertThrows(NullPointerException.class,
                             () -> StemmerPatchTrieBinaryIO.read((ByteArrayInputStream) null),
-                            "read(InputStream) must reject null input stream."));
+                            "read(InputStream) must reject null input stream."),
+                    () -> assertThrows(NullPointerException.class,
+                            () -> StemmerPatchTrieBinaryIO.read((ByteArrayInputStream) null, FrequencyTrie.DEFAULT_MAX_EXPANDED_INDEX),
+                            "read(InputStream, int) must reject null input stream."));
         }
 
         /**
@@ -383,6 +397,143 @@ class StemmerPatchTrieBinaryIOTest {
                 assertSame(expectedTrie, actualTrie,
                         "read(String) must return the trie created by FrequencyTrie.readFrom(...).");
             }
+        }
+
+        /**
+         * Verifies that stream overload with dense span override delegates to the
+         * four-argument readFrom method.
+         */
+        @SuppressWarnings("unchecked")
+        @Test
+        @DisplayName("Should delegate stream read with dense span override")
+        void shouldDelegateInputStreamReadWithDenseSpanOverride() throws IOException {
+            final FrequencyTrie<String> expectedTrie = mock(FrequencyTrie.class);
+            final byte[] gzipPayload = gzip("binary-content-with-max-expanded-index");
+
+            try (@SuppressWarnings("rawtypes")
+            MockedStatic<FrequencyTrie> mockedStatic = mockStatic(FrequencyTrie.class)) {
+                mockedStatic.when(() -> FrequencyTrie.readFrom(any(DataInputStream.class), any(),
+                        any(FrequencyTrie.ValueStreamCodec.class), anyInt())).thenReturn(expectedTrie);
+
+                final FrequencyTrie<String> actualTrie = StemmerPatchTrieBinaryIO
+                        .read(new ByteArrayInputStream(gzipPayload), 17);
+
+                assertSame(expectedTrie, actualTrie,
+                        "read(InputStream, int) must return the trie produced by FrequencyTrie.readFrom(...).");
+
+                mockedStatic.verify(() -> FrequencyTrie.readFrom(any(DataInputStream.class), any(),
+                        any(FrequencyTrie.ValueStreamCodec.class), eq(17)));
+            }
+        }
+
+        /**
+         * Verifies that path overload with dense span override delegates to the
+         * same method overload with the override parameter.
+         */
+        @SuppressWarnings("unchecked")
+        @Test
+        @DisplayName("Should delegate path read with dense span override")
+        void shouldDelegatePathReadWithDenseSpanOverride() throws IOException {
+            final FrequencyTrie<String> expectedTrie = mock(FrequencyTrie.class);
+            final Path sourceFile = temporaryDirectory.resolve("input-max-expanded.bin.gz");
+            Files.write(sourceFile, gzip("path-based-max-expanded-index"));
+
+            try (@SuppressWarnings("rawtypes")
+            MockedStatic<FrequencyTrie> mockedStatic = mockStatic(FrequencyTrie.class)) {
+                mockedStatic.when(() -> FrequencyTrie.readFrom(any(DataInputStream.class), any(),
+                        any(FrequencyTrie.ValueStreamCodec.class), anyInt())).thenReturn(expectedTrie);
+
+                final FrequencyTrie<String> actualTrie = StemmerPatchTrieBinaryIO.read(sourceFile, 0);
+
+                assertSame(expectedTrie, actualTrie,
+                        "read(Path, int) must return the trie produced by FrequencyTrie.readFrom(...).");
+
+                mockedStatic.verify(() -> FrequencyTrie.readFrom(any(DataInputStream.class), any(),
+                        any(FrequencyTrie.ValueStreamCodec.class), eq(0)));
+            }
+        }
+
+        /**
+         * Verifies that string path overload with dense span override delegates to the
+         * same method overload with the override parameter.
+         */
+        @SuppressWarnings("unchecked")
+        @Test
+        @DisplayName("Should delegate file name read with dense span override")
+        void shouldDelegateStringReadWithDenseSpanOverride() throws IOException {
+            final FrequencyTrie<String> expectedTrie = mock(FrequencyTrie.class);
+            final Path sourceFile = temporaryDirectory.resolve("input-string-max-expanded.bin.gz");
+            Files.write(sourceFile, gzip("string-based-max-expanded-index"));
+
+            try (@SuppressWarnings("rawtypes")
+            MockedStatic<FrequencyTrie> mockedStatic = mockStatic(FrequencyTrie.class)) {
+                mockedStatic.when(() -> FrequencyTrie.readFrom(any(DataInputStream.class), any(),
+                        any(FrequencyTrie.ValueStreamCodec.class), anyInt())).thenReturn(expectedTrie);
+
+                final FrequencyTrie<String> actualTrie = StemmerPatchTrieBinaryIO.read(sourceFile.toString(), 32);
+
+                assertSame(expectedTrie, actualTrie,
+                        "read(String, int) must return the trie produced by FrequencyTrie.readFrom(...).");
+
+                mockedStatic.verify(() -> FrequencyTrie.readFrom(any(DataInputStream.class), any(),
+                        any(FrequencyTrie.ValueStreamCodec.class), eq(32)));
+            }
+        }
+
+        /**
+         * Verifies that metadata-only read parses and returns the persisted metadata.
+         */
+        @Test
+        @DisplayName("Should read metadata from gzip payload")
+        void shouldReadMetadataFromGzipPayload() throws IOException {
+            final FrequencyTrie.Builder<String> builder = new FrequencyTrie.Builder<String>(String[]::new,
+                    ReductionSettings.withDefaults(ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS));
+            builder.put("run", PatchCommandEncoder.builder().build().encode("running", "run"));
+            final FrequencyTrie<String> trie = builder.build();
+
+            final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            StemmerPatchTrieBinaryIO.write(trie, outputStream);
+
+            final TrieMetadata metadata = StemmerPatchTrieBinaryIO.readMetadata(new ByteArrayInputStream(outputStream.toByteArray()));
+
+            assertEquals(trie.metadata(), metadata,
+                    "readMetadata(InputStream) must return the same metadata persisted by write().");
+        }
+
+        /**
+         * Verifies that metadata can be read from a binary file path.
+         */
+        @Test
+        @DisplayName("Should read metadata from file path")
+        void shouldReadMetadataFromPath() throws IOException {
+            final FrequencyTrie.Builder<String> builder = new FrequencyTrie.Builder<String>(String[]::new,
+                    ReductionSettings.withDefaults(ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS));
+            builder.put("city", PatchCommandEncoder.builder().build().encode("cities", "city"));
+            final FrequencyTrie<String> trie = builder.build();
+
+            final Path sourceFile = temporaryDirectory.resolve("metadata-path.bin.gz");
+            StemmerPatchTrieBinaryIO.write(trie, sourceFile);
+
+            final TrieMetadata metadata = StemmerPatchTrieBinaryIO.readMetadata(sourceFile);
+            assertEquals(trie.metadata(), metadata);
+        }
+
+        /**
+         * Verifies that metadata can be read from a binary file name.
+         */
+        @Test
+        @DisplayName("Should read metadata from file name")
+        void shouldReadMetadataFromStringPath() throws IOException {
+            final FrequencyTrie.Builder<String> builder = new FrequencyTrie.Builder<String>(String[]::new,
+                    ReductionSettings.withDefaults(ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS));
+            builder.put("city", PatchCommandEncoder.builder().build().encode("cities", "city"));
+            final FrequencyTrie<String> trie = builder.build();
+
+            final Path sourceFile = temporaryDirectory.resolve("metadata-string.bin.gz");
+            StemmerPatchTrieBinaryIO.write(trie, sourceFile);
+
+            final TrieMetadata metadata = StemmerPatchTrieBinaryIO.readMetadata(sourceFile.toString());
+            assertEquals(trie.metadata(), metadata);
         }
 
         /**

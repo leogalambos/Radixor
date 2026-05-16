@@ -71,6 +71,7 @@ import java.util.zip.GZIPInputStream;
 public final class StemmerPatchTrieLoader {
 
     /* default */ static final String FILENAME_REQUIRED = "fileName required";
+    private static final String PARAMETER_PATH = "path";
 
     /**
      * Logger of this class.
@@ -460,8 +461,8 @@ public final class StemmerPatchTrieLoader {
     public static FrequencyTrie<String> load(final Path path, final boolean storeOriginal,
             final ReductionSettings reductionSettings, final WordTraversalDirection traversalDirection,
             final CaseProcessingMode caseProcessingMode, final DiacriticProcessingMode diacriticProcessingMode)
-            throws IOException {
-        Objects.requireNonNull(path, "path");
+        throws IOException {
+        Objects.requireNonNull(path, PARAMETER_PATH);
         final TrieMetadata metadata = metadataForCompilation(traversalDirection, reductionSettings, caseProcessingMode,
                 diacriticProcessingMode);
         return load(path, storeOriginal, metadata);
@@ -487,7 +488,7 @@ public final class StemmerPatchTrieLoader {
      */
     public static FrequencyTrie<String> load(final Path path, final boolean storeOriginal, final TrieMetadata metadata)
             throws IOException {
-        Objects.requireNonNull(path, "path");
+        Objects.requireNonNull(path, PARAMETER_PATH);
         Objects.requireNonNull(metadata, "metadata");
 
         try (InputStream inputStream = openDictionaryInputStream(path);
@@ -759,8 +760,29 @@ public final class StemmerPatchTrieLoader {
      *                              read
      */
     public static FrequencyTrie<String> loadBinary(final Path path) throws IOException {
-        Objects.requireNonNull(path, "path");
+        Objects.requireNonNull(path, PARAMETER_PATH);
         return StemmerPatchTrieBinaryIO.read(path);
+    }
+
+    /**
+     * Loads a GZip-compressed binary patch-command trie from a filesystem path
+     * using a custom dense lookup span override.
+     * <p>
+     * This is a runtime-only tuning parameter that does not affect persisted
+     * metadata.
+     * </p>
+     *
+     * @param path             path to the compressed binary trie file
+     * @param maxExpandedIndex dense lookup span override; negative values use
+     *                         {@link FrequencyTrie#DEFAULT_MAX_EXPANDED_INDEX}
+     * @return compiled patch-command trie
+     * @throws NullPointerException if {@code path} is {@code null}
+     * @throws IOException          if the file cannot be opened, decompressed, or
+     *                              read
+     */
+    public static FrequencyTrie<String> loadBinary(final Path path, final int maxExpandedIndex) throws IOException {
+        Objects.requireNonNull(path, PARAMETER_PATH);
+        return StemmerPatchTrieBinaryIO.read(path, maxExpandedIndex);
     }
 
     /**
@@ -776,6 +798,27 @@ public final class StemmerPatchTrieLoader {
     public static FrequencyTrie<String> loadBinary(final String fileName) throws IOException {
         Objects.requireNonNull(fileName, FILENAME_REQUIRED);
         return StemmerPatchTrieBinaryIO.read(fileName);
+    }
+
+    /**
+     * Loads a GZip-compressed binary patch-command trie from a filesystem path
+     * string using a custom dense lookup span override.
+     * <p>
+     * This is a runtime-only tuning parameter that does not affect persisted
+     * metadata.
+     * </p>
+     *
+     * @param fileName         file name or path string
+     * @param maxExpandedIndex dense lookup span override; negative values use
+     *                         {@link FrequencyTrie#DEFAULT_MAX_EXPANDED_INDEX}
+     * @return compiled patch-command trie
+     * @throws NullPointerException if {@code fileName} is {@code null}
+     * @throws IOException          if the file cannot be opened, decompressed, or
+     *                              read
+     */
+    public static FrequencyTrie<String> loadBinary(final String fileName, final int maxExpandedIndex) throws IOException {
+        Objects.requireNonNull(fileName, FILENAME_REQUIRED);
+        return StemmerPatchTrieBinaryIO.read(fileName, maxExpandedIndex);
     }
 
     /**
@@ -802,7 +845,7 @@ public final class StemmerPatchTrieLoader {
      *                              read
      */
     public static TrieMetadata loadBinaryMetadata(final Path path) throws IOException {
-        Objects.requireNonNull(path, "path");
+        Objects.requireNonNull(path, PARAMETER_PATH);
         return StemmerPatchTrieBinaryIO.readMetadata(path);
     }
 
@@ -845,7 +888,7 @@ public final class StemmerPatchTrieLoader {
      */
     public static void saveBinary(final FrequencyTrie<String> trie, final Path path) throws IOException {
         Objects.requireNonNull(trie, "trie");
-        Objects.requireNonNull(path, "path");
+        Objects.requireNonNull(path, PARAMETER_PATH);
         StemmerPatchTrieBinaryIO.write(trie, path);
     }
 

@@ -47,7 +47,7 @@ import java.util.List;
 import net.jqwik.api.ForAll;
 import net.jqwik.api.Label;
 import net.jqwik.api.Property;
-import net.jqwik.api.Tag;
+import org.junit.jupiter.api.Tag;
 
 /**
  * Property-based tests for the compiled trie abstraction.
@@ -59,9 +59,9 @@ import net.jqwik.api.Tag;
  * core algorithm without overfitting to particular fixture data.
  */
 @Label("FrequencyTrie properties")
-@Tag("unit")
 @Tag("property")
 @Tag("trie")
+@Tag("frequency-trie")
 class FrequencyTrieProperties extends PropertyBasedTestSupport {
 
     /**

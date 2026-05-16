@@ -25,6 +25,7 @@ This is why Radixor can generalize beyond explicitly listed forms and why compil
 The programmatic API is easier to understand when split by developer task:
 
 - [Loading and Building Stemmers](programmatic-loading-and-building.md) explains how to acquire a compiled stemmer from bundled resources, textual dictionaries, binary artifacts, or direct builder usage.
+- [Lookup Edge Optimization](lookup-edge-optimization.md) explains dense child lookup tuning and the speed/memory trade-off when materializing compiled tries.
 - [Querying and Ambiguity Handling](programmatic-querying-and-ambiguity.md) explains `get(...)`, `getAll(...)`, `getEntries(...)`, patch application, and the practical meaning of reduction modes.
 - [Extending and Persisting Compiled Tries](programmatic-extending-and-persistence.md) explains how to reopen compiled tries, add new lexical data, rebuild them, and store them as binary artifacts.
 

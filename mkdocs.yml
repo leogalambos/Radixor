@@ -54,6 +54,7 @@ nav:
      - Overview: architecture-and-reduction.md
      - Architecture: architecture.md
      - Reduction Semantics: reduction-semantics.md
+     - Lookup Edge Optimization: lookup-edge-optimization.md
      - Compatibility and Guarantees: compatibility-and-guarantees.md
 
   - Dictionaries:
@@ -63,3 +64,4 @@ nav:
      - Quality and Operations: quality-and-operations.md
      - Benchmarking: benchmarking.md
      - Reports: reports.md
+     - Test taxonomy and execution filtering: test-taxonomy-and-filtering.md

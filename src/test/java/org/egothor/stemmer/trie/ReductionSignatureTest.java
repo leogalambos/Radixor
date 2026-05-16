@@ -46,7 +46,7 @@ import org.junit.jupiter.api.Test;
  * Unit tests for {@link ReductionSignature}.
  */
 @Tag("unit")
-@Tag("fast")
+@Tag("trie")
 @DisplayName("ReductionSignature")
 class ReductionSignatureTest {
 

@@ -41,7 +41,7 @@ import org.junit.jupiter.api.Test;
  * Unit tests for {@link DominantLocalDescriptor}.
  */
 @Tag("unit")
-@Tag("fast")
+@Tag("trie")
 @DisplayName("DominantLocalDescriptor")
 class DominantLocalDescriptorTest {
 

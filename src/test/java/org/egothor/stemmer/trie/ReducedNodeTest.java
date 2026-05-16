@@ -48,7 +48,7 @@ import org.junit.jupiter.api.Test;
  * Unit tests for {@link ReducedNode}.
  */
 @Tag("unit")
-@Tag("fast")
+@Tag("trie")
 @DisplayName("ReducedNode")
 class ReducedNodeTest {
 

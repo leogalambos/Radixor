@@ -167,6 +167,9 @@ The repository keeps the front page concise and places detailed documentation un
 - [Architecture](docs/architecture.md)  
   Structural model, data flow, and runtime lookup behavior.
 
+- [Lookup Edge Optimization](docs/lookup-edge-optimization.md)  
+  Speed/memory trade-off of dense child edge lookup in compiled tries.
+
 - [Reduction Semantics](docs/reduction-semantics.md)  
   Ranked, unordered, and dominant reduction behavior.
 

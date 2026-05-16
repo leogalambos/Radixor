@@ -41,7 +41,8 @@ import org.junit.jupiter.api.Test;
  * Unit tests for {@link DiacriticStripper}.
  */
 @Tag("unit")
-@Tag("diacritics")
+@Tag("diacritic")
+@Tag("stemmer")
 @DisplayName("DiacriticStripper")
 class DiacriticStripperTest {
 

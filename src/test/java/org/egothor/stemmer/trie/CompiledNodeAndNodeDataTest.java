@@ -31,8 +31,10 @@
 package org.egothor.stemmer.trie;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
@@ -43,7 +45,6 @@ import org.junit.jupiter.api.Test;
  * documented backing-array exposure.
  */
 @Tag("unit")
-@Tag("fast")
 @Tag("trie")
 @DisplayName("CompiledNode and NodeData")
 class CompiledNodeAndNodeDataTest {
@@ -140,5 +141,137 @@ class CompiledNodeAndNodeDataTest {
         assertSame(children, node.children());
         assertSame(orderedValues, node.orderedValues());
         assertSame(orderedCounts, node.orderedCounts());
+    }
+
+    /**
+     * Verifies that dense lookup is used when the interval is compact.
+     */
+    @Test
+    @DisplayName("CompiledNode can resolve child via dense lookup table")
+    void compiledNodeUsesDenseLookupForCompactIntervals() {
+        @SuppressWarnings("unchecked")
+        final CompiledNode<String>[] children = new CompiledNode[4];
+        children[0] = new CompiledNode<>(new char[0], new CompiledNode[0], new String[0], new int[0]);
+        children[1] = new CompiledNode<>(new char[0], new CompiledNode[0], new String[0], new int[0]);
+        children[2] = new CompiledNode<>(new char[0], new CompiledNode[0], new String[0], new int[0]);
+        children[3] = new CompiledNode<>(new char[0], new CompiledNode[0], new String[0], new int[0]);
+
+        final CompiledNode<String> node = new CompiledNode<>(new char[] { 'a', 'b', 'c', 'd' }, children,
+                new String[] { "1", "2", "3", "4" }, new int[] { 1, 1, 1, 1 });
+
+        assertTrue(node.hasDenseLookup());
+
+        assertSame(children[0], node.findChild('a'));
+        assertSame(children[3], node.findChild('d'));
+        assertSame(null, node.findChild('z'));
+    }
+
+    /**
+     * Verifies that fallback linear scan is used for small node degree.
+     */
+    @Test
+    @DisplayName("CompiledNode resolves child by linear scan for small degree")
+    void compiledNodeUsesLinearScanForSmallDegree() {
+        @SuppressWarnings("unchecked")
+        final CompiledNode<String>[] children = new CompiledNode[4];
+        final CompiledNode<String> childA = new CompiledNode<>(new char[0], new CompiledNode[0], new String[0], new int[0]);
+        final CompiledNode<String> childB = new CompiledNode<>(new char[0], new CompiledNode[0], new String[0], new int[0]);
+        final CompiledNode<String> childC = new CompiledNode<>(new char[0], new CompiledNode[0], new String[0], new int[0]);
+        final CompiledNode<String> childD = new CompiledNode<>(new char[0], new CompiledNode[0], new String[0], new int[0]);
+        children[0] = childA;
+        children[1] = childB;
+        children[2] = childC;
+        children[3] = childD;
+
+        final CompiledNode<String> node = new CompiledNode<>(new char[] { 'a', 'z', '中', '你' }, children,
+                new String[] { "1", "2", "3", "4" }, 0, new int[] { 1, 1, 1, 1 });
+
+        assertFalse(node.hasDenseLookup());
+
+        assertSame(childA, node.findChild('a'));
+        assertSame(childD, node.findChild('你'));
+        assertSame(null, node.findChild('b'));
+    }
+
+    /**
+     * Verifies that fallback binary search is used for larger node degree without
+     * dense lookup.
+     */
+    @Test
+    @DisplayName("CompiledNode resolves child by binary search for large degree")
+    void compiledNodeUsesBinarySearchForLargeDegree() {
+        @SuppressWarnings("unchecked")
+        final CompiledNode<String>[] children = new CompiledNode[5];
+        final CompiledNode<String> childA = new CompiledNode<>(new char[0], new CompiledNode[0], new String[0], new int[0]);
+        final CompiledNode<String> childB = new CompiledNode<>(new char[0], new CompiledNode[0], new String[0], new int[0]);
+        final CompiledNode<String> childC = new CompiledNode<>(new char[0], new CompiledNode[0], new String[0], new int[0]);
+        final CompiledNode<String> childD = new CompiledNode<>(new char[0], new CompiledNode[0], new String[0], new int[0]);
+        final CompiledNode<String> childE = new CompiledNode<>(new char[0], new CompiledNode[0], new String[0], new int[0]);
+        children[0] = childA;
+        children[1] = childB;
+        children[2] = childC;
+        children[3] = childD;
+        children[4] = childE;
+
+        final CompiledNode<String> node = new CompiledNode<>(new char[] { 'a', 'c', 'k', 't', 'z' }, children,
+                new String[] { "1", "2", "3", "4", "5" }, 0, new int[] { 1, 1, 1, 1, 1 });
+
+        assertFalse(node.hasDenseLookup());
+
+        assertSame(childC, node.findChild('k'));
+        assertSame(childE, node.findChild('z'));
+        assertSame(null, node.findChild('x'));
+    }
+
+    /**
+     * Verifies the basic node-state helpers that are used by diagnostics and
+     * behavioral checks.
+     */
+    @Test
+    @DisplayName("CompiledNode reports leaf, value and edge presence state")
+    void compiledNodeReportsNodeStateHelpers() {
+        @SuppressWarnings("unchecked")
+        final CompiledNode<String>[] childless = new CompiledNode[0];
+        final CompiledNode<String> leaf = new CompiledNode<>(new char[0], childless, new String[0], new int[0]);
+
+        assertTrue(leaf.isLeaf());
+        assertFalse(leaf.hasChildren());
+        assertFalse(leaf.hasValues());
+        assertFalse(leaf.hasEdge('a'));
+
+        @SuppressWarnings("unchecked")
+        final CompiledNode<String>[] child = new CompiledNode[1];
+        final String[] orderedValues = new String[] { "leaf" };
+        final int[] orderedCounts = new int[] { 1 };
+        child[0] = new CompiledNode<>(new char[0], new CompiledNode[0], orderedValues, orderedCounts);
+        final CompiledNode<String> node = new CompiledNode<>(new char[] { 'a' }, child, orderedValues, orderedCounts);
+
+        assertFalse(node.isLeaf());
+        assertTrue(node.hasChildren());
+        assertTrue(node.hasValues());
+        assertTrue(node.valueCount() > 0);
+        assertTrue(node.hasEdge('a'));
+        assertFalse(node.hasEdge('b'));
+    }
+
+    /**
+     * Verifies structural equality and hash-code behavior for compiled nodes.
+     */
+    @Test
+    @DisplayName("CompiledNode equals and hashCode align for identical structure")
+    void compiledNodeEqualsAndHashCodeAlignForIdenticalStructure() {
+        @SuppressWarnings("unchecked")
+        final CompiledNode<String>[] child = new CompiledNode[1];
+        final CompiledNode<String> leaf = new CompiledNode<>(new char[0], new CompiledNode[0], new String[] { "v" },
+                new int[] { 1 });
+        child[0] = leaf;
+
+        final CompiledNode<String> first = new CompiledNode<>(new char[] { 'a' }, child, new String[] { "x" },
+                new int[] { 2 });
+        final CompiledNode<String> second = new CompiledNode<>(new char[] { 'a' }, child, new String[] { "x" },
+                new int[] { 2 });
+
+        assertEquals(first, second);
+        assertEquals(first.hashCode(), second.hashCode());
     }
 }

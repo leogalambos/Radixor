@@ -51,7 +51,6 @@ import java.util.logging.Logger;
 import org.egothor.stemmer.trie.CompiledNode;
 import org.egothor.stemmer.trie.LocalValueSummary;
 import org.egothor.stemmer.trie.MutableNode;
-import org.egothor.stemmer.trie.NodeData;
 import org.egothor.stemmer.trie.ReducedNode;
 import org.egothor.stemmer.trie.ReductionContext;
 import org.egothor.stemmer.trie.ReductionSignature;
@@ -87,7 +86,6 @@ import org.egothor.stemmer.trie.ReductionSignature;
  *
  * @param <V> value type
  */
-@SuppressWarnings("PMD.CyclomaticComplexity")
 public final class FrequencyTrie<V> {
 
     /**
@@ -131,9 +129,52 @@ public final class FrequencyTrie<V> {
     private static final int STREAM_MAGIC = 0x45475452;
 
     /**
+     * Minimum supported stream version constant retained for explicit range checks.
+     */
+    private static final int MIN_STREAM_VERSION = 1;
+
+    /**
+     * Number of stored values for which {@link #getEntries(String)} can return an
+     * empty result.
+     */
+    private static final int NO_VALUE_COUNT = 0;
+
+    /**
+     * Number of stored values for which {@link #getEntries(String)} can use a
+     * one-item immutable list special case.
+     */
+    private static final int SINGLE_VALUE_COUNT = 1;
+
+    /**
      * Binary format version.
      */
     private static final int STREAM_VERSION = 5;
+
+    /**
+     * Version where traversal-direction ordinal is persisted.
+     */
+    private static final int TRAVERSAL_VERSION = 2;
+
+    /**
+     * Version where compact reduction metadata is persisted.
+     */
+    private static final int REDUCTION_VERSION = 3;
+
+    /**
+     * Version where case-processing mode ordinal is persisted.
+     */
+    private static final int CASE_VERSION = 4;
+
+    /**
+     * Default dense child lookup span in code points used when materializing
+     * compiled nodes without an explicit override.
+     * <p>
+     * Increasing this value increases the chance of direct array indexing for
+     * child lookup at runtime at the cost of per-node dense table memory for
+     * compact character spans.
+     * </p>
+     */
+    public static final int DEFAULT_MAX_EXPANDED_INDEX = 512;
 
     /**
      * Returns the current persisted binary stream format version.
@@ -259,7 +300,6 @@ public final class FrequencyTrie<V> {
      *         if the key does not exist or no value is stored at the addressed node
      * @throws NullPointerException if {@code key} is {@code null}
      */
-    @SuppressWarnings("PMD.AvoidLiteralsInIfCondition")
     public List<ValueCount<V>> getEntries(final String key) {
         Objects.requireNonNull(key, "key");
         final CompiledNode<V> node = findNode(normalizeLookupKey(key));
@@ -269,11 +309,11 @@ public final class FrequencyTrie<V> {
 
         final V[] orderedValues = node.orderedValues();
         final int valueCount = orderedValues.length;
-        if (valueCount == 0) {
+        if (valueCount == NO_VALUE_COUNT) {
             return List.of();
         }
 
-        if (valueCount == 1) {
+        if (valueCount == SINGLE_VALUE_COUNT) {
             return List.of(new ValueCount<>(orderedValues[0], node.orderedCounts()[0]));
         }
 
@@ -383,47 +423,31 @@ public final class FrequencyTrie<V> {
      */
     public static <V> FrequencyTrie<V> readFrom(final InputStream inputStream, final IntFunction<V[]> arrayFactory,
             final ValueStreamCodec<V> valueCodec) throws IOException {
-        Objects.requireNonNull(inputStream, "inputStream");
-        Objects.requireNonNull(arrayFactory, "arrayFactory");
-        Objects.requireNonNull(valueCodec, "valueCodec");
+        return readFrom(inputStream, arrayFactory, valueCodec, -1);
+    }
 
-        final DataInputStream dataInput; // NOPMD
-        if (inputStream instanceof DataInputStream) {
-            dataInput = (DataInputStream) inputStream;
-        } else {
-            dataInput = new DataInputStream(inputStream);
-        }
-
-        final int magic = dataInput.readInt();
-        if (magic != STREAM_MAGIC) {
-            throw new IOException("Unsupported trie stream header: " + Integer.toHexString(magic));
-        }
-
-        final int version = dataInput.readInt();
-        if (version != 1 && version != 3 && version != 4 && version != STREAM_VERSION) {
-            throw new IOException("Unsupported trie stream version: " + version);
-        }
-
-        final int nodeCount = dataInput.readInt();
-        if (nodeCount < 0) {
-            throw new IOException("Negative node count: " + nodeCount);
-        }
-
-        final int rootNodeId = dataInput.readInt();
-        if (rootNodeId < 0 || rootNodeId >= nodeCount) {
-            throw new IOException("Invalid root node id: " + rootNodeId);
-        }
-
-        final TrieMetadata metadata = readMetadata(dataInput, version);
-
-        final CompiledNode<V>[] nodes = readNodes(dataInput, arrayFactory, valueCodec, nodeCount);
-        final CompiledNode<V> rootNode = nodes[rootNodeId];
-
-        if (LOGGER.isLoggable(Level.FINE)) {
-            LOGGER.log(Level.FINE, "Read compiled trie with {0} canonical nodes.", nodeCount);
-        }
-
-        return new FrequencyTrie<>(arrayFactory, rootNode, metadata);
+    /**
+     * Reads a compiled trie from the supplied input stream, optionally overriding
+     * dense child-index span configuration.
+     * <p>
+     * This setting is applied only while materializing the in-memory compiled
+     * representation during load. It is not serialized in {@link TrieMetadata},
+     * so each load can independently choose its own runtime lookup trade-off.
+     * </p>
+     *
+     * @param inputStream       source input stream
+     * @param arrayFactory      array factory used to create typed arrays
+     * @param valueCodec        codec used to read values
+     * @param maxExpandedIndex  dense lookup span override; zero disables dense lookup,
+     *                          negative values use {@link #DEFAULT_MAX_EXPANDED_INDEX}
+     * @param <V>               value type
+     * @return deserialized compiled trie
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IOException          if reading fails or the binary format is invalid
+     */
+    public static <V> FrequencyTrie<V> readFrom(final InputStream inputStream, final IntFunction<V[]> arrayFactory,
+            final ValueStreamCodec<V> valueCodec, final int maxExpandedIndex) throws IOException {
+        return CompiledTrieReader.read(inputStream, arrayFactory, valueCodec, maxExpandedIndex);
     }
 
     /**
@@ -436,73 +460,6 @@ public final class FrequencyTrie<V> {
     private static void writeMetadata(final DataOutputStream dataOutput, final TrieMetadata metadata)
             throws IOException {
         dataOutput.writeUTF(metadata.toTextBlock());
-    }
-
-    /**
-     * Reads persisted trie metadata while remaining backward compatible with
-     * earlier stream versions.
-     *
-     * @param dataInput input stream
-     * @param version   persisted stream version
-     * @return deserialized metadata
-     * @throws IOException if the metadata section is invalid
-     */
-    private static TrieMetadata readMetadata(final DataInputStream dataInput, final int version) throws IOException {
-        if (version >= 5) { // NOPMD
-            try {
-                return TrieMetadata.fromTextBlock(version, dataInput.readUTF());
-            } catch (IllegalArgumentException exception) {
-                throw new IOException("Invalid metadata block.", exception);
-            }
-        }
-
-        final WordTraversalDirection traversalDirection;
-        if (version >= 2) { // NOPMD
-            final int traversalDirectionOrdinal = dataInput.readInt();
-            final WordTraversalDirection[] traversalDirections = WordTraversalDirection.values();
-            if (traversalDirectionOrdinal < 0 || traversalDirectionOrdinal >= traversalDirections.length) {
-                throw new IOException("Invalid traversal direction ordinal: " + traversalDirectionOrdinal);
-            }
-            traversalDirection = traversalDirections[traversalDirectionOrdinal];
-        } else {
-            traversalDirection = WordTraversalDirection.BACKWARD;
-        }
-
-        if (version < 3) { // NOPMD
-            return TrieMetadata.legacy(version, traversalDirection);
-        }
-
-        final ReductionMode[] reductionModes = ReductionMode.values();
-        final int reductionModeOrdinal = dataInput.readInt();
-        if (reductionModeOrdinal < 0 || reductionModeOrdinal >= reductionModes.length) {
-            throw new IOException("Invalid reduction mode ordinal: " + reductionModeOrdinal);
-        }
-
-        final int dominantWinnerMinPercent = dataInput.readInt();
-        final int dominantWinnerOverSecondRatio = dataInput.readInt(); // NOPMD
-
-        final DiacriticProcessingMode[] diacriticProcessingModes = DiacriticProcessingMode.values();
-        final int diacriticProcessingModeOrdinal = dataInput.readInt(); // NOPMD
-        if (diacriticProcessingModeOrdinal < 0 || diacriticProcessingModeOrdinal >= diacriticProcessingModes.length) {
-            throw new IOException("Invalid diacritic processing mode ordinal: " + diacriticProcessingModeOrdinal);
-        }
-
-        final CaseProcessingMode caseProcessingMode;
-        if (version >= 4) { // NOPMD
-            final CaseProcessingMode[] caseProcessingModes = CaseProcessingMode.values();
-            final int caseProcessingModeOrdinal = dataInput.readInt();
-            if (caseProcessingModeOrdinal < 0 || caseProcessingModeOrdinal >= caseProcessingModes.length) {
-                throw new IOException("Invalid case processing mode ordinal: " + caseProcessingModeOrdinal);
-            }
-            caseProcessingMode = caseProcessingModes[caseProcessingModeOrdinal];
-        } else {
-            caseProcessingMode = CaseProcessingMode.LOWERCASE_WITH_LOCALE_ROOT;
-        }
-
-        return new TrieMetadata(version, traversalDirection,
-                new ReductionSettings(reductionModes[reductionModeOrdinal], dominantWinnerMinPercent,
-                        dominantWinnerOverSecondRatio),
-                diacriticProcessingModes[diacriticProcessingModeOrdinal], caseProcessingMode);
     }
 
     /**
@@ -574,103 +531,218 @@ public final class FrequencyTrie<V> {
     }
 
     /**
-     * Reads all compiled nodes and resolves child references.
-     *
-     * @param dataInput    input
-     * @param arrayFactory array factory
-     * @param valueCodec   value codec
-     * @param nodeCount    number of nodes
-     * @param <V>          value type
-     * @return array of nodes indexed by serialized node identifier
-     * @throws IOException if reading fails or the stream is invalid
-     */
-    @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
-    private static <V> CompiledNode<V>[] readNodes(final DataInputStream dataInput, final IntFunction<V[]> arrayFactory,
-            final ValueStreamCodec<V> valueCodec, final int nodeCount) throws IOException {
-        final List<NodeData<V>> nodeDataList = new ArrayList<>(nodeCount);
-
-        for (int nodeIndex = 0; nodeIndex < nodeCount; nodeIndex++) {
-            final int edgeCount = dataInput.readInt();
-            if (edgeCount < 0) {
-                throw new IOException("Negative edge count at node " + nodeIndex + ": " + edgeCount);
-            }
-
-            final char[] edgeLabels = new char[edgeCount];
-            final int[] childNodeIds = new int[edgeCount];
-
-            for (int edgeIndex = 0; edgeIndex < edgeCount; edgeIndex++) {
-                edgeLabels[edgeIndex] = dataInput.readChar();
-                childNodeIds[edgeIndex] = dataInput.readInt();
-            }
-
-            validateSerializedEdges(nodeIndex, edgeLabels);
-
-            final int valueCount = dataInput.readInt();
-            if (valueCount < 0) {
-                throw new IOException("Negative value count at node " + nodeIndex + ": " + valueCount);
-            }
-
-            final V[] orderedValues = arrayFactory.apply(valueCount);
-            final int[] orderedCounts = new int[valueCount];
-
-            for (int valueIndex = 0; valueIndex < valueCount; valueIndex++) {
-                orderedValues[valueIndex] = valueCodec.read(dataInput);
-                orderedCounts[valueIndex] = dataInput.readInt();
-                if (orderedCounts[valueIndex] <= 0) {
-                    throw new IOException("Non-positive stored count at node " + nodeIndex + ", value index "
-                            + valueIndex + ": " + orderedCounts[valueIndex]);
-                }
-            }
-
-            nodeDataList.add(new NodeData<>(edgeLabels, childNodeIds, orderedValues, orderedCounts));
-        }
-
-        @SuppressWarnings("unchecked")
-        final CompiledNode<V>[] nodes = new CompiledNode[nodeCount];
-
-        for (int nodeIndex = 0; nodeIndex < nodeCount; nodeIndex++) {
-            final NodeData<V> nodeData = nodeDataList.get(nodeIndex);
-            @SuppressWarnings("unchecked")
-            final CompiledNode<V>[] children = new CompiledNode[nodeData.childNodeIds().length];
-            nodes[nodeIndex] = new CompiledNode<>(nodeData.edgeLabels(), children, nodeData.orderedValues(),
-                    nodeData.orderedCounts());
-        }
-
-        for (int nodeIndex = 0; nodeIndex < nodeCount; nodeIndex++) {
-            final NodeData<V> nodeData = nodeDataList.get(nodeIndex);
-            final CompiledNode<V> node = nodes[nodeIndex];
-
-            for (int edgeIndex = 0; edgeIndex < nodeData.childNodeIds().length; edgeIndex++) {
-                final int childNodeId = nodeData.childNodeIds()[edgeIndex];
-                if (childNodeId < 0 || childNodeId >= nodeCount) {
-                    throw new IOException("Invalid child node id at node " + nodeIndex + ", edge index " + edgeIndex
-                            + ": " + childNodeId);
-                }
-                node.children()[edgeIndex] = nodes[childNodeId];
-            }
-        }
-
-        return nodes;
-    }
-
-    /**
-     * Validates the serialized edge-label sequence for one node.
+     * Internal helper that materializes serialized trie data.
      *
      * <p>
-     * Compiled nodes rely on binary search for child lookup and therefore require
-     * edge labels to be stored in strict ascending order without duplicates.
-     * Rejecting malformed streams here keeps lookup semantics deterministic and
-     * avoids silently constructing a trie whose search behavior would be undefined.
-     *
-     * @param nodeIndex  serialized node identifier
-     * @param edgeLabels serialized edge labels
-     * @throws IOException if the edge labels are not strictly ascending
+     * Moving reader complexity into this helper keeps the public-facing class from
+     * accumulating excessive class-level cyclomatic complexity while preserving the
+     * same binary compatibility contract.
+     * </p>
      */
-    private static void validateSerializedEdges(final int nodeIndex, final char... edgeLabels) throws IOException {
-        for (int edgeIndex = 1; edgeIndex < edgeLabels.length; edgeIndex++) {
-            if (edgeLabels[edgeIndex - 1] >= edgeLabels[edgeIndex]) {
-                throw new IOException("Edge labels must be strictly ascending at node " + nodeIndex + ", edge index "
-                        + edgeIndex + ": '" + edgeLabels[edgeIndex - 1] + "' then '" + edgeLabels[edgeIndex] + "'.");
+    private static final class CompiledTrieReader {
+
+        private static <V> FrequencyTrie<V> read(final InputStream inputStream, final IntFunction<V[]> arrayFactory,
+                final ValueStreamCodec<V> valueCodec, final int maxExpandedIndex) throws IOException {
+            Objects.requireNonNull(inputStream, "inputStream");
+            Objects.requireNonNull(arrayFactory, "arrayFactory");
+            Objects.requireNonNull(valueCodec, "valueCodec");
+            if (maxExpandedIndex < -1) {
+                throw new IllegalArgumentException("maxExpandedIndex must be >= -1.");
+            }
+
+            final DataInputStream dataInput = wrapInputStream(inputStream);
+            final int magic = dataInput.readInt();
+            if (magic != STREAM_MAGIC) {
+                throw new IOException("Unsupported trie stream header: " + Integer.toHexString(magic));
+            }
+
+            final int version = dataInput.readInt();
+            if (version < MIN_STREAM_VERSION || version > STREAM_VERSION) {
+                throw new IOException("Unsupported trie stream version: " + version);
+            }
+
+            final int nodeCount = dataInput.readInt();
+            if (nodeCount < 0) {
+                throw new IOException("Negative node count: " + nodeCount);
+            }
+
+            final int rootNodeId = dataInput.readInt();
+            if (rootNodeId < 0 || rootNodeId >= nodeCount) {
+                throw new IOException("Invalid root node id: " + rootNodeId);
+            }
+
+            final TrieMetadata sourceMetadata = readMetadata(dataInput, version);
+            final int effectiveMaxExpandedIndex = maxExpandedIndex >= 0 ? maxExpandedIndex : DEFAULT_MAX_EXPANDED_INDEX;
+            final CompiledNode<V>[] nodes = readNodes(dataInput, arrayFactory, valueCodec, nodeCount, effectiveMaxExpandedIndex);
+            final CompiledNode<V> rootNode = nodes[rootNodeId];
+
+            if (LOGGER.isLoggable(Level.FINE)) {
+                LOGGER.log(Level.FINE, "Read compiled trie with {0} canonical nodes.", nodeCount);
+            }
+
+            return new FrequencyTrie<>(arrayFactory, rootNode, sourceMetadata);
+        }
+
+        private static DataInputStream wrapInputStream(final InputStream inputStream) {
+            return inputStream instanceof DataInputStream
+                    ? (DataInputStream) inputStream
+                    : new DataInputStream(inputStream);
+        }
+
+        private static TrieMetadata readMetadata(final DataInputStream dataInput, final int version) throws IOException {
+            if (version == STREAM_VERSION) {
+                return readTextMetadata(dataInput);
+            }
+
+            final WordTraversalDirection traversalDirection = readTraversalDirection(dataInput, version);
+            if (version < REDUCTION_VERSION) {
+                return TrieMetadata.legacy(version, traversalDirection);
+            }
+
+            final ReductionSettings reductionSettings = readReductionSettings(dataInput);
+            final DiacriticProcessingMode diacriticProcessingMode = readEnumByOrdinal(dataInput, DiacriticProcessingMode.values(),
+                    "diacritic processing mode");
+            final CaseProcessingMode caseProcessingMode = version >= CASE_VERSION
+                    ? readCaseProcessingMode(dataInput)
+                    : CaseProcessingMode.LOWERCASE_WITH_LOCALE_ROOT;
+            return new TrieMetadata(version, traversalDirection, reductionSettings, diacriticProcessingMode, caseProcessingMode);
+        }
+
+        private static TrieMetadata readTextMetadata(final DataInputStream dataInput) throws IOException {
+            try {
+                return TrieMetadata.fromTextBlock(STREAM_VERSION, dataInput.readUTF());
+            } catch (IllegalArgumentException exception) {
+                throw new IOException("Invalid metadata block.", exception);
+            }
+        }
+
+        private static WordTraversalDirection readTraversalDirection(final DataInputStream dataInput, final int version)
+                throws IOException {
+            if (version < TRAVERSAL_VERSION) {
+                return WordTraversalDirection.BACKWARD;
+            }
+            return readEnumByOrdinal(dataInput, WordTraversalDirection.values(), "traversal direction");
+        }
+
+        private static ReductionSettings readReductionSettings(final DataInputStream dataInput) throws IOException {
+            final ReductionMode reductionMode = readEnumByOrdinal(dataInput, ReductionMode.values(), "reduction mode");
+            final int dominantWinnerMinPercent = dataInput.readInt();
+            final int dominantWinnerOverSecondRatio = dataInput.readInt(); // NOPMD
+            return new ReductionSettings(reductionMode, dominantWinnerMinPercent, dominantWinnerOverSecondRatio);
+        }
+
+        private static CaseProcessingMode readCaseProcessingMode(final DataInputStream dataInput) throws IOException {
+            return readEnumByOrdinal(dataInput, CaseProcessingMode.values(), "case processing mode");
+        }
+
+        private static <E extends Enum<E>> E readEnumByOrdinal(final DataInputStream dataInput, final E[] values,
+                final String name) throws IOException {
+            final int ordinal = dataInput.readInt();
+            if (ordinal < 0 || ordinal >= values.length) {
+                throw new IOException("Invalid " + name + " ordinal: " + ordinal);
+            }
+            return values[ordinal];
+        }
+
+        private static <V> CompiledNode<V>[] readNodes(final DataInputStream dataInput, final IntFunction<V[]> arrayFactory,
+                final ValueStreamCodec<V> valueCodec, final int nodeCount, final int maxExpandedIndex) throws IOException {
+            final char[][] edgeLabelsByNode = new char[nodeCount][];
+            final int[][] childNodeIdsByNode = new int[nodeCount][];
+            @SuppressWarnings("unchecked")
+            final V[][] orderedValuesByNode = (V[][]) new Object[nodeCount][];
+            final int[][] orderedCountsByNode = new int[nodeCount][];
+
+            for (int nodeIndex = 0; nodeIndex < nodeCount; nodeIndex++) {
+                final int edgeCount = dataInput.readInt();
+                if (edgeCount < 0) {
+                    throw new IOException("Negative edge count at node " + nodeIndex + ": " + edgeCount);
+                }
+
+                edgeLabelsByNode[nodeIndex] = new char[edgeCount];
+                childNodeIdsByNode[nodeIndex] = new int[edgeCount];
+
+                for (int edgeIndex = 0; edgeIndex < edgeCount; edgeIndex++) {
+                    edgeLabelsByNode[nodeIndex][edgeIndex] = dataInput.readChar();
+                    childNodeIdsByNode[nodeIndex][edgeIndex] = dataInput.readInt();
+                }
+
+                validateSerializedEdges(nodeIndex, edgeLabelsByNode[nodeIndex]);
+
+                final int valueCount = dataInput.readInt();
+                if (valueCount < 0) {
+                    throw new IOException("Negative value count at node " + nodeIndex + ": " + valueCount);
+                }
+
+                orderedValuesByNode[nodeIndex] = arrayFactory.apply(valueCount);
+                orderedCountsByNode[nodeIndex] = new int[valueCount];
+
+                for (int valueIndex = 0; valueIndex < valueCount; valueIndex++) {
+                    orderedValuesByNode[nodeIndex][valueIndex] = valueCodec.read(dataInput);
+                    orderedCountsByNode[nodeIndex][valueIndex] = dataInput.readInt();
+                    if (orderedCountsByNode[nodeIndex][valueIndex] <= 0) {
+                        throw new IOException("Non-positive stored count at node " + nodeIndex + ", value index "
+                                + valueIndex + ": " + orderedCountsByNode[nodeIndex][valueIndex]);
+                    }
+                }
+            }
+
+            @SuppressWarnings("unchecked")
+            final CompiledNode<V>[] nodes = new CompiledNode[nodeCount];
+            final boolean[] inProgress = new boolean[nodeCount];
+
+            for (int nodeIndex = 0; nodeIndex < nodeCount; nodeIndex++) {
+                nodes[nodeIndex] = resolveNode(nodeIndex, edgeLabelsByNode, childNodeIdsByNode, orderedValuesByNode,
+                        orderedCountsByNode, nodes, inProgress, maxExpandedIndex);
+            }
+
+            return nodes;
+        }
+
+        private static <V> CompiledNode<V> resolveNode(final int nodeIndex, final char[][] edgeLabelsByNode,
+                final int[][] childNodeIdsByNode, final V[][] orderedValuesByNode, final int[][] orderedCountsByNode,
+                final CompiledNode<V>[] nodes, final boolean[] inProgress, final int maxExpandedIndex) throws IOException {
+            final CompiledNode<V> cachedNode = nodes[nodeIndex];
+            if (cachedNode != null) {
+                return cachedNode;
+            }
+
+            if (inProgress[nodeIndex]) {
+                throw new IOException("Invalid serialized node graph: cyclic reference detected at node " + nodeIndex + '.');
+            }
+            inProgress[nodeIndex] = true;
+            try {
+                final char[] edgeLabels = edgeLabelsByNode[nodeIndex];
+                final int[] childNodeIds = childNodeIdsByNode[nodeIndex];
+                final int edgeCount = childNodeIds.length;
+                @SuppressWarnings("unchecked")
+                final CompiledNode<V>[] children = new CompiledNode[edgeCount];
+
+                for (int edgeIndex = 0; edgeIndex < edgeCount; edgeIndex++) {
+                    final int childNodeId = childNodeIds[edgeIndex];
+                    if (childNodeId < 0 || childNodeId >= edgeLabelsByNode.length) {
+                        throw new IOException(
+                                "Invalid child node id at node " + nodeIndex + ", edge index " + edgeIndex + ": "
+                                        + childNodeId);
+                    }
+                    children[edgeIndex] = resolveNode(childNodeId, edgeLabelsByNode, childNodeIdsByNode,
+                            orderedValuesByNode, orderedCountsByNode, nodes, inProgress, maxExpandedIndex);
+                }
+
+                final CompiledNode<V> node = new CompiledNode<>(edgeLabels, children, orderedValuesByNode[nodeIndex], maxExpandedIndex,
+                        orderedCountsByNode[nodeIndex]);
+                nodes[nodeIndex] = node;
+                return node;
+            } finally {
+                inProgress[nodeIndex] = false;
+            }
+        }
+
+        private static void validateSerializedEdges(final int nodeIndex, final char... edgeLabels) throws IOException {
+            for (int edgeIndex = 1; edgeIndex < edgeLabels.length; edgeIndex++) {
+                if (edgeLabels[edgeIndex - 1] >= edgeLabels[edgeIndex]) {
+                    throw new IOException("Edge labels must be strictly ascending at node " + nodeIndex + ", edge index "
+                            + edgeIndex + ": '" + edgeLabels[edgeIndex - 1] + "' then '" + edgeLabels[edgeIndex] + "'.");
+                }
             }
         }
     }
@@ -772,6 +844,16 @@ public final class FrequencyTrie<V> {
         private final DiacriticProcessingMode diacriticProcessingMode;
 
         /**
+         * Dense edge lookup span threshold.
+         * <p>
+         * This value controls a speed/memory trade-off during freezing:
+         * dense child lookup tables are allocated only for nodes whose child
+         * labels fit in this span.
+         * </p>
+         */
+        private final int maxExpandedIndex;
+
+        /**
          * Mutable root node.
          */
         private final MutableNode<V> root;
@@ -837,11 +919,39 @@ public final class FrequencyTrie<V> {
         public Builder(final IntFunction<V[]> arrayFactory, final ReductionSettings reductionSettings,
                 final WordTraversalDirection traversalDirection, final CaseProcessingMode caseProcessingMode,
                 final DiacriticProcessingMode diacriticProcessingMode) {
+            this(arrayFactory, reductionSettings, traversalDirection, caseProcessingMode, diacriticProcessingMode,
+                    CompiledNode.DEFAULT_MAX_EXPANDED_INDEX);
+        }
+
+        /**
+         * Creates a new builder with the provided settings, explicit traversal
+         * direction, explicit case processing mode, explicit diacritic processing
+         * mode, and an explicit dense child lookup threshold.
+         *
+         * @param arrayFactory            array factory
+         * @param reductionSettings       reduction configuration
+         * @param traversalDirection      logical key traversal direction
+         * @param caseProcessingMode      dictionary case processing mode
+         * @param diacriticProcessingMode dictionary diacritic processing mode
+         * @param maxExpandedIndex        dense lookup span override; zero disables
+         *                               dense lookup. Larger values increase direct
+         *                               indexing opportunities while potentially
+         *                               increasing materialization memory in nodes
+         *                               whose edge label span is within the limit.
+         * @throws NullPointerException if any argument is {@code null}
+         */
+        public Builder(final IntFunction<V[]> arrayFactory, final ReductionSettings reductionSettings,
+                final WordTraversalDirection traversalDirection, final CaseProcessingMode caseProcessingMode,
+                final DiacriticProcessingMode diacriticProcessingMode, final int maxExpandedIndex) {
             this.arrayFactory = Objects.requireNonNull(arrayFactory, "arrayFactory");
             this.reductionSettings = Objects.requireNonNull(reductionSettings, "reductionSettings");
             this.traversalDirection = Objects.requireNonNull(traversalDirection, "traversalDirection");
             this.caseProcessingMode = Objects.requireNonNull(caseProcessingMode, "caseProcessingMode");
             this.diacriticProcessingMode = Objects.requireNonNull(diacriticProcessingMode, "diacriticProcessingMode");
+            if (maxExpandedIndex < 0) {
+                throw new IllegalArgumentException("maxExpandedIndex must be non-negative.");
+            }
+            this.maxExpandedIndex = maxExpandedIndex;
             this.root = new MutableNode<>();
         }
 
@@ -1098,7 +1208,7 @@ public final class FrequencyTrie<V> {
             }
 
             final CompiledNode<V> frozen = new CompiledNode<>(edges, childNodes, localSummary.orderedValues(),
-                    localSummary.orderedCounts());
+                    this.maxExpandedIndex, localSummary.orderedCounts());
             cache.put(reducedNode, frozen);
             return frozen;
         }

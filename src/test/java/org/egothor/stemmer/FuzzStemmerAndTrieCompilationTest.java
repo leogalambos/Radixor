@@ -65,10 +65,9 @@ import org.junit.jupiter.api.io.TempDir;
  * stems declared by the source dictionary.
  */
 @DisplayName("Deterministic fuzz-style trie and stemmer compilation")
-@Tag("unit")
 @Tag("fuzz")
 @Tag("trie")
-@Tag("stemming")
+@Tag("stemmer")
 class FuzzStemmerAndTrieCompilationTest {
 
     /**

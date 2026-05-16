@@ -95,6 +95,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 @Tag("integration")
 @Tag("cli")
 @Tag("stemmer")
+@Tag("compile")
+@Tag("slow")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @DisplayName("Compile integration")
 final class CompileIntegrationTest {
@@ -189,9 +191,10 @@ final class CompileIntegrationTest {
          * create nested output directories, preserve expected lookup behavior, and
          * store canonical stems when {@code --store-original} is enabled.
          *
-         * @throws IOException if reading or writing fails
+        * @throws IOException if reading or writing fails
          */
         @Test
+        @Tag("slow")
         @DisplayName("CLI should compile the remark-aware fixture and preserve expected lookups")
         void shouldCompileRemarkAwareFixtureAndPreserveExpectedLookups() throws IOException {
             final Path inputFile = copyResourceToTemporaryFile(REMARK_AWARE_DICTIONARY_RESOURCE,
@@ -234,9 +237,10 @@ final class CompileIntegrationTest {
          * Verifies that the CLI rejects an already existing output path unless
          * overwrite is explicitly enabled.
          *
-         * @throws IOException if reading or writing fails
+        * @throws IOException if reading or writing fails
          */
         @Test
+        @Tag("slow")
         @DisplayName("CLI should require overwrite before replacing an existing output artifact")
         void shouldRequireOverwriteForExistingOutput() throws IOException {
             final Path inputFile = copyResourceToTemporaryFile(REMARK_AWARE_DICTIONARY_RESOURCE,
@@ -301,6 +305,7 @@ final class CompileIntegrationTest {
 
     @Nested
     @DisplayName("Bundled project dictionary workflows")
+    @Tag("slow")
     final class BundledProjectDictionaryWorkflows {
 
         /**
@@ -317,11 +322,12 @@ final class CompileIntegrationTest {
          * </p>
          *
          * @param scenario     scenario identifier
-         * @param resourcePath bundled dictionary resource path
+        * @param resourcePath bundled dictionary resource path
          * @throws IOException if reading or writing fails
          */
         @ParameterizedTest(name = "[{index}] {0}")
         @MethodSource("org.egothor.stemmer.CompileIntegrationTest#bundledDictionaryCases")
+        @Tag("slow")
         @DisplayName("CLI should compile bundled project dictionaries and preserve representative variant semantics")
         void shouldCompileBundledProjectDictionaryAndPreserveRepresentativeVariantSemantics(final String scenario,
                 final String resourcePath) throws IOException {

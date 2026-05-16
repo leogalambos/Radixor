@@ -66,7 +66,10 @@ import org.junit.jupiter.api.io.TempDir;
  * {@link System#exit(int)}.
  * </p>
  */
-@Tag("unit")
+@Tag("integration")
+@Tag("cli")
+@Tag("compile")
+@Tag("stemmer")
 @DisplayName("Compile")
 class CompileTest {
 
