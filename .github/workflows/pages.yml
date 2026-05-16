@@ -263,7 +263,7 @@ jobs:
 
           - [Latest build summary](https://leogalambos.github.io/Radixor/builds/latest/)
           - [Javadoc](https://leogalambos.github.io/Radixor/builds/latest/javadoc/)
-- [Release verification test report (ciRelease)](https://leogalambos.github.io/Radixor/builds/latest/test/)
+          - [Release verification test report (ciRelease)](https://leogalambos.github.io/Radixor/builds/latest/test/)
           - [PMD report](https://leogalambos.github.io/Radixor/builds/latest/pmd/main.html)
           - [JaCoCo coverage report](https://leogalambos.github.io/Radixor/builds/latest/coverage/)
           - [PIT mutation testing report](https://leogalambos.github.io/Radixor/builds/latest/pitest/)
