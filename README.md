@@ -1,15 +1,13 @@
-<img src="Radixor.png" width="30%" align="right" alt="Radixor logo" />
+<img src="docs/assets/images/banner.jpg" width="100%" alt="Radixor banner" />
 
-# Radixor
-
-[![Quality gates](https://github.com/leogalambos/Radixor/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/leogalambos/Radixor/actions/workflows/build.yml)
-[![Coverage](https://img.shields.io/endpoint?url=https://leogalambos.github.io/Radixor/builds/latest/metrics/coverage-badge.json)](https://leogalambos.github.io/Radixor/builds/latest/coverage/)
-[![Published reports](https://img.shields.io/badge/reports-GitHub%20Pages-blue)](https://leogalambos.github.io/Radixor/builds/latest/)
-[![Mutation score](https://img.shields.io/endpoint?url=https://leogalambos.github.io/Radixor/builds/latest/metrics/pitest-badge.json)](https://leogalambos.github.io/Radixor/builds/latest/pitest/)
-[![English benchmark](https://img.shields.io/endpoint?url=https://leogalambos.github.io/Radixor/builds/latest/metrics/jmh-badge.json)](https://leogalambos.github.io/Radixor/builds/latest/jmh/jmh-results.txt)
-[![Maven Central](https://img.shields.io/maven-central/v/org.egothor/radixor)](https://central.sonatype.com/artifact/org.egothor/radixor)
 [![License](https://img.shields.io/github/license/leogalambos/Radixor)](LICENSE)
 [![Java](https://img.shields.io/badge/Java-21%2B-brightgreen)](#)
+[![Maven Central](https://img.shields.io/maven-central/v/org.egothor/radixor)](https://central.sonatype.com/artifact/org.egothor/radixor)
+[![Published reports](https://img.shields.io/badge/reports-GitHub%20Pages-blue)](https://leogalambos.github.io/Radixor/builds/latest/)
+[![Quality gates](https://github.com/leogalambos/Radixor/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/leogalambos/Radixor/actions/workflows/build.yml)
+[![Coverage](https://img.shields.io/endpoint?url=https://leogalambos.github.io/Radixor/builds/latest/metrics/coverage-badge.json)](https://leogalambos.github.io/Radixor/builds/latest/coverage/)
+[![Mutation score](https://img.shields.io/endpoint?url=https://leogalambos.github.io/Radixor/builds/latest/metrics/pitest-badge.json)](https://leogalambos.github.io/Radixor/builds/latest/pitest/)
+[![English benchmark](https://img.shields.io/endpoint?url=https://leogalambos.github.io/Radixor/builds/latest/metrics/jmh-badge.json)](https://leogalambos.github.io/Radixor/builds/latest/jmh/jmh-results.txt)
 
 *Fast, deterministic, multi-language stemming for Java, built around compact patch-command tries and measured at roughly 4× to 6× the throughput of the Snowball Porter stemmer family on the current English benchmark workload.*
 
