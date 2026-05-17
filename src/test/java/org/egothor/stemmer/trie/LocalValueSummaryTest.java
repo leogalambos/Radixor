@@ -51,6 +51,7 @@ import org.junit.jupiter.api.Test;
  */
 @Tag("unit")
 @Tag("trie")
+@Tag("reduction")
 @DisplayName("LocalValueSummary")
 class LocalValueSummaryTest {
 
@@ -190,6 +191,9 @@ class LocalValueSummaryTest {
     /**
      * Test helper with identical textual form but distinct identity.
      */
+    @Tag("unit")
+    @Tag("trie")
+    @Tag("reduction")
     private static final class TextTwin {
 
         /**

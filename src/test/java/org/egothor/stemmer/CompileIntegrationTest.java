@@ -96,6 +96,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 @Tag("cli")
 @Tag("stemmer")
 @Tag("compile")
+@Tag("construction")
 @Tag("slow")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @DisplayName("Compile integration")
@@ -184,6 +185,11 @@ final class CompileIntegrationTest {
 
     @Nested
     @DisplayName("Remark-aware fixture workflow")
+    @Tag("integration")
+    @Tag("cli")
+    @Tag("stemmer")
+    @Tag("compile")
+    @Tag("construction")
     final class RemarkAwareFixtureWorkflow {
 
         /**
@@ -306,6 +312,11 @@ final class CompileIntegrationTest {
     @Nested
     @DisplayName("Bundled project dictionary workflows")
     @Tag("slow")
+    @Tag("integration")
+    @Tag("cli")
+    @Tag("stemmer")
+    @Tag("compile")
+    @Tag("construction")
     final class BundledProjectDictionaryWorkflows {
 
         /**

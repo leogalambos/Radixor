@@ -45,6 +45,7 @@ import org.junit.jupiter.api.Test;
  */
 @Tag("unit")
 @Tag("trie")
+@Tag("construction")
 @DisplayName("MutableNode")
 class MutableNodeTest {
 

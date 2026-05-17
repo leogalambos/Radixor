@@ -68,6 +68,7 @@ import org.junit.jupiter.api.io.TempDir;
 @Tag("fuzz")
 @Tag("trie")
 @Tag("stemmer")
+@Tag("determinism")
 class FuzzStemmerAndTrieCompilationTest {
 
     /**

@@ -42,6 +42,7 @@ import org.junit.jupiter.api.Test;
  */
 @Tag("unit")
 @Tag("trie")
+@Tag("reduction")
 @DisplayName("DominantLocalDescriptor")
 class DominantLocalDescriptorTest {
 

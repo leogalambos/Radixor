@@ -89,6 +89,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 @Tag("stemmer")
 @Tag("io")
 @Tag("parser")
+@Tag("trie")
+@Tag("persistence")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 final class StemmerPatchTrieLoaderTest {
 
@@ -266,6 +268,9 @@ final class StemmerPatchTrieLoaderTest {
      */
     @Nested
     @DisplayName("API contracts")
+    @Tag("validation")
+    @Tag("integration")
+    @Tag("trie")
     final class ApiContractTests {
 
         /**
@@ -315,10 +320,82 @@ final class StemmerPatchTrieLoaderTest {
     }
 
     /**
+     * Focused internal loader behavior tests.
+     */
+    @Nested
+    @DisplayName("Internal helper behavior")
+    @Tag("construction")
+    @Tag("integration")
+    @Tag("trie")
+    final class InternalLoaderBehaviorTests {
+
+        /**
+         * Verifies that bundled language loading follows explicit
+         * right-to-left metadata mapping.
+         */
+        @Test
+        @DisplayName("bundled language loading must infer traversal direction from language metadata")
+        void shouldLoadBundledLanguagesUsingLanguageRightToLeftMetadata() throws IOException {
+            final ReductionSettings settings = ReductionSettings.withDefaults(DEFAULT_REDUCTION_MODE);
+            final FrequencyTrie<String> leftToRightDictionary = StemmerPatchTrieLoader.load(
+                    StemmerPatchTrieLoader.Language.US_UK, true, settings);
+            final FrequencyTrie<String> rightToLeftDictionary = StemmerPatchTrieLoader.load(
+                    StemmerPatchTrieLoader.Language.FA_IR, true, settings);
+
+            assertEquals(WordTraversalDirection.BACKWARD, leftToRightDictionary.traversalDirection(),
+                    "Left-to-right languages should use backward traversal.");
+            assertEquals(WordTraversalDirection.FORWARD, rightToLeftDictionary.traversalDirection(),
+                    "Right-to-left languages should use forward traversal.");
+        }
+
+        /**
+         * Verifies the mode-based and settings-based bundled load overloads remain
+         * semantically consistent for traversal direction.
+         */
+        @Test
+        @DisplayName("load(Language,.., ReductionMode) and load(Language,.., ReductionSettings) should agree on traversal direction")
+        void shouldKeepBundledTraversalDirectionConsistentAcrossOverloads() throws IOException {
+            final FrequencyTrie<String> byMode = StemmerPatchTrieLoader.load(
+                    StemmerPatchTrieLoader.Language.US_UK, true, DEFAULT_REDUCTION_MODE);
+            final FrequencyTrie<String> bySettings = StemmerPatchTrieLoader.load(
+                    StemmerPatchTrieLoader.Language.US_UK, true,
+                    ReductionSettings.withDefaults(DEFAULT_REDUCTION_MODE));
+
+            assertEquals(byMode.traversalDirection(), bySettings.traversalDirection());
+            assertEquals(byMode.metadata().reductionSettings().reductionMode(),
+                    bySettings.metadata().reductionSettings().reductionMode());
+        }
+
+        /**
+         * Verifies bundled resource access succeeds for known resources and fails
+         * for unknown resources.
+         */
+        @Test
+        @DisplayName("openBundledResource should return readable streams for known resources and fail for unknown ones")
+        void shouldOpenBundledResourcesSuccessfullyAndRejectUnknowns() throws IOException {
+            final String resourcePath = StemmerPatchTrieLoader.Language.US_UK.resourcePath();
+            try (InputStream inputStream = StemmerPatchTrieLoader.openBundledResource(resourcePath);
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+                assertNotNull(reader.readLine(), "Known bundled resource must expose readable content.");
+            }
+
+            final String missingResource = "org/egothor/stemmer/missing-dictionary.dict.gz";
+            final IOException exception = assertThrows(IOException.class,
+                    () -> StemmerPatchTrieLoader.openBundledResource(missingResource));
+
+            assertEquals("Stemmer resource not found: " + missingResource, exception.getMessage());
+        }
+    }
+
+    /**
      * Focused filesystem and parser behavior tests.
      */
     @Nested
     @DisplayName("Filesystem and parser behavior")
+    @Tag("io")
+    @Tag("construction")
+    @Tag("integration")
+    @Tag("trie")
     final class FilesystemAndParserTests {
 
         /**
@@ -578,6 +655,9 @@ final class StemmerPatchTrieLoaderTest {
     @Nested
     @Tag("slow")
     @DisplayName("Bundled dictionaries")
+    @Tag("compat")
+    @Tag("trie")
+    @Tag("regression")
     final class BundledDictionaryTests {
 
         /**

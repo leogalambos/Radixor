@@ -42,6 +42,7 @@ import org.junit.jupiter.api.Test;
 @Tag("unit")
 @Tag("core")
 @Tag("stemmer")
+@Tag("validation")
 @DisplayName("WordTraversalDirection")
 class WordTraversalDirectionTest {
 

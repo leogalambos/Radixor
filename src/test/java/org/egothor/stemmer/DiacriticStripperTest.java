@@ -43,6 +43,7 @@ import org.junit.jupiter.api.Test;
 @Tag("unit")
 @Tag("diacritic")
 @Tag("stemmer")
+@Tag("normalization")
 @DisplayName("DiacriticStripper")
 class DiacriticStripperTest {
 

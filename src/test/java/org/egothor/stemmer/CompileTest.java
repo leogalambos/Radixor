@@ -70,6 +70,7 @@ import org.junit.jupiter.api.io.TempDir;
 @Tag("cli")
 @Tag("compile")
 @Tag("stemmer")
+@Tag("construction")
 @DisplayName("Compile")
 class CompileTest {
 
@@ -178,6 +179,11 @@ class CompileTest {
 
     @Nested
     @DisplayName("argument validation")
+    @Tag("integration")
+    @Tag("cli")
+    @Tag("compile")
+    @Tag("stemmer")
+    @Tag("validation")
     class ArgumentValidationTest {
 
         @Test

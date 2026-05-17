@@ -48,6 +48,7 @@ import org.junit.jupiter.api.Test;
  */
 @Tag("unit")
 @Tag("trie")
+@Tag("reduction")
 @DisplayName("ReductionContext")
 class ReductionContextTest {
 

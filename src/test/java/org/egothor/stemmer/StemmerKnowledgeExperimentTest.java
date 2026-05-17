@@ -57,6 +57,7 @@ import org.junit.jupiter.api.io.TempDir;
 @Tag("integration")
 @Tag("stemmer")
 @Tag("trie")
+@Tag("reduction")
 final class StemmerKnowledgeExperimentTest {
 
     /**

@@ -42,6 +42,7 @@ import org.junit.jupiter.api.Test;
 @Tag("unit")
 @Tag("metadata")
 @Tag("trie")
+@Tag("validation")
 @DisplayName("TrieMetadata")
 class TrieMetadataTest {
 

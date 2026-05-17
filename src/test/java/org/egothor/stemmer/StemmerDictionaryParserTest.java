@@ -76,6 +76,7 @@ import org.junit.jupiter.api.io.TempDir;
 @Tag("unit")
 @Tag("parser")
 @Tag("stemmer")
+@Tag("validation")
 class StemmerDictionaryParserTest {
 
     /**
@@ -98,6 +99,10 @@ class StemmerDictionaryParserTest {
     /**
      * Log handler capturing parser diagnostics for assertions.
      */
+    @Tag("unit")
+    @Tag("parser")
+    @Tag("stemmer")
+    @Tag("validation")
     private static final class CapturedLogHandler extends Handler {
 
         /**
@@ -158,6 +163,10 @@ class StemmerDictionaryParserTest {
 
     @Nested
     @DisplayName("parse(Reader, String, EntryHandler)")
+    @Tag("unit")
+    @Tag("parser")
+    @Tag("stemmer")
+    @Tag("validation")
     class ReaderParsingTests {
 
         @Test
@@ -334,6 +343,10 @@ class StemmerDictionaryParserTest {
 
     @Nested
     @DisplayName("parse(Path, EntryHandler) and parse(String, EntryHandler)")
+    @Tag("unit")
+    @Tag("parser")
+    @Tag("stemmer")
+    @Tag("validation")
     class FileParsingTests {
 
         @Test
@@ -424,6 +437,10 @@ class StemmerDictionaryParserTest {
 
     @Nested
     @DisplayName("ParseStatistics")
+    @Tag("unit")
+    @Tag("parser")
+    @Tag("stemmer")
+    @Tag("validation")
     class ParseStatisticsTests {
 
         @Test

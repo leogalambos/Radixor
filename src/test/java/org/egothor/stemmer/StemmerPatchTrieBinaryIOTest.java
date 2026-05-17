@@ -134,6 +134,10 @@ class StemmerPatchTrieBinaryIOTest {
      */
     @Nested
     @DisplayName("write(...)")
+    @Tag("unit")
+    @Tag("io")
+    @Tag("trie")
+    @Tag("persistence")
     class WriteTests {
 
         /**
@@ -290,6 +294,10 @@ class StemmerPatchTrieBinaryIOTest {
      */
     @Nested
     @DisplayName("read(...)")
+    @Tag("unit")
+    @Tag("io")
+    @Tag("trie")
+    @Tag("persistence")
     class ReadTests {
 
         /**
@@ -633,6 +641,10 @@ class StemmerPatchTrieBinaryIOTest {
     /**
      * Output stream that records whether it has been closed.
      */
+    @Tag("unit")
+    @Tag("io")
+    @Tag("trie")
+    @Tag("persistence")
     private static final class TrackingOutputStream extends ByteArrayOutputStream {
 
         /**
@@ -659,6 +671,10 @@ class StemmerPatchTrieBinaryIOTest {
     /**
      * Input stream that records whether it has been closed.
      */
+    @Tag("unit")
+    @Tag("io")
+    @Tag("trie")
+    @Tag("persistence")
     private static final class TrackingInputStream extends ByteArrayInputStream {
 
         /**
