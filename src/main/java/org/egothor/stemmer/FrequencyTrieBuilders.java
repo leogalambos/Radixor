@@ -119,11 +119,11 @@ public final class FrequencyTrieBuilders {
      * Copies one compiled node and all reachable descendants into the target
      * builder.
      *
-     * @param node       current compiled node
-     * @param keyBuilder current key builder
+     * @param node               current compiled node
+     * @param keyBuilder         current key builder
      * @param builder            target mutable builder
      * @param traversalDirection logical key traversal direction used by the source
-     * @param <V>                 value type
+     * @param <V>                value type
      */
     private static <V> void copyNode(final CompiledNode<V> node, final StringBuilder keyBuilder,
             final FrequencyTrie.Builder<V> builder, final WordTraversalDirection traversalDirection) {

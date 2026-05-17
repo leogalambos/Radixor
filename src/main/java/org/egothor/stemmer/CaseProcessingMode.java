@@ -48,8 +48,7 @@ public enum CaseProcessingMode {
     AS_IS,
 
     /**
-     * Normalizes all dictionary content to lower case using
-     * {@link Locale#ROOT}.
+     * Normalizes all dictionary content to lower case using {@link Locale#ROOT}.
      */
     LOWERCASE_WITH_LOCALE_ROOT
 }

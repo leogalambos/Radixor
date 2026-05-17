@@ -93,12 +93,12 @@ final class DiacriticStripper {
     }
 
     /**
-     * Removes supported diacritic marks and common Latin ligatures from the supplied
-     * text.
+     * Removes supported diacritic marks and common Latin ligatures from the
+     * supplied text.
      *
      * <p>
-     * The method returns the original {@link String} instance when no replacement is
-     * required, avoiding an unnecessary allocation on the common ASCII path.
+     * The method returns the original {@link String} instance when no replacement
+     * is required, avoiding an unnecessary allocation on the common ASCII path.
      * </p>
      *
      * @param input text to normalize

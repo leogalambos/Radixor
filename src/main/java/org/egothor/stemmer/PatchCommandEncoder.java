@@ -67,7 +67,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * instance can still be used safely when needed.
  * </p>
  */
-@SuppressWarnings("PMD.CyclomaticComplexity")
+@SuppressWarnings({ "PMD.AvoidLiteralsInIfCondition", "PMD.CyclomaticComplexity", "PMD.ForLoopVariableCount" })
 public final class PatchCommandEncoder {
 
     /**
@@ -120,6 +120,13 @@ public final class PatchCommandEncoder {
      * Canonical serialized no-operation patch.
      */
     /* default */ static final String NOOP_PATCH = String.valueOf(new char[] { NOOP_OPCODE, NOOP_ARGUMENT });
+
+    /**
+     * Return value used by
+     * {@link #applyTo(CharSequence, String, WordTraversalDirection, char[], int, int)}
+     * when the caller-owned output range is too small for the transformed text.
+     */
+    public static final int APPLY_INSUFFICIENT_CAPACITY = -1;
 
     /**
      * Prefix used in unsupported NOOP patch argument exceptions.
@@ -347,6 +354,78 @@ public final class PatchCommandEncoder {
     }
 
     /**
+     * Applies a compact patch command into a caller-owned output buffer.
+     *
+     * <p>
+     * The output array is not retained. Capacity failure is reported by
+     * {@link #APPLY_INSUFFICIENT_CAPACITY} and leaves the output range unchanged.
+     * Malformed compatibility cases preserve the source exactly as
+     * {@link #apply(String, String, WordTraversalDirection)} does.
+     * </p>
+     *
+     * @param source             original source text
+     * @param patchCommand       compact patch command
+     * @param traversalDirection traversal direction used by the patch command
+     * @param output             caller-owned output storage
+     * @param outputOffset       first writable output offset
+     * @param outputLength       writable output capacity
+     * @return produced character count, or {@link #APPLY_INSUFFICIENT_CAPACITY}
+     *         when {@code outputLength} is too small
+     */
+    public static int applyTo(final CharSequence source, final String patchCommand,
+            final WordTraversalDirection traversalDirection, final char[] output, final int outputOffset,
+            final int outputLength) {
+        Objects.requireNonNull(source, "source");
+        Objects.requireNonNull(traversalDirection, "traversalDirection");
+        Objects.requireNonNull(output, "output");
+        Objects.checkFromIndexSize(outputOffset, outputLength, output.length);
+
+        final int sourceLength = source.length();
+        final int producedLength = computeAppliedLength(sourceLength, patchCommand, traversalDirection);
+        if (producedLength > outputLength) {
+            return APPLY_INSUFFICIENT_CAPACITY;
+        }
+        applyToOutput(source, 0, sourceLength, patchCommand, traversalDirection, output, outputOffset, producedLength);
+        return producedLength;
+    }
+
+    /**
+     * Applies a compact patch command from a caller-owned source slice into a
+     * caller-owned output buffer.
+     *
+     * @param source             source storage
+     * @param sourceOffset       first source character offset
+     * @param sourceLength       number of source characters
+     * @param patchCommand       compact patch command
+     * @param traversalDirection traversal direction used by the patch command
+     * @param output             caller-owned output storage
+     * @param outputOffset       first writable output offset
+     * @param outputLength       writable output capacity
+     * @return produced character count, or {@link #APPLY_INSUFFICIENT_CAPACITY}
+     *         when {@code outputLength} is too small
+     * @throws IllegalArgumentException when source and output ranges overlap in the
+     *                                  same array
+     */
+    public static int applyTo(final char[] source, final int sourceOffset, final int sourceLength,
+            final String patchCommand, final WordTraversalDirection traversalDirection, final char[] output,
+            final int outputOffset, final int outputLength) {
+        Objects.requireNonNull(source, "source");
+        Objects.requireNonNull(traversalDirection, "traversalDirection");
+        Objects.requireNonNull(output, "output");
+        Objects.checkFromIndexSize(sourceOffset, sourceLength, source.length);
+        Objects.checkFromIndexSize(outputOffset, outputLength, output.length);
+        validateNonOverlappingRanges(source, sourceOffset, sourceLength, output, outputOffset, outputLength);
+
+        final int producedLength = computeAppliedLength(sourceLength, patchCommand, traversalDirection);
+        if (producedLength > outputLength) {
+            return APPLY_INSUFFICIENT_CAPACITY;
+        }
+        applyToOutput(source, sourceOffset, sourceLength, patchCommand, traversalDirection, output, outputOffset,
+                producedLength);
+        return producedLength;
+    }
+
+    /**
      * Encodes a patch command using the historical backward Egothor semantics.
      *
      * @param source source word form in legacy backward logical space
@@ -409,7 +488,6 @@ public final class PatchCommandEncoder {
      * @param patchCommand compact patch command
      * @return transformed word, or {@code null} when {@code source} is {@code null}
      */
-    @SuppressWarnings({ "PMD.CyclomaticComplexity", "PMD.AvoidLiteralsInIfCondition" })
     private static String applyBackward(final String source, final String patchCommand) {
         if (source == null) {
             return null;
@@ -435,7 +513,7 @@ public final class PatchCommandEncoder {
         int position = result.length() - 1;
 
         try {
-            for (int patchIndex = 0, patchLength = patchCommand.length(); patchIndex < patchLength; patchIndex += 2) { // NOPMD
+            for (int patchIndex = 0, patchLength = patchCommand.length(); patchIndex < patchLength; patchIndex += 2) {
                 final char opcode = patchCommand.charAt(patchIndex);
                 final char argument = patchCommand.charAt(patchIndex + 1);
 
@@ -493,7 +571,6 @@ public final class PatchCommandEncoder {
      * @param patchCommand compact patch command
      * @return transformed word, or {@code null} when {@code source} is {@code null}
      */
-    @SuppressWarnings({ "PMD.CyclomaticComplexity", "PMD.AvoidLiteralsInIfCondition" })
     private static String applyForward(final String source, final String patchCommand) {
         if (source == null) {
             return null;
@@ -519,7 +596,7 @@ public final class PatchCommandEncoder {
         int position = 0;
 
         try {
-            for (int patchIndex = 0, patchLength = patchCommand.length(); patchIndex < patchLength; patchIndex += 2) { // NOPMD
+            for (int patchIndex = 0, patchLength = patchCommand.length(); patchIndex < patchLength; patchIndex += 2) {
                 final char opcode = patchCommand.charAt(patchIndex);
                 final char argument = patchCommand.charAt(patchIndex + 1);
 
@@ -681,7 +758,7 @@ public final class PatchCommandEncoder {
      */
     private static String applyBackwardToEmptySource(final StringBuilder result, final String patchCommand) {
         try {
-            for (int patchIndex = 0, patchLength = patchCommand.length(); patchIndex < patchLength; patchIndex += 2) { // NOPMD
+            for (int patchIndex = 0, patchLength = patchCommand.length(); patchIndex < patchLength; patchIndex += 2) {
                 final char opcode = patchCommand.charAt(patchIndex);
                 final char argument = patchCommand.charAt(patchIndex + 1);
 
@@ -722,7 +799,7 @@ public final class PatchCommandEncoder {
      */
     private static String applyForwardToEmptySource(final StringBuilder result, final String patchCommand) {
         try {
-            for (int patchIndex = 0, patchLength = patchCommand.length(); patchIndex < patchLength; patchIndex += 2) { // NOPMD
+            for (int patchIndex = 0, patchLength = patchCommand.length(); patchIndex < patchLength; patchIndex += 2) {
                 final char opcode = patchCommand.charAt(patchIndex);
                 final char argument = patchCommand.charAt(patchIndex + 1);
 
@@ -754,6 +831,711 @@ public final class PatchCommandEncoder {
     }
 
     /**
+     * Computes the transformed length or the preserved source length for malformed
+     * compatibility cases.
+     *
+     * @param sourceLength       source length
+     * @param patchCommand       patch command
+     * @param traversalDirection traversal direction
+     * @return produced length
+     */
+    private static int computeAppliedLength(final int sourceLength, final String patchCommand,
+            final WordTraversalDirection traversalDirection) {
+        if (patchCommand == null || patchCommand.isEmpty() || NOOP_PATCH.equals(patchCommand)
+                || (patchCommand.length() & 1) != 0) {
+            return sourceLength;
+        }
+        if (traversalDirection == WordTraversalDirection.BACKWARD) {
+            return computeBackwardAppliedLength(sourceLength, patchCommand);
+        }
+        return computeForwardAppliedLength(sourceLength, patchCommand);
+    }
+
+    /**
+     * Computes the backward traversal output length.
+     *
+     * @param sourceLength source length
+     * @param patchCommand patch command
+     * @return produced length
+     */
+    private static int computeBackwardAppliedLength(final int sourceLength, final String patchCommand) {
+        if (patchCommand.length() == 2) {
+            return computeSingleBackwardAppliedLength(sourceLength, patchCommand.charAt(0), patchCommand.charAt(1));
+        }
+        if (sourceLength == 0) {
+            return computeBackwardEmptyAppliedLength(patchCommand);
+        }
+
+        int currentLength = sourceLength;
+        int position = sourceLength - 1;
+        for (int patchIndex = 0, patchLength = patchCommand.length(); patchIndex < patchLength; patchIndex += 2) {
+            final char opcode = patchCommand.charAt(patchIndex);
+            final char argument = patchCommand.charAt(patchIndex + 1);
+
+            switch (opcode) {
+                case SKIP_OPCODE:
+                    final int skipCount = decodeEncodedCount(argument);
+                    if (skipCount < 1) {
+                        return sourceLength;
+                    }
+                    position = position - skipCount + 1;
+                    break;
+
+                case REPLACE_OPCODE:
+                    if (position < 0 || position >= currentLength) {
+                        return sourceLength;
+                    }
+                    break;
+
+                case DELETE_OPCODE:
+                    final int deleteCount = decodeEncodedCount(argument);
+                    if (deleteCount < 1) {
+                        return sourceLength;
+                    }
+                    final int deleteEndExclusive = position + 1;
+                    position -= deleteCount - 1;
+                    if (position < 0 || deleteEndExclusive > currentLength || position > deleteEndExclusive) {
+                        return sourceLength;
+                    }
+                    currentLength -= deleteEndExclusive - position;
+                    break;
+
+                case INSERT_OPCODE:
+                    if (position < -1 || position >= currentLength) {
+                        return sourceLength;
+                    }
+                    currentLength++;
+                    position++;
+                    break;
+
+                case NOOP_OPCODE:
+                    if (argument != NOOP_ARGUMENT) {
+                        throw new IllegalArgumentException(MSG_NOOP + argument);
+                    }
+                    return sourceLength;
+
+                default:
+                    throw new IllegalArgumentException(MSG_OPCODE + opcode);
+            }
+
+            position--;
+        }
+        return currentLength;
+    }
+
+    /**
+     * Computes the forward traversal output length.
+     *
+     * @param sourceLength source length
+     * @param patchCommand patch command
+     * @return produced length
+     */
+    private static int computeForwardAppliedLength(final int sourceLength, final String patchCommand) {
+        if (patchCommand.length() == 2) {
+            return computeSingleForwardAppliedLength(sourceLength, patchCommand.charAt(0), patchCommand.charAt(1));
+        }
+        if (sourceLength == 0) {
+            return computeForwardEmptyAppliedLength(patchCommand);
+        }
+
+        int currentLength = sourceLength;
+        int position = 0;
+        for (int patchIndex = 0, patchLength = patchCommand.length(); patchIndex < patchLength; patchIndex += 2) {
+            final char opcode = patchCommand.charAt(patchIndex);
+            final char argument = patchCommand.charAt(patchIndex + 1);
+
+            switch (opcode) {
+                case SKIP_OPCODE:
+                    final int skipCount = decodeEncodedCount(argument);
+                    if (skipCount < 1) {
+                        return sourceLength;
+                    }
+                    position = position + skipCount - 1;
+                    break;
+
+                case REPLACE_OPCODE:
+                    if (position < 0 || position >= currentLength) {
+                        return sourceLength;
+                    }
+                    break;
+
+                case DELETE_OPCODE:
+                    final int deleteCount = decodeEncodedCount(argument);
+                    if (deleteCount < 1 || position < 0 || position + deleteCount > currentLength) {
+                        return sourceLength;
+                    }
+                    currentLength -= deleteCount;
+                    position--;
+                    break;
+
+                case INSERT_OPCODE:
+                    if (position < 0 || position > currentLength) {
+                        return sourceLength;
+                    }
+                    currentLength++;
+                    break;
+
+                case NOOP_OPCODE:
+                    if (argument != NOOP_ARGUMENT) {
+                        throw new IllegalArgumentException(MSG_NOOP + argument);
+                    }
+                    return sourceLength;
+
+                default:
+                    throw new IllegalArgumentException(MSG_OPCODE + opcode);
+            }
+
+            position++;
+        }
+        return currentLength;
+    }
+
+    /**
+     * Computes a single backward instruction output length.
+     *
+     * @param sourceLength source length
+     * @param opcode       opcode
+     * @param argument     argument
+     * @return produced length
+     */
+    private static int computeSingleBackwardAppliedLength(final int sourceLength, final char opcode,
+            final char argument) {
+        final int encodedValue;
+        switch (opcode) {
+            case DELETE_OPCODE:
+                encodedValue = decodeEncodedCount(argument);
+                return encodedValue < 1 || encodedValue > sourceLength ? sourceLength : sourceLength - encodedValue;
+            case INSERT_OPCODE:
+                return sourceLength + 1;
+            case REPLACE_OPCODE:
+            case SKIP_OPCODE:
+                return sourceLength;
+            case NOOP_OPCODE:
+                if (argument != NOOP_ARGUMENT) {
+                    throw new IllegalArgumentException(MSG_NOOP + argument);
+                }
+                return sourceLength;
+            default:
+                throw new IllegalArgumentException(MSG_OPCODE + opcode);
+        }
+    }
+
+    /**
+     * Computes a single forward instruction output length.
+     *
+     * @param sourceLength source length
+     * @param opcode       opcode
+     * @param argument     argument
+     * @return produced length
+     */
+    private static int computeSingleForwardAppliedLength(final int sourceLength, final char opcode,
+            final char argument) {
+        return computeSingleBackwardAppliedLength(sourceLength, opcode, argument);
+    }
+
+    /**
+     * Computes output length for an empty source in backward traversal.
+     *
+     * @param patchCommand patch command
+     * @return produced length
+     */
+    private static int computeBackwardEmptyAppliedLength(final String patchCommand) {
+        int currentLength = 0;
+        for (int patchIndex = 0, patchLength = patchCommand.length(); patchIndex < patchLength; patchIndex += 2) {
+            final char opcode = patchCommand.charAt(patchIndex);
+            final char argument = patchCommand.charAt(patchIndex + 1);
+            switch (opcode) {
+                case INSERT_OPCODE:
+                    currentLength++;
+                    break;
+                case SKIP_OPCODE:
+                case REPLACE_OPCODE:
+                case DELETE_OPCODE:
+                    return 0;
+                case NOOP_OPCODE:
+                    if (argument != NOOP_ARGUMENT) {
+                        throw new IllegalArgumentException(MSG_NOOP + argument);
+                    }
+                    return 0;
+                default:
+                    throw new IllegalArgumentException(MSG_OPCODE + opcode);
+            }
+        }
+        return currentLength;
+    }
+
+    /**
+     * Computes output length for an empty source in forward traversal.
+     *
+     * @param patchCommand patch command
+     * @return produced length
+     */
+    private static int computeForwardEmptyAppliedLength(final String patchCommand) {
+        return computeBackwardEmptyAppliedLength(patchCommand);
+    }
+
+    /**
+     * Applies an already-sized patch into caller output.
+     *
+     * @param source             source text
+     * @param sourceOffset       source offset
+     * @param sourceLength       source length
+     * @param patchCommand       patch command
+     * @param traversalDirection traversal direction
+     * @param output             output storage
+     * @param outputOffset       output offset
+     * @param producedLength     already-validated produced length
+     */
+    private static void applyToOutput(final CharSequence source, final int sourceOffset, final int sourceLength,
+            final String patchCommand, final WordTraversalDirection traversalDirection, final char[] output,
+            final int outputOffset, final int producedLength) {
+        if (isPreservedSource(sourceLength, producedLength, patchCommand, traversalDirection)) {
+            copySource(source, sourceOffset, sourceLength, output, outputOffset);
+            return;
+        }
+
+        if (sourceLength > 0) {
+            copySource(source, sourceOffset, sourceLength, output, outputOffset);
+        }
+
+        if (traversalDirection == WordTraversalDirection.BACKWARD) {
+            applyBackwardToOutput(sourceLength, patchCommand, output, outputOffset);
+        } else {
+            applyForwardToOutput(sourceLength, patchCommand, output, outputOffset);
+        }
+    }
+
+    /**
+     * Applies an already-sized patch into caller output.
+     *
+     * @param source             source storage
+     * @param sourceOffset       source offset
+     * @param sourceLength       source length
+     * @param patchCommand       patch command
+     * @param traversalDirection traversal direction
+     * @param output             output storage
+     * @param outputOffset       output offset
+     * @param producedLength     already-validated produced length
+     */
+    private static void applyToOutput(final char[] source, final int sourceOffset, final int sourceLength,
+            final String patchCommand, final WordTraversalDirection traversalDirection, final char[] output,
+            final int outputOffset, final int producedLength) {
+        if (isPreservedSource(sourceLength, producedLength, patchCommand, traversalDirection)) {
+            System.arraycopy(source, sourceOffset, output, outputOffset, sourceLength);
+            return;
+        }
+
+        if (sourceLength > 0) {
+            System.arraycopy(source, sourceOffset, output, outputOffset, sourceLength);
+        }
+
+        if (traversalDirection == WordTraversalDirection.BACKWARD) {
+            applyBackwardToOutput(sourceLength, patchCommand, output, outputOffset);
+        } else {
+            applyForwardToOutput(sourceLength, patchCommand, output, outputOffset);
+        }
+    }
+
+    /**
+     * Determines whether the output is exactly the original source.
+     *
+     * @param sourceLength       source length
+     * @param producedLength     produced length
+     * @param patchCommand       patch command
+     * @param traversalDirection traversal direction
+     * @return {@code true} if copying the source is sufficient
+     */
+    private static boolean isPreservedSource(final int sourceLength, final int producedLength,
+            final String patchCommand, final WordTraversalDirection traversalDirection) {
+        return producedLength == sourceLength
+                && isKnownPreserveOnlyPatch(sourceLength, patchCommand, traversalDirection);
+    }
+
+    /**
+     * Returns whether equal length also means no mutation is needed.
+     *
+     * @param sourceLength       source length
+     * @param patchCommand       patch command
+     * @param traversalDirection traversal direction
+     * @return {@code true} when the command preserves source content
+     */
+    private static boolean isKnownPreserveOnlyPatch(final int sourceLength, final String patchCommand,
+            final WordTraversalDirection traversalDirection) {
+        if (patchCommand == null || patchCommand.isEmpty() || NOOP_PATCH.equals(patchCommand)
+                || (patchCommand.length() & 1) != 0) {
+            return true;
+        }
+        if (patchCommand.length() == 2) {
+            return isSingleInstructionPreserveOnly(sourceLength, patchCommand.charAt(0), patchCommand.charAt(1));
+        }
+        if (sourceLength == 0) {
+            return hasEmptySourcePreserveOnlyPatch(patchCommand);
+        }
+        return traversalDirection == WordTraversalDirection.BACKWARD
+                ? hasBackwardPreserveOnlyPatch(sourceLength, patchCommand)
+                : hasForwardPreserveOnlyPatch(sourceLength, patchCommand);
+    }
+
+    /**
+     * Tests whether a single instruction preserves the source content.
+     *
+     * @param sourceLength source length
+     * @param opcode       opcode
+     * @param argument     argument
+     * @return {@code true} when no mutation should be applied
+     */
+    private static boolean isSingleInstructionPreserveOnly(final int sourceLength, final char opcode,
+            final char argument) {
+        switch (opcode) {
+            case DELETE_OPCODE:
+                final int encodedValue = decodeEncodedCount(argument);
+                return encodedValue < 1 || encodedValue > sourceLength;
+            case INSERT_OPCODE:
+                return false;
+            case REPLACE_OPCODE:
+                return sourceLength == 0;
+            case SKIP_OPCODE:
+                return true;
+            case NOOP_OPCODE:
+                if (argument != NOOP_ARGUMENT) {
+                    throw new IllegalArgumentException(MSG_NOOP + argument);
+                }
+                return true;
+            default:
+                throw new IllegalArgumentException(MSG_OPCODE + opcode);
+        }
+    }
+
+    /**
+     * Tests whether an empty-source patch preserves the source.
+     *
+     * @param patchCommand patch command
+     * @return {@code true} when no mutation should be applied
+     */
+    private static boolean hasEmptySourcePreserveOnlyPatch(final String patchCommand) {
+        for (int patchIndex = 0, patchLength = patchCommand.length(); patchIndex < patchLength; patchIndex += 2) {
+            final char opcode = patchCommand.charAt(patchIndex);
+            final char argument = patchCommand.charAt(patchIndex + 1);
+            switch (opcode) {
+                case INSERT_OPCODE:
+                    break;
+                case SKIP_OPCODE:
+                case REPLACE_OPCODE:
+                case DELETE_OPCODE:
+                    return true;
+                case NOOP_OPCODE:
+                    if (argument != NOOP_ARGUMENT) {
+                        throw new IllegalArgumentException(MSG_NOOP + argument);
+                    }
+                    return true;
+                default:
+                    throw new IllegalArgumentException(MSG_OPCODE + opcode);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Tests whether a backward patch preserves the source because it is malformed
+     * or a NOOP.
+     *
+     * @param sourceLength source length
+     * @param patchCommand patch command
+     * @return {@code true} when no mutation should be applied
+     */
+    private static boolean hasBackwardPreserveOnlyPatch(final int sourceLength, final String patchCommand) {
+        int currentLength = sourceLength;
+        int position = sourceLength - 1;
+        for (int patchIndex = 0, patchLength = patchCommand.length(); patchIndex < patchLength; patchIndex += 2) {
+            final char opcode = patchCommand.charAt(patchIndex);
+            final char argument = patchCommand.charAt(patchIndex + 1);
+            switch (opcode) {
+                case SKIP_OPCODE:
+                    final int skipCount = decodeEncodedCount(argument);
+                    if (skipCount < 1) {
+                        return true;
+                    }
+                    position = position - skipCount + 1;
+                    break;
+                case REPLACE_OPCODE:
+                    if (position < 0 || position >= currentLength) {
+                        return true;
+                    }
+                    break;
+                case DELETE_OPCODE:
+                    final int deleteCount = decodeEncodedCount(argument);
+                    if (deleteCount < 1) {
+                        return true;
+                    }
+                    final int deleteEndExclusive = position + 1;
+                    position -= deleteCount - 1;
+                    if (position < 0 || deleteEndExclusive > currentLength || position > deleteEndExclusive) {
+                        return true;
+                    }
+                    currentLength -= deleteEndExclusive - position;
+                    break;
+                case INSERT_OPCODE:
+                    if (position < -1 || position >= currentLength) {
+                        return true;
+                    }
+                    currentLength++;
+                    position++;
+                    break;
+                case NOOP_OPCODE:
+                    if (argument != NOOP_ARGUMENT) {
+                        throw new IllegalArgumentException(MSG_NOOP + argument);
+                    }
+                    return true;
+                default:
+                    throw new IllegalArgumentException(MSG_OPCODE + opcode);
+            }
+            position--;
+        }
+        return false;
+    }
+
+    /**
+     * Tests whether a forward patch preserves the source because it is malformed or
+     * a NOOP.
+     *
+     * @param sourceLength source length
+     * @param patchCommand patch command
+     * @return {@code true} when no mutation should be applied
+     */
+    private static boolean hasForwardPreserveOnlyPatch(final int sourceLength, final String patchCommand) {
+        int currentLength = sourceLength;
+        int position = 0;
+        for (int patchIndex = 0, patchLength = patchCommand.length(); patchIndex < patchLength; patchIndex += 2) {
+            final char opcode = patchCommand.charAt(patchIndex);
+            final char argument = patchCommand.charAt(patchIndex + 1);
+            switch (opcode) {
+                case SKIP_OPCODE:
+                    final int skipCount = decodeEncodedCount(argument);
+                    if (skipCount < 1) {
+                        return true;
+                    }
+                    position = position + skipCount - 1;
+                    break;
+                case REPLACE_OPCODE:
+                    if (position < 0 || position >= currentLength) {
+                        return true;
+                    }
+                    break;
+                case DELETE_OPCODE:
+                    final int deleteCount = decodeEncodedCount(argument);
+                    if (deleteCount < 1 || position < 0 || position + deleteCount > currentLength) {
+                        return true;
+                    }
+                    currentLength -= deleteCount;
+                    position--;
+                    break;
+                case INSERT_OPCODE:
+                    if (position < 0 || position > currentLength) {
+                        return true;
+                    }
+                    currentLength++;
+                    break;
+                case NOOP_OPCODE:
+                    if (argument != NOOP_ARGUMENT) {
+                        throw new IllegalArgumentException(MSG_NOOP + argument);
+                    }
+                    return true;
+                default:
+                    throw new IllegalArgumentException(MSG_OPCODE + opcode);
+            }
+            position++;
+        }
+        return false;
+    }
+
+    /**
+     * Copies source characters from a sequence.
+     *
+     * @param source       source text
+     * @param sourceOffset source offset
+     * @param sourceLength source length
+     * @param output       output storage
+     * @param outputOffset output offset
+     */
+    private static void copySource(final CharSequence source, final int sourceOffset, final int sourceLength,
+            final char[] output, final int outputOffset) {
+        for (int index = 0; index < sourceLength; index++) {
+            output[outputOffset + index] = source.charAt(sourceOffset + index);
+        }
+    }
+
+    /**
+     * Applies a backward patch after validation.
+     *
+     * @param sourceLength source length
+     * @param patchCommand patch command
+     * @param output       output storage initialized with source
+     * @param outputOffset output offset
+     */
+    private static void applyBackwardToOutput(final int sourceLength, final String patchCommand, final char[] output,
+            final int outputOffset) {
+        if (sourceLength == 0) {
+            applyBackwardEmptyToOutput(patchCommand, output, outputOffset);
+            return;
+        }
+
+        int currentLength = sourceLength;
+        int position = sourceLength - 1;
+        for (int patchIndex = 0, patchLength = patchCommand.length(); patchIndex < patchLength; patchIndex += 2) {
+            final char opcode = patchCommand.charAt(patchIndex);
+            final char argument = patchCommand.charAt(patchIndex + 1);
+
+            switch (opcode) {
+                case SKIP_OPCODE:
+                    position = position - decodeEncodedCount(argument) + 1;
+                    break;
+
+                case REPLACE_OPCODE:
+                    output[outputOffset + position] = argument;
+                    break;
+
+                case DELETE_OPCODE:
+                    final int deleteEndExclusive = position + 1;
+                    position -= decodeEncodedCount(argument) - 1;
+                    System.arraycopy(output, outputOffset + deleteEndExclusive, output, outputOffset + position,
+                            currentLength - deleteEndExclusive);
+                    currentLength -= deleteEndExclusive - position;
+                    break;
+
+                case INSERT_OPCODE:
+                    final int insertIndex = position + 1;
+                    System.arraycopy(output, outputOffset + insertIndex, output, outputOffset + insertIndex + 1,
+                            currentLength - insertIndex);
+                    output[outputOffset + insertIndex] = argument;
+                    currentLength++;
+                    position++;
+                    break;
+
+                case NOOP_OPCODE:
+                    return;
+
+                default:
+                    throw new AssertionError("Patch command was not validated.");
+            }
+
+            position--;
+        }
+    }
+
+    /**
+     * Applies a forward patch after validation.
+     *
+     * @param sourceLength source length
+     * @param patchCommand patch command
+     * @param output       output storage initialized with source
+     * @param outputOffset output offset
+     */
+    private static void applyForwardToOutput(final int sourceLength, final String patchCommand, final char[] output,
+            final int outputOffset) {
+        if (sourceLength == 0) {
+            applyForwardEmptyToOutput(patchCommand, output, outputOffset);
+            return;
+        }
+
+        int currentLength = sourceLength;
+        int position = 0;
+        for (int patchIndex = 0, patchLength = patchCommand.length(); patchIndex < patchLength; patchIndex += 2) {
+            final char opcode = patchCommand.charAt(patchIndex);
+            final char argument = patchCommand.charAt(patchIndex + 1);
+
+            switch (opcode) {
+                case SKIP_OPCODE:
+                    position = position + decodeEncodedCount(argument) - 1;
+                    break;
+
+                case REPLACE_OPCODE:
+                    output[outputOffset + position] = argument;
+                    break;
+
+                case DELETE_OPCODE:
+                    final int deleteCount = decodeEncodedCount(argument);
+                    System.arraycopy(output, outputOffset + position + deleteCount, output, outputOffset + position,
+                            currentLength - position - deleteCount);
+                    currentLength -= deleteCount;
+                    position--;
+                    break;
+
+                case INSERT_OPCODE:
+                    System.arraycopy(output, outputOffset + position, output, outputOffset + position + 1,
+                            currentLength - position);
+                    output[outputOffset + position] = argument;
+                    currentLength++;
+                    break;
+
+                case NOOP_OPCODE:
+                    return;
+
+                default:
+                    throw new AssertionError("Patch command was not validated.");
+            }
+
+            position++;
+        }
+    }
+
+    /**
+     * Applies an empty-source backward patch after validation.
+     *
+     * @param patchCommand patch command
+     * @param output       output storage
+     * @param outputOffset output offset
+     */
+    private static void applyBackwardEmptyToOutput(final String patchCommand, final char[] output,
+            final int outputOffset) {
+        int currentLength = 0;
+        for (int patchIndex = 0, patchLength = patchCommand.length(); patchIndex < patchLength; patchIndex += 2) {
+            final char argument = patchCommand.charAt(patchIndex + 1);
+            System.arraycopy(output, outputOffset, output, outputOffset + 1, currentLength);
+            output[outputOffset] = argument;
+            currentLength++;
+        }
+    }
+
+    /**
+     * Applies an empty-source forward patch after validation.
+     *
+     * @param patchCommand patch command
+     * @param output       output storage
+     * @param outputOffset output offset
+     */
+    private static void applyForwardEmptyToOutput(final String patchCommand, final char[] output,
+            final int outputOffset) {
+        int currentLength = 0;
+        for (int patchIndex = 0, patchLength = patchCommand.length(); patchIndex < patchLength; patchIndex += 2) {
+            output[outputOffset + currentLength] = patchCommand.charAt(patchIndex + 1);
+            currentLength++;
+        }
+    }
+
+    /**
+     * Validates that source and output slices do not overlap when backed by the
+     * same array.
+     *
+     * @param source       source storage
+     * @param sourceOffset source offset
+     * @param sourceLength source length
+     * @param output       output storage
+     * @param outputOffset output offset
+     * @param outputLength output length
+     */
+    private static void validateNonOverlappingRanges(final char[] source, final int sourceOffset,
+            final int sourceLength, final char[] output, final int outputOffset, final int outputLength) {
+        if (!source.equals(output) || sourceLength == 0 || outputLength == 0) {
+            return;
+        }
+        final int sourceEnd = sourceOffset + sourceLength;
+        final int outputEnd = outputOffset + outputLength;
+        if (sourceOffset < outputEnd && outputOffset < sourceEnd) {
+            throw new IllegalArgumentException("source and output ranges must not overlap.");
+        }
+    }
+
+    /**
      * Returns the direction-specialized apply strategy.
      *
      * @param traversalDirection requested traversal direction
@@ -769,7 +1551,6 @@ public final class PatchCommandEncoder {
      * @param argument serialized count argument
      * @return decoded positive count, or {@code -1} when the argument is malformed
      */
-    @SuppressWarnings("PMD.AvoidLiteralsInIfCondition")
     private static int decodeEncodedCount(final char argument) {
         if (argument < 'a') {
             return -1;

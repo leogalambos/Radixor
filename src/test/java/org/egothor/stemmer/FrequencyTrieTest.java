@@ -45,6 +45,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.DisplayName;
@@ -63,6 +64,7 @@ import org.junit.jupiter.api.Test;
 @Tag("unit")
 @Tag("trie")
 @Tag("frequency-trie")
+@Tag("lookup")
 @DisplayName("FrequencyTrie")
 class FrequencyTrieTest {
 
@@ -396,6 +398,149 @@ class FrequencyTrieTest {
 
         assertAll(() -> assertEquals(List.of(new ValueCount<String>("only", 1)), entries),
                 () -> assertThrows(UnsupportedOperationException.class, () -> entries.add(new ValueCount<String>("z", 1))));
+    }
+
+    /**
+     * Verifies that visitor lookup returns the same deterministic order and counts
+     * as the allocating APIs.
+     */
+    @Test
+    @DisplayName("Visitor lookup matches getAll order and getEntries counts")
+    void visitorLookupMatchesGetAllOrderAndGetEntriesCounts() {
+        final FrequencyTrie.Builder<String> builder = rankedBuilder();
+        builder.put("house", "noun", 3);
+        builder.put("house", "verb", 2);
+        builder.put("house", "adjective", 1);
+        final FrequencyTrie<String> trie = builder.build();
+        final List<String> values = new ArrayList<>();
+        final List<Integer> counts = new ArrayList<>();
+        final List<Integer> ranks = new ArrayList<>();
+
+        final int visited = trie.getAllNormalized("house", (value, count, rank) -> {
+            values.add(value);
+            counts.add(count);
+            ranks.add(rank);
+            return true;
+        }, 10);
+
+        assertAll(() -> assertEquals(3, visited),
+                () -> assertEquals(List.of("noun", "verb", "adjective"), values),
+                () -> assertEquals(List.of(3, 2, 1), counts),
+                () -> assertEquals(List.of(0, 1, 2), ranks));
+    }
+
+    /**
+     * Verifies visitor maximum result and early-stop behavior.
+     */
+    @Test
+    @DisplayName("Visitor lookup honors maxResults and sink early stop")
+    void visitorLookupHonorsMaxResultsAndSinkEarlyStop() {
+        final FrequencyTrie.Builder<String> builder = rankedBuilder();
+        builder.put("house", "noun", 3);
+        builder.put("house", "verb", 2);
+        builder.put("house", "adjective", 1);
+        final FrequencyTrie<String> trie = builder.build();
+        final List<String> limited = new ArrayList<>();
+        final List<String> stopped = new ArrayList<>();
+
+        final int limitedCount = trie.getAllNormalized("house", (value, count, rank) -> {
+            limited.add(value);
+            return true;
+        }, 2);
+        final int stoppedCount = trie.getAllNormalized("house", (value, count, rank) -> {
+            stopped.add(value);
+            return false;
+        }, 10);
+
+        assertAll(() -> assertEquals(2, limitedCount),
+                () -> assertEquals(List.of("noun", "verb"), limited),
+                () -> assertEquals(1, stoppedCount),
+                () -> assertEquals(List.of("noun"), stopped));
+    }
+
+    /**
+     * Verifies visitor zero, negative, missing, and first-result behavior.
+     */
+    @Test
+    @DisplayName("Visitor lookup handles zero, negative, missing, and first-result cases")
+    void visitorLookupHandlesBoundaryCases() {
+        final FrequencyTrie.Builder<String> builder = rankedBuilder();
+        builder.put("house", "noun");
+        final FrequencyTrie<String> trie = builder.build();
+        final int[] calls = new int[1];
+
+        assertAll(() -> assertEquals(0, trie.getAllNormalized("house", (value, count, rank) -> {
+            calls[0]++;
+            return true;
+        }, 0)),
+                () -> assertEquals(0, calls[0]),
+                () -> assertThrows(IllegalArgumentException.class,
+                        () -> trie.getAllNormalized("house", (value, count, rank) -> true, -1)),
+                () -> assertEquals(0, trie.getAllNormalized("missing", (value, count, rank) -> true, 10)),
+                () -> assertFalse(trie.getFirstNormalized("missing", (value, count, rank) -> true)),
+                () -> assertTrue(trie.getFirstNormalized("house", (value, count, rank) -> {
+                    assertEquals("noun", value);
+                    assertEquals(1, count);
+                    assertEquals(0, rank);
+                    return true;
+                })));
+    }
+
+    /**
+     * Verifies visitor API argument validation.
+     */
+    @Test
+    @DisplayName("Visitor lookup rejects null and invalid range arguments")
+    void visitorLookupRejectsNullAndInvalidRangeArguments() {
+        final FrequencyTrie<String> trie = rankedBuilder().build();
+        final char[] key = "house".toCharArray();
+        final FrequencyTrie.EntrySink<String> sink = (value, count, rank) -> true;
+
+        assertAll(() -> assertThrows(NullPointerException.class,
+                () -> trie.getAllNormalized((char[]) null, 0, 0, sink, 1)),
+                () -> assertThrows(NullPointerException.class,
+                        () -> trie.getAllNormalized(key, 0, key.length, null, 1)),
+                () -> assertThrows(IndexOutOfBoundsException.class,
+                        () -> trie.getAllNormalized(key, -1, key.length, sink, 1)),
+                () -> assertThrows(IndexOutOfBoundsException.class,
+                        () -> trie.getAllNormalized(key, 1, key.length, sink, 1)),
+                () -> assertThrows(NullPointerException.class,
+                        () -> trie.getAllNormalized((CharSequence) null, sink, 1)),
+                () -> assertThrows(NullPointerException.class,
+                        () -> trie.getAllNormalized("house", null, 1)),
+                () -> assertThrows(NullPointerException.class,
+                        () -> trie.getAll((CharSequence) null, sink, 1)),
+                () -> assertThrows(NullPointerException.class,
+                        () -> trie.getAll("house", null, 1)),
+                () -> assertThrows(IllegalArgumentException.class,
+                        () -> trie.getAll("house", sink, -1)));
+    }
+
+    /**
+     * Verifies normalized char-array slices and metadata-aware CharSequence visitor
+     * lookup.
+     */
+    @Test
+    @DisplayName("Visitor lookup supports normalized char slices and metadata-aware CharSequence keys")
+    void visitorLookupSupportsCharSlicesAndMetadataAwareKeys() {
+        final FrequencyTrie.Builder<String> builder = new FrequencyTrie.Builder<>(String[]::new,
+                ReductionSettings.withDefaults(ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS),
+                WordTraversalDirection.BACKWARD, CaseProcessingMode.LOWERCASE_WITH_LOCALE_ROOT);
+        builder.put("house", "noun");
+        final FrequencyTrie<String> trie = builder.build();
+        final char[] padded = "__house__".toCharArray();
+
+        assertAll(() -> assertEquals(1,
+                trie.getAllNormalized(padded, 2, 5, (value, count, rank) -> {
+                    assertEquals("noun", value);
+                    return true;
+                }, 10)),
+                () -> assertFalse(trie.getFirstNormalized("HOUSE", (value, count, rank) -> true),
+                        "Normalized lookup must bypass metadata lowercasing."),
+                () -> assertTrue(trie.getFirst("HOUSE", (value, count, rank) -> {
+                    assertEquals("noun", value);
+                    return true;
+                })));
     }
 
     /**

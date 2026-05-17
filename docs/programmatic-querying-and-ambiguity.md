@@ -33,6 +33,28 @@ import org.egothor.stemmer.ValueCount;
 final List<ValueCount<String>> entries = trie.getEntries("axes");
 ```
 
+### Visitor lookup for hot paths
+
+For allocation-sensitive token loops, use the visitor-style lookup methods. They visit the same ordered local values and counts without allocating a result array, list, or `ValueCount` objects.
+
+```java
+trie.getAll("axes", (patch, count, rank) -> {
+    // rank is zero-based and follows the same ordering as getAll(String).
+    return true; // return false to stop after this callback
+}, 8);
+```
+
+If the caller has already normalized the input exactly as required by `trie.metadata()`, the normalized methods avoid lookup normalization buffers too:
+
+```java
+final char[] token = "axes".toCharArray();
+trie.getAllNormalized(token, 0, token.length, (patch, count, rank) -> {
+    return true;
+}, 8);
+```
+
+`getAllNormalized(...)` bypasses `caseProcessingMode` and `diacriticProcessingMode`; callers are responsible for supplying canonical input. `maxResults == 0` visits nothing, negative values are rejected, and a sink returning `false` stops iteration after the current callback.
+
 ## Apply patch commands
 
 A patch command is not the final stem. It must be applied to the original input token. `PatchCommandEncoder.apply(source, patchCommand)` performs that transformation directly on the serialized command format. If the source is `null`, the method returns `null`. If the patch is `null`, empty, or malformed in compatibility-relevant ways, the original source word is preserved. Equal source and target words are represented by the canonical no-op patch.
@@ -44,6 +66,25 @@ final String word = "running";
 final String patch = trie.get(word);
 final String stem = PatchCommandEncoder.apply(word, patch);
 ```
+
+Hot paths can apply a patch into caller-owned character storage:
+
+```java
+final char[] output = new char[32];
+final int produced = PatchCommandEncoder.applyTo(
+        word,
+        patch,
+        trie.traversalDirection(),
+        output,
+        0,
+        output.length);
+
+if (produced != PatchCommandEncoder.APPLY_INSUFFICIENT_CAPACITY) {
+    final String stem = new String(output, 0, produced);
+}
+```
+
+`applyTo(...)` returns the produced character count on success and `APPLY_INSUFFICIENT_CAPACITY` when the output range is too small. Capacity failure does not write partial output. The source and output ranges of the `char[]` overload must not overlap.
 
 For multiple candidates:
 

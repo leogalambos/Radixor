@@ -461,7 +461,7 @@ public final class StemmerPatchTrieLoader {
     public static FrequencyTrie<String> load(final Path path, final boolean storeOriginal,
             final ReductionSettings reductionSettings, final WordTraversalDirection traversalDirection,
             final CaseProcessingMode caseProcessingMode, final DiacriticProcessingMode diacriticProcessingMode)
-        throws IOException {
+            throws IOException {
         Objects.requireNonNull(path, PARAMETER_PATH);
         final TrieMetadata metadata = metadataForCompilation(traversalDirection, reductionSettings, caseProcessingMode,
                 diacriticProcessingMode);
@@ -816,7 +816,8 @@ public final class StemmerPatchTrieLoader {
      * @throws IOException          if the file cannot be opened, decompressed, or
      *                              read
      */
-    public static FrequencyTrie<String> loadBinary(final String fileName, final int maxExpandedIndex) throws IOException {
+    public static FrequencyTrie<String> loadBinary(final String fileName, final int maxExpandedIndex)
+            throws IOException {
         Objects.requireNonNull(fileName, FILENAME_REQUIRED);
         return StemmerPatchTrieBinaryIO.read(fileName, maxExpandedIndex);
     }

@@ -31,6 +31,7 @@
 package org.egothor.stemmer;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -68,6 +69,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 @Tag("unit")
 @Tag("stemmer")
 @Tag("patch")
+@Tag("encoding")
+@Tag("apply")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class PatchCommandEncoderTest {
 
@@ -145,6 +148,63 @@ class PatchCommandEncoderTest {
                 Arguments.of(9, "", "IbIa", "ab"),
                 // 10
                 Arguments.of(10, "teacher", PatchCommandEncoder.NOOP_PATCH, "teacher"));
+    }
+
+    /**
+     * Provides explicit forward-direction single-instruction patch application cases.
+     *
+     * @return test arguments
+     */
+    private static Stream<Arguments> provideForwardSingleInstructionApplyCases() {
+        return Stream.of(
+                // 1
+                Arguments.of(1, "abcd", "Db", "cd"),
+                // 2
+                Arguments.of(2, "abc", "Ia", "aabc"),
+                // 3
+                Arguments.of(3, "abc", "Ra", "abc"),
+                // 4
+                Arguments.of(4, "abc", "-a", "abc"),
+                // 5
+                Arguments.of(5, "abc", PatchCommandEncoder.NOOP_PATCH, "abc"));
+    }
+
+    /**
+     * Provides forward-direction applyTo cases that exercise preserve-only and
+     * non-preserve branches.
+     *
+     * @return test arguments
+     */
+    private static Stream<Arguments> provideForwardApplyToCases() {
+        return Stream.of(
+                // 1
+                Arguments.of(1, "book", "-aRa", "baok"),
+                // 2
+                Arguments.of(2, "abc", "-dRa", "abc"),
+                // 3
+                Arguments.of(3, "abc", "DdRa", "abc"),
+                // 4
+                Arguments.of(4, "abc", "-dIa", "abc"),
+                // 5
+                Arguments.of(5, "abc", "Na-a", "abc"));
+    }
+
+    /**
+     * Provides empty-source forward applyTo cases that cover empty-source
+     * instruction handling.
+     *
+     * @return test arguments
+     */
+    private static Stream<Arguments> provideForwardEmptySourceApplyCases() {
+        return Stream.of(
+                // 1
+                Arguments.of(1, "IaIb", "ab"),
+                // 2
+                Arguments.of(2, "-aRa", ""),
+                // 3
+                Arguments.of(3, "IaRa", ""),
+                // 4
+                Arguments.of(4, "Na-a", ""));
     }
 
     /**
@@ -237,11 +297,30 @@ class PatchCommandEncoderTest {
     }
 
     /**
+     * Applies a patch into a right-sized output buffer and returns the produced
+     * string.
+     *
+     * @param source             source text
+     * @param patch              patch command
+     * @param traversalDirection traversal direction
+     * @return transformed text
+     */
+    private static String applyToString(final String source, final String patch,
+            final WordTraversalDirection traversalDirection) {
+        final char[] output = new char[Math.max(source.length() + 16, 16)];
+        final int produced = PatchCommandEncoder.applyTo(source, patch, traversalDirection, output, 0, output.length);
+        return new String(output, 0, produced);
+    }
+
+    /**
      * Tests constructor validation and basic instantiation behavior.
      */
     @Nested
     @DisplayName("construction")
     @Tag("construction")
+    @Tag("unit")
+    @Tag("stemmer")
+    @Tag("patch")
     class ConstructionTests {
 
         /**
@@ -327,6 +406,9 @@ class PatchCommandEncoderTest {
     @Nested
     @DisplayName("encode(String, String)")
     @Tag("encoding")
+    @Tag("unit")
+    @Tag("stemmer")
+    @Tag("patch")
     class EncodeTests {
 
         /**
@@ -461,6 +543,9 @@ class PatchCommandEncoderTest {
     @Nested
     @DisplayName("apply(String, String)")
     @Tag("apply")
+    @Tag("unit")
+    @Tag("stemmer")
+    @Tag("patch")
     class ApplyTests {
 
         /**
@@ -536,6 +621,101 @@ class PatchCommandEncoderTest {
         }
 
         /**
+         * Verifies explicit single-instruction forward patch application
+         * semantics.
+         *
+         * @param caseId   numeric case identifier
+         * @param source   source word
+         * @param patch    encoded patch command
+         * @param expected expected transformed word
+         */
+        @ParameterizedTest(name = "[{index}] case {0}: forward single instruction apply({1}, {2}) -> {3}")
+        @MethodSource("org.egothor.stemmer.PatchCommandEncoderTest#provideForwardSingleInstructionApplyCases")
+        @DisplayName("applies forward single instruction patches correctly")
+        void shouldApplyForwardSingleInstructionsExplicitly(int caseId, String source, String patch, String expected) {
+            assertEquals(expected, PatchCommandEncoder.apply(source, patch, WordTraversalDirection.FORWARD),
+                    () -> "Case " + caseId + " failed for source='" + source + "', patch='" + patch + "'.");
+        }
+
+        /**
+         * Verifies forward single-instruction malformed commands fail fast.
+         */
+        @Test
+        @DisplayName("throws for unsupported forward opcode and NOOP argument")
+        void shouldThrowForUnsupportedForwardOpcodeAndNoopArgument() {
+            assertAll(() -> assertEquals("Unsupported patch opcode: X",
+                    assertThrows(IllegalArgumentException.class,
+                            () -> PatchCommandEncoder.apply("abc", "Xa", WordTraversalDirection.FORWARD))
+                                    .getMessage()),
+                    () -> assertEquals("Unsupported NOOP patch argument: `",
+                            assertThrows(IllegalArgumentException.class,
+                                    () -> PatchCommandEncoder.apply("abc", "N`", WordTraversalDirection.FORWARD))
+                                            .getMessage()));
+        }
+
+        /**
+         * Verifies explicit forward-applyTo cases that exercise preserve-only and
+         * non-preserve branches.
+         *
+         * @param caseId   numeric case identifier
+         * @param source   source word
+         * @param patch    encoded patch command
+         * @param expected expected transformed word
+         */
+        @ParameterizedTest(name = "[{index}] case {0}: applyToForward({1}, {2}) -> {3}")
+        @MethodSource("org.egothor.stemmer.PatchCommandEncoderTest#provideForwardApplyToCases")
+        @DisplayName("applyTo handles forward preserve-only and mutation branches")
+        void shouldApplyToForwardPreserveAndMutationBranches(int caseId, String source, String patch, String expected) {
+            final char[] output = new char[Math.max(source.length() + 16, 16)];
+
+            final int produced = PatchCommandEncoder.applyTo(source, patch, WordTraversalDirection.FORWARD, output, 0,
+                    output.length);
+
+            assertAll(
+                    () -> assertEquals(expected.length(), produced,
+                            () -> "Case " + caseId + " produced wrong length."),
+                    () -> assertEquals(expected, new String(output, 0, produced),
+                            () -> "Case " + caseId + " failed for patch='" + patch + "'."));
+        }
+
+        /**
+         * Verifies empty-source forward applyTo behavior for insert-only and malformed
+         * instructions.
+         *
+         * @param caseId numeric case identifier
+         * @param patch  encoded patch command
+         * @param expected expected transformed word
+         */
+        @ParameterizedTest(name = "[{index}] case {0}: applyToForward(\"\", {1}) -> \"{2}\"")
+        @MethodSource("org.egothor.stemmer.PatchCommandEncoderTest#provideForwardEmptySourceApplyCases")
+        @DisplayName("applies forward empty-source patches correctly")
+        void shouldApplyToForwardEmptySourceCases(int caseId, String patch, String expected) {
+            final char[] output = new char[Math.max(expected.length() + 16, 16)];
+
+            final int produced = PatchCommandEncoder.applyTo("", patch, WordTraversalDirection.FORWARD, output, 0,
+                    output.length);
+
+            assertAll(
+                    () -> assertEquals(expected.length(), produced,
+                            () -> "Case " + caseId + " produced wrong length."),
+                    () -> assertEquals(expected, new String(output, 0, produced),
+                            () -> "Case " + caseId + " failed for patch='" + patch + "'."));
+        }
+
+        /**
+         * Verifies malformed empty-source forward patches fail fast and preserve
+         * empty-source semantics.
+         */
+        @Test
+        @DisplayName("throws for unsupported NOOP argument on empty-source forward patch")
+        void shouldThrowForUnsupportedNoopArgumentOnForwardEmptySource() {
+            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                    () -> PatchCommandEncoder.apply("", "N`Ra", WordTraversalDirection.FORWARD));
+
+            assertEquals("Unsupported NOOP patch argument: `", exception.getMessage());
+        }
+
+        /**
          * Verifies explicit patch application cases.
          *
          * @param caseId   numeric case identifier
@@ -590,6 +770,181 @@ class PatchCommandEncoderTest {
             assertEquals(source, PatchCommandEncoder.apply(source, malformedPatch), () -> "Case " + caseId
                     + " failed for source='" + source + "', malformedPatch='" + malformedPatch + "'.");
         }
+
+        /**
+         * Verifies buffer application against string-returning application.
+         *
+         * @param caseId   numeric case identifier
+         * @param source   source word
+         * @param patch    patch command
+         * @param expected expected transformed word
+         */
+        @ParameterizedTest(name = "[{index}] case {0}: applyTo({1}, {2}) -> {3}")
+        @MethodSource("org.egothor.stemmer.PatchCommandEncoderTest#provideApplyCases")
+        @DisplayName("applyTo matches apply for explicit backward patch commands")
+        void shouldApplyToBufferLikeApplyForBackwardCommands(int caseId, String source, String patch, String expected) {
+            final char[] output = "___..............".toCharArray();
+
+            final int produced = PatchCommandEncoder.applyTo(source, patch, WordTraversalDirection.BACKWARD, output, 3,
+                    output.length - 3);
+
+            assertAll(() -> assertEquals(expected.length(), produced, () -> "Case " + caseId + " produced wrong length."),
+                    () -> assertEquals(expected, new String(output, 3, produced)));
+        }
+
+        /**
+         * Verifies char-array source slices.
+         */
+        @Test
+        @DisplayName("applyTo supports char-array source slices")
+        void shouldApplyToCharArraySourceSlice() {
+            final char[] source = "__teacher__".toCharArray();
+            final char[] output = new char[16];
+
+            final int produced = PatchCommandEncoder.applyTo(source, 2, 7, "Db", WordTraversalDirection.BACKWARD,
+                    output, 1, output.length - 1);
+
+            assertAll(() -> assertEquals(5, produced), () -> assertEquals("teach", new String(output, 1, produced)));
+        }
+
+        /**
+         * Verifies null and range validation for buffer application.
+         */
+        @Test
+        @DisplayName("applyTo rejects null and invalid range arguments")
+        void shouldRejectNullAndInvalidRangeArguments() {
+            final char[] source = "teacher".toCharArray();
+            final char[] output = new char[16];
+
+            assertAll(() -> assertThrows(NullPointerException.class,
+                    () -> PatchCommandEncoder.applyTo((CharSequence) null, "Db", WordTraversalDirection.BACKWARD,
+                            output, 0, output.length)),
+                    () -> assertThrows(NullPointerException.class,
+                            () -> PatchCommandEncoder.applyTo("teacher", "Db", null, output, 0, output.length)),
+                    () -> assertThrows(NullPointerException.class,
+                            () -> PatchCommandEncoder.applyTo("teacher", "Db", WordTraversalDirection.BACKWARD, null,
+                                    0, output.length)),
+                    () -> assertThrows(IndexOutOfBoundsException.class,
+                            () -> PatchCommandEncoder.applyTo("teacher", "Db", WordTraversalDirection.BACKWARD,
+                                    output, -1, output.length)),
+                    () -> assertThrows(NullPointerException.class,
+                            () -> PatchCommandEncoder.applyTo((char[]) null, 0, 7, "Db",
+                                    WordTraversalDirection.BACKWARD, output, 0, output.length)),
+                    () -> assertThrows(IndexOutOfBoundsException.class,
+                            () -> PatchCommandEncoder.applyTo(source, 1, source.length, "Db",
+                                    WordTraversalDirection.BACKWARD, output, 0, output.length)));
+        }
+
+        /**
+         * Verifies null, empty, and canonical NOOP patch preservation.
+         */
+        @Test
+        @DisplayName("applyTo preserves source for null, empty, and canonical NOOP patches")
+        void shouldApplyToPreserveSourceForEmptyCompatibilityPatches() {
+            final char[] nullPatchOutput = new char[8];
+            final char[] emptyPatchOutput = new char[8];
+            final char[] noopOutput = new char[8];
+
+            final int nullPatchLength = PatchCommandEncoder.applyTo("teacher", null, WordTraversalDirection.BACKWARD,
+                    nullPatchOutput, 0, nullPatchOutput.length);
+            final int emptyPatchLength = PatchCommandEncoder.applyTo("teacher", "", WordTraversalDirection.BACKWARD,
+                    emptyPatchOutput, 0, emptyPatchOutput.length);
+            final int noopLength = PatchCommandEncoder.applyTo("teacher", PatchCommandEncoder.NOOP_PATCH,
+                    WordTraversalDirection.BACKWARD, noopOutput, 0, noopOutput.length);
+
+            assertAll(() -> assertEquals(7, nullPatchLength),
+                    () -> assertEquals("teacher", new String(nullPatchOutput, 0, nullPatchLength)),
+                    () -> assertEquals(7, emptyPatchLength),
+                    () -> assertEquals("teacher", new String(emptyPatchOutput, 0, emptyPatchLength)),
+                    () -> assertEquals(7, noopLength),
+                    () -> assertEquals("teacher", new String(noopOutput, 0, noopLength)));
+        }
+
+        /**
+         * Verifies insufficient capacity behavior.
+         */
+        @Test
+        @DisplayName("applyTo reports insufficient capacity without writing output")
+        void shouldReportInsufficientCapacityWithoutWritingOutput() {
+            final char[] output = "xxxx".toCharArray();
+
+            final int produced = PatchCommandEncoder.applyTo("abc", "Ic", WordTraversalDirection.BACKWARD, output, 0,
+                    output.length - 1);
+
+            assertAll(() -> assertEquals(PatchCommandEncoder.APPLY_INSUFFICIENT_CAPACITY, produced),
+                    () -> assertArrayEquals("xxxx".toCharArray(), output));
+        }
+
+        /**
+         * Verifies exception parity with string-returning application.
+         */
+        @Test
+        @DisplayName("applyTo throws for unsupported opcode and NOOP argument")
+        void shouldApplyToThrowForUnsupportedOpcodeAndNoopArgument() {
+            final char[] output = new char[8];
+
+            assertAll(() -> {
+                final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                        () -> PatchCommandEncoder.applyTo("abc", "Xa", WordTraversalDirection.BACKWARD, output, 0,
+                                output.length));
+                assertEquals("Unsupported patch opcode: X", exception.getMessage());
+            }, () -> {
+                final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                        () -> PatchCommandEncoder.applyTo("abc", "Nb", WordTraversalDirection.BACKWARD, output, 0,
+                                output.length));
+                assertEquals("Unsupported NOOP patch argument: b", exception.getMessage());
+            });
+        }
+
+        /**
+         * Verifies malformed compatibility behavior for buffer application.
+         *
+         * @param caseId         numeric case identifier
+         * @param source         original source
+         * @param malformedPatch malformed patch
+         */
+        @ParameterizedTest(name = "[{index}] case {0}: malformed applyTo patch {2} preserves {1}")
+        @MethodSource("org.egothor.stemmer.PatchCommandEncoderTest#provideMalformedPatchCases")
+        @DisplayName("applyTo preserves source for malformed or index-invalid patch commands")
+        void shouldApplyToPreserveSourceForMalformedOrIndexInvalidPatchCommands(int caseId, String source,
+                String malformedPatch) {
+            final char[] output = new char[Math.max(source.length(), 1)];
+
+            final int produced = PatchCommandEncoder.applyTo(source, malformedPatch, WordTraversalDirection.BACKWARD,
+                    output, 0, output.length);
+
+            assertAll(() -> assertEquals(source.length(), produced, () -> "Case " + caseId + " produced wrong length."),
+                    () -> assertEquals(source, new String(output, 0, produced)));
+        }
+
+        /**
+         * Verifies explicit traversal direction for buffer application.
+         */
+        @Test
+        @DisplayName("applyTo follows explicit forward traversal direction")
+        void shouldApplyToWithForwardTraversalDirection() {
+            final PatchCommandEncoder encoder = PatchCommandEncoder.builder()
+                    .traversalDirection(WordTraversalDirection.FORWARD)
+                    .build();
+            final String patch = encoder.encode("cities", "city");
+
+            assertEquals(PatchCommandEncoder.apply("cities", patch, WordTraversalDirection.FORWARD),
+                    applyToString("cities", patch, WordTraversalDirection.FORWARD));
+        }
+
+        /**
+         * Verifies overlapping source/output slices are rejected.
+         */
+        @Test
+        @DisplayName("applyTo rejects overlapping char-array source and output ranges")
+        void shouldRejectOverlappingSourceAndOutputRanges() {
+            final char[] buffer = "teacher....".toCharArray();
+
+            final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                    () -> PatchCommandEncoder.applyTo(buffer, 0, 7, "Db", WordTraversalDirection.BACKWARD, buffer, 2, 5));
+
+            assertEquals("source and output ranges must not overlap.", exception.getMessage());
+        }
     }
 
     /**
@@ -598,6 +953,9 @@ class PatchCommandEncoderTest {
     @Nested
     @DisplayName("stemming-oriented scenarios")
     @Tag("regression")
+    @Tag("unit")
+    @Tag("stemmer")
+    @Tag("patch")
     class StemmingScenarioTests {
 
         /**
@@ -659,6 +1017,9 @@ class PatchCommandEncoderTest {
     @Nested
     @DisplayName("reversed-word processing")
     @Tag("normalization")
+    @Tag("unit")
+    @Tag("stemmer")
+    @Tag("patch")
     class ReversedWordProcessingTests {
 
         /**
@@ -743,6 +1104,7 @@ class PatchCommandEncoderTest {
      */
     @ParameterizedTest(name = "[{index}] case {0}: mirrored consistency for {1} -> {2}")
     @MethodSource("org.egothor.stemmer.PatchCommandEncoderTest#provideReversedRoundTripPairs")
+    @Tag("normalization")
     @DisplayName("preserves correctness under mirrored input orientation")
     void shouldPreserveCorrectnessUnderMirroredInputOrientation(int caseId, String source, String target) {
         PatchCommandEncoder encoder = PatchCommandEncoder.builder().build();

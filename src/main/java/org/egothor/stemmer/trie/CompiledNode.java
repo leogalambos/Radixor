@@ -48,8 +48,8 @@ import java.util.Objects;
 public final class CompiledNode<V> {
 
     /**
-     * Default dense child lookup span in characters used when an explicit override is
-     * not provided.
+     * Default dense child lookup span in characters used when an explicit override
+     * is not provided.
      */
     public static final int DEFAULT_MAX_EXPANDED_INDEX = 512;
 
@@ -71,8 +71,8 @@ public final class CompiledNode<V> {
     /**
      * Dense child lookup table used when labels fit into a compact char interval.
      * <p>
-     * The table enables direct O(1) indexing for child lookup and is allocated
-     * only when the character span of this node's edges is within the configured
+     * The table enables direct O(1) indexing for child lookup and is allocated only
+     * when the character span of this node's edges is within the configured
      * threshold.
      * </p>
      */
@@ -111,8 +111,8 @@ public final class CompiledNode<V> {
      *
      * @param maxExpandedIndex upper bound for the dense lookup interval size; zero
      *                         disables dense lookup. Larger values improve
-     *                         direct-index likelihood while increasing dense
-     *                         table memory in compact-label nodes.
+     *                         direct-index likelihood while increasing dense table
+     *                         memory in compact-label nodes.
      * @throws NullPointerException     if any array argument is {@code null}
      * @throws IllegalArgumentException if the edge-related arrays or value-related
      *                                  arrays do not have matching lengths or the
@@ -288,7 +288,8 @@ public final class CompiledNode<V> {
     }
 
     /**
-     * Returns a small memory-related metric describing this node's dense table size.
+     * Returns a small memory-related metric describing this node's dense table
+     * size.
      *
      * @return number of dense table slots, or {@code 0} when dense lookup is not
      *         enabled
@@ -328,8 +329,9 @@ public final class CompiledNode<V> {
             return false;
         }
         return Arrays.equals(this.edgeLabels, other.edgeLabels) && Arrays.equals(this.children, other.children)
-                && Arrays.equals(this.orderedValues, other.orderedValues) && Arrays.equals(this.orderedCounts, other.orderedCounts)
-                && this.denseEdgeMin == other.denseEdgeMin && Arrays.equals(this.denseChildren, other.denseChildren);
+                && Arrays.equals(this.orderedValues, other.orderedValues)
+                && Arrays.equals(this.orderedCounts, other.orderedCounts) && this.denseEdgeMin == other.denseEdgeMin
+                && Arrays.equals(this.denseChildren, other.denseChildren);
     }
 
     /**
@@ -339,9 +341,8 @@ public final class CompiledNode<V> {
      */
     @Override
     public String toString() {
-        return "CompiledNode{"
-                + "edgeCount=" + this.edgeLabels.length + ", orderedValueCount=" + this.orderedValues.length
-                + ", denseTableLength=" + denseTableLength() + '}';
+        return "CompiledNode{" + "edgeCount=" + this.edgeLabels.length + ", orderedValueCount="
+                + this.orderedValues.length + ", denseTableLength=" + denseTableLength() + '}';
     }
 
     /**
@@ -350,8 +351,8 @@ public final class CompiledNode<V> {
      * Lookup order is:
      * <ol>
      * <li>dense array index (if the label interval is compact enough),</li>
-     * <li>small-child linear scan when the fallback node has {@value #LINEAR_CHILD_COUNT_THRESHOLD}
-     * or fewer edges,</li>
+     * <li>small-child linear scan when the fallback node has
+     * {@value #LINEAR_CHILD_COUNT_THRESHOLD} or fewer edges,</li>
      * <li>binary search over sorted labels.</li>
      * </ol>
      * </p>

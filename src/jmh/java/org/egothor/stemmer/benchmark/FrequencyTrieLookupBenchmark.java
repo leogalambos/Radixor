@@ -31,11 +31,13 @@
 package org.egothor.stemmer.benchmark;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.egothor.stemmer.FrequencyTrie;
 import org.egothor.stemmer.PatchCommandEncoder;
 import org.egothor.stemmer.ReductionMode;
 import org.egothor.stemmer.ReductionSettings;
+import org.egothor.stemmer.ValueCount;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Level;
@@ -98,10 +100,43 @@ public class FrequencyTrieLookupBenchmark {
         private String[] lookupKeys;
 
         /**
+         * Lookup keys as normalized caller-owned character storage.
+         */
+        private char[][] lookupKeyCharacters;
+
+        /**
          * Keys that are known to return multiple patch candidates from
          * {@code getAll()}.
          */
         private String[] ambiguousLookupKeys;
+
+        /**
+         * Ambiguous lookup keys as normalized caller-owned character storage.
+         */
+        private char[][] ambiguousLookupKeyCharacters;
+
+        /**
+         * Preferred patches aligned with {@link #lookupKeys}.
+         */
+        private String[] preferredPatches;
+
+        /**
+         * Reusable output buffer for patch application benchmarks.
+         */
+        private char[] outputBuffer;
+
+        /**
+         * Mutable field consumed by visitor sinks.
+         */
+        private int visitorAccumulator;
+
+        /**
+         * Sink used by visitor lookup benchmarks without per-invocation allocation.
+         */
+        private final FrequencyTrie.EntrySink<String> visitorSink = (value, count, rank) -> {
+            this.visitorAccumulator += value.length() + count + rank;
+            return true;
+        };
 
         /**
          * Initializes the benchmark state.
@@ -116,6 +151,23 @@ public class FrequencyTrieLookupBenchmark {
             this.trie = BenchmarkCorpusSupport.compilePatchTrie(corpus.dictionaryText(), settings, true);
             this.lookupKeys = corpus.lookupKeys();
             this.ambiguousLookupKeys = corpus.ambiguousLookupKeys();
+            this.lookupKeyCharacters = toCharArrays(this.lookupKeys);
+            this.ambiguousLookupKeyCharacters = toCharArrays(this.ambiguousLookupKeys);
+            this.preferredPatches = new String[this.lookupKeys.length];
+            int maxKeyLength = 0;
+            for (int index = 0; index < this.lookupKeys.length; index++) {
+                this.preferredPatches[index] = this.trie.get(this.lookupKeys[index]);
+                maxKeyLength = Math.max(maxKeyLength, this.lookupKeys[index].length());
+            }
+            this.outputBuffer = new char[maxKeyLength + 32];
+        }
+
+        private static char[][] toCharArrays(final String[] values) {
+            final char[][] characters = new char[values.length][];
+            for (int index = 0; index < values.length; index++) {
+                characters[index] = values[index].toCharArray();
+            }
+            return characters;
         }
     }
 
@@ -156,6 +208,61 @@ public class FrequencyTrieLookupBenchmark {
     }
 
     /**
+     * Measures retrieval of all patch candidates through caller-owned normalized
+     * character storage and a visitor sink.
+     *
+     * @param state prepared lookup state
+     * @param blackhole sink preventing dead-code elimination
+     */
+    @Benchmark
+    public void lookupAllPatchesWithNormalizedCharVisitor(final LookupState state, final Blackhole blackhole) {
+        final char[][] keys = state.ambiguousLookupKeyCharacters;
+        for (char[] key : keys) {
+            final int count = state.trie.getAllNormalized(key, 0, key.length, state.visitorSink, Integer.MAX_VALUE);
+            if (count < 2) {
+                throw new IllegalStateException("Expected multiple patches for benchmark key.");
+            }
+        }
+        blackhole.consume(state.visitorAccumulator);
+    }
+
+    /**
+     * Measures counted candidate retrieval through the allocating entry API.
+     *
+     * @param state prepared lookup state
+     * @param blackhole sink preventing dead-code elimination
+     */
+    @Benchmark
+    public void lookupPatchEntries(final LookupState state, final Blackhole blackhole) {
+        final String[] keys = state.ambiguousLookupKeys;
+        for (String key : keys) {
+            final List<ValueCount<String>> entries = state.trie.getEntries(key);
+            if (entries.size() < 2) {
+                throw new IllegalStateException("Expected multiple entries for key " + key + '.');
+            }
+            blackhole.consume(entries);
+        }
+    }
+
+    /**
+     * Measures counted candidate retrieval through the visitor API.
+     *
+     * @param state prepared lookup state
+     * @param blackhole sink preventing dead-code elimination
+     */
+    @Benchmark
+    public void lookupPatchEntriesWithVisitor(final LookupState state, final Blackhole blackhole) {
+        final char[][] keys = state.ambiguousLookupKeyCharacters;
+        for (char[] key : keys) {
+            final int count = state.trie.getAllNormalized(key, 0, key.length, state.visitorSink, Integer.MAX_VALUE);
+            if (count < 2) {
+                throw new IllegalStateException("Expected multiple entries for benchmark key.");
+            }
+        }
+        blackhole.consume(state.visitorAccumulator);
+    }
+
+    /**
      * Measures end-to-end preferred stemming from lookup plus patch application.
      *
      * @param state prepared lookup state
@@ -167,6 +274,28 @@ public class FrequencyTrieLookupBenchmark {
         for (String key : keys) {
             final String patch = state.trie.get(key);
             blackhole.consume(PatchCommandEncoder.apply(key, patch));
+        }
+    }
+
+    /**
+     * Measures patch application into caller-owned output storage.
+     *
+     * @param state prepared lookup state
+     * @param blackhole sink preventing dead-code elimination
+     */
+    @Benchmark
+    public void applyPreferredPatchToBuffer(final LookupState state, final Blackhole blackhole) {
+        final String[] keys = state.lookupKeys;
+        final String[] patches = state.preferredPatches;
+        final char[] output = state.outputBuffer;
+        for (int index = 0; index < keys.length; index++) {
+            final int length = PatchCommandEncoder.applyTo(keys[index], patches[index],
+                    state.trie.traversalDirection(), output, 0, output.length);
+            if (length == PatchCommandEncoder.APPLY_INSUFFICIENT_CAPACITY) {
+                throw new IllegalStateException("Output buffer too small for key " + keys[index] + '.');
+            }
+            blackhole.consume(length);
+            blackhole.consume(output[0]);
         }
     }
 

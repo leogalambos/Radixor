@@ -75,6 +75,14 @@ The distinction between preferred-result lookup and multi-result lookup is part 
 
 That model is part of how the public API should be understood.
 
+Visitor lookup methods such as `getAllNormalized(..., EntrySink, maxResults)` are additive hot-path APIs. They expose the same local ordering and count semantics without allocating result containers, but they do not replace `get()`, `getAll()`, or `getEntries()`.
+
+Compiled `FrequencyTrie` instances are immutable and thread-safe for concurrent reads. Visitor sinks are caller-owned and are not retained by the trie. Stored values passed to sinks are the model-owned trie values; for `FrequencyTrie<String>` patch tries, those patch strings are immutable stored strings rather than fresh per-result strings.
+
+### Stable patch application behavior
+
+`PatchCommandEncoder.apply(...)` remains the compatibility API for string-returning patch application. Buffer-oriented `applyTo(...)` overloads are additive APIs for caller-owned output storage. They do not retain output arrays, report insufficient capacity with `APPLY_INSUFFICIENT_CAPACITY`, and preserve the existing malformed-patch compatibility behavior where `apply(...)` preserves the source.
+
 ### Stable reduction-mode intent
 
 Each public `ReductionMode` constant carries a semantic contract that should remain meaningful across versions.

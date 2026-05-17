@@ -46,8 +46,38 @@ import org.junit.jupiter.api.Test;
  */
 @Tag("unit")
 @Tag("trie")
+@Tag("lookup")
 @DisplayName("CompiledNode and NodeData")
 class CompiledNodeAndNodeDataTest {
+
+    /**
+     * Creates a typed child array for compiled-node tests.
+     *
+     * @param length requested array length
+     * @return typed child array
+     */
+    @SuppressWarnings("unchecked")
+    private static CompiledNode<String>[] children(final int length) {
+        return new CompiledNode[length];
+    }
+
+    /**
+     * Creates an empty child array for leaf compiled-node tests.
+     *
+     * @return empty typed child array
+     */
+    private static CompiledNode<String>[] noChildren() {
+        return children(0);
+    }
+
+    /**
+     * Creates a leaf node used as a child in lookup tests.
+     *
+     * @return leaf node
+     */
+    private static CompiledNode<String> leaf() {
+        return new CompiledNode<>(new char[0], noChildren(), new String[0], new int[0]);
+    }
 
     /**
      * Verifies that {@link NodeData} rejects mismatched edge-related array lengths.
@@ -99,8 +129,7 @@ class CompiledNodeAndNodeDataTest {
     @Test
     @DisplayName("CompiledNode rejects mismatched edge and child arrays")
     void compiledNodeShouldRejectMismatchedEdgeAndChildArrays() {
-        @SuppressWarnings("unchecked")
-        final CompiledNode<String>[] children = new CompiledNode[0];
+        final CompiledNode<String>[] children = noChildren();
 
         final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> new CompiledNode<String>(new char[] { 'a' }, children, new String[0], new int[0]));
@@ -114,8 +143,7 @@ class CompiledNodeAndNodeDataTest {
     @Test
     @DisplayName("CompiledNode rejects mismatched value arrays")
     void compiledNodeShouldRejectMismatchedValueArrays() {
-        @SuppressWarnings("unchecked")
-        final CompiledNode<String>[] children = new CompiledNode[0];
+        final CompiledNode<String>[] children = noChildren();
 
         final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> new CompiledNode<String>(new char[0], children, new String[] { "stem" }, new int[0]));
@@ -131,8 +159,7 @@ class CompiledNodeAndNodeDataTest {
     @DisplayName("CompiledNode accessors expose documented backing arrays")
     void compiledNodeAccessorsShouldExposeDocumentedBackingArrays() {
         final char[] edgeLabels = new char[] { 'a' };
-        @SuppressWarnings("unchecked")
-        final CompiledNode<String>[] children = new CompiledNode[1];
+        final CompiledNode<String>[] children = children(1);
         final String[] orderedValues = new String[] { "stem" };
         final int[] orderedCounts = new int[] { 5 };
         final CompiledNode<String> node = new CompiledNode<>(edgeLabels, children, orderedValues, orderedCounts);
@@ -149,12 +176,11 @@ class CompiledNodeAndNodeDataTest {
     @Test
     @DisplayName("CompiledNode can resolve child via dense lookup table")
     void compiledNodeUsesDenseLookupForCompactIntervals() {
-        @SuppressWarnings("unchecked")
-        final CompiledNode<String>[] children = new CompiledNode[4];
-        children[0] = new CompiledNode<>(new char[0], new CompiledNode[0], new String[0], new int[0]);
-        children[1] = new CompiledNode<>(new char[0], new CompiledNode[0], new String[0], new int[0]);
-        children[2] = new CompiledNode<>(new char[0], new CompiledNode[0], new String[0], new int[0]);
-        children[3] = new CompiledNode<>(new char[0], new CompiledNode[0], new String[0], new int[0]);
+        final CompiledNode<String>[] children = children(4);
+        children[0] = leaf();
+        children[1] = leaf();
+        children[2] = leaf();
+        children[3] = leaf();
 
         final CompiledNode<String> node = new CompiledNode<>(new char[] { 'a', 'b', 'c', 'd' }, children,
                 new String[] { "1", "2", "3", "4" }, new int[] { 1, 1, 1, 1 });
@@ -172,12 +198,11 @@ class CompiledNodeAndNodeDataTest {
     @Test
     @DisplayName("CompiledNode resolves child by linear scan for small degree")
     void compiledNodeUsesLinearScanForSmallDegree() {
-        @SuppressWarnings("unchecked")
-        final CompiledNode<String>[] children = new CompiledNode[4];
-        final CompiledNode<String> childA = new CompiledNode<>(new char[0], new CompiledNode[0], new String[0], new int[0]);
-        final CompiledNode<String> childB = new CompiledNode<>(new char[0], new CompiledNode[0], new String[0], new int[0]);
-        final CompiledNode<String> childC = new CompiledNode<>(new char[0], new CompiledNode[0], new String[0], new int[0]);
-        final CompiledNode<String> childD = new CompiledNode<>(new char[0], new CompiledNode[0], new String[0], new int[0]);
+        final CompiledNode<String>[] children = children(4);
+        final CompiledNode<String> childA = leaf();
+        final CompiledNode<String> childB = leaf();
+        final CompiledNode<String> childC = leaf();
+        final CompiledNode<String> childD = leaf();
         children[0] = childA;
         children[1] = childB;
         children[2] = childC;
@@ -200,13 +225,12 @@ class CompiledNodeAndNodeDataTest {
     @Test
     @DisplayName("CompiledNode resolves child by binary search for large degree")
     void compiledNodeUsesBinarySearchForLargeDegree() {
-        @SuppressWarnings("unchecked")
-        final CompiledNode<String>[] children = new CompiledNode[5];
-        final CompiledNode<String> childA = new CompiledNode<>(new char[0], new CompiledNode[0], new String[0], new int[0]);
-        final CompiledNode<String> childB = new CompiledNode<>(new char[0], new CompiledNode[0], new String[0], new int[0]);
-        final CompiledNode<String> childC = new CompiledNode<>(new char[0], new CompiledNode[0], new String[0], new int[0]);
-        final CompiledNode<String> childD = new CompiledNode<>(new char[0], new CompiledNode[0], new String[0], new int[0]);
-        final CompiledNode<String> childE = new CompiledNode<>(new char[0], new CompiledNode[0], new String[0], new int[0]);
+        final CompiledNode<String>[] children = children(5);
+        final CompiledNode<String> childA = leaf();
+        final CompiledNode<String> childB = leaf();
+        final CompiledNode<String> childC = leaf();
+        final CompiledNode<String> childD = leaf();
+        final CompiledNode<String> childE = leaf();
         children[0] = childA;
         children[1] = childB;
         children[2] = childC;
@@ -230,8 +254,7 @@ class CompiledNodeAndNodeDataTest {
     @Test
     @DisplayName("CompiledNode reports leaf, value and edge presence state")
     void compiledNodeReportsNodeStateHelpers() {
-        @SuppressWarnings("unchecked")
-        final CompiledNode<String>[] childless = new CompiledNode[0];
+        final CompiledNode<String>[] childless = noChildren();
         final CompiledNode<String> leaf = new CompiledNode<>(new char[0], childless, new String[0], new int[0]);
 
         assertTrue(leaf.isLeaf());
@@ -239,11 +262,10 @@ class CompiledNodeAndNodeDataTest {
         assertFalse(leaf.hasValues());
         assertFalse(leaf.hasEdge('a'));
 
-        @SuppressWarnings("unchecked")
-        final CompiledNode<String>[] child = new CompiledNode[1];
+        final CompiledNode<String>[] child = children(1);
         final String[] orderedValues = new String[] { "leaf" };
         final int[] orderedCounts = new int[] { 1 };
-        child[0] = new CompiledNode<>(new char[0], new CompiledNode[0], orderedValues, orderedCounts);
+        child[0] = new CompiledNode<>(new char[0], noChildren(), orderedValues, orderedCounts);
         final CompiledNode<String> node = new CompiledNode<>(new char[] { 'a' }, child, orderedValues, orderedCounts);
 
         assertFalse(node.isLeaf());
@@ -260,9 +282,8 @@ class CompiledNodeAndNodeDataTest {
     @Test
     @DisplayName("CompiledNode equals and hashCode align for identical structure")
     void compiledNodeEqualsAndHashCodeAlignForIdenticalStructure() {
-        @SuppressWarnings("unchecked")
-        final CompiledNode<String>[] child = new CompiledNode[1];
-        final CompiledNode<String> leaf = new CompiledNode<>(new char[0], new CompiledNode[0], new String[] { "v" },
+        final CompiledNode<String>[] child = children(1);
+        final CompiledNode<String> leaf = new CompiledNode<>(new char[0], noChildren(), new String[] { "v" },
                 new int[] { 1 });
         child[0] = leaf;
 

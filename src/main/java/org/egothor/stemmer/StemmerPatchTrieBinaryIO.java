@@ -95,8 +95,8 @@ public final class StemmerPatchTrieBinaryIO {
     }
 
     /**
-     * Reads a GZip-compressed binary patch-command trie from a filesystem path
-     * with an optional dense child lookup span override.
+     * Reads a GZip-compressed binary patch-command trie from a filesystem path with
+     * an optional dense child lookup span override.
      * <p>
      * This is a runtime-only tuning parameter. The dense-span setting is not
      * persisted in the file and does not change the compiled metadata.
@@ -183,14 +183,15 @@ public final class StemmerPatchTrieBinaryIO {
      * persisted in the file and does not change the compiled metadata.
      * </p>
      *
-     * @param inputStream     source stream
+     * @param inputStream      source stream
      * @param maxExpandedIndex dense lookup span override; negative values use
      *                         {@link FrequencyTrie#DEFAULT_MAX_EXPANDED_INDEX}
      * @return deserialized trie
      * @throws NullPointerException if {@code inputStream} is {@code null}
      * @throws IOException          if reading or decompression fails
      */
-    public static FrequencyTrie<String> read(final InputStream inputStream, final int maxExpandedIndex) throws IOException {
+    public static FrequencyTrie<String> read(final InputStream inputStream, final int maxExpandedIndex)
+            throws IOException {
         Objects.requireNonNull(inputStream, "inputStream");
 
         try (GZIPInputStream gzipInputStream = new GZIPInputStream(new BufferedInputStream(inputStream));

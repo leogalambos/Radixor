@@ -119,7 +119,8 @@ public final class FrequencyTrie<V> {
     private final boolean removeDiacritics;
 
     /**
-     * Shared empty array instance for empty lookup results from {@link #getAll(String)}.
+     * Shared empty array instance for empty lookup results from
+     * {@link #getAll(String)}.
      */
     private final V[] emptyValues;
 
@@ -166,12 +167,17 @@ public final class FrequencyTrie<V> {
     private static final int CASE_VERSION = 4;
 
     /**
+     * Argument name for lookup keys.
+     */
+    private static final String ARG_KEY = "key";
+
+    /**
      * Default dense child lookup span in code points used when materializing
      * compiled nodes without an explicit override.
      * <p>
-     * Increasing this value increases the chance of direct array indexing for
-     * child lookup at runtime at the cost of per-node dense table memory for
-     * compact character spans.
+     * Increasing this value increases the chance of direct array indexing for child
+     * lookup at runtime at the cost of per-node dense table memory for compact
+     * character spans.
      * </p>
      */
     public static final int DEFAULT_MAX_EXPANDED_INDEX = 512;
@@ -189,6 +195,30 @@ public final class FrequencyTrie<V> {
      */
     public static int currentFormatVersion() {
         return STREAM_VERSION;
+    }
+
+    /**
+     * Receives trie values during visitor-style lookup.
+     *
+     * <p>
+     * Implementations are caller-owned and are not retained by the trie. Returning
+     * {@code false} stops iteration after the current callback.
+     * </p>
+     *
+     * @param <V> value type
+     */
+    @FunctionalInterface
+    public interface EntrySink<V> {
+
+        /**
+         * Accepts one ordered local value.
+         *
+         * @param value stored value
+         * @param count stored local occurrence count
+         * @param rank  zero-based rank in deterministic local ordering
+         * @return {@code true} to continue iteration, {@code false} to stop
+         */
+        boolean accept(V value, int count, int rank);
     }
 
     /**
@@ -229,7 +259,7 @@ public final class FrequencyTrie<V> {
      * @throws NullPointerException if {@code key} is {@code null}
      */
     public V get(final String key) {
-        Objects.requireNonNull(key, "key");
+        Objects.requireNonNull(key, ARG_KEY);
         final CompiledNode<V> node = findNode(normalizeLookupKey(key));
         if (node == null) {
             return null;
@@ -266,7 +296,7 @@ public final class FrequencyTrie<V> {
      */
     @SuppressWarnings("PMD.MethodReturnsInternalArray")
     public V[] getAll(final String key) {
-        Objects.requireNonNull(key, "key");
+        Objects.requireNonNull(key, ARG_KEY);
         final CompiledNode<V> node = findNode(normalizeLookupKey(key));
         if (node == null) {
             return this.emptyValues;
@@ -301,7 +331,7 @@ public final class FrequencyTrie<V> {
      * @throws NullPointerException if {@code key} is {@code null}
      */
     public List<ValueCount<V>> getEntries(final String key) {
-        Objects.requireNonNull(key, "key");
+        Objects.requireNonNull(key, ARG_KEY);
         final CompiledNode<V> node = findNode(normalizeLookupKey(key));
         if (node == null) {
             return List.of();
@@ -323,6 +353,132 @@ public final class FrequencyTrie<V> {
             entries.add(new ValueCount<>(orderedValues[index], orderedCounts[index]));
         }
         return Collections.unmodifiableList(entries);
+    }
+
+    /**
+     * Visits all values stored at the node addressed by an already-normalized
+     * {@code char[]} key slice.
+     *
+     * <p>
+     * This method bypasses {@link TrieMetadata#caseProcessingMode()} and
+     * {@link TrieMetadata#diacriticProcessingMode()}. The caller must provide input
+     * normalized exactly as required by this trie's metadata. The trie is immutable
+     * and thread-safe for concurrent reads; the supplied sink is caller-owned and
+     * is not retained.
+     * </p>
+     *
+     * @param key        normalized key storage
+     * @param offset     first character offset
+     * @param length     number of characters to read
+     * @param sink       value sink
+     * @param maxResults maximum number of results to visit
+     * @return number of visited values
+     * @throws NullPointerException      if {@code key} or {@code sink} is
+     *                                   {@code null}
+     * @throws IndexOutOfBoundsException if the key slice is invalid
+     * @throws IllegalArgumentException  if {@code maxResults} is negative
+     */
+    public int getAllNormalized(final char[] key, final int offset, final int length, final EntrySink<? super V> sink,
+            final int maxResults) {
+        Objects.requireNonNull(key, ARG_KEY);
+        Objects.requireNonNull(sink, "sink");
+        Objects.checkFromIndexSize(offset, length, key.length);
+        validateMaxResults(maxResults);
+        if (maxResults == 0) {
+            return 0;
+        }
+        return visitNode(findNode(key, offset, length), sink, maxResults);
+    }
+
+    /**
+     * Visits all values stored at the node addressed by an already-normalized
+     * character sequence.
+     *
+     * @param key        normalized key
+     * @param sink       value sink
+     * @param maxResults maximum number of results to visit
+     * @return number of visited values
+     * @throws NullPointerException     if {@code key} or {@code sink} is
+     *                                  {@code null}
+     * @throws IllegalArgumentException if {@code maxResults} is negative
+     * @see #getAllNormalized(char[], int, int, EntrySink, int)
+     */
+    public int getAllNormalized(final CharSequence key, final EntrySink<? super V> sink, final int maxResults) {
+        Objects.requireNonNull(key, ARG_KEY);
+        Objects.requireNonNull(sink, "sink");
+        validateMaxResults(maxResults);
+        if (maxResults == 0) {
+            return 0;
+        }
+        return visitNode(findNode(key), sink, maxResults);
+    }
+
+    /**
+     * Visits the first value stored at the node addressed by an already-normalized
+     * {@code char[]} key slice.
+     *
+     * @param key    normalized key storage
+     * @param offset first character offset
+     * @param length number of characters to read
+     * @param sink   value sink
+     * @return {@code true} when a value was visited, otherwise {@code false}
+     * @see #getAllNormalized(char[], int, int, EntrySink, int)
+     */
+    public boolean getFirstNormalized(final char[] key, final int offset, final int length,
+            final EntrySink<? super V> sink) {
+        return getAllNormalized(key, offset, length, sink, 1) == 1;
+    }
+
+    /**
+     * Visits the first value stored at the node addressed by an already-normalized
+     * character sequence.
+     *
+     * @param key  normalized key
+     * @param sink value sink
+     * @return {@code true} when a value was visited, otherwise {@code false}
+     * @see #getAllNormalized(CharSequence, EntrySink, int)
+     */
+    public boolean getFirstNormalized(final CharSequence key, final EntrySink<? super V> sink) {
+        return getAllNormalized(key, sink, 1) == 1;
+    }
+
+    /**
+     * Visits all values stored at the node addressed by the supplied key, applying
+     * metadata-driven lookup normalization when required.
+     *
+     * <p>
+     * This method preserves the same lookup normalization semantics as
+     * {@link #getAll(String)}. It may allocate when metadata requires lowercase or
+     * diacritic normalization.
+     * </p>
+     *
+     * @param key        key to resolve
+     * @param sink       value sink
+     * @param maxResults maximum number of results to visit
+     * @return number of visited values
+     */
+    public int getAll(final CharSequence key, final EntrySink<? super V> sink, final int maxResults) {
+        Objects.requireNonNull(key, ARG_KEY);
+        Objects.requireNonNull(sink, "sink");
+        validateMaxResults(maxResults);
+        if (maxResults == 0) {
+            return 0;
+        }
+        final CharSequence normalized = normalizeLookupKey(key);
+        return visitNode(findNode(normalized), sink, maxResults);
+    }
+
+    /**
+     * Visits the first value stored at the node addressed by the supplied key,
+     * applying metadata-driven lookup normalization when required.
+     *
+     * @param key  key to resolve
+     * @param sink value sink
+     * @return {@code true} when a value was visited, otherwise {@code false}
+     * @see #getAll(CharSequence, EntrySink, int)
+     */
+    public boolean getFirst(final CharSequence key, final EntrySink<? super V> sink) {
+        return getAll(key, sink, 1) == 1;
     }
 
     /**
@@ -431,16 +587,17 @@ public final class FrequencyTrie<V> {
      * dense child-index span configuration.
      * <p>
      * This setting is applied only while materializing the in-memory compiled
-     * representation during load. It is not serialized in {@link TrieMetadata},
-     * so each load can independently choose its own runtime lookup trade-off.
+     * representation during load. It is not serialized in {@link TrieMetadata}, so
+     * each load can independently choose its own runtime lookup trade-off.
      * </p>
      *
-     * @param inputStream       source input stream
-     * @param arrayFactory      array factory used to create typed arrays
-     * @param valueCodec        codec used to read values
-     * @param maxExpandedIndex  dense lookup span override; zero disables dense lookup,
-     *                          negative values use {@link #DEFAULT_MAX_EXPANDED_INDEX}
-     * @param <V>               value type
+     * @param inputStream      source input stream
+     * @param arrayFactory     array factory used to create typed arrays
+     * @param valueCodec       codec used to read values
+     * @param maxExpandedIndex dense lookup span override; zero disables dense
+     *                         lookup, negative values use
+     *                         {@link #DEFAULT_MAX_EXPANDED_INDEX}
+     * @param <V>              value type
      * @return deserialized compiled trie
      * @throws NullPointerException if any argument is {@code null}
      * @throws IOException          if reading fails or the binary format is invalid
@@ -573,7 +730,8 @@ public final class FrequencyTrie<V> {
 
             final TrieMetadata sourceMetadata = readMetadata(dataInput, version);
             final int effectiveMaxExpandedIndex = maxExpandedIndex >= 0 ? maxExpandedIndex : DEFAULT_MAX_EXPANDED_INDEX;
-            final CompiledNode<V>[] nodes = readNodes(dataInput, arrayFactory, valueCodec, nodeCount, effectiveMaxExpandedIndex);
+            final CompiledNode<V>[] nodes = readNodes(dataInput, arrayFactory, valueCodec, nodeCount,
+                    effectiveMaxExpandedIndex);
             final CompiledNode<V> rootNode = nodes[rootNodeId];
 
             if (LOGGER.isLoggable(Level.FINE)) {
@@ -584,12 +742,12 @@ public final class FrequencyTrie<V> {
         }
 
         private static DataInputStream wrapInputStream(final InputStream inputStream) {
-            return inputStream instanceof DataInputStream
-                    ? (DataInputStream) inputStream
+            return inputStream instanceof DataInputStream ? (DataInputStream) inputStream
                     : new DataInputStream(inputStream);
         }
 
-        private static TrieMetadata readMetadata(final DataInputStream dataInput, final int version) throws IOException {
+        private static TrieMetadata readMetadata(final DataInputStream dataInput, final int version)
+                throws IOException {
             if (version == STREAM_VERSION) {
                 return readTextMetadata(dataInput);
             }
@@ -600,12 +758,12 @@ public final class FrequencyTrie<V> {
             }
 
             final ReductionSettings reductionSettings = readReductionSettings(dataInput);
-            final DiacriticProcessingMode diacriticProcessingMode = readEnumByOrdinal(dataInput, DiacriticProcessingMode.values(),
-                    "diacritic processing mode");
-            final CaseProcessingMode caseProcessingMode = version >= CASE_VERSION
-                    ? readCaseProcessingMode(dataInput)
+            final DiacriticProcessingMode diacriticProcessingMode = readEnumByOrdinal(dataInput,
+                    DiacriticProcessingMode.values(), "diacritic processing mode");
+            final CaseProcessingMode caseProcessingMode = version >= CASE_VERSION ? readCaseProcessingMode(dataInput)
                     : CaseProcessingMode.LOWERCASE_WITH_LOCALE_ROOT;
-            return new TrieMetadata(version, traversalDirection, reductionSettings, diacriticProcessingMode, caseProcessingMode);
+            return new TrieMetadata(version, traversalDirection, reductionSettings, diacriticProcessingMode,
+                    caseProcessingMode);
         }
 
         private static TrieMetadata readTextMetadata(final DataInputStream dataInput) throws IOException {
@@ -644,8 +802,9 @@ public final class FrequencyTrie<V> {
             return values[ordinal];
         }
 
-        private static <V> CompiledNode<V>[] readNodes(final DataInputStream dataInput, final IntFunction<V[]> arrayFactory,
-                final ValueStreamCodec<V> valueCodec, final int nodeCount, final int maxExpandedIndex) throws IOException {
+        private static <V> CompiledNode<V>[] readNodes(final DataInputStream dataInput,
+                final IntFunction<V[]> arrayFactory, final ValueStreamCodec<V> valueCodec, final int nodeCount,
+                final int maxExpandedIndex) throws IOException {
             final char[][] edgeLabelsByNode = new char[nodeCount][];
             final int[][] childNodeIdsByNode = new int[nodeCount][];
             @SuppressWarnings("unchecked")
@@ -700,14 +859,16 @@ public final class FrequencyTrie<V> {
 
         private static <V> CompiledNode<V> resolveNode(final int nodeIndex, final char[][] edgeLabelsByNode,
                 final int[][] childNodeIdsByNode, final V[][] orderedValuesByNode, final int[][] orderedCountsByNode,
-                final CompiledNode<V>[] nodes, final boolean[] inProgress, final int maxExpandedIndex) throws IOException {
+                final CompiledNode<V>[] nodes, final boolean[] inProgress, final int maxExpandedIndex)
+                throws IOException {
             final CompiledNode<V> cachedNode = nodes[nodeIndex];
             if (cachedNode != null) {
                 return cachedNode;
             }
 
             if (inProgress[nodeIndex]) {
-                throw new IOException("Invalid serialized node graph: cyclic reference detected at node " + nodeIndex + '.');
+                throw new IOException(
+                        "Invalid serialized node graph: cyclic reference detected at node " + nodeIndex + '.');
             }
             inProgress[nodeIndex] = true;
             try {
@@ -720,16 +881,15 @@ public final class FrequencyTrie<V> {
                 for (int edgeIndex = 0; edgeIndex < edgeCount; edgeIndex++) {
                     final int childNodeId = childNodeIds[edgeIndex];
                     if (childNodeId < 0 || childNodeId >= edgeLabelsByNode.length) {
-                        throw new IOException(
-                                "Invalid child node id at node " + nodeIndex + ", edge index " + edgeIndex + ": "
-                                        + childNodeId);
+                        throw new IOException("Invalid child node id at node " + nodeIndex + ", edge index " + edgeIndex
+                                + ": " + childNodeId);
                     }
                     children[edgeIndex] = resolveNode(childNodeId, edgeLabelsByNode, childNodeIdsByNode,
                             orderedValuesByNode, orderedCountsByNode, nodes, inProgress, maxExpandedIndex);
                 }
 
-                final CompiledNode<V> node = new CompiledNode<>(edgeLabels, children, orderedValuesByNode[nodeIndex], maxExpandedIndex,
-                        orderedCountsByNode[nodeIndex]);
+                final CompiledNode<V> node = new CompiledNode<>(edgeLabels, children, orderedValuesByNode[nodeIndex],
+                        maxExpandedIndex, orderedCountsByNode[nodeIndex]);
                 nodes[nodeIndex] = node;
                 return node;
             } finally {
@@ -740,8 +900,9 @@ public final class FrequencyTrie<V> {
         private static void validateSerializedEdges(final int nodeIndex, final char... edgeLabels) throws IOException {
             for (int edgeIndex = 1; edgeIndex < edgeLabels.length; edgeIndex++) {
                 if (edgeLabels[edgeIndex - 1] >= edgeLabels[edgeIndex]) {
-                    throw new IOException("Edge labels must be strictly ascending at node " + nodeIndex + ", edge index "
-                            + edgeIndex + ": '" + edgeLabels[edgeIndex - 1] + "' then '" + edgeLabels[edgeIndex] + "'.");
+                    throw new IOException(
+                            "Edge labels must be strictly ascending at node " + nodeIndex + ", edge index " + edgeIndex
+                                    + ": '" + edgeLabels[edgeIndex - 1] + "' then '" + edgeLabels[edgeIndex] + "'.");
                 }
             }
         }
@@ -754,6 +915,16 @@ public final class FrequencyTrie<V> {
      * @return compiled node, or {@code null} if the path does not exist
      */
     private CompiledNode<V> findNode(final String key) {
+        return findNode((CharSequence) key);
+    }
+
+    /**
+     * Locates the compiled node for the supplied key.
+     *
+     * @param key already-normalized key to resolve
+     * @return compiled node, or {@code null} if the path does not exist
+     */
+    private CompiledNode<V> findNode(final CharSequence key) {
         CompiledNode<V> current = this.root;
         if (this.lookupTraversalDirection == WordTraversalDirection.BACKWARD) {
             for (int traversalOffset = key.length() - 1; traversalOffset >= 0; traversalOffset--) {
@@ -775,17 +946,98 @@ public final class FrequencyTrie<V> {
     }
 
     /**
+     * Locates the compiled node for the supplied key slice.
+     *
+     * @param key    already-normalized key storage
+     * @param offset first character offset
+     * @param length number of characters to read
+     * @return compiled node, or {@code null} if the path does not exist
+     */
+    private CompiledNode<V> findNode(final char[] key, final int offset, final int length) {
+        CompiledNode<V> current = this.root;
+        if (this.lookupTraversalDirection == WordTraversalDirection.BACKWARD) {
+            for (int traversalOffset = offset + length - 1; traversalOffset >= offset; traversalOffset--) {
+                current = current.findChild(key[traversalOffset]);
+                if (current == null) {
+                    return null;
+                }
+            }
+            return current;
+        }
+
+        final int endExclusive = offset + length;
+        for (int traversalOffset = offset; traversalOffset < endExclusive; traversalOffset++) {
+            current = current.findChild(key[traversalOffset]);
+            if (current == null) {
+                return null;
+            }
+        }
+        return current;
+    }
+
+    /**
+     * Visits node-local values without allocating result containers.
+     *
+     * @param node       resolved node, or {@code null}
+     * @param sink       value sink
+     * @param maxResults maximum values to visit
+     * @return number of visited values
+     */
+    private int visitNode(final CompiledNode<V> node, final EntrySink<? super V> sink, final int maxResults) {
+        if (node == null) {
+            return 0;
+        }
+
+        final V[] orderedValues = node.orderedValues();
+        final int valueCount = Math.min(orderedValues.length, maxResults);
+        if (valueCount == 0) {
+            return 0;
+        }
+
+        final int[] orderedCounts = node.orderedCounts();
+        int visited = 0;
+        for (int rank = 0; rank < valueCount; rank++) {
+            visited++;
+            if (!sink.accept(orderedValues[rank], orderedCounts[rank], rank)) {
+                break;
+            }
+        }
+        return visited;
+    }
+
+    /**
+     * Validates visitor maximum result count.
+     *
+     * @param maxResults maximum result count
+     */
+    private static void validateMaxResults(final int maxResults) {
+        if (maxResults < 0) {
+            throw new IllegalArgumentException("maxResults must be non-negative.");
+        }
+    }
+
+    /**
      * Applies lookup-time case normalization according to persisted metadata.
      *
      * @param key lookup key
      * @return normalized key for trie traversal
      */
     private String normalizeLookupKey(final String key) {
+        return normalizeLookupKey((CharSequence) key).toString();
+    }
+
+    /**
+     * Applies lookup-time normalization according to persisted metadata.
+     *
+     * @param key lookup key
+     * @return normalized key for trie traversal
+     */
+    private CharSequence normalizeLookupKey(final CharSequence key) {
         if (!this.lowercasesLookupKeys && !this.removeDiacritics) {
             return key;
         }
 
-        String normalized = key;
+        String normalized = key.toString();
         if (this.lowercasesLookupKeys) {
             normalized = normalized.toLowerCase(Locale.ROOT);
         }
@@ -846,9 +1098,9 @@ public final class FrequencyTrie<V> {
         /**
          * Dense edge lookup span threshold.
          * <p>
-         * This value controls a speed/memory trade-off during freezing:
-         * dense child lookup tables are allocated only for nodes whose child
-         * labels fit in this span.
+         * This value controls a speed/memory trade-off during freezing: dense child
+         * lookup tables are allocated only for nodes whose child labels fit in this
+         * span.
          * </p>
          */
         private final int maxExpandedIndex;
@@ -925,8 +1177,8 @@ public final class FrequencyTrie<V> {
 
         /**
          * Creates a new builder with the provided settings, explicit traversal
-         * direction, explicit case processing mode, explicit diacritic processing
-         * mode, and an explicit dense child lookup threshold.
+         * direction, explicit case processing mode, explicit diacritic processing mode,
+         * and an explicit dense child lookup threshold.
          *
          * @param arrayFactory            array factory
          * @param reductionSettings       reduction configuration
@@ -934,10 +1186,10 @@ public final class FrequencyTrie<V> {
          * @param caseProcessingMode      dictionary case processing mode
          * @param diacriticProcessingMode dictionary diacritic processing mode
          * @param maxExpandedIndex        dense lookup span override; zero disables
-         *                               dense lookup. Larger values increase direct
-         *                               indexing opportunities while potentially
-         *                               increasing materialization memory in nodes
-         *                               whose edge label span is within the limit.
+         *                                dense lookup. Larger values increase direct
+         *                                indexing opportunities while potentially
+         *                                increasing materialization memory in nodes
+         *                                whose edge label span is within the limit.
          * @throws NullPointerException if any argument is {@code null}
          */
         public Builder(final IntFunction<V[]> arrayFactory, final ReductionSettings reductionSettings,
@@ -1052,7 +1304,7 @@ public final class FrequencyTrie<V> {
          * @throws IllegalArgumentException if {@code count} is less than {@code 1}
          */
         public Builder<V> put(final String key, final V value, final int count) {
-            Objects.requireNonNull(key, "key");
+            Objects.requireNonNull(key, ARG_KEY);
             Objects.requireNonNull(value, "value");
 
             if (count < 1) { // NOPMD
