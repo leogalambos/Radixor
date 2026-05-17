@@ -41,6 +41,24 @@ The main types involved in programmatic usage are:
 - `FrequencyTrieBuilders` for reconstructing a mutable builder from a compiled trie,
 - `ReductionMode` and `ReductionSettings` for controlling compilation semantics.
 
+## Java module system (JPMS)
+
+The core artifact is published as an explicit JPMS module:
+
+```java
+module org.egothor.radixor;
+```
+
+A named consuming module uses:
+
+```java
+module example.consumer {
+    requires org.egothor.radixor;
+}
+```
+
+The core module is standalone and can be consumed directly as a normal Java module.
+
 ## Recommended reading order
 
 For most developers, the best order is:
