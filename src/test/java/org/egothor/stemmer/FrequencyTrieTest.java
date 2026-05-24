@@ -873,6 +873,7 @@ class FrequencyTrieTest {
                 .readFrom(new ByteArrayInputStream(outputStream.toByteArray()), String[]::new, STRING_CODEC);
 
         assertAll(() -> assertEquals(original.size(), restored.size()),
+                () -> assertEquals(original.getFingerprint(), restored.getFingerprint()),
                 () -> assertEquals(original.get(""), restored.get("")),
                 () -> assertArrayEquals(original.getAll(""), restored.getAll("")),
                 () -> assertEquals(original.get("run"), restored.get("run")),
@@ -892,6 +893,82 @@ class FrequencyTrieTest {
                 () -> assertEquals(List.of(), restored.getEntries("missing")));
     }
 
+    /**
+     * Verifies fingerprint stability and sensitivity to metadata and trie content.
+     */
+    @Test
+    @DisplayName("Fingerprint reflects metadata and compiled trie content")
+    void fingerprintReflectsMetadataAndCompiledTrieContent() {
+        final FrequencyTrie.Builder<String> baseBuilderA = rankedBuilder();
+        baseBuilderA.put("run", "verb", 3);
+        baseBuilderA.put("run", "noun", 1);
+        baseBuilderA.put("runner", "noun", 2);
+        final FrequencyTrie<String> trieA = baseBuilderA.build();
+
+        final FrequencyTrie.Builder<String> baseBuilderB = rankedBuilder();
+        baseBuilderB.put("run", "verb", 3);
+        baseBuilderB.put("run", "noun", 1);
+        baseBuilderB.put("runner", "noun", 2);
+        final FrequencyTrie<String> trieB = baseBuilderB.build();
+
+        final FrequencyTrie.Builder<String> reorderedBuilder = rankedBuilder();
+        reorderedBuilder.put("runner", "noun", 2);
+        reorderedBuilder.put("run", "noun", 1);
+        reorderedBuilder.put("run", "verb", 3);
+        final FrequencyTrie<String> reorderedTrie = reorderedBuilder.build();
+
+        final FrequencyTrie.Builder<String> differentContentBuilder = rankedBuilder();
+        differentContentBuilder.put("run", "verb", 3);
+        differentContentBuilder.put("run", "noun", 2);
+        differentContentBuilder.put("runner", "noun", 2);
+        final FrequencyTrie<String> differentContentTrie = differentContentBuilder.build();
+
+        final FrequencyTrie.Builder<String> differentMetadataBuilder = new FrequencyTrie.Builder<>(String[]::new,
+                ReductionSettings.withDefaults(ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS),
+                WordTraversalDirection.FORWARD, CaseProcessingMode.AS_IS);
+        differentMetadataBuilder.put("run", "verb", 3);
+        differentMetadataBuilder.put("run", "noun", 1);
+        differentMetadataBuilder.put("runner", "noun", 2);
+        final FrequencyTrie<String> differentMetadataTrie = differentMetadataBuilder.build();
+
+        final String fingerprintA = trieA.getFingerprint();
+        final String fingerprintB = trieB.getFingerprint();
+        final String reorderedFingerprint = reorderedTrie.getFingerprint();
+        final String differentContentFingerprint = differentContentTrie.getFingerprint();
+        final String differentMetadataFingerprint = differentMetadataTrie.getFingerprint();
+        final byte[] fingerprintBytes = trieA.copyFingerprintBytes();
+        final byte[] secondFingerprintBytes = trieA.copyFingerprintBytes();
+        fingerprintBytes[0] = (byte) (fingerprintBytes[0] ^ 0x7F);
+
+        assertAll(() -> assertEquals(fingerprintA, fingerprintB),
+                () -> assertEquals(fingerprintA, reorderedFingerprint),
+                () -> assertEquals(fingerprintA, trieA.getFingerprint()),
+                () -> assertFalse(fingerprintA.isBlank()),
+                () -> assertLowercaseSha256Hex(fingerprintA),
+                () -> assertEquals(fingerprintA, toLowerHex(secondFingerprintBytes)),
+                () -> assertArrayEquals(secondFingerprintBytes, trieA.copyFingerprintBytes()),
+                () -> assertFalse(fingerprintA.equals(differentContentFingerprint)),
+                () -> assertFalse(fingerprintA.equals(differentMetadataFingerprint)));
+    }
+
+    private static void assertLowercaseSha256Hex(final String fingerprint) {
+        assertEquals(64, fingerprint.length());
+        for (int index = 0; index < fingerprint.length(); index++) {
+            final char character = fingerprint.charAt(index);
+            final boolean digit = character >= '0' && character <= '9';
+            final boolean lowercaseHex = character >= 'a' && character <= 'f';
+            assertTrue(digit || lowercaseHex, "Invalid fingerprint character at index " + index + '.');
+        }
+    }
+
+    private static String toLowerHex(final byte[] bytes) {
+        final StringBuilder builder = new StringBuilder(bytes.length * 2);
+        for (byte item : bytes) {
+            builder.append(Character.forDigit((item >>> 4) & 0x0F, 16));
+            builder.append(Character.forDigit(item & 0x0F, 16));
+        }
+        return builder.toString();
+    }
     /**
      * Verifies that persistence methods reject {@code null} arguments.
      *

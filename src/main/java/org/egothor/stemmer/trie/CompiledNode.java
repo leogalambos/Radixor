@@ -158,7 +158,7 @@ public final class CompiledNode<V> {
         }
 
         @SuppressWarnings("unchecked")
-        final CompiledNode<V>[] dense = (CompiledNode<V>[]) new CompiledNode[span + 1];
+        final CompiledNode<V>[] dense = new CompiledNode[span + 1];
         for (int edgeIndex = 0; edgeIndex < edgeLabels.length; edgeIndex++) {
             dense[edgeLabels[edgeIndex] - minEdge] = children[edgeIndex];
         }
@@ -347,7 +347,7 @@ public final class CompiledNode<V> {
 
     /**
      * Finds a child for the supplied edge character.
-     * <p>
+     * 
      * Lookup order is:
      * <ol>
      * <li>dense array index (if the label interval is compact enough),</li>
@@ -355,7 +355,6 @@ public final class CompiledNode<V> {
      * {@value #LINEAR_CHILD_COUNT_THRESHOLD} or fewer edges,</li>
      * <li>binary search over sorted labels.</li>
      * </ol>
-     * </p>
      *
      * @param edge edge character
      * @return child node, or {@code null} if absent
