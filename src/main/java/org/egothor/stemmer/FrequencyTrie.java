@@ -529,10 +529,16 @@ public final class FrequencyTrie<V> {
      * Returns the deterministic SHA-256 fingerprint of this trie.
      *
      * <p>
-     * The fingerprint is a canonical model identity, not a Java object identity. It
-     * includes a fingerprint-domain marker, the fingerprint input format version,
-     * persisted metadata, and the complete compiled-node structure reachable from
-     * the root, including edges, child references, local values, and local counts.
+     * <<<<<<< HEAD The fingerprint is a canonical model identity, not a Java object
+     * identity. It includes a fingerprint-domain marker, the fingerprint input
+     * format version, persisted metadata, and the complete compiled-node structure
+     * reachable from the root, including edges, child references, local values, and
+     * local counts. ======= The fingerprint is a canonical model identity, not a
+     * Java object identity. It includes a fingerprint-domain marker, the
+     * fingerprint input format version, persisted metadata, and the complete
+     * compiled-node structure reachable from the root, including edges, child
+     * references, local values, and local counts. >>>>>>>
+     * 464b5804366e8d7034a819f891f5cd730ad8c005
      * </p>
      *
      * <p>
