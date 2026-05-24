@@ -35,6 +35,9 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -86,12 +89,23 @@ import org.egothor.stemmer.trie.ReductionSignature;
  *
  * @param <V> value type
  */
+@SuppressWarnings("PMD.CyclomaticComplexity")
 public final class FrequencyTrie<V> {
 
     /**
      * Logger of this class.
      */
     private static final Logger LOGGER = Logger.getLogger(FrequencyTrie.class.getName());
+
+    /**
+     * Domain separator used by the trie fingerprint canonical input.
+     */
+    private static final String FINGERPRINT_DOMAIN = "RADIXOR-FREQUENCY-TRIE-FINGERPRINT";
+
+    /**
+     * Version of the canonical fingerprint input format.
+     */
+    private static final int FINGERPRINT_FORMAT_VERSION = 1;
 
     /**
      * Root node of the compiled read-only trie.
@@ -102,6 +116,12 @@ public final class FrequencyTrie<V> {
      * Metadata persisted together with this trie.
      */
     private final TrieMetadata metadata;
+
+    /**
+     * Canonical SHA-256 fingerprint bytes. The internal array is never exposed
+     * directly to callers.
+     */
+    private final byte[] fingerprintBytes;
 
     /**
      * Cached traversal direction used for key lookup.
@@ -233,6 +253,7 @@ public final class FrequencyTrie<V> {
             final TrieMetadata metadata) {
         this.root = Objects.requireNonNull(root, "root");
         this.metadata = Objects.requireNonNull(metadata, "metadata");
+        this.fingerprintBytes = computeFingerprintBytes(root, metadata);
         this.lookupTraversalDirection = metadata.traversalDirection();
         this.lowercasesLookupKeys = metadata.caseProcessingMode() == CaseProcessingMode.LOWERCASE_WITH_LOCALE_ROOT;
         this.removeDiacritics = metadata.diacriticProcessingMode() == DiacriticProcessingMode.REMOVE;
@@ -505,6 +526,60 @@ public final class FrequencyTrie<V> {
     }
 
     /**
+     * Returns the deterministic SHA-256 fingerprint of this trie.
+     *
+     * <p>
+     * The fingerprint is a canonical model identity, not a Java object identity. It
+     * includes a fingerprint-domain marker, the fingerprint input format version,
+     * persisted metadata, and the complete compiled-node structure reachable from
+     * the root, including edges, child references, local values, and local counts.
+     * </p>
+     *
+     * <p>
+     * The returned value is stable across JVM runs for equivalent trie content and
+     * metadata. It does not include object identity, memory layout, runtime cache
+     * state, absolute file paths, timestamps, or other process-local state.
+     * </p>
+     *
+     * @return 64-character lowercase hexadecimal SHA-256 fingerprint
+     */
+    public String getFingerprint() {
+        return toLowerHex(this.fingerprintBytes);
+    }
+
+    /**
+     * Returns a defensive copy of the raw SHA-256 fingerprint bytes.
+     *
+     * <p>
+     * The returned array has length {@code 32}. Mutating it does not affect this
+     * trie.
+     * </p>
+     *
+     * @return defensive copy of the 32-byte SHA-256 fingerprint
+     */
+    public byte[] copyFingerprintBytes() {
+        return Arrays.copyOf(this.fingerprintBytes, this.fingerprintBytes.length);
+    }
+
+    private static <V> byte[] computeFingerprintBytes(final CompiledNode<V> root, final TrieMetadata metadata) {
+        final MessageDigest messageDigest = newSha256Digest();
+        updateUtf8(messageDigest, FINGERPRINT_DOMAIN);
+        updateInt(messageDigest, FINGERPRINT_FORMAT_VERSION);
+        updateUtf8(messageDigest, metadata.toTextBlock());
+
+        final Map<CompiledNode<V>, Integer> nodeIds = new IdentityHashMap<>();
+        final List<CompiledNode<V>> orderedNodes = new ArrayList<>();
+        assignNodeIds(root, nodeIds, orderedNodes);
+
+        updateInt(messageDigest, nodeIds.get(root));
+        updateInt(messageDigest, orderedNodes.size());
+        for (CompiledNode<V> node : orderedNodes) {
+            updateNodeFingerprint(messageDigest, node, nodeIds);
+        }
+        return messageDigest.digest();
+    }
+
+    /**
      * Returns the root node mainly for diagnostics and tests within the package.
      *
      * @return compiled root node
@@ -685,6 +760,63 @@ public final class FrequencyTrie<V> {
             valueCodec.write(dataOutput, node.orderedValues()[index]);
             dataOutput.writeInt(node.orderedCounts()[index]);
         }
+    }
+
+    private static MessageDigest newSha256Digest() {
+        try {
+            return MessageDigest.getInstance("SHA-256");
+        } catch (NoSuchAlgorithmException exception) {
+            throw new IllegalStateException("SHA-256 digest is not available.", exception);
+        }
+    }
+
+    private static <V> void updateNodeFingerprint(final MessageDigest messageDigest, final CompiledNode<V> node,
+            final Map<CompiledNode<V>, Integer> nodeIds) {
+        final char[] edgeLabels = node.edgeLabels();
+        final CompiledNode<V>[] children = node.children();
+        final V[] values = node.orderedValues();
+        final int[] counts = node.orderedCounts();
+
+        updateInt(messageDigest, edgeLabels.length);
+        for (char edgeLabel : edgeLabels) {
+            updateInt(messageDigest, edgeLabel);
+        }
+        for (CompiledNode<V> child : children) {
+            final Integer childNodeId = nodeIds.get(child);
+            if (childNodeId == null) {
+                throw new IllegalStateException("Missing child node identifier during trie fingerprinting.");
+            }
+            updateInt(messageDigest, childNodeId);
+        }
+
+        updateInt(messageDigest, values.length);
+        for (V value : values) {
+            updateUtf8(messageDigest, String.valueOf(value));
+        }
+        for (int count : counts) {
+            updateInt(messageDigest, count);
+        }
+    }
+
+    private static void updateUtf8(final MessageDigest messageDigest, final String value) {
+        final byte[] encoded = value.getBytes(StandardCharsets.UTF_8);
+        updateInt(messageDigest, encoded.length);
+        messageDigest.update(encoded);
+    }
+
+    private static void updateInt(final MessageDigest messageDigest, final int value) {
+        messageDigest.update((byte) (value >>> 24));
+        messageDigest.update((byte) (value >>> 16));
+        messageDigest.update((byte) (value >>> 8));
+        messageDigest.update((byte) value);
+    }
+
+    private static String toLowerHex(final byte[] digest) {
+        final StringBuilder builder = new StringBuilder(digest.length * 2);
+        for (byte item : digest) {
+            builder.append(Character.forDigit((item >>> 4) & 0x0F, 16)).append(Character.forDigit(item & 0x0F, 16));
+        }
+        return builder.toString();
     }
 
     /**
