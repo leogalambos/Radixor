@@ -70,7 +70,7 @@ jobs:
           test -f gradle/verification-metadata.xml
 
       - name: Build reports for publication
-        run: ./gradlew --no-daemon clean ciRelease pmdMain javadoc jacocoCiReleaseReport pitest jmh -Pjmh.includes='.*StemmerComparisonBenchmark.*' cyclonedxBom
+        run: ./gradlew --no-daemon clean ciRelease pmdMain javadoc jacocoCiReleaseReport pitest jmh -Pjmh.includes='.*EnglishStemmerComparisonBenchmark.*' cyclonedxBom
 
       - name: Prepare gh-pages worktree
         shell: bash

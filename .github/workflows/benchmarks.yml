@@ -56,7 +56,7 @@ jobs:
           test -f gradle/verification-metadata.xml
 
       - name: Run JMH benchmarks
-        run: ./gradlew clean jmh -Pjmh.includes='.*StemmerComparisonBenchmark.*' --no-daemon
+        run: ./gradlew clean jmh -Pjmh.includes='.*EnglishStemmerComparisonBenchmark.*' --no-daemon
 
       - name: Upload JMH reports
         uses: actions/upload-artifact@v4
