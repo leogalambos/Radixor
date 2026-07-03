@@ -95,6 +95,17 @@ class FrequencyTrieTest {
     }
 
     /**
+     * Creates reduction settings with the internal uniform-subtree contraction
+     * enabled.
+     *
+     * @return contraction-enabled settings
+     */
+    private static ReductionSettings uniformSubtreeContractionSettings() {
+        return ReductionSettings.withUniformSubtreeContraction(ReductionSettings
+                .withDefaults(ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS));
+    }
+
+    /**
      * Verifies that the builder rejects {@code null} constructor arguments.
      */
     @Test
@@ -509,6 +520,10 @@ class FrequencyTrieTest {
                 () -> assertThrows(NullPointerException.class,
                         () -> trie.getAllNormalized("house", null, 1)),
                 () -> assertThrows(NullPointerException.class,
+                        () -> trie.getNormalized(null)),
+                () -> assertThrows(NullPointerException.class,
+                        () -> trie.getNormalizedString(null)),
+                () -> assertThrows(NullPointerException.class,
                         () -> trie.getAll((CharSequence) null, sink, 1)),
                 () -> assertThrows(NullPointerException.class,
                         () -> trie.getAll("house", null, 1)),
@@ -537,6 +552,12 @@ class FrequencyTrieTest {
                 }, 10)),
                 () -> assertFalse(trie.getFirstNormalized("HOUSE", (value, count, rank) -> true),
                         "Normalized lookup must bypass metadata lowercasing."),
+                () -> assertNull(trie.getNormalized("HOUSE"),
+                        "Normalized preferred lookup must bypass metadata lowercasing."),
+                () -> assertNull(trie.getNormalizedString("HOUSE"),
+                        "String-specialized normalized lookup must bypass metadata lowercasing."),
+                () -> assertEquals("noun", trie.getNormalized("house")),
+                () -> assertEquals("noun", trie.getNormalizedString("house")),
                 () -> assertTrue(trie.getFirst("HOUSE", (value, count, rank) -> {
                     assertEquals("noun", value);
                     return true;
@@ -1054,6 +1075,103 @@ class FrequencyTrieTest {
                 () -> assertEquals(original.get("c"), disabledDense.get("c")),
                 () -> assertEquals(original.get("d"), disabledDense.get("d")),
                 () -> assertEquals(original.get("z"), disabledDense.get("z")));
+    }
+
+    /**
+     * Verifies that uniform subtree contraction is not part of the default generic
+     * trie semantics.
+     */
+    @Test
+    @Tag("reduction")
+    @DisplayName("Default reduction keeps exact lookup semantics for uniform subtrees")
+    void shouldKeepExactLookupWhenUniformSubtreeContractionIsDisabled() {
+        final FrequencyTrie.Builder<String> builder = new FrequencyTrie.Builder<>(String[]::new,
+                ReductionSettings.withDefaults(ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS),
+                WordTraversalDirection.FORWARD);
+        builder.put("aa", "x");
+        builder.put("ab", "x");
+
+        final FrequencyTrie<String> trie = builder.build();
+
+        assertAll("exact lookup",
+                () -> assertEquals("x", trie.get("aa")),
+                () -> assertEquals("x", trie.get("ab")),
+                () -> assertNull(trie.get("az")),
+                () -> assertFalse(trie.root().findChild('a').acceptsRemainingInput()));
+    }
+
+    /**
+     * Verifies that the internal uniform-subtree contraction replaces a uniform
+     * non-leaf subtree with an accepting leaf.
+     */
+    @Test
+    @Tag("reduction")
+    @DisplayName("Uniform subtree contraction replaces uniform internal subtree with accepting leaf")
+    void shouldContractUniformInternalSubtreeIntoAcceptingLeaf() {
+        final FrequencyTrie.Builder<String> builder = new FrequencyTrie.Builder<>(String[]::new,
+                uniformSubtreeContractionSettings(), WordTraversalDirection.FORWARD);
+        builder.put("aa", "x");
+        builder.put("ab", "x");
+        builder.put("ba", "y");
+
+        final FrequencyTrie<String> trie = builder.build();
+
+        assertAll("contracted lookup",
+                () -> assertEquals(3, trie.size()),
+                () -> assertTrue(trie.root().findChild('a').acceptsRemainingInput()),
+                () -> assertEquals("x", trie.get("a")),
+                () -> assertEquals("x", trie.get("aa")),
+                () -> assertEquals("x", trie.get("ab")),
+                () -> assertEquals("x", trie.get("az")),
+                () -> assertEquals("y", trie.get("bz")),
+                () -> assertNull(trie.get("c")));
+    }
+
+    /**
+     * Verifies that binary persistence preserves accepting leaf semantics.
+     */
+    @Test
+    @Tag("persistence")
+    @DisplayName("Binary round trip preserves uniform subtree accepting leaf")
+    void shouldPreserveUniformSubtreeContractionAcrossBinaryRoundTrip() throws IOException {
+        final FrequencyTrie.Builder<String> builder = new FrequencyTrie.Builder<>(String[]::new,
+                uniformSubtreeContractionSettings(), WordTraversalDirection.FORWARD);
+        builder.put("aa", "x");
+        builder.put("ab", "x");
+        builder.put("ba", "y");
+        final FrequencyTrie<String> original = builder.build();
+        final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        original.writeTo(outputStream, STRING_CODEC);
+
+        final FrequencyTrie<String> restored = FrequencyTrie
+                .readFrom(new ByteArrayInputStream(outputStream.toByteArray()), String[]::new, STRING_CODEC);
+
+        assertAll("restored contraction",
+                () -> assertTrue(restored.root().findChild('a').acceptsRemainingInput()),
+                () -> assertEquals("x", restored.get("az")),
+                () -> assertTrue(restored.metadata().reductionSettings().contractUniformSubtrees()));
+    }
+
+    /**
+     * Verifies that value mapping keeps accepting leaf semantics.
+     */
+    @Test
+    @Tag("reduction")
+    @DisplayName("Value mapping preserves uniform subtree accepting leaf")
+    void shouldPreserveUniformSubtreeContractionWhenMappingValues() {
+        final FrequencyTrie.Builder<String> builder = new FrequencyTrie.Builder<>(String[]::new,
+                uniformSubtreeContractionSettings(), WordTraversalDirection.FORWARD);
+        builder.put("aa", "x");
+        builder.put("ab", "x");
+        builder.put("ba", "y");
+        final FrequencyTrie<String> source = builder.build();
+
+        final FrequencyTrie<Integer> mapped = FrequencyTrieBuilders.mapValues(source, Integer[]::new,
+                source.metadata().reductionSettings(), String::length);
+
+        assertAll("mapped contraction",
+                () -> assertTrue(mapped.root().findChild('a').acceptsRemainingInput()),
+                () -> assertEquals(1, mapped.get("az")));
     }
 
     /**

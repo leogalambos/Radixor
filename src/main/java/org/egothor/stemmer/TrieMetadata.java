@@ -167,6 +167,8 @@ public record TrieMetadata(int formatVersion, WordTraversalDirection traversalDi
                 .append("dominantWinnerOverSecondRatio=").append(this.reductionSettings.dominantWinnerOverSecondRatio())
                 .append('\n')
                 //
+                .append("contractUniformSubtrees=").append(this.reductionSettings.contractUniformSubtrees()).append('\n')
+                //
                 .append("diacriticProcessingMode=").append(this.diacriticProcessingMode.name()).append('\n')
                 //
                 .append("caseProcessingMode=").append(this.caseProcessingMode.name()).append('\n');
@@ -207,13 +209,16 @@ public record TrieMetadata(int formatVersion, WordTraversalDirection traversalDi
         final int dominantWinnerMinPercent = Integer.parseInt(requireEntry(entries, "dominantWinnerMinPercent"));
         final int dominantWinnerOverSecondRatio = Integer // NOPMD
                 .parseInt(requireEntry(entries, "dominantWinnerOverSecondRatio"));
+        final boolean contractUniformSubtrees = Boolean
+                .parseBoolean(entries.getOrDefault("contractUniformSubtrees", "false"));
         final DiacriticProcessingMode diacriticProcessingMode = DiacriticProcessingMode
                 .valueOf(requireEntry(entries, "diacriticProcessingMode"));
         final CaseProcessingMode caseProcessingMode = CaseProcessingMode
                 .valueOf(requireEntry(entries, "caseProcessingMode"));
 
         return new TrieMetadata(formatVersion, traversalDirection,
-                new ReductionSettings(reductionMode, dominantWinnerMinPercent, dominantWinnerOverSecondRatio),
+                new ReductionSettings(reductionMode, dominantWinnerMinPercent, dominantWinnerOverSecondRatio,
+                        contractUniformSubtrees),
                 diacriticProcessingMode, caseProcessingMode);
     }
 

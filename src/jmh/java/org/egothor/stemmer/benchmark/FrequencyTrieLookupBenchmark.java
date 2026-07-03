@@ -65,6 +65,7 @@ import org.openjdk.jmh.infra.Blackhole;
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 @Warmup(iterations = 3, time = 1)
 @Measurement(iterations = 5, time = 1)
+@SuppressWarnings("deprecation")
 public class FrequencyTrieLookupBenchmark {
 
     /**

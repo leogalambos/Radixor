@@ -81,13 +81,22 @@ Compiled `FrequencyTrie` instances are immutable and thread-safe for concurrent 
 
 ### Stable patch application behavior
 
-`PatchCommandEncoder.apply(...)` remains the compatibility API for string-returning patch application. Buffer-oriented `applyTo(...)` overloads are additive APIs for caller-owned output storage. They do not retain output arrays, report insufficient capacity with `APPLY_INSUFFICIENT_CAPACITY`, and preserve the existing malformed-patch compatibility behavior where `apply(...)` preserves the source.
+Serialized patch-command strings remain the stable stored representation used by textual dictionaries and binary artifacts. Runtime stemming should use `CompiledPatchCommand` values produced by `StemmerPatchTrieLoader.loadCompiled(...)`, `StemmerPatchTrieLoader.loadBinaryCompiled(...)`, or `PatchCommandEncoder.compile(...)`.
+
+The historical `PatchCommandEncoder.apply(...)` and String-based `applyTo(...)` overloads remain compatibility APIs during the 2.x transition, but they are deprecated because they reparse the patch-command string on each application. See [Migration and Backward Compatibility](migration-and-backward-compatibility.md) for old and new code examples.
+
+Compiled buffer-oriented `CompiledPatchCommand.applyTo(...)` overloads use caller-owned output storage. They do not retain output arrays and report insufficient capacity with `CompiledPatchCommand.APPLY_INSUFFICIENT_CAPACITY`.
 
 ### Stable reduction-mode intent
 
 Each public `ReductionMode` constant carries a semantic contract that should remain meaningful across versions.
 
 In other words, the implementation may evolve, but the intended meaning of modes such as ranked `getAll()` equivalence, unordered `getAll()` equivalence, and dominant `get()` equivalence should not drift casually.
+
+Internal pre-reduction optimizations may still change the physical compiled trie shape when they
+preserve the documented lookup contract. Uniform-subtree contraction is one such optimization: it
+can replace a subtree with an accepting leaf when all reachable entries choose the same preferred
+patch command.
 
 ### Stable binary artifact purpose
 

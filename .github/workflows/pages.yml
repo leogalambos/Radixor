@@ -70,7 +70,7 @@ jobs:
           test -f gradle/verification-metadata.xml
 
       - name: Build reports for publication
-        run: ./gradlew --no-daemon clean ciRelease pmdMain javadoc jacocoCiReleaseReport pitest jmh cyclonedxBom
+        run: ./gradlew --no-daemon clean ciRelease pmdMain javadoc jacocoCiReleaseReport pitest jmh -Pjmh.includes='.*StemmerComparisonBenchmark.*' cyclonedxBom
 
       - name: Prepare gh-pages worktree
         shell: bash
@@ -191,11 +191,8 @@ jobs:
           COVERAGE_BADGE_LATEST_LINK='<li><a href="./builds/latest/metrics/coverage-badge.json">Coverage Badge Metadata</a></li>'
           MUTATION_BADGE_LINK='<li><a href="./metrics/pitest-badge.json">Mutation Badge Metadata</a></li>'
           MUTATION_BADGE_LATEST_LINK='<li><a href="./builds/latest/metrics/pitest-badge.json">Mutation Badge Metadata</a></li>'
-          JMH_BADGE_LINK='<li><a href="./metrics/jmh-badge.json">Benchmark Badge Metadata</a></li>'
-          JMH_BADGE_LATEST_LINK='<li><a href="./builds/latest/metrics/jmh-badge.json">Benchmark Badge Metadata</a></li>'
           COVERAGE_BADGE_REPORT_MD='- [Coverage badge metadata](https://leogalambos.github.io/Radixor/builds/latest/metrics/coverage-badge.json)'
           MUTATION_BADGE_REPORT_MD='- [Mutation badge metadata](https://leogalambos.github.io/Radixor/builds/latest/metrics/pitest-badge.json)'
-          JMH_BADGE_REPORT_MD='- [Benchmark badge metadata](https://leogalambos.github.io/Radixor/builds/latest/metrics/jmh-badge.json)'
 
           if [ ! -f "${RUN_METRICS_DIR}/coverage-badge.json" ]; then
             COVERAGE_BADGE_LINK='<li>Coverage Badge Metadata: not available</li>'
@@ -205,10 +202,6 @@ jobs:
 
           if [ ! -f "${RUN_METRICS_DIR}/pitest-badge.json" ]; then
             MUTATION_BADGE_REPORT_MD='- Mutation badge metadata: not currently available'
-          fi
-
-          if [ ! -f "${RUN_METRICS_DIR}/jmh-badge.json" ]; then
-            JMH_BADGE_REPORT_MD='- Benchmark badge metadata: not currently available'
           fi
 
           cat > "${RUN_DIR}/index.html" <<EOF
@@ -239,7 +232,6 @@ jobs:
               ${SBOM_XML_LINK:-<li>SBOM (XML): not available</li>}
               ${COVERAGE_BADGE_LINK}
               ${MUTATION_BADGE_LINK}
-              ${JMH_BADGE_LINK}
               <li><a href="./pitest/">Mutation Testing Report</a></li>
               $(
                 [ "${HAS_JMH}" = "true" ] && { echo "${JMH_TXT_LINK:-<li>Benchmark Results (TXT): not available</li>}"; echo "${JMH_CSV_LINK:-<li>Benchmark Results (CSV): not available</li>}"; } \
@@ -271,13 +263,12 @@ jobs:
           ${SBOM_JSON_REPORT_MD}
           ${SBOM_XML_REPORT_MD}
 
-          ## Benchmark and badge metadata
+          ## Benchmark reports and badge metadata
 
           ${JMH_TXT_REPORT_MD}
           ${JMH_CSV_REPORT_MD}
           ${COVERAGE_BADGE_REPORT_MD}
           ${MUTATION_BADGE_REPORT_MD}
-          ${JMH_BADGE_REPORT_MD}
 
           ## Historical runs
 

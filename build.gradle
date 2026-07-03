@@ -18,6 +18,8 @@ version = gitVersion(prefix:'release@')
 
 def benchmarkReportsDirectory = layout.buildDirectory.dir('reports/jmh')
 def sbomReportsDirectory = layout.buildDirectory.dir('reports/sbom')
+def jmhIncludesProperty = providers.gradleProperty('jmh.includes')
+        .orElse(providers.systemProperty('jmh.includes'))
 
 def nvdApiKey = providers.gradleProperty('nvdApiKey')
         .orElse(providers.environmentVariable('NVD_API_KEY'))
@@ -154,7 +156,10 @@ def configureJUnitPlatformTags = { Test task, String includeTagsExpr, String exc
 }
 
 tasks.named('test', Test) {
-    configureJUnitPlatformTags(it, cliIncludeTags, cliExcludeTags)
+    final def requestedIncludes = splitTagExpression(cliIncludeTags)
+    final boolean slowExplicitlyIncluded = requestedIncludes.contains('slow')
+    final String defaultExcludeTags = cliExcludeTags ?: (slowExplicitlyIncluded ? null : 'slow')
+    configureJUnitPlatformTags(it, cliIncludeTags, defaultExcludeTags)
     finalizedBy(tasks.named('jacocoTestReport'))
 }
 
@@ -430,12 +435,17 @@ jmh {
     resultsFile = benchmarkReportsDirectory.map { it.file('jmh-results.csv').asFile }.get()
     humanOutputFile = benchmarkReportsDirectory.map { it.file('jmh-results.txt').asFile }.get()
     duplicateClassesStrategy = DuplicatesStrategy.EXCLUDE
+    if (jmhIncludesProperty.isPresent()) {
+        includes = [jmhIncludesProperty.get()]
+    }
 }
 
 tasks.named('jmh') {
     group = 'verification'
     description = 'Runs JMH benchmarks for the Radixor algorithmic core and Snowball comparison suite.'
 }
+
+apply from: 'gradle/lucene-benchmarks.gradle'
 
 tasks.register('regressionArtifactGenerator', JavaExec) {
     group = 'verification'
@@ -506,6 +516,8 @@ javadoc {
 }
 
 apply from: 'gradle/snowball-benchmarks.gradle'
+apply from: 'gradle/paicehusk-benchmarks.gradle'
+apply from: 'gradle/opennlp-benchmarks.gradle'
 
 gradle.taskGraph.whenReady { taskGraph ->
     def banner = """

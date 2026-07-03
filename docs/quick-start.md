@@ -2,6 +2,10 @@
 
 This guide introduces the fastest practical path to using **Radixor**.
 
+If you are new to Radixor and want the shortest possible path to a first working stem, start with
+[Fast Track](fast-track.md). This Quick Start is a broader developer walkthrough: it introduces the
+main loading options, query methods, artifact workflow, and metadata model.
+
 Radixor separates preparation from runtime usage. Source dictionaries are used to derive patch commands and reduce them into a compact read-only trie. Runtime stemming then operates on that compiled structure rather than on the original dictionary text. A richer dictionary usually improves the quality and coverage of inferred transformations, including transformations that are applicable to words not explicitly present in the source material. The reduction step also removes a large amount of redundant lexical information, which is why very large dictionaries can still produce compact runtime artifacts. These artifacts can be persisted and loaded directly when needed.
 
 A practical workflow usually consists of two independent phases:
@@ -15,11 +19,12 @@ A compiled stemmer can be obtained in three common ways.
 
 ### Use a bundled language dictionary
 
-Radixor ships with bundled dictionaries for a set of supported languages. These resources are line-oriented dictionaries stored with the library and compiled into a `FrequencyTrie<String>` when loaded. The loader can also store the canonical stem itself as a no-op patch command. Compiled trie artifacts now persist self-describing metadata, including the traversal direction and compilation reduction settings used to build the artifact.
+Radixor ships with bundled dictionaries for a set of supported languages. These resources are line-oriented dictionaries stored with the library and compiled into a `FrequencyTrie<CompiledPatchCommand>` when loaded through the runtime API. The loader can also store the canonical stem itself as a no-op patch command. Compiled trie artifacts now persist self-describing metadata, including the traversal direction and compilation reduction settings used to build the artifact.
 
 ```java
 import java.io.IOException;
 
+import org.egothor.stemmer.CompiledPatchCommand;
 import org.egothor.stemmer.FrequencyTrie;
 import org.egothor.stemmer.ReductionMode;
 import org.egothor.stemmer.StemmerPatchTrieLoader;
@@ -31,7 +36,7 @@ public final class BundledStemmerExample {
     }
 
     public static void main(final String[] arguments) throws IOException {
-        final FrequencyTrie<String> trie = StemmerPatchTrieLoader.load(
+        final FrequencyTrie<CompiledPatchCommand> trie = StemmerPatchTrieLoader.loadCompiled(
                 StemmerPatchTrieLoader.Language.US_UK,
                 true,
                 ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS);
@@ -49,6 +54,7 @@ Compiled stemmers can be stored as GZip-compressed binary artifacts and loaded d
 import java.io.IOException;
 import java.nio.file.Path;
 
+import org.egothor.stemmer.CompiledPatchCommand;
 import org.egothor.stemmer.FrequencyTrie;
 import org.egothor.stemmer.StemmerPatchTrieLoader;
 
@@ -59,7 +65,7 @@ public final class LoadBinaryStemmerExample {
     }
 
     public static void main(final String[] arguments) throws IOException {
-        final FrequencyTrie<String> trie = StemmerPatchTrieLoader.loadBinary(
+        final FrequencyTrie<CompiledPatchCommand> trie = StemmerPatchTrieLoader.loadBinaryCompiled(
                 Path.of("stemmers", "english.radixor.gz"));
 
         System.out.println("Canonical node count: " + trie.size());
@@ -73,6 +79,7 @@ You can tune in-memory child lookup density at load time without changing the ar
 import java.io.IOException;
 import java.nio.file.Path;
 
+import org.egothor.stemmer.CompiledPatchCommand;
 import org.egothor.stemmer.FrequencyTrie;
 import org.egothor.stemmer.StemmerPatchTrieLoader;
 
@@ -83,10 +90,10 @@ public final class LoadBinaryStemmerExampleTuned {
     }
 
     public static void main(final String[] arguments) throws IOException {
-        final FrequencyTrie<String> fast = StemmerPatchTrieLoader.loadBinary(
+        final FrequencyTrie<CompiledPatchCommand> fast = StemmerPatchTrieLoader.loadBinaryCompiled(
                 Path.of("stemmers", "english.radixor.gz"),
                 1024);
-        final FrequencyTrie<String> compact = StemmerPatchTrieLoader.loadBinary(
+        final FrequencyTrie<CompiledPatchCommand> compact = StemmerPatchTrieLoader.loadBinaryCompiled(
                 Path.of("stemmers", "english.radixor.gz"),
                 128);
 
@@ -107,7 +114,7 @@ A dedicated CLI compilation workflow deserves its own focused page and should re
 
 ## 2. Use the compiled stemmer
 
-A compiled `FrequencyTrie<String>` stores patch commands, not final stems. Querying therefore has two steps:
+A compiled `FrequencyTrie<CompiledPatchCommand>` stores patch commands, not final stems. Querying therefore has two steps:
 
 1. retrieve one or more patch commands from the trie,
 2. apply each patch command to the original input word.
@@ -121,8 +128,8 @@ Use `get(...)` when the application needs a single preferred transformation.
 ```java
 import java.io.IOException;
 
+import org.egothor.stemmer.CompiledPatchCommand;
 import org.egothor.stemmer.FrequencyTrie;
-import org.egothor.stemmer.PatchCommandEncoder;
 import org.egothor.stemmer.ReductionMode;
 import org.egothor.stemmer.StemmerPatchTrieLoader;
 
@@ -133,14 +140,14 @@ public final class SingleStemExample {
     }
 
     public static void main(final String[] arguments) throws IOException {
-        final FrequencyTrie<String> trie = StemmerPatchTrieLoader.load(
+        final FrequencyTrie<CompiledPatchCommand> trie = StemmerPatchTrieLoader.loadCompiled(
                 StemmerPatchTrieLoader.Language.US_UK,
                 true,
                 ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS);
 
         final String word = "running";
-        final String patch = trie.get(word);
-        final String stem = PatchCommandEncoder.apply(word, patch);
+        final CompiledPatchCommand patch = trie.get(word);
+        final String stem = patch == null ? word : patch.apply(word);
 
         System.out.println(word + " -> " + stem + " (" + patch + ")");
     }
@@ -153,10 +160,10 @@ Use `getAll(...)` when the application should preserve ambiguity instead of coll
 
 ```java
 final String word = "axes";
-final String[] patches = trie.getAll(word);
+final CompiledPatchCommand[] patches = trie.getAll(word);
 
-for (final String patch : patches) {
-    final String stem = PatchCommandEncoder.apply(word, patch);
+for (final CompiledPatchCommand patch : patches) {
+    final String stem = patch.apply(word);
     System.out.println(word + " -> " + stem + " (" + patch + ")");
 }
 ```
@@ -168,11 +175,12 @@ For diagnostics or advanced ranking logic, use `getEntries(...)` to obtain value
 ```java
 import java.util.List;
 
+import org.egothor.stemmer.CompiledPatchCommand;
 import org.egothor.stemmer.ValueCount;
 
-final List<ValueCount<String>> entries = trie.getEntries("axes");
+final List<ValueCount<CompiledPatchCommand>> entries = trie.getEntries("axes");
 
-for (final ValueCount<String> entry : entries) {
+for (final ValueCount<CompiledPatchCommand> entry : entries) {
     System.out.println(entry.value() + " -> " + entry.count());
 }
 ```
@@ -210,7 +218,11 @@ public final class ExtendCompiledStemmerExample {
                 String[]::new,
                 settings);
 
-        builder.put("microservices", "Na");
+        final PatchCommandEncoder encoder = PatchCommandEncoder.builder()
+                .traversalDirection(compiledTrie.traversalDirection())
+                .build();
+
+        builder.put("microservices", encoder.encode("microservices", "microservice"));
 
         final FrequencyTrie<String> updatedTrie = builder.build();
 

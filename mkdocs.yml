@@ -38,17 +38,23 @@ markdown_extensions:
 nav:
   - Home: index.md
 
-  - Getting Started:
+  - Start:
+     - Fast Track: fast-track.md
      - Quick Start: quick-start.md
-     - Built-in Languages: built-in-languages.md
-     - Dictionary Format: dictionary-format.md
-     - CLI Compilation: cli-compilation.md
+     - Integration Deep Dive: integration-deep-dive.md
 
-  - Programmatic Usage:
+  - Integration:
      - Overview: programmatic-usage.md
      - Loading and Building Stemmers: programmatic-loading-and-building.md
      - Querying and Ambiguity Handling: programmatic-querying-and-ambiguity.md
      - Extending and Persisting Compiled Tries: programmatic-extending-and-persistence.md
+     - Migration and Backward Compatibility: migration-and-backward-compatibility.md
+     - CLI Compilation: cli-compilation.md
+
+  - Dictionaries and Languages:
+     - Built-in Languages: built-in-languages.md
+     - Dictionary Format: dictionary-format.md
+     - Contributing Dictionaries: contributing-dictionaries.md
 
   - Architecture and Semantics:
      - Overview: architecture-and-reduction.md
@@ -57,11 +63,38 @@ nav:
      - Lookup Edge Optimization: lookup-edge-optimization.md
      - Compatibility and Guarantees: compatibility-and-guarantees.md
 
-  - Dictionaries:
-     - Contributing Dictionaries: contributing-dictionaries.md
+  - Benchmarks:
+     - How to Read Benchmarks: benchmarking.md
+     - Benchmark Results: benchmarks/index.md
+     - Reference:
+        - Methodology: benchmarks/reference/methodology.md
+        - Corpora: benchmarks/reference/corpora.md
+        - Environment and Reports: benchmarks/reference/environment.md
+        - English Dictionary Coverage: benchmarks/reference/english-coverage.md
+        - Candidate Evaluation: benchmarks/reference/candidates.md
+     - Language Results:
+        - Overview: benchmarks/languages/index.md
+        - Czech: benchmarks/languages/czech.md
+        - Danish: benchmarks/languages/danish.md
+        - Dutch: benchmarks/languages/dutch.md
+        - English: benchmarks/languages/english.md
+        - Finnish: benchmarks/languages/finnish.md
+        - French: benchmarks/languages/french.md
+        - German: benchmarks/languages/german.md
+        - Hungarian: benchmarks/languages/hungarian.md
+        - Italian: benchmarks/languages/italian.md
+        - Norwegian Bokmal: benchmarks/languages/norwegian-bokmal.md
+        - Norwegian Nynorsk: benchmarks/languages/norwegian-nynorsk.md
+        - Persian: benchmarks/languages/persian.md
+        - Polish: benchmarks/languages/polish.md
+        - Portuguese: benchmarks/languages/portuguese.md
+        - Russian: benchmarks/languages/russian.md
+        - Spanish: benchmarks/languages/spanish.md
+        - Swedish: benchmarks/languages/swedish.md
+        - Ukrainian: benchmarks/languages/ukrainian.md
+        - Yiddish: benchmarks/languages/yiddish.md
 
   - Quality and Operations:
      - Quality and Operations: quality-and-operations.md
-     - Benchmarking: benchmarking.md
      - Reports: reports.md
      - Test taxonomy and execution filtering: test-taxonomy-and-filtering.md

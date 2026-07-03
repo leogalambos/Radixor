@@ -10,7 +10,7 @@ Bundled dictionaries are exposed through:
 org.egothor.stemmer.StemmerPatchTrieLoader.Language
 ```
 
-Each bundled dictionary is packaged with the library as a compressed UTF-8 text resource. When loaded, the resource is parsed by `StemmerDictionaryParser`, transformed into patch-command mappings, and compiled into a read-only `FrequencyTrie<String>` by `StemmerPatchTrieLoader`.
+Each bundled dictionary is packaged with the library as a compressed UTF-8 text resource. When loaded through the runtime API, the resource is parsed by `StemmerDictionaryParser`, transformed into patch-command mappings, and compiled into a read-only `FrequencyTrie<CompiledPatchCommand>` by `StemmerPatchTrieLoader`.
 
 The bundled language definition also carries a language-level right-to-left flag. That flag is used by the loader to derive the `WordTraversalDirection` used for both trie-key construction and patch-command generation. In practice, left-to-right bundled languages use historical backward Egothor traversal, while right-to-left bundled languages use forward traversal over the stored form.
 
@@ -18,28 +18,28 @@ The bundled language definition also carries a language-level right-to-left flag
 
 The following bundled language identifiers are currently available:
 
-| Language | Enum constant | Writing direction | Notes |
-|---|---|---:|---|
-| Czech | `CS_CZ` | LTR | Bundled general-purpose dictionary |
-| Danish | `DA_DK` | LTR | Bundled general-purpose dictionary |
-| German | `DE_DE` | LTR | Bundled general-purpose dictionary |
-| Spanish | `ES_ES` | LTR | Bundled general-purpose dictionary |
-| Persian | `FA_IR` | RTL | Bundled dictionary uses forward traversal over the stored form |
-| Finnish | `FI_FI` | LTR | Bundled general-purpose dictionary |
-| French | `FR_FR` | LTR | Bundled general-purpose dictionary |
-| Hebrew | `HE_IL` | RTL | Bundled dictionary uses forward traversal over the stored form |
-| Hungarian | `HU_HU` | LTR | Bundled general-purpose dictionary |
-| Italian | `IT_IT` | LTR | Bundled general-purpose dictionary |
-| Norwegian Bokmål | `NB_NO` | LTR | Bundled general-purpose dictionary |
-| Dutch | `NL_NL` | LTR | Bundled general-purpose dictionary |
-| Norwegian Nynorsk | `NN_NO` | LTR | Bundled general-purpose dictionary |
-| Polish | `PL_PL` | LTR | Bundled general-purpose dictionary |
-| Portuguese | `PT_PT` | LTR | Bundled general-purpose dictionary |
-| Russian | `RU_RU` | LTR | Bundled general-purpose dictionary |
-| Swedish | `SV_SE` | LTR | Bundled general-purpose dictionary |
-| Ukrainian | `UK_UA` | LTR | Bundled general-purpose dictionary |
-| English | `US_UK` | LTR | Bundled general-purpose dictionary |
-| Yiddish | `YI` | RTL | Bundled dictionary uses forward traversal over the stored form |
+| Language | Enum constant | Writing direction | Notes | Benchmark page |
+|---|---|---:|---|---|
+| Czech | `CS_CZ` | LTR | Bundled general-purpose dictionary | [Czech](benchmarks/languages/czech.md) |
+| Danish | `DA_DK` | LTR | Bundled general-purpose dictionary | [Danish](benchmarks/languages/danish.md) |
+| German | `DE_DE` | LTR | Bundled general-purpose dictionary | [German](benchmarks/languages/german.md) |
+| Spanish | `ES_ES` | LTR | Bundled general-purpose dictionary | [Spanish](benchmarks/languages/spanish.md) |
+| Persian | `FA_IR` | RTL | Bundled dictionary uses forward traversal over the stored form | [Persian](benchmarks/languages/persian.md) |
+| Finnish | `FI_FI` | LTR | Bundled general-purpose dictionary | [Finnish](benchmarks/languages/finnish.md) |
+| French | `FR_FR` | LTR | Bundled general-purpose dictionary | [French](benchmarks/languages/french.md) |
+| Hebrew | `HE_IL` | RTL | Bundled dictionary uses forward traversal over the stored form | No same-language external benchmark in this run |
+| Hungarian | `HU_HU` | LTR | Bundled general-purpose dictionary | [Hungarian](benchmarks/languages/hungarian.md) |
+| Italian | `IT_IT` | LTR | Bundled general-purpose dictionary | [Italian](benchmarks/languages/italian.md) |
+| Norwegian Bokmål | `NB_NO` | LTR | Bundled general-purpose dictionary | [Norwegian Bokmal](benchmarks/languages/norwegian-bokmal.md) |
+| Dutch | `NL_NL` | LTR | Bundled general-purpose dictionary | [Dutch](benchmarks/languages/dutch.md) |
+| Norwegian Nynorsk | `NN_NO` | LTR | Bundled general-purpose dictionary | [Norwegian Nynorsk](benchmarks/languages/norwegian-nynorsk.md) |
+| Polish | `PL_PL` | LTR | Bundled general-purpose dictionary | [Polish](benchmarks/languages/polish.md) |
+| Portuguese | `PT_PT` | LTR | Bundled general-purpose dictionary | [Portuguese](benchmarks/languages/portuguese.md) |
+| Russian | `RU_RU` | LTR | Bundled general-purpose dictionary | [Russian](benchmarks/languages/russian.md) |
+| Swedish | `SV_SE` | LTR | Bundled general-purpose dictionary | [Swedish](benchmarks/languages/swedish.md) |
+| Ukrainian | `UK_UA` | LTR | Bundled general-purpose dictionary | [Ukrainian](benchmarks/languages/ukrainian.md) |
+| English | `US_UK` | LTR | Bundled general-purpose dictionary | [English](benchmarks/languages/english.md) |
+| Yiddish | `YI` | RTL | Bundled dictionary uses forward traversal over the stored form | [Yiddish](benchmarks/languages/yiddish.md) |
 
 ## Basic usage
 
@@ -48,6 +48,7 @@ Load a bundled dictionary like this:
 ```java
 import java.io.IOException;
 
+import org.egothor.stemmer.CompiledPatchCommand;
 import org.egothor.stemmer.FrequencyTrie;
 import org.egothor.stemmer.ReductionMode;
 import org.egothor.stemmer.StemmerPatchTrieLoader;
@@ -59,7 +60,7 @@ public final class BuiltInExample {
     }
 
     public static void main(final String[] arguments) throws IOException {
-        final FrequencyTrie<String> trie = StemmerPatchTrieLoader.load(
+        final FrequencyTrie<CompiledPatchCommand> trie = StemmerPatchTrieLoader.loadCompiled(
                 StemmerPatchTrieLoader.Language.US_UK,
                 true,
                 ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS);
@@ -76,8 +77,8 @@ This call loads the bundled dictionary resource for the selected language, parse
 ```java
 import java.io.IOException;
 
+import org.egothor.stemmer.CompiledPatchCommand;
 import org.egothor.stemmer.FrequencyTrie;
-import org.egothor.stemmer.PatchCommandEncoder;
 import org.egothor.stemmer.ReductionMode;
 import org.egothor.stemmer.StemmerPatchTrieLoader;
 
@@ -88,21 +89,21 @@ public final class EnglishExample {
     }
 
     public static void main(final String[] arguments) throws IOException {
-        final FrequencyTrie<String> trie = StemmerPatchTrieLoader.load(
+        final FrequencyTrie<CompiledPatchCommand> trie = StemmerPatchTrieLoader.loadCompiled(
                 StemmerPatchTrieLoader.Language.US_UK,
                 true,
                 ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS);
 
         final String word = "running";
-        final String patch = trie.get(word);
-        final String stem = PatchCommandEncoder.apply(word, patch, trie.traversalDirection());
+        final CompiledPatchCommand patch = trie.get(word);
+        final String stem = patch == null ? word : patch.apply(word);
 
         System.out.println(word + " -> " + stem);
     }
 }
 ```
 
-Passing `trie.traversalDirection()` to `PatchCommandEncoder.apply(...)` is the correct general contract. It ensures that the patch is applied using the same logical traversal model that was used when the trie and its patch commands were produced.
+`CompiledPatchCommand` values are compiled with the traversal direction used when the trie and its patch commands were produced.
 
 ## Traversal behavior and right-to-left languages
 
@@ -114,7 +115,7 @@ For bundled right-to-left languages such as Persian, Hebrew, and Yiddish, Radixo
 
 - trie keys are traversed from the logical beginning of the stored form,
 - patch commands are generated in that same forward direction,
-- patch application must use `WordTraversalDirection.FORWARD`, which is naturally obtained from `trie.traversalDirection()`.
+- compiled patch-command application uses `WordTraversalDirection.FORWARD`, which is naturally captured when `loadCompiled(...)` creates `CompiledPatchCommand` values.
 
 This design keeps the traversal policy explicit and consistent across dictionary loading, trie lookup, binary persistence, builder reconstruction, and patch application.
 
@@ -124,10 +125,15 @@ Bundled dictionaries can be compiled using any supported `ReductionMode`. The re
 
 Typical entry points are:
 
-- `StemmerPatchTrieLoader.load(language, storeOriginal, reductionMode)`
-- `StemmerPatchTrieLoader.load(language, storeOriginal, reductionSettings)`
+- `StemmerPatchTrieLoader.loadCompiled(language, storeOriginal, reductionMode)`
+- `StemmerPatchTrieLoader.loadCompiled(language, storeOriginal, reductionSettings)`
 
 For most users, `ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS` is the most conservative general-purpose choice because it preserves ranked `getAll(...)` behavior.
+
+Compiled bundled dictionaries also use internal uniform-subtree contraction. If a whole subtree
+would return the same preferred patch command, Radixor stores that subtree as an accepting leaf and
+removes the deeper branches. This is the contracted trie representation used by the published
+benchmark tables and is independent of the public reduction mode selected by the caller.
 
 ## Intended role of bundled dictionaries
 
@@ -178,7 +184,7 @@ For production systems, the most robust workflow is usually:
 2. extend it with domain-specific forms if needed,
 3. rebuild it into a binary artifact,
 4. deploy that compiled binary artifact,
-5. load it at runtime through `loadBinary(...)`.
+5. load it at runtime through `loadBinaryCompiled(...)`.
 
 This avoids repeated startup parsing and makes the deployed stemming behavior explicit, reproducible, and versionable.
 
@@ -190,6 +196,7 @@ import java.nio.file.Path;
 
 import org.egothor.stemmer.FrequencyTrie;
 import org.egothor.stemmer.FrequencyTrieBuilders;
+import org.egothor.stemmer.PatchCommandEncoder;
 import org.egothor.stemmer.ReductionMode;
 import org.egothor.stemmer.ReductionSettings;
 import org.egothor.stemmer.StemmerPatchTrieBinaryIO;
@@ -213,7 +220,11 @@ public final class BundledRefinementExample {
                 ReductionSettings.withDefaults(
                         ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS));
 
-        builder.put("microservices", "Na");
+        final PatchCommandEncoder encoder = PatchCommandEncoder.builder()
+                .traversalDirection(base.traversalDirection())
+                .build();
+
+        builder.put("microservices", encoder.encode("microservices", "microservice"));
 
         final FrequencyTrie<String> compiled = builder.build();
 

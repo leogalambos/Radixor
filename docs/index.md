@@ -30,8 +30,10 @@ Radixor is intended for teams that require consistent stemming quality at scale,
 
 ## Start here
 
-- Read [Quick Start](quick-start.md) for immediate implementation guidance.
-- Use [Programmatic Usage](programmatic-usage.md) for application integration patterns.
-- Review [Benchmarking](benchmarking.md) for reproducible performance methodology.
+- Read [Fast Track](fast-track.md) when you want the shortest path to a working bundled stemmer.
+- Use [Integration Deep Dive](integration-deep-dive.md) when you are wiring Radixor into a real application or search pipeline.
+- Read [Quick Start](quick-start.md) for the broader developer walkthrough after the first result works.
+- Use [Built-in Languages](built-in-languages.md) to find the bundled dictionaries exposed by Radixor.
+- Review [Benchmarking](benchmarking.md) and [Benchmark Results](benchmarks/index.md) for reproducible performance and quality methodology.
 - Open [CI Reports](reports.md) to inspect published build artifacts and quality metrics.
 - See the historical paper: [*Lemmatizer for Document Information Retrieval Systems in JAVA*](https://www.researchgate.net/publication/221512865_Lemmatizer_for_Document_Information_Retrieval_Systems_in_JAVA).

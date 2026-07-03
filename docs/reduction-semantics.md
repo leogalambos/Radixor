@@ -103,6 +103,24 @@ This turns reduction into a canonicalization process:
 
 That is how Radixor eliminates duplicated equivalent subtrees.
 
+## Uniform-subtree contraction
+
+Radixor performs one additional internal reduction before each public reduction mode is applied.
+When all reachable entries below a subtree have the same preferred patch command, the subtree is
+contracted into an accepting leaf for that command.
+
+This optimization is deliberately narrower than the public reduction modes:
+
+- it is based on preferred `get()` behavior,
+- it does not depend on child edge shape once the preferred command is uniform,
+- it removes lookup depth that cannot affect the selected command,
+- it preserves the standard single-result stemming path used by `StemmerPatchTrieLoader.loadCompiled(...)`.
+
+The effect is especially visible in large dictionary tries with many inflected forms that map to
+the same command class, such as no-op preservation or common suffix deletion. Runtime lookup can
+return the accepting leaf as soon as it is reached instead of traversing the remaining characters
+only to discover the same command deeper in the trie.
+
 ## Count aggregation and compiled state
 
 When multiple original build-time subtrees collapse into one canonical reduced node, local counts may be aggregated.

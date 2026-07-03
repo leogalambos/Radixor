@@ -42,10 +42,13 @@ import java.util.Objects;
  * @param reductionMode                 reduction mode
  * @param dominantWinnerMinPercent      minimum dominant winner percentage
  * @param dominantWinnerOverSecondRatio minimum winner-over-second ratio
+ * @param contractUniformSubtrees       whether compilation may contract a subtree
+ *                                      whose reachable terminal values all contain
+ *                                      the same single value
  */
 @SuppressWarnings("PMD.LongVariable")
 public record ReductionSettings(ReductionMode reductionMode, int dominantWinnerMinPercent,
-        int dominantWinnerOverSecondRatio) {
+        int dominantWinnerOverSecondRatio, boolean contractUniformSubtrees) {
 
     /**
      * Default minimum dominant winner percentage.
@@ -65,12 +68,14 @@ public record ReductionSettings(ReductionMode reductionMode, int dominantWinnerM
      *                                      the inclusive range {@code 1..100}
      * @param dominantWinnerOverSecondRatio minimum winner-over-second ratio, must
      *                                      be at least {@code 1}
+     * @param contractUniformSubtrees       whether uniform subtrees may be
+     *                                      contracted into accepting leaves
      * @throws NullPointerException     if {@code reductionMode} is {@code null}
      * @throws IllegalArgumentException if any numeric value is outside the valid
      *                                  range
      */
     public ReductionSettings(final ReductionMode reductionMode, final int dominantWinnerMinPercent,
-            final int dominantWinnerOverSecondRatio) {
+            final int dominantWinnerOverSecondRatio, final boolean contractUniformSubtrees) {
         this.reductionMode = Objects.requireNonNull(reductionMode, "reductionMode");
         if (dominantWinnerMinPercent < 1 || dominantWinnerMinPercent > 100) {
             throw new IllegalArgumentException("dominantWinnerMinPercent must be in range 1..100.");
@@ -80,6 +85,19 @@ public record ReductionSettings(ReductionMode reductionMode, int dominantWinnerM
         }
         this.dominantWinnerMinPercent = dominantWinnerMinPercent;
         this.dominantWinnerOverSecondRatio = dominantWinnerOverSecondRatio;
+        this.contractUniformSubtrees = contractUniformSubtrees;
+    }
+
+    /**
+     * Creates a new instance without uniform-subtree contraction.
+     *
+     * @param reductionMode                 reduction mode
+     * @param dominantWinnerMinPercent      minimum dominant winner percentage
+     * @param dominantWinnerOverSecondRatio minimum winner-over-second ratio
+     */
+    public ReductionSettings(final ReductionMode reductionMode, final int dominantWinnerMinPercent,
+            final int dominantWinnerOverSecondRatio) {
+        this(reductionMode, dominantWinnerMinPercent, dominantWinnerOverSecondRatio, false);
     }
 
     /**
@@ -92,5 +110,24 @@ public record ReductionSettings(ReductionMode reductionMode, int dominantWinnerM
     public static ReductionSettings withDefaults(final ReductionMode reductionMode) {
         return new ReductionSettings(reductionMode, DEFAULT_DOMINANT_WINNER_MIN_PERCENT,
                 DEFAULT_DOMINANT_WINNER_OVER_SECOND_RATIO);
+    }
+
+    /**
+     * Returns settings that run uniform-subtree contraction before the configured
+     * subtree-merging mode.
+     *
+     * <p>
+     * This is intended for Radixor patch-command tries, where a contracted accepting
+     * leaf can safely represent a subtree whose reachable entries all use the same
+     * patch command.
+     * </p>
+     *
+     * @param settings base settings
+     * @return equivalent settings with uniform-subtree contraction enabled
+     */
+    /* default */ static ReductionSettings withUniformSubtreeContraction(final ReductionSettings settings) {
+        Objects.requireNonNull(settings, "settings");
+        return new ReductionSettings(settings.reductionMode(), settings.dominantWinnerMinPercent(),
+                settings.dominantWinnerOverSecondRatio(), true);
     }
 }

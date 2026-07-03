@@ -100,6 +100,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 @Tag("slow")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @DisplayName("Compile integration")
+@SuppressWarnings("deprecation")
 final class CompileIntegrationTest {
 
     /**

@@ -4,11 +4,12 @@ This document explains how to acquire a compiled Radixor stemmer in Java.
 
 ## Load a bundled language dictionary
 
-Bundled language resources are simple to use and compile directly into a `FrequencyTrie<String>` during loading.
+Bundled language resources are simple to use and compile directly into a `FrequencyTrie<CompiledPatchCommand>` during loading.
 
 ```java
 import java.io.IOException;
 
+import org.egothor.stemmer.CompiledPatchCommand;
 import org.egothor.stemmer.FrequencyTrie;
 import org.egothor.stemmer.ReductionMode;
 import org.egothor.stemmer.StemmerPatchTrieLoader;
@@ -20,7 +21,7 @@ public final class BundledLanguageExample {
     }
 
     public static void main(final String[] arguments) throws IOException {
-        final FrequencyTrie<String> trie = StemmerPatchTrieLoader.load(
+        final FrequencyTrie<CompiledPatchCommand> trie = StemmerPatchTrieLoader.loadCompiled(
                 StemmerPatchTrieLoader.Language.US_UK,
                 true,
                 ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS);
@@ -30,6 +31,11 @@ public final class BundledLanguageExample {
 
 The `storeOriginal` flag controls whether the canonical stem is inserted as a no-op patch entry for the stem itself.
 
+Bundled `loadCompiled(...)` entry points build the runtime trie with the same contracted
+representation used by the published benchmarks. During compilation, uniform preferred-command
+subtrees are collapsed into accepting leaves, so lookup can stop before consuming the entire input
+when the remaining characters cannot change the selected patch command.
+
 ## Load a textual dictionary
 
 Loading from a dictionary file follows the same preparation model as bundled resources, but the source comes from your own file or path. The input may be plain UTF-8 text or GZip-compressed UTF-8 text; the loader detects GZip data from the stream header. The textual format is tab-separated values, meaning that columns are separated by the tab character. Each non-empty logical line starts with the stem column and may contain zero or more variant columns. Input case normalization is controlled by `CaseProcessingMode` (default: `LOWERCASE_WITH_LOCALE_ROOT`), trailing remarks introduced by `#` or `//` are ignored, and dictionary items containing embedded whitespace are currently ignored with warning-level diagnostics.
@@ -38,6 +44,7 @@ Loading from a dictionary file follows the same preparation model as bundled res
 import java.io.IOException;
 import java.nio.file.Path;
 
+import org.egothor.stemmer.CompiledPatchCommand;
 import org.egothor.stemmer.FrequencyTrie;
 import org.egothor.stemmer.ReductionMode;
 import org.egothor.stemmer.ReductionSettings;
@@ -50,7 +57,7 @@ public final class LoadTextDictionaryExample {
     }
 
     public static void main(final String[] arguments) throws IOException {
-        final FrequencyTrie<String> trie = StemmerPatchTrieLoader.load(
+        final FrequencyTrie<CompiledPatchCommand> trie = StemmerPatchTrieLoader.loadCompiled(
                 Path.of("data", "stemmer.tsv"),
                 true,
                 ReductionSettings.withDefaults(
@@ -59,7 +66,12 @@ public final class LoadTextDictionaryExample {
 }
 ```
 
-Additional `StemmerPatchTrieLoader.load(...)` overloads let callers provide explicit `WordTraversalDirection`, `CaseProcessingMode`, `DiacriticProcessingMode`, or a complete `TrieMetadata` instance. Use those overloads when a custom dictionary must be compiled with forward traversal for right-to-left languages, case-sensitive keys, or diacritic stripping.
+Additional `StemmerPatchTrieLoader.loadCompiled(...)` overloads let callers provide explicit `WordTraversalDirection`, `CaseProcessingMode`, `DiacriticProcessingMode`, or a complete `TrieMetadata` instance. Use those overloads when a custom dictionary must be compiled with forward traversal for right-to-left languages, case-sensitive keys, or diacritic stripping.
+
+When `ReductionSettings` are supplied through these compiled loader APIs, uniform-subtree
+contraction is still enabled as an internal pre-reduction step. The public `ReductionMode` remains
+the semantic policy for subtree equivalence after that contraction has removed regions whose
+preferred command is already uniform.
 
 ## Load a compiled binary artifact
 
@@ -69,6 +81,7 @@ Binary loading is typically the preferred runtime path because it avoids reparsi
 import java.io.IOException;
 import java.nio.file.Path;
 
+import org.egothor.stemmer.CompiledPatchCommand;
 import org.egothor.stemmer.FrequencyTrie;
 import org.egothor.stemmer.StemmerPatchTrieLoader;
 
@@ -79,7 +92,7 @@ public final class LoadBinaryExample {
     }
 
     public static void main(final String[] arguments) throws IOException {
-        final FrequencyTrie<String> trie = StemmerPatchTrieLoader.loadBinary(
+        final FrequencyTrie<CompiledPatchCommand> trie = StemmerPatchTrieLoader.loadBinaryCompiled(
                 Path.of("stemmers", "english.radixor.gz"));
     }
 }
@@ -96,6 +109,7 @@ at load time. This does not change persisted metadata, only the materialized in-
 import java.io.IOException;
 import java.nio.file.Path;
 
+import org.egothor.stemmer.CompiledPatchCommand;
 import org.egothor.stemmer.FrequencyTrie;
 import org.egothor.stemmer.StemmerPatchTrieLoader;
 
@@ -106,14 +120,14 @@ public final class LoadBinaryWithDenseLookupExample {
     }
 
     public static void main(final String[] arguments) throws IOException {
-        final FrequencyTrie<String> balanced = StemmerPatchTrieLoader.loadBinary(
+        final FrequencyTrie<CompiledPatchCommand> balanced = StemmerPatchTrieLoader.loadBinaryCompiled(
                 Path.of("stemmers", "english.radixor.gz"));
 
-        final FrequencyTrie<String> fast = StemmerPatchTrieLoader.loadBinary(
+        final FrequencyTrie<CompiledPatchCommand> fast = StemmerPatchTrieLoader.loadBinaryCompiled(
                 Path.of("stemmers", "english.radixor.gz"),
                 1024);
 
-        final FrequencyTrie<String> compact = StemmerPatchTrieLoader.loadBinary(
+        final FrequencyTrie<CompiledPatchCommand> compact = StemmerPatchTrieLoader.loadBinaryCompiled(
                 Path.of("stemmers", "english.radixor.gz"),
                 0);
     }

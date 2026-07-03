@@ -7,13 +7,43 @@ def snowballDistributionDirectoryName = "libstemmer_java-${snowballVersion}"
 def snowballRootRelativePath = 'third-party/snowball'
 def snowballSourceRelativePath = "${snowballRootRelativePath}/source"
 def snowballJavaSourceRelativePath = "${snowballSourceRelativePath}/${snowballDistributionDirectoryName}/java"
+def snowballGeneratedSourceRelativePath = 'generated/sources/snowball'
 def snowballDownloadUrl = "https://snowballstem.org/dist/${snowballArchiveName}"
 def snowballDownloadFile = layout.buildDirectory.file("${snowballRootRelativePath}/${snowballArchiveName}")
 def snowballExtractDirectory = layout.buildDirectory.dir(snowballSourceRelativePath)
 def snowballJavaSourceDirectory = layout.buildDirectory.dir(snowballJavaSourceRelativePath)
+def snowballGeneratedSourceDirectory = layout.buildDirectory.dir(snowballGeneratedSourceRelativePath)
 def snowballJavaSourceClasspathPath = provider {
     project.relativePath(snowballJavaSourceDirectory.get().asFile)
 }
+def snowballGeneratedSourceClasspathPath = provider {
+    project.relativePath(snowballGeneratedSourceDirectory.get().asFile)
+}
+def transformSnowballSourceText = { final String sourceText ->
+    String transformedText = sourceText
+
+    transformedText = transformedText.replaceAll(/(?m)^\s*package\s+org\.tartarus\.snowball\.ext\s*;/,
+            'package org.egothor.stemmer.benchmark.snowball.ext;')
+    transformedText = transformedText.replaceAll(/(?m)^\s*package\s+org\.tartarus\.snowball\s*;/,
+            'package org.egothor.stemmer.benchmark.snowball;')
+    transformedText = transformedText.replace('org.tartarus.snowball.', 'org.egothor.stemmer.benchmark.snowball.')
+
+    return transformedText
+}
+def copySnowballSourcesWithPackageIsolation = { final File sourceDirectory, final File targetDirectory ->
+    final FileTree sourceFiles = fileTree(sourceDirectory).matching { include '**/*.java' }
+    if (targetDirectory.exists()) {
+        targetDirectory.deleteDir()
+    }
+
+    for (File sourceFile : sourceFiles.files) {
+        final String relativePath = sourceDirectory.toPath().relativize(sourceFile.toPath()).toString()
+        final File outputFile = new File(targetDirectory, relativePath)
+        outputFile.parentFile.mkdirs()
+        outputFile.text = transformSnowballSourceText(sourceFile.getText('UTF-8'))
+    }
+}
+
 def snowballEclipseClasspathAttributes = [
         gradle_scope        : 'jmh',
         gradle_used_by_scope: 'jmh',
@@ -53,16 +83,33 @@ tasks.register('extractSnowballJava', Copy) {
     into(snowballExtractDirectory)
 }
 
+tasks.register('generateIsolatedSnowballSources') {
+    group = 'build setup'
+    description = 'Copies Snowball source to benchmark-only package-isolated package paths.'
+
+    dependsOn(tasks.named('extractSnowballJava'))
+
+    inputs.dir(snowballJavaSourceDirectory)
+    outputs.dir(snowballGeneratedSourceDirectory)
+
+    doLast {
+        copySnowballSourcesWithPackageIsolation(
+                snowballJavaSourceDirectory.get().asFile,
+                snowballGeneratedSourceDirectory.get().asFile
+        )
+    }
+}
+
 sourceSets {
     jmh {
         java {
-            srcDir(snowballJavaSourceDirectory)
+            srcDir(snowballGeneratedSourceDirectory)
         }
     }
 }
 
 tasks.named('compileJmhJava') {
-    dependsOn(tasks.named('extractSnowballJava'))
+    dependsOn(tasks.named('generateIsolatedSnowballSources'))
 }
 
 eclipse {
@@ -70,17 +117,19 @@ eclipse {
         file {
             whenMerged { classpath ->
                 String generatedSnowballPath = snowballJavaSourceClasspathPath.get()
+                String generatedIsolatedSnowballPath = snowballGeneratedSourceClasspathPath.get()
                 String modelSnowballPath = snowballJavaSourceRelativePath
 
                 classpath.entries.removeAll { entry ->
                     entry.hasProperty('path') && (
                             entry.path == generatedSnowballPath ||
+                            entry.path == generatedIsolatedSnowballPath ||
                             entry.path == modelSnowballPath ||
                             isAbsoluteClasspathPath(entry.path)
                     )
                 }
 
-                SourceFolder snowballEntry = new SourceFolder(generatedSnowballPath, null)
+                SourceFolder snowballEntry = new SourceFolder(generatedIsolatedSnowballPath, null)
                 snowballEntry.output = 'bin/jmh'
                 snowballEclipseClasspathAttributes.each { String name, String value ->
                     snowballEntry.entryAttributes[name] = value

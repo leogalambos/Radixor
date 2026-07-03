@@ -50,6 +50,7 @@ import org.junit.jupiter.api.Tag;
 @Tag("property")
 @Tag("patch")
 @Tag("stemmer")
+@SuppressWarnings("deprecation")
 class PatchCommandEncoderProperties extends PropertyBasedTestSupport {
 
     /**

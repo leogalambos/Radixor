@@ -24,6 +24,8 @@ This is why Radixor can generalize beyond explicitly listed forms and why compil
 
 The programmatic API is easier to understand when split by developer task:
 
+- [Fast Track](fast-track.md) gives the shortest dependency-to-first-stem path for a new Java project.
+- [Integration Deep Dive](integration-deep-dive.md) explains production integration, deployment artifacts, search-pipeline usage, and operational decisions.
 - [Loading and Building Stemmers](programmatic-loading-and-building.md) explains how to acquire a compiled stemmer from bundled resources, textual dictionaries, binary artifacts, or direct builder usage.
 - [Lookup Edge Optimization](lookup-edge-optimization.md) explains dense child lookup tuning and the speed/memory trade-off when materializing compiled tries.
 - [Querying and Ambiguity Handling](programmatic-querying-and-ambiguity.md) explains `get(...)`, `getAll(...)`, `getEntries(...)`, patch application, and the practical meaning of reduction modes.
@@ -35,7 +37,8 @@ The main types involved in programmatic usage are:
 
 - `FrequencyTrie.Builder<V>` for mutable construction and extension,
 - `FrequencyTrie<V>` for the compiled read-only trie,
-- `PatchCommandEncoder` for creating and applying patch commands,
+- `PatchCommandEncoder` for creating serialized patch commands,
+- `CompiledPatchCommand` for repeated runtime patch application,
 - `StemmerPatchTrieLoader` for loading bundled or textual dictionaries,
 - `StemmerPatchTrieBinaryIO` for reading and writing compressed binary artifacts,
 - `FrequencyTrieBuilders` for reconstructing a mutable builder from a compiled trie,
@@ -63,9 +66,11 @@ The core module is standalone and can be consumed directly as a normal Java modu
 
 For most developers, the best order is:
 
-1. [Loading and Building Stemmers](programmatic-loading-and-building.md)
-2. [Querying and Ambiguity Handling](programmatic-querying-and-ambiguity.md)
-3. [Extending and Persisting Compiled Tries](programmatic-extending-and-persistence.md)
+1. [Fast Track](fast-track.md)
+2. [Integration Deep Dive](integration-deep-dive.md)
+3. [Loading and Building Stemmers](programmatic-loading-and-building.md)
+4. [Querying and Ambiguity Handling](programmatic-querying-and-ambiguity.md)
+5. [Extending and Persisting Compiled Tries](programmatic-extending-and-persistence.md)
 
 ## Next steps
 

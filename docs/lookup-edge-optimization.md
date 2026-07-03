@@ -6,7 +6,10 @@ Compiled trie nodes (`CompiledNode`) use three lookup strategies when resolving 
 2. linear scan for very small child counts,
 3. binary search over sorted edge labels.
 
-This page explains the dense path, what `maxExpandedIndex` controls, and how to tune it.
+This page explains the dense path, what `maxExpandedIndex` controls, and how to tune it. These
+edge lookup strategies operate after trie reduction and uniform-subtree contraction. If lookup
+reaches an accepting contracted leaf, no child edge search is needed for the remaining input
+characters.
 
 ## Runtime model of one node
 
@@ -75,7 +78,7 @@ The value never changes lookup semantics. It only changes the in-memory structur
 This threshold is **not** stored in `TrieMetadata`.
 
 - The binary format stores only trie payload and semantic metadata (`reduction`, `traversal`,
-  case/diacritic settings, and stream version).
+  case/diacritic settings, contraction settings, and stream version).
 - `maxExpandedIndex` is chosen when materializing nodes in memory.
 - You can therefore keep one persisted artifact and load it with different in-memory
   trade-offs depending on deployment constraints.
@@ -135,15 +138,17 @@ At artifact load time, you can tune the same trade-off independently of persiste
 ```java
 import java.nio.file.Path;
 
+import org.egothor.stemmer.CompiledPatchCommand;
+import org.egothor.stemmer.FrequencyTrie;
 import org.egothor.stemmer.StemmerPatchTrieLoader;
 
-var defaultLookup = StemmerPatchTrieLoader.loadBinary(
+final FrequencyTrie<CompiledPatchCommand> defaultLookup = StemmerPatchTrieLoader.loadBinaryCompiled(
         Path.of("stemmers", "english.radixor.gz"));
 
-var fastLookup = StemmerPatchTrieLoader.loadBinary(
+final FrequencyTrie<CompiledPatchCommand> fastLookup = StemmerPatchTrieLoader.loadBinaryCompiled(
         Path.of("stemmers", "english.radixor.gz"), 1024);
 
-var compactLookup = StemmerPatchTrieLoader.loadBinary(
+final FrequencyTrie<CompiledPatchCommand> compactLookup = StemmerPatchTrieLoader.loadBinaryCompiled(
         Path.of("stemmers", "english.radixor.gz"), 0);
 ```
 

@@ -1,0 +1,219 @@
+import org.gradle.plugins.ide.eclipse.model.SourceFolder
+
+
+def paicehuskVersion = 'master'
+def paicehuskArchiveName = "paice-husk-stemmer-${paicehuskVersion}.zip"
+def paicehuskDownloadUrl = "https://github.com/Hopper262/paice-husk-stemmer/archive/refs/heads/${paicehuskVersion}.zip"
+def paicehuskDownloadFile = layout.buildDirectory.file("third-party/paicehusk/${paicehuskArchiveName}")
+def paicehuskExtractDirectory = layout.buildDirectory.dir('third-party/paicehusk/source')
+def paicehuskArchiveDirectory = paicehuskExtractDirectory.map { it.dir('paice-husk-stemmer-master') }
+def paicehuskJavaFile = paicehuskArchiveDirectory.map { it.file('paicehusk_java.java') }
+def paicehuskRulesFile = paicehuskArchiveDirectory.map { it.file('paicehusk_rules.txt') }
+
+def paicehuskGeneratedSourceDirectory = layout.buildDirectory.dir('generated/sources/paicehusk')
+def paicehuskGeneratedStemmerFile = paicehuskGeneratedSourceDirectory.map { it.file('org/egothor/stemmer/benchmark/PaiceHuskLancasterStemmer.java') }
+
+def paicehuskGeneratedSourcePath = provider {
+    project.relativePath(paicehuskGeneratedSourceDirectory.get().asFile)
+}
+def paicehuskSourceEclipseClasspathAttributes = [
+        gradle_scope        : 'jmh',
+        gradle_used_by_scope: 'jmh',
+        test                : 'true'
+]
+
+def paicehuskIsAbsolutePath = { String path ->
+    path.startsWith('/') || path ==~ /^[A-Za-z]:[\\\/].*/
+}
+
+def paicehuskGeneratedNotice = '''
+/**
+ * Generated at benchmark execution time from upstream
+ * https://github.com/Hopper262/paice-husk-stemmer .
+ *
+ * This source copy is compiled only for the JMH benchmark source set and is
+ * not committed as production code.
+ */
+'''
+
+def escapeForJava = { final String text ->
+    return text.replace('\\\\', '\\\\\\\\')
+            .replace('\"', '\\\"')
+}
+
+def toRuleLines = { final File rulesFile ->
+    final List<String> lines = rulesFile.readLines('UTF-8')
+    final StringBuilder ruleLines = new StringBuilder()
+    for (int index = 0; index < lines.size(); index++) {
+        final String line = lines.get(index)
+        ruleLines.append('            "')
+        ruleLines.append(escapeForJava(line))
+        ruleLines.append('"')
+        if (index < lines.size() - 1) {
+            ruleLines.append(',')
+        }
+        ruleLines.append('\n')
+    }
+    return ruleLines.toString()
+}
+
+def paicehuskEngineInsertion = { final String ruleLines ->
+    return """
+
+    public static final String[] RULE_LINES = {
+${ruleLines}
+    };
+
+    private static final java.util.HashMap RULES = createRulesFromEmbeddedRules();
+
+    /**
+     * Creates benchmark stemmer instance.
+     */
+    public PaiceHuskLancasterStemmer() {
+    }
+
+    /**
+     * Applies Paice/Husk stemming to one token.
+     *
+     * @param token input token
+     * @return stemmed token
+     */
+    public String stem(final String token) {
+        if (token == null) {
+            return null;
+        }
+        return stemWord(token, RULES, null);
+    }
+
+    /**
+     * Loads bundled rule lines directly from the generated benchmark source.
+     *
+     * @return initialized rule map
+     */
+    private static java.util.HashMap createRulesFromEmbeddedRules() {
+        try {
+            final java.io.File ruleFile = java.io.File.createTempFile("paicehusk-rules", ".txt");
+            ruleFile.deleteOnExit();
+            try (java.io.PrintWriter writer = new java.io.PrintWriter(new java.io.FileWriter(ruleFile))) {
+                for (String line : RULE_LINES) {
+                    writer.println(line);
+                }
+            }
+            return loadRules(ruleFile.getAbsolutePath());
+        } catch (Exception exception) {
+            throw new IllegalStateException("Unable to initialize benchmark Paice/Husk rules.", exception);
+        }
+    }
+"""
+}
+
+def transformPaiceHuskSource = { final File sourceFile, final File rulesFile, final File targetFile ->
+    if (!sourceFile.exists()) {
+        throw new GradleException("Paice/Husk Java source was not available at ${sourceFile}.")
+    }
+    if (!rulesFile.exists()) {
+        throw new GradleException("Paice/Husk rule file was not available at ${rulesFile}.")
+    }
+
+    final String sourceText = sourceFile.getText('UTF-8')
+    String transformedText = sourceText
+
+    transformedText = 'package org.egothor.stemmer.benchmark;' + '\n\n' + transformedText
+    transformedText = transformedText.replaceFirst(/(?m)^\s*class\s+PaiceHusk\s*\{/, 'public final class PaiceHuskLancasterStemmer {')
+
+    final int packageEnd = transformedText.indexOf('\n', transformedText.indexOf('package org.egothor.stemmer.benchmark;'))
+    if (packageEnd >= 0) {
+        transformedText = transformedText.substring(0, packageEnd + 1) + '\n' + paicehuskGeneratedNotice + transformedText.substring(packageEnd + 1)
+    }
+
+    final String marker = '\n} // end class PaiceHusk'
+    final int markerIndex = transformedText.lastIndexOf(marker)
+    if (markerIndex < 0) {
+        throw new GradleException("Unexpected Paice/Husk source structure at ${sourceFile}.")
+    }
+    final String replacement = paicehuskEngineInsertion(toRuleLines(rulesFile))
+    transformedText = transformedText.substring(0, markerIndex) + '\n' + replacement + '\n}' 
+
+    targetFile.parentFile.mkdirs()
+    targetFile.text = transformedText
+}
+
+tasks.register('downloadPaiceHuskStemmer') {
+    group = 'build setup'
+    description = 'Downloads the upstream Paice/Husk benchmark source for dynamic extraction.'
+
+    outputs.file(paicehuskDownloadFile)
+
+    doLast {
+        final File targetFile = paicehuskDownloadFile.get().asFile
+        targetFile.parentFile.mkdirs()
+
+        if (!targetFile.exists()) {
+            new URL(paicehuskDownloadUrl).withInputStream { inputStream ->
+                targetFile.withOutputStream { outputStream ->
+                    outputStream << inputStream
+                }
+            }
+        }
+    }
+}
+
+tasks.register('extractPaiceHuskStemmer', Copy) {
+    group = 'build setup'
+    description = 'Extracts the upstream Paice/Husk benchmark archive.'
+
+    dependsOn(tasks.named('downloadPaiceHuskStemmer'))
+
+    from(zipTree(paicehuskDownloadFile))
+    into(paicehuskExtractDirectory)
+}
+
+tasks.register('generatePaiceHuskLancasterStemmer') {
+    group = 'build setup'
+    description = 'Generates PaiceHuskLancasterStemmer into a benchmark-only generated source directory.'
+
+    dependsOn(tasks.named('extractPaiceHuskStemmer'))
+
+    inputs.files(paicehuskJavaFile, paicehuskRulesFile)
+    outputs.file(paicehuskGeneratedStemmerFile)
+
+    doLast {
+        transformPaiceHuskSource(paicehuskJavaFile.get().asFile, paicehuskRulesFile.get().asFile, paicehuskGeneratedStemmerFile.get().asFile)
+    }
+}
+
+sourceSets {
+    jmh {
+        java {
+            srcDir(paicehuskGeneratedSourceDirectory)
+        }
+    }
+}
+
+tasks.named('compileJmhJava') {
+    dependsOn(tasks.named('generatePaiceHuskLancasterStemmer'))
+}
+
+eclipse {
+    classpath {
+        file {
+            whenMerged { classpath ->
+                String generatedPath = paicehuskGeneratedSourcePath.get()
+
+                classpath.entries.removeAll { entry ->
+                    entry.hasProperty('path') && (
+                            entry.path == generatedPath ||
+                            paicehuskIsAbsolutePath(entry.path)
+                    )
+                }
+
+                SourceFolder paicehuskEntry = new SourceFolder(generatedPath, null)
+                paicehuskEntry.output = 'bin/jmh'
+                paicehuskSourceEclipseClasspathAttributes.each { String name, String value ->
+                    paicehuskEntry.entryAttributes[name] = value
+                }
+                classpath.entries.add(paicehuskEntry)
+            }
+        }
+    }
+}

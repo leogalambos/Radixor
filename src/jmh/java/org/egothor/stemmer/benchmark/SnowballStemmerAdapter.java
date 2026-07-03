@@ -32,7 +32,7 @@ package org.egothor.stemmer.benchmark;
 
 import java.util.Objects;
 
-import org.tartarus.snowball.SnowballStemmer;
+import org.egothor.stemmer.benchmark.snowball.SnowballStemmer;
 
 /**
  * Small adapter around a Snowball stemmer instance used by benchmarks.

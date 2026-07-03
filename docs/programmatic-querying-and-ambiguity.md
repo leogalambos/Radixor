@@ -10,7 +10,7 @@ This document explains how a compiled Radixor trie is queried and how ambiguity 
 
 ```java
 final String word = "running";
-final String patch = trie.get(word);
+final CompiledPatchCommand patch = trie.get(word);
 ```
 
 ### `getAll(...)`: ordered local values
@@ -18,7 +18,7 @@ final String patch = trie.get(word);
 `FrequencyTrie.getAll(String)` returns all values stored at the addressed node, ordered by descending frequency using the same deterministic tie-breaking rules. The returned array is a defensive copy. If the key is missing or has no local values, an empty array is returned.
 
 ```java
-final String[] patches = trie.getAll("axes");
+final CompiledPatchCommand[] patches = trie.getAll("axes");
 ```
 
 ### `getEntries(...)`: values with counts
@@ -28,9 +28,10 @@ final String[] patches = trie.getAll("axes");
 ```java
 import java.util.List;
 
+import org.egothor.stemmer.CompiledPatchCommand;
 import org.egothor.stemmer.ValueCount;
 
-final List<ValueCount<String>> entries = trie.getEntries("axes");
+final List<ValueCount<CompiledPatchCommand>> entries = trie.getEntries("axes");
 ```
 
 ### Visitor lookup for hot paths
@@ -55,31 +56,29 @@ trie.getAllNormalized(token, 0, token.length, (patch, count, rank) -> {
 
 `getAllNormalized(...)` bypasses `caseProcessingMode` and `diacriticProcessingMode`; callers are responsible for supplying canonical input. `maxResults == 0` visits nothing, negative values are rejected, and a sink returning `false` stops iteration after the current callback.
 
-## Apply patch commands
+## Apply compiled patch commands
 
-A patch command is not the final stem. It must be applied to the original input token. `PatchCommandEncoder.apply(source, patchCommand)` performs that transformation directly on the serialized command format. If the source is `null`, the method returns `null`. If the patch is `null`, empty, or malformed in compatibility-relevant ways, the original source word is preserved. Equal source and target words are represented by the canonical no-op patch.
+A patch command is not the final stem. It must be applied to the original input token. Runtime code should use `CompiledPatchCommand`, which parses the stored patch-command representation once during setup and then applies the concrete immutable command repeatedly.
 
 ```java
-import org.egothor.stemmer.PatchCommandEncoder;
+import org.egothor.stemmer.CompiledPatchCommand;
 
 final String word = "running";
-final String patch = trie.get(word);
-final String stem = PatchCommandEncoder.apply(word, patch);
+final CompiledPatchCommand patch = trie.get(word);
+final String stem = patch == null ? word : patch.apply(word);
 ```
 
 Hot paths can apply a patch into caller-owned character storage:
 
 ```java
 final char[] output = new char[32];
-final int produced = PatchCommandEncoder.applyTo(
+final int produced = patch.applyTo(
         word,
-        patch,
-        trie.traversalDirection(),
         output,
         0,
         output.length);
 
-if (produced != PatchCommandEncoder.APPLY_INSUFFICIENT_CAPACITY) {
+if (produced != CompiledPatchCommand.APPLY_INSUFFICIENT_CAPACITY) {
     final String stem = new String(output, 0, produced);
 }
 ```
@@ -90,11 +89,13 @@ For multiple candidates:
 
 ```java
 final String word = "axes";
-for (final String patch : trie.getAll(word)) {
-    final String stem = PatchCommandEncoder.apply(word, patch);
+for (final CompiledPatchCommand patch : trie.getAll(word)) {
+    final String stem = patch.apply(word);
     System.out.println(word + " -> " + stem + " (" + patch + ")");
 }
 ```
+
+The historical `PatchCommandEncoder.apply(...)` API still exists for compatibility with code that directly handles serialized patch-command strings, but it is deprecated because it reparses the command on every call. See [Migration and Backward Compatibility](migration-and-backward-compatibility.md) for the old and new forms side by side.
 
 ## Understand reduction modes
 

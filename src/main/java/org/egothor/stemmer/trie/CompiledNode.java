@@ -94,6 +94,11 @@ public final class CompiledNode<V> {
     private final int[] orderedCounts;
 
     /**
+     * Whether this node accepts any remaining lookup input.
+     */
+    private final boolean acceptsRemainingInput;
+
+    /**
      * Creates one validated compiled node using {@link #DEFAULT_MAX_EXPANDED_INDEX}
      * for dense lookup sizing.
      *
@@ -120,6 +125,23 @@ public final class CompiledNode<V> {
      */
     public CompiledNode(final char[] edgeLabels, final CompiledNode<V>[] children, final V[] orderedValues,
             final int maxExpandedIndex, final int... orderedCounts) {
+        this(edgeLabels, children, orderedValues, false, maxExpandedIndex, orderedCounts);
+    }
+
+    /**
+     * Creates one validated compiled node.
+     *
+     * @param acceptsRemainingInput whether this node accepts any remaining lookup
+     *                              input
+     * @param maxExpandedIndex      upper bound for the dense lookup interval size
+     * @throws NullPointerException     if any array argument is {@code null}
+     * @throws IllegalArgumentException if the edge-related arrays or value-related
+     *                                  arrays do not have matching lengths, the
+     *                                  dense interval size is negative, or an
+     *                                  accepting node has children
+     */
+    public CompiledNode(final char[] edgeLabels, final CompiledNode<V>[] children, final V[] orderedValues,
+            final boolean acceptsRemainingInput, final int maxExpandedIndex, final int... orderedCounts) {
         Objects.requireNonNull(edgeLabels, "edgeLabels");
         Objects.requireNonNull(children, "children");
         Objects.requireNonNull(orderedValues, "orderedValues");
@@ -135,11 +157,18 @@ public final class CompiledNode<V> {
         if (orderedValues.length != orderedCounts.length) {
             throw new IllegalArgumentException("orderedValues and orderedCounts must have the same length.");
         }
+        if (acceptsRemainingInput && edgeLabels.length != 0) {
+            throw new IllegalArgumentException("Accepting nodes cannot have child edges.");
+        }
+        if (acceptsRemainingInput && orderedValues.length == 0) {
+            throw new IllegalArgumentException("Accepting nodes must store at least one value.");
+        }
 
         this.edgeLabels = edgeLabels;
         this.children = children;
         this.orderedValues = orderedValues;
         this.orderedCounts = orderedCounts;
+        this.acceptsRemainingInput = acceptsRemainingInput;
 
         if (edgeLabels.length == 0 || maxExpandedIndex == 0) {
             this.denseChildren = null;
@@ -269,6 +298,15 @@ public final class CompiledNode<V> {
     }
 
     /**
+     * Indicates whether this node accepts any remaining lookup input.
+     *
+     * @return {@code true} for a contracted accepting leaf
+     */
+    public boolean acceptsRemainingInput() {
+        return this.acceptsRemainingInput;
+    }
+
+    /**
      * Tests whether an edge label is present at this node.
      *
      * @param edge edge label
@@ -310,6 +348,7 @@ public final class CompiledNode<V> {
         hash = 31 * hash + Arrays.hashCode(this.orderedValues);
         hash = 31 * hash + Arrays.hashCode(this.orderedCounts);
         hash = 31 * hash + Objects.hash(this.denseEdgeMin);
+        hash = 31 * hash + Boolean.hashCode(this.acceptsRemainingInput);
         hash = 31 * hash + (hasDenseLookup() ? Arrays.hashCode(this.denseChildren) : 0);
         return hash;
     }
@@ -331,6 +370,7 @@ public final class CompiledNode<V> {
         return Arrays.equals(this.edgeLabels, other.edgeLabels) && Arrays.equals(this.children, other.children)
                 && Arrays.equals(this.orderedValues, other.orderedValues)
                 && Arrays.equals(this.orderedCounts, other.orderedCounts) && this.denseEdgeMin == other.denseEdgeMin
+                && this.acceptsRemainingInput == other.acceptsRemainingInput
                 && Arrays.equals(this.denseChildren, other.denseChildren);
     }
 
@@ -342,7 +382,8 @@ public final class CompiledNode<V> {
     @Override
     public String toString() {
         return "CompiledNode{" + "edgeCount=" + this.edgeLabels.length + ", orderedValueCount="
-                + this.orderedValues.length + ", denseTableLength=" + denseTableLength() + '}';
+                + this.orderedValues.length + ", acceptsRemainingInput=" + this.acceptsRemainingInput
+                + ", denseTableLength=" + denseTableLength() + '}';
     }
 
     /**

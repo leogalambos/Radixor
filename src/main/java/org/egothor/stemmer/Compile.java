@@ -147,6 +147,7 @@ public final class Compile {
      * @param arguments parsed command-line arguments
      * @throws IOException if compilation or output writing fails
      */
+    @SuppressWarnings("deprecation")
     private static void compile(final Arguments arguments) throws IOException {
         final ReductionSettings reductionSettings = new ReductionSettings(arguments.reductionMode(),
                 arguments.dominantWinnerMinPercent(), arguments.dominantWinnerOverSecondRatio());

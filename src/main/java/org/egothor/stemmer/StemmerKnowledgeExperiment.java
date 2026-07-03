@@ -349,6 +349,7 @@ public final class StemmerKnowledgeExperiment {
      * @param trie         compiled trie under test
      * @return immutable counts for this single input
      */
+    @SuppressWarnings("deprecation")
     private static EvaluationCounts evaluateInput(final String input, final String expectedStem,
             final FrequencyTrie<String> trie) {
         long getCorrect = 0L;

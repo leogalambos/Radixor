@@ -145,6 +145,14 @@ defensive fallback in case of future tag drift.
 
 All examples use Gradle with JUnit Platform integration:
 
+- Default fast test run:
+
+```
+./gradlew test
+```
+
+The default `test` task excludes `slow` tests. Supplying `-DincludeTags` or `-PincludeTags` still excludes `slow` unless the include expression contains `slow`; supplying an explicit exclude expression replaces the default. Long-running bundled-dictionary compilation and full-language loading checks therefore run only through an explicit tag expression such as `-DincludeTags=slow` or a dedicated profile such as `ciSlow`.
+
 - Only unit tests:
 
 ```
@@ -154,7 +162,7 @@ All examples use Gradle with JUnit Platform integration:
 - Integration tests only:
 
 ```
-./gradlew test -DincludeTags=integration
+./gradlew test -DincludeTags=integration -DexcludeTags=slow
 ```
 
 - Only trie subsystem tests:

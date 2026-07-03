@@ -30,7 +30,10 @@
  ******************************************************************************/
 package org.egothor.stemmer;
 
+import java.util.IdentityHashMap;
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -116,6 +119,63 @@ public final class FrequencyTrieBuilders {
     }
 
     /**
+     * Reconstructs a compiled trie with every stored value transformed to another
+     * value type.
+     *
+     * <p>
+     * The method preserves logical keys, local value counts, trie metadata, and the
+     * supplied reduction settings. It is intended for runtime specialization, such
+     * as replacing serialized patch-command strings with precompiled patch command
+     * objects without changing the persisted binary trie format.
+     * </p>
+     *
+     * @param source            source compiled trie
+     * @param arrayFactory      array factory for mapped values
+     * @param reductionSettings reduction settings for the mapped trie
+     * @param valueMapper       value mapping function
+     * @param <S>               source value type
+     * @param <T>               target value type
+     * @return compiled trie containing mapped values
+     * @throws NullPointerException if any argument is {@code null}
+     */
+    public static <S, T> FrequencyTrie<T> mapValues(final FrequencyTrie<S> source,
+            final IntFunction<T[]> arrayFactory, final ReductionSettings reductionSettings,
+            final Function<? super S, ? extends T> valueMapper) {
+        Objects.requireNonNull(source, "source");
+        Objects.requireNonNull(arrayFactory, "arrayFactory");
+        Objects.requireNonNull(reductionSettings, "reductionSettings");
+        Objects.requireNonNull(valueMapper, "valueMapper");
+
+        final Map<CompiledNode<S>, CompiledNode<T>> cache = new IdentityHashMap<>();
+        final CompiledNode<T> mappedRoot = mapCompiledNode(source.root(), arrayFactory, valueMapper, cache);
+        final TrieMetadata metadata = TrieMetadata.forCompilation(source.traversalDirection(), reductionSettings,
+                source.metadata().diacriticProcessingMode(), source.metadata().caseProcessingMode());
+
+        LOGGER.log(Level.FINE, "Mapped compiled trie values to a specialized value type.");
+        return FrequencyTrie.fromCompiled(arrayFactory, mappedRoot, metadata);
+    }
+
+    /**
+     * Reconstructs a compiled trie with every stored value transformed to another
+     * value type using default settings for the supplied reduction mode.
+     *
+     * @param source        source compiled trie
+     * @param arrayFactory  array factory for mapped values
+     * @param reductionMode reduction mode for the mapped trie
+     * @param valueMapper   value mapping function
+     * @param <S>           source value type
+     * @param <T>           target value type
+     * @return compiled trie containing mapped values
+     * @throws NullPointerException if any argument is {@code null}
+     */
+    public static <S, T> FrequencyTrie<T> mapValues(final FrequencyTrie<S> source,
+            final IntFunction<T[]> arrayFactory, final ReductionMode reductionMode,
+            final Function<? super S, ? extends T> valueMapper) {
+        Objects.requireNonNull(reductionMode, "reductionMode");
+        return mapValues(source, arrayFactory, ReductionSettings.withDefaults(reductionMode), valueMapper);
+    }
+
+    /**
      * Copies one compiled node and all reachable descendants into the target
      * builder.
      *
@@ -137,5 +197,44 @@ public final class FrequencyTrieBuilders {
             copyNode(node.children()[childIndex], keyBuilder, builder, traversalDirection);
             keyBuilder.setLength(keyBuilder.length() - 1);
         }
+    }
+
+    /**
+     * Maps one compiled node graph while preserving canonical sharing and accepting
+     * leaf semantics.
+     *
+     * @param node         source node
+     * @param arrayFactory target value array factory
+     * @param valueMapper  value mapper
+     * @param cache        identity cache for shared compiled nodes
+     * @param <S>          source value type
+     * @param <T>          target value type
+     * @return mapped compiled node
+     */
+    private static <S, T> CompiledNode<T> mapCompiledNode(final CompiledNode<S> node,
+            final IntFunction<T[]> arrayFactory, final Function<? super S, ? extends T> valueMapper,
+            final Map<CompiledNode<S>, CompiledNode<T>> cache) {
+        final CompiledNode<T> existing = cache.get(node);
+        if (existing != null) {
+            return existing;
+        }
+
+        final CompiledNode<S>[] sourceChildren = node.children();
+        @SuppressWarnings("unchecked")
+        final CompiledNode<T>[] mappedChildren = new CompiledNode[sourceChildren.length];
+        for (int childIndex = 0; childIndex < sourceChildren.length; childIndex++) {
+            mappedChildren[childIndex] = mapCompiledNode(sourceChildren[childIndex], arrayFactory, valueMapper, cache);
+        }
+
+        final S[] sourceValues = node.orderedValues();
+        final T[] mappedValues = arrayFactory.apply(sourceValues.length);
+        for (int valueIndex = 0; valueIndex < sourceValues.length; valueIndex++) {
+            mappedValues[valueIndex] = valueMapper.apply(sourceValues[valueIndex]);
+        }
+
+        final CompiledNode<T> mapped = new CompiledNode<>(node.edgeLabels().clone(), mappedChildren, mappedValues,
+                node.acceptsRemainingInput(), CompiledNode.DEFAULT_MAX_EXPANDED_INDEX, node.orderedCounts().clone());
+        cache.put(node, mapped);
+        return mapped;
     }
 }

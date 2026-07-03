@@ -89,7 +89,7 @@ import org.egothor.stemmer.trie.ReductionSignature;
  *
  * @param <V> value type
  */
-@SuppressWarnings("PMD.CyclomaticComplexity")
+@SuppressWarnings({ "PMD.CyclomaticComplexity", "PMD.CouplingBetweenObjects" })
 public final class FrequencyTrie<V> {
 
     /**
@@ -105,7 +105,7 @@ public final class FrequencyTrie<V> {
     /**
      * Version of the canonical fingerprint input format.
      */
-    private static final int FINGERPRINT_FORMAT_VERSION = 1;
+    private static final int FINGERPRINT_FORMAT_VERSION = 2;
 
     /**
      * Root node of the compiled read-only trie.
@@ -169,7 +169,7 @@ public final class FrequencyTrie<V> {
     /**
      * Binary format version.
      */
-    private static final int STREAM_VERSION = 5;
+    private static final int STREAM_VERSION = 6;
 
     /**
      * Version where traversal-direction ordinal is persisted.
@@ -185,6 +185,16 @@ public final class FrequencyTrie<V> {
      * Version where case-processing mode ordinal is persisted.
      */
     private static final int CASE_VERSION = 4;
+
+    /**
+     * Version where the persisted metadata switched to a text block.
+     */
+    private static final int TEXT_METADATA_VERSION = 5;
+
+    /**
+     * Version where contracted accepting nodes are persisted.
+     */
+    private static final int ACCEPTING_NODE_VERSION = 6;
 
     /**
      * Argument name for lookup keys.
@@ -261,6 +271,21 @@ public final class FrequencyTrie<V> {
     }
 
     /**
+     * Creates a trie from an already compiled root.
+     *
+     * @param arrayFactory array factory
+     * @param root         compiled root
+     * @param metadata     trie metadata
+     * @param <V>          value type
+     * @return trie instance
+     */
+    /* default */ static <V> FrequencyTrie<V> fromCompiled(final IntFunction<V[]> arrayFactory,
+            final CompiledNode<V> root,
+            final TrieMetadata metadata) {
+        return new FrequencyTrie<>(arrayFactory, root, metadata);
+    }
+
+    /**
      * Returns the most frequent value stored at the node addressed by the supplied
      * key.
      *
@@ -282,6 +307,63 @@ public final class FrequencyTrie<V> {
     public V get(final String key) {
         Objects.requireNonNull(key, ARG_KEY);
         final CompiledNode<V> node = findNode(normalizeLookupKey(key));
+        if (node == null) {
+            return null;
+        }
+        final V[] orderedValues = node.orderedValues();
+        if (orderedValues.length == 0) {
+            return null;
+        }
+        return orderedValues[0];
+    }
+
+    /**
+     * Returns the preferred value for an already-normalized key.
+     *
+     * <p>
+     * This method bypasses {@link TrieMetadata#caseProcessingMode()} and
+     * {@link TrieMetadata#diacriticProcessingMode()}. Callers must supply input
+     * normalized exactly as required by this trie's metadata. It is intended for
+     * hot paths where normalization is guaranteed by an upstream tokenizer or
+     * benchmark corpus and repeated lookup-time normalization would be redundant.
+     * </p>
+     *
+     * @param key already-normalized key to resolve
+     * @return most frequent value, or {@code null} if the key does not exist or no
+     *         value is stored at the addressed node
+     * @throws NullPointerException if {@code key} is {@code null}
+     */
+    public V getNormalized(final CharSequence key) {
+        Objects.requireNonNull(key, ARG_KEY);
+        final CompiledNode<V> node = findNode(key);
+        if (node == null) {
+            return null;
+        }
+        final V[] orderedValues = node.orderedValues();
+        if (orderedValues.length == 0) {
+            return null;
+        }
+        return orderedValues[0];
+    }
+
+    /**
+     * Returns the preferred value for an already-normalized {@link String} key.
+     *
+     * <p>
+     * This overload keeps high-volume string lookup on a monomorphic path and
+     * avoids the {@link CharSequence} dispatch used by the general overload.
+     * Callers must supply input normalized exactly as required by this trie's
+     * metadata.
+     * </p>
+     *
+     * @param key already-normalized key to resolve
+     * @return most frequent value, or {@code null} if the key does not exist or no
+     *         value is stored at the addressed node
+     * @throws NullPointerException if {@code key} is {@code null}
+     */
+    public V getNormalizedString(final String key) {
+        Objects.requireNonNull(key, ARG_KEY);
+        final CompiledNode<V> node = findNode(key);
         if (node == null) {
             return null;
         }
@@ -745,6 +827,7 @@ public final class FrequencyTrie<V> {
      */
     private static <V> void writeNode(final DataOutputStream dataOutput, final ValueStreamCodec<V> valueCodec,
             final CompiledNode<V> node, final Map<CompiledNode<V>, Integer> nodeIds) throws IOException {
+        dataOutput.writeBoolean(node.acceptsRemainingInput());
         dataOutput.writeInt(node.edgeLabels().length);
         for (int index = 0; index < node.edgeLabels().length; index++) {
             dataOutput.writeChar(node.edgeLabels()[index]);
@@ -777,6 +860,7 @@ public final class FrequencyTrie<V> {
         final V[] values = node.orderedValues();
         final int[] counts = node.orderedCounts();
 
+        updateInt(messageDigest, node.acceptsRemainingInput() ? 1 : 0);
         updateInt(messageDigest, edgeLabels.length);
         for (char edgeLabel : edgeLabels) {
             updateInt(messageDigest, edgeLabel);
@@ -863,7 +947,7 @@ public final class FrequencyTrie<V> {
             final TrieMetadata sourceMetadata = readMetadata(dataInput, version);
             final int effectiveMaxExpandedIndex = maxExpandedIndex >= 0 ? maxExpandedIndex : DEFAULT_MAX_EXPANDED_INDEX;
             final CompiledNode<V>[] nodes = readNodes(dataInput, arrayFactory, valueCodec, nodeCount,
-                    effectiveMaxExpandedIndex);
+                    effectiveMaxExpandedIndex, version);
             final CompiledNode<V> rootNode = nodes[rootNodeId];
 
             if (LOGGER.isLoggable(Level.FINE)) {
@@ -880,8 +964,8 @@ public final class FrequencyTrie<V> {
 
         private static TrieMetadata readMetadata(final DataInputStream dataInput, final int version)
                 throws IOException {
-            if (version == STREAM_VERSION) {
-                return readTextMetadata(dataInput);
+            if (version >= TEXT_METADATA_VERSION) {
+                return readTextMetadata(dataInput, version);
             }
 
             final WordTraversalDirection traversalDirection = readTraversalDirection(dataInput, version);
@@ -898,9 +982,10 @@ public final class FrequencyTrie<V> {
                     caseProcessingMode);
         }
 
-        private static TrieMetadata readTextMetadata(final DataInputStream dataInput) throws IOException {
+        private static TrieMetadata readTextMetadata(final DataInputStream dataInput, final int version)
+                throws IOException {
             try {
-                return TrieMetadata.fromTextBlock(STREAM_VERSION, dataInput.readUTF());
+                return TrieMetadata.fromTextBlock(version, dataInput.readUTF());
             } catch (IllegalArgumentException exception) {
                 throw new IOException("Invalid metadata block.", exception);
             }
@@ -936,14 +1021,19 @@ public final class FrequencyTrie<V> {
 
         private static <V> CompiledNode<V>[] readNodes(final DataInputStream dataInput,
                 final IntFunction<V[]> arrayFactory, final ValueStreamCodec<V> valueCodec, final int nodeCount,
-                final int maxExpandedIndex) throws IOException {
+                final int maxExpandedIndex, final int version) throws IOException {
             final char[][] edgeLabelsByNode = new char[nodeCount][];
             final int[][] childNodeIdsByNode = new int[nodeCount][];
             @SuppressWarnings("unchecked")
             final V[][] orderedValuesByNode = (V[][]) new Object[nodeCount][];
             final int[][] orderedCountsByNode = new int[nodeCount][];
+            final boolean[] acceptsRemainingInputByNode = new boolean[nodeCount];
 
             for (int nodeIndex = 0; nodeIndex < nodeCount; nodeIndex++) {
+                if (version >= ACCEPTING_NODE_VERSION) {
+                    acceptsRemainingInputByNode[nodeIndex] = dataInput.readBoolean();
+                }
+
                 final int edgeCount = dataInput.readInt();
                 if (edgeCount < 0) {
                     throw new IOException("Negative edge count at node " + nodeIndex + ": " + edgeCount);
@@ -962,6 +1052,12 @@ public final class FrequencyTrie<V> {
                 final int valueCount = dataInput.readInt();
                 if (valueCount < 0) {
                     throw new IOException("Negative value count at node " + nodeIndex + ": " + valueCount);
+                }
+                if (acceptsRemainingInputByNode[nodeIndex] && edgeCount != 0) {
+                    throw new IOException("Accepting node " + nodeIndex + " cannot have child edges.");
+                }
+                if (acceptsRemainingInputByNode[nodeIndex] && valueCount == 0) {
+                    throw new IOException("Accepting node " + nodeIndex + " must store at least one value.");
                 }
 
                 orderedValuesByNode[nodeIndex] = arrayFactory.apply(valueCount);
@@ -983,7 +1079,7 @@ public final class FrequencyTrie<V> {
 
             for (int nodeIndex = 0; nodeIndex < nodeCount; nodeIndex++) {
                 nodes[nodeIndex] = resolveNode(nodeIndex, edgeLabelsByNode, childNodeIdsByNode, orderedValuesByNode,
-                        orderedCountsByNode, nodes, inProgress, maxExpandedIndex);
+                        orderedCountsByNode, acceptsRemainingInputByNode, nodes, inProgress, maxExpandedIndex);
             }
 
             return nodes;
@@ -991,8 +1087,8 @@ public final class FrequencyTrie<V> {
 
         private static <V> CompiledNode<V> resolveNode(final int nodeIndex, final char[][] edgeLabelsByNode,
                 final int[][] childNodeIdsByNode, final V[][] orderedValuesByNode, final int[][] orderedCountsByNode,
-                final CompiledNode<V>[] nodes, final boolean[] inProgress, final int maxExpandedIndex)
-                throws IOException {
+                final boolean[] acceptsRemainingInputByNode, final CompiledNode<V>[] nodes,
+                final boolean[] inProgress, final int maxExpandedIndex) throws IOException {
             final CompiledNode<V> cachedNode = nodes[nodeIndex];
             if (cachedNode != null) {
                 return cachedNode;
@@ -1017,11 +1113,12 @@ public final class FrequencyTrie<V> {
                                 + ": " + childNodeId);
                     }
                     children[edgeIndex] = resolveNode(childNodeId, edgeLabelsByNode, childNodeIdsByNode,
-                            orderedValuesByNode, orderedCountsByNode, nodes, inProgress, maxExpandedIndex);
+                            orderedValuesByNode, orderedCountsByNode, acceptsRemainingInputByNode, nodes, inProgress,
+                            maxExpandedIndex);
                 }
 
                 final CompiledNode<V> node = new CompiledNode<>(edgeLabels, children, orderedValuesByNode[nodeIndex],
-                        maxExpandedIndex, orderedCountsByNode[nodeIndex]);
+                        acceptsRemainingInputByNode[nodeIndex], maxExpandedIndex, orderedCountsByNode[nodeIndex]);
                 nodes[nodeIndex] = node;
                 return node;
             } finally {
@@ -1047,7 +1144,30 @@ public final class FrequencyTrie<V> {
      * @return compiled node, or {@code null} if the path does not exist
      */
     private CompiledNode<V> findNode(final String key) {
-        return findNode((CharSequence) key);
+        CompiledNode<V> current = this.root;
+        if (this.lookupTraversalDirection == WordTraversalDirection.BACKWARD) {
+            for (int traversalOffset = key.length() - 1; traversalOffset >= 0; traversalOffset--) {
+                if (current.acceptsRemainingInput()) {
+                    return current;
+                }
+                current = current.findChild(key.charAt(traversalOffset));
+                if (current == null) {
+                    return null;
+                }
+            }
+            return current;
+        }
+
+        for (int traversalOffset = 0; traversalOffset < key.length(); traversalOffset++) {
+            if (current.acceptsRemainingInput()) {
+                return current;
+            }
+            current = current.findChild(key.charAt(traversalOffset));
+            if (current == null) {
+                return null;
+            }
+        }
+        return current;
     }
 
     /**
@@ -1060,6 +1180,9 @@ public final class FrequencyTrie<V> {
         CompiledNode<V> current = this.root;
         if (this.lookupTraversalDirection == WordTraversalDirection.BACKWARD) {
             for (int traversalOffset = key.length() - 1; traversalOffset >= 0; traversalOffset--) {
+                if (current.acceptsRemainingInput()) {
+                    return current;
+                }
                 current = current.findChild(key.charAt(traversalOffset));
                 if (current == null) {
                     return null;
@@ -1069,6 +1192,9 @@ public final class FrequencyTrie<V> {
         }
 
         for (int traversalOffset = 0; traversalOffset < key.length(); traversalOffset++) {
+            if (current.acceptsRemainingInput()) {
+                return current;
+            }
             current = current.findChild(key.charAt(traversalOffset));
             if (current == null) {
                 return null;
@@ -1089,6 +1215,9 @@ public final class FrequencyTrie<V> {
         CompiledNode<V> current = this.root;
         if (this.lookupTraversalDirection == WordTraversalDirection.BACKWARD) {
             for (int traversalOffset = offset + length - 1; traversalOffset >= offset; traversalOffset--) {
+                if (current.acceptsRemainingInput()) {
+                    return current;
+                }
                 current = current.findChild(key[traversalOffset]);
                 if (current == null) {
                     return null;
@@ -1099,6 +1228,9 @@ public final class FrequencyTrie<V> {
 
         final int endExclusive = offset + length;
         for (int traversalOffset = offset; traversalOffset < endExclusive; traversalOffset++) {
+            if (current.acceptsRemainingInput()) {
+                return current;
+            }
             current = current.findChild(key[traversalOffset]);
             if (current == null) {
                 return null;
@@ -1535,21 +1667,31 @@ public final class FrequencyTrie<V> {
          * @return canonical reduced node
          */
         private ReducedNode<V> reduce(final MutableNode<V> source, final ReductionContext<V> context) {
-            final Map<Character, ReducedNode<V>> reducedChildren = new LinkedHashMap<>();
+            Map<Character, ReducedNode<V>> reducedChildren = new LinkedHashMap<>();
 
             for (Map.Entry<Character, MutableNode<V>> childEntry : source.children().entrySet()) {
                 final ReducedNode<V> reducedChild = reduce(childEntry.getValue(), context);
                 reducedChildren.put(childEntry.getKey(), reducedChild);
             }
 
-            final Map<V, Integer> localCounts = copyCounts(source.valueCounts());
+            Map<V, Integer> localCounts = copyCounts(source.valueCounts());
+            boolean acceptsRemainingInput = false;
+            if (context.settings().contractUniformSubtrees()) {
+                final Map<V, Integer> contractedCounts = contractUniformSubtree(localCounts, reducedChildren);
+                if (!contractedCounts.isEmpty()) {
+                    localCounts = contractedCounts;
+                    reducedChildren = Collections.emptyMap();
+                    acceptsRemainingInput = true;
+                }
+            }
+
             final LocalValueSummary<V> localSummary = LocalValueSummary.of(localCounts, this.arrayFactory);
             final ReductionSignature<V> signature = ReductionSignature.create(localSummary, reducedChildren,
-                    context.settings());
+                    context.settings(), acceptsRemainingInput);
 
             ReducedNode<V> canonical = context.lookup(signature);
             if (canonical == null) {
-                canonical = new ReducedNode<>(signature, localCounts, reducedChildren);
+                canonical = new ReducedNode<>(signature, localCounts, reducedChildren, acceptsRemainingInput);
                 context.register(signature, canonical);
                 return canonical;
             }
@@ -1558,6 +1700,64 @@ public final class FrequencyTrie<V> {
             canonical.mergeChildren(reducedChildren);
 
             return canonical;
+        }
+
+        /**
+         * Returns aggregated local counts when the supplied internal subtree contains
+         * one uniform value, otherwise {@code null}.
+         *
+         * @param localCounts     local counts at the current node
+         * @param reducedChildren already reduced children
+         * @return single-value aggregate for a uniform non-leaf subtree, otherwise an
+         *         empty map
+         */
+        private Map<V, Integer> contractUniformSubtree(final Map<V, Integer> localCounts,
+                final Map<Character, ReducedNode<V>> reducedChildren) {
+            if (reducedChildren.isEmpty()) {
+                return Collections.emptyMap();
+            }
+
+            V uniformValue = null;
+            boolean valueSeen = false;
+
+            if (!localCounts.isEmpty()) {
+                if (localCounts.size() != SINGLE_VALUE_COUNT) {
+                    return Collections.emptyMap();
+                }
+                final Map.Entry<V, Integer> localEntry = localCounts.entrySet().iterator().next();
+                uniformValue = localEntry.getKey();
+                valueSeen = true;
+            }
+
+            for (ReducedNode<V> child : reducedChildren.values()) {
+                if (!isSingleValueLeaf(child)) {
+                    return Collections.emptyMap();
+                }
+                final Map.Entry<V, Integer> childEntry = child.localCounts().entrySet().iterator().next();
+                if (valueSeen && !Objects.equals(uniformValue, childEntry.getKey())) {
+                    return Collections.emptyMap();
+                }
+                uniformValue = childEntry.getKey();
+                valueSeen = true;
+            }
+
+            if (!valueSeen) {
+                return Collections.emptyMap();
+            }
+
+            final Map<V, Integer> contractedCounts = new LinkedHashMap<>(SINGLE_VALUE_COUNT);
+            contractedCounts.put(uniformValue, SINGLE_VALUE_COUNT);
+            return contractedCounts;
+        }
+
+        /**
+         * Returns whether the reduced node is a leaf with exactly one stored value.
+         *
+         * @param node node to inspect
+         * @return {@code true} when the node can participate in uniform contraction
+         */
+        private boolean isSingleValueLeaf(final ReducedNode<V> node) {
+            return node.children().isEmpty() && node.localCounts().size() == SINGLE_VALUE_COUNT;
         }
 
         /**
@@ -1592,7 +1792,7 @@ public final class FrequencyTrie<V> {
             }
 
             final CompiledNode<V> frozen = new CompiledNode<>(edges, childNodes, localSummary.orderedValues(),
-                    this.maxExpandedIndex, localSummary.orderedCounts());
+                    reducedNode.acceptsRemainingInput(), this.maxExpandedIndex, localSummary.orderedCounts());
             cache.put(reducedNode, frozen);
             return frozen;
         }

@@ -171,6 +171,11 @@ The short form `-h` is also supported.
 
 Reduction mode is not only a storage decision. It also influences what semantics are preserved when the mutable trie is compiled into its canonical read-only form.
 
+Before the selected public reduction mode is applied, compilation performs uniform-subtree
+contraction. If all reachable entries below a subtree select the same preferred patch command, the
+compiler stores that subtree as an accepting leaf and removes the deeper branches. This reduces
+runtime lookup depth without changing the preferred result returned by the standard stemming path.
+
 ### Ranked `getAll()` equivalence
 
 `MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS` merges subtrees whose `getAll()` results remain equivalent for every reachable key suffix and whose local result ordering is the same.
@@ -203,9 +208,9 @@ The CLI is best used as a preparation step during packaging, deployment, or cont
 
 ### Treat compiled files as versioned assets
 
-A `.radixor.gz` file should be handled as a versioned output artifact. It represents a specific dictionary state, a specific reduction mode, and, where relevant, specific dominant-result thresholds.
+A `.radixor.gz` file should be handled as a versioned output artifact. It represents a specific dictionary state, a specific reduction mode, whether uniform-subtree contraction was used, and, where relevant, specific dominant-result thresholds.
 
-Compiled tries also persist a human-readable metadata block (`key=value` lines) that includes format version, traversal direction, RTL indicator, reduction mode, dominant thresholds, diacritic-processing mode, and case-processing mode. After decompression, you can inspect this block directly to identify what dictionary/trie configuration the artifact contains. The current CLI uses `DiacriticProcessingMode.AS_IS`; custom diacritic stripping is available through the programmatic builder and loader APIs rather than through a CLI flag.
+Compiled tries also persist a human-readable metadata block (`key=value` lines) that includes format version, traversal direction, RTL indicator, reduction mode, contraction flag, dominant thresholds, diacritic-processing mode, and case-processing mode. After decompression, you can inspect this block directly to identify what dictionary/trie configuration the artifact contains. The current CLI uses `DiacriticProcessingMode.AS_IS`; custom diacritic stripping is available through the programmatic builder and loader APIs rather than through a CLI flag.
 
 ### Choose reduction mode deliberately
 
@@ -237,11 +242,12 @@ java org.egothor.stemmer.Compile \
 ### 3. Load it in an application
 
 ```java
+import org.egothor.stemmer.CompiledPatchCommand;
 import org.egothor.stemmer.FrequencyTrie;
 import org.egothor.stemmer.StemmerPatchTrieLoader;
 
-final FrequencyTrie<String> trie =
-        StemmerPatchTrieLoader.loadBinary("english.radixor.gz");
+final FrequencyTrie<CompiledPatchCommand> trie =
+        StemmerPatchTrieLoader.loadBinaryCompiled("english.radixor.gz");
 ```
 
 ## Exit codes and error handling

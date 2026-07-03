@@ -49,6 +49,7 @@ import java.util.Objects;
  * calculation, and failure-message formatting so that regression tests stay
  * focused on contract verification.
  */
+@SuppressWarnings("deprecation")
 final class RegressionArtifactSupport {
 
     /**

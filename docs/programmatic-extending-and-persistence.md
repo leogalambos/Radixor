@@ -94,7 +94,8 @@ This model works especially well when domain-specific extensions are added in la
 After loading a compiled artifact, applications can inspect the persisted build descriptor directly:
 
 ```java
-final FrequencyTrie<String> trie = StemmerPatchTrieLoader.loadBinary("build/stemmers/cs_cz.dat.gz");
+final FrequencyTrie<CompiledPatchCommand> trie =
+        StemmerPatchTrieLoader.loadBinaryCompiled("build/stemmers/cs_cz.dat.gz");
 final TrieMetadata metadata = trie.metadata();
 
 System.out.println(metadata.formatVersion());

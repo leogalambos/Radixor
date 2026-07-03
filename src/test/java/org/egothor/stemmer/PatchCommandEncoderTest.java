@@ -72,6 +72,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 @Tag("encoding")
 @Tag("apply")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@SuppressWarnings("deprecation")
 class PatchCommandEncoderTest {
 
     /**

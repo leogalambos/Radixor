@@ -1,0 +1,5 @@
+def openNlpVersion = '2.5.4'
+
+dependencies {
+    jmhImplementation "org.apache.opennlp:opennlp-tools:${openNlpVersion}"
+}

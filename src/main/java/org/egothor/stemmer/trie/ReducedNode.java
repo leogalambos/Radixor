@@ -61,7 +61,29 @@ public final class ReducedNode<V> {
     private final Map<Character, ReducedNode<V>> children;
 
     /**
+     * Whether this reduced node accepts any remaining lookup input.
+     */
+    private final boolean acceptsRemainingInput;
+
+    /**
      * Creates a new reduced node.
+     *
+     * @param signature   reduction signature
+     * @param localCounts local counts
+     * @param children    children
+     * @param acceptsRemainingInput whether this node accepts any remaining lookup
+     *                              input
+     */
+    public ReducedNode(final ReductionSignature<V> signature, final Map<V, Integer> localCounts,
+            final Map<Character, ReducedNode<V>> children, final boolean acceptsRemainingInput) {
+        this.signature = signature;
+        this.localCounts = new LinkedHashMap<>(localCounts);
+        this.children = new LinkedHashMap<>(children);
+        this.acceptsRemainingInput = acceptsRemainingInput;
+    }
+
+    /**
+     * Creates a new non-accepting reduced node.
      *
      * @param signature   reduction signature
      * @param localCounts local counts
@@ -69,9 +91,7 @@ public final class ReducedNode<V> {
      */
     public ReducedNode(final ReductionSignature<V> signature, final Map<V, Integer> localCounts,
             final Map<Character, ReducedNode<V>> children) {
-        this.signature = signature;
-        this.localCounts = new LinkedHashMap<>(localCounts);
-        this.children = new LinkedHashMap<>(children);
+        this(signature, localCounts, children, false);
     }
 
     /**
@@ -109,6 +129,15 @@ public final class ReducedNode<V> {
      */
     public Map<Character, ReducedNode<V>> children() {
         return this.children;
+    }
+
+    /**
+     * Returns whether this node accepts any remaining lookup input.
+     *
+     * @return {@code true} for a contracted accepting leaf
+     */
+    public boolean acceptsRemainingInput() {
+        return this.acceptsRemainingInput;
     }
 
     /**

@@ -270,6 +270,25 @@ class FrequencyTrieBuildersTest {
     }
 
     /**
+     * Verifies that compiled trie values can be mapped to another value type while
+     * preserving lookup semantics and local counts.
+     */
+    @Test
+    @DisplayName("should map values while preserving keys and counts")
+    void shouldMapValuesWhilePreservingKeysAndCounts() {
+        final FrequencyTrie<String> original = createRepresentativeTrie();
+
+        final FrequencyTrie<String> mapped = FrequencyTrieBuilders.mapValues(original, ARRAY_FACTORY,
+                RANKED_SETTINGS, value -> "mapped-" + value);
+
+        assertAll(
+                () -> assertEquals("mapped-root-main", mapped.get("")),
+                () -> assertArrayEquals(new String[] { "mapped-A1", "mapped-A2" }, mapped.getAll("a")),
+                () -> assertIterableEquals(List.of(new ValueCount<String>("mapped-AB1", 5),
+                        new ValueCount<String>("mapped-AB2", 2)), mapped.getEntries("ab")));
+    }
+
+    /**
      * Verifies the documented null-argument contract for both public reconstruction
      * entry points.
      */
@@ -292,7 +311,19 @@ class FrequencyTrieBuildersTest {
                         () -> FrequencyTrieBuilders.copyOf(trie, null,
                                 ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS)),
                 () -> assertThrows(NullPointerException.class,
-                        () -> FrequencyTrieBuilders.copyOf(trie, ARRAY_FACTORY, (ReductionMode) null)));
+                        () -> FrequencyTrieBuilders.copyOf(trie, ARRAY_FACTORY, (ReductionMode) null)),
+                () -> assertThrows(NullPointerException.class,
+                        () -> FrequencyTrieBuilders.mapValues(null, Integer[]::new, RANKED_SETTINGS, String::length)),
+                () -> assertThrows(NullPointerException.class,
+                        () -> FrequencyTrieBuilders.mapValues(trie, null, RANKED_SETTINGS, String::length)),
+                () -> assertThrows(NullPointerException.class,
+                        () -> FrequencyTrieBuilders.mapValues(trie, Integer[]::new, (ReductionSettings) null,
+                                String::length)),
+                () -> assertThrows(NullPointerException.class,
+                        () -> FrequencyTrieBuilders.mapValues(trie, Integer[]::new, RANKED_SETTINGS, null)),
+                () -> assertThrows(NullPointerException.class,
+                        () -> FrequencyTrieBuilders.mapValues(trie, Integer[]::new, (ReductionMode) null,
+                                String::length)));
     }
 
     /**

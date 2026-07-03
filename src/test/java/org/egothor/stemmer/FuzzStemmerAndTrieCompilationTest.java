@@ -69,6 +69,7 @@ import org.junit.jupiter.api.io.TempDir;
 @Tag("trie")
 @Tag("stemmer")
 @Tag("determinism")
+@SuppressWarnings("deprecation")
 class FuzzStemmerAndTrieCompilationTest {
 
     /**

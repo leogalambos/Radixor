@@ -42,15 +42,14 @@ They are useful for dependency inspection, downstream integration, compliance-or
 
 ## Benchmark outputs and badge metadata
 
-These resources expose benchmark results and generated badge metadata derived from the latest published build:
+These resources expose benchmark results and generated badge metadata derived from the latest published build. JMH benchmark reports are published as TXT and CSV files; the historical Porter comparison badge is no longer generated.
 
 - [JMH benchmark results (TXT)](https://leogalambos.github.io/Radixor/builds/latest/jmh/jmh-results.txt)
 - [JMH benchmark results (CSV)](https://leogalambos.github.io/Radixor/builds/latest/jmh/jmh-results.csv)
 - [Coverage badge metadata](https://leogalambos.github.io/Radixor/builds/latest/metrics/coverage-badge.json)
 - [Mutation badge metadata](https://leogalambos.github.io/Radixor/builds/latest/metrics/pitest-badge.json)
-- [Benchmark badge metadata](https://leogalambos.github.io/Radixor/builds/latest/metrics/jmh-badge.json)
 
-The benchmark outputs provide direct access to the published JMH result files, while the badge metadata endpoints are intended for status surfaces such as the project README or other generated dashboards.
+The benchmark outputs provide direct access to the published JMH result files. Coverage and mutation badge metadata endpoints are intended for status surfaces such as the project README or other generated dashboards.
 
 ## Practical usage
 

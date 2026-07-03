@@ -113,12 +113,12 @@ final class BenchmarkCorpusSupport {
             dictionaryBuilder.append(stem);
             lookupKeys.add(stem);
             for (String variant : variants) {
-                dictionaryBuilder.append(' ').append(variant);
+                dictionaryBuilder.append('\t').append(variant);
                 lookupKeys.add(variant);
             }
 
             final String homograph = createHomograph(index);
-            dictionaryBuilder.append(' ').append(homograph);
+            dictionaryBuilder.append('\t').append(homograph);
             lookupKeys.add(homograph);
             ambiguousLookupKeys.add(homograph);
 

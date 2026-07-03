@@ -39,6 +39,8 @@ import java.io.PushbackInputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -68,6 +70,7 @@ import java.util.zip.GZIPInputStream;
  * items containing Unicode whitespace characters while reporting them through
  * aggregated warning log records.
  */
+@SuppressWarnings({ "PMD.ExcessivePublicCount", "PMD.TooManyMethods" })
 public final class StemmerPatchTrieLoader {
 
     /* default */ static final String FILENAME_REQUIRED = "fileName required";
@@ -293,7 +296,12 @@ public final class StemmerPatchTrieLoader {
      * @return compiled patch-command trie
      * @throws NullPointerException if any argument is {@code null}
      * @throws IOException          if the dictionary cannot be found or read
+     * @deprecated Since 2.3.0 for runtime stemming. Use
+     *             {@link #loadCompiled(Language, boolean, ReductionSettings)} so
+     *             patch commands are represented as {@link CompiledPatchCommand}
+     *             values instead of reparsed {@link String} values.
      */
+    @Deprecated(since = "2.3.0", forRemoval = false)
     public static FrequencyTrie<String> load(final Language language, final boolean storeOriginal,
             final ReductionSettings reductionSettings) throws IOException {
         Objects.requireNonNull(language, "language");
@@ -301,6 +309,30 @@ public final class StemmerPatchTrieLoader {
         final TrieMetadata metadata = metadataForCompilation(traversalDirectionOf(language), reductionSettings,
                 CaseProcessingMode.LOWERCASE_WITH_LOCALE_ROOT, DiacriticProcessingMode.AS_IS);
         return load(language, storeOriginal, metadata);
+    }
+
+    /**
+     * Loads a bundled dictionary and returns a runtime-specialized trie whose
+     * values are compiled patch commands.
+     *
+     * <p>
+     * The text dictionary is still compiled through the canonical serialized
+     * patch-command representation. The returned trie replaces each stored
+     * serialized patch command with a {@link CompiledPatchCommand} so repeated
+     * runtime stemming does not parse patch-command strings.
+     * </p>
+     *
+     * @param language          bundled language dictionary
+     * @param storeOriginal     whether the stem itself should be inserted using the
+     *                          canonical no-op patch command
+     * @param reductionSettings reduction settings
+     * @return compiled patch-command trie with runtime-specialized values
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IOException          if the dictionary cannot be found or read
+     */
+    public static FrequencyTrie<CompiledPatchCommand> loadCompiled(final Language language,
+            final boolean storeOriginal, final ReductionSettings reductionSettings) throws IOException {
+        return compilePatchTrie(load(language, storeOriginal, reductionSettings));
     }
 
     /**
@@ -320,7 +352,11 @@ public final class StemmerPatchTrieLoader {
      * @return compiled patch-command trie
      * @throws NullPointerException if any argument is {@code null}
      * @throws IOException          if the dictionary cannot be found or read
+     * @deprecated Since 2.3.0 for runtime stemming. Use
+     *             {@link #loadCompiled(Language, boolean, TrieMetadata)} so patch
+     *             commands are represented as {@link CompiledPatchCommand} values.
      */
+    @Deprecated(since = "2.3.0", forRemoval = false)
     public static FrequencyTrie<String> load(final Language language, final boolean storeOriginal,
             final TrieMetadata metadata) throws IOException {
         Objects.requireNonNull(language, "language");
@@ -333,6 +369,23 @@ public final class StemmerPatchTrieLoader {
                         new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
             return load(reader, resourcePath, storeOriginal, metadata);
         }
+    }
+
+    /**
+     * Loads a bundled dictionary using explicit trie compilation metadata and
+     * returns a runtime-specialized trie whose values are compiled patch commands.
+     *
+     * @param language      bundled language dictionary
+     * @param storeOriginal whether the stem itself should be inserted using the
+     *                      canonical no-op patch command
+     * @param metadata      trie metadata describing the compilation configuration
+     * @return compiled patch-command trie with runtime-specialized values
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IOException          if the dictionary cannot be found or read
+     */
+    public static FrequencyTrie<CompiledPatchCommand> loadCompiled(final Language language,
+            final boolean storeOriginal, final TrieMetadata metadata) throws IOException {
+        return compilePatchTrie(load(language, storeOriginal, metadata));
     }
 
     /**
@@ -354,11 +407,33 @@ public final class StemmerPatchTrieLoader {
      * @return compiled patch-command trie
      * @throws NullPointerException if any argument is {@code null}
      * @throws IOException          if the dictionary cannot be found or read
+     * @deprecated Since 2.3.0 for runtime stemming. Use
+     *             {@link #loadCompiled(Language, boolean, ReductionMode)} so patch
+     *             commands are represented as {@link CompiledPatchCommand} values.
      */
+    @Deprecated(since = "2.3.0", forRemoval = false)
     public static FrequencyTrie<String> load(final Language language, final boolean storeOriginal,
             final ReductionMode reductionMode) throws IOException {
         Objects.requireNonNull(reductionMode, "reductionMode");
         return load(language, storeOriginal, ReductionSettings.withDefaults(reductionMode));
+    }
+
+    /**
+     * Loads a bundled dictionary using default settings for the supplied reduction
+     * mode and returns a runtime-specialized trie whose values are compiled patch
+     * commands.
+     *
+     * @param language      bundled language dictionary
+     * @param storeOriginal whether the stem itself should be inserted using the
+     *                      canonical no-op patch command
+     * @param reductionMode reduction mode
+     * @return compiled patch-command trie with runtime-specialized values
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IOException          if the dictionary cannot be found or read
+     */
+    public static FrequencyTrie<CompiledPatchCommand> loadCompiled(final Language language,
+            final boolean storeOriginal, final ReductionMode reductionMode) throws IOException {
+        return compilePatchTrie(load(language, storeOriginal, reductionMode));
     }
 
     /**
@@ -379,11 +454,33 @@ public final class StemmerPatchTrieLoader {
      * @return compiled patch-command trie
      * @throws NullPointerException if any argument is {@code null}
      * @throws IOException          if the file cannot be opened or read
+     * @deprecated Since 2.3.0 for runtime stemming. Use
+     *             {@link #loadCompiled(Path, boolean, ReductionSettings)} so patch
+     *             commands are represented as {@link CompiledPatchCommand} values.
      */
+    @Deprecated(since = "2.3.0", forRemoval = false)
     public static FrequencyTrie<String> load(final Path path, final boolean storeOriginal,
             final ReductionSettings reductionSettings) throws IOException {
         return load(path, storeOriginal, reductionSettings, WordTraversalDirection.BACKWARD,
                 CaseProcessingMode.LOWERCASE_WITH_LOCALE_ROOT, DiacriticProcessingMode.AS_IS);
+    }
+
+    /**
+     * Loads a dictionary from a filesystem path using explicit reduction settings
+     * and returns a runtime-specialized trie whose values are compiled patch
+     * commands.
+     *
+     * @param path              path to the dictionary file
+     * @param storeOriginal     whether the stem itself should be inserted using the
+     *                          canonical no-op patch command
+     * @param reductionSettings reduction settings
+     * @return compiled patch-command trie with runtime-specialized values
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IOException          if the file cannot be opened or read
+     */
+    public static FrequencyTrie<CompiledPatchCommand> loadCompiled(final Path path,
+            final boolean storeOriginal, final ReductionSettings reductionSettings) throws IOException {
+        return compilePatchTrie(load(path, storeOriginal, reductionSettings));
     }
 
     /**
@@ -405,12 +502,37 @@ public final class StemmerPatchTrieLoader {
      * @return compiled patch-command trie
      * @throws NullPointerException if any argument is {@code null}
      * @throws IOException          if the file cannot be opened or read
+     * @deprecated Since 2.3.0 for runtime stemming. Use
+     *             {@link #loadCompiled(Path, boolean, ReductionSettings, WordTraversalDirection)}
+     *             so patch commands are represented as
+     *             {@link CompiledPatchCommand} values.
      */
+    @Deprecated(since = "2.3.0", forRemoval = false)
     public static FrequencyTrie<String> load(final Path path, final boolean storeOriginal,
             final ReductionSettings reductionSettings, final WordTraversalDirection traversalDirection)
             throws IOException {
         return load(path, storeOriginal, reductionSettings, traversalDirection,
                 CaseProcessingMode.LOWERCASE_WITH_LOCALE_ROOT, DiacriticProcessingMode.AS_IS);
+    }
+
+    /**
+     * Loads a dictionary from a filesystem path using explicit reduction settings
+     * and traversal direction, returning runtime-specialized compiled patch values.
+     *
+     * @param path               path to the dictionary file
+     * @param storeOriginal      whether the stem itself should be inserted using
+     *                           the canonical no-op patch command
+     * @param reductionSettings  reduction settings
+     * @param traversalDirection traversal direction used for both trie keys and
+     *                           patch commands
+     * @return compiled patch-command trie with runtime-specialized values
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IOException          if the file cannot be opened or read
+     */
+    public static FrequencyTrie<CompiledPatchCommand> loadCompiled(final Path path,
+            final boolean storeOriginal, final ReductionSettings reductionSettings,
+            final WordTraversalDirection traversalDirection) throws IOException {
+        return compilePatchTrie(load(path, storeOriginal, reductionSettings, traversalDirection));
     }
 
     /**
@@ -432,12 +554,40 @@ public final class StemmerPatchTrieLoader {
      * @return compiled patch-command trie
      * @throws NullPointerException if any argument is {@code null}
      * @throws IOException          if the file cannot be opened or read
+     * @deprecated Since 2.3.0 for runtime stemming. Use
+     *             {@link #loadCompiled(Path, boolean, ReductionSettings, WordTraversalDirection, CaseProcessingMode)}
+     *             so patch commands are represented as
+     *             {@link CompiledPatchCommand} values.
      */
+    @Deprecated(since = "2.3.0", forRemoval = false)
     public static FrequencyTrie<String> load(final Path path, final boolean storeOriginal,
             final ReductionSettings reductionSettings, final WordTraversalDirection traversalDirection,
             final CaseProcessingMode caseProcessingMode) throws IOException {
         return load(path, storeOriginal, reductionSettings, traversalDirection, caseProcessingMode,
                 DiacriticProcessingMode.AS_IS);
+    }
+
+    /**
+     * Loads a dictionary from a filesystem path using explicit reduction settings,
+     * traversal direction, and case processing mode, returning runtime-specialized
+     * compiled patch values.
+     *
+     * @param path               path to the dictionary file
+     * @param storeOriginal      whether the stem itself should be inserted using
+     *                           the canonical no-op patch command
+     * @param reductionSettings  reduction settings
+     * @param traversalDirection traversal direction used for both trie keys and
+     *                           patch commands
+     * @param caseProcessingMode case processing mode used during dictionary parsing
+     * @return compiled patch-command trie with runtime-specialized values
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IOException          if the file cannot be opened or read
+     */
+    public static FrequencyTrie<CompiledPatchCommand> loadCompiled(final Path path,
+            final boolean storeOriginal, final ReductionSettings reductionSettings,
+            final WordTraversalDirection traversalDirection, final CaseProcessingMode caseProcessingMode)
+            throws IOException {
+        return compilePatchTrie(load(path, storeOriginal, reductionSettings, traversalDirection, caseProcessingMode));
     }
 
     /**
@@ -457,7 +607,12 @@ public final class StemmerPatchTrieLoader {
      * @return compiled patch-command trie
      * @throws NullPointerException if any argument is {@code null}
      * @throws IOException          if the file cannot be opened or read
+     * @deprecated Since 2.3.0 for runtime stemming. Use
+     *             {@link #loadCompiled(Path, boolean, ReductionSettings, WordTraversalDirection, CaseProcessingMode, DiacriticProcessingMode)}
+     *             so patch commands are represented as
+     *             {@link CompiledPatchCommand} values.
      */
+    @Deprecated(since = "2.3.0", forRemoval = false)
     public static FrequencyTrie<String> load(final Path path, final boolean storeOriginal,
             final ReductionSettings reductionSettings, final WordTraversalDirection traversalDirection,
             final CaseProcessingMode caseProcessingMode, final DiacriticProcessingMode diacriticProcessingMode)
@@ -466,6 +621,32 @@ public final class StemmerPatchTrieLoader {
         final TrieMetadata metadata = metadataForCompilation(traversalDirection, reductionSettings, caseProcessingMode,
                 diacriticProcessingMode);
         return load(path, storeOriginal, metadata);
+    }
+
+    /**
+     * Loads a dictionary from a filesystem path using explicit semantic metadata
+     * dimensions, returning runtime-specialized compiled patch values.
+     *
+     * @param path                    path to the dictionary file
+     * @param storeOriginal           whether the stem itself should be inserted
+     *                                using the canonical no-op patch command
+     * @param reductionSettings       reduction settings
+     * @param traversalDirection      traversal direction used for both trie keys
+     *                                and patch commands
+     * @param caseProcessingMode      case processing mode used during dictionary
+     *                                parsing
+     * @param diacriticProcessingMode diacritic processing mode used during
+     *                                dictionary parsing
+     * @return compiled patch-command trie with runtime-specialized values
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IOException          if the file cannot be opened or read
+     */
+    public static FrequencyTrie<CompiledPatchCommand> loadCompiled(final Path path,
+            final boolean storeOriginal, final ReductionSettings reductionSettings,
+            final WordTraversalDirection traversalDirection, final CaseProcessingMode caseProcessingMode,
+            final DiacriticProcessingMode diacriticProcessingMode) throws IOException {
+        return compilePatchTrie(load(path, storeOriginal, reductionSettings, traversalDirection, caseProcessingMode,
+                diacriticProcessingMode));
     }
 
     /**
@@ -485,7 +666,11 @@ public final class StemmerPatchTrieLoader {
      * @return compiled patch-command trie
      * @throws NullPointerException if any argument is {@code null}
      * @throws IOException          if the file cannot be opened or read
+     * @deprecated Since 2.3.0 for runtime stemming. Use
+     *             {@link #loadCompiled(Path, boolean, TrieMetadata)} so patch
+     *             commands are represented as {@link CompiledPatchCommand} values.
      */
+    @Deprecated(since = "2.3.0", forRemoval = false)
     public static FrequencyTrie<String> load(final Path path, final boolean storeOriginal, final TrieMetadata metadata)
             throws IOException {
         Objects.requireNonNull(path, PARAMETER_PATH);
@@ -496,6 +681,24 @@ public final class StemmerPatchTrieLoader {
                         new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
             return load(reader, path.toAbsolutePath().toString(), storeOriginal, metadata);
         }
+    }
+
+    /**
+     * Loads a dictionary from a filesystem path using explicit trie compilation
+     * metadata and returns a runtime-specialized trie whose values are compiled
+     * patch commands.
+     *
+     * @param path          path to the dictionary file
+     * @param storeOriginal whether the stem itself should be inserted using the
+     *                      canonical no-op patch command
+     * @param metadata      trie metadata describing the compilation configuration
+     * @return compiled patch-command trie with runtime-specialized values
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IOException          if the file cannot be opened or read
+     */
+    public static FrequencyTrie<CompiledPatchCommand> loadCompiled(final Path path,
+            final boolean storeOriginal, final TrieMetadata metadata) throws IOException {
+        return compilePatchTrie(load(path, storeOriginal, metadata));
     }
 
     /**
@@ -518,11 +721,33 @@ public final class StemmerPatchTrieLoader {
      * @return compiled patch-command trie
      * @throws NullPointerException if any argument is {@code null}
      * @throws IOException          if the file cannot be opened or read
+     * @deprecated Since 2.3.0 for runtime stemming. Use
+     *             {@link #loadCompiled(Path, boolean, ReductionMode)} so patch
+     *             commands are represented as {@link CompiledPatchCommand} values.
      */
+    @Deprecated(since = "2.3.0", forRemoval = false)
     public static FrequencyTrie<String> load(final Path path, final boolean storeOriginal,
             final ReductionMode reductionMode) throws IOException {
         Objects.requireNonNull(reductionMode, "reductionMode");
         return load(path, storeOriginal, ReductionSettings.withDefaults(reductionMode));
+    }
+
+    /**
+     * Loads a dictionary from a filesystem path using default settings for the
+     * supplied reduction mode and returns runtime-specialized compiled patch
+     * values.
+     *
+     * @param path          path to the dictionary file
+     * @param storeOriginal whether the stem itself should be inserted using the
+     *                      canonical no-op patch command
+     * @param reductionMode reduction mode
+     * @return compiled patch-command trie with runtime-specialized values
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IOException          if the file cannot be opened or read
+     */
+    public static FrequencyTrie<CompiledPatchCommand> loadCompiled(final Path path,
+            final boolean storeOriginal, final ReductionMode reductionMode) throws IOException {
+        return compilePatchTrie(load(path, storeOriginal, reductionMode));
     }
 
     /**
@@ -543,11 +768,34 @@ public final class StemmerPatchTrieLoader {
      * @return compiled patch-command trie
      * @throws NullPointerException if any argument is {@code null}
      * @throws IOException          if the file cannot be opened or read
+     * @deprecated Since 2.3.0 for runtime stemming. Use
+     *             {@link #loadCompiled(String, boolean, ReductionSettings)} so
+     *             patch commands are represented as
+     *             {@link CompiledPatchCommand} values.
      */
+    @Deprecated(since = "2.3.0", forRemoval = false)
     public static FrequencyTrie<String> load(final String fileName, final boolean storeOriginal,
             final ReductionSettings reductionSettings) throws IOException {
         Objects.requireNonNull(fileName, FILENAME_REQUIRED);
         return load(Path.of(fileName), storeOriginal, reductionSettings);
+    }
+
+    /**
+     * Loads a dictionary from a filesystem path string using explicit reduction
+     * settings and returns runtime-specialized compiled patch values.
+     *
+     * @param fileName          file name or path string
+     * @param storeOriginal     whether the stem itself should be inserted using the
+     *                          canonical no-op patch command
+     * @param reductionSettings reduction settings
+     * @return compiled patch-command trie with runtime-specialized values
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IOException          if the file cannot be opened or read
+     */
+    public static FrequencyTrie<CompiledPatchCommand> loadCompiled(final String fileName,
+            final boolean storeOriginal, final ReductionSettings reductionSettings) throws IOException {
+        Objects.requireNonNull(fileName, FILENAME_REQUIRED);
+        return loadCompiled(Path.of(fileName), storeOriginal, reductionSettings);
     }
 
     /**
@@ -571,13 +819,40 @@ public final class StemmerPatchTrieLoader {
      * @return compiled patch-command trie
      * @throws NullPointerException if any argument is {@code null}
      * @throws IOException          if the file cannot be opened or read
+     * @deprecated Since 2.3.0 for runtime stemming. Use
+     *             {@link #loadCompiled(String, boolean, ReductionSettings, WordTraversalDirection)}
+     *             so patch commands are represented as
+     *             {@link CompiledPatchCommand} values.
      */
+    @Deprecated(since = "2.3.0", forRemoval = false)
     public static FrequencyTrie<String> load(final String fileName, final boolean storeOriginal,
             final ReductionSettings reductionSettings, final WordTraversalDirection traversalDirection)
             throws IOException {
         Objects.requireNonNull(fileName, FILENAME_REQUIRED);
         return load(Path.of(fileName), storeOriginal, reductionSettings, traversalDirection,
                 CaseProcessingMode.LOWERCASE_WITH_LOCALE_ROOT);
+    }
+
+    /**
+     * Loads a dictionary from a filesystem path string using explicit reduction
+     * settings and traversal direction, returning runtime-specialized compiled
+     * patch values.
+     *
+     * @param fileName           file name or path string
+     * @param storeOriginal      whether the stem itself should be inserted using
+     *                           the canonical no-op patch command
+     * @param reductionSettings  reduction settings
+     * @param traversalDirection traversal direction used for both trie keys and
+     *                           patch commands
+     * @return compiled patch-command trie with runtime-specialized values
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IOException          if the file cannot be opened or read
+     */
+    public static FrequencyTrie<CompiledPatchCommand> loadCompiled(final String fileName,
+            final boolean storeOriginal, final ReductionSettings reductionSettings,
+            final WordTraversalDirection traversalDirection) throws IOException {
+        Objects.requireNonNull(fileName, FILENAME_REQUIRED);
+        return loadCompiled(Path.of(fileName), storeOriginal, reductionSettings, traversalDirection);
     }
 
     /**
@@ -600,13 +875,43 @@ public final class StemmerPatchTrieLoader {
      * @return compiled patch-command trie
      * @throws NullPointerException if any argument is {@code null}
      * @throws IOException          if the file cannot be opened or read
+     * @deprecated Since 2.3.0 for runtime stemming. Use
+     *             {@link #loadCompiled(String, boolean, ReductionSettings, WordTraversalDirection, CaseProcessingMode)}
+     *             so patch commands are represented as
+     *             {@link CompiledPatchCommand} values.
      */
+    @Deprecated(since = "2.3.0", forRemoval = false)
     public static FrequencyTrie<String> load(final String fileName, final boolean storeOriginal,
             final ReductionSettings reductionSettings, final WordTraversalDirection traversalDirection,
             final CaseProcessingMode caseProcessingMode) throws IOException {
         Objects.requireNonNull(fileName, FILENAME_REQUIRED);
         return load(Path.of(fileName), storeOriginal, reductionSettings, traversalDirection, caseProcessingMode,
                 DiacriticProcessingMode.AS_IS);
+    }
+
+    /**
+     * Loads a dictionary from a filesystem path string using explicit reduction
+     * settings, traversal direction, and case processing mode, returning
+     * runtime-specialized compiled patch values.
+     *
+     * @param fileName           file name or path string
+     * @param storeOriginal      whether the stem itself should be inserted using
+     *                           the canonical no-op patch command
+     * @param reductionSettings  reduction settings
+     * @param traversalDirection traversal direction used for both trie keys and
+     *                           patch commands
+     * @param caseProcessingMode case processing mode used during dictionary parsing
+     * @return compiled patch-command trie with runtime-specialized values
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IOException          if the file cannot be opened or read
+     */
+    public static FrequencyTrie<CompiledPatchCommand> loadCompiled(final String fileName,
+            final boolean storeOriginal, final ReductionSettings reductionSettings,
+            final WordTraversalDirection traversalDirection, final CaseProcessingMode caseProcessingMode)
+            throws IOException {
+        Objects.requireNonNull(fileName, FILENAME_REQUIRED);
+        return loadCompiled(Path.of(fileName), storeOriginal, reductionSettings, traversalDirection,
+                caseProcessingMode);
     }
 
     /**
@@ -627,7 +932,12 @@ public final class StemmerPatchTrieLoader {
      * @return compiled patch-command trie
      * @throws NullPointerException if any argument is {@code null}
      * @throws IOException          if the file cannot be opened or read
+     * @deprecated Since 2.3.0 for runtime stemming. Use
+     *             {@link #loadCompiled(String, boolean, ReductionSettings, WordTraversalDirection, CaseProcessingMode, DiacriticProcessingMode)}
+     *             so patch commands are represented as
+     *             {@link CompiledPatchCommand} values.
      */
+    @Deprecated(since = "2.3.0", forRemoval = false)
     public static FrequencyTrie<String> load(final String fileName, final boolean storeOriginal,
             final ReductionSettings reductionSettings, final WordTraversalDirection traversalDirection,
             final CaseProcessingMode caseProcessingMode, final DiacriticProcessingMode diacriticProcessingMode)
@@ -635,6 +945,33 @@ public final class StemmerPatchTrieLoader {
         Objects.requireNonNull(fileName, FILENAME_REQUIRED);
         return load(Path.of(fileName), storeOriginal, reductionSettings, traversalDirection, caseProcessingMode,
                 diacriticProcessingMode);
+    }
+
+    /**
+     * Loads a dictionary from a filesystem path string using explicit semantic
+     * metadata dimensions, returning runtime-specialized compiled patch values.
+     *
+     * @param fileName                file name or path string
+     * @param storeOriginal           whether the stem itself should be inserted
+     *                                using the canonical no-op patch command
+     * @param reductionSettings       reduction settings
+     * @param traversalDirection      traversal direction used for both trie keys
+     *                                and patch commands
+     * @param caseProcessingMode      case processing mode used during dictionary
+     *                                parsing
+     * @param diacriticProcessingMode diacritic processing mode used during
+     *                                dictionary parsing
+     * @return compiled patch-command trie with runtime-specialized values
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IOException          if the file cannot be opened or read
+     */
+    public static FrequencyTrie<CompiledPatchCommand> loadCompiled(final String fileName,
+            final boolean storeOriginal, final ReductionSettings reductionSettings,
+            final WordTraversalDirection traversalDirection, final CaseProcessingMode caseProcessingMode,
+            final DiacriticProcessingMode diacriticProcessingMode) throws IOException {
+        Objects.requireNonNull(fileName, FILENAME_REQUIRED);
+        return loadCompiled(Path.of(fileName), storeOriginal, reductionSettings, traversalDirection,
+                caseProcessingMode, diacriticProcessingMode);
     }
 
     /**
@@ -652,11 +989,33 @@ public final class StemmerPatchTrieLoader {
      * @return compiled patch-command trie
      * @throws NullPointerException if any argument is {@code null}
      * @throws IOException          if the file cannot be opened or read
+     * @deprecated Since 2.3.0 for runtime stemming. Use
+     *             {@link #loadCompiled(String, boolean, TrieMetadata)} so patch
+     *             commands are represented as {@link CompiledPatchCommand} values.
      */
+    @Deprecated(since = "2.3.0", forRemoval = false)
     public static FrequencyTrie<String> load(final String fileName, final boolean storeOriginal,
             final TrieMetadata metadata) throws IOException {
         Objects.requireNonNull(fileName, FILENAME_REQUIRED);
         return load(Path.of(fileName), storeOriginal, metadata);
+    }
+
+    /**
+     * Loads a dictionary from a filesystem path string using explicit trie
+     * compilation metadata and returns runtime-specialized compiled patch values.
+     *
+     * @param fileName      file name or path string
+     * @param storeOriginal whether the stem itself should be inserted using the
+     *                      canonical no-op patch command
+     * @param metadata      trie metadata describing the compilation configuration
+     * @return compiled patch-command trie with runtime-specialized values
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IOException          if the file cannot be opened or read
+     */
+    public static FrequencyTrie<CompiledPatchCommand> loadCompiled(final String fileName,
+            final boolean storeOriginal, final TrieMetadata metadata) throws IOException {
+        Objects.requireNonNull(fileName, FILENAME_REQUIRED);
+        return loadCompiled(Path.of(fileName), storeOriginal, metadata);
     }
 
     /**
@@ -677,11 +1036,34 @@ public final class StemmerPatchTrieLoader {
      * @return compiled patch-command trie
      * @throws NullPointerException if any argument is {@code null}
      * @throws IOException          if the file cannot be opened or read
+     * @deprecated Since 2.3.0 for runtime stemming. Use
+     *             {@link #loadCompiled(String, boolean, ReductionMode)} so patch
+     *             commands are represented as {@link CompiledPatchCommand} values.
      */
+    @Deprecated(since = "2.3.0", forRemoval = false)
     public static FrequencyTrie<String> load(final String fileName, final boolean storeOriginal,
             final ReductionMode reductionMode) throws IOException {
         Objects.requireNonNull(fileName, FILENAME_REQUIRED);
         return load(Path.of(fileName), storeOriginal, reductionMode);
+    }
+
+    /**
+     * Loads a dictionary from a filesystem path string using default settings for
+     * the supplied reduction mode and returns runtime-specialized compiled patch
+     * values.
+     *
+     * @param fileName      file name or path string
+     * @param storeOriginal whether the stem itself should be inserted using the
+     *                      canonical no-op patch command
+     * @param reductionMode reduction mode
+     * @return compiled patch-command trie with runtime-specialized values
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IOException          if the file cannot be opened or read
+     */
+    public static FrequencyTrie<CompiledPatchCommand> loadCompiled(final String fileName,
+            final boolean storeOriginal, final ReductionMode reductionMode) throws IOException {
+        Objects.requireNonNull(fileName, FILENAME_REQUIRED);
+        return loadCompiled(Path.of(fileName), storeOriginal, reductionMode);
     }
 
     /**
@@ -736,7 +1118,9 @@ public final class StemmerPatchTrieLoader {
         Objects.requireNonNull(reductionSettings, "reductionSettings");
         Objects.requireNonNull(caseProcessingMode, "caseProcessingMode");
         Objects.requireNonNull(diacriticProcessingMode, "diacriticProcessingMode");
-        return TrieMetadata.forCompilation(traversalDirection, reductionSettings, diacriticProcessingMode,
+        final ReductionSettings patchReductionSettings = ReductionSettings
+                .withUniformSubtreeContraction(reductionSettings);
+        return TrieMetadata.forCompilation(traversalDirection, patchReductionSettings, diacriticProcessingMode,
                 caseProcessingMode);
     }
 
@@ -751,6 +1135,28 @@ public final class StemmerPatchTrieLoader {
     }
 
     /**
+     * Maps textual patch commands to runtime-specialized compiled patch commands.
+     *
+     * <p>
+     * Equal textual patch commands are compiled once and shared by all trie values
+     * that reference them. The returned trie preserves the source trie keys,
+     * metadata, traversal direction, counts, and reduction settings.
+     * </p>
+     *
+     * @param trie source trie containing textual patch commands
+     * @return equivalent trie containing compiled patch commands
+     * @throws NullPointerException if {@code trie} is {@code null}
+     */
+    private static FrequencyTrie<CompiledPatchCommand> compilePatchTrie(final FrequencyTrie<String> trie) {
+        final FrequencyTrie<String> sourceTrie = Objects.requireNonNull(trie, "trie");
+        final Map<String, CompiledPatchCommand> compiledPatches = new HashMap<>(4096);
+        return FrequencyTrieBuilders.mapValues(sourceTrie, CompiledPatchCommand[]::new,
+                sourceTrie.metadata().reductionSettings(),
+                patch -> compiledPatches.computeIfAbsent(patch,
+                        value -> CompiledPatchCommand.compile(value, sourceTrie.traversalDirection())));
+    }
+
+    /**
      * Loads a GZip-compressed binary patch-command trie from a filesystem path.
      *
      * @param path path to the compressed binary trie file
@@ -758,10 +1164,28 @@ public final class StemmerPatchTrieLoader {
      * @throws NullPointerException if {@code path} is {@code null}
      * @throws IOException          if the file cannot be opened, decompressed, or
      *                              read
+     * @deprecated Since 2.3.0 for runtime stemming. Use
+     *             {@link #loadBinaryCompiled(Path)} so patch commands are
+     *             represented as {@link CompiledPatchCommand} values.
      */
+    @Deprecated(since = "2.3.0", forRemoval = false)
     public static FrequencyTrie<String> loadBinary(final Path path) throws IOException {
         Objects.requireNonNull(path, PARAMETER_PATH);
         return StemmerPatchTrieBinaryIO.read(path);
+    }
+
+    /**
+     * Loads a GZip-compressed binary patch-command trie from a filesystem path and
+     * returns runtime-specialized compiled patch values.
+     *
+     * @param path path to the compressed binary trie file
+     * @return compiled patch-command trie with runtime-specialized values
+     * @throws NullPointerException if {@code path} is {@code null}
+     * @throws IOException          if the file cannot be opened, decompressed, or
+     *                              read
+     */
+    public static FrequencyTrie<CompiledPatchCommand> loadBinaryCompiled(final Path path) throws IOException {
+        return compilePatchTrie(loadBinary(path));
     }
 
     /**
@@ -779,10 +1203,32 @@ public final class StemmerPatchTrieLoader {
      * @throws NullPointerException if {@code path} is {@code null}
      * @throws IOException          if the file cannot be opened, decompressed, or
      *                              read
+     * @deprecated Since 2.3.0 for runtime stemming. Use
+     *             {@link #loadBinaryCompiled(Path, int)} so patch commands are
+     *             represented as {@link CompiledPatchCommand} values.
      */
+    @Deprecated(since = "2.3.0", forRemoval = false)
     public static FrequencyTrie<String> loadBinary(final Path path, final int maxExpandedIndex) throws IOException {
         Objects.requireNonNull(path, PARAMETER_PATH);
         return StemmerPatchTrieBinaryIO.read(path, maxExpandedIndex);
+    }
+
+    /**
+     * Loads a GZip-compressed binary patch-command trie from a filesystem path using
+     * a custom dense lookup span override and returns runtime-specialized compiled
+     * patch values.
+     *
+     * @param path             path to the compressed binary trie file
+     * @param maxExpandedIndex dense lookup span override; negative values use
+     *                         {@link FrequencyTrie#DEFAULT_MAX_EXPANDED_INDEX}
+     * @return compiled patch-command trie with runtime-specialized values
+     * @throws NullPointerException if {@code path} is {@code null}
+     * @throws IOException          if the file cannot be opened, decompressed, or
+     *                              read
+     */
+    public static FrequencyTrie<CompiledPatchCommand> loadBinaryCompiled(final Path path,
+            final int maxExpandedIndex) throws IOException {
+        return compilePatchTrie(loadBinary(path, maxExpandedIndex));
     }
 
     /**
@@ -794,10 +1240,28 @@ public final class StemmerPatchTrieLoader {
      * @throws NullPointerException if {@code fileName} is {@code null}
      * @throws IOException          if the file cannot be opened, decompressed, or
      *                              read
+     * @deprecated Since 2.3.0 for runtime stemming. Use
+     *             {@link #loadBinaryCompiled(String)} so patch commands are
+     *             represented as {@link CompiledPatchCommand} values.
      */
+    @Deprecated(since = "2.3.0", forRemoval = false)
     public static FrequencyTrie<String> loadBinary(final String fileName) throws IOException {
         Objects.requireNonNull(fileName, FILENAME_REQUIRED);
         return StemmerPatchTrieBinaryIO.read(fileName);
+    }
+
+    /**
+     * Loads a GZip-compressed binary patch-command trie from a filesystem path
+     * string and returns runtime-specialized compiled patch values.
+     *
+     * @param fileName file name or path string
+     * @return compiled patch-command trie with runtime-specialized values
+     * @throws NullPointerException if {@code fileName} is {@code null}
+     * @throws IOException          if the file cannot be opened, decompressed, or
+     *                              read
+     */
+    public static FrequencyTrie<CompiledPatchCommand> loadBinaryCompiled(final String fileName) throws IOException {
+        return compilePatchTrie(loadBinary(fileName));
     }
 
     /**
@@ -815,11 +1279,33 @@ public final class StemmerPatchTrieLoader {
      * @throws NullPointerException if {@code fileName} is {@code null}
      * @throws IOException          if the file cannot be opened, decompressed, or
      *                              read
+     * @deprecated Since 2.3.0 for runtime stemming. Use
+     *             {@link #loadBinaryCompiled(String, int)} so patch commands are
+     *             represented as {@link CompiledPatchCommand} values.
      */
+    @Deprecated(since = "2.3.0", forRemoval = false)
     public static FrequencyTrie<String> loadBinary(final String fileName, final int maxExpandedIndex)
             throws IOException {
         Objects.requireNonNull(fileName, FILENAME_REQUIRED);
         return StemmerPatchTrieBinaryIO.read(fileName, maxExpandedIndex);
+    }
+
+    /**
+     * Loads a GZip-compressed binary patch-command trie from a filesystem path string
+     * using a custom dense lookup span override and returns runtime-specialized
+     * compiled patch values.
+     *
+     * @param fileName         file name or path string
+     * @param maxExpandedIndex dense lookup span override; negative values use
+     *                         {@link FrequencyTrie#DEFAULT_MAX_EXPANDED_INDEX}
+     * @return compiled patch-command trie with runtime-specialized values
+     * @throws NullPointerException if {@code fileName} is {@code null}
+     * @throws IOException          if the file cannot be opened, decompressed, or
+     *                              read
+     */
+    public static FrequencyTrie<CompiledPatchCommand> loadBinaryCompiled(final String fileName,
+            final int maxExpandedIndex) throws IOException {
+        return compilePatchTrie(loadBinary(fileName, maxExpandedIndex));
     }
 
     /**
@@ -829,10 +1315,28 @@ public final class StemmerPatchTrieLoader {
      * @return compiled patch-command trie
      * @throws NullPointerException if {@code inputStream} is {@code null}
      * @throws IOException          if the stream cannot be decompressed or read
+     * @deprecated Since 2.3.0 for runtime stemming. Use
+     *             {@link #loadBinaryCompiled(InputStream)} so patch commands are
+     *             represented as {@link CompiledPatchCommand} values.
      */
+    @Deprecated(since = "2.3.0", forRemoval = false)
     public static FrequencyTrie<String> loadBinary(final InputStream inputStream) throws IOException {
         Objects.requireNonNull(inputStream, "inputStream");
         return StemmerPatchTrieBinaryIO.read(inputStream);
+    }
+
+    /**
+     * Loads a GZip-compressed binary patch-command trie from an input stream and
+     * returns runtime-specialized compiled patch values.
+     *
+     * @param inputStream source input stream
+     * @return compiled patch-command trie with runtime-specialized values
+     * @throws NullPointerException if {@code inputStream} is {@code null}
+     * @throws IOException          if the stream cannot be decompressed or read
+     */
+    public static FrequencyTrie<CompiledPatchCommand> loadBinaryCompiled(final InputStream inputStream)
+            throws IOException {
+        return compilePatchTrie(loadBinary(inputStream));
     }
 
     /**

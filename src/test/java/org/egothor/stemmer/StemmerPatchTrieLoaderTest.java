@@ -92,6 +92,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 @Tag("trie")
 @Tag("persistence")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@SuppressWarnings("deprecation")
 final class StemmerPatchTrieLoaderTest {
 
     /**
@@ -251,6 +252,72 @@ final class StemmerPatchTrieLoaderTest {
                         StemmerPatchTrieLoader.FILENAME_REQUIRED),
                 Arguments.of("27-load-binary-metadata-stream-null",
                         (ExecutableOperation) () -> StemmerPatchTrieLoader.loadBinaryMetadata((InputStream) null),
+                        "inputStream"),
+                Arguments.of("28-load-compiled-language-settings-null-language",
+                        (ExecutableOperation) () -> StemmerPatchTrieLoader.loadCompiled(
+                                (StemmerPatchTrieLoader.Language) null, true, settings),
+                        "language"),
+                Arguments.of("29-load-compiled-language-settings-null-settings",
+                        (ExecutableOperation) () -> StemmerPatchTrieLoader.loadCompiled(
+                                StemmerPatchTrieLoader.Language.US_UK, true, (ReductionSettings) null),
+                        "reductionSettings"),
+                Arguments.of("30-load-compiled-language-mode-null-language",
+                        (ExecutableOperation) () -> StemmerPatchTrieLoader.loadCompiled(
+                                (StemmerPatchTrieLoader.Language) null, true, DEFAULT_REDUCTION_MODE),
+                        "language"),
+                Arguments.of("31-load-compiled-language-mode-null-mode",
+                        (ExecutableOperation) () -> StemmerPatchTrieLoader.loadCompiled(
+                                StemmerPatchTrieLoader.Language.US_UK, true, (ReductionMode) null),
+                        "reductionMode"),
+                Arguments.of("32-load-compiled-language-metadata-null-metadata",
+                        (ExecutableOperation) () -> StemmerPatchTrieLoader.loadCompiled(
+                                StemmerPatchTrieLoader.Language.US_UK, true, (TrieMetadata) null),
+                        "metadata"),
+                Arguments.of("33-load-compiled-path-settings-null-path",
+                        (ExecutableOperation) () -> StemmerPatchTrieLoader.loadCompiled((Path) null, true, settings),
+                        "path"),
+                Arguments.of("34-load-compiled-path-settings-null-settings",
+                        (ExecutableOperation) () -> StemmerPatchTrieLoader.loadCompiled(tempPath(), true,
+                                (ReductionSettings) null),
+                        "reductionSettings"),
+                Arguments.of("35-load-compiled-path-mode-null-mode",
+                        (ExecutableOperation) () -> StemmerPatchTrieLoader.loadCompiled(tempPath(), true,
+                                (ReductionMode) null),
+                        "reductionMode"),
+                Arguments.of("36-load-compiled-path-metadata-null-metadata",
+                        (ExecutableOperation) () -> StemmerPatchTrieLoader.loadCompiled(tempPath(), true,
+                                (TrieMetadata) null),
+                        "metadata"),
+                Arguments.of("37-load-compiled-string-settings-null-file",
+                        (ExecutableOperation) () -> StemmerPatchTrieLoader.loadCompiled((String) null, true, settings),
+                        StemmerPatchTrieLoader.FILENAME_REQUIRED),
+                Arguments.of("38-load-compiled-string-settings-null-settings",
+                        (ExecutableOperation) () -> StemmerPatchTrieLoader.loadCompiled(tempPath().toString(), true,
+                                (ReductionSettings) null),
+                        "reductionSettings"),
+                Arguments.of("39-load-compiled-string-mode-null-mode",
+                        (ExecutableOperation) () -> StemmerPatchTrieLoader.loadCompiled(tempPath().toString(), true,
+                                (ReductionMode) null),
+                        "reductionMode"),
+                Arguments.of("40-load-compiled-string-metadata-null-metadata",
+                        (ExecutableOperation) () -> StemmerPatchTrieLoader.loadCompiled(tempPath().toString(), true,
+                                (TrieMetadata) null),
+                        "metadata"),
+                Arguments.of("41-load-binary-compiled-path-null",
+                        (ExecutableOperation) () -> StemmerPatchTrieLoader.loadBinaryCompiled((Path) null), "path"),
+                Arguments.of("42-load-binary-compiled-path-override-null",
+                        (ExecutableOperation) () -> StemmerPatchTrieLoader.loadBinaryCompiled((Path) null,
+                                FrequencyTrie.DEFAULT_MAX_EXPANDED_INDEX),
+                        "path"),
+                Arguments.of("43-load-binary-compiled-string-null",
+                        (ExecutableOperation) () -> StemmerPatchTrieLoader.loadBinaryCompiled((String) null),
+                        StemmerPatchTrieLoader.FILENAME_REQUIRED),
+                Arguments.of("44-load-binary-compiled-string-override-null",
+                        (ExecutableOperation) () -> StemmerPatchTrieLoader.loadBinaryCompiled((String) null,
+                                FrequencyTrie.DEFAULT_MAX_EXPANDED_INDEX),
+                        StemmerPatchTrieLoader.FILENAME_REQUIRED),
+                Arguments.of("45-load-binary-compiled-stream-null",
+                        (ExecutableOperation) () -> StemmerPatchTrieLoader.loadBinaryCompiled((InputStream) null),
                         "inputStream"));
     }
 
@@ -432,6 +499,38 @@ final class StemmerPatchTrieLoaderTest {
         }
 
         /**
+         * Verifies that textual compiled loading overloads produce patch-command
+         * tries with the same stemming semantics as the canonical textual patch trie.
+         *
+         * @throws IOException if the test file cannot be written or read
+         */
+        @Test
+        @DisplayName("Textual compiled load overloads must preserve stemming semantics")
+        void shouldLoadCompiledTrieFromTextualOverloads() throws IOException {
+            final Path dictionaryFile = writeDictionary("""
+                    run	running	runs	runner
+                    play	playing	played	plays
+                    city	cities
+                    """);
+
+            final ReductionSettings settings = ReductionSettings.withDefaults(DEFAULT_REDUCTION_MODE);
+            final FrequencyTrie<String> expected = StemmerPatchTrieLoader.load(dictionaryFile, true, settings);
+            final FrequencyTrie<CompiledPatchCommand> fromPathWithSettings = StemmerPatchTrieLoader.loadCompiled(
+                    dictionaryFile, true, settings);
+            final FrequencyTrie<CompiledPatchCommand> fromPathWithMode = StemmerPatchTrieLoader.loadCompiled(
+                    dictionaryFile, true, DEFAULT_REDUCTION_MODE);
+            final FrequencyTrie<CompiledPatchCommand> fromStringWithSettings = StemmerPatchTrieLoader.loadCompiled(
+                    dictionaryFile.toString(), true, settings);
+            final FrequencyTrie<CompiledPatchCommand> fromStringWithMode = StemmerPatchTrieLoader.loadCompiled(
+                    dictionaryFile.toString(), true, DEFAULT_REDUCTION_MODE);
+
+            assertCompiledTrieSemanticsEqual(expected, fromPathWithSettings, "running", "played", "cities", "run");
+            assertCompiledTrieSemanticsEqual(expected, fromPathWithMode, "running", "played", "cities", "run");
+            assertCompiledTrieSemanticsEqual(expected, fromStringWithSettings, "running", "played", "cities", "run");
+            assertCompiledTrieSemanticsEqual(expected, fromStringWithMode, "running", "played", "cities", "run");
+        }
+
+        /**
          * Verifies that metadata-driven loading keeps all configuration dimensions in
          * one explicit object and applies them during compilation.
          *
@@ -577,14 +676,28 @@ final class StemmerPatchTrieLoaderTest {
             StemmerPatchTrieLoader.saveBinary(original, binaryFile);
             final FrequencyTrie<String> fromPath = StemmerPatchTrieLoader.loadBinary(binaryFile);
             final FrequencyTrie<String> fromString = StemmerPatchTrieLoader.loadBinary(binaryFile.toString());
+            final FrequencyTrie<CompiledPatchCommand> compiledFromPath = StemmerPatchTrieLoader.loadBinaryCompiled(
+                    binaryFile);
+            final FrequencyTrie<CompiledPatchCommand> compiledFromString = StemmerPatchTrieLoader.loadBinaryCompiled(
+                    binaryFile.toString());
 
             final byte[] binaryBytes = Files.readAllBytes(binaryFile);
             try (InputStream inputStream = new ByteArrayInputStream(binaryBytes)) {
                 final FrequencyTrie<String> fromStream = StemmerPatchTrieLoader.loadBinary(inputStream);
+                final FrequencyTrie<CompiledPatchCommand> compiledFromStream;
+                try (InputStream compiledInputStream = new ByteArrayInputStream(binaryBytes)) {
+                    compiledFromStream = StemmerPatchTrieLoader.loadBinaryCompiled(compiledInputStream);
+                }
 
                 assertTriePatchSemanticsEqual(original, fromPath, "run", "running", "runner", "cities", "studying");
                 assertTriePatchSemanticsEqual(original, fromString, "run", "running", "runner", "cities", "studying");
                 assertTriePatchSemanticsEqual(original, fromStream, "run", "running", "runner", "cities", "studying");
+                assertCompiledTrieSemanticsEqual(original, compiledFromPath, "run", "running", "runner", "cities",
+                        "studying");
+                assertCompiledTrieSemanticsEqual(original, compiledFromString, "run", "running", "runner", "cities",
+                        "studying");
+                assertCompiledTrieSemanticsEqual(original, compiledFromStream, "run", "running", "runner", "cities",
+                        "studying");
             }
 
             final TrieMetadata metadataFromPath = StemmerPatchTrieLoader.loadBinaryMetadata(binaryFile);
@@ -857,6 +970,30 @@ final class StemmerPatchTrieLoaderTest {
     }
 
     /**
+     * Reconstructs all stem candidates for the supplied word from compiled patch
+     * commands returned by {@link FrequencyTrie#getAll(String)}.
+     *
+     * @param trie compiled patch-command trie
+     * @param word surface word
+     * @return reconstructed stem candidates
+     */
+    private static Set<String> reconstructAllCompiledStemCandidates(final FrequencyTrie<CompiledPatchCommand> trie,
+            final String word) {
+        final CompiledPatchCommand[] patchCommands = trie.getAll(word);
+        final Set<String> stems = new LinkedHashSet<String>();
+
+        if (patchCommands == null) {
+            return stems;
+        }
+
+        for (CompiledPatchCommand patchCommand : patchCommands) {
+            stems.add(patchCommand.apply(word));
+        }
+
+        return stems;
+    }
+
+    /**
      * Verifies semantic equality of two tries for the supplied words by comparing
      * both their raw patch arrays and reconstructed stem sets.
      *
@@ -873,6 +1010,26 @@ final class StemmerPatchTrieLoaderTest {
                     () -> assertEquals(reconstructAllStemCandidates(expected, word),
                             reconstructAllStemCandidates(actual, word),
                             "Reconstructed stems must match for word '" + word + "'."));
+        }
+    }
+
+    /**
+     * Verifies semantic equality of a textual patch trie and a compiled patch trie
+     * for the supplied words.
+     *
+     * @param expected reference trie with textual patch commands
+     * @param actual   compared trie with compiled patch commands
+     * @param words    words to verify
+     */
+    private static void assertCompiledTrieSemanticsEqual(final FrequencyTrie<String> expected,
+            final FrequencyTrie<CompiledPatchCommand> actual, final String... words) {
+        assertAll(() -> assertEquals(expected.metadata(), actual.metadata(), "Trie metadata must be preserved."),
+                () -> assertEquals(expected.traversalDirection(), actual.traversalDirection(),
+                        "Trie traversal direction must be preserved."));
+
+        for (String word : words) {
+            assertEquals(reconstructAllStemCandidates(expected, word), reconstructAllCompiledStemCandidates(actual, word),
+                    "Compiled patch stems must match textual patch stems for word '" + word + "'.");
         }
     }
 

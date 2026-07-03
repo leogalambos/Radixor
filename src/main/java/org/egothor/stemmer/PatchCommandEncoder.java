@@ -71,16 +71,6 @@ import java.util.concurrent.locks.ReentrantLock;
 public final class PatchCommandEncoder {
 
     /**
-     * Backward direction apply strategy with no runtime direction branching.
-     */
-    private static final ApplyStrategy BACKWARD_APPLY_STRATEGY = PatchCommandEncoder::applyBackward;
-
-    /**
-     * Forward direction apply strategy with no runtime direction branching.
-     */
-    private static final ApplyStrategy FORWARD_APPLY_STRATEGY = PatchCommandEncoder::applyForward;
-
-    /**
      * Serialized opcode for deleting one or more characters.
      */
     private static final char DELETE_OPCODE = 'D';
@@ -175,9 +165,9 @@ public final class PatchCommandEncoder {
     private final WordTraversalDirection traversalDirection;
 
     /**
-     * Direction-specialized patch apply strategy.
+     * Whether this instance applies patch commands in backward traversal order.
      */
-    private final ApplyStrategy applyStrategy;
+    private final boolean backwardTraversal;
 
     /**
      * Currently allocated source dimension of reusable matrices.
@@ -222,21 +212,6 @@ public final class PatchCommandEncoder {
         MATCH
     }
 
-    /**
-     * Direction-specialized patch application strategy.
-     */
-    @FunctionalInterface
-    private interface ApplyStrategy {
-        /**
-         * Applies the command.
-         * 
-         * @param source       original text
-         * @param patchCommand patch command
-         * @return final text after applying the command
-         */
-        String apply(String source, String patchCommand);
-    }
-
     private PatchCommandEncoder(final Builder builder) {
         this.traversalDirection = Objects.requireNonNull(builder.traversalDirection, "traversalDirection");
         final int insertCost = builder.insertCost;
@@ -260,7 +235,7 @@ public final class PatchCommandEncoder {
         this.deleteCost = deleteCost;
         this.replaceCost = replaceCost;
         this.matchCost = matchCost;
-        this.applyStrategy = applyStrategyFor(this.traversalDirection);
+        this.backwardTraversal = this.traversalDirection == WordTraversalDirection.BACKWARD;
         this.sourceCapacity = 0;
         this.targetCapacity = 0;
         this.costMatrix = new int[0][0];
@@ -304,19 +279,43 @@ public final class PatchCommandEncoder {
      * direction.
      *
      * <p>
-     * This is the branch-free instance-level fast path for repeated patch
-     * application in a known traversal direction.
+     * This is the instance-level fast path for repeated patch application in a
+     * known traversal direction. It avoids the static API null and direction
+     * validation path and calls the selected decoder directly.
      * </p>
      *
      * @param source       original source word
      * @param patchCommand compact patch command
      * @return transformed word, or {@code null} when {@code source} is {@code null}
+     * @deprecated Since 2.3.0. Runtime stemming should compile
+     *             {@code patchCommand} once through {@link #compile(String)} and
+     *             reuse {@link CompiledPatchCommand#apply(String)}. The
+     *             String-based application path reparses the patch command on every
+     *             call and is kept only for source compatibility before the 3.0.0
+     *             migration.
      */
+    @Deprecated(since = "2.3.0", forRemoval = false)
     public String applyWithConfiguredDirection(final String source, final String patchCommand) {
         if (source == null) {
             return null;
         }
-        return this.applyStrategy.apply(source, patchCommand);
+        if (this.backwardTraversal) {
+            return applyBackwardNonNull(source, patchCommand);
+        }
+        return applyForwardNonNull(source, patchCommand);
+    }
+
+    /**
+     * Compiles a patch command for repeated application with this encoder
+     * instance traversal direction.
+     *
+     * @param patchCommand compact patch command
+     * @return immutable compiled patch command
+     * @throws IllegalArgumentException if the serialized command contains an
+     *                                  unsupported opcode or invalid NOOP argument
+     */
+    public CompiledPatchCommand compile(final String patchCommand) {
+        return CompiledPatchCommand.compile(patchCommand, this.traversalDirection);
     }
 
     /**
@@ -326,7 +325,14 @@ public final class PatchCommandEncoder {
      * @param source       original source word
      * @param patchCommand compact patch command
      * @return transformed word, or {@code null} when {@code source} is {@code null}
+     * @deprecated Since 2.3.0. Runtime stemming should use
+     *             {@link CompiledPatchCommand#compile(String, WordTraversalDirection)}
+     *             once and then reuse {@link CompiledPatchCommand#apply(String)}.
+     *             This method repeatedly interprets the serialized patch-command
+     *             string and is retained only for compatibility before the 3.0.0
+     *             migration.
      */
+    @Deprecated(since = "2.3.0", forRemoval = false)
     public static String apply(final String source, final String patchCommand) {
         return apply(source, patchCommand, WordTraversalDirection.BACKWARD);
     }
@@ -343,14 +349,41 @@ public final class PatchCommandEncoder {
      * @param patchCommand       compact patch command
      * @param traversalDirection traversal direction used by the patch command
      * @return transformed word, or {@code null} when {@code source} is {@code null}
+     * @deprecated Since 2.3.0. Runtime stemming should use
+     *             {@link CompiledPatchCommand#compile(String, WordTraversalDirection)}
+     *             once and then reuse {@link CompiledPatchCommand#apply(String)}.
+     *             This method repeatedly interprets the serialized patch-command
+     *             string and is retained only for compatibility before the 3.0.0
+     *             migration.
      */
+    @Deprecated(since = "2.3.0", forRemoval = false)
     public static String apply(final String source, final String patchCommand,
             final WordTraversalDirection traversalDirection) {
         Objects.requireNonNull(traversalDirection, "traversalDirection");
         if (source == null) {
             return null;
         }
-        return applyStrategyFor(traversalDirection).apply(source, patchCommand);
+        if (traversalDirection == WordTraversalDirection.BACKWARD) {
+            return applyBackwardNonNull(source, patchCommand);
+        }
+        return applyForwardNonNull(source, patchCommand);
+    }
+
+    /**
+     * Compiles a patch command for repeated application with the supplied
+     * traversal direction.
+     *
+     * @param patchCommand       compact patch command
+     * @param traversalDirection traversal direction used by the patch command
+     * @return immutable compiled patch command
+     * @throws NullPointerException     if {@code traversalDirection} is
+     *                                  {@code null}
+     * @throws IllegalArgumentException if the serialized command contains an
+     *                                  unsupported opcode or invalid NOOP argument
+     */
+    public static CompiledPatchCommand compile(final String patchCommand,
+            final WordTraversalDirection traversalDirection) {
+        return CompiledPatchCommand.compile(patchCommand, traversalDirection);
     }
 
     /**
@@ -371,7 +404,15 @@ public final class PatchCommandEncoder {
      * @param outputLength       writable output capacity
      * @return produced character count, or {@link #APPLY_INSUFFICIENT_CAPACITY}
      *         when {@code outputLength} is too small
+     * @deprecated Since 2.3.0. Compile {@code patchCommand} once through
+     *             {@link #compile(String, WordTraversalDirection)} and call
+     *             {@link CompiledPatchCommand#applyTo(CharSequence, char[], int, int)}
+     *             or
+     *             {@link CompiledPatchCommand#applyTo(CharSequence, int, int, char[], int, int)}.
+     *             This String-based method reparses patch commands on every call and
+     *             is kept only for compatibility before the 3.0.0 migration.
      */
+    @Deprecated(since = "2.3.0", forRemoval = false)
     public static int applyTo(final CharSequence source, final String patchCommand,
             final WordTraversalDirection traversalDirection, final char[] output, final int outputOffset,
             final int outputLength) {
@@ -405,7 +446,13 @@ public final class PatchCommandEncoder {
      *         when {@code outputLength} is too small
      * @throws IllegalArgumentException when source and output ranges overlap in the
      *                                  same array
+     * @deprecated Since 2.3.0. Compile {@code patchCommand} once through
+     *             {@link #compile(String, WordTraversalDirection)} and call
+     *             {@link CompiledPatchCommand#applyTo(char[], int, int, char[], int, int)}.
+     *             This String-based method reparses patch commands on every call and
+     *             is kept only for compatibility before the 3.0.0 migration.
      */
+    @Deprecated(since = "2.3.0", forRemoval = false)
     public static int applyTo(final char[] source, final int sourceOffset, final int sourceLength,
             final String patchCommand, final WordTraversalDirection traversalDirection, final char[] output,
             final int outputOffset, final int outputLength) {
@@ -484,36 +531,33 @@ public final class PatchCommandEncoder {
     /**
      * Applies a patch command using the historical backward Egothor semantics.
      *
-     * @param source       original source word in legacy backward logical space
+     * @param source       non-null original source word in legacy backward logical
+     *                     space
      * @param patchCommand compact patch command
-     * @return transformed word, or {@code null} when {@code source} is {@code null}
+     * @return transformed word
      */
-    private static String applyBackward(final String source, final String patchCommand) {
-        if (source == null) {
-            return null;
-        }
-        if (patchCommand == null || patchCommand.isEmpty()) {
+    private static String applyBackwardNonNull(final String source, final String patchCommand) {
+        if (patchCommand == null) {
             return source;
         }
-        if (NOOP_PATCH.equals(patchCommand)) {
+        final int patchLength = patchCommand.length();
+        if (patchLength == 0 || (patchLength & 1) != 0) {
             return source;
         }
-        if ((patchCommand.length() & 1) != 0) {
-            return source;
-        }
-        if (patchCommand.length() == 2) {
+        if (patchLength == 2) {
             return applySingleBackwardInstruction(source, patchCommand.charAt(0), patchCommand.charAt(1));
         }
 
-        final StringBuilder result = new StringBuilder(source);
-        if (result.isEmpty()) {
-            return applyBackwardToEmptySource(result, patchCommand);
+        if (source.isEmpty()) {
+            return applyBackwardToEmptySource(patchCommand);
         }
+
+        final StringBuilder result = new StringBuilder(source);
 
         int position = result.length() - 1;
 
         try {
-            for (int patchIndex = 0, patchLength = patchCommand.length(); patchIndex < patchLength; patchIndex += 2) {
+            for (int patchIndex = 0; patchIndex < patchLength; patchIndex += 2) {
                 final char opcode = patchCommand.charAt(patchIndex);
                 final char argument = patchCommand.charAt(patchIndex + 1);
 
@@ -547,12 +591,12 @@ public final class PatchCommandEncoder {
 
                     case NOOP_OPCODE:
                         if (argument != NOOP_ARGUMENT) {
-                            throw new IllegalArgumentException("Unsupported NOOP patch argument: " + argument);
+                            throw new IllegalArgumentException(MSG_NOOP + argument);
                         }
                         return source;
 
                     default:
-                        throw new IllegalArgumentException("Unsupported patch opcode: " + opcode);
+                        throw new IllegalArgumentException(MSG_OPCODE + opcode);
                 }
 
                 position--;
@@ -567,36 +611,32 @@ public final class PatchCommandEncoder {
     /**
      * Applies a patch command using forward traversal semantics.
      *
-     * @param source       original source word
+     * @param source       non-null original source word
      * @param patchCommand compact patch command
-     * @return transformed word, or {@code null} when {@code source} is {@code null}
+     * @return transformed word
      */
-    private static String applyForward(final String source, final String patchCommand) {
-        if (source == null) {
-            return null;
-        }
-        if (patchCommand == null || patchCommand.isEmpty()) {
+    private static String applyForwardNonNull(final String source, final String patchCommand) {
+        if (patchCommand == null) {
             return source;
         }
-        if (NOOP_PATCH.equals(patchCommand)) {
+        final int patchLength = patchCommand.length();
+        if (patchLength == 0 || (patchLength & 1) != 0) {
             return source;
         }
-        if ((patchCommand.length() & 1) != 0) {
-            return source;
-        }
-        if (patchCommand.length() == 2) {
+        if (patchLength == 2) {
             return applySingleForwardInstruction(source, patchCommand.charAt(0), patchCommand.charAt(1));
         }
 
-        final StringBuilder result = new StringBuilder(source);
-        if (result.isEmpty()) {
-            return applyForwardToEmptySource(result, patchCommand);
+        if (source.isEmpty()) {
+            return applyForwardToEmptySource(patchCommand);
         }
+
+        final StringBuilder result = new StringBuilder(source);
 
         int position = 0;
 
         try {
-            for (int patchIndex = 0, patchLength = patchCommand.length(); patchIndex < patchLength; patchIndex += 2) {
+            for (int patchIndex = 0; patchIndex < patchLength; patchIndex += 2) {
                 final char opcode = patchCommand.charAt(patchIndex);
                 final char argument = patchCommand.charAt(patchIndex + 1);
 
@@ -628,12 +668,12 @@ public final class PatchCommandEncoder {
 
                     case NOOP_OPCODE:
                         if (argument != NOOP_ARGUMENT) {
-                            throw new IllegalArgumentException("Unsupported NOOP patch argument: " + argument);
+                            throw new IllegalArgumentException(MSG_NOOP + argument);
                         }
                         return source;
 
                     default:
-                        throw new IllegalArgumentException("Unsupported patch opcode: " + opcode);
+                        throw new IllegalArgumentException(MSG_OPCODE + opcode);
                 }
 
                 position++;
@@ -751,12 +791,12 @@ public final class PatchCommandEncoder {
      * behavior for index-invalid commands.
      * </p>
      *
-     * @param result       empty result builder
      * @param patchCommand compact patch command
      * @return transformed word, or the original empty word when the patch is
      *         malformed
      */
-    private static String applyBackwardToEmptySource(final StringBuilder result, final String patchCommand) {
+    private static String applyBackwardToEmptySource(final String patchCommand) {
+        final StringBuilder result = new StringBuilder(patchCommand.length() >> 1);
         try {
             for (int patchIndex = 0, patchLength = patchCommand.length(); patchIndex < patchLength; patchIndex += 2) {
                 final char opcode = patchCommand.charAt(patchIndex);
@@ -774,12 +814,12 @@ public final class PatchCommandEncoder {
 
                     case NOOP_OPCODE:
                         if (argument != NOOP_ARGUMENT) {
-                            throw new IllegalArgumentException("Unsupported NOOP patch argument: " + argument);
+                            throw new IllegalArgumentException(MSG_NOOP + argument);
                         }
                         return "";
 
                     default:
-                        throw new IllegalArgumentException("Unsupported patch opcode: " + opcode);
+                        throw new IllegalArgumentException(MSG_OPCODE + opcode);
                 }
             }
         } catch (IndexOutOfBoundsException exception) {
@@ -792,12 +832,12 @@ public final class PatchCommandEncoder {
     /**
      * Applies a forward patch command to an empty source word.
      *
-     * @param result       empty result builder
      * @param patchCommand compact patch command
      * @return transformed word, or the original empty word when the patch is
      *         malformed
      */
-    private static String applyForwardToEmptySource(final StringBuilder result, final String patchCommand) {
+    private static String applyForwardToEmptySource(final String patchCommand) {
+        final StringBuilder result = new StringBuilder(patchCommand.length() >> 1);
         try {
             for (int patchIndex = 0, patchLength = patchCommand.length(); patchIndex < patchLength; patchIndex += 2) {
                 final char opcode = patchCommand.charAt(patchIndex);
@@ -815,12 +855,12 @@ public final class PatchCommandEncoder {
 
                     case NOOP_OPCODE:
                         if (argument != NOOP_ARGUMENT) {
-                            throw new IllegalArgumentException("Unsupported NOOP patch argument: " + argument);
+                            throw new IllegalArgumentException(MSG_NOOP + argument);
                         }
                         return "";
 
                     default:
-                        throw new IllegalArgumentException("Unsupported patch opcode: " + opcode);
+                        throw new IllegalArgumentException(MSG_OPCODE + opcode);
                 }
             }
         } catch (IndexOutOfBoundsException exception) {
@@ -1533,16 +1573,6 @@ public final class PatchCommandEncoder {
         if (sourceOffset < outputEnd && outputOffset < sourceEnd) {
             throw new IllegalArgumentException("source and output ranges must not overlap.");
         }
-    }
-
-    /**
-     * Returns the direction-specialized apply strategy.
-     *
-     * @param traversalDirection requested traversal direction
-     * @return branch-free apply strategy for that direction
-     */
-    private static ApplyStrategy applyStrategyFor(final WordTraversalDirection traversalDirection) {
-        return traversalDirection == WordTraversalDirection.BACKWARD ? BACKWARD_APPLY_STRATEGY : FORWARD_APPLY_STRATEGY;
     }
 
     /**

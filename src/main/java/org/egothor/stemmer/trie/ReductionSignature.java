@@ -56,14 +56,21 @@ public final class ReductionSignature<V> {
     private final List<ChildDescriptor<V>> childDescriptors;
 
     /**
+     * Whether the represented node accepts any remaining lookup input.
+     */
+    private final boolean acceptsRemainingInput;
+
+    /**
      * Creates a signature.
      *
      * @param localDescriptor  local descriptor
      * @param childDescriptors child descriptors
      */
-    private ReductionSignature(final Object localDescriptor, final List<ChildDescriptor<V>> childDescriptors) {
+    private ReductionSignature(final Object localDescriptor, final List<ChildDescriptor<V>> childDescriptors,
+            final boolean acceptsRemainingInput) {
         this.localDescriptor = localDescriptor;
         this.childDescriptors = childDescriptors;
+        this.acceptsRemainingInput = acceptsRemainingInput;
     }
 
     /**
@@ -72,11 +79,14 @@ public final class ReductionSignature<V> {
      * @param localSummary local value summary
      * @param children     reduced children
      * @param settings     reduction settings
+     * @param acceptsRemainingInput whether this node accepts any remaining lookup
+     *                              input
      * @param <V>          value type
      * @return subtree signature
      */
     public static <V> ReductionSignature<V> create(final LocalValueSummary<V> localSummary,
-            final Map<Character, ReducedNode<V>> children, final ReductionSettings settings) {
+            final Map<Character, ReducedNode<V>> children, final ReductionSettings settings,
+            final boolean acceptsRemainingInput) {
         final Object localDescriptor = switch (settings.reductionMode()) {
             case MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS ->
                 RankedLocalDescriptor.of(localSummary.orderedValues());
@@ -100,12 +110,28 @@ public final class ReductionSignature<V> {
             childDescriptors.add(new ChildDescriptor<>(entry.getKey(), entry.getValue().signature()));
         }
 
-        return new ReductionSignature<>(localDescriptor, Collections.unmodifiableList(childDescriptors));
+        return new ReductionSignature<>(localDescriptor, Collections.unmodifiableList(childDescriptors),
+                acceptsRemainingInput);
+    }
+
+    /**
+     * Creates a non-accepting subtree signature according to the selected reduction
+     * mode.
+     *
+     * @param localSummary local value summary
+     * @param children     reduced children
+     * @param settings     reduction settings
+     * @param <V>          value type
+     * @return subtree signature
+     */
+    public static <V> ReductionSignature<V> create(final LocalValueSummary<V> localSummary,
+            final Map<Character, ReducedNode<V>> children, final ReductionSettings settings) {
+        return create(localSummary, children, settings, false);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.localDescriptor, this.childDescriptors);
+        return Objects.hash(this.localDescriptor, this.childDescriptors, this.acceptsRemainingInput);
     }
 
     @Override
@@ -118,6 +144,7 @@ public final class ReductionSignature<V> {
         }
         final ReductionSignature<?> that = (ReductionSignature<?>) other;
         return Objects.equals(this.localDescriptor, that.localDescriptor)
-                && Objects.equals(this.childDescriptors, that.childDescriptors);
+                && Objects.equals(this.childDescriptors, that.childDescriptors)
+                && this.acceptsRemainingInput == that.acceptsRemainingInput;
     }
 }

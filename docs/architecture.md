@@ -53,6 +53,16 @@ Those patch-command values are inserted into a mutable trie keyed by the source 
 
 Equivalent subtrees are merged into canonical reduced nodes.
 
+Before a selected semantic reduction mode is applied, Radixor also performs uniform-subtree
+contraction. If every reachable entry below a subtree resolves to the same preferred patch
+command, that subtree can be represented as an accepting leaf for that command. Runtime lookup can
+then stop at that leaf even when the input word still has remaining characters.
+
+This is a structural optimization of preferred-result lookup. It reduces trie depth in regions
+where the remaining suffix cannot change the selected command, while preserving the `get()` result
+used by the standard stemmer path. The benchmark tables in `docs/benchmarks/` are based on this
+contracted compiled representation.
+
 ### Compilation
 
 The reduced structure is frozen into an immutable compiled trie optimized for runtime lookup.
@@ -124,7 +134,7 @@ At runtime, lookup is conceptually simple:
 3. retrieve one or more stored patch commands,
 4. apply the chosen patch command to the original word.
 
-The trie itself does not create the final stem string. It selects the stored transformation command. `PatchCommandEncoder.apply(...)` then performs the actual transformation.
+The trie itself does not create the final stem string. It selects the stored transformation command. Runtime code should use `CompiledPatchCommand.apply(...)` so the serialized command is compiled once and reused.
 
 That separation is architecturally important:
 
@@ -170,6 +180,7 @@ The final compiled trie can be much smaller than the original dictionary for sev
 
 - patch commands are compact,
 - trie paths reuse shared structure,
+- uniform preferred-command subtrees can be contracted into accepting leaves,
 - reduction merges equivalent subtrees,
 - binary persistence stores the already reduced form,
 - GZip compression is applied on top of the binary format.

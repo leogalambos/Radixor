@@ -7,9 +7,8 @@
 [![Quality gates](https://github.com/leogalambos/Radixor/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/leogalambos/Radixor/actions/workflows/build.yml)
 [![Coverage](https://img.shields.io/endpoint?url=https://leogalambos.github.io/Radixor/builds/latest/metrics/coverage-badge.json)](https://leogalambos.github.io/Radixor/builds/latest/coverage/)
 [![Mutation score](https://img.shields.io/endpoint?url=https://leogalambos.github.io/Radixor/builds/latest/metrics/pitest-badge.json)](https://leogalambos.github.io/Radixor/builds/latest/pitest/)
-[![English benchmark](https://img.shields.io/endpoint?url=https://leogalambos.github.io/Radixor/builds/latest/metrics/jmh-badge.json)](https://leogalambos.github.io/Radixor/builds/latest/jmh/jmh-results.txt)
 
-*Fast, deterministic, multi-language stemming for Java, built around compact patch-command tries and measured at roughly 4× to 6× the throughput of the Snowball Porter stemmer family on the current English benchmark workload.*
+*Deterministic, multi-language stemming for Java, built around compact dictionary-derived patch-command tries with an explicit quality/speed trade-off.*
 
 **Radixor** is a modern multi-language stemming toolkit for Java in the tradition of the original **Egothor** approach. It learns compact word-to-stem transformations from dictionary data, stores them in compiled patch-command tries, and exposes a runtime model designed for speed, determinism, and operational simplicity. Unlike a closed-form dictionary lookup stemmer, Radixor can also generalize beyond explicitly listed word forms.
 
@@ -50,18 +49,33 @@ Radixor is especially attractive when you want something more adaptable than sim
 
 ## Performance
 
-Radixor includes a JMH benchmark suite for both its own algorithmic core and a side-by-side English comparison against the Snowball Porter stemmer family.
+Radixor performance is best read together with stemming quality. The English dictionary coverage benchmark builds contracted compiled patch tries from deterministic slices of the `US_UK` dictionary and then measures both exact-root agreement and changed-token runtime.
 
-On the current English comparison workload, Radixor with bundled `US_UK` reaches approximately **31 to 32 million tokens per second**. Snowball original Porter reaches approximately **8 million tokens per second**, and Snowball English (Porter2) approximately **5 to 5.5 million tokens per second**.
+| Used rows | Actual row ratio | All exact | Changed exact | Root preserved | Speed ms/op | Error ms | ns/token |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 100% | 100.000% | 97.478% | 97.197% | 97.552% | 23.113 | 7.065 | 109.8 |
+| 90% | 90.000% | 97.047% | 94.913% | 97.613% | 21.270 | 9.914 | 101.0 |
+| 80% | 80.000% | 96.635% | 92.768% | 97.661% | 19.170 | 6.609 | 91.1 |
+| 70% | 70.000% | 96.209% | 90.565% | 97.705% | 20.857 | 6.734 | 99.1 |
+| 60% | 60.000% | 95.750% | 88.384% | 97.703% | 14.975 | 1.215 | 71.1 |
+| 50% | 50.000% | 95.262% | 86.107% | 97.690% | 15.249 | 1.078 | 72.4 |
+| 40% | 40.000% | 94.753% | 83.855% | 97.643% | 15.323 | 2.340 | 72.8 |
+| 30% | 30.000% | 94.208% | 81.651% | 97.537% | 16.778 | 2.643 | 79.7 |
+| 20% | 20.000% | 93.633% | 79.366% | 97.416% | 18.929 | 3.241 | 89.9 |
+| 10% | 10.000% | 92.868% | 76.516% | 97.204% | 19.124 | 1.883 | 90.9 |
 
-That places Radixor at approximately:
+Column meanings:
 
-- **4× the throughput of Snowball original Porter**
-- **6× the throughput of Snowball English (Porter2)**
+- `Used rows` is the requested deterministic percentage of English dictionary rows used to build the stemmer.
+- `Actual row ratio` is the selected row count divided by the full parsed dictionary row count.
+- `All exact` is exact agreement over every word/root pair in the full dictionary.
+- `Changed exact` is exact agreement only where the word differs from its root.
+- `Root preserved` is the share of already-root forms that remain unchanged.
+- `Speed ms/op` is JMH average time for one changed-token benchmark operation.
+- `Error ms` is the JMH score error converted to milliseconds.
+- `ns/token` is average nanoseconds per changed token in that operation.
 
-on the current benchmark workload.
-
-This is a throughput comparison on the same deterministic token stream. It is **not** a claim that the compared stemmers are linguistically equivalent or interchangeable.
+The contracted trie result is materially stronger than the older uncontracted profile: full English coverage reaches 97.478% all-token exactness and 97.197% changed-token exactness at 109.8 ns/token, while even a 10% deterministic dictionary slice remains at 92.868% all-token exactness and 76.516% changed-token exactness at 90.9 ns/token. This is why Radixor benchmark results are documented with both speed and quality instead of a single Porter speed badge.
 
 For benchmark scope, workload design, environment, commands, report locations, and interpretation guidance, see [Benchmarking](docs/benchmarking.md).
 
@@ -101,6 +115,9 @@ Compared with the historical baseline, Radixor emphasizes:
 - **frequency-aware deterministic ordering**  
   Candidate results are ordered consistently and reproducibly.
 
+- **contracted compiled patch tries**  
+  Uniform patch-command subtrees are collapsed into accepting leaves, reducing hot lookup depth while preserving preferred stemming results.
+
 - **practical subtree reduction modes**  
   Reduction can be tuned toward stronger compression or more conservative semantic preservation.
 
@@ -131,8 +148,14 @@ The repository keeps the front page concise and places detailed documentation un
 
 ### Getting Started
 
+- [Fast Track](docs/fast-track.md)  
+  The shortest path from adding the dependency to getting a first stem from a bundled dictionary.
+
 - [Quick Start](docs/quick-start.md)  
-  A practical first guide to loading, compiling, and using Radixor.
+  A broader developer walkthrough covering loading options, querying, extension, persistence, and metadata.
+
+- [Integration Deep Dive](docs/integration-deep-dive.md)  
+  Dependency setup, bundled dictionary selection, production lifecycle, search-pipeline guidance, and operational checklist.
 
 - [Built-in Languages](docs/built-in-languages.md)  
   Overview of bundled language resources such as `US_UK`.
@@ -156,6 +179,9 @@ The repository keeps the front page concise and places detailed documentation un
 
 - [Extending and Persisting Compiled Tries](docs/programmatic-extending-and-persistence.md)  
   Reopening compiled tries, rebuilding them, and writing binary artifacts.
+
+- [Migration and Backward Compatibility](docs/migration-and-backward-compatibility.md)  
+  Migration from serialized String patch-command application to `CompiledPatchCommand`.
 
 ### Concepts and Internals
 
@@ -185,7 +211,10 @@ The repository keeps the front page concise and places detailed documentation un
   Engineering standards, validation posture, auditability, and operational model.
 
 - [Benchmarking](docs/benchmarking.md)  
-  JMH benchmark methodology, Porter comparison, and result interpretation.
+  JMH benchmark methodology, dictionary coverage trade-offs, speed, quality, and result interpretation.
+
+- [Benchmark Results](docs/benchmarks/index.md)  
+  Structured reference for methodology, corpora, environment, English coverage, and per-language result pages.
 
 - [Published Reports](docs/reports.md)  
   Entry points to CI-published reports and GitHub Pages artifacts.

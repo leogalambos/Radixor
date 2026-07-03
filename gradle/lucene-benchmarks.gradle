@@ -1,0 +1,223 @@
+import org.gradle.plugins.ide.eclipse.model.SourceFolder
+
+
+def luceneVersion = '10.5.0'
+def luceneRootRelativePath = 'third-party/lucene'
+def luceneSourceArtifacts = ['lucene-analysis-common', 'lucene-analyzers-common']
+def luceneSourceDirectory = layout.buildDirectory.dir("${luceneRootRelativePath}/source/analyzers-common")
+
+def luceneGeneratedSourceDirectory = layout.buildDirectory.dir('generated/sources/lucene')
+def luceneGeneratedPorterFile = luceneGeneratedSourceDirectory.map { it.file('org/egothor/stemmer/benchmark/LucenePorterStemmerCopied.java') }
+
+def luceneSourceDownloadFile = layout.buildDirectory.file("${luceneRootRelativePath}/lucene-${luceneVersion}-sources.jar")
+
+dependencies {
+    jmhImplementation "org.apache.lucene:lucene-analysis-common:${luceneVersion}"
+    jmhImplementation "org.apache.lucene:lucene-analysis-stempel:${luceneVersion}"
+    jmhImplementation "org.apache.lucene:lucene-analysis-morfologik:${luceneVersion}"
+}
+
+def buildLuceneSourcesName = { final String artifact ->
+    "${artifact}-${luceneVersion}-sources.jar"
+}
+def buildLuceneSourcesUrl = { final String artifact ->
+    "https://repo1.maven.org/maven2/org/apache/lucene/${artifact}/${luceneVersion}/${buildLuceneSourcesName(artifact)}"
+}
+
+def isLuceneSourcesDownloadable = { final String artifact ->
+    try {
+        final URL sourceUrl = new URL(buildLuceneSourcesUrl(artifact))
+        final java.net.HttpURLConnection connection = (java.net.HttpURLConnection) sourceUrl.openConnection()
+        connection.requestMethod = 'HEAD'
+        connection.instanceFollowRedirects = true
+        connection.connectTimeout = 10000
+        connection.readTimeout = 10000
+        final int responseCode = connection.responseCode
+        connection.disconnect()
+        return responseCode == 200
+    } catch (Exception ignored) {
+        return false
+    }
+}
+
+def downloadLuceneSourcesJar = { ->
+    final File targetFile = luceneSourceDownloadFile.get().asFile
+
+    for (String artifact : luceneSourceArtifacts) {
+        if (!isLuceneSourcesDownloadable(artifact)) {
+            continue
+        }
+
+        final String sourceUrl = buildLuceneSourcesUrl(artifact)
+        final File tempFile = new File(targetFile.parentFile, "${artifact}.${luceneVersion}.tmp")
+        try {
+            new URL(sourceUrl).withInputStream { inputStream ->
+                tempFile.parentFile.mkdirs()
+                tempFile.withOutputStream { outputStream ->
+                    outputStream << inputStream
+                }
+            }
+            if (!tempFile.exists() || tempFile.length() <= 0L) {
+                throw new GradleException("Downloaded Lucene source artifact for ${artifact} was empty.")
+            }
+            targetFile.delete()
+            if (!tempFile.renameTo(targetFile)) {
+                throw new GradleException("Failed to persist downloaded Lucene source artifact for ${artifact}.")
+            }
+            return
+        } catch (Exception ignored) {
+            tempFile.delete()
+        }
+    }
+
+    throw new GradleException(
+            "Failed to download Apache Lucene source artifacts ${luceneSourceArtifacts} for version ${luceneVersion}.")
+}
+
+def luceneSourceClasspathPath = provider {
+    project.relativePath(luceneGeneratedSourceDirectory.get().asFile)
+}
+def luceneEclipseClasspathAttributes = [
+        gradle_scope        : 'jmh',
+        gradle_used_by_scope: 'jmh',
+        test                : 'true'
+]
+
+def isAbsoluteClasspathPath = { String path ->
+    path.startsWith('/') || path ==~ /^[A-Za-z]:[\\\/].*/
+}
+
+def luceneGeneratedPorterNotice = '''
+/**
+ * Generated at benchmark execution time from Apache Lucene source.
+ *
+ * This source copy is compiled only for the JMH benchmark source set and is
+ * not committed as production code.
+ */
+'''
+
+def transformPorterStemmerSource = { final File sourceFile, final File targetFile ->
+    if (!sourceFile.exists()) {
+        throw new GradleException("Apache Lucene PorterStemmer source was not available at ${sourceFile}.")
+    }
+
+    final String sourceText = sourceFile.getText('UTF-8')
+    String transformedText = sourceText
+
+    if (transformedText.contains('package org.apache.lucene.analysis.en;')) {
+        transformedText = transformedText.replaceFirst(/(?m)^\s*package\s+org\.apache\.lucene\.analysis\.en\s*;/,
+                'package org.egothor.stemmer.benchmark;')
+    } else {
+        throw new GradleException(
+                'Expected Lucene package-private PorterStemmer in org.apache.lucene.analysis.en package was not found in downloaded source.')
+    }
+
+    transformedText = transformedText.replaceFirst(/(?m)^\s*class\s+PorterStemmer\s*\{/, 'public final class LucenePorterStemmerCopied {')
+    transformedText = transformedText.replaceFirst(/(?m)^\s*public\s+PorterStemmer\(\)/, 'public LucenePorterStemmerCopied()')
+
+    if (!transformedText.contains('class LucenePorterStemmerCopied')) {
+        throw new GradleException("Failed to rename PorterStemmer class when generating ${targetFile}.")
+    }
+
+    targetFile.parentFile.mkdirs()
+    targetFile.text = transformedText
+}
+
+def resolveLucenePorterStemmerSource = { ->
+    final File sourceRoot = luceneSourceDirectory.get().asFile
+    final List<String> candidates = [
+            'org/apache/lucene/analysis/en/org/apache/lucene/analysis/en/PorterStemmer.java',
+            'org/apache/lucene/analysis/en/PorterStemmer.java',
+            'org/apache/lucene/analysis/en/org/tartarus/snowball/ext/PorterStemmer.java'
+    ]
+
+    for (String candidate : candidates) {
+        final File file = new File(sourceRoot, candidate)
+        if (file.exists()) {
+            return file
+        }
+    }
+
+    final FileTree porterCandidates = fileTree(sourceRoot).matching { include '**/PorterStemmer.java' }
+    for (File file : porterCandidates.files) {
+        if (file.text.contains('class PorterStemmer') && file.text.contains('package org.apache.lucene.analysis.en;')) {
+            return file
+        }
+    }
+
+    throw new GradleException('Unable to resolve Lucene PorterStemmer source file from extracted artifact.')
+}
+
+tasks.register('downloadLuceneAnalyzersSources') {
+    group = 'build setup'
+    description = 'Downloads Apache Lucene analysis sources for benchmark-only code generation.'
+
+    outputs.file(luceneSourceDownloadFile)
+
+    doLast {
+        if (!luceneSourceDownloadFile.get().asFile.exists()) {
+            downloadLuceneSourcesJar()
+        }
+    }
+}
+
+tasks.register('extractLuceneAnalyzersSources', Copy) {
+    group = 'build setup'
+    description = 'Extracts Apache Lucene analysis source JAR for benchmark-only extraction.'
+
+    dependsOn(tasks.named('downloadLuceneAnalyzersSources'))
+
+    from(zipTree(luceneSourceDownloadFile))
+    into(luceneSourceDirectory)
+}
+
+tasks.register('generateLucenePorterStemmerCopied') {
+    group = 'build setup'
+    description = 'Generates LucenePorterStemmerCopied into the build-only benchmark source directory.'
+
+    dependsOn(tasks.named('extractLuceneAnalyzersSources'))
+
+    inputs.dir(luceneSourceDirectory)
+    outputs.file(luceneGeneratedPorterFile)
+
+    doLast {
+        final File sourceFile = resolveLucenePorterStemmerSource()
+        transformPorterStemmerSource(sourceFile, luceneGeneratedPorterFile.get().asFile)
+    }
+}
+
+sourceSets {
+    jmh {
+        java {
+            srcDir(luceneGeneratedSourceDirectory)
+        }
+    }
+}
+
+tasks.named('compileJmhJava') {
+    dependsOn(tasks.named('generateLucenePorterStemmerCopied'))
+}
+
+eclipse {
+    classpath {
+        file {
+            whenMerged { classpath ->
+                String generatedPath = luceneSourceClasspathPath.get()
+
+                classpath.entries.removeAll { entry ->
+                    entry.hasProperty('path') && (
+                            entry.path == generatedPath ||
+                            isAbsoluteClasspathPath(entry.path)
+                    )
+                }
+
+                SourceFolder luceneEntry = new SourceFolder(generatedPath, null)
+                luceneEntry.output = 'bin/jmh'
+                luceneEclipseClasspathAttributes.each { String name, String value ->
+                    luceneEntry.entryAttributes[name] = value
+                }
+                classpath.entries.add(luceneEntry)
+            }
+        }
+    }
+}

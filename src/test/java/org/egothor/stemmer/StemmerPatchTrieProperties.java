@@ -58,6 +58,7 @@ import org.junit.jupiter.api.Tag;
 @Label("Stemmer patch trie properties")
 @Tag("property")
 @Tag("stemmer")
+@SuppressWarnings("deprecation")
 class StemmerPatchTrieProperties extends PropertyBasedTestSupport {
 
     /**

@@ -56,6 +56,7 @@ import java.util.logging.Logger;
  * <li>{@code --reduction-mode <enum-name>}</li>
  * </ul>
  */
+@SuppressWarnings("deprecation")
 public final class RegressionArtifactGenerator {
 
     /**

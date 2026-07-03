@@ -76,6 +76,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 @Tag("serialization")
 @Tag("trie")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@SuppressWarnings("deprecation")
 final class CompiledTrieArtifactRegressionTest {
 
     /**
