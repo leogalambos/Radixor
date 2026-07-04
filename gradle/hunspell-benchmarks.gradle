@@ -1,0 +1,121 @@
+import org.gradle.plugins.ide.eclipse.model.SourceFolder
+
+
+def hunspellDictionaryBaseUrl = 'https://raw.githubusercontent.com/wooorm/dictionaries/main/dictionaries'
+def hunspellDictionaryLanguages = [
+        en: 'English',
+        cs: 'Czech',
+        de: 'German',
+        es: 'Spanish',
+        fr: 'French',
+        nl: 'Dutch',
+        pl: 'Polish',
+        uk: 'Ukrainian'
+]
+def hunspellDownloadDirectory = layout.buildDirectory.dir('third-party/hunspell')
+def hunspellGeneratedResourcesDirectory = layout.buildDirectory.dir('generated/resources/hunspell')
+def hunspellGeneratedResourcesPath = provider {
+    project.relativePath(hunspellGeneratedResourcesDirectory.get().asFile)
+}
+def hunspellEclipseClasspathAttributes = [
+        gradle_scope        : 'jmh',
+        gradle_used_by_scope: 'jmh',
+        test                : 'true'
+]
+def hunspellIsAbsolutePath = { String path ->
+    path.startsWith('/') || path ==~ /^[A-Za-z]:[\\\/].*/
+}
+
+def hunspellDownloadedFiles = hunspellDictionaryLanguages.keySet().collectMany { String code ->
+    [
+            hunspellDownloadDirectory.map { it.file("${code}/index.aff") },
+            hunspellDownloadDirectory.map { it.file("${code}/index.dic") },
+            hunspellDownloadDirectory.map { it.file("${code}/license") }
+    ]
+}
+
+tasks.register('downloadHunspellBenchmarkDictionaries') {
+    group = 'build setup'
+    description = 'Downloads benchmark-only Hunspell dictionaries from wooorm/dictionaries.'
+
+    outputs.files(hunspellDownloadedFiles)
+
+    doLast {
+        hunspellDictionaryLanguages.each { String code, String displayName ->
+            ['index.aff', 'index.dic', 'license'].each { String fileName ->
+                final File targetFile = hunspellDownloadDirectory.get().file("${code}/${fileName}").asFile
+                targetFile.parentFile.mkdirs()
+
+                if (!targetFile.exists()) {
+                    final URL sourceUrl = new URL("${hunspellDictionaryBaseUrl}/${code}/${fileName}")
+                    try {
+                        sourceUrl.withInputStream { inputStream ->
+                            targetFile.withOutputStream { outputStream ->
+                                outputStream << inputStream
+                            }
+                        }
+                    } catch (FileNotFoundException exception) {
+                        throw new GradleException(
+                                "Unable to download Hunspell ${fileName} file for ${displayName} (${code}) from ${sourceUrl}.",
+                                exception)
+                    }
+                }
+
+                if (targetFile.length() <= 0L) {
+                    throw new GradleException("Downloaded Hunspell ${fileName} file for ${displayName} was empty.")
+                }
+            }
+        }
+    }
+}
+
+tasks.register('prepareHunspellBenchmarkResources', Copy) {
+    group = 'build setup'
+    description = 'Copies benchmark-only Hunspell dictionaries into the JMH resource output.'
+
+    dependsOn(tasks.named('downloadHunspellBenchmarkDictionaries'))
+
+    from(hunspellDownloadDirectory) {
+        include '**/index.aff'
+        include '**/index.dic'
+        include '**/license'
+        into 'hunspell'
+    }
+    into(hunspellGeneratedResourcesDirectory)
+}
+
+sourceSets {
+    jmh {
+        resources {
+            srcDir(hunspellGeneratedResourcesDirectory)
+        }
+    }
+}
+
+tasks.named('processJmhResources') {
+    dependsOn(tasks.named('prepareHunspellBenchmarkResources'))
+}
+
+eclipse {
+    classpath {
+        file {
+            whenMerged { classpath ->
+                String generatedPath = hunspellGeneratedResourcesPath.get()
+
+                classpath.entries.removeAll { entry ->
+                    entry.hasProperty('path') && (
+                            entry.path == generatedPath ||
+                            hunspellIsAbsolutePath(entry.path)
+                    )
+                }
+
+                SourceFolder hunspellEntry = new SourceFolder(generatedPath, null)
+                hunspellEntry.output = 'bin/jmh'
+                hunspellEclipseClasspathAttributes.each { String name, String value ->
+                    hunspellEntry.entryAttributes[name] = value
+                }
+                classpath.entries.add(hunspellEntry)
+            }
+        }
+    }
+}
