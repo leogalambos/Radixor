@@ -24,7 +24,7 @@ Radixor stores the preferred transformation for each normalized dictionary word 
 
 ## Accuracy
 
-Accuracy is computed from one deterministic JMH measurement iteration without warmup. The benchmark may execute the full dictionary pass more than once inside that single timed iteration; percentages divide matching counters by evaluated counters from the same iteration.
+Accuracy is computed from JMH auxiliary counters in the current report. The counters are deterministic for a fixed corpus and stemmer; percentages divide matching counters by evaluated counters from the same report and are not timing metrics.
 
 | Stemmer | All exact | Changed exact | Root preserved | Note |
 | --- | ---: | ---: | ---: | --- |
@@ -37,8 +37,8 @@ Speed uses JMH average time, 3 warmup iterations, 5 measurement iterations, 1 fo
 
 | Stemmer | Benchmark method | Score ms/op | Error ms | ns/token | Relative vs Radixor | Note |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
-| Radixor | `persianRadixor` | 0.231 | 0.021 | 63.6 | 1.000 | Full Radixor dictionary patch-command stemmer. |
-| Lucene PersianStemFilter | `persianLucenePersianStemFilter` | 0.443 | 0.012 | 122.0 | 1.918 | Persian suffix stemmer with Lucene normalization in the measured path. |
+| Radixor | `persianRadixor` | 0.245 | 0.025 | 49.0 | 1.000 | Full Radixor dictionary patch-command stemmer. |
+| Lucene PersianStemFilter | `persianLucenePersianStemFilter` | 0.466 | 0.015 | 93.3 | 1.902 | Persian suffix stemmer with Lucene normalization in the measured path. |
 
 ## Interpretation Notes
 

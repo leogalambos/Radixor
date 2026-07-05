@@ -4,11 +4,11 @@ The values below are environment-specific and must not be read as universal perf
 
 | Item | Value |
 | --- | --- |
-| Benchmark date | 2026-07-03 |
-| Focused comparison command family | JMH jar runs limited to `EnglishStemmerComparisonBenchmark`, `MultiLanguageStemmerComparisonBenchmark`, and `SnowballLanguageStemmerComparisonBenchmark`; Radixor exact-root metrics were recomputed deterministically against the same contracted loaders |
+| Benchmark date | 2026-07-06 (Europe/Prague) |
+| Focused comparison command family | `./gradlew jmh -Pjmh.includes='.*StemmerComparisonBenchmark.*' --no-daemon` |
 | English coverage command | `./gradlew jmh -Pjmh.includes='.*EnglishRadixorDictionaryCoverageBenchmark.*' --no-daemon` |
-| Speed result reports | `build/reports/jmh/contracted/english-comparison.csv`, `multilanguage-speed.csv`, `snowball-language-speed.csv` |
-| Accuracy result reports | Deterministic Radixor exact-root pass over bundled dictionaries; non-Radixor quality rows retained from the existing published quality suite |
+| Speed result reports | `build/reports/jmh/stemmer-comparison-2026-07-06.csv`, `build/reports/jmh/stemmer-comparison-2026-07-06.txt`, `build/reports/jmh/english-coverage-2026-07-06.csv`, and `build/reports/jmh/english-coverage-2026-07-06.txt` |
+| Accuracy result reports | `build/reports/jmh/stemmer-comparison-2026-07-06.csv`, `build/reports/jmh/english-coverage-2026-07-06.csv`, and deterministic Radixor exact-root accounting over the same bundled language corpora |
 | Final comparison JMH scope | Stemmer comparison benchmarks only; internal `FrequencyTrie*` microbenchmarks were not run |
 | Coverage JMH scope | English Radixor dictionary coverage benchmark only |
 | JMH version | 1.37 |
@@ -16,15 +16,19 @@ The values below are environment-specific and must not be read as universal perf
 | Score unit | `ns/op` |
 | Speed warmup | 3 iterations, 1 s each |
 | Speed measurement | 5 iterations, 1 s each |
-| Accuracy warmup | none for deterministic exact-root accounting |
-| Accuracy measurement | 1 deterministic measurement iteration; counters only, not speed interpretation |
+| Accuracy warmup | 3 JMH warmup iterations were applied by the Gradle invocation; timing scores from quality methods are not interpreted |
+| Accuracy measurement | 5 JMH measurement samples; documentation uses deterministic auxiliary counter ratios from the same report |
 | Fork count in generated report files | 1 |
 | Default fork policy for accuracy-only benchmark classes | `@Fork(0)` for future default runs because accuracy counters are deterministic and not interpreted as speed |
 | Thread count | 1 |
-| JVM reported by JMH | OpenJDK 64-Bit Server VM, 25.0.3+9 |
+| JVM reported by JMH | JDK 25.0.3, OpenJDK 64-Bit Server VM, 25.0.3+9 |
+| Java runtime | OpenJDK Runtime Environment, Red Hat build 25.0.3+9 |
 | JVM invoker | `/usr/lib/jvm/java-25-openjdk/bin/java` |
-| Operating system | Linux 7.0.13-200.fc44.x86_64 |
-| CPU | AMD Ryzen 5 7600 6-Core Processor |
+| Operating system | Fedora Linux 44 (MATE-Compiz) |
+| Kernel | Linux 7.0.12-201.fc44.x86_64 |
+| Architecture | x86_64 |
+| CPU | AMD Ryzen 5 8600G w/ Radeon 760M Graphics |
+| Physical cores | 6 |
 | Logical CPUs | 12 |
 
 ## Contracted Trie Baseline
@@ -35,12 +39,10 @@ All Radixor rows in the refreshed benchmark tables use contracted compiled patch
 
 Generated local report files for this benchmark update:
 
-- `build/reports/jmh/contracted/english-comparison.csv`
-- `build/reports/jmh/contracted/english-comparison.txt`
-- `build/reports/jmh/contracted/multilanguage-speed.csv`
-- `build/reports/jmh/contracted/multilanguage-speed.txt`
-- `build/reports/jmh/contracted/snowball-language-speed.csv`
-- `build/reports/jmh/contracted/snowball-language-speed.txt`
+- `build/reports/jmh/stemmer-comparison-2026-07-06.csv`
+- `build/reports/jmh/stemmer-comparison-2026-07-06.txt`
+- `build/reports/jmh/english-coverage-2026-07-06.csv`
+- `build/reports/jmh/english-coverage-2026-07-06.txt`
 
 JMH TXT and CSV reports are still published as benchmark artifacts. They are not converted into a Porter speed badge.
 

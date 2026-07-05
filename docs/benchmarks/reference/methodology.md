@@ -56,4 +56,4 @@ rootPreservedPercent = rootPreservedMatches / rootEvaluatedTokens * 100
 
 Morfologik can emit multiple terms for one input token. The quality benchmark uses the first emitted term for exact-root accounting when no ranking weight is exposed. Throughput benchmarks for Morfologik TokenFilter paths consume all emitted terms.
 
-Quality reports intentionally use one deterministic measurement iteration without warmup, because exact-root agreement is not a timing metric and repeated precision passes would only duplicate the same counters.
+Quality reports use JMH auxiliary counter rows. Exact-root accounting is deterministic for a fixed corpus and stemmer, so repeated measurement samples duplicate the same counters; documentation uses the counter ratios and does not interpret quality benchmark timing scores.

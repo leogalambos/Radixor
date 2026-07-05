@@ -1,0 +1,69 @@
+def cistemGoldStandardBaseUrl = 'https://raw.githubusercontent.com/LeonieWeissweiler/CISTEM/refs/heads/master/gold_standards'
+def cistemGoldStandardFiles = [
+        'goldstandard1.txt',
+        'goldstandard2.txt'
+]
+def cistemGoldStandardDownloadDirectory = layout.buildDirectory.dir('third-party/cistem-gold-standards')
+def cistemGoldStandardGeneratedResourcesDirectory = layout.buildDirectory.dir('generated/resources/cistem-gold-standards')
+
+def cistemGoldStandardDownloadedFiles = cistemGoldStandardFiles.collect { String fileName ->
+    cistemGoldStandardDownloadDirectory.map { it.file(fileName) }
+}
+
+tasks.register('downloadCistemGoldStandards') {
+    group = 'build setup'
+    description = 'Downloads benchmark-only CISTEM German gold standards.'
+
+    outputs.files(cistemGoldStandardDownloadedFiles)
+
+    doLast {
+        cistemGoldStandardFiles.each { String fileName ->
+            final File targetFile = cistemGoldStandardDownloadDirectory.get().file(fileName).asFile
+            targetFile.parentFile.mkdirs()
+
+            if (!targetFile.exists()) {
+                final URL sourceUrl = new URL("${cistemGoldStandardBaseUrl}/${fileName}")
+                try {
+                    sourceUrl.withInputStream { inputStream ->
+                        targetFile.withOutputStream { outputStream ->
+                            outputStream << inputStream
+                        }
+                    }
+                } catch (FileNotFoundException exception) {
+                    throw new GradleException(
+                            "Unable to download CISTEM gold standard ${fileName} from ${sourceUrl}.",
+                            exception)
+                }
+            }
+
+            if (targetFile.length() <= 0L) {
+                throw new GradleException("Downloaded CISTEM gold standard ${fileName} was empty.")
+            }
+        }
+    }
+}
+
+tasks.register('prepareCistemGoldStandardResources', Copy) {
+    group = 'build setup'
+    description = 'Copies benchmark-only CISTEM German gold standards into the JMH resource output.'
+
+    dependsOn(tasks.named('downloadCistemGoldStandards'))
+
+    from(cistemGoldStandardDownloadDirectory) {
+        include 'goldstandard1.txt'
+        include 'goldstandard2.txt'
+    }
+    into(cistemGoldStandardGeneratedResourcesDirectory)
+}
+
+sourceSets {
+    jmh {
+        resources {
+            srcDir(cistemGoldStandardGeneratedResourcesDirectory)
+        }
+    }
+}
+
+tasks.named('processJmhResources') {
+    dependsOn(tasks.named('prepareCistemGoldStandardResources'))
+}

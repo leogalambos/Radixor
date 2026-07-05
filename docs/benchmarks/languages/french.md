@@ -26,11 +26,12 @@ Radixor stores the preferred transformation for each normalized dictionary word 
 
 ## Accuracy
 
-Accuracy is computed from one deterministic JMH measurement iteration without warmup. The benchmark may execute the full dictionary pass more than once inside that single timed iteration; percentages divide matching counters by evaluated counters from the same iteration.
+Accuracy is computed from JMH auxiliary counters in the current report. The counters are deterministic for a fixed corpus and stemmer; percentages divide matching counters by evaluated counters from the same report and are not timing metrics.
 
 | Stemmer | All exact | Changed exact | Root preserved | Note |
 | --- | ---: | ---: | ---: | --- |
 | Radixor | 94.831% | 94.859% | 94.734% | Full Radixor dictionary patch-command stemmer. |
+| Lucene HunspellStemFilter | 68.923% | 63.617% | 86.876% | Benchmark-only French Hunspell dictionary compared via Lucene HunspellStemFilter. |
 | Lucene FrenchMinimalStemFilter | 11.472% | 6.236% | 29.192% | Minimal suffix reducer; narrow baseline, not a full stemmer. |
 | Lucene SnowballFilter | 8.551% | 5.183% | 19.952% | Lucene TokenFilter integration path around the Snowball algorithm. |
 | Official Snowball direct | 8.462% | 5.067% | 19.952% | Official Snowball generated Java stemmer; rule-based suffix algorithm. |
@@ -42,11 +43,12 @@ Speed uses JMH average time, 3 warmup iterations, 5 measurement iterations, 1 fo
 
 | Stemmer | Benchmark method | Score ms/op | Error ms | ns/token | Relative vs Radixor | Note |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
-| Radixor | `frenchRadixor` | 38.598 | 5.425 | 105.5 | 1.000 | Full Radixor dictionary patch-command stemmer. |
-| Lucene FrenchMinimalStemFilter | `frenchLuceneFrenchMinimalStemFilter` | 17.657 | 1.956 | 48.2 | 0.457 | Minimal French suffix reducer; narrow baseline. |
-| Lucene FrenchLightStemFilter | `frenchLuceneFrenchLightStemFilter` | 28.742 | 2.391 | 78.5 | 0.745 | Light French suffix stemmer. |
-| Official Snowball direct | `snowballDirect[FRENCH]` | 104.983 | 10.116 | 286.9 | 2.720 | Official Snowball generated Java stemmer; direct API. |
-| Lucene SnowballFilter | `luceneSnowballFilter[FRENCH]` | 117.938 | 4.007 | 322.3 | 3.056 | Lucene TokenFilter path around Snowball; includes TokenStream overhead. |
+| Radixor | `frenchRadixor` | 47.033 | 4.146 | 128.5 | 1.000 | Full Radixor dictionary patch-command stemmer. |
+| Lucene HunspellStemFilter | `luceneHunspellStemFilter` | 1664.935 | 65.928 | 4549.4 | 35.399 | Benchmark-only French Hunspell dictionary compared via Lucene HunspellStemFilter. |
+| Lucene FrenchMinimalStemFilter | `frenchLuceneFrenchMinimalStemFilter` | 19.234 | 2.098 | 52.6 | 0.409 | Minimal French suffix reducer; narrow baseline. |
+| Lucene FrenchLightStemFilter | `frenchLuceneFrenchLightStemFilter` | 30.560 | 3.680 | 83.5 | 0.650 | Light French suffix stemmer. |
+| Official Snowball direct | `snowballDirect[FRENCH]` | 111.057 | 8.172 | 303.5 | 2.361 | Official Snowball generated Java stemmer; direct API. |
+| Lucene SnowballFilter | `luceneSnowballFilter[FRENCH]` | 123.648 | 3.500 | 337.9 | 2.629 | Lucene TokenFilter path around Snowball; includes TokenStream overhead. |
 
 ## Interpretation Notes
 

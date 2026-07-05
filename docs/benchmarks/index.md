@@ -47,8 +47,8 @@ Open [Language Benchmark Pages](languages/index.md) for the complete language li
 
 The English dictionary coverage benchmark shows the current contracted-trie operating curve. With
 the full English dictionary, Radixor reaches `97.478%` all-token exactness and `97.197%`
-changed-token exactness at `109.8 ns/token`. Even with a deterministic 10% dictionary slice, it
-keeps `92.868%` all-token exactness and `76.516%` changed-token exactness at `90.9 ns/token`.
+changed-token exactness at `135.8 ns/token`. Even with a deterministic 10% dictionary slice, it
+keeps `92.868%` all-token exactness and `76.516%` changed-token exactness at `86.0 ns/token`.
 
 Those figures should not be reduced to a single speed badge. The professional interpretation is a
 quality/speed envelope: the amount and quality of dictionary knowledge affect stemming precision,

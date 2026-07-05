@@ -144,6 +144,7 @@ public class StemmerComparisonBenchmarkQuality {
                 "GERMAN_LUCENE_GERMAN_STEM_FILTER",
                 "GERMAN_LUCENE_GERMAN_LIGHT_STEM_FILTER",
                 "GERMAN_LUCENE_GERMAN_MINIMAL_STEM_FILTER",
+                "GERMAN_CISTEM",
                 "SPANISH_RADIXOR",
                 "SPANISH_LUCENE_SPANISH_LIGHT_STEM_FILTER",
                 "SPANISH_LUCENE_SPANISH_MINIMAL_STEM_FILTER",
@@ -178,46 +179,32 @@ public class StemmerComparisonBenchmarkQuality {
                 "UKRAINIAN_RADIXOR",
                 "UKRAINIAN_MORFOLOGIK_DIRECT",
                 "UKRAINIAN_LUCENE_MORFOLOGIK_FILTER",
-                "SNOWBALL_DANISH_RADIXOR",
                 "SNOWBALL_DANISH_DIRECT",
                 "SNOWBALL_DANISH_LUCENE_FILTER",
-                "SNOWBALL_DUTCH_RADIXOR",
                 "SNOWBALL_DUTCH_DIRECT",
                 "SNOWBALL_DUTCH_LUCENE_FILTER",
-                "SNOWBALL_FINNISH_RADIXOR",
                 "SNOWBALL_FINNISH_DIRECT",
                 "SNOWBALL_FINNISH_LUCENE_FILTER",
-                "SNOWBALL_FRENCH_RADIXOR",
                 "SNOWBALL_FRENCH_DIRECT",
                 "SNOWBALL_FRENCH_LUCENE_FILTER",
-                "SNOWBALL_GERMAN_RADIXOR",
                 "SNOWBALL_GERMAN_DIRECT",
                 "SNOWBALL_GERMAN_LUCENE_FILTER",
-                "SNOWBALL_HUNGARIAN_RADIXOR",
                 "SNOWBALL_HUNGARIAN_DIRECT",
                 "SNOWBALL_HUNGARIAN_LUCENE_FILTER",
-                "SNOWBALL_ITALIAN_RADIXOR",
                 "SNOWBALL_ITALIAN_DIRECT",
                 "SNOWBALL_ITALIAN_LUCENE_FILTER",
-                "SNOWBALL_NORWEGIAN_BOKMAL_RADIXOR",
                 "SNOWBALL_NORWEGIAN_BOKMAL_DIRECT",
                 "SNOWBALL_NORWEGIAN_BOKMAL_LUCENE_FILTER",
-                "SNOWBALL_NORWEGIAN_NYNORSK_RADIXOR",
                 "SNOWBALL_NORWEGIAN_NYNORSK_DIRECT",
                 "SNOWBALL_NORWEGIAN_NYNORSK_LUCENE_FILTER",
-                "SNOWBALL_PORTUGUESE_RADIXOR",
                 "SNOWBALL_PORTUGUESE_DIRECT",
                 "SNOWBALL_PORTUGUESE_LUCENE_FILTER",
-                "SNOWBALL_RUSSIAN_RADIXOR",
                 "SNOWBALL_RUSSIAN_DIRECT",
                 "SNOWBALL_RUSSIAN_LUCENE_FILTER",
-                "SNOWBALL_SPANISH_RADIXOR",
                 "SNOWBALL_SPANISH_DIRECT",
                 "SNOWBALL_SPANISH_LUCENE_FILTER",
-                "SNOWBALL_SWEDISH_RADIXOR",
                 "SNOWBALL_SWEDISH_DIRECT",
                 "SNOWBALL_SWEDISH_LUCENE_FILTER",
-                "SNOWBALL_YIDDISH_RADIXOR",
                 "SNOWBALL_YIDDISH_DIRECT",
                 "SNOWBALL_YIDDISH_LUCENE_FILTER"
         })
@@ -343,6 +330,7 @@ public class StemmerComparisonBenchmarkQuality {
         GERMAN_LUCENE_GERMAN_STEM_FILTER(StemmerPatchTrieLoader.Language.DE_DE),
         GERMAN_LUCENE_GERMAN_LIGHT_STEM_FILTER(StemmerPatchTrieLoader.Language.DE_DE),
         GERMAN_LUCENE_GERMAN_MINIMAL_STEM_FILTER(StemmerPatchTrieLoader.Language.DE_DE),
+        GERMAN_CISTEM(StemmerPatchTrieLoader.Language.DE_DE),
         SPANISH_RADIXOR(StemmerPatchTrieLoader.Language.ES_ES),
         SPANISH_LUCENE_SPANISH_LIGHT_STEM_FILTER(StemmerPatchTrieLoader.Language.ES_ES),
         SPANISH_LUCENE_SPANISH_MINIMAL_STEM_FILTER(StemmerPatchTrieLoader.Language.ES_ES),
@@ -377,52 +365,36 @@ public class StemmerComparisonBenchmarkQuality {
         UKRAINIAN_RADIXOR(StemmerPatchTrieLoader.Language.UK_UA),
         UKRAINIAN_MORFOLOGIK_DIRECT(StemmerPatchTrieLoader.Language.UK_UA),
         UKRAINIAN_LUCENE_MORFOLOGIK_FILTER(StemmerPatchTrieLoader.Language.UK_UA),
-        SNOWBALL_DANISH_RADIXOR(StemmerPatchTrieLoader.Language.DA_DK, SnowballLanguageCase.DANISH),
         SNOWBALL_DANISH_DIRECT(StemmerPatchTrieLoader.Language.DA_DK, SnowballLanguageCase.DANISH),
         SNOWBALL_DANISH_LUCENE_FILTER(StemmerPatchTrieLoader.Language.DA_DK, SnowballLanguageCase.DANISH),
-        SNOWBALL_DUTCH_RADIXOR(StemmerPatchTrieLoader.Language.NL_NL, SnowballLanguageCase.DUTCH),
         SNOWBALL_DUTCH_DIRECT(StemmerPatchTrieLoader.Language.NL_NL, SnowballLanguageCase.DUTCH),
         SNOWBALL_DUTCH_LUCENE_FILTER(StemmerPatchTrieLoader.Language.NL_NL, SnowballLanguageCase.DUTCH),
-        SNOWBALL_FINNISH_RADIXOR(StemmerPatchTrieLoader.Language.FI_FI, SnowballLanguageCase.FINNISH),
         SNOWBALL_FINNISH_DIRECT(StemmerPatchTrieLoader.Language.FI_FI, SnowballLanguageCase.FINNISH),
         SNOWBALL_FINNISH_LUCENE_FILTER(StemmerPatchTrieLoader.Language.FI_FI, SnowballLanguageCase.FINNISH),
-        SNOWBALL_FRENCH_RADIXOR(StemmerPatchTrieLoader.Language.FR_FR, SnowballLanguageCase.FRENCH),
         SNOWBALL_FRENCH_DIRECT(StemmerPatchTrieLoader.Language.FR_FR, SnowballLanguageCase.FRENCH),
         SNOWBALL_FRENCH_LUCENE_FILTER(StemmerPatchTrieLoader.Language.FR_FR, SnowballLanguageCase.FRENCH),
-        SNOWBALL_GERMAN_RADIXOR(StemmerPatchTrieLoader.Language.DE_DE, SnowballLanguageCase.GERMAN),
         SNOWBALL_GERMAN_DIRECT(StemmerPatchTrieLoader.Language.DE_DE, SnowballLanguageCase.GERMAN),
         SNOWBALL_GERMAN_LUCENE_FILTER(StemmerPatchTrieLoader.Language.DE_DE, SnowballLanguageCase.GERMAN),
-        SNOWBALL_HUNGARIAN_RADIXOR(StemmerPatchTrieLoader.Language.HU_HU, SnowballLanguageCase.HUNGARIAN),
         SNOWBALL_HUNGARIAN_DIRECT(StemmerPatchTrieLoader.Language.HU_HU, SnowballLanguageCase.HUNGARIAN),
         SNOWBALL_HUNGARIAN_LUCENE_FILTER(StemmerPatchTrieLoader.Language.HU_HU, SnowballLanguageCase.HUNGARIAN),
-        SNOWBALL_ITALIAN_RADIXOR(StemmerPatchTrieLoader.Language.IT_IT, SnowballLanguageCase.ITALIAN),
         SNOWBALL_ITALIAN_DIRECT(StemmerPatchTrieLoader.Language.IT_IT, SnowballLanguageCase.ITALIAN),
         SNOWBALL_ITALIAN_LUCENE_FILTER(StemmerPatchTrieLoader.Language.IT_IT, SnowballLanguageCase.ITALIAN),
-        SNOWBALL_NORWEGIAN_BOKMAL_RADIXOR(StemmerPatchTrieLoader.Language.NB_NO,
-                SnowballLanguageCase.NORWEGIAN_BOKMAL),
         SNOWBALL_NORWEGIAN_BOKMAL_DIRECT(StemmerPatchTrieLoader.Language.NB_NO,
                 SnowballLanguageCase.NORWEGIAN_BOKMAL),
         SNOWBALL_NORWEGIAN_BOKMAL_LUCENE_FILTER(StemmerPatchTrieLoader.Language.NB_NO,
                 SnowballLanguageCase.NORWEGIAN_BOKMAL),
-        SNOWBALL_NORWEGIAN_NYNORSK_RADIXOR(StemmerPatchTrieLoader.Language.NN_NO,
-                SnowballLanguageCase.NORWEGIAN_NYNORSK),
         SNOWBALL_NORWEGIAN_NYNORSK_DIRECT(StemmerPatchTrieLoader.Language.NN_NO,
                 SnowballLanguageCase.NORWEGIAN_NYNORSK),
         SNOWBALL_NORWEGIAN_NYNORSK_LUCENE_FILTER(StemmerPatchTrieLoader.Language.NN_NO,
                 SnowballLanguageCase.NORWEGIAN_NYNORSK),
-        SNOWBALL_PORTUGUESE_RADIXOR(StemmerPatchTrieLoader.Language.PT_PT, SnowballLanguageCase.PORTUGUESE),
         SNOWBALL_PORTUGUESE_DIRECT(StemmerPatchTrieLoader.Language.PT_PT, SnowballLanguageCase.PORTUGUESE),
         SNOWBALL_PORTUGUESE_LUCENE_FILTER(StemmerPatchTrieLoader.Language.PT_PT, SnowballLanguageCase.PORTUGUESE),
-        SNOWBALL_RUSSIAN_RADIXOR(StemmerPatchTrieLoader.Language.RU_RU, SnowballLanguageCase.RUSSIAN),
         SNOWBALL_RUSSIAN_DIRECT(StemmerPatchTrieLoader.Language.RU_RU, SnowballLanguageCase.RUSSIAN),
         SNOWBALL_RUSSIAN_LUCENE_FILTER(StemmerPatchTrieLoader.Language.RU_RU, SnowballLanguageCase.RUSSIAN),
-        SNOWBALL_SPANISH_RADIXOR(StemmerPatchTrieLoader.Language.ES_ES, SnowballLanguageCase.SPANISH),
         SNOWBALL_SPANISH_DIRECT(StemmerPatchTrieLoader.Language.ES_ES, SnowballLanguageCase.SPANISH),
         SNOWBALL_SPANISH_LUCENE_FILTER(StemmerPatchTrieLoader.Language.ES_ES, SnowballLanguageCase.SPANISH),
-        SNOWBALL_SWEDISH_RADIXOR(StemmerPatchTrieLoader.Language.SV_SE, SnowballLanguageCase.SWEDISH),
         SNOWBALL_SWEDISH_DIRECT(StemmerPatchTrieLoader.Language.SV_SE, SnowballLanguageCase.SWEDISH),
         SNOWBALL_SWEDISH_LUCENE_FILTER(StemmerPatchTrieLoader.Language.SV_SE, SnowballLanguageCase.SWEDISH),
-        SNOWBALL_YIDDISH_RADIXOR(StemmerPatchTrieLoader.Language.YI, SnowballLanguageCase.YIDDISH),
         SNOWBALL_YIDDISH_DIRECT(StemmerPatchTrieLoader.Language.YI, SnowballLanguageCase.YIDDISH),
         SNOWBALL_YIDDISH_LUCENE_FILTER(StemmerPatchTrieLoader.Language.YI, SnowballLanguageCase.YIDDISH);
 
@@ -504,6 +476,7 @@ public class StemmerComparisonBenchmarkQuality {
                     tokenFilter(input -> new GermanLightStemFilter(germanNormalize(input)));
                 case GERMAN_LUCENE_GERMAN_MINIMAL_STEM_FILTER ->
                     tokenFilter(input -> new GermanMinimalStemFilter(germanNormalize(input)));
+                case GERMAN_CISTEM -> direct(createGermanCistemStemmer());
                 case SPANISH_LUCENE_SPANISH_LIGHT_STEM_FILTER ->
                     tokenFilter(input -> new SpanishLightStemFilter(lowercase(input)));
                 case SPANISH_LUCENE_SPANISH_MINIMAL_STEM_FILTER ->
@@ -559,6 +532,15 @@ public class StemmerComparisonBenchmarkQuality {
                 default -> throw new IllegalStateException("No evaluator for " + this + ".");
             };
         }
+    }
+
+    /**
+     * Creates a CISTEM stemmer adapter.
+     *
+     * @return German stem function
+     */
+    private static Stemmer createGermanCistemStemmer() {
+        return Cistem::stem;
     }
 
     /**

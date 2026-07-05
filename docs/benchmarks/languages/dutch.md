@@ -26,11 +26,12 @@ Radixor stores the preferred transformation for each normalized dictionary word 
 
 ## Accuracy
 
-Accuracy is computed from one deterministic JMH measurement iteration without warmup. The benchmark may execute the full dictionary pass more than once inside that single timed iteration; percentages divide matching counters by evaluated counters from the same iteration.
+Accuracy is computed from JMH auxiliary counters in the current report. The counters are deterministic for a fixed corpus and stemmer; percentages divide matching counters by evaluated counters from the same report and are not timing metrics.
 
 | Stemmer | All exact | Changed exact | Root preserved | Note |
 | --- | ---: | ---: | ---: | --- |
-| Radixor | 99.120% | 98.711% | 100.000% | Radixor baseline in the Snowball-language comparison family. |
+| Radixor | 99.120% | 98.711% | 100.000% | Full Radixor dictionary patch-command stemmer. |
+| Lucene HunspellStemFilter | 46.590% | 22.718% | 97.976% | Benchmark-only Dutch Hunspell dictionary compared via Lucene HunspellStemFilter. |
 | Official Snowball direct | 15.954% | 8.992% | 30.939% | Official Snowball generated Java stemmer; rule-based suffix algorithm. |
 | Lucene SnowballFilter | 12.620% | 5.441% | 28.073% | Lucene TokenFilter integration path around the Snowball algorithm. |
 
@@ -40,9 +41,10 @@ Speed uses JMH average time, 3 warmup iterations, 5 measurement iterations, 1 fo
 
 | Stemmer | Benchmark method | Score ms/op | Error ms | ns/token | Relative vs Radixor | Note |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
-| Radixor | `radixor[DUTCH]` | 1.262 | 0.039 | 58.7 | 1.000 | Radixor baseline for the Snowball-language comparison family. |
-| Official Snowball direct | `snowballDirect[DUTCH]` | 3.968 | 0.258 | 184.7 | 3.145 | Official Snowball generated Java stemmer; direct API. |
-| Lucene SnowballFilter | `luceneSnowballFilter[DUTCH]` | 6.866 | 0.337 | 319.6 | 5.441 | Lucene TokenFilter path around Snowball; includes TokenStream overhead. |
+| Radixor | `radixor[DUTCH]` | 1.331 | 0.114 | 61.9 | 1.000 | Full Radixor dictionary patch-command stemmer. |
+| Lucene HunspellStemFilter | `luceneHunspellStemFilter` | 22.760 | 1.387 | 1059.3 | 17.105 | Benchmark-only Dutch Hunspell dictionary compared via Lucene HunspellStemFilter. |
+| Official Snowball direct | `snowballDirect[DUTCH]` | 4.146 | 0.291 | 193.0 | 3.116 | Official Snowball generated Java stemmer; direct API. |
+| Lucene SnowballFilter | `luceneSnowballFilter[DUTCH]` | 7.375 | 0.595 | 343.3 | 5.543 | Lucene TokenFilter path around Snowball; includes TokenStream overhead. |
 
 ## Interpretation Notes
 

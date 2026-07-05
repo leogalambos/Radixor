@@ -26,11 +26,12 @@ Radixor stores the preferred transformation for each normalized dictionary word 
 
 ## Accuracy
 
-Accuracy is computed from one deterministic JMH measurement iteration without warmup. The benchmark may execute the full dictionary pass more than once inside that single timed iteration; percentages divide matching counters by evaluated counters from the same iteration.
+Accuracy is computed from JMH auxiliary counters in the current report. The counters are deterministic for a fixed corpus and stemmer; percentages divide matching counters by evaluated counters from the same report and are not timing metrics.
 
 | Stemmer | All exact | Changed exact | Root preserved | Note |
 | --- | ---: | ---: | ---: | --- |
 | Radixor | 98.837% | 98.744% | 99.359% | Full Radixor dictionary patch-command stemmer. |
+| Lucene HunspellStemFilter | 89.545% | 88.272% | 96.713% | Benchmark-only Polish Hunspell dictionary compared via Lucene HunspellStemFilter. |
 | Lucene MorfologikFilter | 87.729% | 86.606% | 94.047% | Dictionary-based path; Morfologik can emit multiple terms. |
 | Lucene StempelFilter | 70.009% | 69.262% | 74.220% | Lucene TokenFilter integration path for table-driven Polish Stempel. |
 | Lucene StempelStemmer direct | 70.009% | 69.262% | 74.220% | Direct table-driven Polish Stempel stemmer API. |
@@ -41,10 +42,11 @@ Speed uses JMH average time, 3 warmup iterations, 5 measurement iterations, 1 fo
 
 | Stemmer | Benchmark method | Score ms/op | Error ms | ns/token | Relative vs Radixor | Note |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
-| Radixor | `polishRadixor` | 7.760 | 0.240 | 69.1 | 1.000 | Full Radixor dictionary patch-command stemmer. |
-| Lucene StempelStemmer direct | `polishLuceneStempelStemmerDirect` | 34.295 | 0.418 | 305.3 | 4.420 | Direct table-driven Polish Stempel stemmer API. |
-| Lucene StempelFilter | `polishLuceneStempelFilter` | 39.116 | 1.717 | 348.2 | 5.041 | Lucene TokenFilter integration path for table-driven Polish Stempel. |
-| Lucene MorfologikFilter | `polishLuceneMorfologikFilter` | 128.516 | 12.557 | 1143.9 | 16.562 | Dictionary-based Morfologik TokenFilter; may emit multiple terms. |
+| Radixor | `polishRadixor` | 9.049 | 0.485 | 80.5 | 1.000 | Full Radixor dictionary patch-command stemmer. |
+| Lucene HunspellStemFilter | `luceneHunspellStemFilter` | 483.316 | 11.455 | 4301.8 | 53.408 | Benchmark-only Polish Hunspell dictionary compared via Lucene HunspellStemFilter. |
+| Lucene StempelStemmer direct | `polishLuceneStempelStemmerDirect` | 41.932 | 1.916 | 373.2 | 4.634 | Direct table-driven Polish Stempel stemmer API. |
+| Lucene StempelFilter | `polishLuceneStempelFilter` | 45.277 | 13.693 | 403.0 | 5.003 | Lucene TokenFilter integration path for table-driven Polish Stempel. |
+| Lucene MorfologikFilter | `polishLuceneMorfologikFilter` | 135.763 | 31.634 | 1208.4 | 15.002 | Dictionary-based Morfologik TokenFilter; may emit multiple terms. |
 
 ## Interpretation Notes
 

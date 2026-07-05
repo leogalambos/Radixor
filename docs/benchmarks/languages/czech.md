@@ -26,11 +26,12 @@ Radixor stores the preferred transformation for each normalized dictionary word 
 
 ## Accuracy
 
-Accuracy is computed from one deterministic JMH measurement iteration without warmup. The benchmark may execute the full dictionary pass more than once inside that single timed iteration; percentages divide matching counters by evaluated counters from the same iteration.
+Accuracy is computed from JMH auxiliary counters in the current report. The counters are deterministic for a fixed corpus and stemmer; percentages divide matching counters by evaluated counters from the same report and are not timing metrics.
 
 | Stemmer | All exact | Changed exact | Root preserved | Note |
 | --- | ---: | ---: | ---: | --- |
 | Radixor | 99.465% | 99.439% | 99.582% | Full Radixor dictionary patch-command stemmer. |
+| Lucene HunspellStemFilter | 84.850% | 82.269% | 96.806% | Benchmark-only Czech Hunspell dictionary compared via Lucene HunspellStemFilter. |
 | Lucene CzechStemFilter | 16.784% | 15.538% | 22.559% | Lucene Czech suffix stemmer implemented as a TokenFilter. |
 
 ## Speed
@@ -39,8 +40,9 @@ Speed uses JMH average time, 3 warmup iterations, 5 measurement iterations, 1 fo
 
 | Stemmer | Benchmark method | Score ms/op | Error ms | ns/token | Relative vs Radixor | Note |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
-| Radixor | `czechRadixor` | 3.117 | 0.454 | 66.9 | 1.000 | Full Radixor dictionary patch-command stemmer. |
-| Lucene CzechStemFilter | `czechLuceneCzechStemFilter` | 2.921 | 0.202 | 62.7 | 0.937 | Czech suffix stemmer implemented as a Lucene TokenFilter. |
+| Radixor | `czechRadixor` | 3.332 | 0.240 | 71.6 | 1.000 | Full Radixor dictionary patch-command stemmer. |
+| Lucene HunspellStemFilter | `luceneHunspellStemFilter` | 346.819 | 3.622 | 7448.4 | 104.091 | Benchmark-only Czech Hunspell dictionary compared via Lucene HunspellStemFilter. |
+| Lucene CzechStemFilter | `czechLuceneCzechStemFilter` | 3.163 | 0.253 | 67.9 | 0.949 | Czech suffix stemmer implemented as a Lucene TokenFilter. |
 
 ## Interpretation Notes
 

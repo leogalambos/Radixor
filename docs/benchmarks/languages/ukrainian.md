@@ -26,11 +26,12 @@ Radixor stores the preferred transformation for each normalized dictionary word 
 
 ## Accuracy
 
-Accuracy is computed from one deterministic JMH measurement iteration without warmup. The benchmark may execute the full dictionary pass more than once inside that single timed iteration; percentages divide matching counters by evaluated counters from the same iteration.
+Accuracy is computed from JMH auxiliary counters in the current report. The counters are deterministic for a fixed corpus and stemmer; percentages divide matching counters by evaluated counters from the same report and are not timing metrics.
 
 | Stemmer | All exact | Changed exact | Root preserved | Note |
 | --- | ---: | ---: | ---: | --- |
 | Radixor | 99.307% | 99.365% | 99.062% | Full Radixor dictionary patch-command stemmer. |
+| Lucene HunspellStemFilter | 86.815% | 83.759% | 99.866% | Benchmark-only Ukrainian Hunspell dictionary compared via Lucene HunspellStemFilter. |
 | Lucene MorfologikFilter | 92.362% | 90.637% | 99.732% | Dictionary-based path; Morfologik can emit multiple terms. |
 | Morfologik direct | 92.362% | 90.637% | 99.732% | Direct dictionary lookup; first returned stem is used for quality when no ranking weight is exposed. |
 
@@ -40,9 +41,10 @@ Speed uses JMH average time, 3 warmup iterations, 5 measurement iterations, 1 fo
 
 | Stemmer | Benchmark method | Score ms/op | Error ms | ns/token | Relative vs Radixor | Note |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
-| Radixor | `ukrainianRadixor` | 0.605 | 0.056 | 47.4 | 1.000 | Full Radixor dictionary patch-command stemmer. |
-| Morfologik direct | `ukrainianMorfologikDirect` | 8.106 | 0.040 | 635.7 | 13.408 | Direct Morfologik dictionary lookup; first returned stem is used for quality. |
-| Lucene MorfologikFilter | `ukrainianLuceneMorfologikFilter` | 14.684 | 5.214 | 1151.5 | 24.287 | Dictionary-based Morfologik TokenFilter; may emit multiple terms. |
+| Radixor | `ukrainianRadixor` | 0.682 | 0.057 | 53.5 | 1.000 | Full Radixor dictionary patch-command stemmer. |
+| Lucene HunspellStemFilter | `luceneHunspellStemFilter` | 43.527 | 1.207 | 3413.3 | 63.799 | Benchmark-only Ukrainian Hunspell dictionary compared via Lucene HunspellStemFilter. |
+| Morfologik direct | `ukrainianMorfologikDirect` | 8.680 | 0.073 | 680.7 | 12.723 | Direct Morfologik dictionary lookup; first returned stem is used for quality. |
+| Lucene MorfologikFilter | `ukrainianLuceneMorfologikFilter` | 14.575 | 0.248 | 1143.0 | 21.364 | Dictionary-based Morfologik TokenFilter; may emit multiple terms. |
 
 ## Interpretation Notes
 

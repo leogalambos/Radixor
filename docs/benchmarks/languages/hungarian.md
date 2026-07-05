@@ -26,7 +26,7 @@ Radixor stores the preferred transformation for each normalized dictionary word 
 
 ## Accuracy
 
-Accuracy is computed from one deterministic JMH measurement iteration without warmup. The benchmark may execute the full dictionary pass more than once inside that single timed iteration; percentages divide matching counters by evaluated counters from the same iteration.
+Accuracy is computed from JMH auxiliary counters in the current report. The counters are deterministic for a fixed corpus and stemmer; percentages divide matching counters by evaluated counters from the same report and are not timing metrics.
 
 | Stemmer | All exact | Changed exact | Root preserved | Note |
 | --- | ---: | ---: | ---: | --- |
@@ -41,10 +41,10 @@ Speed uses JMH average time, 3 warmup iterations, 5 measurement iterations, 1 fo
 
 | Stemmer | Benchmark method | Score ms/op | Error ms | ns/token | Relative vs Radixor | Note |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
-| Radixor | `hungarianRadixor` | 53.844 | 5.619 | 60.0 | 1.000 | Full Radixor dictionary patch-command stemmer. |
-| Lucene HungarianLightStemFilter | `hungarianLuceneHungarianLightStemFilter` | 85.802 | 4.554 | 95.7 | 1.594 | Light Hungarian suffix stemmer. |
-| Official Snowball direct | `snowballDirect[HUNGARIAN]` | 161.996 | 61.038 | 180.6 | 3.009 | Official Snowball generated Java stemmer; direct API. |
-| Lucene SnowballFilter | `luceneSnowballFilter[HUNGARIAN]` | 185.097 | 44.447 | 206.4 | 3.438 | Lucene TokenFilter path around Snowball; includes TokenStream overhead. |
+| Radixor | `hungarianRadixor` | 62.232 | 6.412 | 69.4 | 1.000 | Full Radixor dictionary patch-command stemmer. |
+| Lucene HungarianLightStemFilter | `hungarianLuceneHungarianLightStemFilter` | 92.813 | 6.929 | 103.5 | 1.491 | Light Hungarian suffix stemmer. |
+| Official Snowball direct | `snowballDirect[HUNGARIAN]` | 157.765 | 13.202 | 175.9 | 2.535 | Official Snowball generated Java stemmer; direct API. |
+| Lucene SnowballFilter | `luceneSnowballFilter[HUNGARIAN]` | 188.863 | 15.880 | 210.6 | 3.035 | Lucene TokenFilter path around Snowball; includes TokenStream overhead. |
 
 ## Interpretation Notes
 

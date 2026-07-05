@@ -519,6 +519,7 @@ apply from: 'gradle/snowball-benchmarks.gradle'
 apply from: 'gradle/paicehusk-benchmarks.gradle'
 apply from: 'gradle/opennlp-benchmarks.gradle'
 apply from: 'gradle/hunspell-benchmarks.gradle'
+apply from: 'gradle/cistem-benchmarks.gradle'
 
 gradle.taskGraph.whenReady { taskGraph ->
     def banner = """

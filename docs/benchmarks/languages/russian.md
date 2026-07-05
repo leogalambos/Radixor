@@ -26,7 +26,7 @@ Radixor stores the preferred transformation for each normalized dictionary word 
 
 ## Accuracy
 
-Accuracy is computed from one deterministic JMH measurement iteration without warmup. The benchmark may execute the full dictionary pass more than once inside that single timed iteration; percentages divide matching counters by evaluated counters from the same iteration.
+Accuracy is computed from JMH auxiliary counters in the current report. The counters are deterministic for a fixed corpus and stemmer; percentages divide matching counters by evaluated counters from the same report and are not timing metrics.
 
 | Stemmer | All exact | Changed exact | Root preserved | Note |
 | --- | ---: | ---: | ---: | --- |
@@ -41,10 +41,10 @@ Speed uses JMH average time, 3 warmup iterations, 5 measurement iterations, 1 fo
 
 | Stemmer | Benchmark method | Score ms/op | Error ms | ns/token | Relative vs Radixor | Note |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
-| Radixor | `russianRadixor` | 72.970 | 15.642 | 99.8 | 1.000 | Full Radixor dictionary patch-command stemmer. |
-| Lucene RussianLightStemFilter | `russianLuceneRussianLightStemFilter` | 57.900 | 4.404 | 79.2 | 0.793 | Light Russian suffix stemmer. |
-| Official Snowball direct | `snowballDirect[RUSSIAN]` | 99.019 | 14.688 | 135.4 | 1.357 | Official Snowball generated Java stemmer; direct API. |
-| Lucene SnowballFilter | `luceneSnowballFilter[RUSSIAN]` | 128.272 | 7.201 | 175.4 | 1.758 | Lucene TokenFilter path around Snowball; includes TokenStream overhead. |
+| Radixor | `russianRadixor` | 89.671 | 3.886 | 122.6 | 1.000 | Full Radixor dictionary patch-command stemmer. |
+| Lucene RussianLightStemFilter | `russianLuceneRussianLightStemFilter` | 60.522 | 5.310 | 82.7 | 0.675 | Light Russian suffix stemmer. |
+| Official Snowball direct | `snowballDirect[RUSSIAN]` | 106.031 | 9.287 | 145.0 | 1.182 | Official Snowball generated Java stemmer; direct API. |
+| Lucene SnowballFilter | `luceneSnowballFilter[RUSSIAN]` | 137.512 | 10.801 | 188.0 | 1.534 | Lucene TokenFilter path around Snowball; includes TokenStream overhead. |
 
 ## Interpretation Notes
 

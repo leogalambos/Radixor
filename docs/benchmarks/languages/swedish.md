@@ -26,7 +26,7 @@ Radixor stores the preferred transformation for each normalized dictionary word 
 
 ## Accuracy
 
-Accuracy is computed from one deterministic JMH measurement iteration without warmup. The benchmark may execute the full dictionary pass more than once inside that single timed iteration; percentages divide matching counters by evaluated counters from the same iteration.
+Accuracy is computed from JMH auxiliary counters in the current report. The counters are deterministic for a fixed corpus and stemmer; percentages divide matching counters by evaluated counters from the same report and are not timing metrics.
 
 | Stemmer | All exact | Changed exact | Root preserved | Note |
 | --- | ---: | ---: | ---: | --- |
@@ -42,11 +42,11 @@ Speed uses JMH average time, 3 warmup iterations, 5 measurement iterations, 1 fo
 
 | Stemmer | Benchmark method | Score ms/op | Error ms | ns/token | Relative vs Radixor | Note |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
-| Radixor | `swedishRadixor` | 4.916 | 0.525 | 57.3 | 1.000 | Full Radixor dictionary patch-command stemmer. |
-| Lucene SwedishMinimalStemFilter | `swedishLuceneSwedishMinimalStemFilter` | 4.453 | 0.530 | 51.9 | 0.906 | Minimal Swedish suffix reducer. |
-| Lucene SwedishLightStemFilter | `swedishLuceneSwedishLightStemFilter` | 4.523 | 0.151 | 52.8 | 0.920 | Light Swedish suffix stemmer. |
-| Official Snowball direct | `snowballDirect[SWEDISH]` | 7.075 | 0.541 | 82.5 | 1.439 | Official Snowball generated Java stemmer; direct API. |
-| Lucene SnowballFilter | `luceneSnowballFilter[SWEDISH]` | 9.379 | 0.056 | 109.4 | 1.908 | Lucene TokenFilter path around Snowball; includes TokenStream overhead. |
+| Radixor | `swedishRadixor` | 5.489 | 0.355 | 64.0 | 1.000 | Full Radixor dictionary patch-command stemmer. |
+| Lucene SwedishMinimalStemFilter | `swedishLuceneSwedishMinimalStemFilter` | 4.630 | 0.130 | 54.0 | 0.843 | Minimal Swedish suffix reducer. |
+| Lucene SwedishLightStemFilter | `swedishLuceneSwedishLightStemFilter` | 4.876 | 0.328 | 56.9 | 0.888 | Light Swedish suffix stemmer. |
+| Official Snowball direct | `snowballDirect[SWEDISH]` | 7.517 | 0.072 | 87.7 | 1.370 | Official Snowball generated Java stemmer; direct API. |
+| Lucene SnowballFilter | `luceneSnowballFilter[SWEDISH]` | 9.793 | 0.338 | 114.2 | 1.784 | Lucene TokenFilter path around Snowball; includes TokenStream overhead. |
 
 ## Interpretation Notes
 

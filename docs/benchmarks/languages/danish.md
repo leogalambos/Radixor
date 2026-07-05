@@ -26,11 +26,11 @@ Radixor stores the preferred transformation for each normalized dictionary word 
 
 ## Accuracy
 
-Accuracy is computed from one deterministic JMH measurement iteration without warmup. The benchmark may execute the full dictionary pass more than once inside that single timed iteration; percentages divide matching counters by evaluated counters from the same iteration.
+Accuracy is computed from JMH auxiliary counters in the current report. The counters are deterministic for a fixed corpus and stemmer; percentages divide matching counters by evaluated counters from the same report and are not timing metrics.
 
 | Stemmer | All exact | Changed exact | Root preserved | Note |
 | --- | ---: | ---: | ---: | --- |
-| Radixor | 99.371% | 99.527% | 98.923% | Radixor baseline in the Snowball-language comparison family. |
+| Radixor | 99.371% | 99.527% | 98.923% | Full Radixor dictionary patch-command stemmer. |
 | Lucene SnowballFilter | 55.509% | 54.159% | 59.371% | Lucene TokenFilter integration path around the Snowball algorithm. |
 | Official Snowball direct | 55.509% | 54.159% | 59.371% | Official Snowball generated Java stemmer; rule-based suffix algorithm. |
 
@@ -40,9 +40,9 @@ Speed uses JMH average time, 3 warmup iterations, 5 measurement iterations, 1 fo
 
 | Stemmer | Benchmark method | Score ms/op | Error ms | ns/token | Relative vs Radixor | Note |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
-| Radixor | `radixor[DANISH]` | 1.065 | 0.019 | 44.6 | 1.000 | Radixor baseline for the Snowball-language comparison family. |
-| Official Snowball direct | `snowballDirect[DANISH]` | 2.028 | 0.011 | 84.9 | 1.904 | Official Snowball generated Java stemmer; direct API. |
-| Lucene SnowballFilter | `luceneSnowballFilter[DANISH]` | 2.692 | 0.028 | 112.6 | 2.527 | Lucene TokenFilter path around Snowball; includes TokenStream overhead. |
+| Radixor | `radixor[DANISH]` | 1.143 | 0.017 | 47.8 | 1.000 | Full Radixor dictionary patch-command stemmer. |
+| Official Snowball direct | `snowballDirect[DANISH]` | 2.168 | 0.058 | 90.7 | 1.896 | Official Snowball generated Java stemmer; direct API. |
+| Lucene SnowballFilter | `luceneSnowballFilter[DANISH]` | 2.975 | 0.143 | 124.5 | 2.602 | Lucene TokenFilter path around Snowball; includes TokenStream overhead. |
 
 ## Interpretation Notes
 

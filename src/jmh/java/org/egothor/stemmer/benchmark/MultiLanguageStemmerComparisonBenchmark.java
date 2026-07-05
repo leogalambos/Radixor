@@ -474,6 +474,19 @@ public class MultiLanguageStemmerComparisonBenchmark {
     }
 
     /**
+     * Runs CISTEM directly over the German corpus.
+     *
+     * @param sharedState shared benchmark state
+     * @param blackhole   result sink
+     */
+    @Benchmark
+    public void germanCistem(final SharedState sharedState, final Blackhole blackhole) {
+        for (final String token : sharedState.german.tokens) {
+            blackhole.consume(Cistem.stem(token));
+        }
+    }
+
+    /**
      * Runs Radixor over the Spanish corpus.
      *
      * @param sharedState shared benchmark state

@@ -26,11 +26,12 @@ Radixor stores the preferred transformation for each normalized dictionary word 
 
 ## Accuracy
 
-Accuracy is computed from one deterministic JMH measurement iteration without warmup. The benchmark may execute the full dictionary pass more than once inside that single timed iteration; percentages divide matching counters by evaluated counters from the same iteration.
+Accuracy is computed from JMH auxiliary counters in the current report. The counters are deterministic for a fixed corpus and stemmer; percentages divide matching counters by evaluated counters from the same report and are not timing metrics.
 
 | Stemmer | All exact | Changed exact | Root preserved | Note |
 | --- | ---: | ---: | ---: | --- |
 | Radixor | 97.459% | 97.544% | 96.891% | Full Radixor dictionary patch-command stemmer. |
+| Lucene HunspellStemFilter | 49.074% | 42.656% | 92.154% | Benchmark-only Spanish Hunspell dictionary compared via Lucene HunspellStemFilter. |
 | Lucene SpanishMinimalStemFilter | 17.284% | 5.347% | 97.403% | Minimal suffix reducer; narrow baseline, not a full stemmer. |
 | Lucene SpanishPluralStemFilter | 15.140% | 5.802% | 77.820% | Plural-focused suffix reducer; narrow baseline. |
 | Lucene SpanishLightStemFilter | 9.577% | 7.088% | 26.279% | Light suffix stemmer; intentionally narrower than a dictionary-derived stemmer. |
@@ -43,12 +44,13 @@ Speed uses JMH average time, 3 warmup iterations, 5 measurement iterations, 1 fo
 
 | Stemmer | Benchmark method | Score ms/op | Error ms | ns/token | Relative vs Radixor | Note |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
-| Radixor | `spanishRadixor` | 64.539 | 3.448 | 80.0 | 1.000 | Full Radixor dictionary patch-command stemmer. |
-| Lucene SpanishMinimalStemFilter | `spanishLuceneSpanishMinimalStemFilter` | 38.288 | 2.382 | 47.5 | 0.593 | Minimal Spanish suffix reducer; narrow baseline. |
-| Lucene SpanishLightStemFilter | `spanishLuceneSpanishLightStemFilter` | 40.855 | 2.407 | 50.7 | 0.633 | Light Spanish suffix stemmer. |
-| Lucene SpanishPluralStemFilter | `spanishLuceneSpanishPluralStemFilter` | 91.054 | 8.822 | 112.9 | 1.411 | Plural-oriented Spanish suffix reducer. |
-| Official Snowball direct | `snowballDirect[SPANISH]` | 168.813 | 32.860 | 209.4 | 2.616 | Official Snowball generated Java stemmer; direct API. |
-| Lucene SnowballFilter | `luceneSnowballFilter[SPANISH]` | 185.626 | 50.297 | 230.2 | 2.876 | Lucene TokenFilter path around Snowball; includes TokenStream overhead. |
+| Radixor | `spanishRadixor` | 78.919 | 7.253 | 97.9 | 1.000 | Full Radixor dictionary patch-command stemmer. |
+| Lucene HunspellStemFilter | `luceneHunspellStemFilter` | 2079.041 | 193.548 | 2578.6 | 26.344 | Benchmark-only Spanish Hunspell dictionary compared via Lucene HunspellStemFilter. |
+| Lucene SpanishMinimalStemFilter | `spanishLuceneSpanishMinimalStemFilter` | 45.596 | 4.639 | 56.6 | 0.578 | Minimal Spanish suffix reducer; narrow baseline. |
+| Lucene SpanishLightStemFilter | `spanishLuceneSpanishLightStemFilter` | 42.003 | 1.683 | 52.1 | 0.532 | Light Spanish suffix stemmer. |
+| Lucene SpanishPluralStemFilter | `spanishLuceneSpanishPluralStemFilter` | 93.734 | 6.247 | 116.3 | 1.188 | Plural-oriented Spanish suffix reducer. |
+| Official Snowball direct | `snowballDirect[SPANISH]` | 171.995 | 11.035 | 213.3 | 2.179 | Official Snowball generated Java stemmer; direct API. |
+| Lucene SnowballFilter | `luceneSnowballFilter[SPANISH]` | 211.138 | 17.940 | 261.9 | 2.675 | Lucene TokenFilter path around Snowball; includes TokenStream overhead. |
 
 ## Interpretation Notes
 

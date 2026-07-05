@@ -26,13 +26,14 @@ Radixor stores the preferred transformation for each normalized dictionary word 
 
 ## Accuracy
 
-Accuracy is computed from one deterministic JMH measurement iteration without warmup. The benchmark may execute the full dictionary pass more than once inside that single timed iteration; percentages divide matching counters by evaluated counters from the same iteration.
+Accuracy is computed from JMH auxiliary counters in the current report. The counters are deterministic for a fixed corpus and stemmer; percentages divide matching counters by evaluated counters from the same report and are not timing metrics.
 
 | Stemmer | All exact | Changed exact | Root preserved | Note |
 | --- | ---: | ---: | ---: | --- |
 | Radixor | 97.478% | 97.197% | 97.552% | Full Radixor dictionary patch-command stemmer. |
 | Lucene EnglishMinimalStemFilter | 90.981% | 65.189% | 97.820% | Minimal English plural reduction, not a full stemmer. |
 | Lucene KStemFilter | 80.076% | 76.608% | 80.996% | Krovetz-style English stemming TokenFilter; broader than minimal suffix reducers. |
+| Lucene HunspellStemFilter | 80.243% | 12.750% | 98.139% | Benchmark-only English Hunspell dictionary compared via Lucene HunspellStemFilter. |
 | Lucene EnglishPossessiveFilter | 79.032% | 0.003% | 99.987% | Possessive-ending remover only, not a full stemmer. |
 | Snowball English / Porter2 | 40.342% | 46.296% | 38.763% | Porter2 rule-based suffix stemmer, distinct from original Porter. |
 | Lucene PorterStemFilter | 39.538% | 46.201% | 37.772% | Lucene TokenFilter path for Porter suffix rules; not dictionary-root equivalent. |
@@ -47,16 +48,17 @@ Speed uses JMH average time, 3 warmup iterations, 5 measurement iterations, 1 fo
 
 | Stemmer | Benchmark method | Score ms/op | Error ms | ns/token | Relative vs Radixor | Note |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
-| Radixor | `radixorUsUkProfiPreferredStem` | 16.621 | 8.532 | 79.0 | 1.000 | Full dictionary patch-command stemmer using compiled patch commands. |
-| Lucene EnglishPossessiveFilter | `luceneEnglishPossessiveFilter` | 23.845 | 0.833 | 113.3 | 1.435 | Possessive-ending remover only; not a full stemmer. |
-| Lucene EnglishMinimalStemFilter | `luceneEnglishMinimalStemFilter` | 17.091 | 0.198 | 81.2 | 1.028 | Narrow plural reduction filter; not a full stemmer. |
-| Lucene PorterStemmer direct copy | `lucenePorterStemmerCopied` | 18.598 | 10.954 | 88.4 | 1.119 | Benchmark-only generated copy of Lucene package-private Porter implementation. |
-| OpenNLP PorterStemmer | `opennlpPorterStemmer` | 18.213 | 10.674 | 86.5 | 1.096 | Apache OpenNLP Porter implementation. |
-| Snowball original Porter | `snowballOriginalPorter` | 32.921 | 11.520 | 156.4 | 1.981 | Classic Porter suffix-rule stemmer; historical English baseline, not a dictionary-equivalent stemmer. |
-| Lucene PorterStemFilter | `lucenePorterStemFilter` | 42.874 | 1.321 | 203.7 | 2.579 | Lucene TokenFilter integration path for Porter; includes TokenStream overhead. |
-| Lucene KStemFilter | `luceneKStemFilter` | 50.483 | 3.624 | 239.8 | 3.037 | Krovetz-style English TokenFilter; broader than minimal suffix filters. |
-| Snowball English / Porter2 | `snowballEnglishPorter2` | 47.844 | 1.887 | 227.3 | 2.878 | Porter2 suffix-rule stemmer, distinct from original Porter. |
-| Paice/Husk Lancaster | `paiceHuskLancaster` | 135.050 | 11.088 | 641.6 | 8.125 | Aggressive rule-based English stemmer. |
+| Radixor | `radixorUsUkProfiPreferredStem` | 21.987 | 8.707 | 104.5 | 1.000 | Full dictionary patch-command stemmer using compiled patch commands. |
+| Lucene EnglishPossessiveFilter | `luceneEnglishPossessiveFilter` | 24.539 | 1.515 | 116.6 | 1.116 | Possessive-ending remover only; not a full stemmer. |
+| Lucene EnglishMinimalStemFilter | `luceneEnglishMinimalStemFilter` | 22.702 | 1.195 | 107.8 | 1.032 | Narrow plural reduction filter; not a full stemmer. |
+| Lucene PorterStemmer direct copy | `lucenePorterStemmerCopied` | 24.696 | 13.235 | 117.3 | 1.123 | Benchmark-only generated copy of Lucene package-private Porter implementation. |
+| OpenNLP PorterStemmer | `opennlpPorterStemmer` | 23.121 | 12.528 | 109.8 | 1.052 | Apache OpenNLP Porter implementation. |
+| Snowball original Porter | `snowballOriginalPorter` | 38.904 | 10.353 | 184.8 | 1.769 | Classic Porter suffix-rule stemmer; historical English baseline, not a dictionary-equivalent stemmer. |
+| Lucene PorterStemFilter | `lucenePorterStemFilter` | 37.021 | 1.196 | 175.9 | 1.684 | Lucene TokenFilter integration path for Porter; includes TokenStream overhead. |
+| Lucene KStemFilter | `luceneKStemFilter` | 51.640 | 2.591 | 245.3 | 2.349 | Krovetz-style English TokenFilter; broader than minimal suffix filters. |
+| Lucene HunspellStemFilter | `luceneHunspellStemFilter` | 79.785 | 1.347 | 379.0 | 3.629 | Benchmark-only English Hunspell comparison using the benchmark Hunspell corpus. |
+| Snowball English / Porter2 | `snowballEnglishPorter2` | 52.437 | 0.773 | 249.1 | 2.385 | Porter2 suffix-rule stemmer, distinct from original Porter. |
+| Paice/Husk Lancaster | `paiceHuskLancaster` | 141.556 | 12.324 | 672.5 | 6.438 | Aggressive rule-based English stemmer. |
 
 ## Interpretation Notes
 

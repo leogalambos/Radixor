@@ -10,7 +10,7 @@ This page is the entry point for benchmark interpretation. Detailed tables and l
 - Radixor is the quality-oriented baseline in same-language comparisons. Its exact-root accuracy is often close to 100%, while many faster competitors are light, minimal, possessive, or aggressive rule-based stemmers with much lower root agreement.
 - The measured Radixor cost buys dictionary-trained stemming precision. That precision improves search quality by mapping inflected forms to intended dictionary roots instead of approximate or over-reduced stems.
 - Speed benchmarks process changed dictionary tokens where the surface form differs from the expected root. Accuracy benchmarks process the complete dictionary.
-- Accuracy-only benchmarks intentionally use one deterministic JMH measurement iteration without warmup because repeated precision passes would duplicate the same counters.
+- Accuracy tables use deterministic auxiliary counters from the current JMH reports. Repeated measurement samples duplicate the same exact-root accounting and are not interpreted as timing results.
 - The historical Porter performance badge is retired. Benchmark reporting now uses speed and quality tables rather than a single Porter ratio.
 
 ## Benchmark Documentation Map

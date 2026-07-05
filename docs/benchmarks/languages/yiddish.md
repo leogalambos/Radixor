@@ -25,11 +25,11 @@ Radixor stores the preferred transformation for each normalized dictionary word 
 
 ## Accuracy
 
-Accuracy is computed from one deterministic JMH measurement iteration without warmup. The benchmark may execute the full dictionary pass more than once inside that single timed iteration; percentages divide matching counters by evaluated counters from the same iteration.
+Accuracy is computed from JMH auxiliary counters in the current report. The counters are deterministic for a fixed corpus and stemmer; percentages divide matching counters by evaluated counters from the same report and are not timing metrics.
 
 | Stemmer | All exact | Changed exact | Root preserved | Note |
 | --- | ---: | ---: | ---: | --- |
-| Radixor | 98.930% | 98.343% | 100.000% | Radixor baseline in the Snowball-language comparison family. |
+| Radixor | 98.930% | 98.343% | 100.000% | Full Radixor dictionary patch-command stemmer. |
 | Lucene SnowballFilter | 2.837% | 2.558% | 3.346% | Lucene TokenFilter integration path around the Snowball algorithm. |
 | Official Snowball direct | 2.837% | 2.558% | 3.346% | Official Snowball generated Java stemmer; rule-based suffix algorithm. |
 
@@ -39,9 +39,9 @@ Speed uses JMH average time, 3 warmup iterations, 5 measurement iterations, 1 fo
 
 | Stemmer | Benchmark method | Score ms/op | Error ms | ns/token | Relative vs Radixor | Note |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
-| Radixor | `radixor[YIDDISH]` | 0.236 | 0.004 | 85.1 | 1.000 | Radixor baseline for the Snowball-language comparison family. |
-| Official Snowball direct | `snowballDirect[YIDDISH]` | 1.432 | 0.193 | 515.7 | 6.058 | Official Snowball generated Java stemmer; direct API. |
-| Lucene SnowballFilter | `luceneSnowballFilter[YIDDISH]` | 1.595 | 0.068 | 574.6 | 6.749 | Lucene TokenFilter path around Snowball; includes TokenStream overhead. |
+| Radixor | `radixor[YIDDISH]` | 0.254 | 0.004 | 50.7 | 1.000 | Full Radixor dictionary patch-command stemmer. |
+| Official Snowball direct | `snowballDirect[YIDDISH]` | 1.537 | 0.220 | 307.3 | 6.058 | Official Snowball generated Java stemmer; direct API. |
+| Lucene SnowballFilter | `luceneSnowballFilter[YIDDISH]` | 1.714 | 0.120 | 342.8 | 6.756 | Lucene TokenFilter path around Snowball; includes TokenStream overhead. |
 
 ## Interpretation Notes
 

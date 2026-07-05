@@ -26,7 +26,7 @@ Radixor stores the preferred transformation for each normalized dictionary word 
 
 ## Accuracy
 
-Accuracy is computed from one deterministic JMH measurement iteration without warmup. The benchmark may execute the full dictionary pass more than once inside that single timed iteration; percentages divide matching counters by evaluated counters from the same iteration.
+Accuracy is computed from JMH auxiliary counters in the current report. The counters are deterministic for a fixed corpus and stemmer; percentages divide matching counters by evaluated counters from the same report and are not timing metrics.
 
 | Stemmer | All exact | Changed exact | Root preserved | Note |
 | --- | ---: | ---: | ---: | --- |
@@ -43,12 +43,12 @@ Speed uses JMH average time, 3 warmup iterations, 5 measurement iterations, 1 fo
 
 | Stemmer | Benchmark method | Score ms/op | Error ms | ns/token | Relative vs Radixor | Note |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
-| Radixor | `portugueseRadixor` | 10.598 | 0.273 | 51.1 | 1.000 | Full Radixor dictionary patch-command stemmer. |
-| Lucene PortugueseLightStemFilter | `portugueseLucenePortugueseLightStemFilter` | 10.101 | 0.389 | 48.7 | 0.953 | Light Portuguese suffix stemmer. |
-| Lucene PortugueseMinimalStemFilter | `portugueseLucenePortugueseMinimalStemFilter` | 14.493 | 0.760 | 69.8 | 1.367 | Minimal Portuguese suffix reducer. |
-| Official Snowball direct | `snowballDirect[PORTUGUESE]` | 52.508 | 6.338 | 253.1 | 4.954 | Official Snowball generated Java stemmer; direct API. |
-| Lucene SnowballFilter | `luceneSnowballFilter[PORTUGUESE]` | 54.048 | 1.173 | 260.5 | 5.100 | Lucene TokenFilter path around Snowball; includes TokenStream overhead. |
-| Lucene PortugueseStemFilter | `portugueseLucenePortugueseStemFilter` | 141.208 | 12.785 | 680.6 | 13.324 | Portuguese RSLP-style Lucene TokenFilter. |
+| Radixor | `portugueseRadixor` | 12.109 | 0.698 | 58.4 | 1.000 | Full Radixor dictionary patch-command stemmer. |
+| Lucene PortugueseLightStemFilter | `portugueseLucenePortugueseLightStemFilter` | 11.172 | 1.870 | 53.8 | 0.923 | Light Portuguese suffix stemmer. |
+| Lucene PortugueseMinimalStemFilter | `portugueseLucenePortugueseMinimalStemFilter` | 16.038 | 1.752 | 77.3 | 1.325 | Minimal Portuguese suffix reducer. |
+| Official Snowball direct | `snowballDirect[PORTUGUESE]` | 53.725 | 5.356 | 258.9 | 4.437 | Official Snowball generated Java stemmer; direct API. |
+| Lucene SnowballFilter | `luceneSnowballFilter[PORTUGUESE]` | 57.457 | 1.182 | 276.9 | 4.745 | Lucene TokenFilter path around Snowball; includes TokenStream overhead. |
+| Lucene PortugueseStemFilter | `portugueseLucenePortugueseStemFilter` | 165.447 | 40.334 | 797.4 | 13.663 | Portuguese RSLP-style Lucene TokenFilter. |
 
 ## Interpretation Notes
 

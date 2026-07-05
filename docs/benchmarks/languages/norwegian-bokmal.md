@@ -26,7 +26,7 @@ Radixor stores the preferred transformation for each normalized dictionary word 
 
 ## Accuracy
 
-Accuracy is computed from one deterministic JMH measurement iteration without warmup. The benchmark may execute the full dictionary pass more than once inside that single timed iteration; percentages divide matching counters by evaluated counters from the same iteration.
+Accuracy is computed from JMH auxiliary counters in the current report. The counters are deterministic for a fixed corpus and stemmer; percentages divide matching counters by evaluated counters from the same report and are not timing metrics.
 
 | Stemmer | All exact | Changed exact | Root preserved | Note |
 | --- | ---: | ---: | ---: | --- |
@@ -42,11 +42,11 @@ Speed uses JMH average time, 3 warmup iterations, 5 measurement iterations, 1 fo
 
 | Stemmer | Benchmark method | Score ms/op | Error ms | ns/token | Relative vs Radixor | Note |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
-| Radixor | `norwegianBokmalRadixor` | 3.235 | 0.147 | 56.4 | 1.000 | Full Radixor dictionary patch-command stemmer. |
-| Lucene NorwegianMinimalStemFilter | `norwegianBokmalLuceneNorwegianMinimalStemFilter` | 2.720 | 0.190 | 47.4 | 0.841 | Minimal Norwegian suffix reducer. |
-| Lucene NorwegianLightStemFilter | `norwegianBokmalLuceneNorwegianLightStemFilter` | 3.189 | 0.261 | 55.6 | 0.986 | Light Norwegian suffix stemmer. |
-| Official Snowball direct | `snowballDirect[NORWEGIAN_BOKMAL]` | 3.978 | 0.031 | 69.3 | 1.230 | Official Snowball generated Java stemmer; direct API. |
-| Lucene SnowballFilter | `luceneSnowballFilter[NORWEGIAN_BOKMAL]` | 5.526 | 0.409 | 96.3 | 1.708 | Lucene TokenFilter path around Snowball; includes TokenStream overhead. |
+| Radixor | `norwegianBokmalRadixor` | 3.631 | 1.377 | 63.3 | 1.000 | Full Radixor dictionary patch-command stemmer. |
+| Lucene NorwegianMinimalStemFilter | `norwegianBokmalLuceneNorwegianMinimalStemFilter` | 2.910 | 0.177 | 50.7 | 0.801 | Minimal Norwegian suffix reducer. |
+| Lucene NorwegianLightStemFilter | `norwegianBokmalLuceneNorwegianLightStemFilter` | 3.335 | 0.116 | 58.1 | 0.919 | Light Norwegian suffix stemmer. |
+| Official Snowball direct | `snowballDirect[NORWEGIAN_BOKMAL]` | 4.277 | 0.082 | 74.5 | 1.178 | Official Snowball generated Java stemmer; direct API. |
+| Lucene SnowballFilter | `luceneSnowballFilter[NORWEGIAN_BOKMAL]` | 6.077 | 0.208 | 105.9 | 1.674 | Lucene TokenFilter path around Snowball; includes TokenStream overhead. |
 
 ## Interpretation Notes
 
