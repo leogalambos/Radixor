@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ReducedNode.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Radixor</a> &gt; <a href="index.source.html" class="el_package">org.egothor.stemmer.trie</a> &gt; <span class="el_source">ReducedNode.java</span></div><h1>ReducedNode.java</h1><pre class="source lang-java linenums">/*******************************************************************************
+ * Copyright (C) 2026, Leo Galambos
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * 
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ * 
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ * 
+ * 3. Neither the name of the copyright holder nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&quot;
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ ******************************************************************************/
+package org.egothor.stemmer.trie;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+/**
+ * Canonical reduced node used during subtree merging.
+ *
+ * &lt;p&gt;
+ * The maps exposed by the accessors are the internal backing state of the
+ * canonical reduced node. They are returned directly for efficiency and are
+ * intended only for closely related trie-reduction infrastructure.
+ *
+ * @param &lt;V&gt; value type
+ */
+public final class ReducedNode&lt;V&gt; {
+
+    /**
+     * Reduction signature.
+     */
+    private final ReductionSignature&lt;V&gt; signature;
+
+    /**
+     * Aggregated local value counts.
+     */
+    private final Map&lt;V, Integer&gt; localCounts;
+
+    /**
+     * Canonical children by edge.
+     */
+    private final Map&lt;Character, ReducedNode&lt;V&gt;&gt; children;
+
+    /**
+     * Creates a new reduced node.
+     *
+     * @param signature   reduction signature
+     * @param localCounts local counts
+     * @param children    children
+     */
+    public ReducedNode(final ReductionSignature&lt;V&gt; signature, final Map&lt;V, Integer&gt; localCounts,
+<span class="fc" id="L71">            final Map&lt;Character, ReducedNode&lt;V&gt;&gt; children) {</span>
+<span class="fc" id="L72">        this.signature = signature;</span>
+<span class="fc" id="L73">        this.localCounts = new LinkedHashMap&lt;&gt;(localCounts);</span>
+<span class="fc" id="L74">        this.children = new LinkedHashMap&lt;&gt;(children);</span>
+<span class="fc" id="L75">    }</span>
+
+    /**
+     * Returns the reduction signature of this canonical node.
+     *
+     * @return reduction signature
+     */
+    public ReductionSignature&lt;V&gt; signature() {
+<span class="fc" id="L83">        return this.signature;</span>
+    }
+
+    /**
+     * Returns the internal aggregated local value-count map.
+     *
+     * &lt;p&gt;
+     * The returned map is the internal backing state of this canonical reduced node
+     * and is exposed only for efficient cooperation with trie-reduction
+     * infrastructure.
+     *
+     * @return internal aggregated local value-count map
+     */
+    public Map&lt;V, Integer&gt; localCounts() {
+<span class="fc" id="L97">        return this.localCounts;</span>
+    }
+
+    /**
+     * Returns the internal canonical child map indexed by transition character.
+     *
+     * &lt;p&gt;
+     * The returned map is the internal backing state of this canonical reduced node
+     * and is exposed only for efficient cooperation with trie-reduction
+     * infrastructure.
+     *
+     * @return internal canonical child map
+     */
+    public Map&lt;Character, ReducedNode&lt;V&gt;&gt; children() {
+<span class="fc" id="L111">        return this.children;</span>
+    }
+
+    /**
+     * Merges additional local counts into this node.
+     *
+     * @param additionalCounts additional local counts
+     */
+    public void mergeLocalCounts(final Map&lt;V, Integer&gt; additionalCounts) {
+<span class="fc bfc" id="L120" title="All 2 branches covered.">        for (Map.Entry&lt;V, Integer&gt; entry : additionalCounts.entrySet()) {</span>
+<span class="fc" id="L121">            final Integer previous = this.localCounts.get(entry.getKey());</span>
+<span class="fc bfc" id="L122" title="All 2 branches covered.">            if (previous == null) {</span>
+<span class="fc" id="L123">                this.localCounts.put(entry.getKey(), entry.getValue());</span>
+            } else {
+<span class="fc" id="L125">                this.localCounts.put(entry.getKey(), previous + entry.getValue());</span>
+            }
+<span class="fc" id="L127">        }</span>
+<span class="fc" id="L128">    }</span>
+
+    /**
+     * Merges child references into this node.
+     *
+     * &lt;p&gt;
+     * For nodes with the same reduction signature, child edge sets and child
+     * signatures must be compatible. This method therefore only needs to verify
+     * consistency and store the canonical child instance.
+     *
+     * @param additionalChildren additional children
+     */
+    public void mergeChildren(final Map&lt;Character, ReducedNode&lt;V&gt;&gt; additionalChildren) {
+<span class="fc bfc" id="L141" title="All 2 branches covered.">        for (Map.Entry&lt;Character, ReducedNode&lt;V&gt;&gt; entry : additionalChildren.entrySet()) {</span>
+<span class="fc" id="L142">            final ReducedNode&lt;V&gt; existing = this.children.get(entry.getKey());</span>
+<span class="fc bfc" id="L143" title="All 2 branches covered.">            if (existing == null) {</span>
+<span class="fc" id="L144">                this.children.put(entry.getKey(), entry.getValue());</span>
+<span class="fc bfc" id="L145" title="All 2 branches covered.">            } else if (existing != entry.getValue()) { // NOPMD - we have canonical instances</span>
+<span class="fc" id="L146">                throw new IllegalStateException(&quot;Incompatible canonical child encountered during reduction.&quot;);</span>
+            }
+<span class="fc" id="L148">        }</span>
+<span class="fc" id="L149">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

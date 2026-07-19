@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"m":"org.egothor.radixor","l":"org.egothor.stemmer"},{"m":"org.egothor.radixor","l":"org.egothor.stemmer.trie"}];updateSearchResults();

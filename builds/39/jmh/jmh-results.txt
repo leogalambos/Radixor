@@ -1,0 +1,2219 @@
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.EnglishStemmerComparisonBenchmark.radixorUsUkProfiPreferredStem
+# Parameters: (familyCount = 1000)
+
+# Run progress: 0.00% complete, ETA 00:08:48
+# Fork: 1 of 1
+# Warmup Iteration   1: 682017.234 ns/op
+# Warmup Iteration   2: 669122.087 ns/op
+# Warmup Iteration   3: 666341.971 ns/op
+Iteration   1: 665652.095 ns/op
+Iteration   2: 664453.637 ns/op
+Iteration   3: 666268.192 ns/op
+Iteration   4: 662230.547 ns/op
+Iteration   5: 670220.163 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.EnglishStemmerComparisonBenchmark.radixorUsUkProfiPreferredStem":
+  665764.927 ±(99.9%) 11280.227 ns/op [Average]
+  (min, avg, max) = (662230.547, 665764.927, 670220.163), stdev = 2929.439
+  CI (99.9%): [654484.700, 677045.154] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.EnglishStemmerComparisonBenchmark.radixorUsUkProfiPreferredStem
+# Parameters: (familyCount = 5000)
+
+# Run progress: 1.52% complete, ETA 00:15:36
+# Fork: 1 of 1
+# Warmup Iteration   1: 3224437.460 ns/op
+# Warmup Iteration   2: 3157690.448 ns/op
+# Warmup Iteration   3: 3158396.237 ns/op
+Iteration   1: 3170625.623 ns/op
+Iteration   2: 3178652.752 ns/op
+Iteration   3: 3205355.933 ns/op
+Iteration   4: 3166918.057 ns/op
+Iteration   5: 3162391.754 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.EnglishStemmerComparisonBenchmark.radixorUsUkProfiPreferredStem":
+  3176788.824 ±(99.9%) 65637.573 ns/op [Average]
+  (min, avg, max) = (3162391.754, 3176788.824, 3205355.933), stdev = 17045.869
+  CI (99.9%): [3111151.251, 3242426.397] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.EnglishStemmerComparisonBenchmark.snowballEnglishPorter2
+# Parameters: (familyCount = 1000)
+
+# Run progress: 3.03% complete, ETA 00:15:22
+# Fork: 1 of 1
+# Warmup Iteration   1: 4328595.767 ns/op
+# Warmup Iteration   2: 3972534.183 ns/op
+# Warmup Iteration   3: 4132441.671 ns/op
+Iteration   1: 3970427.040 ns/op
+Iteration   2: 3967587.071 ns/op
+Iteration   3: 4080225.907 ns/op
+Iteration   4: 3980022.413 ns/op
+Iteration   5: 3978841.079 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.EnglishStemmerComparisonBenchmark.snowballEnglishPorter2":
+  3995420.702 ±(99.9%) 183697.390 ns/op [Average]
+  (min, avg, max) = (3967587.071, 3995420.702, 4080225.907), stdev = 47705.629
+  CI (99.9%): [3811723.312, 4179118.092] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.EnglishStemmerComparisonBenchmark.snowballEnglishPorter2
+# Parameters: (familyCount = 5000)
+
+# Run progress: 4.55% complete, ETA 00:15:12
+# Fork: 1 of 1
+# Warmup Iteration   1: 23663938.209 ns/op
+# Warmup Iteration   2: 24636936.171 ns/op
+# Warmup Iteration   3: 20600049.449 ns/op
+Iteration   1: 20621420.286 ns/op
+Iteration   2: 20612614.245 ns/op
+Iteration   3: 22484895.911 ns/op
+Iteration   4: 20627223.265 ns/op
+Iteration   5: 20528787.102 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.EnglishStemmerComparisonBenchmark.snowballEnglishPorter2":
+  20974988.162 ±(99.9%) 3253841.010 ns/op [Average]
+  (min, avg, max) = (20528787.102, 20974988.162, 22484895.911), stdev = 845012.177
+  CI (99.9%): [17721147.152, 24228829.172] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.EnglishStemmerComparisonBenchmark.snowballOriginalPorter
+# Parameters: (familyCount = 1000)
+
+# Run progress: 6.06% complete, ETA 00:14:55
+# Fork: 1 of 1
+# Warmup Iteration   1: 3596635.717 ns/op
+# Warmup Iteration   2: 2735773.822 ns/op
+# Warmup Iteration   3: 2718683.079 ns/op
+Iteration   1: 2774791.463 ns/op
+Iteration   2: 3011543.656 ns/op
+Iteration   3: 2739509.863 ns/op
+Iteration   4: 2721255.992 ns/op
+Iteration   5: 2747852.071 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.EnglishStemmerComparisonBenchmark.snowballOriginalPorter":
+  2798990.609 ±(99.9%) 463519.718 ns/op [Average]
+  (min, avg, max) = (2721255.992, 2798990.609, 3011543.656), stdev = 120374.599
+  CI (99.9%): [2335470.891, 3262510.327] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.EnglishStemmerComparisonBenchmark.snowballOriginalPorter
+# Parameters: (familyCount = 5000)
+
+# Run progress: 7.58% complete, ETA 00:14:42
+# Fork: 1 of 1
+# Warmup Iteration   1: 27977791.500 ns/op
+# Warmup Iteration   2: 26251793.308 ns/op
+# Warmup Iteration   3: 26367000.895 ns/op
+Iteration   1: 26396964.500 ns/op
+Iteration   2: 30172976.676 ns/op
+Iteration   3: 26150061.205 ns/op
+Iteration   4: 26184091.564 ns/op
+Iteration   5: 29233809.897 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.EnglishStemmerComparisonBenchmark.snowballOriginalPorter":
+  27627580.769 ±(99.9%) 7416902.459 ns/op [Average]
+  (min, avg, max) = (26150061.205, 27627580.769, 30172976.676), stdev = 1926146.015
+  CI (99.9%): [20210678.310, 35044483.227] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieCompilationBenchmark.compilePatchTrie
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS, stemCount = 2000, storeOriginalStem = true)
+
+# Run progress: 9.09% complete, ETA 00:14:30
+# Fork: 1 of 1
+# Warmup Iteration   1: 648566373.500 ns/op
+# Warmup Iteration   2: 212990476.800 ns/op
+# Warmup Iteration   3: 113043791.667 ns/op
+Iteration   1: 95058546.636 ns/op
+Iteration   2: 85929122.333 ns/op
+Iteration   3: 89972688.583 ns/op
+Iteration   4: 87553339.500 ns/op
+Iteration   5: 56680075.722 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieCompilationBenchmark.compilePatchTrie":
+  83038754.555 ±(99.9%) 58273058.545 ns/op [Average]
+  (min, avg, max) = (56680075.722, 83038754.555, 95058546.636), stdev = 15133328.250
+  CI (99.9%): [24765696.010, 141311813.101] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieCompilationBenchmark.compilePatchTrie
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS, stemCount = 2000, storeOriginalStem = false)
+
+# Run progress: 10.61% complete, ETA 00:13:29
+# Fork: 1 of 1
+# Warmup Iteration   1: 372641993.000 ns/op
+# Warmup Iteration   2: 145432382.714 ns/op
+# Warmup Iteration   3: 69385345.600 ns/op
+Iteration   1: 61241182.647 ns/op
+Iteration   2: 51734760.700 ns/op
+Iteration   3: 51827400.600 ns/op
+Iteration   4: 67399996.467 ns/op
+Iteration   5: 78875929.615 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieCompilationBenchmark.compilePatchTrie":
+  62215854.006 ±(99.9%) 44037156.489 ns/op [Average]
+  (min, avg, max) = (51734760.700, 62215854.006, 78875929.615), stdev = 11436309.694
+  CI (99.9%): [18178697.517, 106253010.494] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieCompilationBenchmark.compilePatchTrie
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS, stemCount = 10000, storeOriginalStem = true)
+
+# Run progress: 12.12% complete, ETA 00:12:39
+# Fork: 1 of 1
+# Warmup Iteration   1: 1315641710.000 ns/op
+# Warmup Iteration   2: 601246889.000 ns/op
+# Warmup Iteration   3: 378356225.667 ns/op
+Iteration   1: 282323027.500 ns/op
+Iteration   2: 282641598.500 ns/op
+Iteration   3: 251386896.000 ns/op
+Iteration   4: 343778186.250 ns/op
+Iteration   5: 311557286.750 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieCompilationBenchmark.compilePatchTrie":
+  294337399.000 ±(99.9%) 134315165.232 ns/op [Average]
+  (min, avg, max) = (251386896.000, 294337399.000, 343778186.250), stdev = 34881221.875
+  CI (99.9%): [160022233.768, 428652564.232] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieCompilationBenchmark.compilePatchTrie
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS, stemCount = 10000, storeOriginalStem = false)
+
+# Run progress: 13.64% complete, ETA 00:12:06
+# Fork: 1 of 1
+# Warmup Iteration   1: 1440603536.000 ns/op
+# Warmup Iteration   2: 410942411.000 ns/op
+# Warmup Iteration   3: 337841733.667 ns/op
+Iteration   1: 278213332.250 ns/op
+Iteration   2: 371894032.667 ns/op
+Iteration   3: 419338943.000 ns/op
+Iteration   4: 440777922.667 ns/op
+Iteration   5: 314396953.500 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieCompilationBenchmark.compilePatchTrie":
+  364924236.817 ±(99.9%) 264233218.383 ns/op [Average]
+  (min, avg, max) = (278213332.250, 364924236.817, 440777922.667), stdev = 68620527.706
+  CI (99.9%): [100691018.433, 629157455.200] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieCompilationBenchmark.compilePatchTrie
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS, stemCount = 2000, storeOriginalStem = true)
+
+# Run progress: 15.15% complete, ETA 00:11:39
+# Fork: 1 of 1
+# Warmup Iteration   1: 378547141.000 ns/op
+# Warmup Iteration   2: 95822230.636 ns/op
+# Warmup Iteration   3: 70084252.800 ns/op
+Iteration   1: 62179647.529 ns/op
+Iteration   2: 79908198.692 ns/op
+Iteration   3: 59820824.778 ns/op
+Iteration   4: 55971300.333 ns/op
+Iteration   5: 61858479.118 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieCompilationBenchmark.compilePatchTrie":
+  63947690.090 ±(99.9%) 35651349.726 ns/op [Average]
+  (min, avg, max) = (55971300.333, 63947690.090, 79908198.692), stdev = 9258542.308
+  CI (99.9%): [28296340.364, 99599039.816] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieCompilationBenchmark.compilePatchTrie
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS, stemCount = 2000, storeOriginalStem = false)
+
+# Run progress: 16.67% complete, ETA 00:11:09
+# Fork: 1 of 1
+# Warmup Iteration   1: 374378435.333 ns/op
+# Warmup Iteration   2: 157383604.000 ns/op
+# Warmup Iteration   3: 70595347.400 ns/op
+Iteration   1: 70880809.333 ns/op
+Iteration   2: 83920774.000 ns/op
+Iteration   3: 80993019.615 ns/op
+Iteration   4: 89543667.583 ns/op
+Iteration   5: 82616523.538 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieCompilationBenchmark.compilePatchTrie":
+  81590958.814 ±(99.9%) 26172359.098 ns/op [Average]
+  (min, avg, max) = (70880809.333, 81590958.814, 89543667.583), stdev = 6796878.544
+  CI (99.9%): [55418599.716, 107763317.912] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieCompilationBenchmark.compilePatchTrie
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS, stemCount = 10000, storeOriginalStem = true)
+
+# Run progress: 18.18% complete, ETA 00:10:42
+# Fork: 1 of 1
+# Warmup Iteration   1: 1356620000.000 ns/op
+# Warmup Iteration   2: 597444550.500 ns/op
+# Warmup Iteration   3: 337218441.250 ns/op
+Iteration   1: 339466350.333 ns/op
+Iteration   2: 369389587.000 ns/op
+Iteration   3: 440503140.667 ns/op
+Iteration   4: 441485802.000 ns/op
+Iteration   5: 441706364.000 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieCompilationBenchmark.compilePatchTrie":
+  406510248.800 ±(99.9%) 187562336.048 ns/op [Average]
+  (min, avg, max) = (339466350.333, 406510248.800, 441706364.000), stdev = 48709343.042
+  CI (99.9%): [218947912.752, 594072584.848] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieCompilationBenchmark.compilePatchTrie
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS, stemCount = 10000, storeOriginalStem = false)
+
+# Run progress: 19.70% complete, ETA 00:10:24
+# Fork: 1 of 1
+# Warmup Iteration   1: 1412019912.000 ns/op
+# Warmup Iteration   2: 507054146.500 ns/op
+# Warmup Iteration   3: 334728541.000 ns/op
+Iteration   1: 304685879.250 ns/op
+Iteration   2: 294970743.000 ns/op
+Iteration   3: 301902680.750 ns/op
+Iteration   4: 298298830.000 ns/op
+Iteration   5: 310843309.750 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieCompilationBenchmark.compilePatchTrie":
+  302140288.550 ±(99.9%) 23457206.171 ns/op [Average]
+  (min, avg, max) = (294970743.000, 302140288.550, 310843309.750), stdev = 6091761.951
+  CI (99.9%): [278683082.379, 325597494.721] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieCompilationBenchmark.compilePatchTrie
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS, stemCount = 2000, storeOriginalStem = true)
+
+# Run progress: 21.21% complete, ETA 00:10:06
+# Fork: 1 of 1
+# Warmup Iteration   1: 368574140.000 ns/op
+# Warmup Iteration   2: 127620240.250 ns/op
+# Warmup Iteration   3: 65308181.375 ns/op
+Iteration   1: 62861820.313 ns/op
+Iteration   2: 60297094.235 ns/op
+Iteration   3: 70921483.067 ns/op
+Iteration   4: 69211120.133 ns/op
+Iteration   5: 65901329.188 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieCompilationBenchmark.compilePatchTrie":
+  65838569.387 ±(99.9%) 16870812.177 ns/op [Average]
+  (min, avg, max) = (60297094.235, 65838569.387, 70921483.067), stdev = 4381296.347
+  CI (99.9%): [48967757.210, 82709381.564] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieCompilationBenchmark.compilePatchTrie
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS, stemCount = 2000, storeOriginalStem = false)
+
+# Run progress: 22.73% complete, ETA 00:09:45
+# Fork: 1 of 1
+# Warmup Iteration   1: 335633994.333 ns/op
+# Warmup Iteration   2: 127097653.000 ns/op
+# Warmup Iteration   3: 79954509.692 ns/op
+Iteration   1: 62711456.765 ns/op
+Iteration   2: 69804887.467 ns/op
+Iteration   3: 74372605.286 ns/op
+Iteration   4: 71734894.286 ns/op
+Iteration   5: 73161335.714 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieCompilationBenchmark.compilePatchTrie":
+  70357035.903 ±(99.9%) 17713708.837 ns/op [Average]
+  (min, avg, max) = (62711456.765, 70357035.903, 74372605.286), stdev = 4600193.933
+  CI (99.9%): [52643327.066, 88070744.741] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieCompilationBenchmark.compilePatchTrie
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS, stemCount = 10000, storeOriginalStem = true)
+
+# Run progress: 24.24% complete, ETA 00:09:25
+# Fork: 1 of 1
+# Warmup Iteration   1: 1277700778.000 ns/op
+# Warmup Iteration   2: 634615920.500 ns/op
+# Warmup Iteration   3: 356089642.333 ns/op
+Iteration   1: 301153054.500 ns/op
+Iteration   2: 335051002.667 ns/op
+Iteration   3: 293207676.750 ns/op
+Iteration   4: 252458000.400 ns/op
+Iteration   5: 378149429.667 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieCompilationBenchmark.compilePatchTrie":
+  312003832.797 ±(99.9%) 181870615.434 ns/op [Average]
+  (min, avg, max) = (252458000.400, 312003832.797, 378149429.667), stdev = 47231221.273
+  CI (99.9%): [130133217.363, 493874448.231] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieCompilationBenchmark.compilePatchTrie
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS, stemCount = 10000, storeOriginalStem = false)
+
+# Run progress: 25.76% complete, ETA 00:09:09
+# Fork: 1 of 1
+# Warmup Iteration   1: 1497812959.000 ns/op
+# Warmup Iteration   2: 407296673.000 ns/op
+# Warmup Iteration   3: 369206178.000 ns/op
+Iteration   1: 276117825.000 ns/op
+Iteration   2: 355310502.000 ns/op
+Iteration   3: 334233715.000 ns/op
+Iteration   4: 280855511.750 ns/op
+Iteration   5: 349213051.000 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieCompilationBenchmark.compilePatchTrie":
+  319146120.950 ±(99.9%) 146085169.379 ns/op [Average]
+  (min, avg, max) = (276117825.000, 319146120.950, 355310502.000), stdev = 37937854.574
+  CI (99.9%): [173060951.571, 465231290.329] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.applyPreferredPatchToBuffer
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS, stemCount = 2000)
+
+# Run progress: 27.27% complete, ETA 00:08:54
+# Fork: 1 of 1
+# Warmup Iteration   1: 723266.422 ns/op
+# Warmup Iteration   2: 683357.948 ns/op
+# Warmup Iteration   3: 679097.957 ns/op
+Iteration   1: 686716.410 ns/op
+Iteration   2: 693084.059 ns/op
+Iteration   3: 687628.957 ns/op
+Iteration   4: 684940.259 ns/op
+Iteration   5: 683232.069 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.applyPreferredPatchToBuffer":
+  687120.351 ±(99.9%) 14389.666 ns/op [Average]
+  (min, avg, max) = (683232.069, 687120.351, 693084.059), stdev = 3736.951
+  CI (99.9%): [672730.685, 701510.017] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.applyPreferredPatchToBuffer
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS, stemCount = 10000)
+
+# Run progress: 28.79% complete, ETA 00:08:37
+# Fork: 1 of 1
+# Warmup Iteration   1: 3982939.028 ns/op
+# Warmup Iteration   2: 3840045.992 ns/op
+# Warmup Iteration   3: 3808805.711 ns/op
+Iteration   1: 3834974.088 ns/op
+Iteration   2: 3803108.589 ns/op
+Iteration   3: 3865201.019 ns/op
+Iteration   4: 3832499.759 ns/op
+Iteration   5: 3931223.702 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.applyPreferredPatchToBuffer":
+  3853401.431 ±(99.9%) 187670.534 ns/op [Average]
+  (min, avg, max) = (3803108.589, 3853401.431, 3931223.702), stdev = 48737.442
+  CI (99.9%): [3665730.897, 4041071.966] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.applyPreferredPatchToBuffer
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS, stemCount = 2000)
+
+# Run progress: 30.30% complete, ETA 00:08:24
+# Fork: 1 of 1
+# Warmup Iteration   1: 725228.750 ns/op
+# Warmup Iteration   2: 677674.825 ns/op
+# Warmup Iteration   3: 681185.902 ns/op
+Iteration   1: 677036.208 ns/op
+Iteration   2: 688000.999 ns/op
+Iteration   3: 678836.318 ns/op
+Iteration   4: 684707.238 ns/op
+Iteration   5: 680837.354 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.applyPreferredPatchToBuffer":
+  681883.623 ±(99.9%) 17142.208 ns/op [Average]
+  (min, avg, max) = (677036.208, 681883.623, 688000.999), stdev = 4451.777
+  CI (99.9%): [664741.416, 699025.831] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.applyPreferredPatchToBuffer
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS, stemCount = 10000)
+
+# Run progress: 31.82% complete, ETA 00:08:08
+# Fork: 1 of 1
+# Warmup Iteration   1: 998141.317 ns/op
+# Warmup Iteration   2: 931082.331 ns/op
+# Warmup Iteration   3: 931348.752 ns/op
+Iteration   1: 932075.187 ns/op
+Iteration   2: 930944.159 ns/op
+Iteration   3: 933066.474 ns/op
+Iteration   4: 927775.523 ns/op
+Iteration   5: 931527.304 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.applyPreferredPatchToBuffer":
+  931077.729 ±(99.9%) 7719.210 ns/op [Average]
+  (min, avg, max) = (927775.523, 931077.729, 933066.474), stdev = 2004.654
+  CI (99.9%): [923358.519, 938796.939] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.applyPreferredPatchToBuffer
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS, stemCount = 2000)
+
+# Run progress: 33.33% complete, ETA 00:07:56
+# Fork: 1 of 1
+# Warmup Iteration   1: 795723.629 ns/op
+# Warmup Iteration   2: 689842.191 ns/op
+# Warmup Iteration   3: 694284.178 ns/op
+Iteration   1: 687705.657 ns/op
+Iteration   2: 693520.064 ns/op
+Iteration   3: 687568.621 ns/op
+Iteration   4: 693366.525 ns/op
+Iteration   5: 688142.616 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.applyPreferredPatchToBuffer":
+  690060.696 ±(99.9%) 11920.123 ns/op [Average]
+  (min, avg, max) = (687568.621, 690060.696, 693520.064), stdev = 3095.618
+  CI (99.9%): [678140.573, 701980.820] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.applyPreferredPatchToBuffer
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS, stemCount = 10000)
+
+# Run progress: 34.85% complete, ETA 00:07:41
+# Fork: 1 of 1
+# Warmup Iteration   1: 3734417.239 ns/op
+# Warmup Iteration   2: 3587425.375 ns/op
+# Warmup Iteration   3: 3595580.125 ns/op
+Iteration   1: 3558471.699 ns/op
+Iteration   2: 3590180.616 ns/op
+Iteration   3: 3550769.000 ns/op
+Iteration   4: 3576857.118 ns/op
+Iteration   5: 3557169.865 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.applyPreferredPatchToBuffer":
+  3566689.660 ±(99.9%) 62885.597 ns/op [Average]
+  (min, avg, max) = (3550769.000, 3566689.660, 3590180.616), stdev = 16331.190
+  CI (99.9%): [3503804.063, 3629575.256] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupAllPatches
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS, stemCount = 2000)
+
+# Run progress: 36.36% complete, ETA 00:07:29
+# Fork: 1 of 1
+# Warmup Iteration   1: <failure>
+
+java.lang.IllegalStateException: Expected multiple patches for key shared0.
+	at org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupAllPatches(FrequencyTrieLookupBenchmark.java:204)
+	at org.egothor.stemmer.benchmark.jmh_generated.FrequencyTrieLookupBenchmark_lookupAllPatches_jmhTest.lookupAllPatches_avgt_jmhStub(FrequencyTrieLookupBenchmark_lookupAllPatches_jmhTest.java:241)
+	at org.egothor.stemmer.benchmark.jmh_generated.FrequencyTrieLookupBenchmark_lookupAllPatches_jmhTest.lookupAllPatches_AverageTime(FrequencyTrieLookupBenchmark_lookupAllPatches_jmhTest.java:180)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call(BenchmarkHandler.java:527)
+	at org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call(BenchmarkHandler.java:504)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:572)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+
+
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupAllPatches
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS, stemCount = 10000)
+
+# Run progress: 37.88% complete, ETA 00:07:02
+# Fork: 1 of 1
+# Warmup Iteration   1: <failure>
+
+java.lang.IllegalStateException: Expected multiple patches for key shared0.
+	at org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupAllPatches(FrequencyTrieLookupBenchmark.java:204)
+	at org.egothor.stemmer.benchmark.jmh_generated.FrequencyTrieLookupBenchmark_lookupAllPatches_jmhTest.lookupAllPatches_avgt_jmhStub(FrequencyTrieLookupBenchmark_lookupAllPatches_jmhTest.java:241)
+	at org.egothor.stemmer.benchmark.jmh_generated.FrequencyTrieLookupBenchmark_lookupAllPatches_jmhTest.lookupAllPatches_AverageTime(FrequencyTrieLookupBenchmark_lookupAllPatches_jmhTest.java:180)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call(BenchmarkHandler.java:527)
+	at org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call(BenchmarkHandler.java:504)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:572)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+
+
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupAllPatches
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS, stemCount = 2000)
+
+# Run progress: 39.39% complete, ETA 00:06:39
+# Fork: 1 of 1
+# Warmup Iteration   1: <failure>
+
+java.lang.IllegalStateException: Expected multiple patches for key shared0.
+	at org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupAllPatches(FrequencyTrieLookupBenchmark.java:204)
+	at org.egothor.stemmer.benchmark.jmh_generated.FrequencyTrieLookupBenchmark_lookupAllPatches_jmhTest.lookupAllPatches_avgt_jmhStub(FrequencyTrieLookupBenchmark_lookupAllPatches_jmhTest.java:241)
+	at org.egothor.stemmer.benchmark.jmh_generated.FrequencyTrieLookupBenchmark_lookupAllPatches_jmhTest.lookupAllPatches_AverageTime(FrequencyTrieLookupBenchmark_lookupAllPatches_jmhTest.java:180)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call(BenchmarkHandler.java:527)
+	at org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call(BenchmarkHandler.java:504)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:572)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+
+
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupAllPatches
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS, stemCount = 10000)
+
+# Run progress: 40.91% complete, ETA 00:06:16
+# Fork: 1 of 1
+# Warmup Iteration   1: <failure>
+
+java.lang.IllegalStateException: Expected multiple patches for key shared0.
+	at org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupAllPatches(FrequencyTrieLookupBenchmark.java:204)
+	at org.egothor.stemmer.benchmark.jmh_generated.FrequencyTrieLookupBenchmark_lookupAllPatches_jmhTest.lookupAllPatches_avgt_jmhStub(FrequencyTrieLookupBenchmark_lookupAllPatches_jmhTest.java:241)
+	at org.egothor.stemmer.benchmark.jmh_generated.FrequencyTrieLookupBenchmark_lookupAllPatches_jmhTest.lookupAllPatches_AverageTime(FrequencyTrieLookupBenchmark_lookupAllPatches_jmhTest.java:180)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call(BenchmarkHandler.java:527)
+	at org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call(BenchmarkHandler.java:504)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:572)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+
+
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupAllPatches
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS, stemCount = 2000)
+
+# Run progress: 42.42% complete, ETA 00:05:55
+# Fork: 1 of 1
+# Warmup Iteration   1: <failure>
+
+java.lang.IllegalStateException: Expected multiple patches for key shared0.
+	at org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupAllPatches(FrequencyTrieLookupBenchmark.java:204)
+	at org.egothor.stemmer.benchmark.jmh_generated.FrequencyTrieLookupBenchmark_lookupAllPatches_jmhTest.lookupAllPatches_avgt_jmhStub(FrequencyTrieLookupBenchmark_lookupAllPatches_jmhTest.java:241)
+	at org.egothor.stemmer.benchmark.jmh_generated.FrequencyTrieLookupBenchmark_lookupAllPatches_jmhTest.lookupAllPatches_AverageTime(FrequencyTrieLookupBenchmark_lookupAllPatches_jmhTest.java:180)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call(BenchmarkHandler.java:527)
+	at org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call(BenchmarkHandler.java:504)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:572)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+
+
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupAllPatches
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS, stemCount = 10000)
+
+# Run progress: 43.94% complete, ETA 00:05:35
+# Fork: 1 of 1
+# Warmup Iteration   1: <failure>
+
+java.lang.IllegalStateException: Expected multiple patches for key shared0.
+	at org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupAllPatches(FrequencyTrieLookupBenchmark.java:204)
+	at org.egothor.stemmer.benchmark.jmh_generated.FrequencyTrieLookupBenchmark_lookupAllPatches_jmhTest.lookupAllPatches_avgt_jmhStub(FrequencyTrieLookupBenchmark_lookupAllPatches_jmhTest.java:241)
+	at org.egothor.stemmer.benchmark.jmh_generated.FrequencyTrieLookupBenchmark_lookupAllPatches_jmhTest.lookupAllPatches_AverageTime(FrequencyTrieLookupBenchmark_lookupAllPatches_jmhTest.java:180)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call(BenchmarkHandler.java:527)
+	at org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call(BenchmarkHandler.java:504)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:572)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+
+
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupAllPatchesWithNormalizedCharVisitor
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS, stemCount = 2000)
+
+# Run progress: 45.45% complete, ETA 00:05:18
+# Fork: 1 of 1
+# Warmup Iteration   1: <failure>
+
+java.lang.IllegalStateException: Expected multiple patches for benchmark key.
+	at org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupAllPatchesWithNormalizedCharVisitor(FrequencyTrieLookupBenchmark.java:223)
+	at org.egothor.stemmer.benchmark.jmh_generated.FrequencyTrieLookupBenchmark_lookupAllPatchesWithNormalizedCharVisitor_jmhTest.lookupAllPatchesWithNormalizedCharVisitor_avgt_jmhStub(FrequencyTrieLookupBenchmark_lookupAllPatchesWithNormalizedCharVisitor_jmhTest.java:241)
+	at org.egothor.stemmer.benchmark.jmh_generated.FrequencyTrieLookupBenchmark_lookupAllPatchesWithNormalizedCharVisitor_jmhTest.lookupAllPatchesWithNormalizedCharVisitor_AverageTime(FrequencyTrieLookupBenchmark_lookupAllPatchesWithNormalizedCharVisitor_jmhTest.java:180)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call(BenchmarkHandler.java:527)
+	at org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call(BenchmarkHandler.java:504)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:572)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+
+
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupAllPatchesWithNormalizedCharVisitor
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS, stemCount = 10000)
+
+# Run progress: 46.97% complete, ETA 00:05:00
+# Fork: 1 of 1
+# Warmup Iteration   1: <failure>
+
+java.lang.IllegalStateException: Expected multiple patches for benchmark key.
+	at org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupAllPatchesWithNormalizedCharVisitor(FrequencyTrieLookupBenchmark.java:223)
+	at org.egothor.stemmer.benchmark.jmh_generated.FrequencyTrieLookupBenchmark_lookupAllPatchesWithNormalizedCharVisitor_jmhTest.lookupAllPatchesWithNormalizedCharVisitor_avgt_jmhStub(FrequencyTrieLookupBenchmark_lookupAllPatchesWithNormalizedCharVisitor_jmhTest.java:241)
+	at org.egothor.stemmer.benchmark.jmh_generated.FrequencyTrieLookupBenchmark_lookupAllPatchesWithNormalizedCharVisitor_jmhTest.lookupAllPatchesWithNormalizedCharVisitor_AverageTime(FrequencyTrieLookupBenchmark_lookupAllPatchesWithNormalizedCharVisitor_jmhTest.java:180)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call(BenchmarkHandler.java:527)
+	at org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call(BenchmarkHandler.java:504)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:572)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+
+
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupAllPatchesWithNormalizedCharVisitor
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS, stemCount = 2000)
+
+# Run progress: 48.48% complete, ETA 00:04:44
+# Fork: 1 of 1
+# Warmup Iteration   1: <failure>
+
+java.lang.IllegalStateException: Expected multiple patches for benchmark key.
+	at org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupAllPatchesWithNormalizedCharVisitor(FrequencyTrieLookupBenchmark.java:223)
+	at org.egothor.stemmer.benchmark.jmh_generated.FrequencyTrieLookupBenchmark_lookupAllPatchesWithNormalizedCharVisitor_jmhTest.lookupAllPatchesWithNormalizedCharVisitor_avgt_jmhStub(FrequencyTrieLookupBenchmark_lookupAllPatchesWithNormalizedCharVisitor_jmhTest.java:241)
+	at org.egothor.stemmer.benchmark.jmh_generated.FrequencyTrieLookupBenchmark_lookupAllPatchesWithNormalizedCharVisitor_jmhTest.lookupAllPatchesWithNormalizedCharVisitor_AverageTime(FrequencyTrieLookupBenchmark_lookupAllPatchesWithNormalizedCharVisitor_jmhTest.java:180)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call(BenchmarkHandler.java:527)
+	at org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call(BenchmarkHandler.java:504)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:572)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+
+
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupAllPatchesWithNormalizedCharVisitor
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS, stemCount = 10000)
+
+# Run progress: 50.00% complete, ETA 00:04:28
+# Fork: 1 of 1
+# Warmup Iteration   1: <failure>
+
+java.lang.IllegalStateException: Expected multiple patches for benchmark key.
+	at org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupAllPatchesWithNormalizedCharVisitor(FrequencyTrieLookupBenchmark.java:223)
+	at org.egothor.stemmer.benchmark.jmh_generated.FrequencyTrieLookupBenchmark_lookupAllPatchesWithNormalizedCharVisitor_jmhTest.lookupAllPatchesWithNormalizedCharVisitor_avgt_jmhStub(FrequencyTrieLookupBenchmark_lookupAllPatchesWithNormalizedCharVisitor_jmhTest.java:241)
+	at org.egothor.stemmer.benchmark.jmh_generated.FrequencyTrieLookupBenchmark_lookupAllPatchesWithNormalizedCharVisitor_jmhTest.lookupAllPatchesWithNormalizedCharVisitor_AverageTime(FrequencyTrieLookupBenchmark_lookupAllPatchesWithNormalizedCharVisitor_jmhTest.java:180)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call(BenchmarkHandler.java:527)
+	at org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call(BenchmarkHandler.java:504)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:572)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+
+
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupAllPatchesWithNormalizedCharVisitor
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS, stemCount = 2000)
+
+# Run progress: 51.52% complete, ETA 00:04:14
+# Fork: 1 of 1
+# Warmup Iteration   1: <failure>
+
+java.lang.IllegalStateException: Expected multiple patches for benchmark key.
+	at org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupAllPatchesWithNormalizedCharVisitor(FrequencyTrieLookupBenchmark.java:223)
+	at org.egothor.stemmer.benchmark.jmh_generated.FrequencyTrieLookupBenchmark_lookupAllPatchesWithNormalizedCharVisitor_jmhTest.lookupAllPatchesWithNormalizedCharVisitor_avgt_jmhStub(FrequencyTrieLookupBenchmark_lookupAllPatchesWithNormalizedCharVisitor_jmhTest.java:241)
+	at org.egothor.stemmer.benchmark.jmh_generated.FrequencyTrieLookupBenchmark_lookupAllPatchesWithNormalizedCharVisitor_jmhTest.lookupAllPatchesWithNormalizedCharVisitor_AverageTime(FrequencyTrieLookupBenchmark_lookupAllPatchesWithNormalizedCharVisitor_jmhTest.java:180)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call(BenchmarkHandler.java:527)
+	at org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call(BenchmarkHandler.java:504)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:572)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+
+
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupAllPatchesWithNormalizedCharVisitor
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS, stemCount = 10000)
+
+# Run progress: 53.03% complete, ETA 00:04:00
+# Fork: 1 of 1
+# Warmup Iteration   1: <failure>
+
+java.lang.IllegalStateException: Expected multiple patches for benchmark key.
+	at org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupAllPatchesWithNormalizedCharVisitor(FrequencyTrieLookupBenchmark.java:223)
+	at org.egothor.stemmer.benchmark.jmh_generated.FrequencyTrieLookupBenchmark_lookupAllPatchesWithNormalizedCharVisitor_jmhTest.lookupAllPatchesWithNormalizedCharVisitor_avgt_jmhStub(FrequencyTrieLookupBenchmark_lookupAllPatchesWithNormalizedCharVisitor_jmhTest.java:241)
+	at org.egothor.stemmer.benchmark.jmh_generated.FrequencyTrieLookupBenchmark_lookupAllPatchesWithNormalizedCharVisitor_jmhTest.lookupAllPatchesWithNormalizedCharVisitor_AverageTime(FrequencyTrieLookupBenchmark_lookupAllPatchesWithNormalizedCharVisitor_jmhTest.java:180)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call(BenchmarkHandler.java:527)
+	at org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call(BenchmarkHandler.java:504)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:572)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+
+
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupPatchEntries
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS, stemCount = 2000)
+
+# Run progress: 54.55% complete, ETA 00:03:47
+# Fork: 1 of 1
+# Warmup Iteration   1: <failure>
+
+java.lang.IllegalStateException: Expected multiple entries for key shared0.
+	at org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupPatchEntries(FrequencyTrieLookupBenchmark.java:241)
+	at org.egothor.stemmer.benchmark.jmh_generated.FrequencyTrieLookupBenchmark_lookupPatchEntries_jmhTest.lookupPatchEntries_avgt_jmhStub(FrequencyTrieLookupBenchmark_lookupPatchEntries_jmhTest.java:241)
+	at org.egothor.stemmer.benchmark.jmh_generated.FrequencyTrieLookupBenchmark_lookupPatchEntries_jmhTest.lookupPatchEntries_AverageTime(FrequencyTrieLookupBenchmark_lookupPatchEntries_jmhTest.java:180)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call(BenchmarkHandler.java:527)
+	at org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call(BenchmarkHandler.java:504)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:572)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+
+
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupPatchEntries
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS, stemCount = 10000)
+
+# Run progress: 56.06% complete, ETA 00:03:34
+# Fork: 1 of 1
+# Warmup Iteration   1: <failure>
+
+java.lang.IllegalStateException: Expected multiple entries for key shared0.
+	at org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupPatchEntries(FrequencyTrieLookupBenchmark.java:241)
+	at org.egothor.stemmer.benchmark.jmh_generated.FrequencyTrieLookupBenchmark_lookupPatchEntries_jmhTest.lookupPatchEntries_avgt_jmhStub(FrequencyTrieLookupBenchmark_lookupPatchEntries_jmhTest.java:241)
+	at org.egothor.stemmer.benchmark.jmh_generated.FrequencyTrieLookupBenchmark_lookupPatchEntries_jmhTest.lookupPatchEntries_AverageTime(FrequencyTrieLookupBenchmark_lookupPatchEntries_jmhTest.java:180)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call(BenchmarkHandler.java:527)
+	at org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call(BenchmarkHandler.java:504)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:572)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+
+
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupPatchEntries
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS, stemCount = 2000)
+
+# Run progress: 57.58% complete, ETA 00:03:23
+# Fork: 1 of 1
+# Warmup Iteration   1: <failure>
+
+java.lang.IllegalStateException: Expected multiple entries for key shared0.
+	at org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupPatchEntries(FrequencyTrieLookupBenchmark.java:241)
+	at org.egothor.stemmer.benchmark.jmh_generated.FrequencyTrieLookupBenchmark_lookupPatchEntries_jmhTest.lookupPatchEntries_avgt_jmhStub(FrequencyTrieLookupBenchmark_lookupPatchEntries_jmhTest.java:241)
+	at org.egothor.stemmer.benchmark.jmh_generated.FrequencyTrieLookupBenchmark_lookupPatchEntries_jmhTest.lookupPatchEntries_AverageTime(FrequencyTrieLookupBenchmark_lookupPatchEntries_jmhTest.java:180)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call(BenchmarkHandler.java:527)
+	at org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call(BenchmarkHandler.java:504)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:572)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+
+
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupPatchEntries
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS, stemCount = 10000)
+
+# Run progress: 59.09% complete, ETA 00:03:11
+# Fork: 1 of 1
+# Warmup Iteration   1: <failure>
+
+java.lang.IllegalStateException: Expected multiple entries for key shared0.
+	at org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupPatchEntries(FrequencyTrieLookupBenchmark.java:241)
+	at org.egothor.stemmer.benchmark.jmh_generated.FrequencyTrieLookupBenchmark_lookupPatchEntries_jmhTest.lookupPatchEntries_avgt_jmhStub(FrequencyTrieLookupBenchmark_lookupPatchEntries_jmhTest.java:241)
+	at org.egothor.stemmer.benchmark.jmh_generated.FrequencyTrieLookupBenchmark_lookupPatchEntries_jmhTest.lookupPatchEntries_AverageTime(FrequencyTrieLookupBenchmark_lookupPatchEntries_jmhTest.java:180)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call(BenchmarkHandler.java:527)
+	at org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call(BenchmarkHandler.java:504)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:572)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+
+
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupPatchEntries
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS, stemCount = 2000)
+
+# Run progress: 60.61% complete, ETA 00:03:01
+# Fork: 1 of 1
+# Warmup Iteration   1: <failure>
+
+java.lang.IllegalStateException: Expected multiple entries for key shared0.
+	at org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupPatchEntries(FrequencyTrieLookupBenchmark.java:241)
+	at org.egothor.stemmer.benchmark.jmh_generated.FrequencyTrieLookupBenchmark_lookupPatchEntries_jmhTest.lookupPatchEntries_avgt_jmhStub(FrequencyTrieLookupBenchmark_lookupPatchEntries_jmhTest.java:241)
+	at org.egothor.stemmer.benchmark.jmh_generated.FrequencyTrieLookupBenchmark_lookupPatchEntries_jmhTest.lookupPatchEntries_AverageTime(FrequencyTrieLookupBenchmark_lookupPatchEntries_jmhTest.java:180)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call(BenchmarkHandler.java:527)
+	at org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call(BenchmarkHandler.java:504)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:572)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+
+
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupPatchEntries
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS, stemCount = 10000)
+
+# Run progress: 62.12% complete, ETA 00:02:50
+# Fork: 1 of 1
+# Warmup Iteration   1: <failure>
+
+java.lang.IllegalStateException: Expected multiple entries for key shared0.
+	at org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupPatchEntries(FrequencyTrieLookupBenchmark.java:241)
+	at org.egothor.stemmer.benchmark.jmh_generated.FrequencyTrieLookupBenchmark_lookupPatchEntries_jmhTest.lookupPatchEntries_avgt_jmhStub(FrequencyTrieLookupBenchmark_lookupPatchEntries_jmhTest.java:241)
+	at org.egothor.stemmer.benchmark.jmh_generated.FrequencyTrieLookupBenchmark_lookupPatchEntries_jmhTest.lookupPatchEntries_AverageTime(FrequencyTrieLookupBenchmark_lookupPatchEntries_jmhTest.java:180)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call(BenchmarkHandler.java:527)
+	at org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call(BenchmarkHandler.java:504)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:572)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+
+
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupPatchEntriesWithVisitor
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS, stemCount = 2000)
+
+# Run progress: 63.64% complete, ETA 00:02:40
+# Fork: 1 of 1
+# Warmup Iteration   1: <failure>
+
+java.lang.IllegalStateException: Expected multiple entries for benchmark key.
+	at org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupPatchEntriesWithVisitor(FrequencyTrieLookupBenchmark.java:259)
+	at org.egothor.stemmer.benchmark.jmh_generated.FrequencyTrieLookupBenchmark_lookupPatchEntriesWithVisitor_jmhTest.lookupPatchEntriesWithVisitor_avgt_jmhStub(FrequencyTrieLookupBenchmark_lookupPatchEntriesWithVisitor_jmhTest.java:241)
+	at org.egothor.stemmer.benchmark.jmh_generated.FrequencyTrieLookupBenchmark_lookupPatchEntriesWithVisitor_jmhTest.lookupPatchEntriesWithVisitor_AverageTime(FrequencyTrieLookupBenchmark_lookupPatchEntriesWithVisitor_jmhTest.java:180)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call(BenchmarkHandler.java:527)
+	at org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call(BenchmarkHandler.java:504)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:572)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+
+
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupPatchEntriesWithVisitor
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS, stemCount = 10000)
+
+# Run progress: 65.15% complete, ETA 00:02:31
+# Fork: 1 of 1
+# Warmup Iteration   1: <failure>
+
+java.lang.IllegalStateException: Expected multiple entries for benchmark key.
+	at org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupPatchEntriesWithVisitor(FrequencyTrieLookupBenchmark.java:259)
+	at org.egothor.stemmer.benchmark.jmh_generated.FrequencyTrieLookupBenchmark_lookupPatchEntriesWithVisitor_jmhTest.lookupPatchEntriesWithVisitor_avgt_jmhStub(FrequencyTrieLookupBenchmark_lookupPatchEntriesWithVisitor_jmhTest.java:241)
+	at org.egothor.stemmer.benchmark.jmh_generated.FrequencyTrieLookupBenchmark_lookupPatchEntriesWithVisitor_jmhTest.lookupPatchEntriesWithVisitor_AverageTime(FrequencyTrieLookupBenchmark_lookupPatchEntriesWithVisitor_jmhTest.java:180)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call(BenchmarkHandler.java:527)
+	at org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call(BenchmarkHandler.java:504)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:572)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+
+
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupPatchEntriesWithVisitor
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS, stemCount = 2000)
+
+# Run progress: 66.67% complete, ETA 00:02:22
+# Fork: 1 of 1
+# Warmup Iteration   1: <failure>
+
+java.lang.IllegalStateException: Expected multiple entries for benchmark key.
+	at org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupPatchEntriesWithVisitor(FrequencyTrieLookupBenchmark.java:259)
+	at org.egothor.stemmer.benchmark.jmh_generated.FrequencyTrieLookupBenchmark_lookupPatchEntriesWithVisitor_jmhTest.lookupPatchEntriesWithVisitor_avgt_jmhStub(FrequencyTrieLookupBenchmark_lookupPatchEntriesWithVisitor_jmhTest.java:241)
+	at org.egothor.stemmer.benchmark.jmh_generated.FrequencyTrieLookupBenchmark_lookupPatchEntriesWithVisitor_jmhTest.lookupPatchEntriesWithVisitor_AverageTime(FrequencyTrieLookupBenchmark_lookupPatchEntriesWithVisitor_jmhTest.java:180)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call(BenchmarkHandler.java:527)
+	at org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call(BenchmarkHandler.java:504)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:572)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+
+
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupPatchEntriesWithVisitor
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS, stemCount = 10000)
+
+# Run progress: 68.18% complete, ETA 00:02:13
+# Fork: 1 of 1
+# Warmup Iteration   1: <failure>
+
+java.lang.IllegalStateException: Expected multiple entries for benchmark key.
+	at org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupPatchEntriesWithVisitor(FrequencyTrieLookupBenchmark.java:259)
+	at org.egothor.stemmer.benchmark.jmh_generated.FrequencyTrieLookupBenchmark_lookupPatchEntriesWithVisitor_jmhTest.lookupPatchEntriesWithVisitor_avgt_jmhStub(FrequencyTrieLookupBenchmark_lookupPatchEntriesWithVisitor_jmhTest.java:241)
+	at org.egothor.stemmer.benchmark.jmh_generated.FrequencyTrieLookupBenchmark_lookupPatchEntriesWithVisitor_jmhTest.lookupPatchEntriesWithVisitor_AverageTime(FrequencyTrieLookupBenchmark_lookupPatchEntriesWithVisitor_jmhTest.java:180)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call(BenchmarkHandler.java:527)
+	at org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call(BenchmarkHandler.java:504)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:572)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+
+
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupPatchEntriesWithVisitor
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS, stemCount = 2000)
+
+# Run progress: 69.70% complete, ETA 00:02:04
+# Fork: 1 of 1
+# Warmup Iteration   1: <failure>
+
+java.lang.IllegalStateException: Expected multiple entries for benchmark key.
+	at org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupPatchEntriesWithVisitor(FrequencyTrieLookupBenchmark.java:259)
+	at org.egothor.stemmer.benchmark.jmh_generated.FrequencyTrieLookupBenchmark_lookupPatchEntriesWithVisitor_jmhTest.lookupPatchEntriesWithVisitor_avgt_jmhStub(FrequencyTrieLookupBenchmark_lookupPatchEntriesWithVisitor_jmhTest.java:241)
+	at org.egothor.stemmer.benchmark.jmh_generated.FrequencyTrieLookupBenchmark_lookupPatchEntriesWithVisitor_jmhTest.lookupPatchEntriesWithVisitor_AverageTime(FrequencyTrieLookupBenchmark_lookupPatchEntriesWithVisitor_jmhTest.java:180)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call(BenchmarkHandler.java:527)
+	at org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call(BenchmarkHandler.java:504)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:572)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+
+
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupPatchEntriesWithVisitor
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS, stemCount = 10000)
+
+# Run progress: 71.21% complete, ETA 00:01:56
+# Fork: 1 of 1
+# Warmup Iteration   1: <failure>
+
+java.lang.IllegalStateException: Expected multiple entries for benchmark key.
+	at org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupPatchEntriesWithVisitor(FrequencyTrieLookupBenchmark.java:259)
+	at org.egothor.stemmer.benchmark.jmh_generated.FrequencyTrieLookupBenchmark_lookupPatchEntriesWithVisitor_jmhTest.lookupPatchEntriesWithVisitor_avgt_jmhStub(FrequencyTrieLookupBenchmark_lookupPatchEntriesWithVisitor_jmhTest.java:241)
+	at org.egothor.stemmer.benchmark.jmh_generated.FrequencyTrieLookupBenchmark_lookupPatchEntriesWithVisitor_jmhTest.lookupPatchEntriesWithVisitor_AverageTime(FrequencyTrieLookupBenchmark_lookupPatchEntriesWithVisitor_jmhTest.java:180)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call(BenchmarkHandler.java:527)
+	at org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call(BenchmarkHandler.java:504)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:572)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+
+
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupPreferredPatch
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS, stemCount = 2000)
+
+# Run progress: 72.73% complete, ETA 00:01:48
+# Fork: 1 of 1
+# Warmup Iteration   1: <failure>
+
+java.lang.IllegalStateException: Missing preferred patch for key adapt0.
+	at org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupPreferredPatch(FrequencyTrieLookupBenchmark.java:186)
+	at org.egothor.stemmer.benchmark.jmh_generated.FrequencyTrieLookupBenchmark_lookupPreferredPatch_jmhTest.lookupPreferredPatch_avgt_jmhStub(FrequencyTrieLookupBenchmark_lookupPreferredPatch_jmhTest.java:241)
+	at org.egothor.stemmer.benchmark.jmh_generated.FrequencyTrieLookupBenchmark_lookupPreferredPatch_jmhTest.lookupPreferredPatch_AverageTime(FrequencyTrieLookupBenchmark_lookupPreferredPatch_jmhTest.java:180)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call(BenchmarkHandler.java:527)
+	at org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call(BenchmarkHandler.java:504)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:572)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+
+
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupPreferredPatch
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS, stemCount = 10000)
+
+# Run progress: 74.24% complete, ETA 00:01:40
+# Fork: 1 of 1
+# Warmup Iteration   1: <failure>
+
+java.lang.IllegalStateException: Missing preferred patch for key adapt0.
+	at org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupPreferredPatch(FrequencyTrieLookupBenchmark.java:186)
+	at org.egothor.stemmer.benchmark.jmh_generated.FrequencyTrieLookupBenchmark_lookupPreferredPatch_jmhTest.lookupPreferredPatch_avgt_jmhStub(FrequencyTrieLookupBenchmark_lookupPreferredPatch_jmhTest.java:241)
+	at org.egothor.stemmer.benchmark.jmh_generated.FrequencyTrieLookupBenchmark_lookupPreferredPatch_jmhTest.lookupPreferredPatch_AverageTime(FrequencyTrieLookupBenchmark_lookupPreferredPatch_jmhTest.java:180)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call(BenchmarkHandler.java:527)
+	at org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call(BenchmarkHandler.java:504)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:572)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+
+
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupPreferredPatch
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS, stemCount = 2000)
+
+# Run progress: 75.76% complete, ETA 00:01:33
+# Fork: 1 of 1
+# Warmup Iteration   1: <failure>
+
+java.lang.IllegalStateException: Missing preferred patch for key adapt0.
+	at org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupPreferredPatch(FrequencyTrieLookupBenchmark.java:186)
+	at org.egothor.stemmer.benchmark.jmh_generated.FrequencyTrieLookupBenchmark_lookupPreferredPatch_jmhTest.lookupPreferredPatch_avgt_jmhStub(FrequencyTrieLookupBenchmark_lookupPreferredPatch_jmhTest.java:241)
+	at org.egothor.stemmer.benchmark.jmh_generated.FrequencyTrieLookupBenchmark_lookupPreferredPatch_jmhTest.lookupPreferredPatch_AverageTime(FrequencyTrieLookupBenchmark_lookupPreferredPatch_jmhTest.java:180)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call(BenchmarkHandler.java:527)
+	at org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call(BenchmarkHandler.java:504)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:572)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+
+
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupPreferredPatch
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS, stemCount = 10000)
+
+# Run progress: 77.27% complete, ETA 00:01:26
+# Fork: 1 of 1
+# Warmup Iteration   1: <failure>
+
+java.lang.IllegalStateException: Missing preferred patch for key adapt0.
+	at org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupPreferredPatch(FrequencyTrieLookupBenchmark.java:186)
+	at org.egothor.stemmer.benchmark.jmh_generated.FrequencyTrieLookupBenchmark_lookupPreferredPatch_jmhTest.lookupPreferredPatch_avgt_jmhStub(FrequencyTrieLookupBenchmark_lookupPreferredPatch_jmhTest.java:241)
+	at org.egothor.stemmer.benchmark.jmh_generated.FrequencyTrieLookupBenchmark_lookupPreferredPatch_jmhTest.lookupPreferredPatch_AverageTime(FrequencyTrieLookupBenchmark_lookupPreferredPatch_jmhTest.java:180)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call(BenchmarkHandler.java:527)
+	at org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call(BenchmarkHandler.java:504)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:572)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+
+
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupPreferredPatch
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS, stemCount = 2000)
+
+# Run progress: 78.79% complete, ETA 00:01:19
+# Fork: 1 of 1
+# Warmup Iteration   1: <failure>
+
+java.lang.IllegalStateException: Missing preferred patch for key adapt0.
+	at org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupPreferredPatch(FrequencyTrieLookupBenchmark.java:186)
+	at org.egothor.stemmer.benchmark.jmh_generated.FrequencyTrieLookupBenchmark_lookupPreferredPatch_jmhTest.lookupPreferredPatch_avgt_jmhStub(FrequencyTrieLookupBenchmark_lookupPreferredPatch_jmhTest.java:241)
+	at org.egothor.stemmer.benchmark.jmh_generated.FrequencyTrieLookupBenchmark_lookupPreferredPatch_jmhTest.lookupPreferredPatch_AverageTime(FrequencyTrieLookupBenchmark_lookupPreferredPatch_jmhTest.java:180)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call(BenchmarkHandler.java:527)
+	at org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call(BenchmarkHandler.java:504)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:572)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+
+
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupPreferredPatch
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS, stemCount = 10000)
+
+# Run progress: 80.30% complete, ETA 00:01:12
+# Fork: 1 of 1
+# Warmup Iteration   1: <failure>
+
+java.lang.IllegalStateException: Missing preferred patch for key adapt0.
+	at org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.lookupPreferredPatch(FrequencyTrieLookupBenchmark.java:186)
+	at org.egothor.stemmer.benchmark.jmh_generated.FrequencyTrieLookupBenchmark_lookupPreferredPatch_jmhTest.lookupPreferredPatch_avgt_jmhStub(FrequencyTrieLookupBenchmark_lookupPreferredPatch_jmhTest.java:241)
+	at org.egothor.stemmer.benchmark.jmh_generated.FrequencyTrieLookupBenchmark_lookupPreferredPatch_jmhTest.lookupPreferredPatch_AverageTime(FrequencyTrieLookupBenchmark_lookupPreferredPatch_jmhTest.java:180)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call(BenchmarkHandler.java:527)
+	at org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call(BenchmarkHandler.java:504)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:572)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+
+
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.stemAllVariants
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS, stemCount = 2000)
+
+# Run progress: 81.82% complete, ETA 00:01:06
+# Fork: 1 of 1
+# Warmup Iteration   1: 8925.209 ns/op
+# Warmup Iteration   2: 7380.884 ns/op
+# Warmup Iteration   3: 7306.663 ns/op
+Iteration   1: 7418.377 ns/op
+Iteration   2: 7334.966 ns/op
+Iteration   3: 7436.210 ns/op
+Iteration   4: 7311.435 ns/op
+Iteration   5: 7409.650 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.stemAllVariants":
+  7382.128 ±(99.9%) 212.816 ns/op [Average]
+  (min, avg, max) = (7311.435, 7382.128, 7436.210), stdev = 55.268
+  CI (99.9%): [7169.312, 7594.944] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.stemAllVariants
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS, stemCount = 10000)
+
+# Run progress: 83.33% complete, ETA 00:01:01
+# Fork: 1 of 1
+# Warmup Iteration   1: 46665.294 ns/op
+# Warmup Iteration   2: 44149.023 ns/op
+# Warmup Iteration   3: 43832.252 ns/op
+Iteration   1: 44098.862 ns/op
+Iteration   2: 44075.504 ns/op
+Iteration   3: 43883.296 ns/op
+Iteration   4: 43553.201 ns/op
+Iteration   5: 43914.779 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.stemAllVariants":
+  43905.128 ±(99.9%) 841.397 ns/op [Average]
+  (min, avg, max) = (43553.201, 43905.128, 44098.862), stdev = 218.508
+  CI (99.9%): [43063.731, 44746.525] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.stemAllVariants
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS, stemCount = 2000)
+
+# Run progress: 84.85% complete, ETA 00:00:56
+# Fork: 1 of 1
+# Warmup Iteration   1: 8189.518 ns/op
+# Warmup Iteration   2: 7430.583 ns/op
+# Warmup Iteration   3: 7402.303 ns/op
+Iteration   1: 7437.091 ns/op
+Iteration   2: 7417.179 ns/op
+Iteration   3: 7402.221 ns/op
+Iteration   4: 7405.387 ns/op
+Iteration   5: 7452.434 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.stemAllVariants":
+  7422.863 ±(99.9%) 82.602 ns/op [Average]
+  (min, avg, max) = (7402.221, 7422.863, 7452.434), stdev = 21.452
+  CI (99.9%): [7340.260, 7505.465] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.stemAllVariants
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS, stemCount = 10000)
+
+# Run progress: 86.36% complete, ETA 00:00:51
+# Fork: 1 of 1
+# Warmup Iteration   1: 31659.752 ns/op
+# Warmup Iteration   2: 29429.163 ns/op
+# Warmup Iteration   3: 29231.347 ns/op
+Iteration   1: 31639.627 ns/op
+Iteration   2: 32501.660 ns/op
+Iteration   3: 33163.086 ns/op
+Iteration   4: 32496.250 ns/op
+Iteration   5: 32901.703 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.stemAllVariants":
+  32540.465 ±(99.9%) 2222.992 ns/op [Average]
+  (min, avg, max) = (31639.627, 32540.465, 33163.086), stdev = 577.304
+  CI (99.9%): [30317.473, 34763.457] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.stemAllVariants
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS, stemCount = 2000)
+
+# Run progress: 87.88% complete, ETA 00:00:46
+# Fork: 1 of 1
+# Warmup Iteration   1: 8119.904 ns/op
+# Warmup Iteration   2: 7710.327 ns/op
+# Warmup Iteration   3: 7413.781 ns/op
+Iteration   1: 7254.828 ns/op
+Iteration   2: 7494.260 ns/op
+Iteration   3: 7311.243 ns/op
+Iteration   4: 7368.513 ns/op
+Iteration   5: 7404.919 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.stemAllVariants":
+  7366.753 ±(99.9%) 351.477 ns/op [Average]
+  (min, avg, max) = (7254.828, 7366.753, 7494.260), stdev = 91.278
+  CI (99.9%): [7015.275, 7718.230] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.stemAllVariants
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS, stemCount = 10000)
+
+# Run progress: 89.39% complete, ETA 00:00:40
+# Fork: 1 of 1
+# Warmup Iteration   1: 37515.857 ns/op
+# Warmup Iteration   2: 34720.639 ns/op
+# Warmup Iteration   3: 34806.765 ns/op
+Iteration   1: 34900.819 ns/op
+Iteration   2: 35110.175 ns/op
+Iteration   3: 34818.630 ns/op
+Iteration   4: 37052.393 ns/op
+Iteration   5: 34506.156 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.stemAllVariants":
+  35277.635 ±(99.9%) 3910.662 ns/op [Average]
+  (min, avg, max) = (34506.156, 35277.635, 37052.393), stdev = 1015.587
+  CI (99.9%): [31366.972, 39188.297] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.stemPreferredVariant
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS, stemCount = 2000)
+
+# Run progress: 90.91% complete, ETA 00:00:35
+# Fork: 1 of 1
+# Warmup Iteration   1: 412452.131 ns/op
+# Warmup Iteration   2: 357391.698 ns/op
+# Warmup Iteration   3: 356718.023 ns/op
+Iteration   1: 353660.277 ns/op
+Iteration   2: 358714.978 ns/op
+Iteration   3: 356448.459 ns/op
+Iteration   4: 355370.918 ns/op
+Iteration   5: 358031.004 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.stemPreferredVariant":
+  356445.127 ±(99.9%) 7838.818 ns/op [Average]
+  (min, avg, max) = (353660.277, 356445.127, 358714.978), stdev = 2035.716
+  CI (99.9%): [348606.309, 364283.945] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.stemPreferredVariant
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS, stemCount = 10000)
+
+# Run progress: 92.42% complete, ETA 00:00:29
+# Fork: 1 of 1
+# Warmup Iteration   1: 1885584.205 ns/op
+# Warmup Iteration   2: 1852948.428 ns/op
+# Warmup Iteration   3: 1871821.312 ns/op
+Iteration   1: 1827737.823 ns/op
+Iteration   2: 1817560.514 ns/op
+Iteration   3: 1831615.952 ns/op
+Iteration   4: 1815927.495 ns/op
+Iteration   5: 1826688.184 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.stemPreferredVariant":
+  1823905.994 ±(99.9%) 26242.959 ns/op [Average]
+  (min, avg, max) = (1815927.495, 1823905.994, 1831615.952), stdev = 6815.213
+  CI (99.9%): [1797663.035, 1850148.953] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.stemPreferredVariant
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS, stemCount = 2000)
+
+# Run progress: 93.94% complete, ETA 00:00:24
+# Fork: 1 of 1
+# Warmup Iteration   1: 396892.135 ns/op
+# Warmup Iteration   2: 356443.192 ns/op
+# Warmup Iteration   3: 361853.688 ns/op
+Iteration   1: 355550.666 ns/op
+Iteration   2: 361688.211 ns/op
+Iteration   3: 354597.008 ns/op
+Iteration   4: 357705.430 ns/op
+Iteration   5: 357578.573 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.stemPreferredVariant":
+  357423.978 ±(99.9%) 10508.071 ns/op [Average]
+  (min, avg, max) = (354597.008, 357423.978, 361688.211), stdev = 2728.913
+  CI (99.9%): [346915.907, 367932.049] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.stemPreferredVariant
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS, stemCount = 10000)
+
+# Run progress: 95.45% complete, ETA 00:00:18
+# Fork: 1 of 1
+# Warmup Iteration   1: 1978970.955 ns/op
+# Warmup Iteration   2: 1811469.601 ns/op
+# Warmup Iteration   3: 1827618.024 ns/op
+Iteration   1: 1816319.327 ns/op
+Iteration   2: 1830153.898 ns/op
+Iteration   3: 1814534.862 ns/op
+Iteration   4: 1827763.219 ns/op
+Iteration   5: 1994999.086 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.stemPreferredVariant":
+  1856754.078 ±(99.9%) 298748.636 ns/op [Average]
+  (min, avg, max) = (1814534.862, 1856754.078, 1994999.086), stdev = 77584.072
+  CI (99.9%): [1558005.442, 2155502.714] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.stemPreferredVariant
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS, stemCount = 2000)
+
+# Run progress: 96.97% complete, ETA 00:00:12
+# Fork: 1 of 1
+# Warmup Iteration   1: 418542.529 ns/op
+# Warmup Iteration   2: 372063.965 ns/op
+# Warmup Iteration   3: 376586.032 ns/op
+Iteration   1: 369677.008 ns/op
+Iteration   2: 371676.031 ns/op
+Iteration   3: 387079.913 ns/op
+Iteration   4: 370817.601 ns/op
+Iteration   5: 370990.251 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.stemPreferredVariant":
+  374048.161 ±(99.9%) 28187.915 ns/op [Average]
+  (min, avg, max) = (369677.008, 374048.161, 387079.913), stdev = 7320.312
+  CI (99.9%): [345860.246, 402236.076] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.stemPreferredVariant
+# Parameters: (reductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS, stemCount = 10000)
+
+# Run progress: 98.48% complete, ETA 00:00:06
+# Fork: 1 of 1
+# Warmup Iteration   1: 1903975.709 ns/op
+# Warmup Iteration   2: 1707885.265 ns/op
+# Warmup Iteration   3: 1708309.892 ns/op
+Iteration   1: 1683992.158 ns/op
+Iteration   2: 1766541.102 ns/op
+Iteration   3: 1680601.539 ns/op
+Iteration   4: 1722424.845 ns/op
+Iteration   5: 1675324.415 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.FrequencyTrieLookupBenchmark.stemPreferredVariant":
+  1705776.812 ±(99.9%) 149199.036 ns/op [Average]
+  (min, avg, max) = (1675324.415, 1705776.812, 1766541.102), stdev = 38746.516
+  CI (99.9%): [1556577.776, 1854975.848] (assumes normal distribution)
+
+
+# Run complete. Total time: 00:06:50
+
+REMEMBER: The numbers below are just data. To gain reusable insights, you need to follow up on
+why the numbers are the way they are. Use profilers (see -prof, -lprof), design factorial
+experiments, perform baseline and negative tests that provide experimental control, make sure
+the benchmarking environment is safe on JVM/OS/HW level, ask for reviews from the domain experts.
+Do not assume the numbers tell you what you want them to tell.
+
+NOTE: Current JVM experimentally supports Compiler Blackholes, and they are in use. Please exercise
+extra caution when trusting the results, look into the generated code to check the benchmark still
+works, and factor in a small probability of new VM bugs. Additionally, while comparisons between
+different JVMs are already problematic, the performance difference caused by different Blackhole
+modes can be very significant. Please make sure you use the consistent Blackhole mode for comparisons.
+
+Benchmark                                                        (familyCount)                                           (reductionMode)  (stemCount)  (storeOriginalStem)  Mode  Cnt          Score           Error  Units
+EnglishStemmerComparisonBenchmark.radixorUsUkProfiPreferredStem           1000                                                       N/A          N/A                  N/A  avgt    5     665764.927 ±     11280.227  ns/op
+EnglishStemmerComparisonBenchmark.radixorUsUkProfiPreferredStem           5000                                                       N/A          N/A                  N/A  avgt    5    3176788.824 ±     65637.573  ns/op
+EnglishStemmerComparisonBenchmark.snowballEnglishPorter2                  1000                                                       N/A          N/A                  N/A  avgt    5    3995420.702 ±    183697.390  ns/op
+EnglishStemmerComparisonBenchmark.snowballEnglishPorter2                  5000                                                       N/A          N/A                  N/A  avgt    5   20974988.162 ±   3253841.010  ns/op
+EnglishStemmerComparisonBenchmark.snowballOriginalPorter                  1000                                                       N/A          N/A                  N/A  avgt    5    2798990.609 ±    463519.718  ns/op
+EnglishStemmerComparisonBenchmark.snowballOriginalPorter                  5000                                                       N/A          N/A                  N/A  avgt    5   27627580.769 ±   7416902.459  ns/op
+FrequencyTrieCompilationBenchmark.compilePatchTrie                         N/A     MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS         2000                 true  avgt    5   83038754.555 ±  58273058.545  ns/op
+FrequencyTrieCompilationBenchmark.compilePatchTrie                         N/A     MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS         2000                false  avgt    5   62215854.006 ±  44037156.489  ns/op
+FrequencyTrieCompilationBenchmark.compilePatchTrie                         N/A     MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS        10000                 true  avgt    5  294337399.000 ± 134315165.232  ns/op
+FrequencyTrieCompilationBenchmark.compilePatchTrie                         N/A     MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS        10000                false  avgt    5  364924236.817 ± 264233218.383  ns/op
+FrequencyTrieCompilationBenchmark.compilePatchTrie                         N/A  MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS         2000                 true  avgt    5   63947690.090 ±  35651349.726  ns/op
+FrequencyTrieCompilationBenchmark.compilePatchTrie                         N/A  MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS         2000                false  avgt    5   81590958.814 ±  26172359.098  ns/op
+FrequencyTrieCompilationBenchmark.compilePatchTrie                         N/A  MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS        10000                 true  avgt    5  406510248.800 ± 187562336.048  ns/op
+FrequencyTrieCompilationBenchmark.compilePatchTrie                         N/A  MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS        10000                false  avgt    5  302140288.550 ±  23457206.171  ns/op
+FrequencyTrieCompilationBenchmark.compilePatchTrie                         N/A       MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS         2000                 true  avgt    5   65838569.387 ±  16870812.177  ns/op
+FrequencyTrieCompilationBenchmark.compilePatchTrie                         N/A       MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS         2000                false  avgt    5   70357035.903 ±  17713708.837  ns/op
+FrequencyTrieCompilationBenchmark.compilePatchTrie                         N/A       MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS        10000                 true  avgt    5  312003832.797 ± 181870615.434  ns/op
+FrequencyTrieCompilationBenchmark.compilePatchTrie                         N/A       MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS        10000                false  avgt    5  319146120.950 ± 146085169.379  ns/op
+FrequencyTrieLookupBenchmark.applyPreferredPatchToBuffer                   N/A     MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS         2000                  N/A  avgt    5     687120.351 ±     14389.666  ns/op
+FrequencyTrieLookupBenchmark.applyPreferredPatchToBuffer                   N/A     MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS        10000                  N/A  avgt    5    3853401.431 ±    187670.534  ns/op
+FrequencyTrieLookupBenchmark.applyPreferredPatchToBuffer                   N/A  MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS         2000                  N/A  avgt    5     681883.623 ±     17142.208  ns/op
+FrequencyTrieLookupBenchmark.applyPreferredPatchToBuffer                   N/A  MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS        10000                  N/A  avgt    5     931077.729 ±      7719.210  ns/op
+FrequencyTrieLookupBenchmark.applyPreferredPatchToBuffer                   N/A       MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS         2000                  N/A  avgt    5     690060.696 ±     11920.123  ns/op
+FrequencyTrieLookupBenchmark.applyPreferredPatchToBuffer                   N/A       MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS        10000                  N/A  avgt    5    3566689.660 ±     62885.597  ns/op
+FrequencyTrieLookupBenchmark.stemAllVariants                               N/A     MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS         2000                  N/A  avgt    5       7382.128 ±       212.816  ns/op
+FrequencyTrieLookupBenchmark.stemAllVariants                               N/A     MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS        10000                  N/A  avgt    5      43905.128 ±       841.397  ns/op
+FrequencyTrieLookupBenchmark.stemAllVariants                               N/A  MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS         2000                  N/A  avgt    5       7422.863 ±        82.602  ns/op
+FrequencyTrieLookupBenchmark.stemAllVariants                               N/A  MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS        10000                  N/A  avgt    5      32540.465 ±      2222.992  ns/op
+FrequencyTrieLookupBenchmark.stemAllVariants                               N/A       MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS         2000                  N/A  avgt    5       7366.753 ±       351.477  ns/op
+FrequencyTrieLookupBenchmark.stemAllVariants                               N/A       MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS        10000                  N/A  avgt    5      35277.635 ±      3910.662  ns/op
+FrequencyTrieLookupBenchmark.stemPreferredVariant                          N/A     MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS         2000                  N/A  avgt    5     356445.127 ±      7838.818  ns/op
+FrequencyTrieLookupBenchmark.stemPreferredVariant                          N/A     MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS        10000                  N/A  avgt    5    1823905.994 ±     26242.959  ns/op
+FrequencyTrieLookupBenchmark.stemPreferredVariant                          N/A  MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS         2000                  N/A  avgt    5     357423.978 ±     10508.071  ns/op
+FrequencyTrieLookupBenchmark.stemPreferredVariant                          N/A  MERGE_SUBTREES_WITH_EQUIVALENT_UNORDERED_GET_ALL_RESULTS        10000                  N/A  avgt    5    1856754.078 ±    298748.636  ns/op
+FrequencyTrieLookupBenchmark.stemPreferredVariant                          N/A       MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS         2000                  N/A  avgt    5     374048.161 ±     28187.915  ns/op
+FrequencyTrieLookupBenchmark.stemPreferredVariant                          N/A       MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS        10000                  N/A  avgt    5    1705776.812 ±    149199.036  ns/op
+
+Benchmark result is saved to /home/runner/work/Radixor/Radixor/build/reports/jmh/jmh-results.csv

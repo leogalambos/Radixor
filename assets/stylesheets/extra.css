@@ -1,0 +1,109 @@
+/* Compact technical typography for Radixor */
+
+:root {
+  --md-text-font: "Inter", "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Hide page title only on the landing page */
+.visually-hidden {
+  display: none;
+}
+
+/* Main article text */
+.md-typeset {
+  font-size: 0.78rem;
+  line-height: 1.3;
+}
+
+/* Paragraph spacing */
+.md-typeset p,
+.md-typeset ul,
+.md-typeset ol,
+.md-typeset dl,
+.md-typeset blockquote {
+  margin-top: 0.45em;
+  margin-bottom: 0.45em;
+}
+
+/* Headings */
+.md-typeset h1 {
+  margin: 0 0 0.7rem;
+  font-size: 1.8rem;
+  line-height: 1.15;
+}
+
+.md-typeset h2 {
+  margin: 1.2rem 0 0.55rem;
+  font-size: 1.3rem;
+  line-height: 1.2;
+}
+
+.md-typeset h3 {
+  margin: 1rem 0 0.45rem;
+  font-size: 1.05rem;
+  line-height: 1.25;
+}
+
+.md-typeset h4,
+.md-typeset h5,
+.md-typeset h6 {
+  margin: 0.85rem 0 0.35rem;
+  line-height: 1.25;
+}
+
+/* Lists */
+.md-typeset li {
+  margin-bottom: 0.15em;
+}
+
+.md-typeset ul,
+.md-typeset ol {
+  padding-left: 1.1rem;
+}
+
+/* Tables */
+.md-typeset table:not([class]) td,
+.md-typeset table:not([class]) th {
+  padding: 0.45rem 0.7rem;
+}
+
+/* Code blocks */
+.md-typeset pre > code {
+  font-size: 0.72rem;
+  line-height: 1.4;
+}
+
+/* Inline code */
+.md-typeset code {
+  font-size: 0.72rem;
+}
+
+/* Navigation density */
+.md-nav__item .md-nav__link {
+  margin-top: 0.12rem;
+  margin-bottom: 0.12rem;
+}
+
+.md-sidebar__scrollwrap {
+  padding-top: 0.3rem;
+  padding-bottom: 0.3rem;
+}
+
+/* Slightly narrower content rhythm */
+.md-content__inner {
+  margin-top: 0.6rem;
+  padding-bottom: 1.2rem;
+}
+
+/* Admonitions more compact */
+.md-typeset .admonition,
+.md-typeset details {
+  margin: 0.8rem 0;
+}
+
+/* Optional: use a bit wider content area on large screens */
+@media screen and (min-width: 76.25em) {
+  .md-grid {
+    max-width: 68rem;
+  }
+}

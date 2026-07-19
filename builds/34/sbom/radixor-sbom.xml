@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bom serialNumber="urn:uuid:27bc9799-6cb9-47ac-ac1f-c0fea838e7b8" version="1" xmlns="http://cyclonedx.org/schema/bom/1.6">
+  <metadata>
+    <timestamp>2026-05-17T14:15:00Z</timestamp>
+    <tools>
+      <components>
+        <component type="application">
+          <author>CycloneDX</author>
+          <name>cyclonedx-gradle-plugin</name>
+          <version>3.2.4</version>
+        </component>
+      </components>
+    </tools>
+    <component type="library" bom-ref="pkg:maven/org.egothor/Radixor@2.2.0?project_path=%3A">
+      <group>org.egothor</group>
+      <name>Radixor</name>
+      <version>2.2.0</version>
+      <purl>pkg:maven/org.egothor/Radixor@2.2.0?project_path=%3A</purl>
+      <modified>false</modified>
+      <externalReferences>
+        <reference type="build-system">
+          <url>https://github.com/leogalambos/Radixor/actions/runs/25993034295</url>
+        </reference>
+        <reference type="vcs">
+          <url>https://github.com/leogalambos/Radixor</url>
+        </reference>
+      </externalReferences>
+    </component>
+  </metadata>
+</bom>

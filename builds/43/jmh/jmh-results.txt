@@ -1,0 +1,531 @@
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.EnglishStemmerComparisonBenchmark.luceneEnglishMinimalStemFilter
+
+# Run progress: 0.00% complete, ETA 00:02:20
+# Fork: 1 of 1
+# Warmup Iteration   1: 76803399.214 ns/op
+# Warmup Iteration   2: 85189954.833 ns/op
+# Warmup Iteration   3: 72069687.286 ns/op
+Iteration   1: 69885408.733 ns/op
+Iteration   2: 62815521.188 ns/op
+Iteration   3: 68755372.600 ns/op
+Iteration   4: 71856622.786 ns/op
+Iteration   5: 75303040.714 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.EnglishStemmerComparisonBenchmark.luceneEnglishMinimalStemFilter":
+  69723193.204 ±(99.9%) 17684178.487 ns/op [Average]
+  (min, avg, max) = (62815521.188, 69723193.204, 75303040.714), stdev = 4592524.995
+  CI (99.9%): [52039014.717, 87407371.691] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.EnglishStemmerComparisonBenchmark.luceneEnglishPossessiveFilter
+
+# Run progress: 5.71% complete, ETA 00:03:25
+# Fork: 1 of 1
+# Warmup Iteration   1: 91346564.182 ns/op
+# Warmup Iteration   2: 83412539.615 ns/op
+# Warmup Iteration   3: 85594748.333 ns/op
+Iteration   1: 82156351.231 ns/op
+Iteration   2: 85888458.750 ns/op
+Iteration   3: 81893798.385 ns/op
+Iteration   4: 85928005.083 ns/op
+Iteration   5: 82565495.769 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.EnglishStemmerComparisonBenchmark.luceneEnglishPossessiveFilter":
+  83686421.844 ±(99.9%) 7864357.461 ns/op [Average]
+  (min, avg, max) = (81893798.385, 83686421.844, 85928005.083), stdev = 2042348.658
+  CI (99.9%): [75822064.383, 91550779.305] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.EnglishStemmerComparisonBenchmark.luceneKStemFilter
+
+# Run progress: 11.43% complete, ETA 00:03:12
+# Fork: 1 of 1
+# Warmup Iteration   1: 159982829.143 ns/op
+# Warmup Iteration   2: 132245240.375 ns/op
+# Warmup Iteration   3: 127647659.125 ns/op
+Iteration   1: 115776473.222 ns/op
+Iteration   2: 115880517.667 ns/op
+Iteration   3: 124188258.000 ns/op
+Iteration   4: 117607467.556 ns/op
+Iteration   5: 117913369.000 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.EnglishStemmerComparisonBenchmark.luceneKStemFilter":
+  118273217.089 ±(99.9%) 13272042.214 ns/op [Average]
+  (min, avg, max) = (115776473.222, 118273217.089, 124188258.000), stdev = 3446707.216
+  CI (99.9%): [105001174.874, 131545259.303] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.EnglishStemmerComparisonBenchmark.lucenePorterStemFilter
+
+# Run progress: 17.14% complete, ETA 00:03:01
+# Fork: 1 of 1
+# Warmup Iteration   1: 117469677.333 ns/op
+# Warmup Iteration   2: 86852554.583 ns/op
+# Warmup Iteration   3: 80627367.615 ns/op
+Iteration   1: 84811171.500 ns/op
+Iteration   2: 80174896.154 ns/op
+Iteration   3: 79992563.846 ns/op
+Iteration   4: 79486860.692 ns/op
+Iteration   5: 80587647.385 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.EnglishStemmerComparisonBenchmark.lucenePorterStemFilter":
+  81010627.915 ±(99.9%) 8321270.183 ns/op [Average]
+  (min, avg, max) = (79486860.692, 81010627.915, 84811171.500), stdev = 2161007.441
+  CI (99.9%): [72689357.732, 89331898.099] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.EnglishStemmerComparisonBenchmark.lucenePorterStemmerCopied
+
+# Run progress: 22.86% complete, ETA 00:02:48
+# Fork: 1 of 1
+# Warmup Iteration   1: 46402330.409 ns/op
+# Warmup Iteration   2: 44448819.304 ns/op
+# Warmup Iteration   3: 45799619.304 ns/op
+Iteration   1: 44381757.652 ns/op
+Iteration   2: 43646699.217 ns/op
+Iteration   3: 42643831.667 ns/op
+Iteration   4: 42951206.833 ns/op
+Iteration   5: 46775586.500 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.EnglishStemmerComparisonBenchmark.lucenePorterStemmerCopied":
+  44079816.374 ±(99.9%) 6351154.543 ns/op [Average]
+  (min, avg, max) = (42643831.667, 44079816.374, 46775586.500), stdev = 1649374.666
+  CI (99.9%): [37728661.831, 50430970.917] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.EnglishStemmerComparisonBenchmark.opennlpPorterStemmer
+
+# Run progress: 28.57% complete, ETA 00:02:35
+# Fork: 1 of 1
+# Warmup Iteration   1: 50200797.350 ns/op
+# Warmup Iteration   2: 44990891.783 ns/op
+# Warmup Iteration   3: 47011687.727 ns/op
+Iteration   1: 48304647.095 ns/op
+Iteration   2: 44874856.870 ns/op
+Iteration   3: 43771662.435 ns/op
+Iteration   4: 43598483.130 ns/op
+Iteration   5: 44956957.739 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.EnglishStemmerComparisonBenchmark.opennlpPorterStemmer":
+  45101321.454 ±(99.9%) 7295913.118 ns/op [Average]
+  (min, avg, max) = (43598483.130, 45101321.454, 48304647.095), stdev = 1894725.467
+  CI (99.9%): [37805408.336, 52397234.571] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.EnglishStemmerComparisonBenchmark.paiceHuskLancaster
+
+# Run progress: 34.28% complete, ETA 00:02:22
+# Fork: 1 of 1
+# Warmup Iteration   1: 405941330.667 ns/op
+# Warmup Iteration   2: 299053977.250 ns/op
+# Warmup Iteration   3: 311405881.250 ns/op
+Iteration   1: 296118345.500 ns/op
+Iteration   2: 317405696.000 ns/op
+Iteration   3: 300978885.500 ns/op
+Iteration   4: 292670362.750 ns/op
+Iteration   5: 269442130.000 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.EnglishStemmerComparisonBenchmark.paiceHuskLancaster":
+  295323083.950 ±(99.9%) 66615110.359 ns/op [Average]
+  (min, avg, max) = (269442130.000, 295323083.950, 317405696.000), stdev = 17299732.615
+  CI (99.9%): [228707973.591, 361938194.309] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.EnglishStemmerComparisonBenchmark.radixorUsUkProfiPreferredStem
+
+# Run progress: 40.00% complete, ETA 00:02:11
+# Fork: 1 of 1
+# Warmup Iteration   1: 48436012.619 ns/op
+# Warmup Iteration   2: 49099091.333 ns/op
+# Warmup Iteration   3: 44419895.870 ns/op
+Iteration   1: 43593073.130 ns/op
+Iteration   2: 46346831.909 ns/op
+Iteration   3: 43199293.958 ns/op
+Iteration   4: 49377444.619 ns/op
+Iteration   5: 44981092.739 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.EnglishStemmerComparisonBenchmark.radixorUsUkProfiPreferredStem":
+  45499547.271 ±(99.9%) 9617090.781 ns/op [Average]
+  (min, avg, max) = (43199293.958, 45499547.271, 49377444.619), stdev = 2497527.935
+  CI (99.9%): [35882456.490, 55116638.052] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.EnglishStemmerComparisonBenchmark.snowballEnglishPorter2
+
+# Run progress: 45.71% complete, ETA 00:01:59
+# Fork: 1 of 1
+# Warmup Iteration   1: 113334453.000 ns/op
+# Warmup Iteration   2: 101123012.545 ns/op
+# Warmup Iteration   3: 93618460.455 ns/op
+Iteration   1: 93260873.545 ns/op
+Iteration   2: 92729555.455 ns/op
+Iteration   3: 93334855.727 ns/op
+Iteration   4: 93597034.455 ns/op
+Iteration   5: 93212136.364 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.EnglishStemmerComparisonBenchmark.snowballEnglishPorter2":
+  93226891.109 ±(99.9%) 1213682.585 ns/op [Average]
+  (min, avg, max) = (92729555.455, 93226891.109, 93597034.455), stdev = 315189.513
+  CI (99.9%): [92013208.524, 94440573.694] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.EnglishStemmerComparisonBenchmark.snowballOriginalPorter
+
+# Run progress: 51.42% complete, ETA 00:01:46
+# Fork: 1 of 1
+# Warmup Iteration   1: 74198806.571 ns/op
+# Warmup Iteration   2: 67698778.733 ns/op
+# Warmup Iteration   3: 68042283.867 ns/op
+Iteration   1: 68138562.000 ns/op
+Iteration   2: 68350314.200 ns/op
+Iteration   3: 72643324.214 ns/op
+Iteration   4: 67395240.333 ns/op
+Iteration   5: 68105290.600 ns/op
+
+
+Result "org.egothor.stemmer.benchmark.EnglishStemmerComparisonBenchmark.snowballOriginalPorter":
+  68926546.270 ±(99.9%) 8119920.618 ns/op [Average]
+  (min, avg, max) = (67395240.333, 68926546.270, 72643324.214), stdev = 2108717.599
+  CI (99.9%): [60806625.651, 77046466.888] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 10 s each
+# Measurement: 5 iterations, 1 ms each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.EnglishStemmerComparisonBenchmarkQuality.radixorUsUkProfiPreferredStemAccuracy
+
+# Run progress: 57.14% complete, ETA 00:01:33
+# Fork: 1 of 1
+# Warmup Iteration   1: 93037042.907 ns/op
+# Warmup Iteration   2: 92149922.431 ns/op
+# Warmup Iteration   3: 92611240.361 ns/op
+Iteration   1: 92801437.000 ns/op
+                 changedCorrectMatches:  204599.000 #
+                 changedEvaluatedTokens: 210500.000 #
+                 correctMatches:         979039.000 #
+                 evaluatedTokens:        1004374.000 #
+                 rootEvaluatedTokens:    793874.000 #
+                 rootPreservedMatches:   774440.000 #
+
+Iteration   2: 93083909.000 ns/op
+                 changedCorrectMatches:  204599.000 #
+                 changedEvaluatedTokens: 210500.000 #
+                 correctMatches:         979039.000 #
+                 evaluatedTokens:        1004374.000 #
+                 rootEvaluatedTokens:    793874.000 #
+                 rootPreservedMatches:   774440.000 #
+
+Iteration   3: 95298510.000 ns/op
+                 changedCorrectMatches:  204599.000 #
+                 changedEvaluatedTokens: 210500.000 #
+                 correctMatches:         979039.000 #
+                 evaluatedTokens:        1004374.000 #
+                 rootEvaluatedTokens:    793874.000 #
+                 rootPreservedMatches:   774440.000 #
+
+Iteration   4: 91856242.000 ns/op
+                 changedCorrectMatches:  204599.000 #
+                 changedEvaluatedTokens: 210500.000 #
+                 correctMatches:         979039.000 #
+                 evaluatedTokens:        1004374.000 #
+                 rootEvaluatedTokens:    793874.000 #
+                 rootPreservedMatches:   774440.000 #
+
+Iteration   5: 92113922.000 ns/op
+                 changedCorrectMatches:  204599.000 #
+                 changedEvaluatedTokens: 210500.000 #
+                 correctMatches:         979039.000 #
+                 evaluatedTokens:        1004374.000 #
+                 rootEvaluatedTokens:    793874.000 #
+                 rootPreservedMatches:   774440.000 #
+
+
+
+Result "org.egothor.stemmer.benchmark.EnglishStemmerComparisonBenchmarkQuality.radixorUsUkProfiPreferredStemAccuracy":
+  93030804.000 ±(99.9%) 5243874.551 ns/op [Average]
+  (min, avg, max) = (91856242.000, 93030804.000, 95298510.000), stdev = 1361817.568
+  CI (99.9%): [87786929.449, 98274678.551] (assumes normal distribution)
+
+Secondary result "org.egothor.stemmer.benchmark.EnglishStemmerComparisonBenchmarkQuality.radixorUsUkProfiPreferredStemAccuracy:changedCorrectMatches":
+  1022995.000 ±(99.9%) 0.001 # [Sum]
+  (min, avg, max) = (204599.000, 204599.000, 204599.000), stdev = 0.001
+  CI (99.9%): [1022995.000, 1022995.000] (assumes normal distribution)
+
+Secondary result "org.egothor.stemmer.benchmark.EnglishStemmerComparisonBenchmarkQuality.radixorUsUkProfiPreferredStemAccuracy:changedEvaluatedTokens":
+  1052500.000 ±(99.9%) 0.001 # [Sum]
+  (min, avg, max) = (210500.000, 210500.000, 210500.000), stdev = 0.001
+  CI (99.9%): [1052500.000, 1052500.000] (assumes normal distribution)
+
+Secondary result "org.egothor.stemmer.benchmark.EnglishStemmerComparisonBenchmarkQuality.radixorUsUkProfiPreferredStemAccuracy:correctMatches":
+  4895195.000 ±(99.9%) 0.001 # [Sum]
+  (min, avg, max) = (979039.000, 979039.000, 979039.000), stdev = 0.001
+  CI (99.9%): [4895195.000, 4895195.000] (assumes normal distribution)
+
+Secondary result "org.egothor.stemmer.benchmark.EnglishStemmerComparisonBenchmarkQuality.radixorUsUkProfiPreferredStemAccuracy:evaluatedTokens":
+  5021870.000 ±(99.9%) 0.001 # [Sum]
+  (min, avg, max) = (1004374.000, 1004374.000, 1004374.000), stdev = 0.001
+  CI (99.9%): [5021870.000, 5021870.000] (assumes normal distribution)
+
+Secondary result "org.egothor.stemmer.benchmark.EnglishStemmerComparisonBenchmarkQuality.radixorUsUkProfiPreferredStemAccuracy:rootEvaluatedTokens":
+  3969370.000 ±(99.9%) 0.001 # [Sum]
+  (min, avg, max) = (793874.000, 793874.000, 793874.000), stdev = 0.001
+  CI (99.9%): [3969370.000, 3969370.000] (assumes normal distribution)
+
+Secondary result "org.egothor.stemmer.benchmark.EnglishStemmerComparisonBenchmarkQuality.radixorUsUkProfiPreferredStemAccuracy:rootPreservedMatches":
+  3872200.000 ±(99.9%) 0.001 # [Sum]
+  (min, avg, max) = (774440.000, 774440.000, 774440.000), stdev = 0.001
+  CI (99.9%): [3872200.000, 3872200.000] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-LTS
+# VM invoker: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/runner/work/Radixor/Radixor/build/tmp/jmh -Duser.country -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 10 s each
+# Measurement: 5 iterations, 1 ms each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.egothor.stemmer.benchmark.EnglishStemmerComparisonBenchmarkQuality.snowballOriginalPorterAccuracy
+
+# Run progress: 78.57% complete, ETA 00:00:43
+# Fork: 1 of 1
+# Warmup Iteration   1: 244570973.902 ns/op
+# Warmup Iteration   2: 239796199.333 ns/op
+# Warmup Iteration   3: 240000646.690 ns/op
+Iteration   1: 237662106.000 ns/op
+                 changedCorrectMatches:  97207.000 #
+                 changedEvaluatedTokens: 210500.000 #
+                 correctMatches:         397019.000 #
+                 evaluatedTokens:        1004374.000 #
+                 rootEvaluatedTokens:    793874.000 #
+                 rootPreservedMatches:   299812.000 #
+
+Iteration   2: 268569717.000 ns/op
+                 changedCorrectMatches:  97207.000 #
+                 changedEvaluatedTokens: 210500.000 #
+                 correctMatches:         397019.000 #
+                 evaluatedTokens:        1004374.000 #
+                 rootEvaluatedTokens:    793874.000 #
+                 rootPreservedMatches:   299812.000 #
+
+Iteration   3: 237505875.000 ns/op
+                 changedCorrectMatches:  97207.000 #
+                 changedEvaluatedTokens: 210500.000 #
+                 correctMatches:         397019.000 #
+                 evaluatedTokens:        1004374.000 #
+                 rootEvaluatedTokens:    793874.000 #
+                 rootPreservedMatches:   299812.000 #
+
+Iteration   4: 238959920.000 ns/op
+                 changedCorrectMatches:  97207.000 #
+                 changedEvaluatedTokens: 210500.000 #
+                 correctMatches:         397019.000 #
+                 evaluatedTokens:        1004374.000 #
+                 rootEvaluatedTokens:    793874.000 #
+                 rootPreservedMatches:   299812.000 #
+
+Iteration   5: 237513296.000 ns/op
+                 changedCorrectMatches:  97207.000 #
+                 changedEvaluatedTokens: 210500.000 #
+                 correctMatches:         397019.000 #
+                 evaluatedTokens:        1004374.000 #
+                 rootEvaluatedTokens:    793874.000 #
+                 rootPreservedMatches:   299812.000 #
+
+
+
+Result "org.egothor.stemmer.benchmark.EnglishStemmerComparisonBenchmarkQuality.snowballOriginalPorterAccuracy":
+  244042182.800 ±(99.9%) 52849452.860 ns/op [Average]
+  (min, avg, max) = (237505875.000, 244042182.800, 268569717.000), stdev = 13724835.077
+  CI (99.9%): [191192729.940, 296891635.660] (assumes normal distribution)
+
+Secondary result "org.egothor.stemmer.benchmark.EnglishStemmerComparisonBenchmarkQuality.snowballOriginalPorterAccuracy:changedCorrectMatches":
+  486035.000 ±(99.9%) 0.001 # [Sum]
+  (min, avg, max) = (97207.000, 97207.000, 97207.000), stdev = 0.001
+  CI (99.9%): [486035.000, 486035.000] (assumes normal distribution)
+
+Secondary result "org.egothor.stemmer.benchmark.EnglishStemmerComparisonBenchmarkQuality.snowballOriginalPorterAccuracy:changedEvaluatedTokens":
+  1052500.000 ±(99.9%) 0.001 # [Sum]
+  (min, avg, max) = (210500.000, 210500.000, 210500.000), stdev = 0.001
+  CI (99.9%): [1052500.000, 1052500.000] (assumes normal distribution)
+
+Secondary result "org.egothor.stemmer.benchmark.EnglishStemmerComparisonBenchmarkQuality.snowballOriginalPorterAccuracy:correctMatches":
+  1985095.000 ±(99.9%) 0.001 # [Sum]
+  (min, avg, max) = (397019.000, 397019.000, 397019.000), stdev = 0.001
+  CI (99.9%): [1985095.000, 1985095.000] (assumes normal distribution)
+
+Secondary result "org.egothor.stemmer.benchmark.EnglishStemmerComparisonBenchmarkQuality.snowballOriginalPorterAccuracy:evaluatedTokens":
+  5021870.000 ±(99.9%) 0.001 # [Sum]
+  (min, avg, max) = (1004374.000, 1004374.000, 1004374.000), stdev = 0.001
+  CI (99.9%): [5021870.000, 5021870.000] (assumes normal distribution)
+
+Secondary result "org.egothor.stemmer.benchmark.EnglishStemmerComparisonBenchmarkQuality.snowballOriginalPorterAccuracy:rootEvaluatedTokens":
+  3969370.000 ±(99.9%) 0.001 # [Sum]
+  (min, avg, max) = (793874.000, 793874.000, 793874.000), stdev = 0.001
+  CI (99.9%): [3969370.000, 3969370.000] (assumes normal distribution)
+
+Secondary result "org.egothor.stemmer.benchmark.EnglishStemmerComparisonBenchmarkQuality.snowballOriginalPorterAccuracy:rootPreservedMatches":
+  1499060.000 ±(99.9%) 0.001 # [Sum]
+  (min, avg, max) = (299812.000, 299812.000, 299812.000), stdev = 0.001
+  CI (99.9%): [1499060.000, 1499060.000] (assumes normal distribution)
+
+
+# Run complete. Total time: 00:03:15
+
+REMEMBER: The numbers below are just data. To gain reusable insights, you need to follow up on
+why the numbers are the way they are. Use profilers (see -prof, -lprof), design factorial
+experiments, perform baseline and negative tests that provide experimental control, make sure
+the benchmarking environment is safe on JVM/OS/HW level, ask for reviews from the domain experts.
+Do not assume the numbers tell you what you want them to tell.
+
+NOTE: Current JVM experimentally supports Compiler Blackholes, and they are in use. Please exercise
+extra caution when trusting the results, look into the generated code to check the benchmark still
+works, and factor in a small probability of new VM bugs. Additionally, while comparisons between
+different JVMs are already problematic, the performance difference caused by different Blackhole
+modes can be very significant. Please make sure you use the consistent Blackhole mode for comparisons.
+
+Benchmark                                                                                              Mode  Cnt          Score          Error  Units
+EnglishStemmerComparisonBenchmark.luceneEnglishMinimalStemFilter                                       avgt    5   69723193.204 ± 17684178.487  ns/op
+EnglishStemmerComparisonBenchmark.luceneEnglishPossessiveFilter                                        avgt    5   83686421.844 ±  7864357.461  ns/op
+EnglishStemmerComparisonBenchmark.luceneKStemFilter                                                    avgt    5  118273217.089 ± 13272042.214  ns/op
+EnglishStemmerComparisonBenchmark.lucenePorterStemFilter                                               avgt    5   81010627.915 ±  8321270.183  ns/op
+EnglishStemmerComparisonBenchmark.lucenePorterStemmerCopied                                            avgt    5   44079816.374 ±  6351154.543  ns/op
+EnglishStemmerComparisonBenchmark.opennlpPorterStemmer                                                 avgt    5   45101321.454 ±  7295913.118  ns/op
+EnglishStemmerComparisonBenchmark.paiceHuskLancaster                                                   avgt    5  295323083.950 ± 66615110.359  ns/op
+EnglishStemmerComparisonBenchmark.radixorUsUkProfiPreferredStem                                        avgt    5   45499547.271 ±  9617090.781  ns/op
+EnglishStemmerComparisonBenchmark.snowballEnglishPorter2                                               avgt    5   93226891.109 ±  1213682.585  ns/op
+EnglishStemmerComparisonBenchmark.snowballOriginalPorter                                               avgt    5   68926546.270 ±  8119920.618  ns/op
+EnglishStemmerComparisonBenchmarkQuality.radixorUsUkProfiPreferredStemAccuracy                         avgt    5   93030804.000 ±  5243874.551  ns/op
+EnglishStemmerComparisonBenchmarkQuality.radixorUsUkProfiPreferredStemAccuracy:changedCorrectMatches   avgt    5    1022995.000                     #
+EnglishStemmerComparisonBenchmarkQuality.radixorUsUkProfiPreferredStemAccuracy:changedEvaluatedTokens  avgt    5    1052500.000                     #
+EnglishStemmerComparisonBenchmarkQuality.radixorUsUkProfiPreferredStemAccuracy:correctMatches          avgt    5    4895195.000                     #
+EnglishStemmerComparisonBenchmarkQuality.radixorUsUkProfiPreferredStemAccuracy:evaluatedTokens         avgt    5    5021870.000                     #
+EnglishStemmerComparisonBenchmarkQuality.radixorUsUkProfiPreferredStemAccuracy:rootEvaluatedTokens     avgt    5    3969370.000                     #
+EnglishStemmerComparisonBenchmarkQuality.radixorUsUkProfiPreferredStemAccuracy:rootPreservedMatches    avgt    5    3872200.000                     #
+EnglishStemmerComparisonBenchmarkQuality.snowballOriginalPorterAccuracy                                avgt    5  244042182.800 ± 52849452.860  ns/op
+EnglishStemmerComparisonBenchmarkQuality.snowballOriginalPorterAccuracy:changedCorrectMatches          avgt    5     486035.000                     #
+EnglishStemmerComparisonBenchmarkQuality.snowballOriginalPorterAccuracy:changedEvaluatedTokens         avgt    5    1052500.000                     #
+EnglishStemmerComparisonBenchmarkQuality.snowballOriginalPorterAccuracy:correctMatches                 avgt    5    1985095.000                     #
+EnglishStemmerComparisonBenchmarkQuality.snowballOriginalPorterAccuracy:evaluatedTokens                avgt    5    5021870.000                     #
+EnglishStemmerComparisonBenchmarkQuality.snowballOriginalPorterAccuracy:rootEvaluatedTokens            avgt    5    3969370.000                     #
+EnglishStemmerComparisonBenchmarkQuality.snowballOriginalPorterAccuracy:rootPreservedMatches           avgt    5    1499060.000                     #
+
+Benchmark result is saved to /home/runner/work/Radixor/Radixor/build/reports/jmh/jmh-results.csv
