@@ -275,10 +275,25 @@ jobs:
           - [Browse historical build reports](https://leogalambos.github.io/Radixor/builds/)
           EOF
 
+          # Retain only the 10 most recent numbered builds to stay within
+          # GitHub Pages capacity limits. The "latest" alias is kept separately.
+          mapfile -t EXPIRED_BUILDS < <(
+            find "${SITE_DIR}/builds" -mindepth 1 -maxdepth 1 -type d -printf '%P\n' \
+              | grep -E '^[0-9]+$' \
+              | sort -r -n \
+              | tail -n +11
+          )
+
+          for build in "${EXPIRED_BUILDS[@]}"; do
+            rm -rf "${SITE_DIR}/builds/${build}"
+          done
+
           {
             echo "# Historical Build Reports"
             echo
             echo "The following build report sets are currently published on GitHub Pages."
+            echo
+            echo "To stay within GitHub Pages capacity limits, only the 10 most recent build report sets are retained."
             echo
             echo "| Build | Published | Link |"
             echo "|---:|---|---|"
