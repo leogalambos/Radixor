@@ -18,6 +18,9 @@ This page is the entry point for benchmark interpretation. Detailed tables and l
 | Page | Purpose |
 | --- | --- |
 | [Benchmark methodology](benchmarks/reference/methodology.md) | Workload design, speed pass, quality pass, normalization policy, and exact-root metrics. |
+| [Linguistic quality methodology](benchmarks/reference/linguistic-quality.md) | Pairwise gold standard, over/under-stemming, candidate policies, metrics, and ranking rules. |
+| [Tested stemmers](benchmarks/reference/tested-stemmers.md) | Upstream attribution, tested versions, language coverage, adapter behaviour, and limitations. |
+| [Reproducibility and raw data](benchmarks/reference/reproducibility.md) | Versioned quality snapshot, checksum, commands, reports, and provenance limitations. |
 | [Benchmark corpora](benchmarks/reference/corpora.md) | Dictionary row counts, complete quality tokens, already-root tokens, changed speed tokens, and timing token counts. |
 | [Benchmark environment and reports](benchmarks/reference/environment.md) | Hardware, OS, JVM, JMH settings, report files, and current badge/report policy. |
 | [English dictionary coverage benchmark](benchmarks/reference/english-coverage.md) | The quality/speed operating curve for contracted Radixor tries built from 100% down to 10% of English dictionary rows. |

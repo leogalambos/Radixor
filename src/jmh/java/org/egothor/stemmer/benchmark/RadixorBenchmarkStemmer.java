@@ -30,7 +30,10 @@
  ******************************************************************************/
 package org.egothor.stemmer.benchmark;
 
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import org.egothor.stemmer.CompiledPatchCommand;
 import org.egothor.stemmer.FrequencyTrie;
@@ -78,5 +81,23 @@ final class RadixorBenchmarkStemmer {
             return token;
         }
         return patch.apply(token);
+    }
+
+    /**
+     * Returns every distinct candidate stem from the ranked {@code getAll} path,
+     * always including the deterministic primary output.
+     *
+     * @param token original input token
+     * @return immutable candidate list in deterministic ranked order
+     */
+    List<String> stemAll(final String token) {
+        final String primary = stem(token);
+        final Set<String> candidates = new LinkedHashSet<>();
+        candidates.add(primary);
+        final CompiledPatchCommand[] patches = this.trie.getAll(token);
+        for (CompiledPatchCommand patch : patches) {
+            candidates.add(patch.preservesAllSources() ? token : patch.apply(token));
+        }
+        return List.copyOf(candidates);
     }
 }

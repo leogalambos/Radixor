@@ -58,10 +58,10 @@ final class PaiceHuskLancasterStemmerTest {
      */
     private static final String[][] SAMPLE_STEMS = {
             { "running", "run" },
-            { "caresses", "cares" },
-            { "happiness", "happi" },
+            { "caresses", "caress" },
+            { "happiness", "happy" },
             { "connected", "connect" },
-            { "dancing", "danc" },
+            { "dancing", "dant" },
             { "happy", "happy" }
     };
 
@@ -116,7 +116,7 @@ final class PaiceHuskLancasterStemmerTest {
         final Object stemmer = createStemmer();
         final Method stemMethod = stemMethod();
 
-        assertEquals("running", stemMethod.invoke(stemmer, "running"));
+        assertEquals("run", stemMethod.invoke(stemmer, "running"));
         assertEquals(null, stemMethod.invoke(stemmer, new Object[] { null }));
         assertNotNull(stemMethod.invoke(stemmer, "connected"));
     }

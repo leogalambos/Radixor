@@ -68,6 +68,9 @@ nav:
      - Benchmark Results: benchmarks/index.md
      - Reference:
         - Methodology: benchmarks/reference/methodology.md
+        - Linguistic Quality Methodology: benchmarks/reference/linguistic-quality.md
+        - Tested Stemmers: benchmarks/reference/tested-stemmers.md
+        - Reproducibility and Raw Data: benchmarks/reference/reproducibility.md
         - Corpora: benchmarks/reference/corpora.md
         - Environment and Reports: benchmarks/reference/environment.md
         - English Dictionary Coverage: benchmarks/reference/english-coverage.md
@@ -96,5 +99,6 @@ nav:
 
   - Quality and Operations:
      - Quality and Operations: quality-and-operations.md
+     - Stemming Quality: stemming-quality.md
      - Reports: reports.md
      - Test taxonomy and execution filtering: test-taxonomy-and-filtering.md

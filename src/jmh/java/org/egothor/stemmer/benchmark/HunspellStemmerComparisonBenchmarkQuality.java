@@ -254,7 +254,9 @@ public class HunspellStemmerComparisonBenchmarkQuality {
                 outputs[inputIndex] = termAttribute.toString();
                 recordedForPosition = true;
             }
-            blackhole.consume(termAttribute);
+            if (blackhole != null) {
+                blackhole.consume(termAttribute);
+            }
         }
         output.end();
         output.close();
@@ -286,6 +288,53 @@ public class HunspellStemmerComparisonBenchmarkQuality {
     }
 
     /**
+     * Stems one analytical batch through the exact Hunspell quality-benchmark path.
+     *
+     * @param languageCase declared Hunspell language case
+     * @param tokens original dictionary forms
+     * @return first Hunspell output per input form
+     * @throws IOException if dictionary parsing or token streaming fails
+     */
+    static String[] stemForQuality(final HunspellLanguageCase languageCase, final String[] tokens) throws IOException {
+        try {
+            return firstHunspellOutputs(tokens, loadDictionary(languageCase), null);
+        } catch (ParseException exception) {
+            throw new IOException("Unable to parse the JMH Hunspell dictionary for " + languageCase + ".", exception);
+        }
+    }
+
+    /** Returns all distinct Hunspell stems per token through the quality-benchmark dictionary. */
+    static List<List<String>> stemCandidatesForQuality(final HunspellLanguageCase languageCase,
+            final String[] tokens) throws IOException {
+        try {
+            final Dictionary dictionary = loadDictionary(languageCase);
+            final List<java.util.LinkedHashSet<String>> candidates = new java.util.ArrayList<>(tokens.length);
+            for (int index = 0; index < tokens.length; index++) { candidates.add(new java.util.LinkedHashSet<>()); }
+            final BenchmarkTokenStream input = new BenchmarkTokenStream(tokens);
+            final TokenStream output = new HunspellStemFilter(new LowerCaseFilter(input), dictionary, true);
+            final CharTermAttribute term = output.addAttribute(CharTermAttribute.class);
+            final PositionIncrementAttribute position = output.addAttribute(PositionIncrementAttribute.class);
+            int inputIndex = -1;
+            output.reset();
+            while (output.incrementToken()) {
+                if (position.getPositionIncrement() > 0) { inputIndex += position.getPositionIncrement(); }
+                if (inputIndex >= 0 && inputIndex < candidates.size()) { candidates.get(inputIndex).add(term.toString()); }
+            }
+            output.end();
+            output.close();
+            final String[] primary = firstHunspellOutputs(tokens, dictionary, null);
+            final List<List<String>> result = new java.util.ArrayList<>(tokens.length);
+            for (int index = 0; index < tokens.length; index++) {
+                candidates.get(index).add(primary[index]);
+                result.add(List.copyOf(candidates.get(index)));
+            }
+            return List.copyOf(result);
+        } catch (ParseException exception) {
+            throw new IOException("Unable to parse the JMH Hunspell dictionary for " + languageCase + ".", exception);
+        }
+    }
+
+    /**
      * Opens a required classpath resource.
      *
      * @param classLoader class loader
@@ -303,7 +352,7 @@ public class HunspellStemmerComparisonBenchmarkQuality {
     /**
      * Benchmark language mapping.
      */
-    private enum HunspellLanguageCase {
+    enum HunspellLanguageCase {
 
         /**
          * English Hunspell dictionary over the Radixor English corpus.

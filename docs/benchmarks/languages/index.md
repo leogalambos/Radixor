@@ -1,12 +1,12 @@
 # Language Benchmark Pages
 
-This section splits Radixor stemmer benchmark results by language. Each language page lists accuracy first and speed second.
+This section splits Radixor stemmer benchmark results by language. Each language page preserves the existing exact-root accuracy and runtime-performance results and adds pairwise stemming-quality tables for both dictionary-processing modes.
 
 ## Reference Pages
 
 | Page | Purpose |
 | --- | --- |
-| [Methodology](../reference/methodology.md) | Workload design, normalization, speed metrics, and quality metrics. |
+| [Methodology](../reference/methodology.md) | Workload design, normalization, speed metrics, and exact-root quality metrics. Pairwise quality definitions are also reproduced on every language page. |
 | [Corpora](../reference/corpora.md) | Dictionary sizes and changed-token timing workloads. |
 | [Environment and reports](../reference/environment.md) | Hardware, JVM, JMH settings, report files, and badge policy. |
 | [English dictionary coverage](../reference/english-coverage.md) | Quality/speed operating curve for contracted Radixor tries built from 100% down to 10% of English dictionary rows. |

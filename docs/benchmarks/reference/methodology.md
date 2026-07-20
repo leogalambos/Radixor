@@ -21,11 +21,9 @@ timePerChangedTokenNs = JMH score ns/op / changedTimingTokenCount
 
 This is necessary because Radixor dictionaries have different token counts by language.
 
-## Quality And Search Interpretation
+## Exact-root quality and interpretation
 
-Radixor speed must be interpreted together with exact-root quality. A slower Radixor row must not be read as a simple performance weakness when Radixor is also the row with accuracy close to 100% and competing stemmers are much lower.
-
-Many fast light, minimal, possessive, or aggressive rule-based stemmers are fast because they do much less linguistic work. The measured Radixor cost buys dictionary-trained precision, and that precision is what improves search quality when queries and indexed text are reduced to the same intended roots.
+Runtime and exact-root agreement must be interpreted separately. Light, minimal, possessive, and aggressive rule-based implementations deliberately address different scopes and may achieve lower latency by performing fewer transformations. A throughput advantage does not establish higher linguistic quality, and higher dictionary agreement does not establish lower operational cost.
 
 The [English dictionary coverage benchmark](english-coverage.md) shows this operating curve explicitly: contracted tries reduce lookup cost in uniform regions, while reduced dictionary coverage still lowers changed-form precision.
 
@@ -57,3 +55,5 @@ rootPreservedPercent = rootPreservedMatches / rootEvaluatedTokens * 100
 Morfologik can emit multiple terms for one input token. The quality benchmark uses the first emitted term for exact-root accounting when no ranking weight is exposed. Throughput benchmarks for Morfologik TokenFilter paths consume all emitted terms.
 
 Quality reports use JMH auxiliary counter rows. Exact-root accounting is deterministic for a fixed corpus and stemmer, so repeated measurement samples duplicate the same counters; documentation uses the counter ratios and does not interpret quality benchmark timing scores.
+
+Pairwise over-stemming, under-stemming, candidate-aware policies, balanced accuracy, and partition comparison are a separate analytical evaluation. See [Linguistic Quality Methodology](linguistic-quality.md); exact-root accuracy must not be interpreted as the complement of pairwise under-stemming.

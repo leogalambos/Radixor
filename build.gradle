@@ -30,6 +30,11 @@ apply from: 'gradle/maven-pom.gradle'
 
 configurations {
     mockitoAgent
+    stemmingQualityJmhRuntime {
+        canBeConsumed = false
+        canBeResolved = true
+        extendsFrom(jmhImplementation, jmhRuntimeOnly)
+    }
 }
 
 java {
@@ -76,6 +81,16 @@ dependencies {
     mockitoAgent(libs.mockito.core) {
         transitive = false
     }
+}
+
+sourceSets.jmh.compileClasspath = sourceSets.jmh.compileClasspath - sourceSets.test.output
+sourceSets.jmh.runtimeClasspath = sourceSets.jmh.runtimeClasspath - sourceSets.test.output
+sourceSets.test.compileClasspath += sourceSets.jmh.output + configurations.jmhCompileClasspath
+sourceSets.test.runtimeClasspath += sourceSets.jmh.output + configurations.jmhCompileClasspath
+
+tasks.named('compileJmhJava', JavaCompile) {
+    classpath = classpath - sourceSets.test.output
+    setDependsOn([tasks.named('classes')])
 }
 
 dependencyCheck {
@@ -426,6 +441,7 @@ tasks.named('distTar') {
 
 jmh {
     jmhVersion = '1.37'
+    includeTests = false
     warmupIterations = 3
     iterations = 5
     fork = 1
@@ -465,6 +481,85 @@ tasks.register('regressionArtifactGenerator', JavaExec) {
     }
     if (project.hasProperty('regressionReductionMode')) {
         args '--reduction-mode', project.property('regressionReductionMode').toString()
+    }
+}
+
+tasks.register('stemmingQuality', JavaExec) {
+    group = 'verification'
+    description = 'Evaluates pairwise over-stemming and under-stemming against bundled dictionary groups.'
+    dependsOn(tasks.named('testClasses'))
+    dependsOn(tasks.named('jmhClasses'))
+    classpath = files(sourceSets.test.runtimeClasspath, configurations.stemmingQualityJmhRuntime)
+    mainClass = 'org.egothor.stemmer.benchmark.quality.StemmingQualityApplication'
+    args layout.buildDirectory.dir('reports/stemming-quality').get().asFile.absolutePath,
+            layout.projectDirectory.dir('src/main/resources').asFile.absolutePath,
+            providers.gradleProperty('stemmingQualityLanguage').getOrElse(''),
+            providers.gradleProperty('stemmingQualityStemmer').getOrElse(''),
+            providers.gradleProperty('stemmingQualityMode').getOrElse(''),
+            providers.gradleProperty('stemmingQualityOutputPolicy').getOrElse(''),
+            providers.gradleProperty('stemmingQualityRankMetric').getOrElse('PAIRWISE_F05'),
+            providers.gradleProperty('stemmingQualityAudit').getOrElse('false'),
+            providers.gradleProperty('stemmingQualityAuditLimit').getOrElse('25')
+    maxHeapSize = '6g'
+}
+
+tasks.register('publishStemmingQualityDocumentation', JavaExec) {
+    group = 'documentation'
+    description = 'Publishes validated complete stemming-quality results on the language benchmark pages.'
+    dependsOn(tasks.named('testClasses'))
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'org.egothor.stemmer.benchmark.quality.StemmingQualityDocumentationPublisher'
+    args layout.buildDirectory.file('reports/stemming-quality/stemming-quality.csv').get().asFile.absolutePath,
+            layout.projectDirectory.dir('docs').asFile.absolutePath,
+            'update'
+    doFirst {
+        if (!file("$buildDir/reports/stemming-quality/stemming-quality.csv").isFile()) {
+            throw new GradleException('A complete stemming-quality CSV is required. Run stemmingQuality only when no validated complete report is available.')
+        }
+    }
+}
+
+tasks.register('verifyStemmingQualityDocumentation', JavaExec) {
+    group = 'verification'
+    description = 'Verifies published language-page quality tables against the checked-in authoritative CSV.'
+    dependsOn(tasks.named('testClasses'))
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'org.egothor.stemmer.benchmark.quality.StemmingQualityDocumentationPublisher'
+    args layout.projectDirectory.file('docs/benchmarks/data/stemming-quality.csv').asFile.absolutePath,
+            layout.projectDirectory.dir('docs').asFile.absolutePath,
+            'verify'
+}
+
+tasks.named('check') {
+    dependsOn(tasks.named('verifyStemmingQualityDocumentation'))
+}
+
+tasks.register('verifyStemmingQualitySourceSets') {
+    group = 'verification'
+    description = 'Verifies the production, JMH, and standard-test ownership of stemming-quality infrastructure.'
+    doLast {
+        if (sourceSets.findByName('stemmingQualityTest') != null || file('src/stemmingQualityTest').exists()) {
+            throw new GradleException('The obsolete stemmingQualityTest source set or directory still exists.')
+        }
+        if (!file('src/jmh/java/org/egothor/stemmer/benchmark/QualityStemmerMatrix.java').isFile()) {
+            throw new GradleException('The authoritative JMH stemmer matrix is not in src/jmh.')
+        }
+        if (!file('src/test/java/org/egothor/stemmer/benchmark/quality/StemmingQualityApplication.java').isFile()) {
+            throw new GradleException('The stemming-quality evaluator is not in the standard test source set.')
+        }
+    }
+}
+
+tasks.register('verifyProductionJarExcludesStemmingQuality') {
+    group = 'verification'
+    description = 'Verifies that analytical stemming-quality classes are absent from the production JAR.'
+    dependsOn(tasks.named('jar'))
+    doLast {
+        final File archive = tasks.named('jar').get().archiveFile.get().asFile
+        final def forbidden = zipTree(archive).matching { include '**/benchmark/**' }.files
+        if (!forbidden.isEmpty()) {
+            throw new GradleException("Production JAR contains analytical stemming-quality classes: ${forbidden}")
+        }
     }
 }
 

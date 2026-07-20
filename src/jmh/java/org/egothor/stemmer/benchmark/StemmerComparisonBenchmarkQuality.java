@@ -313,7 +313,7 @@ public class StemmerComparisonBenchmarkQuality {
     /**
      * Candidate stemmers that can be evaluated against a Radixor resource.
      */
-    private enum QualityCandidate {
+    enum QualityCandidate {
         ENGLISH_RADIXOR(StemmerPatchTrieLoader.Language.US_UK),
         ENGLISH_SNOWBALL_ORIGINAL_PORTER(StemmerPatchTrieLoader.Language.US_UK),
         ENGLISH_SNOWBALL_PORTER2(StemmerPatchTrieLoader.Language.US_UK),
@@ -444,9 +444,9 @@ public class StemmerComparisonBenchmarkQuality {
          * @return quality evaluator
          * @throws IOException if stemmer resources cannot be loaded
          */
-        QualityEvaluator createEvaluator() throws IOException {
+        CandidateStemmer createStemmer() throws IOException {
             if (name().endsWith("_RADIXOR")) {
-                return direct(createRadixorStemmer(this.radixorLanguage));
+                return radixor(createRadixorStemmer(this.radixorLanguage));
             }
             if (name().endsWith("_DIRECT") && this.snowballLanguageCase != null) {
                 return direct(this.snowballLanguageCase.createDirectStemmer()::stem);
@@ -508,7 +508,7 @@ public class StemmerComparisonBenchmarkQuality {
                 }
                 case POLISH_LUCENE_STEMPEL_FILTER ->
                     tokenFilter(input -> new StempelFilter(input, new StempelStemmer(PolishAnalyzer.getDefaultTable())));
-                case POLISH_LUCENE_MORFOLOGIK_FILTER -> tokenFilter(MorfologikFilter::new);
+                case POLISH_LUCENE_MORFOLOGIK_FILTER -> tokenFilter(MorfologikFilter::new, true);
                 case PORTUGUESE_LUCENE_PORTUGUESE_STEM_FILTER ->
                     tokenFilter(input -> new PortugueseStemFilter(lowercase(input)));
                 case PORTUGUESE_LUCENE_PORTUGUESE_LIGHT_STEM_FILTER ->
@@ -523,14 +523,19 @@ public class StemmerComparisonBenchmarkQuality {
                     tokenFilter(input -> new SwedishMinimalStemFilter(lowercase(input)));
                 case UKRAINIAN_MORFOLOGIK_DIRECT -> {
                     final DictionaryLookup lookup = new DictionaryLookup(loadUkrainianMorfologikDictionary());
-                    yield direct(token -> firstMorfologikStem(token, lookup));
+                    yield morphologik(lookup);
                 }
                 case UKRAINIAN_LUCENE_MORFOLOGIK_FILTER -> {
                     final Dictionary dictionary = loadUkrainianMorfologikDictionary();
-                    yield tokenFilter(input -> new MorfologikFilter(input, dictionary));
+                    yield tokenFilter(input -> new MorfologikFilter(input, dictionary), true);
                 }
                 default -> throw new IllegalStateException("No evaluator for " + this + ".");
             };
+        }
+
+        /** Creates the exact-root evaluator used by the JMH quality benchmark. */
+        QualityEvaluator createEvaluator() throws IOException {
+            return exactRootEvaluator(createStemmer());
         }
     }
 
@@ -575,6 +580,68 @@ public class StemmerComparisonBenchmarkQuality {
         QualityResult evaluate(LanguageBenchmarkCorpus.Corpus corpus, Blackhole blackhole) throws IOException;
     }
 
+    /** Stateful candidate adapter confined to one sequential evaluation scenario. */
+    @FunctionalInterface
+    interface CandidateStemmer {
+
+        /**
+         * Stems a deterministic batch through the authoritative JMH invocation path.
+         *
+         * @param tokens input tokens, never {@code null}
+         * @return one non-null output for every input token
+         * @throws IOException if a token-stream implementation fails
+         */
+        String[] stem(String[] tokens) throws IOException;
+
+        /**
+         * Returns complete distinct candidate sets, each containing its primary output.
+         * Single-output adapters expose singleton lists.
+         *
+         * @param tokens input tokens
+         * @return immutable candidate list for every token
+         * @throws IOException if adapter processing fails
+         */
+        default List<List<String>> stemCandidates(final String[] tokens) throws IOException {
+            final String[] primary = stem(tokens);
+            return java.util.Arrays.stream(primary).map(List::of).toList();
+        }
+
+        /** @return whether the adapter exposes genuine alternative outputs */
+        default boolean supportsMultipleOutputs() {
+            return false;
+        }
+    }
+
+    /** Creates the candidate-capable Radixor adapter backed by ranked {@code getAll}. */
+    private static CandidateStemmer radixor(final RadixorBenchmarkStemmer stemmer) {
+        return new CandidateStemmer() {
+            /** {@inheritDoc} */
+            @Override public String[] stem(final String[] tokens) {
+                final String[] outputs = new String[tokens.length];
+                for (int index = 0; index < tokens.length; index++) { outputs[index] = stemmer.stem(tokens[index]); }
+                return outputs;
+            }
+            /** {@inheritDoc} */
+            @Override public List<List<String>> stemCandidates(final String[] tokens) {
+                return java.util.Arrays.stream(tokens).map(stemmer::stemAll).toList();
+            }
+            /** {@inheritDoc} */
+            @Override public boolean supportsMultipleOutputs() { return true; }
+        };
+    }
+
+    /**
+     * Creates the authoritative multi-output Radixor adapter for a validated dictionary language.
+     *
+     * @param language bundled Radixor language
+     * @return scenario-confined adapter using the JMH invocation path
+     * @throws IOException if the compiled dictionary cannot be loaded
+     */
+    static CandidateStemmer createRadixorQualityStemmer(final StemmerPatchTrieLoader.Language language)
+            throws IOException {
+        return radixor(createRadixorStemmer(language));
+    }
+
     /**
      * Exact-root agreement counters for one quality operation.
      *
@@ -590,57 +657,79 @@ public class StemmerComparisonBenchmarkQuality {
     }
 
     /**
-     * Creates a direct evaluator.
+     * Creates a direct candidate adapter.
      *
      * @param stemmer direct stemmer
-     * @return quality evaluator
+     * @return sequential batch adapter
      */
-    private static QualityEvaluator direct(final Stemmer stemmer) {
+    private static CandidateStemmer direct(final Stemmer stemmer) {
         Objects.requireNonNull(stemmer, "stemmer");
-        return (corpus, blackhole) -> {
-            int correct = 0;
-            int changedCorrect = 0;
-            int changedEvaluated = 0;
-            int rootPreserved = 0;
-            int rootEvaluated = 0;
-            final String[] tokens = corpus.tokens();
-            final String[] expectedRoots = corpus.expectedRoots();
+        return tokens -> {
+            final String[] outputs = new String[tokens.length];
             for (int index = 0; index < tokens.length; index++) {
-                final String token = tokens[index];
-                final String expectedRoot = expectedRoots[index];
-                final String actual = stemmer.stem(token);
-                blackhole.consume(actual);
-                final boolean exact = Objects.equals(expectedRoot, actual);
-                if (exact) {
-                    correct++;
-                }
-                if (Objects.equals(token, expectedRoot)) {
-                    rootEvaluated++;
-                    if (exact) {
-                        rootPreserved++;
-                    }
-                } else {
-                    changedEvaluated++;
-                    if (exact) {
-                        changedCorrect++;
-                    }
-                }
+                outputs[index] = stemmer.stem(tokens[index]);
             }
-            return new QualityResult(correct, tokens.length, changedCorrect, changedEvaluated, rootPreserved,
-                    rootEvaluated);
+            return outputs;
         };
     }
 
     /**
-     * Creates a TokenFilter evaluator.
+     * Creates a TokenFilter candidate adapter.
      *
      * @param factory token stream factory
-     * @return quality evaluator
+     * @return sequential batch adapter
      */
-    private static QualityEvaluator tokenFilter(final Function<TokenStream, TokenStream> factory) {
+    private static CandidateStemmer tokenFilter(final Function<TokenStream, TokenStream> factory) {
         Objects.requireNonNull(factory, "factory");
+        return tokens -> firstTokenFilterOutputs(tokens, factory, null);
+    }
+
+    /** Creates a TokenFilter adapter that preserves all terms emitted per position. */
+    private static CandidateStemmer tokenFilter(final Function<TokenStream, TokenStream> factory,
+            final boolean multipleOutputs) {
+        if (!multipleOutputs) { return tokenFilter(factory); }
+        return new CandidateStemmer() {
+            /** {@inheritDoc} */
+            @Override public String[] stem(final String[] tokens) throws IOException {
+                return firstTokenFilterOutputs(tokens, factory, null);
+            }
+            /** {@inheritDoc} */
+            @Override public List<List<String>> stemCandidates(final String[] tokens) throws IOException {
+                return allTokenFilterOutputs(tokens, factory);
+            }
+            /** {@inheritDoc} */
+            @Override public boolean supportsMultipleOutputs() { return true; }
+        };
+    }
+
+    /** Creates a multi-analysis Morphologik direct adapter. */
+    private static CandidateStemmer morphologik(final DictionaryLookup lookup) {
+        return new CandidateStemmer() {
+            /** {@inheritDoc} */
+            @Override public String[] stem(final String[] tokens) {
+                final String[] outputs = new String[tokens.length];
+                for (int index = 0; index < tokens.length; index++) { outputs[index] = firstMorfologikStem(tokens[index], lookup); }
+                return outputs;
+            }
+            /** {@inheritDoc} */
+            @Override public List<List<String>> stemCandidates(final String[] tokens) {
+                return java.util.Arrays.stream(tokens).map(token -> allMorfologikStems(token, lookup)).toList();
+            }
+            /** {@inheritDoc} */
+            @Override public boolean supportsMultipleOutputs() { return true; }
+        };
+    }
+
+    /**
+     * Creates exact-root accounting around an authoritative candidate adapter.
+     *
+     * @param stemmer candidate adapter
+     * @return JMH exact-root evaluator
+     */
+    private static QualityEvaluator exactRootEvaluator(final CandidateStemmer stemmer) {
+        Objects.requireNonNull(stemmer, "stemmer");
         return (corpus, blackhole) -> {
-            final String[] actualStems = firstTokenFilterOutputs(corpus.tokens(), factory, blackhole);
+            final String[] actualStems = stemmer.stem(corpus.tokens());
             final String[] expectedRoots = corpus.expectedRoots();
             final String[] tokens = corpus.tokens();
             int correct = 0;
@@ -651,6 +740,7 @@ public class StemmerComparisonBenchmarkQuality {
             for (int index = 0; index < actualStems.length; index++) {
                 final String token = tokens[index];
                 final String expectedRoot = expectedRoots[index];
+                blackhole.consume(actualStems[index]);
                 final boolean exact = Objects.equals(expectedRoot, actualStems[index]);
                 if (exact) {
                     correct++;
@@ -679,10 +769,9 @@ public class StemmerComparisonBenchmarkQuality {
      * @return direct stemmer
      * @throws IOException if the trie cannot be loaded
      */
-    private static Stemmer createRadixorStemmer(final StemmerPatchTrieLoader.Language language) throws IOException {
-        final RadixorBenchmarkStemmer stemmer = new RadixorBenchmarkStemmer(StemmerPatchTrieLoader.loadCompiled(
+    private static RadixorBenchmarkStemmer createRadixorStemmer(final StemmerPatchTrieLoader.Language language) throws IOException {
+        return new RadixorBenchmarkStemmer(StemmerPatchTrieLoader.loadCompiled(
                 language, true, ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS));
-        return stemmer::stem;
     }
 
     /**
@@ -713,6 +802,14 @@ public class StemmerComparisonBenchmarkQuality {
             return token;
         }
         return analyses.get(0).getStem().toString();
+    }
+
+    /** Returns all distinct Morphologik lemma strings and always includes the primary output. */
+    private static List<String> allMorfologikStems(final String token, final DictionaryLookup lookup) {
+        final java.util.LinkedHashSet<String> stems = new java.util.LinkedHashSet<>();
+        stems.add(firstMorfologikStem(token, lookup));
+        for (WordData analysis : lookup.lookup(token)) { stems.add(analysis.getStem().toString()); }
+        return List.copyOf(stems);
     }
 
     /**
@@ -746,7 +843,9 @@ public class StemmerComparisonBenchmarkQuality {
                 outputs[inputIndex] = termAttribute.toString();
                 recordedForPosition = true;
             }
-            blackhole.consume(termAttribute);
+            if (blackhole != null) {
+                blackhole.consume(termAttribute);
+            }
         }
         output.end();
         output.close();
@@ -757,6 +856,35 @@ public class StemmerComparisonBenchmarkQuality {
             }
         }
         return outputs;
+    }
+
+    /**
+     * Extracts every distinct emitted term for each input position and includes the
+     * deterministic primary output even when a filter omits it.
+     */
+    private static List<List<String>> allTokenFilterOutputs(final String[] tokens,
+            final Function<TokenStream, TokenStream> factory) throws IOException {
+        final List<java.util.LinkedHashSet<String>> candidates = new java.util.ArrayList<>(tokens.length);
+        for (int index = 0; index < tokens.length; index++) { candidates.add(new java.util.LinkedHashSet<>()); }
+        final BenchmarkTokenStream input = new BenchmarkTokenStream(tokens);
+        final TokenStream output = factory.apply(input);
+        final CharTermAttribute term = output.addAttribute(CharTermAttribute.class);
+        final PositionIncrementAttribute position = output.addAttribute(PositionIncrementAttribute.class);
+        int inputIndex = -1;
+        output.reset();
+        while (output.incrementToken()) {
+            if (position.getPositionIncrement() > 0) { inputIndex += position.getPositionIncrement(); }
+            if (inputIndex >= 0 && inputIndex < candidates.size()) { candidates.get(inputIndex).add(term.toString()); }
+        }
+        output.end();
+        output.close();
+        final String[] primary = firstTokenFilterOutputs(tokens, factory, null);
+        final List<List<String>> result = new java.util.ArrayList<>(tokens.length);
+        for (int index = 0; index < tokens.length; index++) {
+            candidates.get(index).add(primary[index]);
+            result.add(List.copyOf(candidates.get(index)));
+        }
+        return List.copyOf(result);
     }
 
     /**
