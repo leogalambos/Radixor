@@ -89,6 +89,10 @@
          <lastmod>2026-07-20</lastmod>
     </url>
     <url>
+         <loc>https://leogalambos.github.io/Radixor/stemming-quality/</loc>
+         <lastmod>2026-07-20</lastmod>
+    </url>
+    <url>
          <loc>https://leogalambos.github.io/Radixor/test-taxonomy-and-filtering/</loc>
          <lastmod>2026-07-20</lastmod>
     </url>
@@ -193,7 +197,19 @@
          <lastmod>2026-07-20</lastmod>
     </url>
     <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/reference/linguistic-quality/</loc>
+         <lastmod>2026-07-20</lastmod>
+    </url>
+    <url>
          <loc>https://leogalambos.github.io/Radixor/benchmarks/reference/methodology/</loc>
+         <lastmod>2026-07-20</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/reference/reproducibility/</loc>
+         <lastmod>2026-07-20</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/reference/tested-stemmers/</loc>
          <lastmod>2026-07-20</lastmod>
     </url>
 </urlset>
