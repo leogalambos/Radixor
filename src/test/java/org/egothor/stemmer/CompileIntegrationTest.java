@@ -1,21 +1,21 @@
 /*******************************************************************************
  * Copyright (C) 2026, Leo Galambos
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * 3. Neither the name of the copyright holder nor the names of its contributors
  *    may be used to endorse or promote products derived from this software
  *    without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -334,7 +334,7 @@ final class CompileIntegrationTest {
          * </p>
          *
          * @param scenario     scenario identifier
-        * @param resourcePath bundled dictionary resource path
+        * @param resourcePath registered model dictionary resource path
          * @throws IOException if reading or writing fails
          */
         @ParameterizedTest(name = "[{index}] {0}")
@@ -359,7 +359,7 @@ final class CompileIntegrationTest {
             final Map<String, Set<String>> representativeStemsByVariant = readRepresentativeVariantExpectations(
                     resourcePath, REPRESENTATIVE_VARIANT_LIMIT);
 
-            assertFalse(representativeStemsByVariant.isEmpty(), "The bundled dictionary must provide at least one "
+            assertFalse(representativeStemsByVariant.isEmpty(), "The registered model dictionary must provide at least one "
                     + "representative variant without Unicode whitespace for " + scenario + '.');
 
             for (Map.Entry<String, Set<String>> entry : representativeStemsByVariant.entrySet()) {
@@ -451,7 +451,7 @@ final class CompileIntegrationTest {
      * </p>
      *
      * <p>
-     * The bundled dictionary format is expected to be tab-separated values, meaning
+     * The registered model dictionary format is expected to be tab-separated values, meaning
      * that columns are separated by the tab character:
      * </p>
      *
@@ -467,7 +467,7 @@ final class CompileIntegrationTest {
      * helper.
      * </p>
      *
-     * @param resourcePath bundled dictionary resource path
+     * @param resourcePath registered model dictionary resource path
      * @param limit        maximum number of representative variants to collect
      * @return representative variants mapped to their acceptable stems
      * @throws IOException if reading fails

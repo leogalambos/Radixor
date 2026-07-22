@@ -1,0 +1,27 @@
+plugins {
+    id 'org.egothor.radixor.model'
+}
+
+radixorModel {
+    modelId = 'pl-pl-polimorf'
+    language = 'PL_PL'
+    displayName = 'Polish — PoliMorf 2.1'
+    defaultModel = false
+    sourceName = 'PoliMorf 2.1'
+    sourceVersion = '2.1'
+    sourceRevision = '6e63b53'
+    sourceProject = 'Morfologik'
+    sourceRepository = 'https://github.com/morfologik/morfologik-stemming'
+    sourceDataset = 'PoliMorf 2.1 from org.carrot2:morfologik-polish:2.1.9'
+    sourceRevisionStatus = 'recorded'
+    sourceLicense = 'BSD-2-Clause'
+    sourceLicenseUri = 'https://spdx.org/licenses/BSD-2-Clause.html'
+    sourceAttribution = 'Copyright (c) 2016, Marcin Miłkowski'
+    sourceVerificationDate = '2026-07-22'
+    transformationsSummary = 'Decoding the compiled FSA dictionary, grouping inflected forms by lemma, removing morphosyntactic tags, exact duplicate removal, deterministic sorting, reformatting into Radixor dictionary groups, GZip packaging, and generation of runtime descriptor and checksum metadata'
+    licenseFileName = 'LICENSE-BSD-2-Clause.txt'
+}
+
+tasks.named('validateModelRelease') {
+    dependsOn(rootProject.tasks.named('runtimeModelIntegrationTest'))
+}

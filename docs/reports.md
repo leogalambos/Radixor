@@ -2,6 +2,8 @@
 
 Radixor publishes durable build outputs to GitHub Pages from qualifying runs of `.github/workflows/pages.yml`.
 
+The workflow builds maintained MkDocs documentation and the generated model catalog from the staged source tree under `build/mkdocs-source/`. It then merges the rendered site into the separate `gh-pages` publication worktree while preserving `builds/`. The main branch stores neither generated Markdown nor rendered site output. The publication retains the ten newest numbered report sets and maintains `builds/latest/` as a stable alias.
+
 This page is the central entry point for published project artifacts, including build summaries, API documentation, test and quality reports, benchmark outputs, and software composition materials. It is intended both for routine project inspection and for linking stable report surfaces from external references such as the README, release notes, or development workflows.
 
 ## Stable entry points

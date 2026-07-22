@@ -1,0 +1,38 @@
+Radixor model-data notice
+
+Radixor-derived model data
+
+Copyright (C) 2026, Leo Galambos.
+
+Copyright and, where applicable, database rights are claimed in the
+Radixor-specific selection, verification, cleaning, normalization,
+grouping, deduplication, filtering, reformatting, metadata preparation,
+and packaging of this model, to the extent protected by applicable law.
+
+The underlying morphological data remains attributed to UniMorph and
+the upstream contributors identified in this notice.
+
+This derived model data, including Radixor's protectable contributions,
+is distributed under Creative Commons Attribution-ShareAlike 3.0
+Unported.
+
+Model ID: ru-ru-default
+Radixor language: RU_RU
+Source project: UniMorph
+Official repository: https://github.com/unimorph/rus
+Upstream dataset: UniMorph Russian morphological dataset (`rus`)
+Upstream lexical source: Wikipedia
+Attribution: UniMorph and Wikipedia contributors
+License:
+Creative Commons Attribution-ShareAlike 3.0 Unported
+Canonical license URI: https://creativecommons.org/licenses/by-sa/3.0/
+Source revision: not-recorded-in-legacy-import
+Revision status: not-recorded-in-legacy-import
+
+The exact UniMorph commit used for the original Radixor import was not recorded. The model remains attributed to the official UniMorph language repository and is distributed under the repository's stated data license.
+
+Radixor modifications: Cleaning, normalization, grouping inflected forms by lemma, deduplication, filtering invalid rows, reformatting into Radixor dictionary groups, GZip packaging, and generation of runtime descriptor and checksum metadata.
+
+The derived model data is distributed under CC BY-SA 3.0. UniMorph supplies morphological data; Radixor constructs its own patch-command trie at runtime. Neither UniMorph nor any upstream contributor endorses Radixor.
+
+Upstream information verified: 2026-07-22

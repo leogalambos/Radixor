@@ -1,21 +1,21 @@
 /*******************************************************************************
  * Copyright (C) 2026, Leo Galambos
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * 3. Neither the name of the copyright holder nor the names of its contributors
  *    may be used to endorse or promote products derived from this software
  *    without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -107,11 +107,11 @@ public final class StemmerKnowledgeExperiment {
     }
 
     /**
-     * Evaluates all supported bundled dictionaries using the supplied seed.
+     * Evaluates all supported registered default-model dictionaries using the supplied seed.
      *
      * @param seed deterministic sampling seed
      * @return immutable ordered list of experiment rows
-     * @throws IOException if reading a bundled dictionary fails
+     * @throws IOException if reading a registered default dictionary fails
      */
     public List<ResultRow> evaluateAllBundledLanguages(final long seed) throws IOException {
         final List<ResultRow> rows = new ArrayList<>();
@@ -122,19 +122,19 @@ public final class StemmerKnowledgeExperiment {
     }
 
     /**
-     * Evaluates one bundled dictionary across all supported experiment
+     * Evaluates one registered default-model dictionary across all supported experiment
      * configurations.
      *
-     * @param language bundled language dictionary
+     * @param language language whose default model dictionary is evaluated
      * @param seed     deterministic sampling seed
      * @return immutable ordered list of experiment rows
      * @throws NullPointerException if {@code language} is {@code null}
-     * @throws IOException          if reading the bundled dictionary fails
+     * @throws IOException          if reading the registered dictionary fails
      */
     public List<ResultRow> evaluateBundledLanguage(final StemmerPatchTrieLoader.Language language, final long seed)
             throws IOException {
         Objects.requireNonNull(language, "language");
-        final String resourcePath = language.resourcePath();
+        final String resourcePath = StemmerModelRegistry.fromContextClassLoader().requireDefault(language).resource();
         try (InputStream inputStream = StemmerPatchTrieLoader.openBundledResource(resourcePath)) {
             try (BufferedReader reader = new BufferedReader(
                     new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
@@ -349,13 +349,13 @@ public final class StemmerKnowledgeExperiment {
      * @param trie         compiled trie under test
      * @return immutable counts for this single input
      */
-    @SuppressWarnings("deprecation")
     private static EvaluationCounts evaluateInput(final String input, final String expectedStem,
             final FrequencyTrie<String> trie) {
         long getCorrect = 0L;
         final String preferredPatch = trie.get(input);
         if (preferredPatch != null) {
-            final String preferredStem = PatchCommandEncoder.apply(input, preferredPatch);
+            final String preferredStem = PatchCommandEncoder.compile(preferredPatch, trie.traversalDirection())
+                    .apply(input);
             if (expectedStem.equals(preferredStem)) {
                 getCorrect = 1L;
             }
@@ -371,7 +371,7 @@ public final class StemmerKnowledgeExperiment {
         long falsePositives = 0L;
         long coveredInputs = 0L;
         for (String patch : patches) {
-            final String candidateStem = PatchCommandEncoder.apply(input, patch);
+            final String candidateStem = PatchCommandEncoder.compile(patch, trie.traversalDirection()).apply(input);
             if (expectedStem.equals(candidateStem)) {
                 truePositives++;
                 coveredInputs = 1L;

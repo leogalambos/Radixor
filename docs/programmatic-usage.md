@@ -1,80 +1,133 @@
 # Programmatic Usage
 
-This document provides the programmatic entry point to **Radixor**.
+Radixor code and model data are separate runtime components. Every example on this page requires `org.egothor:radixor:<radixor-version>` as an `implementation` dependency and at least one model JAR as a runtime dependency. The core JAR contains no `stemmer.gz`.
 
-Radixor follows a clear lifecycle:
+For complete dependency patterns, lifecycle guidance, and troubleshooting, use [Model Selection and Loading](model-selection-and-loading.md). The generated [model catalog](stemmer-model-catalog.md) records the current artifacts, versions, checksums, and provenance.
 
-1. acquire a compiled stemmer,
-2. query it for patch commands,
-3. apply those commands to produce stems,
-4. reopen and extend the compiled structure when needed.
+## 1. Minimal use: the Polish default
 
-## Conceptual model
+Dependency prerequisite:
 
-Radixor is dictionary-driven, but runtime stemming does not operate by scanning raw dictionary files. A source dictionary is parsed as a sequence of canonical stems and their known variants. Each variant is converted into a compact patch command that transforms the variant into the stem, while the stem itself may optionally be stored as a canonical no-op patch. The mutable trie is then reduced into a compiled read-only structure that stores ordered values and their counts at addressed nodes.
-
-Two consequences matter for developers:
-
-- the quality and coverage of stemming behavior depend on dictionary richness,
-- runtime usage is based on compiled patch-command lookup rather than on direct dictionary traversal.
-
-This is why Radixor can generalize beyond explicitly listed forms and why compiled artifacts are well suited for deployment.
-
-## Documentation map
-
-The programmatic API is easier to understand when split by developer task:
-
-- [Fast Track](fast-track.md) gives the shortest dependency-to-first-stem path for a new Java project.
-- [Integration Deep Dive](integration-deep-dive.md) explains production integration, deployment artifacts, search-pipeline usage, and operational decisions.
-- [Loading and Building Stemmers](programmatic-loading-and-building.md) explains how to acquire a compiled stemmer from bundled resources, textual dictionaries, binary artifacts, or direct builder usage.
-- [Lookup Edge Optimization](lookup-edge-optimization.md) explains dense child lookup tuning and the speed/memory trade-off when materializing compiled tries.
-- [Querying and Ambiguity Handling](programmatic-querying-and-ambiguity.md) explains `get(...)`, `getAll(...)`, `getEntries(...)`, patch application, and the practical meaning of reduction modes.
-- [Extending and Persisting Compiled Tries](programmatic-extending-and-persistence.md) explains how to reopen compiled tries, add new lexical data, rebuild them, and store them as binary artifacts.
-
-## Core types
-
-The main types involved in programmatic usage are:
-
-- `FrequencyTrie.Builder<V>` for mutable construction and extension,
-- `FrequencyTrie<V>` for the compiled read-only trie,
-- `PatchCommandEncoder` for creating serialized patch commands,
-- `CompiledPatchCommand` for repeated runtime patch application,
-- `StemmerPatchTrieLoader` for loading bundled or textual dictionaries,
-- `StemmerPatchTrieBinaryIO` for reading and writing compressed binary artifacts,
-- `FrequencyTrieBuilders` for reconstructing a mutable builder from a compiled trie,
-- `ReductionMode` and `ReductionSettings` for controlling compilation semantics.
-
-## Java module system (JPMS)
-
-The core artifact is published as an explicit JPMS module:
-
-```java
-module org.egothor.radixor;
+```groovy
+implementation 'org.egothor:radixor:<radixor-version>'
+runtimeOnly 'org.egothor:radixor-model-pl-pl-unimorph:1.0.0'
 ```
 
-A named consuming module uses:
+```java
+import org.egothor.stemmer.CompiledPatchCommand;
+import org.egothor.stemmer.FrequencyTrie;
+import org.egothor.stemmer.ReductionMode;
+import org.egothor.stemmer.StemmerPatchTrieLoader;
+
+final FrequencyTrie<CompiledPatchCommand> trie =
+        StemmerPatchTrieLoader.loadCompiled(
+                StemmerPatchTrieLoader.Language.PL_PL,
+                true,
+                ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS);
+
+final String word = "koty";
+final CompiledPatchCommand patch = trie.get(word);
+final String stem = patch == null ? word : patch.apply(word);
+```
+
+`Language.PL_PL` resolves to `pl-pl-unimorph`. The loader creates the registry internally through the thread context class loader.
+
+## 2. Explicit model selection
+
+Dependency prerequisite: replace or supplement the default dependency with `runtimeOnly 'org.egothor:radixor-model-pl-pl-polimorf:1.0.0'`.
 
 ```java
-module example.consumer {
-    requires org.egothor.radixor;
+final StemmerModelRegistry registry = StemmerModelRegistry.fromContextClassLoader();
+final StemmerModelDescriptor polimorf = registry.require("pl-pl-polimorf");
+final FrequencyTrie<CompiledPatchCommand> trie =
+        StemmerPatchTrieLoader.loadCompiled(
+                polimorf,
+                true,
+                ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS);
+```
+
+The stable model-ID overload performs the same exact selection without a separately retained registry:
+
+```java
+final FrequencyTrie<CompiledPatchCommand> trie =
+        StemmerPatchTrieLoader.loadCompiled(
+                "pl-pl-polimorf",
+                true,
+                ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS);
+```
+
+## 3. Multiple variants for one language
+
+Dependency prerequisite: both `radixor-model-pl-pl-unimorph:1.0.0` and `radixor-model-pl-pl-polimorf:1.0.0` at runtime.
+
+```java
+final StemmerModelRegistry registry = StemmerModelRegistry.fromContextClassLoader();
+final StemmerModelDescriptor unimorph = registry.require("pl-pl-unimorph");
+final StemmerModelDescriptor polimorf = registry.require("pl-pl-polimorf");
+
+final FrequencyTrie<CompiledPatchCommand> unimorphTrie =
+        StemmerPatchTrieLoader.loadCompiled(unimorph, true, reductionMode);
+final FrequencyTrie<CompiledPatchCommand> polimorfTrie =
+        StemmerPatchTrieLoader.loadCompiled(polimorf, true, reductionMode);
+
+final StemmerModelDescriptor defaultPolish =
+        registry.requireDefault(StemmerPatchTrieLoader.Language.PL_PL);
+if (!"pl-pl-unimorph".equals(defaultPolish.id())) {
+    throw new IllegalStateException(
+            "Unexpected default Polish model: " + defaultPolish.id());
 }
 ```
 
-The core module is standalone and can be consumed directly as a normal Java module.
+The tries remain independent. Radixor does not merge models or infer an alternative default from classpath order.
 
-## Recommended reading order
+## 4. Discovery
 
-For most developers, the best order is:
+Dependency prerequisite: whichever model artifacts the application intends to discover.
 
-1. [Fast Track](fast-track.md)
-2. [Integration Deep Dive](integration-deep-dive.md)
-3. [Loading and Building Stemmers](programmatic-loading-and-building.md)
-4. [Querying and Ambiguity Handling](programmatic-querying-and-ambiguity.md)
-5. [Extending and Persisting Compiled Tries](programmatic-extending-and-persistence.md)
+```java
+final StemmerModelRegistry registry = StemmerModelRegistry.fromContextClassLoader();
 
-## Next steps
+for (final StemmerModelDescriptor descriptor : registry.models()) {
+    System.out.printf("%s %s %s %s/%d%n",
+            descriptor.id(), descriptor.language(), descriptor.version(),
+            descriptor.format(), descriptor.formatVersion());
+}
 
-- [Quick Start](quick-start.md)
-- [CLI compilation](cli-compilation.md)
-- [Dictionary format](dictionary-format.md)
-- [Architecture and reduction](architecture-and-reduction.md)
+final java.util.List<StemmerModelDescriptor> polish =
+        registry.findByLanguage(StemmerPatchTrieLoader.Language.PL_PL);
+```
+
+Results use deterministic model-ID order. See [Built-in Languages](built-in-languages.md) for default interpretation and the generated [catalog](stemmer-model-catalog.md) for provenance.
+
+## 5. Advanced ClassLoader selection
+
+Dependency prerequisite: the model JAR must be visible to the selected loader.
+
+```java
+final ClassLoader applicationLoader = application.getClass().getClassLoader();
+final StemmerModelRegistry isolatedRegistry =
+        StemmerModelRegistry.fromClassLoader(applicationLoader);
+```
+
+This form is useful for plugin containers, isolated application servers, and tests. It can discover a different set from the thread context loader. See [ClassLoader troubleshooting](model-selection-and-loading.md#troubleshooting).
+
+## 6. Error handling
+
+Dependency prerequisite: none beyond core; this example demonstrates an absent optional model.
+
+```java
+try {
+    StemmerModelRegistry.fromContextClassLoader().require("pl-pl-polimorf");
+} catch (final StemmerModelNotFoundException exception) {
+    System.err.println(exception.getMessage());
+}
+```
+
+Missing models never produce an empty trie or arbitrary fallback. Duplicate IDs, unsupported formats, malformed descriptors, missing resources, and checksum mismatches are also fatal. The full exception mapping and remediation table are in [Model Selection and Loading](model-selection-and-loading.md#error-handling).
+
+## Continue into the trie API
+
+- [Loading and Building Stemmers](programmatic-loading-and-building.md)
+- [Querying and Ambiguity Handling](programmatic-querying-and-ambiguity.md)
+- [Extending and Persisting Compiled Tries](programmatic-extending-and-persistence.md)
+- [Architecture](architecture.md)

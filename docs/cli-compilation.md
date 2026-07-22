@@ -2,6 +2,8 @@
 
 Radixor provides a command-line compiler for turning line-oriented dictionary files into compact binary stemmer artifacts.
 
+The CLI output is not a model JAR. A model artifact contains a compressed textual dictionary, descriptor, index, checksum, and license so the runtime registry can discover and compile it. The CLI instead emits an already compiled binary trie for direct `loadBinaryCompiled(...)` use. Choose the model-module workflow when independently published classpath discovery is required; choose the CLI when the application owns a compiled binary asset.
+
 This is the preferred preparation workflow when stemming should run against an already compiled artifact rather than against raw dictionary input. The CLI reads the dictionary, derives patch commands, builds a mutable trie, applies the selected subtree reduction strategy, and writes the final compiled trie in the project binary format under GZip compression. The result is a deployment-ready `.radixor.gz` file that can be loaded directly by application code.
 
 ## What the CLI does
@@ -16,6 +18,10 @@ The `Compile` tool performs the following steps:
 6. writes the compiled trie as a GZip-compressed binary artifact.
 
 This workflow is intentionally aligned with the same dictionary semantics used elsewhere in the library. Remarks introduced by `#` or `//` are supported through the shared dictionary parser.
+
+## Create a registered custom model instead
+
+To publish or deploy a custom dictionary through `StemmerModelRegistry`, do not merely rename CLI output to `stemmer.gz`. Create `models/<model-id>`, preserve the textual dictionary as a GZip module input, provide source metadata and a license, apply `org.egothor.radixor.model`, and run the model validation tasks. The resulting JAR has an index, descriptor, namespaced textual dictionary, checksum, and license. Detailed packaging is documented in [Stemmer Models](stemmer-models.md); selection is documented in [Model Selection and Loading](model-selection-and-loading.md).
 
 ## Basic usage
 
@@ -220,6 +226,8 @@ The ranked `getAll()` mode is the safest default. The unordered and dominant mod
 
 Compilation is usually a one-time step and is generally fast. The more important operational consideration is memory usage during preparation, because the dictionary-derived mutable structure exists before reduction compacts it into the final read-only trie. This is especially relevant for very large source dictionaries.
 
+The complete PoliMorf model is the current exceptional case: registered-model verification uses `runtimeModelIntegrationTest` with a 6 GiB maximum heap, configurable through `-PradixorLargeModelMaxHeap=<size>`. This setting applies only to that isolated test process, not the Gradle daemon or ordinary tests.
+
 ## Example workflow
 
 ### 1. Prepare a dictionary
@@ -282,3 +290,5 @@ The CLI and the programmatic API implement the same conceptual preparation step.
 - [Quick start](quick-start.md)
 - [Programmatic usage](programmatic-usage.md)
 - [Architecture and reduction](architecture-and-reduction.md)
+!!! note "Radixor 4 model artifacts"
+    Language dictionaries are independently versioned runtime model artifacts, not resources embedded in `radixor`. Language-based APIs resolve deterministic defaults through `StemmerModelRegistry`; see [Stemmer Models](stemmer-models.md).

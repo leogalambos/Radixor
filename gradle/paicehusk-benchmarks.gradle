@@ -120,6 +120,11 @@ def transformPaiceHuskSource = { final File sourceFile, final File rulesFile, fi
 
     transformedText = 'package org.egothor.stemmer.benchmark;' + '\n\n' + transformedText
     transformedText = transformedText.replaceFirst(/(?m)^\s*class\s+PaiceHusk\s*\{/, 'public final class PaiceHuskLancasterStemmer {')
+    transformedText = transformedText.replace('new Character(rule.letter)', 'Character.valueOf(rule.letter)')
+    transformedText = transformedText.replace('new Character(stem.charAt(stem.length() - 1))',
+            'Character.valueOf(stem.charAt(stem.length() - 1))')
+    transformedText = transformedText.replaceFirst(/(?m)^(\s*)static HashMap loadRules\(/,
+            '$1@SuppressWarnings("unchecked")\n$1static HashMap loadRules(')
 
     final int packageEnd = transformedText.indexOf('\n', transformedText.indexOf('package org.egothor.stemmer.benchmark;'))
     if (packageEnd >= 0) {

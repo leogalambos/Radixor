@@ -2,6 +2,92 @@
 
 This document explains the structural architecture of **Radixor**: what data is stored, how it flows through the build pipeline, and how runtime lookup works once a compiled trie has been produced.
 
+## Component boundaries
+
+| Component | Responsibility |
+|---|---|
+| Root Radixor core | Patch commands, dictionary parser, trie construction/lookup, descriptor and registry APIs, loaders; no language data |
+| Individual model module | Immutable source input and license; publishes one independently versioned resource JAR |
+| `StemmerModelRegistry` | Deterministic index/descriptor discovery and selection by model ID or language default |
+| `StemmerModelDescriptor` | Immutable public view of validated runtime identity, format, resource, checksum, and source URL |
+| Model convention plugin | Validates inputs and generates the resource namespace, descriptor, index, license, and publication |
+| Standard aggregate | POM-only transitive runtime dependencies for one default per language |
+| Verification classpaths | Direct individual-model dependencies for tests, quality evaluation, and JMH, including optional PoliMorf |
+| Models BOM | POM-only recommended individual model versions in Maven dependency management |
+| Documentation staging | Maintained `docs/` plus generated catalog under `build/mkdocs-source/` |
+| Release workflows | Independent core, one-model, and catalog publication boundaries |
+
+Read [Model Selection and Loading](model-selection-and-loading.md) for executable application examples and [Stemmer Models](stemmer-models.md) for artifact maintenance.
+
+## Runtime model discovery and loading
+
+The implemented sequence is:
+
+1. use the thread context `ClassLoader`, or an explicit non-null loader;
+2. enumerate every `META-INF/radixor/models.index` with `ClassLoader.getResources(...)`;
+3. sort index URLs and validate every descriptor path;
+4. read descriptor resources and required properties;
+5. validate model ID, language, exact resource namespace, checksum syntax, format name, and format version;
+6. sort descriptors by model ID and reject duplicate IDs;
+7. resolve either `Language.defaultModelId()` or an exact explicit model ID;
+8. open the declared model resource with the descriptor's discovering loader;
+9. compare SHA-256 over the compressed bytes;
+10. decompress GZip and parse UTF-8 Radixor dictionary rows;
+11. build and reduce a `FrequencyTrie`;
+12. optionally compile stored patch strings into `CompiledPatchCommand` values for the language-oriented compiled API.
+
+Descriptor discovery verifies resource presence before selection. Byte-level checksum verification happens when the selected model is loaded. The registry never scans arbitrary JAR contents and never selects “the first model for a language.”
+
+### Default Polish resolution
+
+`StemmerPatchTrieLoader.Language.PL_PL` declares `pl-pl-unimorph` in the enum constructor. A language-oriented load creates a context-loader registry and calls `requireDefault(PL_PL)`. If that ID is absent, loading stops with `StemmerModelNotFoundException` naming `org.egothor:radixor-model-pl-pl-unimorph:<version>`.
+
+### Explicit PoliMorf resolution
+
+`registry.require("pl-pl-polimorf")` addresses the alternative directly. It neither changes nor consults the Polish default. Both descriptors may coexist; duplicate declarations of either same ID are rejected.
+
+## Version axes
+
+| Version | Owned by | Compatibility purpose |
+|---|---|---|
+| Core version | Root Git-derived release | Java implementation and public API |
+| Model artifact version | Each `model-version.txt` | One independently published model JAR |
+| Catalog version | `models/catalog-version.txt` | Standard aggregate and BOM recommendation set |
+| Source dictionary version | Module provenance | Upstream lexical data lineage |
+| Model format version | Descriptor and registry | Loader compatibility for packaged dictionary representation |
+
+No equality relationship is implied between these values.
+
+## Build topology and generated output
+
+`models/model-projects.properties` is the single Gradle-readable topology list for the 21 individual model projects and their default or optional aggregate role. Per-model build scripts and generated descriptors remain authoritative for language, resource, provenance, checksum, and model-specific metadata. `settings.gradle`, root verification classpaths, the standard POM, and BOM constraints all derive membership from the topology list.
+
+Gradle implicitly creates the lifecycle parent `:models` because child paths are nested. It has no build script, applied project plugin, Maven coordinate, publication, or archive. The root CycloneDX plugin exposes direct-task instances to subprojects internally; every subproject instance is disabled, so only root `:cyclonedxDirectBom` can generate an SBOM. The ignored path `models/build/` is generated output, not a module, and the supported build does not write reports there. Root aggregate reports, including `verifyJmhModelClasspath`, belong under `build/reports/models/`; each individual model retains its own outputs under `models/<model-id>/build/`.
+
+`models/bom` is a Maven dependency BOM: it controls recommended dependency versions and adds no runtime artifacts. The root CycloneDX task produces a software bill of materials (SBOM) under `build/reports/sbom/`. These artifacts have different purposes and output locations.
+
+## Build-time model packaging
+
+The `org.egothor.radixor.model` convention plugin treats `src/modelInput` as immutable. `validateModelInput` checks the GZip stream, strict UTF-8, dictionary rows, ID, semantic model version, and license. `prepareModelResources` copies identical compressed bytes under `org/egothor/stemmer/models/<model-id>/stemmer.gz` and generates the descriptor, index, and packaged license under `build/`. `verifyModelDescriptor` checks the digest, while `verifyModelJar` checks the unique resource, packaged-byte digest, metadata, and dictionary-free documentation artifacts. The root `runtimeModelIntegrationTest` accepts `-PmodelId=<id>` and verifies transformation of a packaged resource into `FrequencyTrie<CompiledPatchCommand>`; PoliMorf release validation depends on this complete runtime test.
+
+For UniMorph models, the convention validates and packages one model-specific attribution,
+licensing, provenance, and contribution notice. Source and packaged notice bytes must match. The
+notice identifies CC BY-SA 3.0 through its canonical URI; no project-wide CC license directory or
+duplicated full legal text is used. Descriptors distinguish exact revisions from the explicit
+legacy-import sentinel. UniMorph supplies morphological data; runtime patch commands and tries are
+constructed by Radixor. The Java software remains BSD-3-Clause, while PoliMorf data remains under
+its separately packaged BSD-2-Clause license.
+
+## Release and security boundaries
+
+| Tag | Publication boundary |
+|---|---|
+| `release@<core-version>` | Root `org.egothor:radixor` artifacts only; never model JARs |
+| `model/<model-id>@<model-version>` | Exactly one matching model; never core, catalog, or other models |
+| `models-catalog@<catalog-version>` | BOM and standard aggregate only; never model bytes |
+
+License inclusion, strict metadata paths, resource presence, SHA-256 verification, unsupported-format rejection, and duplicate-ID rejection form the model integrity boundary. These checks detect packaging mistakes and corruption; model data remains non-executable dictionary input.
+
 ## The central idea
 
 Radixor does not store final stems directly as a large flat lookup table. Instead, it stores **patch commands** that describe how a word form should be transformed into a canonical stem.
@@ -10,7 +96,7 @@ For example, if a dictionary states that `running` should reduce to `run`, the f
 
 That matters because many words share similar transformation patterns. Once those mappings are organized in a trie and compiled into a canonical structure, the result is much smaller and more reusable than a naive direct-output table.
 
-## End-to-end build flow
+## Trie construction flow
 
 The full build-time flow is:
 
@@ -191,7 +277,7 @@ This is why a very large dictionary can still produce a manageable deployable ru
 
 The compactness of the final artifact should not be confused with the memory usage of preparation.
 
-Before reduction has completed, the mutable build-time structure must exist in memory. For large dictionaries, that temporary preparation cost can be noticeably higher than the size of the final persisted artifact or the loaded compiled trie.
+Before reduction has completed, the mutable build-time structure must exist in memory. For large dictionaries, that temporary preparation cost can be noticeably higher than the size of the final persisted artifact or the loaded compiled trie. PoliMorf is the exceptional current case: two complete test constructions took 23.7 and 23.5 seconds, produced 358,993 canonical nodes, and used a task-specific 6 GiB maximum heap. The process peak does not establish the retained heap of the final trie, which is not currently measured separately.
 
 That is why the preferred operational model is usually:
 
@@ -218,3 +304,5 @@ Determinism matters not only for tests, but also for operational trust. It makes
 - [Reduction Semantics](reduction-semantics.md)
 - [Programmatic usage](programmatic-usage.md)
 - [CLI compilation](cli-compilation.md)
+- [Model selection and loading](model-selection-and-loading.md)
+- [Stemmer models](stemmer-models.md)

@@ -1,267 +1,104 @@
-# Built-in Languages
+# Built-in Languages and Default Models
 
-Radixor ships with a curated set of bundled stemmer dictionaries that can be loaded directly from the library distribution. These resources are intended to provide an immediately usable baseline for evaluation, prototyping, integration, and general-purpose stemming workloads, while still fitting naturally into workflows where the bundled baseline is later refined, extended, or replaced with custom lexical data.
+“Supported language” means that Radixor defines a language enum value and publishes a corresponding default model artifact. It does not mean that a dictionary is embedded in the core JAR. Applications add model artifacts explicitly or use the optional standard pack.
 
-## Overview
+The language enum carries language identity, writing direction, a legacy resource-directory name, and the stable default model ID. A model descriptor carries the independently versioned model identity and resource. See [Model Selection and Loading](model-selection-and-loading.md) for the API and the generated [model catalog](stemmer-model-catalog.md) for versions, provenance, checksums, and sizes.
 
-Bundled dictionaries are exposed through:
+## Defaults and variants
 
-```java
-org.egothor.stemmer.StemmerPatchTrieLoader.Language
-```
+| Language | Enum | Default model ID | Default artifact | Optional variants |
+|---|---|---|---|---|
+| Czech | `CS_CZ` | `cs-cz-default` | `org.egothor:radixor-model-cs-cz-default` | — |
+| Danish | `DA_DK` | `da-dk-default` | `org.egothor:radixor-model-da-dk-default` | — |
+| German | `DE_DE` | `de-de-default` | `org.egothor:radixor-model-de-de-default` | — |
+| Spanish | `ES_ES` | `es-es-default` | `org.egothor:radixor-model-es-es-default` | — |
+| Persian | `FA_IR` | `fa-ir-default` | `org.egothor:radixor-model-fa-ir-default` | — |
+| Finnish | `FI_FI` | `fi-fi-default` | `org.egothor:radixor-model-fi-fi-default` | — |
+| French | `FR_FR` | `fr-fr-default` | `org.egothor:radixor-model-fr-fr-default` | — |
+| Hebrew | `HE_IL` | `he-il-default` | `org.egothor:radixor-model-he-il-default` | — |
+| Hungarian | `HU_HU` | `hu-hu-default` | `org.egothor:radixor-model-hu-hu-default` | — |
+| Italian | `IT_IT` | `it-it-default` | `org.egothor:radixor-model-it-it-default` | — |
+| Norwegian Bokmål | `NB_NO` | `nb-no-default` | `org.egothor:radixor-model-nb-no-default` | — |
+| Dutch | `NL_NL` | `nl-nl-default` | `org.egothor:radixor-model-nl-nl-default` | — |
+| Norwegian Nynorsk | `NN_NO` | `nn-no-default` | `org.egothor:radixor-model-nn-no-default` | — |
+| Polish | `PL_PL` | `pl-pl-unimorph` | `org.egothor:radixor-model-pl-pl-unimorph` | `pl-pl-polimorf` / `org.egothor:radixor-model-pl-pl-polimorf` |
+| Portuguese | `PT_PT` | `pt-pt-default` | `org.egothor:radixor-model-pt-pt-default` | — |
+| Russian | `RU_RU` | `ru-ru-default` | `org.egothor:radixor-model-ru-ru-default` | — |
+| Swedish | `SV_SE` | `sv-se-default` | `org.egothor:radixor-model-sv-se-default` | — |
+| Ukrainian | `UK_UA` | `uk-ua-default` | `org.egothor:radixor-model-uk-ua-default` | — |
+| English | `US_UK` | `us-uk-default` | `org.egothor:radixor-model-us-uk-default` | — |
+| Yiddish | `YI` | `yi-default` | `org.egothor:radixor-model-yi-default` | — |
 
-Each bundled dictionary is packaged with the library as a compressed UTF-8 text resource. When loaded through the runtime API, the resource is parsed by `StemmerDictionaryParser`, transformed into patch-command mappings, and compiled into a read-only `FrequencyTrie<CompiledPatchCommand>` by `StemmerPatchTrieLoader`.
+The maintained table deliberately avoids duplicating mutable provenance and checksum fields. Those values come from module metadata and are generated into the model catalog.
 
-The bundled language definition also carries a language-level right-to-left flag. That flag is used by the loader to derive the `WordTraversalDirection` used for both trie-key construction and patch-command generation. In practice, left-to-right bundled languages use historical backward Egothor traversal, while right-to-left bundled languages use forward traversal over the stored form.
+## The Polish dual-model case
 
-## Supported bundled languages
+`PL_PL` represents Polish. It is not an alias for either source dictionary.
 
-The following bundled language identifiers are currently available:
+- `loadCompiled(Language.PL_PL, ...)` resolves `pl-pl-unimorph`.
+- `registry.require("pl-pl-polimorf")` resolves the optional PoliMorf model.
+- `StemmerPatchTrieLoader.loadCompiled("pl-pl-polimorf", true, reductionMode)` constructs its compiled trie explicitly; complete construction is verified with a dedicated 6 GiB test heap.
+- Both artifacts may be present and loaded independently.
+- Adding PoliMorf does not change the language default.
+- Radixor does not merge their dictionaries or outputs automatically.
 
-| Language | Enum constant | Writing direction | Notes | Benchmark page |
-|---|---|---:|---|---|
-| Czech | `CS_CZ` | LTR | Bundled general-purpose dictionary | [Czech](benchmarks/languages/czech.md) |
-| Danish | `DA_DK` | LTR | Bundled general-purpose dictionary | [Danish](benchmarks/languages/danish.md) |
-| German | `DE_DE` | LTR | Bundled general-purpose dictionary | [German](benchmarks/languages/german.md) |
-| Spanish | `ES_ES` | LTR | Bundled general-purpose dictionary | [Spanish](benchmarks/languages/spanish.md) |
-| Persian | `FA_IR` | RTL | Bundled dictionary uses forward traversal over the stored form | [Persian](benchmarks/languages/persian.md) |
-| Finnish | `FI_FI` | LTR | Bundled general-purpose dictionary | [Finnish](benchmarks/languages/finnish.md) |
-| French | `FR_FR` | LTR | Bundled general-purpose dictionary | [French](benchmarks/languages/french.md) |
-| Hebrew | `HE_IL` | RTL | Bundled dictionary uses forward traversal over the stored form | No same-language external benchmark in this run |
-| Hungarian | `HU_HU` | LTR | Bundled general-purpose dictionary | [Hungarian](benchmarks/languages/hungarian.md) |
-| Italian | `IT_IT` | LTR | Bundled general-purpose dictionary | [Italian](benchmarks/languages/italian.md) |
-| Norwegian Bokmål | `NB_NO` | LTR | Bundled general-purpose dictionary | [Norwegian Bokmal](benchmarks/languages/norwegian-bokmal.md) |
-| Dutch | `NL_NL` | LTR | Bundled general-purpose dictionary | [Dutch](benchmarks/languages/dutch.md) |
-| Norwegian Nynorsk | `NN_NO` | LTR | Bundled general-purpose dictionary | [Norwegian Nynorsk](benchmarks/languages/norwegian-nynorsk.md) |
-| Polish | `PL_PL` | LTR | Bundled general-purpose dictionary | [Polish](benchmarks/languages/polish.md) |
-| Portuguese | `PT_PT` | LTR | Bundled general-purpose dictionary | [Portuguese](benchmarks/languages/portuguese.md) |
-| Russian | `RU_RU` | LTR | Bundled general-purpose dictionary | [Russian](benchmarks/languages/russian.md) |
-| Swedish | `SV_SE` | LTR | Bundled general-purpose dictionary | [Swedish](benchmarks/languages/swedish.md) |
-| Ukrainian | `UK_UA` | LTR | Bundled general-purpose dictionary | [Ukrainian](benchmarks/languages/ukrainian.md) |
-| English | `US_UK` | LTR | Bundled general-purpose dictionary | [English](benchmarks/languages/english.md) |
-| Yiddish | `YI` | RTL | Bundled dictionary uses forward traversal over the stored form | [Yiddish](benchmarks/languages/yiddish.md) |
+UniMorph and PoliMorf have different lexical sources and provenance. Applications should compare outputs with application-specific regression tests before changing an explicit model choice.
 
-## Basic usage
+## Dependency patterns
 
-Load a bundled dictionary like this:
+Minimal English:
 
-```java
-import java.io.IOException;
-
-import org.egothor.stemmer.CompiledPatchCommand;
-import org.egothor.stemmer.FrequencyTrie;
-import org.egothor.stemmer.ReductionMode;
-import org.egothor.stemmer.StemmerPatchTrieLoader;
-
-public final class BuiltInExample {
-
-    private BuiltInExample() {
-        throw new AssertionError("No instances.");
-    }
-
-    public static void main(final String[] arguments) throws IOException {
-        final FrequencyTrie<CompiledPatchCommand> trie = StemmerPatchTrieLoader.loadCompiled(
-                StemmerPatchTrieLoader.Language.US_UK,
-                true,
-                ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS);
-
-        System.out.println(trie.traversalDirection());
-    }
+```groovy
+dependencies {
+    implementation 'org.egothor:radixor:<radixor-version>'
+    runtimeOnly 'org.egothor:radixor-model-us-uk-default:1.0.0'
 }
 ```
 
-This call loads the bundled dictionary resource for the selected language, parses its lexical entries, derives patch-command mappings, and compiles the result into a read-only trie.
+All documented defaults:
 
-## Example: stemming with a bundled dictionary
-
-```java
-import java.io.IOException;
-
-import org.egothor.stemmer.CompiledPatchCommand;
-import org.egothor.stemmer.FrequencyTrie;
-import org.egothor.stemmer.ReductionMode;
-import org.egothor.stemmer.StemmerPatchTrieLoader;
-
-public final class EnglishExample {
-
-    private EnglishExample() {
-        throw new AssertionError("No instances.");
-    }
-
-    public static void main(final String[] arguments) throws IOException {
-        final FrequencyTrie<CompiledPatchCommand> trie = StemmerPatchTrieLoader.loadCompiled(
-                StemmerPatchTrieLoader.Language.US_UK,
-                true,
-                ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS);
-
-        final String word = "running";
-        final CompiledPatchCommand patch = trie.get(word);
-        final String stem = patch == null ? word : patch.apply(word);
-
-        System.out.println(word + " -> " + stem);
-    }
+```groovy
+dependencies {
+    implementation 'org.egothor:radixor:<radixor-version>'
+    runtimeOnly 'org.egothor:radixor-models-standard:<catalog-version>'
 }
 ```
 
-`CompiledPatchCommand` values are compiled with the traversal direction used when the trie and its patch commands were produced.
+The standard pack is metadata-only and excludes optional PoliMorf.
 
-## Traversal behavior and right-to-left languages
+Every individual model artifact carries its own provenance and licensing material. UniMorph
+models carry different model-specific CC BY-SA 3.0 notices because their official language
+repositories identify different lexical sources and contributors. Each notice preserves upstream
+attribution and records the Radixor transformations and Leo Galambos contribution statement.
+Legacy imports disclose when an exact historical revision was not recorded; this is a
+reproducibility limitation, not a claim that the source or license is unknown.
 
-Bundled dictionaries are not all processed identically.
-
-For traditional left-to-right suffix-oriented resources, Radixor preserves historical Egothor behavior and traverses logical word characters backward. That means trie paths are constructed from the logical end of the stored word toward its beginning, and patch commands are interpreted with the same backward traversal model.
-
-For bundled right-to-left languages such as Persian, Hebrew, and Yiddish, Radixor uses forward traversal over the stored form. In those cases:
-
-- trie keys are traversed from the logical beginning of the stored form,
-- patch commands are generated in that same forward direction,
-- compiled patch-command application uses `WordTraversalDirection.FORWARD`, which is naturally captured when `loadCompiled(...)` creates `CompiledPatchCommand` values.
-
-This design keeps the traversal policy explicit and consistent across dictionary loading, trie lookup, binary persistence, builder reconstruction, and patch application.
-
-## Reduction behavior
-
-Bundled dictionaries can be compiled using any supported `ReductionMode`. The reduction configuration controls how semantically equivalent subtrees are merged during trie compilation, while preserving the contract of the selected mode.
-
-Typical entry points are:
-
-- `StemmerPatchTrieLoader.loadCompiled(language, storeOriginal, reductionMode)`
-- `StemmerPatchTrieLoader.loadCompiled(language, storeOriginal, reductionSettings)`
-
-For most users, `ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS` is the most conservative general-purpose choice because it preserves ranked `getAll(...)` behavior.
-
-Compiled bundled dictionaries also use internal uniform-subtree contraction. If a whole subtree
-would return the same preferred patch command, Radixor stores that subtree as an accepting leaf and
-removes the deeper branches. This is the contracted trie representation used by the published
-benchmark tables and is independent of the public reduction mode selected by the caller.
-
-## Intended role of bundled dictionaries
-
-Bundled dictionaries should be understood as practical default resources.
-
-They are a good fit when:
-
-- a supported language is already available,
-- immediate usability matters,
-- a reasonable baseline is sufficient,
-- the goal is evaluation, prototyping, or straightforward integration.
-
-They are also well suited to staged refinement workflows in which a bundled base is loaded first, then extended with domain-specific vocabulary, and finally persisted as a custom binary artifact.
-
-## Character representation
-
-Bundled dictionaries are ordinary UTF-8 lexical resources. The parser reads them as text, the trie stores standard Java strings, and the patch-command model operates on general character sequences.
-
-This is important for two reasons:
-
-1. the built-in resources are not limited to ASCII-only processing,
-2. the traversal model is orthogonal to character encoding and script choice.
-
-In other words, right-to-left handling in the loader is about logical traversal strategy, not about introducing a separate character model.
-
-## When to prefer custom dictionaries
-
-A custom dictionary is usually the better choice when:
-
-- domain-specific vocabulary materially affects stemming quality,
-- lexical coverage must be controlled more precisely,
-- a stronger lexical resource is available than the bundled baseline,
-- operational requirements demand an explicitly curated, versioned artifact.
-
-Typical examples include:
-
-- technical terminology,
-- biomedical language,
-- legal or financial vocabulary,
-- organization-specific product and process names,
-- dictionaries maintained with project-specific validation rules.
-
-## Production recommendation
-
-For production systems, the most robust workflow is usually:
-
-1. start from a bundled dictionary when it is suitable,
-2. extend it with domain-specific forms if needed,
-3. rebuild it into a binary artifact,
-4. deploy that compiled binary artifact,
-5. load it at runtime through `loadBinaryCompiled(...)`.
-
-This avoids repeated startup parsing and makes the deployed stemming behavior explicit, reproducible, and versionable.
-
-## Example refinement workflow
+## Loading a language default
 
 ```java
-import java.io.IOException;
-import java.nio.file.Path;
-
-import org.egothor.stemmer.FrequencyTrie;
-import org.egothor.stemmer.FrequencyTrieBuilders;
-import org.egothor.stemmer.PatchCommandEncoder;
-import org.egothor.stemmer.ReductionMode;
-import org.egothor.stemmer.ReductionSettings;
-import org.egothor.stemmer.StemmerPatchTrieBinaryIO;
-import org.egothor.stemmer.StemmerPatchTrieLoader;
-
-public final class BundledRefinementExample {
-
-    private BundledRefinementExample() {
-        throw new AssertionError("No instances.");
-    }
-
-    public static void main(final String[] arguments) throws IOException {
-        final FrequencyTrie<String> base = StemmerPatchTrieLoader.load(
+final FrequencyTrie<CompiledPatchCommand> trie =
+        StemmerPatchTrieLoader.loadCompiled(
                 StemmerPatchTrieLoader.Language.US_UK,
                 true,
                 ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS);
-
-        final FrequencyTrie.Builder<String> builder = FrequencyTrieBuilders.copyOf(
-                base,
-                String[]::new,
-                ReductionSettings.withDefaults(
-                        ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS));
-
-        final PatchCommandEncoder encoder = PatchCommandEncoder.builder()
-                .traversalDirection(base.traversalDirection())
-                .build();
-
-        builder.put("microservices", encoder.encode("microservices", "microservice"));
-
-        final FrequencyTrie<String> compiled = builder.build();
-
-        StemmerPatchTrieBinaryIO.write(compiled, Path.of("english-custom.radixor.gz"));
-    }
-}
 ```
 
-The reconstructed builder preserves the traversal direction of the source trie, so refinements remain semantically aligned with the original bundled dictionary.
+The call discovers the default descriptor from the runtime classpath, verifies its compressed resource, parses the GZip UTF-8 dictionary, and constructs a read-only trie. A missing default throws `StemmerModelNotFoundException`; there is no arbitrary fallback.
 
-## Extending language support
+## Writing direction
 
-The built-in set is intentionally a practical baseline rather than a closed catalog. Additional languages, stronger lexical coverage, and improved dictionaries for currently supported languages are all natural extension paths.
+Persian, Hebrew, and Yiddish declare right-to-left language metadata and use forward traversal over stored forms. Other defaults use historical backward Egothor traversal. This setting must remain aligned across dictionary parsing, trie lookup, patch generation, persistence, and application. Model identity remains separate from writing direction.
 
-What matters most is not only the number of entries, but the quality, consistency, maintainability, and operational usefulness of the lexical resource being added.
+## Custom and persisted alternatives
 
-## Related API surface
+Registered model artifacts are a convenient reproducible baseline. Applications may instead load caller-owned textual dictionaries or persist compiled `.radixor.gz` tries. Those paths are distinct from model artifact discovery:
 
-The following types are typically involved when working with bundled dictionaries:
+- a model `stemmer.gz` is a compressed textual dictionary plus descriptor/index metadata;
+- a `.radixor.gz` created by the binary writer is a persisted compiled trie;
+- a source dictionary is upstream input, not automatically a valid model artifact.
 
-- `StemmerPatchTrieLoader`
-- `StemmerPatchTrieLoader.Language`
-- `FrequencyTrie`
-- `PatchCommandEncoder`
-- `WordTraversalDirection`
-- `ReductionMode`
-- `ReductionSettings`
-- `StemmerPatchTrieBinaryIO`
-- `FrequencyTrieBuilders`
+See [Dictionary Format](dictionary-format.md), [CLI Compilation](cli-compilation.md), and [Stemmer Models](stemmer-models.md).
 
-## Next steps
+## Benchmark interpretation
 
-- [Quick start](quick-start.md)
-- [Dictionary format](dictionary-format.md)
-- [CLI compilation](cli-compilation.md)
-- [Programmatic usage](programmatic-usage.md)
-
-## Summary
-
-Radixor’s built-in language support provides immediate usability, a professionally defined baseline API, and a practical starting point for custom refinement. The bundled set now includes both left-to-right and right-to-left languages, and the library models that distinction explicitly through `WordTraversalDirection` so that trie construction, lookup, and patch application remain consistent.
+Benchmark rows must identify the Radixor model ID used. Default rows use the default IDs above. Optional Polish PoliMorf comparisons must be labeled `pl-pl-polimorf`; they are not interchangeable with the historical default Polish row. Continue with [Benchmarking](benchmarking.md) and [Reproducibility](benchmarks/reference/reproducibility.md).

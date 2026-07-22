@@ -1,4 +1,19 @@
+pluginManagement {
+    includeBuild('build-logic')
+}
+
 rootProject.name = 'Radixor'
+
+include(':models:standard')
+include(':models:bom')
+
+Properties modelTopology = new Properties()
+file('models/model-projects.properties').withInputStream { InputStream input ->
+    modelTopology.load(input)
+}
+modelTopology.stringPropertyNames().toList().sort().each { String modelId ->
+    include(":models:${modelId}")
+}
 
 dependencyResolutionManagement {
     repositoriesMode = RepositoriesMode.FAIL_ON_PROJECT_REPOS

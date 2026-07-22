@@ -1,12 +1,16 @@
 # Stemming quality evaluation
 
-The explicit `stemmingQuality` analysis measures agreement between stemmer outputs and gold-standard equivalence classes represented by bundled multilingual dictionary rows. Dictionary text remains unchanged; reports and diagnostics use English.
+The explicit `stemmingQuality` analysis measures agreement between stemmer outputs and gold-standard equivalence classes represented by registered multilingual model dictionary rows. Dictionary text remains unchanged; reports and diagnostics use English.
 
 JMH adapters, registries, third-party versions, language mappings, and preparation remain in `src/jmh`. The evaluator, reports, audits, and tests reside in the standard `src/test` source set. The former `src/stemmingQualityTest` source set was removed, and neither analytical nor JMH classes enter the production JAR.
 
 ## Language and adapter coverage
 
-The authoritative Radixor universe is the validated one-to-one reconciliation of `src/main/resources/*/stemmer.gz` and every `StemmerPatchTrieLoader.Language` value. All 20 current values have exactly one resource; no sentinel or alias is excluded. Radixor is evaluated for all 20 languages, independently of third-party support. Third-party combinations come only from explicit JMH adapter metadata. Unsupported combinations are documented and never fabricated as zero-valued rows.
+The authoritative Radixor universe is the validated one-to-one reconciliation of every `StemmerPatchTrieLoader.Language` value with its registered default model descriptor. All 20 current values have exactly one documented default. Optional comparison models, including `pl-pl-polimorf`, are identified separately and never replace default benchmark rows. Third-party combinations come only from explicit JMH adapter metadata.
+
+Default Polish evaluation is therefore `Radixor` with model `pl-pl-unimorph`. A future PoliMorf evaluation is a distinct `Radixor` / `pl-pl-polimorf` row. Evaluation classpaths receive individual models through direct non-production Gradle dependencies; ordinary applications inherit none of them from the core.
+
+Complete PoliMorf trie construction and deterministic stemming smoke fixtures are runtime-verified separately. That functional verification is not a linguistic-quality measurement and does not justify rewriting the historical quality snapshot.
 
 The expected matrix is constructed before evaluation from stemmer, language, dictionary mode, and supported output policy. Generation fails on missing, duplicate, unexpected, or stale keys.
 
@@ -80,3 +84,4 @@ Generated files under `build/reports/stemming-quality/` include `stemming-qualit
 ## Limitations
 
 These measurements evaluate agreement with the available dictionary grouping. They do not capture every semantic, morphological, downstream, or dataset-specific property. `ANY_CANDIDATE` is optimistic and may not be globally realizable. `ALL_CANDIDATES` measures an overlap graph rather than a partition. Language coverage must remain visible in cross-stemmer comparisons. No single published metric establishes universal superiority; multiple metrics and their correlations are provided for transparent scientific assessment.
+Historical checked-in quality results retain their original inputs and claims. The optional PoliMorf model is not attributed to snapshots that predate it. See [Model Selection and Loading](model-selection-and-loading.md) and the generated [model catalog](stemmer-model-catalog.md).

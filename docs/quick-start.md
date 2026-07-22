@@ -4,9 +4,22 @@ This guide introduces the fastest practical path to using **Radixor**.
 
 If you are new to Radixor and want the shortest possible path to a first working stem, start with
 [Fast Track](fast-track.md). This Quick Start is a broader developer walkthrough: it introduces the
-main loading options, query methods, artifact workflow, and metadata model.
+main loading options, query methods, artifact workflow, and metadata model. For model-ID selection and failures, use [Model Selection and Loading](model-selection-and-loading.md).
 
 Radixor separates preparation from runtime usage. Source dictionaries are used to derive patch commands and reduce them into a compact read-only trie. Runtime stemming then operates on that compiled structure rather than on the original dictionary text. A richer dictionary usually improves the quality and coverage of inferred transformations, including transformations that are applicable to words not explicitly present in the source material. The reduction step also removes a large amount of redundant lexical information, which is why very large dictionaries can still produce compact runtime artifacts. These artifacts can be persisted and loaded directly when needed.
+
+From version 4 onward, the core and models are explicit dependencies:
+
+```groovy
+dependencies {
+    implementation 'org.egothor:radixor:<radixor-version>'
+    runtimeOnly 'org.egothor:radixor-models-standard:<catalog-version>'
+}
+```
+
+The core JAR contains no dictionary. Replace the standard pack with `runtimeOnly 'org.egothor:radixor-model-us-uk-default:1.0.0'` for the minimal English example below. For Polish, `Language.PL_PL` resolves `pl-pl-unimorph`; installing optional `pl-pl-polimorf` does not select it automatically.
+
+Explicit PoliMorf loading uses `StemmerPatchTrieLoader.loadCompiled("pl-pl-polimorf", true, reductionMode)`. Its complete dictionary is supported, but construction is exceptional enough that repository verification runs it separately with a 6 GiB maximum heap. See [Model Selection and Loading](model-selection-and-loading.md#load-polimorf-explicitly) for the complete dependency and Java example.
 
 A practical workflow usually consists of two independent phases:
 
@@ -17,9 +30,9 @@ A practical workflow usually consists of two independent phases:
 
 A compiled stemmer can be obtained in three common ways.
 
-### Use a bundled language dictionary
+### Use an external language model
 
-Radixor ships with bundled dictionaries for a set of supported languages. These resources are line-oriented dictionaries stored with the library and compiled into a `FrequencyTrie<CompiledPatchCommand>` when loaded through the runtime API. The loader can also store the canonical stem itself as a no-op patch command. Compiled trie artifacts now persist self-describing metadata, including the traversal direction and compilation reduction settings used to build the artifact.
+Language dictionaries are independently versioned model JARs discovered by `StemmerModelRegistry`. The root `org.egothor:radixor` JAR contains no dictionary bytes. The loader compiles a selected model into a `FrequencyTrie<CompiledPatchCommand>`; compiled trie artifacts retain self-describing traversal and reduction metadata.
 
 ```java
 import java.io.IOException;
@@ -29,9 +42,9 @@ import org.egothor.stemmer.FrequencyTrie;
 import org.egothor.stemmer.ReductionMode;
 import org.egothor.stemmer.StemmerPatchTrieLoader;
 
-public final class BundledStemmerExample {
+public final class RegisteredModelExample {
 
-    private BundledStemmerExample() {
+    private RegisteredModelExample() {
         throw new AssertionError("No instances.");
     }
 
@@ -251,3 +264,5 @@ Dictionary compilation is usually a one-time preparation step and is generally f
 Every compiled trie artifact stores a `TrieMetadata` descriptor together with the immutable trie payload. That metadata currently records the binary format version, the `WordTraversalDirection`, the `ReductionSettings` used during compilation, the declared `DiacriticProcessingMode`, and the selected `CaseProcessingMode`. Traversal, case processing, and diacritic processing are applied during runtime lookup (`get`, `getAll`), and case/diacritic processing are also applied during dictionary insertion when a trie is built.
 
 `DiacriticProcessingMode.AS_IS` keeps dictionary keys and lookup keys unchanged. `DiacriticProcessingMode.REMOVE` strips diacritics from dictionary keys and lookup keys (for Czech diacritics and broad European Latin-script variants). `DiacriticProcessingMode.AS_IS_AND_STRIPPED_FALLBACK` is currently not supported and raises an `UnsupportedOperationException`.
+!!! note "Radixor 4 model artifacts"
+    Language dictionaries are independently versioned runtime model artifacts, not resources embedded in `radixor`. Language-based APIs resolve deterministic defaults through `StemmerModelRegistry`; see [Stemmer Models](stemmer-models.md).

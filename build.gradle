@@ -1,4 +1,5 @@
 plugins {
+    id 'org.egothor.radixor.build-support'
     id 'java'
     id 'eclipse'
     id 'application'
@@ -7,9 +8,9 @@ plugins {
     id 'pmd'
     id 'jacoco'
     id 'info.solidsoft.pitest' version '1.19.0'
-    id 'me.champeau.jmh' version '0.7.2'
+    id 'me.champeau.jmh' version '0.7.3'
     id 'org.owasp.dependencycheck' version '12.2.1'
-    id 'org.cyclonedx.bom' version '3.2.4'
+    id 'org.cyclonedx.bom' version '3.3.0'
     id 'com.palantir.git-version' version '4.0.0'
 }
 
@@ -45,6 +46,10 @@ java {
     targetCompatibility = JavaVersion.VERSION_21
 }
 
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs.addAll(['-Xlint:deprecation', '-Xlint:unchecked'])
+}
+
 tasks.withType(AbstractArchiveTask).configureEach {
     preserveFileTimestamps = false
     reproducibleFileOrder = true
@@ -70,6 +75,11 @@ dependencyLocking {
 dependencies {
     jmhImplementation sourceSets.main.output
 
+    modelProjects().each { Project modelProject ->
+        testRuntimeOnly project(modelProject.path)
+        jmhRuntimeOnly project(modelProject.path)
+    }
+
     testImplementation platform(libs.junit.bom)
     testImplementation libs.junit.jupiter
     testRuntimeOnly libs.junit.platform.launcher
@@ -77,9 +87,42 @@ dependencies {
     testImplementation libs.mockito.core
     testImplementation libs.mockito.junit.jupiter
     testImplementation libs.jqwik
+    testImplementation gradleTestKit()
 
     mockitoAgent(libs.mockito.core) {
         transitive = false
+    }
+}
+
+def modelProjects() {
+    Properties topology = new Properties()
+    rootProject.file('models/model-projects.properties').withInputStream { InputStream input ->
+        topology.load(input)
+    }
+    return topology.stringPropertyNames().toList().sort().collect { String modelId ->
+        project(":models:${modelId}")
+    }
+}
+
+def defaultModelProjects() {
+    Properties topology = new Properties()
+    rootProject.file('models/model-projects.properties').withInputStream { InputStream input ->
+        topology.load(input)
+    }
+    return topology.stringPropertyNames().findAll { String modelId ->
+        topology.getProperty(modelId) == 'default'
+    }.sort().collect { String modelId -> project(":models:${modelId}") }
+}
+
+tasks.named('projects') {
+    actions.clear()
+    doLast {
+        logger.lifecycle('Root project \'{}\'', rootProject.name)
+        rootProject.allprojects.findAll { Project candidate -> candidate != rootProject }
+                .sort { Project left, Project right -> left.path <=> right.path }
+                .each { Project candidate -> logger.lifecycle('+--- Project \'{}\'', candidate.path) }
+        gradle.includedBuilds.toList().sort { left, right -> left.name <=> right.name }
+                .each { includedBuild -> logger.lifecycle('Included build \'{}\'', includedBuild.name) }
     }
 }
 
@@ -138,9 +181,10 @@ def splitTagExpression = { String tagsExpr ->
 }
 
 tasks.withType(Test).configureEach {
-    doFirst {
-        jvmArgs "-javaagent:${configurations.mockitoAgent.singleFile}"
-    }
+    final def mockitoAgentArguments = objects.newInstance(
+            org.egothor.radixor.MockitoAgentArgumentProvider)
+    mockitoAgentArguments.agentClasspath.from(configurations.mockitoAgent)
+    jvmArgumentProviders.add(mockitoAgentArguments)
 
     /*
      * Bundled dictionary integration tests compile and reload large real-world
@@ -154,6 +198,30 @@ tasks.withType(Test).configureEach {
         junitXml.required = true
         html.required = true
     }
+}
+
+tasks.named('test', Test) {
+    dependsOn('prepareModelConsumerTestRepository')
+    systemProperty('radixor.consumer.repository',
+            layout.buildDirectory.dir('model-consumer-repository').get().asFile.absolutePath)
+    systemProperty('radixor.core.version', version.toString())
+    systemProperty('radixor.catalog.version', project(':models:standard').version.toString())
+}
+
+tasks.register('modelDependencyResolutionTest', Test) {
+    group = 'verification'
+    description = 'Verifies that published model coordinates resolve from the generated consumer repository.'
+    dependsOn(tasks.named('prepareModelConsumerTestRepository'))
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    useJUnitPlatform()
+    filter {
+        includeTestsMatching('org.egothor.stemmer.ModelDependencyResolutionTest')
+    }
+    systemProperty('radixor.consumer.repository',
+            layout.buildDirectory.dir('model-consumer-repository').get().asFile.absolutePath)
+    systemProperty('radixor.core.version', version.toString())
+    systemProperty('radixor.catalog.version', project(':models:standard').version.toString())
 }
 
 def configureJUnitPlatformTags = { Test task, String includeTagsExpr, String excludeTagsExpr ->
@@ -173,9 +241,45 @@ def configureJUnitPlatformTags = { Test task, String includeTagsExpr, String exc
 tasks.named('test', Test) {
     final def requestedIncludes = splitTagExpression(cliIncludeTags)
     final boolean slowExplicitlyIncluded = requestedIncludes.contains('slow')
-    final String defaultExcludeTags = cliExcludeTags ?: (slowExplicitlyIncluded ? null : 'slow')
+    final String defaultExcludeTags = cliExcludeTags ?: (slowExplicitlyIncluded ? 'large-model' : 'slow,large-model')
     configureJUnitPlatformTags(it, cliIncludeTags, defaultExcludeTags)
     finalizedBy(tasks.named('jacocoTestReport'))
+}
+
+def largeModelMaxHeap = providers.gradleProperty('radixorLargeModelMaxHeap').orElse('6g')
+def runtimeModelId = providers.gradleProperty('modelId').orElse('pl-pl-polimorf')
+def runtimeModelClasspath = configurations.testRuntimeClasspath.incoming.artifactView {
+    componentFilter { componentIdentifier ->
+        if (!(componentIdentifier instanceof org.gradle.api.artifacts.component.ProjectComponentIdentifier)) {
+            return true
+        }
+        final String projectPath = componentIdentifier.projectPath
+        return !projectPath.startsWith(':models:') || projectPath == ":models:${runtimeModelId.get()}"
+    }
+}.files
+
+tasks.register('runtimeModelIntegrationTest', Test) {
+    group = 'verification'
+    description = 'Constructs one complete selected runtime model in an isolated, memory-sized JVM.'
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.output + sourceSets.main.output + sourceSets.jmh.output + runtimeModelClasspath
+    dependsOn(tasks.named('compileTestJava'))
+    useJUnitPlatform {
+        includeTags('large-model')
+    }
+    systemProperty('radixor.test.modelId', runtimeModelId.get())
+    minHeapSize = '1g'
+    maxHeapSize = largeModelMaxHeap.get()
+    maxParallelForks = 1
+    forkEvery = 1
+    reports {
+        junitXml.required = true
+        html.required = true
+    }
+    doFirst {
+        logger.lifecycle("Runtime model integration uses model '{}' with maximum heap {}.",
+                systemProperties.get('radixor.test.modelId'), maxHeapSize)
+    }
 }
 
 def configureTaggedTestProfile = { String taskName, String includeTagsExpr, String excludeTagsExpr = null,
@@ -188,10 +292,6 @@ def configureTaggedTestProfile = { String taskName, String includeTagsExpr, Stri
         testClassesDirs = sourceSets.test.output.classesDirs
         classpath = sourceSets.test.runtimeClasspath
         dependsOn(tasks.named('compileTestJava'))
-
-        doFirst {
-            jvmArgs "-javaagent:${configurations.mockitoAgent.singleFile}"
-        }
 
         if (testNameExcludePatterns != null && !testNameExcludePatterns.isBlank()) {
             filter {
@@ -253,10 +353,18 @@ configureTaggedTestProfile(
 configureTaggedTestProfile(
         'ciRelease',
         null,
-        'slow',
+        'slow,large-model',
         'Release-profile validation of all non-slow tests.',
         'org.egothor.stemmer.CompileIntegrationTest*,org.egothor.stemmer.StemmerPatchTrieLoaderTest$BundledDictionaryTests*'
 )
+
+tasks.named('ciRelease', Test) {
+    dependsOn('prepareModelConsumerTestRepository')
+    systemProperty('radixor.consumer.repository',
+            layout.buildDirectory.dir('model-consumer-repository').get().asFile.absolutePath)
+    systemProperty('radixor.core.version', version.toString())
+    systemProperty('radixor.catalog.version', project(':models:standard').version.toString())
+}
 
 configureTaggedTestProfile(
         'ciNightly',
@@ -333,23 +441,391 @@ tasks.named('check') {
     // no-default, only on-demand: dependsOn(tasks.named('dependencyCheckAnalyze'))
 }
 
-allprojects {
-    tasks.matching { it.name == 'cyclonedxDirectBom' }.configureEach {
-        includeConfigs = ['runtimeClasspath', 'compileClasspath']
-        skipConfigs = ['testRuntimeClasspath', 'testCompileClasspath', 'jmh.*', 'mockitoAgent']
-        includeBomSerialNumber = true
-        includeLicenseText = false
-        includeMetadataResolution = true
-        includeBuildSystem = true
+tasks.register('verifyCoreJarExcludesModels') {
+    group = 'verification'
+    description = 'Verifies that the root Radixor JAR contains no language dictionary bytes.'
+    dependsOn(tasks.named('jar'))
+    doLast {
+        File archive = tasks.named('jar', Jar).get().archiveFile.get().asFile
+        List<String> dictionaries = []
+        new java.util.zip.ZipFile(archive).withCloseable { zip ->
+            zip.entries().each { entry -> if (entry.name.endsWith('/stemmer.gz')) dictionaries.add(entry.name) }
+        }
+        if (!dictionaries.isEmpty()) {
+            throw new GradleException('The org.egothor:radixor JAR must not contain model data: ' + dictionaries)
+        }
     }
 }
 
-tasks.named('cyclonedxBom') {
+tasks.register('verifyJavaLicenseHeaders') {
+    group = 'verification'
+    description = 'Verifies deterministic license classification for every maintained Java source file.'
+    inputs.file(layout.projectDirectory.file('gradle/java-license-header.txt'))
+    inputs.files(fileTree('src/main/java') { include '**/*.java' })
+    inputs.files(fileTree('src/test/java') { include '**/*.java' })
+    inputs.files(fileTree('src/jmh/java') { include '**/*.java' })
+    outputs.file(layout.buildDirectory.file('reports/license/java-license-headers.txt'))
+    doLast {
+        String canonicalHeader = layout.projectDirectory.file('gradle/java-license-header.txt')
+                .asFile.getText('UTF-8')
+        File canonicalSource = file('src/main/java/org/egothor/stemmer/CaseProcessingMode.java')
+        if (!canonicalSource.getText('UTF-8').startsWith(canonicalHeader)) {
+            throw new GradleException('CaseProcessingMode.java does not begin with the canonical Radixor license template.')
+        }
+
+        List<File> maintainedSources = files(
+                fileTree('src/main/java') { include '**/*.java' },
+                fileTree('src/test/java') { include '**/*.java' },
+                fileTree('src/jmh/java') { include '**/*.java' })
+                .files.toList().sort { File left, File right ->
+                    relativePath(left) <=> relativePath(right)
+                }
+        List<String> classifications = []
+        List<String> failures = []
+        maintainedSources.each { File sourceFile ->
+            String relative = relativePath(sourceFile)
+            String content = sourceFile.getText('UTF-8')
+            if (content.startsWith(canonicalHeader)) {
+                classifications.add("RADIXOR_CANONICAL_HEADER ${relative}")
+                return
+            }
+
+            String leadingNotice = ''
+            if (content.startsWith('/*')) {
+                int closingIndex = content.indexOf('*/')
+                if (closingIndex >= 0) {
+                    leadingNotice = content.substring(0, closingIndex + 2)
+                }
+            } else if (content.startsWith('//')) {
+                leadingNotice = content.readLines().takeWhile { String line ->
+                    line.startsWith('//') || line.isBlank()
+                }.join('\n')
+            }
+            String remainder = content.substring(leadingNotice.length()).stripLeading()
+            boolean duplicateNotice = !leadingNotice.isEmpty()
+                    && (remainder.startsWith('/*') || remainder.startsWith('//'))
+            boolean historicalRadixor = leadingNotice =~ /(?s)Copyright \(C\) \d{4}(?:-\d{4})?, Leo Galambos/
+                    && leadingNotice.contains('All rights reserved.')
+                    && leadingNotice.contains('Redistribution and use in source and binary forms')
+                    && leadingNotice.contains('THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS')
+            boolean thirdPartyOrProvenance = leadingNotice =~ /(?is)(SPDX-License-Identifier|Licensed under|MIT License|Apache License|Permission is hereby granted|Original source|Adapted from|Ported from|Source:\s*\S)/
+            if (duplicateNotice) {
+                classifications.add("AMBIGUOUS_AUTHORSHIP ${relative}")
+                failures.add("${relative}: duplicate leading comment blocks")
+            } else if (historicalRadixor) {
+                classifications.add("RADIXOR_HISTORICAL_HEADER ${relative}")
+            } else if (thirdPartyOrProvenance) {
+                classifications.add("THIRD_PARTY_OR_PROVENANCE_HEADER ${relative}")
+            } else {
+                classifications.add("AMBIGUOUS_AUTHORSHIP ${relative}")
+                failures.add("${relative}: no recognized governing license or provenance header")
+            }
+        }
+
+        File report = layout.buildDirectory.file('reports/license/java-license-headers.txt').get().asFile
+        report.parentFile.mkdirs()
+        report.setText(classifications.join('\n') + '\n', 'UTF-8')
+        if (!failures.isEmpty()) {
+            throw new GradleException('Maintained Java license verification failed: '
+                    + failures.sort().join(', '))
+        }
+    }
+}
+
+tasks.register('verifyAllDefaultModels') {
+    group = 'verification'
+    description = 'Verifies that every language default model project is configured.'
+    dependsOn(defaultModelProjects().collect { Project modelProject ->
+        modelProject.path + ':verifyModelDescriptor'
+    })
+}
+
+tasks.register('verifyAllModels') {
+    group = 'verification'
+    description = 'Runs complete validation and artifact verification for every independently versioned model module.'
+    dependsOn(modelProjects().collect { Project modelProject -> modelProject.tasks.named('check') })
+}
+
+tasks.register('verifyJmhModelClasspath') {
+    group = 'verification'
+    description = 'Verifies that JMH receives each individual model JAR exactly once and embeds no dictionary.'
+    dependsOn(tasks.named('jmhJar'))
+    dependsOn(modelProjects().collect { Project modelProject -> modelProject.tasks.named('jar') })
+    outputs.file(layout.buildDirectory.file('reports/models/jmh-model-classpath.txt'))
+    doLast {
+        List<File> modelJars = configurations.jmhRuntimeClasspath.files.findAll { File dependency ->
+            dependency.name.startsWith('radixor-model-') && dependency.name.endsWith('.jar')
+        }.sort { File left, File right -> left.name <=> right.name }
+        List<String> expectedPrefixes = modelProjects().collect { Project modelProject ->
+            "radixor-model-${modelProject.name}-"
+        }
+        expectedPrefixes.each { String prefix ->
+            List<File> matches = modelJars.findAll { File dependency -> dependency.name.startsWith(prefix) }
+            if (matches.size() != 1) {
+                throw new GradleException("JMH must resolve exactly one model JAR with prefix ${prefix}; resolved ${matches}.")
+            }
+        }
+        if (modelJars.any { File dependency -> dependency.name.contains('benchmark-pack') }) {
+            throw new GradleException('JMH must not resolve a benchmark-pack artifact.')
+        }
+        File executable = tasks.named('jmhJar', Jar).get().archiveFile.get().asFile
+        if (!zipTree(executable).matching { include '**/stemmer.gz' }.isEmpty()) {
+            throw new GradleException('The JMH executable JAR must not embed model dictionaries.')
+        }
+        File report = layout.buildDirectory.file('reports/models/jmh-model-classpath.txt').get().asFile
+        report.parentFile.mkdirs()
+        report.setText(modelJars.collect { File dependency -> dependency.name }.join('\n') + '\n', 'UTF-8')
+    }
+}
+
+tasks.named('prepareModelConsumerTestRepository') {
+    coreVersion = version.toString()
+    catalogVersion = project(':models:standard').version.toString()
+    modelVersions = modelProjects().collectEntries { Project modelProject ->
+        final String modelVersion = providers.gradleProperty('modelReleaseVersion')
+                .orElse(providers.fileContents(modelProject.layout.projectDirectory.file('model-version.txt'))
+                        .asText.map(String::trim))
+                .get()
+        [(modelProject.name): modelVersion]
+    }
+    corePom = layout.file(tasks.named('generatePomFileForMavenJavaPublication').map { it.destination })
+    coreJar = tasks.named('jar', Jar).flatMap { it.archiveFile }
+    modelPoms.from(modelProjects().collect { Project modelProject ->
+        modelProject.tasks.named('generatePomFileForModelPublication').map { it.destination }
+    })
+    modelJars.from(modelProjects().collect { Project modelProject ->
+        modelProject.tasks.named('jar', Jar).flatMap { it.archiveFile }
+    })
+    standardPom = layout.file(project(':models:standard').tasks.named('generatePomFileForStandardPublication')
+            .map { it.destination })
+    bomPom = layout.file(project(':models:bom').tasks.named('generatePomFileForBomPublication')
+            .map { it.destination })
+    repositoryDirectory = layout.buildDirectory.dir('model-consumer-repository')
+}
+
+def cleanModelCatalogStaging = tasks.register('cleanModelCatalogStaging') {
+    group = 'publishing'
+    description = 'Cleans the isolated model catalog Maven staging repository.'
+    doLast {
+        project.delete(layout.buildDirectory.dir('model-catalog-staging-repository'))
+    }
+}
+
+gradle.projectsEvaluated {
+    project(':models:standard').tasks.named('publishStandardPublicationToCatalogStagingRepository') {
+        dependsOn(cleanModelCatalogStaging)
+    }
+    project(':models:bom').tasks.named('publishBomPublicationToCatalogStagingRepository') {
+        dependsOn(cleanModelCatalogStaging)
+    }
+}
+
+tasks.register('prepareModelCatalogReleaseCandidate') {
+    group = 'publishing'
+    description = 'Stages the POM-only standard aggregate and model BOM with Central checksums.'
+    dependsOn(project(':models:standard').tasks.named('check'))
+    dependsOn(project(':models:bom').tasks.named('check'))
+    dependsOn(':models:standard:publishStandardPublicationToCatalogStagingRepository')
+    dependsOn(':models:bom:publishBomPublicationToCatalogStagingRepository')
+    outputs.dir(layout.buildDirectory.dir('model-catalog-staging-repository'))
+    doLast {
+        File repository = layout.buildDirectory.dir('model-catalog-staging-repository').get().asFile
+        repository.eachFileRecurse { File artifact ->
+            if (artifact.isFile() && !['.md5', '.sha1', '.sha256', '.sha512'].any {
+                String extension -> artifact.name.endsWith(extension)
+            }) {
+                ['MD5': 'md5', 'SHA-1': 'sha1'].each { String algorithm, String extension ->
+                    String digest = java.security.MessageDigest.getInstance(algorithm)
+                            .digest(artifact.bytes).encodeHex().toString()
+                    new File(artifact.absolutePath + ".${extension}").setText(digest, 'US-ASCII')
+                }
+            }
+        }
+    }
+}
+
+tasks.register('modelCatalogCentralBundle', Zip) {
+    group = 'publishing'
+    description = 'Builds the local POM-only model catalog bundle without remote publication.'
+    dependsOn(tasks.named('prepareModelCatalogReleaseCandidate'))
+    from(layout.buildDirectory.dir('model-catalog-staging-repository')) {
+        exclude('**/maven-metadata*.xml*', '**/*.module*')
+    }
+    destinationDirectory = layout.buildDirectory.dir('model-catalog-release-candidate')
+    archiveFileName = "radixor-models-catalog-${project(':models:standard').version}-central-bundle.zip"
+    doFirst {
+        if (providers.environmentVariable('GITHUB_REF_TYPE').orNull == 'tag'
+                && (providers.environmentVariable('SIGNING_KEY').orNull?.isBlank() != false
+                || providers.environmentVariable('SIGNING_PASSWORD').orNull?.isBlank() != false)) {
+            throw new GradleException('A tagged model catalog release requires SIGNING_KEY and SIGNING_PASSWORD.')
+        }
+    }
+}
+
+tasks.register('verifyModelCatalogReleaseCandidate') {
+    group = 'verification'
+    description = 'Verifies that the local catalog bundle contains only two POM publications, signatures when configured, and checksums.'
+    dependsOn(tasks.named('modelCatalogCentralBundle'))
+    outputs.file(layout.buildDirectory.file('reports/models/catalog-release-candidate.txt'))
+    doLast {
+        File bundle = tasks.named('modelCatalogCentralBundle', Zip).get().archiveFile.get().asFile
+        List<String> entries = []
+        new java.util.zip.ZipFile(bundle).withCloseable { java.util.zip.ZipFile archive ->
+            archive.entries().each { java.util.zip.ZipEntry entry ->
+                if (!entry.directory) entries.add(entry.name)
+            }
+        }
+        entries.sort()
+        List<String> poms = entries.findAll { String entry -> entry.endsWith('.pom') }
+        if (poms.size() != 2 || entries.any { String entry ->
+            entry.endsWith('.jar') || entry.endsWith('/stemmer.gz') || entry.contains('benchmark-pack')
+        }) {
+            throw new GradleException('The model catalog bundle must contain only the standard and BOM POM publications.')
+        }
+        List<String> unsupported = entries.findAll { String entry ->
+            !(entry.endsWith('.pom') || entry.endsWith('.pom.md5') || entry.endsWith('.pom.sha1')
+                    || entry.endsWith('.pom.sha256') || entry.endsWith('.pom.sha512')
+                    || entry.endsWith('.pom.asc') || entry.endsWith('.pom.asc.md5')
+                    || entry.endsWith('.pom.asc.sha1') || entry.endsWith('.pom.asc.sha256')
+                    || entry.endsWith('.pom.asc.sha512'))
+        }
+        if (!unsupported.isEmpty()) {
+            throw new GradleException("The model catalog bundle contains unsupported files: ${unsupported}.")
+        }
+        poms.each { String pom ->
+            if (!entries.contains(pom + '.md5') || !entries.contains(pom + '.sha1')) {
+                throw new GradleException("The model catalog POM is missing Central checksums: ${pom}.")
+            }
+        }
+        File report = layout.buildDirectory.file('reports/models/catalog-release-candidate.txt').get().asFile
+        report.parentFile.mkdirs()
+        report.setText("Bundle: ${bundle.name}\nBytes: ${bundle.length()}\n" + entries.join('\n') + '\n', 'UTF-8')
+    }
+}
+
+tasks.register('verifyArtifactSizes') {
+    group = 'verification'
+    description = 'Reports artifact sizes and rejects dictionary bytes in core.'
+    dependsOn(tasks.named('verifyCoreJarExcludesModels'))
+    doLast {
+        File archive = tasks.named('jar', Jar).get().archiveFile.get().asFile
+        println('org.egothor:radixor:' + version + ' ' + archive.length() + ' bytes')
+    }
+}
+
+tasks.named('check') {
+    dependsOn(tasks.named('verifyCoreJarExcludesModels'))
+    dependsOn(tasks.named('verifyAllDefaultModels'))
+    dependsOn(tasks.named('verifyJmhModelClasspath'))
+    dependsOn(tasks.named('verifyJavaLicenseHeaders'))
+}
+
+def modelCatalogText = providers.provider {
+    StringBuilder output = new StringBuilder()
+    output.append('| Model ID | Language | Default | Coordinates | Version | Source | Repository | Source version | Revision | Revision status | License | Attribution | SHA-256 | Bytes |\n')
+    output.append('|---|---|---:|---|---:|---|---|---|---|---|---|---|---|---:|\n')
+    modelProjects().each { Project modelProject ->
+        String script = modelProject.file('build.gradle').getText('UTF-8')
+        def value = { String key ->
+            def matcher = script =~ /(?m)^\s*${key}\s*=\s*(?:'([^']+)'|([^\s]+))\s*$/
+            if (!matcher.find()) return 'unavailable'
+            return matcher.group(1) != null ? matcher.group(1) : matcher.group(2)
+        }
+        File input = modelProject.file('src/modelInput/stemmer.gz')
+        String checksum = java.security.MessageDigest.getInstance('SHA-256').digest(input.bytes).encodeHex().toString()
+        output.append('| ').append(modelProject.name)
+                .append(' | ').append(value('language'))
+                .append(' | ').append(value('defaultModel'))
+                .append(' | org.egothor:radixor-model-').append(modelProject.name)
+                .append(' | ').append(modelProject.file('model-version.txt').text.trim())
+                .append(' | ').append(value('sourceName'))
+                .append(' | ').append(value('sourceRepository'))
+                .append(' | ').append(value('sourceVersion'))
+                .append(' | ').append(value('sourceRevision'))
+                .append(' | ').append(value('sourceRevisionStatus'))
+                .append(' | ').append(value('sourceLicense'))
+                .append(' | ').append(value('sourceAttribution'))
+                .append(' | ').append(checksum)
+                .append(' | ').append(input.length()).append(' |\n')
+    }
+    return output.toString()
+}
+
+tasks.register('generateModelCatalogDocumentation') {
+    group = 'documentation'
+    description = 'Generates the deterministic model catalog in the build documentation staging tree.'
+    outputs.file(layout.buildDirectory.file('mkdocs-source/stemmer-model-catalog.md'))
+    doLast {
+        File catalog = layout.buildDirectory.file('mkdocs-source/stemmer-model-catalog.md').get().asFile
+        catalog.parentFile.mkdirs()
+        catalog.setText('# Published Stemmer Model Catalog\n\n' + modelCatalogText.get(), 'UTF-8')
+    }
+}
+
+tasks.register('prepareMkDocsSource', Sync) {
+    group = 'documentation'
+    description = 'Stages maintained documentation, generated catalog, and MkDocs configuration under build/.'
+    dependsOn(modelProjects().collect { Project modelProject -> modelProject.path + ':verifyModelDescriptor' })
+    into(layout.buildDirectory.dir('mkdocs-source'))
+    from(layout.projectDirectory.dir('docs'))
+    doLast {
+        File catalog = layout.buildDirectory.file('mkdocs-source/stemmer-model-catalog.md').get().asFile
+        catalog.setText('# Published Stemmer Model Catalog\n\n' + modelCatalogText.get(), 'UTF-8')
+        File buildsPage = layout.buildDirectory.file('mkdocs-source/builds.md').get().asFile
+        buildsPage.setText('# Historical Builds\n\nThe Pages publication workflow replaces this staging placeholder with the retained build index.\n', 'UTF-8')
+        File configuration = layout.buildDirectory.file('mkdocs/mkdocs.yml').get().asFile
+        configuration.parentFile.mkdirs()
+        configuration.setText(layout.projectDirectory.file('mkdocs.yml').asFile.getText('UTF-8')
+                + '\ndocs_dir: ../mkdocs-source\nsite_dir: ../mkdocs-site\n', 'UTF-8')
+    }
+}
+
+tasks.register('verifyModelCatalogDocumentation') {
+    group = 'verification'
+    description = 'Validates model metadata and the generated build-directory MkDocs catalog.'
+    dependsOn(tasks.named('prepareMkDocsSource'))
+    dependsOn(tasks.named('verifyAllDefaultModels'))
+    doLast {
+        File catalog = layout.buildDirectory.file('mkdocs-source/stemmer-model-catalog.md').get().asFile
+        String expected = '# Published Stemmer Model Catalog\n\n' + modelCatalogText.get()
+        if (!catalog.isFile() || catalog.getText('UTF-8') != expected) {
+            throw new GradleException('The staged model catalog is missing or nondeterministic.')
+        }
+        List<String> identifiers = modelProjects().collect { Project modelProject -> modelProject.name }
+        if (identifiers != identifiers.sort()) {
+            throw new GradleException('Published model projects are not in deterministic model-ID order.')
+        }
+        identifiers.each { String identifier ->
+            if (!expected.contains('org.egothor:radixor-model-' + identifier)) {
+                throw new GradleException('The staged model catalog omits published model ' + identifier + '.')
+            }
+        }
+        if (!layout.buildDirectory.file('mkdocs/mkdocs.yml').get().asFile.isFile()) {
+            throw new GradleException('The staged MkDocs configuration is missing.')
+        }
+    }
+}
+
+tasks.named('check') {
+    dependsOn(tasks.named('verifyModelCatalogDocumentation'))
+}
+
+tasks.named('cyclonedxDirectBom') {
+    includeConfigs = ['runtimeClasspath', 'compileClasspath']
+    skipConfigs = ['testRuntimeClasspath', 'testCompileClasspath', 'jmh.*', 'mockitoAgent']
     includeBomSerialNumber = true
     includeLicenseText = false
+    includeMetadataResolution = true
     includeBuildSystem = true
     jsonOutput.set(sbomReportsDirectory.map { it.file('radixor-sbom.json') })
     xmlOutput.set(sbomReportsDirectory.map { it.file('radixor-sbom.xml') })
+}
+
+subprojects {
+    tasks.matching { Task candidate -> candidate.name == 'cyclonedxDirectBom' }.configureEach {
+        enabled = false
+        description = 'Disabled because the root project exclusively owns CycloneDX SBOM generation.'
+    }
 }
 
 pitest {
@@ -461,6 +937,13 @@ tasks.named('jmh') {
     description = 'Runs JMH benchmarks for the Radixor algorithmic core and external stemmer comparison suites.'
 }
 
+tasks.named('jmhJar', Jar) {
+    exclude 'META-INF/radixor/models.index'
+    exclude 'META-INF/radixor/models/**'
+    exclude 'org/egothor/stemmer/models/**'
+    exclude 'META-INF/LICENSES/**'
+}
+
 apply from: 'gradle/lucene-benchmarks.gradle'
 
 tasks.register('regressionArtifactGenerator', JavaExec) {
@@ -486,13 +969,14 @@ tasks.register('regressionArtifactGenerator', JavaExec) {
 
 tasks.register('stemmingQuality', JavaExec) {
     group = 'verification'
-    description = 'Evaluates pairwise over-stemming and under-stemming against bundled dictionary groups.'
+    description = 'Evaluates pairwise over-stemming and under-stemming against registered model dictionary groups.'
     dependsOn(tasks.named('testClasses'))
     dependsOn(tasks.named('jmhClasses'))
+    dependsOn(tasks.named('prepareBenchmarkModelInputs'))
     classpath = files(sourceSets.test.runtimeClasspath, configurations.stemmingQualityJmhRuntime)
     mainClass = 'org.egothor.stemmer.benchmark.quality.StemmingQualityApplication'
     args layout.buildDirectory.dir('reports/stemming-quality').get().asFile.absolutePath,
-            layout.projectDirectory.dir('src/main/resources').asFile.absolutePath,
+            layout.buildDirectory.dir('generated/benchmark-model-inputs').get().asFile.absolutePath,
             providers.gradleProperty('stemmingQualityLanguage').getOrElse(''),
             providers.gradleProperty('stemmingQualityStemmer').getOrElse(''),
             providers.gradleProperty('stemmingQualityMode').getOrElse(''),
@@ -501,6 +985,20 @@ tasks.register('stemmingQuality', JavaExec) {
             providers.gradleProperty('stemmingQualityAudit').getOrElse('false'),
             providers.gradleProperty('stemmingQualityAuditLimit').getOrElse('25')
     maxHeapSize = '6g'
+}
+
+tasks.register('prepareBenchmarkModelInputs', Sync) {
+    group = 'verification'
+    description = 'Prepares default model inputs for JMH and quality evaluation without changing source data.'
+    into(layout.buildDirectory.dir('generated/benchmark-model-inputs'))
+    defaultModelProjects().each { Project modelProject ->
+        String languageDirectory = modelProject.name == 'pl-pl-unimorph'
+                ? 'pl_pl'
+                : modelProject.name.replace('-default', '').replace('-', '_')
+        from(modelProject.file('src/modelInput/stemmer.gz')) {
+            into(languageDirectory)
+        }
+    }
 }
 
 tasks.register('publishStemmingQualityDocumentation', JavaExec) {

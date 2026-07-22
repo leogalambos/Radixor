@@ -1,0 +1,147 @@
+name: Model Release
+
+on:
+  push:
+    tags:
+      - 'model/*@*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Model tag to validate without publishing
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: model-release-${{ github.event_name == 'push' && github.ref_name || inputs.tag }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    name: Validate selected model
+    runs-on: ubuntu-latest
+    outputs:
+      model_id: ${{ steps.release.outputs.MODEL_ID }}
+      model_version: ${{ steps.release.outputs.MODEL_VERSION }}
+      gradle_project: ${{ steps.release.outputs.GRADLE_PROJECT }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate Gradle wrapper
+        uses: gradle/actions/wrapper-validation@v4
+
+      - name: Set up Temurin JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up Gradle caching and instrumentation
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Verify reproducibility inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f gradle.lockfile
+          test -f gradle.properties
+          test -f gradle/verification-metadata.xml
+
+      - name: Validate and select exactly one model
+        id: release
+        shell: bash
+        env:
+          REQUESTED_TAG: ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+
+          if [[ "${GITHUB_EVENT_NAME}" == "push" ]]; then
+            tag="${GITHUB_REF_NAME}"
+          else
+            tag="${REQUESTED_TAG}"
+          fi
+
+          ./tools/parse-model-release-tag.sh "${tag}" . >> "${GITHUB_OUTPUT}"
+          git merge-base --is-ancestor "${GITHUB_SHA}" origin/main
+
+      - name: Validate one model
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          project="${{ steps.release.outputs.GRADLE_PROJECT }}"
+          version="${{ steps.release.outputs.MODEL_VERSION }}"
+
+          ./gradlew --no-daemon "${project}:clean"
+          ./gradlew --no-daemon "${project}:check"
+          ./gradlew --no-daemon \
+            "${project}:validateModelRelease" \
+            -PmodelReleaseVersion="${version}"
+
+  publish:
+    name: Publish selected model
+    if: github.event_name == 'push'
+    needs: validate
+    runs-on: ubuntu-latest
+    environment: maven-central
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate Gradle wrapper
+        uses: gradle/actions/wrapper-validation@v4
+
+      - name: Set up Temurin JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up Gradle caching and instrumentation
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Verify reproducibility inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f gradle.lockfile
+          test -f gradle.properties
+          test -f gradle/verification-metadata.xml
+
+      - name: Build signed model release candidate
+        shell: bash
+        env:
+          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+          SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
+        run: |
+          set -euo pipefail
+
+          project="${{ needs.validate.outputs.gradle_project }}"
+          version="${{ needs.validate.outputs.model_version }}"
+
+          ./gradlew --no-daemon \
+            "${project}:packageModelReleaseCandidate" \
+            -PmodelReleaseVersion="${version}"
+
+      - name: Publish one model
+        shell: bash
+        env:
+          CENTRAL_BEARER_TOKEN: ${{ secrets.CENTRAL_BEARER_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          model_id="${{ needs.validate.outputs.model_id }}"
+          version="${{ needs.validate.outputs.model_version }}"
+
+          ./tools/publish-central-bundle.sh \
+            "models/${model_id}/build/model-release-candidate/central-bundle.zip" \
+            "org.egothor:radixor-model-${model_id}:${version}"

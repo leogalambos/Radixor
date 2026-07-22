@@ -10,6 +10,8 @@ on:
       - 'src/main/**'
       - 'src/test/**'
       - 'src/jmh/**'
+      - 'models/**'
+      - 'build-logic/**'
       - 'build.gradle'
       - 'gradle.properties'
       - 'gradle.lockfile'
@@ -70,7 +72,7 @@ jobs:
           test -f gradle/verification-metadata.xml
 
       - name: Build reports for publication
-        run: ./gradlew --no-daemon clean ciRelease pmdMain javadoc jacocoCiReleaseReport pitest jmh -Pjmh.includes='.*EnglishStemmerComparisonBenchmark.*' cyclonedxBom
+        run: ./gradlew --no-daemon clean ciRelease pmdMain javadoc jacocoCiReleaseReport pitest jmh -Pjmh.includes='.*EnglishStemmerComparisonBenchmark.*' :cyclonedxDirectBom
 
       - name: Prepare gh-pages worktree
         shell: bash
@@ -87,6 +89,9 @@ jobs:
             git rm -rf . > /dev/null 2>&1 || true
             cd ..
           fi
+
+      - name: Prepare staged MkDocs source
+        run: ./gradlew --no-daemon prepareMkDocsSource verifyModelCatalogDocumentation
 
       - name: Stage published reports
         shell: bash
@@ -246,7 +251,7 @@ jobs:
 
           cp "${RUN_DIR}/index.html" "${LATEST_DIR}/index.html"
 
-          cat > docs/reports.md <<EOF
+          cat > build/mkdocs-source/reports.md <<EOF
           # CI Reports
 
           Radixor publishes durable CI artifacts to GitHub Pages on every qualifying run of \`.github/workflows/pages.yml\`.
@@ -314,19 +319,18 @@ jobs:
               | while IFS=$'\t' read -r _ts build published; do
                   echo "| ${build} | ${published} | [Open](../builds/${build}/) |"
                 done
-          } > docs/builds.md
+          } > build/mkdocs-source/builds.md
 
       - name: Build documentation site (MkDocs Material)
         shell: bash
         run: |
           set -euo pipefail
-          mkdocs build --strict --site-dir .mkdocs-site
-          rsync -a --delete --exclude '.git' --exclude '.git/' --exclude 'builds/' .mkdocs-site/ .gh-pages/
+          mkdocs build --strict --config-file build/mkdocs/mkdocs.yml
+          rsync -a --delete --exclude '.git' --exclude '.git/' --exclude 'builds/' build/mkdocs-site/ .gh-pages/
           mkdir -p .gh-pages/builds
-          cp .mkdocs-site/builds/index.html .gh-pages/builds/index.html
+          cp build/mkdocs-site/builds/index.html .gh-pages/builds/index.html
           cat > .gh-pages/.nojekyll <<EOF
           EOF
-          rm -rf .mkdocs-site
 
       - name: Commit and push gh-pages
         shell: bash

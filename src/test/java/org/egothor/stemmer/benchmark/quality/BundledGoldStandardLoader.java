@@ -1,3 +1,33 @@
+/*******************************************************************************
+ * Copyright (C) 2026, Leo Galambos
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * 3. Neither the name of the copyright holder nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ ******************************************************************************/
 package org.egothor.stemmer.benchmark.quality;
 
 import java.io.BufferedReader;
@@ -15,7 +45,7 @@ import org.egothor.stemmer.CaseProcessingMode;
 import org.egothor.stemmer.StemmerDictionaryParser;
 import org.egothor.stemmer.StemmerPatchTrieLoader.Language;
 
-/** Loads gold-standard groups from authoritative bundled dictionary resources. */
+/** Loads gold-standard groups from authoritative registered model resources. */
 public final class BundledGoldStandardLoader {
     /** Utility class. */
     private BundledGoldStandardLoader() { throw new AssertionError("No instances."); }
@@ -28,7 +58,8 @@ public final class BundledGoldStandardLoader {
      */
     public static List<GoldStandardGroup> load(final Language language) throws IOException {
         Objects.requireNonNull(language, "language");
-        final String resource = language.resourcePath();
+        final String resource = org.egothor.stemmer.StemmerModelRegistry.fromContextClassLoader()
+                .requireDefault(language).resource();
         final List<GoldStandardGroup> groups = new ArrayList<>();
         try (InputStream raw = openResource(language, resource); InputStream gzip = new GZIPInputStream(raw);
                 BufferedReader reader = new BufferedReader(new InputStreamReader(gzip, StandardCharsets.UTF_8))) {

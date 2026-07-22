@@ -444,6 +444,7 @@ public class StemmerComparisonBenchmarkQuality {
          * @return quality evaluator
          * @throws IOException if stemmer resources cannot be loaded
          */
+        @SuppressWarnings("deprecation") // Lucene retains SpanishMinimalStemFilter only for compatibility benchmarking.
         CandidateStemmer createStemmer() throws IOException {
             if (name().endsWith("_RADIXOR")) {
                 return radixor(createRadixorStemmer(this.radixorLanguage));

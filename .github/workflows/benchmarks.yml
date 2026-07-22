@@ -10,6 +10,8 @@ on:
     paths:
       - 'src/main/**'
       - 'src/jmh/**'
+      - 'models/**'
+      - 'build-logic/**'
       - 'build.gradle'
       - 'gradle.properties'
       - 'gradle.lockfile'

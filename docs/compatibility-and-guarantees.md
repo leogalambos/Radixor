@@ -37,7 +37,7 @@ This API is expected to remain supportable across future versions. The preferred
 
 Examples of likely additive evolution include:
 
-- additional bundled language resources,
+- additional independently versioned language models,
 - fuller support for diacritics or native-script language resources,
 - expanded documentation and operational tooling,
 - new convenience methods that do not break existing code.
@@ -83,6 +83,8 @@ Compiled `FrequencyTrie` instances are immutable and thread-safe for concurrent 
 
 Serialized patch-command strings remain the stable stored representation used by textual dictionaries and binary artifacts. Runtime stemming should use `CompiledPatchCommand` values produced by `StemmerPatchTrieLoader.loadCompiled(...)`, `StemmerPatchTrieLoader.loadBinaryCompiled(...)`, or `PatchCommandEncoder.compile(...)`.
 
+Language-default, descriptor, and stable model-ID `loadCompiled` entry points share the same compiled-value conversion. Explicit model IDs never fall back to a language default. Model loading is not cached, and construction-memory requirements are model-dependent; the unusually large PoliMorf input is verified separately with a 6 GiB maximum heap.
+
 The historical `PatchCommandEncoder.apply(...)` and String-based `applyTo(...)` overloads remain compatibility APIs during the 2.x transition, but they are deprecated because they reparse the patch-command string on each application. See [Migration and Backward Compatibility](migration-and-backward-compatibility.md) for old and new code examples.
 
 Compiled buffer-oriented `CompiledPatchCommand.applyTo(...)` overloads use caller-owned output storage. They do not retain output arrays and report insufficient capacity with `CompiledPatchCommand.APPLY_INSUFFICIENT_CAPACITY`.
@@ -110,7 +112,7 @@ The following kinds of change are generally compatible with the project’s dire
 
 - improved internal data structures,
 - changes inside `org.egothor.stemmer.trie`,
-- expanded bundled dictionaries,
+- expanded model dictionaries,
 - additional supported languages,
 - improved native-script handling,
 - better benchmarks, tests, and reports,
@@ -122,11 +124,11 @@ The project should be able to improve substantially while keeping the main user-
 
 Some areas should be treated as stable in intent but still approached carefully when changed.
 
-### Bundled dictionary contents
+### Independently versioned model contents
 
-Bundled resources are versioned project data, not immutable language standards. Their contents may improve over time.
+Model resources are independently versioned project data, not immutable language standards. Their contents may improve over time.
 
-That means stemming outcomes can legitimately change when bundled dictionaries are refined or expanded. Such changes are compatible with the project’s direction, but they should still be understood as behavior changes at the lexical-resource level.
+That means stemming outcomes can legitimately change when a model artifact is updated. Such changes are separate from core compatibility and should be reviewed as lexical-resource behavior changes.
 
 ### Binary format evolution
 
@@ -159,7 +161,7 @@ Users should avoid depending on:
 - internal trie package details,
 - undocumented internal classes or intermediate representations,
 - incidental internal ordering outside documented lookup semantics,
-- assumptions that bundled dictionary contents will never evolve,
+- assumptions that a model's dictionary contents will never evolve across model versions,
 - assumptions that internal binary-format details are frozen forever.
 
 If a behavior is important to your integration, it should ideally be documented at the public API or project-documentation level rather than inferred from internal implementation details.

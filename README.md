@@ -22,6 +22,40 @@ It is particularly well suited to systems that need stemming which is:
 
 It also retains the operational advantages of a compiled artifact model: predictable runtime behavior, direct binary loading, and clear separation between preparation-time compilation and live request processing.
 
+## Add Radixor and a model
+
+The core artifact contains the algorithm and registry, but no language dictionary. Add either one minimal model or the optional standard default pack:
+
+```groovy
+dependencies {
+    implementation 'org.egothor:radixor:<radixor-version>'
+    runtimeOnly 'org.egothor:radixor-model-pl-pl-unimorph:1.0.0'
+    // Or: runtimeOnly 'org.egothor:radixor-models-standard:<catalog-version>'
+}
+```
+
+```java
+final FrequencyTrie<CompiledPatchCommand> polish =
+        StemmerPatchTrieLoader.loadCompiled(
+                StemmerPatchTrieLoader.Language.PL_PL,
+                true,
+                ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS);
+```
+
+`Language.PL_PL` selects the documented default `pl-pl-unimorph`. The optional `pl-pl-polimorf` model requires its own runtime artifact and explicit selection; adding it does not change the default. See [Model Selection and Loading](docs/model-selection-and-loading.md) for complete executable examples and [Stemmer Models](docs/stemmer-models.md) for artifact concepts.
+
+`radixor-models-standard` is a POM-only runtime aggregate: it brings the 20 default model JARs transitively but publishes no empty aggregate JAR. `radixor-models-bom` is the separate POM-only Maven dependency BOM for version management; importing it alone adds no model. The root CycloneDX SBOM report is unrelated to that dependency BOM.
+
+```java
+final FrequencyTrie<CompiledPatchCommand> polimorf =
+        StemmerPatchTrieLoader.loadCompiled(
+                "pl-pl-polimorf",
+                true,
+                ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS);
+```
+
+Complete PoliMorf construction is supported but unusually memory-intensive: the dedicated verification task uses a 6 GiB maximum heap. Applications should load and retain the resulting immutable trie during startup rather than rebuilding it per request.
+
 ## Table of Contents
 
 - [Why Radixor](#why-radixor)
@@ -138,7 +172,7 @@ Compared with the historical baseline, Radixor emphasizes:
 - Compressed binary persistence
 - Programmatic compilation and loading
 - CLI compilation tool
-- Bundled language resources
+- Independently versioned language-model resources
 - Support for extending compiled stemmer tables
 - Reproducible and auditable engineering posture
 
@@ -149,16 +183,16 @@ The repository keeps the front page concise and places detailed documentation un
 ### Getting Started
 
 - [Fast Track](docs/fast-track.md)  
-  The shortest path from adding the dependency to getting a first stem from a bundled dictionary.
+  The shortest path from adding core plus a model artifact to getting a first stem.
 
 - [Quick Start](docs/quick-start.md)  
   A broader developer walkthrough covering loading options, querying, extension, persistence, and metadata.
 
 - [Integration Deep Dive](docs/integration-deep-dive.md)  
-  Dependency setup, bundled dictionary selection, production lifecycle, search-pipeline guidance, and operational checklist.
+  Dependency setup, model selection, production lifecycle, search-pipeline guidance, and operational checklist.
 
 - [Built-in Languages](docs/built-in-languages.md)  
-  Overview of bundled language resources such as `US_UK`.
+  Language enum values, default model IDs, artifacts, and optional variants.
 
 - [Dictionary Format](docs/dictionary-format.md)  
   How to write and normalize stemming dictionaries.
@@ -170,6 +204,9 @@ The repository keeps the front page concise and places detailed documentation un
 
 - [Programmatic Usage Overview](docs/programmatic-usage.md)  
   Entry point to the Java API and the overall usage model.
+
+- [Model Selection and Loading](docs/model-selection-and-loading.md)
+  Default, explicit, dual-model, ClassLoader, dependency, and troubleshooting examples.
 
 - [Loading and Building Stemmers](docs/programmatic-loading-and-building.md)  
   Loading bundled resources, textual dictionaries, binary artifacts, and direct builder usage.
@@ -245,3 +282,19 @@ The goal is to keep the Egothor/Stempel lineage useful as a serious contemporary
 ## Historical note
 
 Egothor showed that stemming could be both algorithmic and compact. Stempel proved that the approach was practical enough to survive inside major search ecosystems. Radixor continues that tradition with a modernized implementation focused on production use, maintainability, and controlled evolution.
+# Radixor 4 artifact architecture
+
+The established `org.egothor:radixor` artifact remains the algorithmic core and contains no language-model data. From version 4 onward, applications explicitly add individual `org.egothor:radixor-model-<model-id>` runtime artifacts or the optional metadata-only `org.egothor:radixor-models-standard` aggregate. Polish defaults to `pl-pl-unimorph`; `pl-pl-polimorf` is opt-in. See [Stemmer Models](docs/stemmer-models.md) and [Migration and Backward Compatibility](docs/migration-and-backward-compatibility.md).
+
+Radixor Java software remains licensed under BSD-3-Clause. UniMorph-derived model data is
+distributed under CC BY-SA 3.0, with upstream attribution, the canonical license URI, Radixor
+transformations, and Leo Galambos's limited contribution notice carried by each model artifact.
+PoliMorf model data retains its separate BSD-2-Clause license. There is no project-wide CC license
+directory because the root artifact contains no model data.
+
+```groovy
+dependencies {
+    implementation 'org.egothor:radixor:4.0.0'
+    runtimeOnly 'org.egothor:radixor-model-pl-pl-polimorf:1.0.0'
+}
+```

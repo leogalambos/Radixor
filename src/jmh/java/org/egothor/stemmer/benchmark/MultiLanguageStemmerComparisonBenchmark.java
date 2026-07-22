@@ -95,7 +95,7 @@ import morfologik.stemming.WordData;
  * Each benchmark operation processes the same changed-token dictionary corpus
  * for one language, repeated only when the changed-token resource contains
  * fewer than 5,000 token fields. The token corpus is built during trial setup
- * from Radixor's bundled dictionary for that same language. Lucene TokenFilter
+ * from Radixor's registered default-model dictionary for that same language. Lucene TokenFilter
  * methods include TokenStream and attribute overhead; direct Stempel measures
  * the public table-driven stemmer API without TokenFilter overhead.
  * </p>

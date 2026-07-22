@@ -2,9 +2,9 @@
 
 This document explains how to acquire a compiled Radixor stemmer in Java.
 
-## Load a bundled language dictionary
+## Load a registered default model
 
-Bundled language resources are simple to use and compile directly into a `FrequencyTrie<CompiledPatchCommand>` during loading.
+Language-oriented entry points resolve a registered default model and compile its GZip textual dictionary into a `FrequencyTrie<CompiledPatchCommand>`. The corresponding model JAR must be on the runtime classpath; the core contains no dictionary.
 
 ```java
 import java.io.IOException;
@@ -14,9 +14,9 @@ import org.egothor.stemmer.FrequencyTrie;
 import org.egothor.stemmer.ReductionMode;
 import org.egothor.stemmer.StemmerPatchTrieLoader;
 
-public final class BundledLanguageExample {
+public final class RegisteredLanguageModelExample {
 
-    private BundledLanguageExample() {
+    private RegisteredLanguageModelExample() {
         throw new AssertionError("No instances.");
     }
 
@@ -31,14 +31,16 @@ public final class BundledLanguageExample {
 
 The `storeOriginal` flag controls whether the canonical stem is inserted as a no-op patch entry for the stem itself.
 
-Bundled `loadCompiled(...)` entry points build the runtime trie with the same contracted
+Language-oriented `loadCompiled(...)` entry points build the runtime trie with the same contracted
 representation used by the published benchmarks. During compilation, uniform preferred-command
 subtrees are collapsed into accepting leaves, so lookup can stop before consuming the entire input
 when the remaining characters cannot change the selected patch command.
 
 ## Load a textual dictionary
 
-Loading from a dictionary file follows the same preparation model as bundled resources, but the source comes from your own file or path. The input may be plain UTF-8 text or GZip-compressed UTF-8 text; the loader detects GZip data from the stream header. The textual format is tab-separated values, meaning that columns are separated by the tab character. Each non-empty logical line starts with the stem column and may contain zero or more variant columns. Input case normalization is controlled by `CaseProcessingMode` (default: `LOWERCASE_WITH_LOCALE_ROOT`), trailing remarks introduced by `#` or `//` are ignored, and dictionary items containing embedded whitespace are currently ignored with warning-level diagnostics.
+Loading from a dictionary file follows the same trie preparation model as registered model resources, but the source comes from your own file or path and bypasses registry metadata. The input may be plain UTF-8 text or GZip-compressed UTF-8 text; the loader detects GZip data from the stream header. The textual format is tab-separated values, meaning that columns are separated by the tab character. Each non-empty logical line starts with the stem column and may contain zero or more variant columns. Input case normalization is controlled by `CaseProcessingMode` (default: `LOWERCASE_WITH_LOCALE_ROOT`), trailing remarks introduced by `#` or `//` are ignored, and dictionary items containing embedded whitespace are currently ignored with warning-level diagnostics.
+
+For explicit model IDs, multiple variants, and ClassLoader control, see [Model Selection and Loading](model-selection-and-loading.md).
 
 ```java
 import java.io.IOException;

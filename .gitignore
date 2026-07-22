@@ -95,19 +95,17 @@ local.properties
 .jqwik-database
 
 ##---------------------------------------------------------------------------------------- Gradle
-.gradle
+.gradle/
 **/build/
-!src/**/build/
+
+# MkDocs generated site
+/site/
 
 # Ignore Gradle GUI config
 gradle-app.setting
 
-# Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
+# Avoid ignoring the Gradle Wrapper JAR
 !gradle-wrapper.jar
 
-# Cache of project
+# Gradle task-name cache
 .gradletasknamecache
-
-
-# Ignore Gradle build output directory
-build

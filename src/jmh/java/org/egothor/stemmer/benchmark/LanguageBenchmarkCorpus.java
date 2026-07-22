@@ -332,7 +332,8 @@ final class LanguageBenchmarkCorpus {
      */
     private static List<Entry> readCandidates(final StemmerPatchTrieLoader.Language language, final int maximumTokenCount)
             throws IOException {
-        final String resourcePath = language.resourcePath();
+        final String resourcePath = org.egothor.stemmer.StemmerModelRegistry.fromContextClassLoader()
+                .requireDefault(language).resource();
         final InputStream resource = StemmerPatchTrieLoader.class.getClassLoader().getResourceAsStream(resourcePath);
         if (resource == null) {
             throw new IllegalStateException("Missing bundled benchmark resource " + resourcePath + ".");

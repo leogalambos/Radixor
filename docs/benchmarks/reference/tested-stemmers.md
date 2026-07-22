@@ -4,7 +4,7 @@ The JMH adapter registry is authoritative for evaluated implementations and lang
 
 | Family or implementation | Upstream / attribution | Tested version or revision | Evaluated scope | Output capability and adapter behaviour | Interpretation notes |
 | --- | --- | --- | --- | --- | --- |
-| Radixor | Egothor / Radixor project | Current repository revision; exact revision was not embedded in the quality CSV | All 20 reconciled Radixor dictionary languages; 19 have benchmark pages | Deterministic preferred patch via `get`; ranked distinct alternatives via `getAll`; primary is always included | Dictionary-derived compiled patch trie. Quality depends on dictionary coverage and annotation. |
+| Radixor | Egothor / Radixor project | Current repository revision; exact revision was not embedded in the quality CSV | All 20 reconciled default model languages; 19 have benchmark pages | Deterministic preferred patch via `get`; ranked distinct alternatives via `getAll`; primary is always included | Model-dictionary-derived compiled patch trie. Default rows use each language's stable default model ID. |
 | Apache Lucene language stem filters | Apache Lucene project | 10.5.0 | Adapter-declared language-specific subsets | TokenFilter lifecycle and language normalization match JMH; normally single-output | Light, minimal, possessive, and language stem filters deliberately implement different scopes. Narrow scope is not a defect. |
 | Apache Lucene SnowballFilter | Apache Lucene project using Snowball algorithms | Lucene 10.5.0 | Snowball-supported subset of Radixor languages | Single primary token emitted through the Lucene TokenFilter path | Includes TokenStream overhead and required normalization. |
 | Official Snowball Java | Snowball project | Repository preparation downloads the configured upstream Java distribution; an immutable revision was not recorded in the quality CSV | Same-language adapter subset | Direct generated Java API; single output | Rule-based suffix algorithms provide broad baselines rather than dictionary-root guarantees. |
@@ -24,6 +24,7 @@ Candidate sets are non-null, non-empty, contain the deterministic primary output
 
 ## Coverage fairness
 
-Radixor coverage is derived independently from its resources and language enumeration. Third-party coverage is the intersection of that universe with actual adapter support. Absence therefore means “not supported or not configured for this language,” not “zero quality.” Consult each language page for the exact evaluated rows.
+Radixor coverage is derived from registered default descriptors reconciled with language enumeration. Third-party coverage is the intersection of that universe with actual adapter support. Absence therefore means “not supported or not configured for this language,” not “zero quality.” Optional `pl-pl-polimorf` is a separate model row and does not replace default `pl-pl-unimorph`. Consult each language page for the exact evaluated rows.
 
 Project authors and organizations are named only where repository configuration or source notices establish attribution. No broader authorship or license claim is inferred when metadata was not captured.
+The JMH runtime configuration directly includes optional models needed for controlled comparisons; ordinary users do not receive these benchmark-only dependencies transitively. Historical rows retain their original model inputs. See [Model Selection and Loading](../../model-selection-and-loading.md).

@@ -4,7 +4,9 @@ This evaluation measures agreement between the relation predicted by a stemmer a
 
 ## Scope and fair-comparison rules
 
-The authoritative Radixor language universe is the reconciled set of `stemmer.gz` resources under `src/main/resources` and `StemmerPatchTrieLoader.Language`. Radixor is evaluated for every reconciled language. A third-party adapter is evaluated only for languages supported by its tested implementation and having a compatible Radixor dictionary; unsupported combinations are absent rather than assigned zero quality.
+The authoritative Radixor language universe is the reconciliation of registered default model descriptors and `StemmerPatchTrieLoader.Language`. Radixor is evaluated for every reconciled language. Optional models are separate comparison rows. A third-party adapter is evaluated only for languages supported by its tested implementation and having a compatible Radixor dictionary; unsupported combinations are absent rather than assigned zero quality.
+
+Model identity is part of the candidate identity. Default Polish means `pl-pl-unimorph`; optional PoliMorf means `pl-pl-polimorf`. Results for those inputs must not be combined or relabeled, and historical snapshots cannot acquire a newer model identity retroactively.
 
 Within one language and dictionary mode, every adapter receives the same original included forms. Exact duplicates are removed only within one dictionary row. Identical surface forms in different rows remain distinct entries. Candidate strings use exact `String.equals`, with no evaluation-only lowercasing, normalization, accent removal, or gold-label-aware selection. Adapter preprocessing and lifecycle match the JMH comparison path.
 

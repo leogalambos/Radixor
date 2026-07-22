@@ -1,0 +1,25 @@
+plugins {
+    id 'groovy-gradle-plugin'
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.14.3'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.14.3'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+gradlePlugin {
+    plugins {
+        radixorModel {
+            id = 'org.egothor.radixor.model'
+            implementationClass = 'org.egothor.radixor.RadixorModelPlugin'
+        }
+        radixorBuildSupport {
+            id = 'org.egothor.radixor.build-support'
+            implementationClass = 'org.egothor.radixor.RadixorBuildSupportPlugin'
+        }
+    }
+}

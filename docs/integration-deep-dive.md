@@ -1,7 +1,7 @@
 # Integration Deep Dive
 
 This page explains how to integrate Radixor into a real Java application after the first
-fast-track experiment works. It covers dependencies, bundled dictionaries, runtime lifecycle,
+fast-track experiment works. It covers dependencies, external model artifacts, runtime lifecycle,
 deployment artifacts, and the decisions that matter in search or text-processing systems.
 
 ## Integration Model
@@ -15,9 +15,10 @@ Radixor has two separate phases:
 
 The practical rule is simple: compile rarely, stem often.
 
-For production systems, prefer a startup-owned or dependency-injected singleton
-`FrequencyTrie<CompiledPatchCommand>` per language/configuration. The trie is immutable after
-construction and is suitable for concurrent reads.
+For production systems, prefer a startup-owned or dependency-injected
+`FrequencyTrie<CompiledPatchCommand>` per language/configuration. The compiled structure has no
+mutating API. The project does not currently publish a formal cross-thread safety guarantee, so
+applications should use normal safe-publication practices when sharing a loaded trie.
 
 ## Dependency Coordinates
 
@@ -31,7 +32,8 @@ Gradle:
 
 ```kotlin
 dependencies {
-    implementation("org.egothor:radixor:3.0.0")
+    implementation("org.egothor:radixor:<radixor-version>")
+    runtimeOnly("org.egothor:radixor-models-standard:<catalog-version>")
 }
 ```
 
@@ -41,11 +43,17 @@ Maven:
 <dependency>
     <groupId>org.egothor</groupId>
     <artifactId>radixor</artifactId>
-    <version>3.0.0</version>
+    <version>${radixor.version}</version>
+</dependency>
+<dependency>
+    <groupId>org.egothor</groupId>
+    <artifactId>radixor-models-standard</artifactId>
+    <version>${model.catalog.version}</version>
+    <scope>runtime</scope>
 </dependency>
 ```
 
-Replace `3.0.0` with the current release selected for your deployment.
+Replace the example versions with the independently selected core and catalog releases for your deployment.
 
 The core Java module is:
 
@@ -61,30 +69,15 @@ module example.search {
 }
 ```
 
-## Bundled Dictionaries
+## Runtime Model Artifacts
 
-Radixor ships bundled dictionaries inside the library artifact. The public API exposes them through:
+The core ships no language dictionary. Add one or more `radixor-model-<model-id>` artifacts, or the optional metadata-only standard pack. Each model JAR contains an indexed descriptor and a namespaced GZip dictionary. `StemmerPatchTrieLoader.Language` represents language properties and a stable default model ID; it does not own embedded data.
 
-```java
-StemmerPatchTrieLoader.Language
-```
+The standard option is specifically a POM-only runtime dependency aggregate, not an all-model binary JAR. It resolves one default model JAR per language and excludes optional PoliMorf. The separate POM-only `radixor-models-bom` manages recommended versions without adding runtime artifacts. Repository tests and JMH attach individual model projects directly to non-production configurations, so neither path changes the root publication's dependency graph.
 
-The physical resources are packaged as compressed UTF-8 dictionaries under resource directories
-such as:
+For minimal deployments choose only required model artifacts. For multiple Polish variants add both `pl-pl-unimorph` and `pl-pl-polimorf`, retain UniMorph as the language default, and request PoliMorf explicitly. See [Model Selection and Loading](model-selection-and-loading.md) for complete dependencies and [Built-in Languages](built-in-languages.md) for mappings.
 
-```text
-us_uk/stemmer.gz
-de_de/stemmer.gz
-fr_fr/stemmer.gz
-pl_pl/stemmer.gz
-```
-
-Treat those resource paths as implementation details. Application code should load bundled
-dictionaries through `StemmerPatchTrieLoader.Language`, because the enum also carries the language
-metadata needed for correct traversal.
-
-See [Built-in Languages](built-in-languages.md) for the complete language list, writing-direction
-notes, and links to per-language benchmark pages.
+Use `loadCompiled("pl-pl-polimorf", true, reductionMode)` for direct exact selection, or discover once and call `loadCompiled(descriptor, true, reductionMode)`. Neither form caches the trie. Complete PoliMorf startup is memory-intensive and is verified with a dedicated 6 GiB heap; construct it once during application initialization and retain the immutable result.
 
 ## Minimal Service Wrapper
 
@@ -126,7 +119,7 @@ searchable.
 
 For a controlled deployment, compile once and deploy the binary artifact:
 
-1. choose a bundled or custom dictionary,
+1. choose a registered model resource or caller-owned custom dictionary,
 2. optionally extend it with domain vocabulary,
 3. compile a contracted trie,
 4. persist it as `.radixor.gz`,
@@ -173,9 +166,9 @@ Use Radixor consistently across indexing and querying:
 For multilingual content, do not run every token through every language. Route text by field,
 document metadata, or language detection before stemming.
 
-## Choosing Bundled Versus Custom Dictionaries
+## Choosing Registered Versus Custom Dictionaries
 
-Start with bundled dictionaries when:
+Start with registered model artifacts when:
 
 - the language is supported,
 - the application needs a strong baseline quickly,
@@ -218,7 +211,7 @@ use [Benchmark Results](benchmarks/index.md) for the detailed reference tree.
 Before production rollout:
 
 - dependency version is pinned,
-- language resource and reduction mode are documented,
+- language, model ID, model artifact version, checksum, and reduction mode are documented,
 - indexing and query pipelines use the same stemming configuration,
 - custom artifacts are versioned and reproducible,
 - fallback behavior for unknown tokens is explicit,
@@ -231,5 +224,6 @@ Before production rollout:
 - [Quick Start](quick-start.md)
 - [Built-in Languages](built-in-languages.md)
 - [Programmatic Usage](programmatic-usage.md)
+- [Model Selection and Loading](model-selection-and-loading.md)
 - [CLI Compilation](cli-compilation.md)
 - [Benchmarking](benchmarking.md)

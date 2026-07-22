@@ -2,6 +2,27 @@
 
 Radixor uses a simple line-oriented dictionary format designed for practical stemming workflows. The textual source format is tab-separated values, meaning that columns are separated by the tab character.
 
+## Source text, model resource, and compiled trie
+
+Three artifacts must not be confused:
+
+| Artifact | Representation | Consumer |
+|---|---|---|
+| Source textual dictionary | Plain UTF-8 tab-separated rows | Authors, parser, CLI, or model preparation |
+| Registered model resource | The same Radixor dictionary bytes under GZip, accompanied by index, descriptor, checksum, and license | `StemmerModelRegistry` and `StemmerPatchTrieLoader` |
+| Persisted compiled trie | GZip-compressed Radixor binary format, commonly `.radixor.gz` | `loadBinaryCompiled(...)` |
+
+The model file named `stemmer.gz` is not Java serialization and is not a pre-instantiated or persisted trie. It is compressed textual dictionary input parsed when the model is loaded.
+
+Consequently, compressed size is not a construction-memory estimate. The PoliMorf resource is 12,624,997 bytes compressed and 68,093,680 bytes decompressed, while full parsing, trie construction, reduction, and patch compilation require a dedicated verification JVM with a 6 GiB maximum heap.
+
+Comment headers in maintained model inputs summarize provenance but do not replace packaged legal
+material. Each UniMorph-derived artifact includes a language-specific notice describing its
+official repository, lexical source, upstream attribution, CC BY-SA 3.0 canonical URI, ShareAlike
+status, Radixor transformations, and Leo Galambos's protectable model-data contributions. The
+notice does not claim ownership over the underlying data. GZip packaging and descriptor/checksum
+generation are disclosed transformations; the in-memory trie is a Radixor runtime structure.
+
 Each logical line describes one canonical stem and zero or more known word variants that should reduce to that stem. The format is intentionally lightweight, easy to maintain in source control, and directly consumable both by the programmatic loader and by the CLI compiler.
 
 ## Core structure
@@ -129,7 +150,11 @@ run	running	runs	ran
 
 ## Character set, compression, and normalization
 
-Dictionary files are read as UTF-8 text. Files loaded through `StemmerPatchTrieLoader.load(Path, ...)` may be either plain UTF-8 text or GZip-compressed UTF-8 text; the loader detects GZip input from the stream header instead of relying on the file extension. Bundled dictionaries are stored as GZip resources and are decoded as UTF-8 after decompression.
+Dictionary files are read as UTF-8 text. Files loaded through `StemmerPatchTrieLoader.load(Path, ...)` may be either plain UTF-8 text or GZip-compressed UTF-8 text; the loader detects GZip input from the stream header instead of relying on the file extension. Registered model dictionaries are stored as GZip resources and are decoded as UTF-8 after decompression.
+
+## Turn a dictionary into a model artifact
+
+An arbitrary classpath copy is not a discoverable model. A model module places immutable input and its license under `models/<model-id>/src/modelInput/`, declares metadata and an independent version, and applies the model convention plugin. The build validates the input, copies identical bytes into a generated namespaced resource, generates `META-INF/radixor/models.index` and a descriptor, records SHA-256, and packages licensing material. See [Stemmer Models](stemmer-models.md#create-or-update-a-model-module) for the complete procedure and [Model Selection and Loading](model-selection-and-loading.md) for runtime use.
 
 The parser and trie are not restricted to ASCII. Dictionary items are ordinary Java `String` values, and trie traversal works over Java `char` sequences. This supports Latin-script data with diacritics, Cyrillic data, Hebrew, Persian, Yiddish, and other scripts represented in UTF-8, subject to the normal Java `String` model and the project’s traversal configuration.
 
@@ -235,3 +260,5 @@ To understand how those dictionary lines are transformed into compiled runtime a
 - [CLI compilation](cli-compilation.md)
 - [Programmatic usage](programmatic-usage.md)
 - [Architecture and reduction](architecture-and-reduction.md)
+!!! note "Radixor 4 model artifacts"
+    Language dictionaries are independently versioned runtime model artifacts, not resources embedded in `radixor`. Language-based APIs resolve deterministic defaults through `StemmerModelRegistry`; see [Stemmer Models](stemmer-models.md).

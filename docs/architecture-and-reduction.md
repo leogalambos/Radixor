@@ -17,6 +17,10 @@ The build-time flow is:
 Dictionary -> Mutable trie -> Reduced trie -> Compiled trie
 ```
 
+For registered models, the dictionary is an independently versioned GZip resource discovered through a descriptor and verified before this flow begins. The model resource is input to trie construction, not a precompiled trie. See [Model Selection and Loading](model-selection-and-loading.md) for discovery and [Architecture](architecture.md) for component and release boundaries.
+
+Explicit descriptors and stable model IDs now use the same compiled-value path as language defaults. `loadCompiled(descriptor, ...)` and `loadCompiled(modelId, ...)` first build with serialized patch commands and then map those values to `CompiledPatchCommand` while preserving metadata, reduction semantics, and ranked `getAll` order. Very large inputs can have a high temporary construction peak; PoliMorf is verified in an isolated 6 GiB JVM rather than increasing ordinary test or Gradle daemon heaps.
+
 At runtime, the compiled trie does not directly return the final stem string. It returns one or more stored patch commands for the addressed key, and those commands are then applied to the original input word.
 
 ## Why this matters
@@ -50,3 +54,5 @@ For most readers, the best order is:
 - [Programmatic usage](programmatic-usage.md)
 - [CLI compilation](cli-compilation.md)
 - [Dictionary format](dictionary-format.md)
+- [Model selection and loading](model-selection-and-loading.md)
+- [Stemmer models](stemmer-models.md)

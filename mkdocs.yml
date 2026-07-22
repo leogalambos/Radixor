@@ -45,6 +45,7 @@ nav:
 
   - Integration:
      - Overview: programmatic-usage.md
+     - Model Selection and Loading: model-selection-and-loading.md
      - Loading and Building Stemmers: programmatic-loading-and-building.md
      - Querying and Ambiguity Handling: programmatic-querying-and-ambiguity.md
      - Extending and Persisting Compiled Tries: programmatic-extending-and-persistence.md
@@ -52,6 +53,8 @@ nav:
      - CLI Compilation: cli-compilation.md
 
   - Dictionaries and Languages:
+     - Stemmer Models: stemmer-models.md
+     - Published Model Catalog: stemmer-model-catalog.md
      - Built-in Languages: built-in-languages.md
      - Dictionary Format: dictionary-format.md
      - Contributing Dictionaries: contributing-dictionaries.md
@@ -101,4 +104,5 @@ nav:
      - Quality and Operations: quality-and-operations.md
      - Stemming Quality: stemming-quality.md
      - Reports: reports.md
+     - Historical Builds: builds.md
      - Test taxonomy and execution filtering: test-taxonomy-and-filtering.md

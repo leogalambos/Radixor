@@ -51,7 +51,7 @@ jobs:
           test -f gradle/verification-metadata.xml
 
       - name: Execute build, tests, PMD, coverage, Javadoc, distribution packaging, and SBOM generation
-        run: ./gradlew --no-daemon clean ciRelease distZip pmdMain javadoc jacocoCiReleaseReport cyclonedxBom
+        run: ./gradlew --no-daemon clean ciRelease distZip pmdMain javadoc jacocoCiReleaseReport :cyclonedxDirectBom
 
       - name: Upload SBOM
         if: always()
@@ -156,11 +156,14 @@ jobs:
           test -f gradle.properties
           test -f gradle/verification-metadata.xml
 
+      - name: Validate exact core release tag
+        run: ./tools/parse-model-release-tag.sh "${GITHUB_REF_NAME}" .
+
       - name: Build release inputs, signed Maven bundle, and SBOM
         env:
           SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
           SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
-        run: ./gradlew --no-daemon clean ciRelease distZip pmdMain javadoc jacocoCiReleaseReport cyclonedxBom centralBundle
+        run: ./gradlew --no-daemon clean ciRelease distZip pmdMain javadoc jacocoCiReleaseReport :cyclonedxDirectBom centralBundle
 
       - name: Generate release changelog
         shell: bash
@@ -177,24 +180,7 @@ jobs:
         shell: bash
         env:
           CENTRAL_BEARER_TOKEN: ${{ secrets.CENTRAL_BEARER_TOKEN }}
-        run: |
-          set -euo pipefail
-          echo "::add-mask::$CENTRAL_BEARER_TOKEN"
-
-          BUNDLE="$(ls build/central-bundle/*.zip)"
-          HEADER_FILE="$(mktemp)"
-          trap 'rm -f "$HEADER_FILE"' EXIT
-          printf 'Authorization: Bearer %s\n' "$CENTRAL_BEARER_TOKEN" > "$HEADER_FILE"
-
-          curl \
-            --fail \
-            --silent \
-            --show-error \
-            --request POST \
-            --header @"$HEADER_FILE" \
-            --form "bundle=@${BUNDLE}" \
-            --form "name=org.egothor:radixor:${GITHUB_REF_NAME#release@}" \
-            "https://central.sonatype.com/api/v1/publisher/upload?publishingType=AUTOMATIC"
+        run: ./tools/publish-central-bundle.sh "$(ls build/central-bundle/*.zip)" "org.egothor:radixor:${GITHUB_REF_NAME#release@}"
 
       - name: Publish GitHub release assets
         uses: softprops/action-gh-release@v2

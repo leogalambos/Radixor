@@ -1,0 +1,101 @@
+import groovy.xml.XmlParser
+
+plugins {
+    id 'java-platform'
+    id 'maven-publish'
+    id 'signing'
+}
+
+group = 'org.egothor'
+version = providers.fileContents(rootProject.layout.projectDirectory.file('models/catalog-version.txt'))
+        .asText.map(String::trim).get()
+
+Properties modelTopology = new Properties()
+rootProject.file('models/model-projects.properties').withInputStream { InputStream input ->
+    modelTopology.load(input)
+}
+List<String> modelIds = modelTopology.stringPropertyNames().toList().sort()
+
+dependencies {
+    constraints {
+        modelIds.each { String modelId ->
+            api project(":models:${modelId}")
+        }
+    }
+}
+
+publishing {
+    publications {
+        bom(MavenPublication) {
+            from components.javaPlatform
+            artifactId = 'radixor-models-bom'
+            pom {
+                name = 'Radixor Stemmer Models BOM'
+                description = 'Maven dependency-management BOM containing recommended versions for published Radixor models.'
+                packaging = 'pom'
+                url = 'https://github.com/leogalambos/Radixor'
+                licenses {
+                    license {
+                        name = 'BSD-3-Clause'
+                        url = 'https://spdx.org/licenses/BSD-3-Clause.html'
+                        distribution = 'repo'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'egothor'
+                        name = 'Leo Galambos'
+                        email = 'egothor@gmail.com'
+                    }
+                }
+                scm {
+                    url = 'https://github.com/leogalambos/Radixor'
+                    connection = 'scm:git:https://github.com/leogalambos/Radixor.git'
+                    developerConnection = 'scm:git:ssh://git@github.com/leogalambos/Radixor.git'
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            name = 'catalogStaging'
+            url = rootProject.layout.buildDirectory.dir('model-catalog-staging-repository').get().asFile.toURI()
+        }
+    }
+}
+
+String signingKey = providers.environmentVariable('SIGNING_KEY').orNull
+String signingPassword = providers.environmentVariable('SIGNING_PASSWORD').orNull
+signing {
+    required = { providers.environmentVariable('GITHUB_REF_TYPE').orNull == 'tag' }
+    if (signingKey != null && !signingKey.isBlank()) {
+        useInMemoryPgpKeys(signingKey, signingPassword)
+        sign publishing.publications.bom
+    }
+}
+
+tasks.register('verifyPomOnlyPlatform') {
+    group = 'verification'
+    description = 'Verifies the POM-only model dependency-management platform.'
+    dependsOn(tasks.named('generatePomFileForBomPublication'))
+    doLast {
+        File pomFile = layout.buildDirectory.file('publications/bom/pom-default.xml').get().asFile
+        Node pom = new XmlParser().parse(pomFile)
+        List<Node> constraints = pom.dependencyManagement.dependencies.dependency as List<Node>
+        List<String> artifactIds = constraints.collect { Node dependency -> dependency.artifactId.text() }
+        List<String> expected = modelIds.collect { String modelId -> "radixor-model-${modelId}" }
+        if (pom.packaging.text() != 'pom' || artifactIds != expected) {
+            throw new GradleException('radixor-models-bom must publish exactly the ordered model constraints as Maven packaging pom.')
+        }
+        if (!pom.dependencies.isEmpty()) {
+            throw new GradleException('radixor-models-bom must not introduce runtime model dependencies.')
+        }
+        if (!tasks.withType(Jar).isEmpty()) {
+            throw new GradleException('radixor-models-bom must not create binary, sources, or Javadoc JARs.')
+        }
+    }
+}
+
+tasks.named('check') {
+    dependsOn(tasks.named('verifyPomOnlyPlatform'))
+}

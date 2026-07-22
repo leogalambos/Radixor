@@ -2,6 +2,10 @@
 
 Radixor contains internal trie microbenchmarks, a separate stemmer comparison suite, and a dictionary coverage benchmark for Radixor itself. Published stemmer comparison results must come only from benchmark classes matching `.*StemmerComparisonBenchmark.*`; internal `FrequencyTrie*` microbenchmarks are not part of those results.
 
+Every current default Radixor benchmark scenario uses the model ID declared by its `Language.defaultModelId()`. The root JMH runtime configuration depends directly on all default model projects plus optional `pl-pl-polimorf`; no benchmark-pack project or artifact exists. These dependencies are benchmark-only and never enter the root published POM. A PoliMorf comparison must be labeled with model ID `pl-pl-polimorf`, while the default Polish row remains `pl-pl-unimorph`.
+
+The optional model now has a verified complete compiled loading path. This does not alter existing benchmark rows or make PoliMorf part of the representative English JMH run. Any future full PoliMorf benchmark must provision its documented startup heap independently and record the exact model artifact version and checksum.
+
 This page is the entry point for benchmark interpretation. Detailed tables and long reference material are split into focused subpages so that important points do not get buried.
 
 ## Key Takeaways
@@ -40,3 +44,4 @@ The [English dictionary coverage benchmark](benchmarks/reference/english-coverag
 The current measured language results are published in [Language Benchmark Pages](benchmarks/languages/index.md). Generated local report files for this benchmark update are listed in [Benchmark environment and reports](benchmarks/reference/environment.md).
 
 JMH TXT and CSV reports are still published as benchmark artifacts. They are no longer converted into a Shields endpoint benchmark badge.
+Model IDs, independent artifact versions, and descriptor checksums identify inputs for future reproducibility. Historical snapshots remain tied to the model inputs used when measured; the optional PoliMorf model must not be retroactively attributed to results that predate it. See [Model Selection and Loading](model-selection-and-loading.md) and [Reproducibility](benchmarks/reference/reproducibility.md).

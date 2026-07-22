@@ -1,21 +1,21 @@
 /*******************************************************************************
  * Copyright (C) 2026, Leo Galambos
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * 3. Neither the name of the copyright holder nor the names of its contributors
  *    may be used to endorse or promote products derived from this software
  *    without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -39,6 +39,7 @@ import java.io.PushbackInputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.MessageDigest;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -94,13 +95,14 @@ public final class StemmerPatchTrieLoader {
     }
 
     /**
-     * Supported bundled stemmer dictionaries.
+     * Supported language identities and their stable default model mappings.
      *
      * <p>
      * Each language constant defines:
      * </p>
      * <ul>
-     * <li>the resource directory name used under the bundled resources tree</li>
+     * <li>a deprecated legacy resource-directory name</li>
+     * <li>the stable default model ID used by language-oriented loading</li>
      * <li>whether the language is written right-to-left</li>
      * </ul>
      *
@@ -115,107 +117,110 @@ public final class StemmerPatchTrieLoader {
         /**
          * Czech.
          */
-        CS_CZ("cs_cz", false),
+        CS_CZ("cs_cz", "cs-cz-default", false),
 
         /**
          * Danish.
          */
-        DA_DK("da_dk", false),
+        DA_DK("da_dk", "da-dk-default", false),
 
         /**
          * German.
          */
-        DE_DE("de_de", false),
+        DE_DE("de_de", "de-de-default", false),
 
         /**
          * Spanish.
          */
-        ES_ES("es_es", false),
+        ES_ES("es_es", "es-es-default", false),
 
         /**
          * Persian.
          */
-        FA_IR("fa_ir", true),
+        FA_IR("fa_ir", "fa-ir-default", true),
 
         /**
          * Finnish.
          */
-        FI_FI("fi_fi", false),
+        FI_FI("fi_fi", "fi-fi-default", false),
 
         /**
          * French.
          */
-        FR_FR("fr_fr", false),
+        FR_FR("fr_fr", "fr-fr-default", false),
 
         /**
          * Hebrew.
          */
-        HE_IL("he_il", true),
+        HE_IL("he_il", "he-il-default", true),
 
         /**
          * Hungarian.
          */
-        HU_HU("hu_hu", false),
+        HU_HU("hu_hu", "hu-hu-default", false),
 
         /**
          * Italian.
          */
-        IT_IT("it_it", false),
+        IT_IT("it_it", "it-it-default", false),
 
         /**
          * Norwegian Bokmål.
          */
-        NB_NO("nb_no", false),
+        NB_NO("nb_no", "nb-no-default", false),
 
         /**
          * Dutch.
          */
-        NL_NL("nl_nl", false),
+        NL_NL("nl_nl", "nl-nl-default", false),
 
         /**
          * Norwegian Nynorsk.
          */
-        NN_NO("nn_no", false),
+        NN_NO("nn_no", "nn-no-default", false),
 
         /**
          * Polish.
          */
-        PL_PL("pl_pl", false),
+        PL_PL("pl_pl", "pl-pl-unimorph", false),
 
         /**
          * Portuguese.
          */
-        PT_PT("pt_pt", false),
+        PT_PT("pt_pt", "pt-pt-default", false),
 
         /**
          * Russian.
          */
-        RU_RU("ru_ru", false),
+        RU_RU("ru_ru", "ru-ru-default", false),
 
         /**
          * Swedish.
          */
-        SV_SE("sv_se", false),
+        SV_SE("sv_se", "sv-se-default", false),
 
         /**
          * Ukrainian.
          */
-        UK_UA("uk_ua", false),
+        UK_UA("uk_ua", "uk-ua-default", false),
 
         /**
          * English.
          */
-        US_UK("us_uk", false),
+        US_UK("us_uk", "us-uk-default", false),
 
         /**
          * Yiddish.
          */
-        YI("yi", true);
+        YI("yi", "yi-default", true);
 
         /**
          * Resource directory name.
          */
         private final String resourceDirectory;
+
+        /** Stable identifier of the documented default model. */
+        private final String defaultModelId;
 
         /**
          * Whether the language is written right-to-left.
@@ -225,21 +230,37 @@ public final class StemmerPatchTrieLoader {
         /**
          * Creates a language constant.
          *
-         * @param resourceDirectory resource directory name
+         * @param resourceDirectory deprecated legacy resource directory name
+         * @param defaultModelId    stable default model identifier
          * @param rightToLeft       whether the language is written right-to-left
          */
-        Language(final String resourceDirectory, final boolean rightToLeft) {
+        Language(final String resourceDirectory, final String defaultModelId, final boolean rightToLeft) {
             this.resourceDirectory = resourceDirectory;
+            this.defaultModelId = defaultModelId;
             this.rightToLeft = rightToLeft;
         }
 
         /**
-         * Returns the classpath resource path of the bundled stemmer dictionary.
+         * Returns the conventional resource path of this language's default model.
+         *
+         * <p>Production loading resolves descriptors through
+         * {@link StemmerModelRegistry}; it does not use this method for discovery or
+         * selection.</p>
          *
          * @return classpath resource path
          */
+        @Deprecated(since = "4.0.0", forRemoval = false)
         public String resourcePath() {
-            return this.resourceDirectory + "/stemmer.gz";
+            return "org/egothor/stemmer/models/" + this.defaultModelId + "/stemmer.gz";
+        }
+
+        /**
+         * Returns the stable identifier selected by language-oriented loader methods.
+         *
+         * @return exact model ID, independent of classpath ordering
+         */
+        public String defaultModelId() {
+            return this.defaultModelId;
         }
 
         /**
@@ -269,7 +290,7 @@ public final class StemmerPatchTrieLoader {
     }
 
     /**
-     * Loads a bundled dictionary using explicit reduction settings.
+     * Loads the language's registered default model using explicit reduction settings.
      *
      * <p>
      * This overload applies the following implicit compilation defaults in addition
@@ -289,7 +310,7 @@ public final class StemmerPatchTrieLoader {
      * resulting trie.
      * </p>
      *
-     * @param language          bundled language dictionary
+     * @param language          language whose stable default model is required
      * @param storeOriginal     whether the stem itself should be inserted using the
      *                          canonical no-op patch command
      * @param reductionSettings reduction settings
@@ -312,7 +333,7 @@ public final class StemmerPatchTrieLoader {
     }
 
     /**
-     * Loads a bundled dictionary and returns a runtime-specialized trie whose
+     * Loads the language's registered default model and returns a runtime-specialized trie whose
      * values are compiled patch commands.
      *
      * <p>
@@ -322,7 +343,7 @@ public final class StemmerPatchTrieLoader {
      * runtime stemming does not parse patch-command strings.
      * </p>
      *
-     * @param language          bundled language dictionary
+     * @param language          language whose stable default model is required
      * @param storeOriginal     whether the stem itself should be inserted using the
      *                          canonical no-op patch command
      * @param reductionSettings reduction settings
@@ -336,7 +357,7 @@ public final class StemmerPatchTrieLoader {
     }
 
     /**
-     * Loads a bundled dictionary using explicit trie compilation metadata.
+     * Loads the language's registered default model using explicit trie compilation metadata.
      *
      * <p>
      * All semantic compilation settings (reduction mode and thresholds, traversal
@@ -345,7 +366,7 @@ public final class StemmerPatchTrieLoader {
      * resulting trie.
      * </p>
      *
-     * @param language      bundled language dictionary
+     * @param language      language whose stable default model is required
      * @param storeOriginal whether the stem itself should be inserted using the
      *                      canonical no-op patch command
      * @param metadata      trie metadata describing the compilation configuration
@@ -362,20 +383,117 @@ public final class StemmerPatchTrieLoader {
         Objects.requireNonNull(language, "language");
         Objects.requireNonNull(metadata, "metadata");
 
-        final String resourcePath = language.resourcePath();
+        final StemmerModelDescriptor descriptor = StemmerModelRegistry.fromContextClassLoader().requireDefault(language);
+        return load(descriptor, storeOriginal, metadata);
+    }
 
-        try (InputStream inputStream = openBundledResource(resourcePath);
+    /**
+     * Loads an explicitly selected descriptor using trie compilation metadata.
+     *
+     * <p>The method opens the descriptor's namespaced resource through its
+     * discovering class loader, verifies SHA-256 over the compressed bytes,
+     * decompresses the GZip UTF-8 dictionary, parses it, and builds a trie. Each
+     * invocation performs this work and returns serialized patch-command values.</p>
+     *
+     * @param descriptor exact validated model descriptor
+     * @param storeOriginal whether canonical stems receive no-op mappings
+     * @param metadata trie compilation configuration
+     * @return newly built trie containing serialized patch-command strings
+     * @throws NullPointerException if {@code descriptor} or {@code metadata} is {@code null}
+     * @throws IOException if the compressed dictionary cannot be read or decompressed
+     * @throws StemmerModelIntegrityException if the resource is missing or its checksum differs
+     */
+    public static FrequencyTrie<String> load(final StemmerModelDescriptor descriptor, final boolean storeOriginal,
+            final TrieMetadata metadata) throws IOException {
+        Objects.requireNonNull(descriptor, "descriptor");
+        Objects.requireNonNull(metadata, "metadata");
+        try (InputStream inputStream = openModelResource(descriptor);
                 BufferedReader reader = new BufferedReader(
                         new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
-            return load(reader, resourcePath, storeOriginal, metadata);
+            return load(reader, descriptor.resource(), storeOriginal, metadata);
         }
     }
 
     /**
-     * Loads a bundled dictionary using explicit trie compilation metadata and
+     * Loads one exact model descriptor and returns a runtime-specialized trie.
+     *
+     * <p>The descriptor's compressed dictionary is integrity-checked, fully
+     * parsed, reduced with the supplied mode, and converted to immutable
+     * {@link CompiledPatchCommand} values. The method does not consult a language
+     * default and does not cache the constructed trie. Applications should retain
+     * the result for their intended runtime scope. Constructing exceptionally
+     * large models can require substantial temporary heap.</p>
+     *
+     * @param descriptor exact validated model descriptor
+     * @param storeOriginal whether canonical stems receive no-op mappings
+     * @param reductionMode reduction mode applied during trie construction
+     * @return newly constructed trie containing compiled patch commands
+     * @throws NullPointerException if {@code descriptor} or {@code reductionMode} is {@code null}
+     * @throws IOException if the compressed dictionary cannot be read or decompressed
+     * @throws StemmerModelIntegrityException if the resource is missing or its checksum differs
+     */
+    public static FrequencyTrie<CompiledPatchCommand> loadCompiled(final StemmerModelDescriptor descriptor,
+            final boolean storeOriginal, final ReductionMode reductionMode) throws IOException {
+        Objects.requireNonNull(descriptor, "descriptor");
+        Objects.requireNonNull(reductionMode, "reductionMode");
+        final TrieMetadata metadata = metadataForCompilation(traversalDirectionOf(descriptor.language()),
+                ReductionSettings.withDefaults(reductionMode), CaseProcessingMode.LOWERCASE_WITH_LOCALE_ROOT,
+                DiacriticProcessingMode.AS_IS);
+        return compilePatchTrie(load(descriptor, storeOriginal, metadata));
+    }
+
+    /**
+     * Loads an exact model ID through a newly discovered context-class-loader registry.
+     *
+     * <p>This method is distinct from {@code load(String, ...)}, whose string is a
+     * filesystem path. Selection is exact and never falls back to another model for
+     * the same language.</p>
+     *
+     * @param modelId exact stable model identifier
+     * @param storeOriginal whether canonical stems receive no-op mappings
+     * @param metadata trie compilation configuration
+     * @return newly built trie containing serialized patch-command strings
+     * @throws NullPointerException if {@code modelId} or {@code metadata} is {@code null}
+     * @throws IOException if discovery or resource reading fails
+     * @throws StemmerModelNotFoundException if the model is not visible
+     * @throws DuplicateStemmerModelException if discovery finds duplicate IDs
+     * @throws UnsupportedStemmerModelFormatException if discovery finds an unsupported format
+     * @throws StemmerModelIntegrityException if metadata or resource integrity is invalid
+     */
+    public static FrequencyTrie<String> loadModel(final String modelId, final boolean storeOriginal,
+            final TrieMetadata metadata) throws IOException {
+        return load(StemmerModelRegistry.fromContextClassLoader().require(modelId), storeOriginal, metadata);
+    }
+
+    /** Opens, integrity-checks, and decompresses a descriptor-backed dictionary. */
+    @SuppressWarnings("PMD.CloseResource")
+    private static InputStream openModelResource(final StemmerModelDescriptor descriptor) throws IOException {
+        final InputStream unresolvedResource = descriptor.classLoader().getResourceAsStream(descriptor.resource());
+        if (unresolvedResource == null) {
+            throw new StemmerModelIntegrityException("Model resource is missing: " + descriptor.resource());
+        }
+        final byte[] bytes;
+        try (InputStream resource = unresolvedResource) {
+            bytes = resource.readAllBytes();
+        }
+        final String checksum;
+        try {
+            checksum = java.util.HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(bytes));
+        } catch (java.security.NoSuchAlgorithmException exception) {
+            throw new StemmerModelIntegrityException("The required SHA-256 algorithm is unavailable.", exception);
+        }
+        if (!checksum.equals(descriptor.sha256())) {
+            throw new StemmerModelIntegrityException("Checksum mismatch for model '" + descriptor.id() + "' at "
+                    + descriptor.resource() + ": expected " + descriptor.sha256() + " but found " + checksum + ".");
+        }
+        return new GZIPInputStream(new java.io.ByteArrayInputStream(bytes));
+    }
+
+    /**
+     * Loads the language's registered default model using explicit trie compilation metadata and
      * returns a runtime-specialized trie whose values are compiled patch commands.
      *
-     * @param language      bundled language dictionary
+     * @param language      language whose stable default model is required
      * @param storeOriginal whether the stem itself should be inserted using the
      *                      canonical no-op patch command
      * @param metadata      trie metadata describing the compilation configuration
@@ -389,7 +507,7 @@ public final class StemmerPatchTrieLoader {
     }
 
     /**
-     * Loads a bundled dictionary using default settings for the supplied reduction
+     * Loads the language's registered default model using settings for the supplied reduction
      * mode.
      *
      * <p>
@@ -400,7 +518,7 @@ public final class StemmerPatchTrieLoader {
      * diacritic processing mode.
      * </p>
      *
-     * @param language      bundled language dictionary
+     * @param language      language whose stable default model is required
      * @param storeOriginal whether the stem itself should be inserted using the
      *                      canonical no-op patch command
      * @param reductionMode reduction mode
@@ -419,11 +537,11 @@ public final class StemmerPatchTrieLoader {
     }
 
     /**
-     * Loads a bundled dictionary using default settings for the supplied reduction
+     * Loads the language's registered default model using settings for the supplied reduction
      * mode and returns a runtime-specialized trie whose values are compiled patch
      * commands.
      *
-     * @param language      bundled language dictionary
+     * @param language      language whose stable default model is required
      * @param storeOriginal whether the stem itself should be inserted using the
      *                      canonical no-op patch command
      * @param reductionMode reduction mode
@@ -1036,9 +1154,11 @@ public final class StemmerPatchTrieLoader {
      * @return compiled patch-command trie
      * @throws NullPointerException if any argument is {@code null}
      * @throws IOException          if the file cannot be opened or read
-     * @deprecated Since 2.3.0 for runtime stemming. Use
-     *             {@link #loadCompiled(String, boolean, ReductionMode)} so patch
-     *             commands are represented as {@link CompiledPatchCommand} values.
+     * @deprecated Since 2.3.0 for runtime stemming. Convert {@code fileName} to a
+     *             {@link Path} and use {@link #loadCompiled(Path, boolean, ReductionMode)}
+     *             so patch commands are represented as {@link CompiledPatchCommand}
+     *             values. The corresponding compiled {@code String} signature is
+     *             reserved for stable model identifiers.
      */
     @Deprecated(since = "2.3.0", forRemoval = false)
     public static FrequencyTrie<String> load(final String fileName, final boolean storeOriginal,
@@ -1048,22 +1168,35 @@ public final class StemmerPatchTrieLoader {
     }
 
     /**
-     * Loads a dictionary from a filesystem path string using default settings for
-     * the supplied reduction mode and returns runtime-specialized compiled patch
-     * values.
+     * Loads one exact stable model identifier and returns a runtime-specialized trie.
      *
-     * @param fileName      file name or path string
+     * <p>The registry is discovered through the thread context class loader.
+     * Selection is exact: the method never resolves a language default, falls back
+     * to another model, or depends on classpath order. Use
+     * {@link #loadCompiled(Path, boolean, ReductionMode)} for a filesystem path.</p>
+     *
+     * @param modelId       exact stable model identifier
      * @param storeOriginal whether the stem itself should be inserted using the
      *                      canonical no-op patch command
      * @param reductionMode reduction mode
      * @return compiled patch-command trie with runtime-specialized values
      * @throws NullPointerException if any argument is {@code null}
-     * @throws IOException          if the file cannot be opened or read
+     * @throws IllegalArgumentException if {@code modelId} is blank
+     * @throws IOException if registry discovery or dictionary reading fails
+     * @throws StemmerModelNotFoundException if the exact model is not visible
+     * @throws DuplicateStemmerModelException if discovery finds duplicate model IDs
+     * @throws UnsupportedStemmerModelFormatException if a descriptor format is unsupported
+     * @throws StemmerModelIntegrityException if descriptor or resource integrity validation fails
      */
-    public static FrequencyTrie<CompiledPatchCommand> loadCompiled(final String fileName,
+    public static FrequencyTrie<CompiledPatchCommand> loadCompiled(final String modelId,
             final boolean storeOriginal, final ReductionMode reductionMode) throws IOException {
-        Objects.requireNonNull(fileName, FILENAME_REQUIRED);
-        return loadCompiled(Path.of(fileName), storeOriginal, reductionMode);
+        Objects.requireNonNull(modelId, "modelId");
+        Objects.requireNonNull(reductionMode, "reductionMode");
+        if (modelId.isBlank()) {
+            throw new IllegalArgumentException("modelId must not be blank");
+        }
+        final StemmerModelDescriptor descriptor = StemmerModelRegistry.fromContextClassLoader().require(modelId);
+        return loadCompiled(descriptor, storeOriginal, reductionMode);
     }
 
     /**
@@ -1125,9 +1258,9 @@ public final class StemmerPatchTrieLoader {
     }
 
     /**
-     * Resolves the traversal direction implied by a bundled language definition.
+     * Resolves the traversal direction implied by a language definition.
      *
-     * @param language bundled language
+     * @param language language definition
      * @return traversal direction to use for that language
      */
     private static WordTraversalDirection traversalDirectionOf(final Language language) {

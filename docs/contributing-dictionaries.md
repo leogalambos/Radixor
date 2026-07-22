@@ -2,7 +2,7 @@
 
 High-quality dictionaries are one of the most valuable ways to improve **Radixor**.
 
-The project already includes practical bundled dictionaries for common use, but the long-term quality and language reach of the stemmer depend heavily on the quality of its lexical resources. Contributions are therefore welcome not only in the form of code changes, but also in the form of well-prepared dictionary data for existing or additional languages.
+The project already publishes practical model dictionaries for common use, but long-term quality and language reach depend heavily on lexical-resource quality. Contributions may provide well-prepared model inputs for existing or additional languages.
 
 This document explains what makes a dictionary contribution useful, how to structure it, and how to prepare it so that it integrates cleanly with the project.
 
@@ -52,7 +52,7 @@ For full format details, see [Dictionary format](dictionary-format.md).
 
 The most useful dictionary contributions generally fall into one of four categories.
 
-### 1. Stronger dictionaries for already bundled languages
+### 1. Stronger models for already supported languages
 
 Improving lexical quality for already supported languages is often more valuable than merely expanding the language list. Better coverage, cleaner canonicalization, and improved consistency directly improve practical stemming outcomes.
 
@@ -68,7 +68,7 @@ That convention belongs to the supplied dictionaries, not to the underlying algo
 
 ### 4. Domain-quality refinements
 
-Some contributions may be more appropriate as curated domain extensions than as replacements for a general-purpose bundled dictionary. These are still useful when they are clearly scoped and operationally coherent.
+Some contributions may be more appropriate as curated domain extensions than as replacements for a general-purpose default model. These are still useful when clearly scoped and operationally coherent.
 
 ## Normalization guidance
 
@@ -139,6 +139,14 @@ A dictionary should read like a curated lexical resource, not like an unfiltered
 
 ## Practical preparation workflow
 
+Before conversion, record the official source project and repository, exact revision or release,
+source-archive checksum, retrieval date, dataset license and URI, supplied attribution, and any
+required upstream notice. Add a model-specific notice describing every material transformation and
+the license applied to the derived data, including its canonical URI. Record any protectable
+Radixor-specific contribution without claiming ownership over the upstream data. A legacy model
+may disclose that its historical revision was not recorded; new imports must record an exact
+revision and source-archive checksum rather than using that sentinel.
+
 A disciplined dictionary contribution should typically follow this path:
 
 1. prepare or normalize the lexical source,
@@ -183,7 +191,7 @@ This note does not need to be long. It simply needs to make the resource intelli
 
 ## Bundled-resource expectations
 
-Not every useful dictionary must automatically become a bundled language resource.
+Not every useful dictionary must automatically become a published default model.
 
 To be suitable for bundling, a dictionary should generally be:
 

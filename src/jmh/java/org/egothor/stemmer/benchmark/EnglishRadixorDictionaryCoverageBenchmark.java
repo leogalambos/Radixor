@@ -331,7 +331,8 @@ public class EnglishRadixorDictionaryCoverageBenchmark {
     }
 
     private static List<DictionaryRow> readEnglishRows() throws IOException {
-        final String resourcePath = StemmerPatchTrieLoader.Language.US_UK.resourcePath();
+        final String resourcePath = org.egothor.stemmer.StemmerModelRegistry.fromContextClassLoader()
+                .requireDefault(StemmerPatchTrieLoader.Language.US_UK).resource();
         final InputStream resource = StemmerPatchTrieLoader.class.getClassLoader().getResourceAsStream(resourcePath);
         if (resource == null) {
             throw new IllegalStateException("Missing bundled English dictionary resource " + resourcePath + ".");

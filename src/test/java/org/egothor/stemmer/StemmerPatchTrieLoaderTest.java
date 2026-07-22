@@ -1,21 +1,21 @@
 /*******************************************************************************
  * Copyright (C) 2026, Leo Galambos
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * 3. Neither the name of the copyright holder nor the names of its contributors
  *    may be used to endorse or promote products derived from this software
  *    without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -73,7 +73,7 @@ import org.junit.jupiter.params.provider.MethodSource;
  *
  * <p>
  * The suite combines focused API-level verification with integration validation
- * against bundled dictionaries. It verifies:
+ * against registered default-model dictionaries. It verifies:
  * </p>
  * <ul>
  * <li>all public loading overloads</li>
@@ -113,7 +113,7 @@ final class StemmerPatchTrieLoaderTest {
     private static final int REPRESENTATIVE_BUNDLED_WORD_COUNT = 25;
 
     /**
-     * Provides arguments for bundled dictionary verification across both supported
+     * Provides arguments for registered model dictionary verification across both supported
      * getAll-preserving reduction modes.
      *
      * <p>
@@ -521,13 +521,10 @@ final class StemmerPatchTrieLoaderTest {
                     dictionaryFile, true, DEFAULT_REDUCTION_MODE);
             final FrequencyTrie<CompiledPatchCommand> fromStringWithSettings = StemmerPatchTrieLoader.loadCompiled(
                     dictionaryFile.toString(), true, settings);
-            final FrequencyTrie<CompiledPatchCommand> fromStringWithMode = StemmerPatchTrieLoader.loadCompiled(
-                    dictionaryFile.toString(), true, DEFAULT_REDUCTION_MODE);
 
             assertCompiledTrieSemanticsEqual(expected, fromPathWithSettings, "running", "played", "cities", "run");
             assertCompiledTrieSemanticsEqual(expected, fromPathWithMode, "running", "played", "cities", "run");
             assertCompiledTrieSemanticsEqual(expected, fromStringWithSettings, "running", "played", "cities", "run");
-            assertCompiledTrieSemanticsEqual(expected, fromStringWithMode, "running", "played", "cities", "run");
         }
 
         /**
@@ -821,14 +818,14 @@ final class StemmerPatchTrieLoaderTest {
         }
 
         /**
-         * Verifies that each bundled dictionary compiles into a trie whose
+         * Verifies that each registered default-model dictionary compiles into a trie whose
          * {@link FrequencyTrie#getAll(String)} results still reconstruct exactly the
          * same set of stems as the source dictionary.
          *
          * @param scenario      human-readable numbered scenario identifier
          * @param language      tested bundled language
          * @param reductionMode reduction mode
-         * @throws IOException if a bundled dictionary cannot be read
+         * @throws IOException if a registered model dictionary cannot be read
          */
         @ParameterizedTest(name = "[{index}] {0}")
         @MethodSource("org.egothor.stemmer.StemmerPatchTrieLoaderTest#bundledDictionaryCases")
@@ -861,7 +858,7 @@ final class StemmerPatchTrieLoaderTest {
         }
 
         /**
-         * Verifies that representative bundled dictionaries load equivalently through
+         * Verifies that representative registered model dictionaries load equivalently through
          * both reduction-setting and reduction-mode overloads.
          *
          * @param scenario scenario identifier
@@ -890,12 +887,12 @@ final class StemmerPatchTrieLoaderTest {
             }
 
             assertFalse(expectedStemsByWord.isEmpty(),
-                    "Scenario " + scenario + " must provide at least one bundled dictionary entry.");
+                    "Scenario " + scenario + " must provide at least one registered model dictionary entry.");
         }
     }
 
     /**
-     * Reads the bundled dictionary and builds a mapping of surface word to all
+     * Reads the registered model dictionary and builds a mapping of surface word to all
      * stems it is associated with in the source data.
      *
      * <p>
@@ -1034,7 +1031,7 @@ final class StemmerPatchTrieLoaderTest {
     }
 
     /**
-     * Opens one bundled dictionary resource.
+     * Opens one registered model dictionary resource.
      *
      * @param resourcePath classpath resource path
      * @return opened input stream

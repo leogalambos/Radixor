@@ -51,11 +51,6 @@ publishing {
                         url = pomLicenseUrl
                         distribution = pomLicenseDistribution
                     }
-                    license {
-                        name = pomStemmerDataLicenseName
-                        url = pomStemmerDataLicenseUrl
-                        distribution = pomLicenseDistribution
-                    }
                 }
 
                 developers {
@@ -104,8 +99,6 @@ tasks.register('validateReleaseMetadata') {
         if (pomScmDeveloperConnection == null || pomScmDeveloperConnection.isBlank()) missing.add('pomScmDeveloperConnection')
         if (pomLicenseName == null || pomLicenseName.isBlank()) missing.add('pomLicenseName')
         if (pomLicenseUrl == null || pomLicenseUrl.isBlank()) missing.add('pomLicenseUrl')
-        if (pomStemmerDataLicenseName == null || pomStemmerDataLicenseName.isBlank()) missing.add('pomStemmerDataLicenseName')
-        if (pomStemmerDataLicenseUrl == null || pomStemmerDataLicenseUrl.isBlank()) missing.add('pomStemmerDataLicenseUrl')
         if (signingKey == null || signingKey.isBlank()) missing.add('pomSigningKey / SIGNING_KEY')
         if (signingPassword == null || signingPassword.isBlank()) missing.add('pomSigningPassword / SIGNING_PASSWORD')
 

@@ -1,0 +1,117 @@
+import groovy.xml.XmlParser
+
+plugins {
+    id 'base'
+    id 'maven-publish'
+    id 'signing'
+}
+
+group = 'org.egothor'
+version = providers.fileContents(rootProject.layout.projectDirectory.file('models/catalog-version.txt'))
+        .asText.map(String::trim).get()
+
+Properties modelTopology = new Properties()
+rootProject.file('models/model-projects.properties').withInputStream { InputStream input ->
+    modelTopology.load(input)
+}
+List<String> defaultModelIds = modelTopology.stringPropertyNames().findAll { String modelId ->
+    modelTopology.getProperty(modelId) == 'default'
+}.sort()
+Map<String, String> defaultModelVersions = defaultModelIds.collectEntries { String modelId ->
+    final Project modelProject = project(":models:${modelId}")
+    final String modelVersion = providers.gradleProperty('modelReleaseVersion')
+            .orElse(providers.fileContents(modelProject.layout.projectDirectory.file('model-version.txt'))
+                    .asText.map(String::trim))
+            .get()
+    [(modelId): modelVersion]
+}
+
+publishing {
+    publications {
+        standard(MavenPublication) {
+            artifactId = 'radixor-models-standard'
+            pom {
+                name = 'Radixor Standard Stemmer Models'
+                description = 'POM-only runtime aggregate containing one default model for every supported language.'
+                packaging = 'pom'
+                url = 'https://github.com/leogalambos/Radixor'
+                licenses {
+                    license {
+                        name = 'BSD-3-Clause'
+                        url = 'https://spdx.org/licenses/BSD-3-Clause.html'
+                        distribution = 'repo'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'egothor'
+                        name = 'Leo Galambos'
+                        email = 'egothor@gmail.com'
+                    }
+                }
+                scm {
+                    url = 'https://github.com/leogalambos/Radixor'
+                    connection = 'scm:git:https://github.com/leogalambos/Radixor.git'
+                    developerConnection = 'scm:git:ssh://git@github.com/leogalambos/Radixor.git'
+                }
+            }
+            pom.withXml {
+                Node dependenciesNode = asNode().appendNode('dependencies')
+                defaultModelIds.each { String modelId ->
+                    Node dependencyNode = dependenciesNode.appendNode('dependency')
+                    dependencyNode.appendNode('groupId', 'org.egothor')
+                    dependencyNode.appendNode('artifactId', "radixor-model-${modelId}")
+                    dependencyNode.appendNode('version', defaultModelVersions.get(modelId))
+                    dependencyNode.appendNode('scope', 'runtime')
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            name = 'catalogStaging'
+            url = rootProject.layout.buildDirectory.dir('model-catalog-staging-repository').get().asFile.toURI()
+        }
+    }
+}
+
+String signingKey = providers.environmentVariable('SIGNING_KEY').orNull
+String signingPassword = providers.environmentVariable('SIGNING_PASSWORD').orNull
+signing {
+    required = { providers.environmentVariable('GITHUB_REF_TYPE').orNull == 'tag' }
+    if (signingKey != null && !signingKey.isBlank()) {
+        useInMemoryPgpKeys(signingKey, signingPassword)
+        sign publishing.publications.standard
+    }
+}
+
+tasks.register('verifyPomOnlyAggregate') {
+    group = 'verification'
+    description = 'Verifies the standard POM-only aggregate and its runtime model dependencies.'
+    dependsOn(tasks.named('generatePomFileForStandardPublication'))
+    doLast {
+        File pomFile = layout.buildDirectory.file('publications/standard/pom-default.xml').get().asFile
+        Node pom = new XmlParser().parse(pomFile)
+        List<Node> dependencies = pom.dependencies.dependency as List<Node>
+        List<String> artifactIds = dependencies.collect { Node dependency ->
+            dependency.artifactId.text()
+        }
+        List<String> expected = defaultModelIds.collect { String modelId -> "radixor-model-${modelId}" }
+        if (pom.packaging.text() != 'pom') {
+            throw new GradleException('radixor-models-standard must publish Maven packaging pom.')
+        }
+        if (artifactIds != expected || dependencies.any { Node dependency -> dependency.scope.text() != 'runtime' }) {
+            throw new GradleException('radixor-models-standard must contain exactly the ordered default model runtime dependencies.')
+        }
+        if (artifactIds.contains('radixor-model-pl-pl-polimorf')) {
+            throw new GradleException('radixor-models-standard must exclude the optional PoliMorf model.')
+        }
+        if (!tasks.withType(Jar).isEmpty()) {
+            throw new GradleException('radixor-models-standard must not create binary, sources, or Javadoc JARs.')
+        }
+    }
+}
+
+tasks.named('check') {
+    dependsOn(tasks.named('verifyPomOnlyAggregate'))
+}

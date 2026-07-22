@@ -28,12 +28,26 @@ Radixor delivers:
 
 Radixor is intended for teams that require consistent stemming quality at scale, while retaining the ability to evolve lexical resources after compilation and to handle ambiguous reductions with greater precision than traditional single-stem pipelines allow.
 
+## Add the core and model data
+
+The core `org.egothor:radixor` JAR contains no language dictionary. A minimal application adds one model; broad deployments may use the optional standard pack:
+
+```groovy
+dependencies {
+    implementation 'org.egothor:radixor:<radixor-version>'
+    runtimeOnly 'org.egothor:radixor-model-pl-pl-unimorph:1.0.0'
+}
+```
+
+`StemmerPatchTrieLoader.loadCompiled(Language.PL_PL, ...)` resolves the default `pl-pl-unimorph`. `pl-pl-polimorf` is a separate optional model selected by stable model ID. Follow [Model Selection and Loading](model-selection-and-loading.md) for runnable examples or choose artifacts from the generated [model catalog](stemmer-model-catalog.md).
+
 ## Start here
 
 - Read [Fast Track](fast-track.md) when you want the shortest path to a working bundled stemmer.
+- Use [Model Selection and Loading](model-selection-and-loading.md) for default, explicit, dual-model, and ClassLoader examples.
 - Use [Integration Deep Dive](integration-deep-dive.md) when you are wiring Radixor into a real application or search pipeline.
 - Read [Quick Start](quick-start.md) for the broader developer walkthrough after the first result works.
-- Use [Built-in Languages](built-in-languages.md) to find the bundled dictionaries exposed by Radixor.
+- Use [Built-in Languages](built-in-languages.md) to interpret language defaults and optional model variants.
 - Review [Benchmarking](benchmarking.md) and [Benchmark Results](benchmarks/index.md) for reproducible performance and quality methodology.
 - Open [CI Reports](reports.md) to inspect published build artifacts and quality metrics.
 - See the historical paper: [*Lemmatizer for Document Information Retrieval Systems in JAVA*](https://www.researchgate.net/publication/221512865_Lemmatizer_for_Document_Information_Retrieval_Systems_in_JAVA).
