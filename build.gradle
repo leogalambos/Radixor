@@ -850,7 +850,10 @@ pitest {
     excludedTestClasses = [
         'org.egothor.stemmer.CompileIntegrationTest',
         'org.egothor.stemmer.StemmerPatchTrieLoaderTest',
-        'org.egothor.stemmer.StemmerKnowledgeExperimentTest'
+        'org.egothor.stemmer.StemmerKnowledgeExperimentTest',
+        // These integration tests require dedicated Gradle task wiring and must not run in PIT worker JVMs.
+        'org.egothor.stemmer.FullRuntimeModelIntegrationTest',
+        'org.egothor.stemmer.ModelDependencyResolutionTest'
     ]
     outputFormats = ['XML', 'HTML']
     timestampedReports = false
