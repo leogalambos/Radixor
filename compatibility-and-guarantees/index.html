@@ -500,6 +500,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../model-selection-and-loading/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model Selection and Loading
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../programmatic-loading-and-building/" class="md-nav__link">
         
   
@@ -691,6 +719,62 @@
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../stemmer-models/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stemmer Models
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../stemmer-model-catalog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Published Model Catalog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -1144,10 +1228,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#bundled-dictionary-contents" class="md-nav__link">
+  <a href="#independently-versioned-model-contents" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Bundled dictionary contents
+        Independently versioned model contents
       
     </span>
   </a>
@@ -2436,6 +2520,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../builds/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Historical Builds
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../test-taxonomy-and-filtering/" class="md-nav__link">
         
   
@@ -2619,10 +2731,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#bundled-dictionary-contents" class="md-nav__link">
+  <a href="#independently-versioned-model-contents" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Bundled dictionary contents
+        Independently versioned model contents
       
     </span>
   </a>
@@ -2790,7 +2902,7 @@
 <p>This API is expected to remain supportable across future versions. The preferred compatibility model is additive evolution: improving documentation, clarifying behavior, and adding capabilities without unnecessary disruption of existing usage patterns.</p>
 <p>Examples of likely additive evolution include:</p>
 <ul>
-<li>additional bundled language resources,</li>
+<li>additional independently versioned language models,</li>
 <li>fuller support for diacritics or native-script language resources,</li>
 <li>expanded documentation and operational tooling,</li>
 <li>new convenience methods that do not break existing code.</li>
@@ -2821,6 +2933,7 @@
 <p>Compiled <code>FrequencyTrie</code> instances are immutable and thread-safe for concurrent reads. Visitor sinks are caller-owned and are not retained by the trie. Stored values passed to sinks are the model-owned trie values; for <code>FrequencyTrie&lt;String&gt;</code> patch tries, those patch strings are immutable stored strings rather than fresh per-result strings.</p>
 <h3 id="stable-patch-application-behavior">Stable patch application behavior</h3>
 <p>Serialized patch-command strings remain the stable stored representation used by textual dictionaries and binary artifacts. Runtime stemming should use <code>CompiledPatchCommand</code> values produced by <code>StemmerPatchTrieLoader.loadCompiled(...)</code>, <code>StemmerPatchTrieLoader.loadBinaryCompiled(...)</code>, or <code>PatchCommandEncoder.compile(...)</code>.</p>
+<p>Language-default, descriptor, and stable model-ID <code>loadCompiled</code> entry points share the same compiled-value conversion. Explicit model IDs never fall back to a language default. Model loading is not cached, and construction-memory requirements are model-dependent; the unusually large PoliMorf input is verified separately with a 6 GiB maximum heap.</p>
 <p>The historical <code>PatchCommandEncoder.apply(...)</code> and String-based <code>applyTo(...)</code> overloads remain compatibility APIs during the 2.x transition, but they are deprecated because they reparse the patch-command string on each application. See <a href="../migration-and-backward-compatibility/">Migration and Backward Compatibility</a> for old and new code examples.</p>
 <p>Compiled buffer-oriented <code>CompiledPatchCommand.applyTo(...)</code> overloads use caller-owned output storage. They do not retain output arrays and report insufficient capacity with <code>CompiledPatchCommand.APPLY_INSUFFICIENT_CAPACITY</code>.</p>
 <h3 id="stable-reduction-mode-intent">Stable reduction-mode intent</h3>
@@ -2838,7 +2951,7 @@ patch command.</p>
 <ul>
 <li>improved internal data structures,</li>
 <li>changes inside <code>org.egothor.stemmer.trie</code>,</li>
-<li>expanded bundled dictionaries,</li>
+<li>expanded model dictionaries,</li>
 <li>additional supported languages,</li>
 <li>improved native-script handling,</li>
 <li>better benchmarks, tests, and reports,</li>
@@ -2847,9 +2960,9 @@ patch command.</p>
 <p>The project should be able to improve substantially while keeping the main user-facing integration model intact.</p>
 <h2 id="what-may-change-more-cautiously">What may change more cautiously</h2>
 <p>Some areas should be treated as stable in intent but still approached carefully when changed.</p>
-<h3 id="bundled-dictionary-contents">Bundled dictionary contents</h3>
-<p>Bundled resources are versioned project data, not immutable language standards. Their contents may improve over time.</p>
-<p>That means stemming outcomes can legitimately change when bundled dictionaries are refined or expanded. Such changes are compatible with the project’s direction, but they should still be understood as behavior changes at the lexical-resource level.</p>
+<h3 id="independently-versioned-model-contents">Independently versioned model contents</h3>
+<p>Model resources are independently versioned project data, not immutable language standards. Their contents may improve over time.</p>
+<p>That means stemming outcomes can legitimately change when a model artifact is updated. Such changes are separate from core compatibility and should be reviewed as lexical-resource behavior changes.</p>
 <h3 id="binary-format-evolution">Binary format evolution</h3>
 <p>Compiled binary artifacts are an intended project output, but binary-format evolution may still be needed in future versions.</p>
 <p>If the format changes, that should be handled deliberately and documented clearly. Users should not assume that every historical persisted artifact will remain readable forever without versioning considerations. What should remain stable is the project’s support for compiled artifact workflows, not necessarily perpetual cross-version binary interchange without explicit format evolution rules.</p>
@@ -2872,7 +2985,7 @@ patch command.</p>
 <li>internal trie package details,</li>
 <li>undocumented internal classes or intermediate representations,</li>
 <li>incidental internal ordering outside documented lookup semantics,</li>
-<li>assumptions that bundled dictionary contents will never evolve,</li>
+<li>assumptions that a model's dictionary contents will never evolve across model versions,</li>
 <li>assumptions that internal binary-format details are frozen forever.</li>
 </ul>
 <p>If a behavior is important to your integration, it should ideally be documented at the public API or project-documentation level rather than inferred from internal implementation details.</p>

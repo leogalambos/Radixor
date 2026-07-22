@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#start-here" class="md-skip">
+        <a href="#add-the-core-and-model-data" class="md-skip">
           Skip to content
         </a>
       
@@ -302,6 +302,17 @@
       Table of contents
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#add-the-core-and-model-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Add the core and model data
+      
+    </span>
+  </a>
+  
+</li>
       
         <li class="md-nav__item">
   <a href="#start-here" class="md-nav__link">
@@ -552,6 +563,34 @@
   
   
     <li class="md-nav__item">
+      <a href="model-selection-and-loading/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model Selection and Loading
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="programmatic-loading-and-building/" class="md-nav__link">
         
   
@@ -743,6 +782,62 @@
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="stemmer-models/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stemmer Models
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="stemmer-model-catalog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Published Model Catalog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -2190,6 +2285,34 @@
   
   
     <li class="md-nav__item">
+      <a href="builds/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Historical Builds
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="test-taxonomy-and-filtering/" class="md-nav__link">
         
   
@@ -2241,6 +2364,17 @@
       Table of contents
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#add-the-core-and-model-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Add the core and model data
+      
+    </span>
+  </a>
+  
+</li>
       
         <li class="md-nav__item">
   <a href="#start-here" class="md-nav__link">
@@ -2298,12 +2432,21 @@
 <li><strong>Operational transparency</strong> through continuously published quality and benchmark reports</li>
 </ul>
 <p>Radixor is intended for teams that require consistent stemming quality at scale, while retaining the ability to evolve lexical resources after compilation and to handle ambiguous reductions with greater precision than traditional single-stem pipelines allow.</p>
+<h2 id="add-the-core-and-model-data">Add the core and model data</h2>
+<p>The core <code>org.egothor:radixor</code> JAR contains no language dictionary. A minimal application adds one model; broad deployments may use the optional standard pack:</p>
+<div class="highlight"><pre><span></span><code><span class="n">dependencies</span><span class="w"> </span><span class="o">{</span>
+<span class="w">    </span><span class="n">implementation</span><span class="w"> </span><span class="s1">&#39;org.egothor:radixor:&lt;radixor-version&gt;&#39;</span>
+<span class="w">    </span><span class="n">runtimeOnly</span><span class="w"> </span><span class="s1">&#39;org.egothor:radixor-model-pl-pl-unimorph:1.0.0&#39;</span>
+<span class="o">}</span>
+</code></pre></div>
+<p><code>StemmerPatchTrieLoader.loadCompiled(Language.PL_PL, ...)</code> resolves the default <code>pl-pl-unimorph</code>. <code>pl-pl-polimorf</code> is a separate optional model selected by stable model ID. Follow <a href="model-selection-and-loading/">Model Selection and Loading</a> for runnable examples or choose artifacts from the generated <a href="stemmer-model-catalog/">model catalog</a>.</p>
 <h2 id="start-here">Start here</h2>
 <ul>
 <li>Read <a href="fast-track/">Fast Track</a> when you want the shortest path to a working bundled stemmer.</li>
+<li>Use <a href="model-selection-and-loading/">Model Selection and Loading</a> for default, explicit, dual-model, and ClassLoader examples.</li>
 <li>Use <a href="integration-deep-dive/">Integration Deep Dive</a> when you are wiring Radixor into a real application or search pipeline.</li>
 <li>Read <a href="quick-start/">Quick Start</a> for the broader developer walkthrough after the first result works.</li>
-<li>Use <a href="built-in-languages/">Built-in Languages</a> to find the bundled dictionaries exposed by Radixor.</li>
+<li>Use <a href="built-in-languages/">Built-in Languages</a> to interpret language defaults and optional model variants.</li>
 <li>Review <a href="benchmarking/">Benchmarking</a> and <a href="benchmarks/">Benchmark Results</a> for reproducible performance and quality methodology.</li>
 <li>Open <a href="reports/">CI Reports</a> to inspect published build artifacts and quality metrics.</li>
 <li>See the historical paper: <a href="https://www.researchgate.net/publication/221512865_Lemmatizer_for_Document_Information_Retrieval_Systems_in_JAVA"><em>Lemmatizer for Document Information Retrieval Systems in JAVA</em></a>.</li>

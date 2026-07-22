@@ -500,6 +500,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../model-selection-and-loading/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model Selection and Loading
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../programmatic-loading-and-building/" class="md-nav__link">
         
   
@@ -691,6 +719,62 @@
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../stemmer-models/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stemmer Models
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../stemmer-model-catalog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Published Model Catalog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -2242,6 +2326,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../builds/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Historical Builds
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../test-taxonomy-and-filtering/" class="md-nav__link">
         
   
@@ -2383,6 +2495,8 @@
 <p>The build-time flow is:</p>
 <div class="highlight"><pre><span></span><code>Dictionary -&gt; Mutable trie -&gt; Reduced trie -&gt; Compiled trie
 </code></pre></div>
+<p>For registered models, the dictionary is an independently versioned GZip resource discovered through a descriptor and verified before this flow begins. The model resource is input to trie construction, not a precompiled trie. See <a href="../model-selection-and-loading/">Model Selection and Loading</a> for discovery and <a href="../architecture/">Architecture</a> for component and release boundaries.</p>
+<p>Explicit descriptors and stable model IDs now use the same compiled-value path as language defaults. <code>loadCompiled(descriptor, ...)</code> and <code>loadCompiled(modelId, ...)</code> first build with serialized patch commands and then map those values to <code>CompiledPatchCommand</code> while preserving metadata, reduction semantics, and ranked <code>getAll</code> order. Very large inputs can have a high temporary construction peak; PoliMorf is verified in an isolated 6 GiB JVM rather than increasing ordinary test or Gradle daemon heaps.</p>
 <p>At runtime, the compiled trie does not directly return the final stem string. It returns one or more stored patch commands for the addressed key, and those commands are then applied to the original input word.</p>
 <h2 id="why-this-matters">Why this matters</h2>
 <p>This design gives Radixor several practical properties at once:</p>
@@ -2411,6 +2525,8 @@
 <li><a href="../programmatic-usage/">Programmatic usage</a></li>
 <li><a href="../cli-compilation/">CLI compilation</a></li>
 <li><a href="../dictionary-format/">Dictionary format</a></li>
+<li><a href="../model-selection-and-loading/">Model selection and loading</a></li>
+<li><a href="../stemmer-models/">Stemmer models</a></li>
 </ul>
 
 

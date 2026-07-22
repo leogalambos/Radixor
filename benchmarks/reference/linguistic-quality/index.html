@@ -500,6 +500,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../model-selection-and-loading/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model Selection and Loading
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../programmatic-loading-and-building/" class="md-nav__link">
         
   
@@ -691,6 +719,62 @@
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../stemmer-models/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stemmer Models
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../stemmer-model-catalog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Published Model Catalog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -2277,6 +2361,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../builds/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Historical Builds
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../test-taxonomy-and-filtering/" class="md-nav__link">
         
   
@@ -2442,7 +2554,8 @@
 <h1 id="linguistic-quality-methodology">Linguistic Quality Methodology</h1>
 <p>This evaluation measures agreement between the relation predicted by a stemmer and the gold-standard relation represented by Radixor dictionary groups. It does not require a generated stem to equal one predetermined lemma string. Runtime performance and linguistic quality are separate measurements.</p>
 <h2 id="scope-and-fair-comparison-rules">Scope and fair-comparison rules</h2>
-<p>The authoritative Radixor language universe is the reconciled set of <code>stemmer.gz</code> resources under <code>src/main/resources</code> and <code>StemmerPatchTrieLoader.Language</code>. Radixor is evaluated for every reconciled language. A third-party adapter is evaluated only for languages supported by its tested implementation and having a compatible Radixor dictionary; unsupported combinations are absent rather than assigned zero quality.</p>
+<p>The authoritative Radixor language universe is the reconciliation of registered default model descriptors and <code>StemmerPatchTrieLoader.Language</code>. Radixor is evaluated for every reconciled language. Optional models are separate comparison rows. A third-party adapter is evaluated only for languages supported by its tested implementation and having a compatible Radixor dictionary; unsupported combinations are absent rather than assigned zero quality.</p>
+<p>Model identity is part of the candidate identity. Default Polish means <code>pl-pl-unimorph</code>; optional PoliMorf means <code>pl-pl-polimorf</code>. Results for those inputs must not be combined or relabeled, and historical snapshots cannot acquire a newer model identity retroactively.</p>
 <p>Within one language and dictionary mode, every adapter receives the same original included forms. Exact duplicates are removed only within one dictionary row. Identical surface forms in different rows remain distinct entries. Candidate strings use exact <code>String.equals</code>, with no evaluation-only lowercasing, normalization, accent removal, or gold-label-aware selection. Adapter preprocessing and lifecycle match the JMH comparison path.</p>
 <h2 id="gold-standard-pairs">Gold-standard pairs</h2>
 <p>Every usable dictionary row is a gold-standard equivalence group. An unordered pair from the same row is positive; a pair from different rows is negative. For group size <code>n</code>, <code>C2(n) = n * (n - 1) / 2</code>.</p>

@@ -16,7 +16,7 @@
         <link rel="prev" href="../migration-and-backward-compatibility/">
       
       
-        <link rel="next" href="../built-in-languages/">
+        <link rel="next" href="../stemmer-models/">
       
       
         
@@ -502,6 +502,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../model-selection-and-loading/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model Selection and Loading
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../programmatic-loading-and-building/" class="md-nav__link">
         
   
@@ -678,6 +706,17 @@
     <span class="md-ellipsis">
       
         What the CLI does
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#create-a-registered-custom-model-instead" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Create a registered custom model instead
       
     </span>
   </a>
@@ -1083,6 +1122,62 @@
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../stemmer-models/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stemmer Models
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../stemmer-model-catalog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Published Model Catalog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -2530,6 +2625,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../builds/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Historical Builds
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../test-taxonomy-and-filtering/" class="md-nav__link">
         
   
@@ -2589,6 +2712,17 @@
     <span class="md-ellipsis">
       
         What the CLI does
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#create-a-registered-custom-model-instead" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Create a registered custom model instead
       
     </span>
   </a>
@@ -2949,6 +3083,7 @@
 
 <h1 id="cli-compilation">CLI Compilation</h1>
 <p>Radixor provides a command-line compiler for turning line-oriented dictionary files into compact binary stemmer artifacts.</p>
+<p>The CLI output is not a model JAR. A model artifact contains a compressed textual dictionary, descriptor, index, checksum, and license so the runtime registry can discover and compile it. The CLI instead emits an already compiled binary trie for direct <code>loadBinaryCompiled(...)</code> use. Choose the model-module workflow when independently published classpath discovery is required; choose the CLI when the application owns a compiled binary asset.</p>
 <p>This is the preferred preparation workflow when stemming should run against an already compiled artifact rather than against raw dictionary input. The CLI reads the dictionary, derives patch commands, builds a mutable trie, applies the selected subtree reduction strategy, and writes the final compiled trie in the project binary format under GZip compression. The result is a deployment-ready <code>.radixor.gz</code> file that can be loaded directly by application code.</p>
 <h2 id="what-the-cli-does">What the CLI does</h2>
 <p>The <code>Compile</code> tool performs the following steps:</p>
@@ -2961,6 +3096,8 @@
 <li>writes the compiled trie as a GZip-compressed binary artifact.</li>
 </ol>
 <p>This workflow is intentionally aligned with the same dictionary semantics used elsewhere in the library. Remarks introduced by <code>#</code> or <code>//</code> are supported through the shared dictionary parser.</p>
+<h2 id="create-a-registered-custom-model-instead">Create a registered custom model instead</h2>
+<p>To publish or deploy a custom dictionary through <code>StemmerModelRegistry</code>, do not merely rename CLI output to <code>stemmer.gz</code>. Create <code>models/&lt;model-id&gt;</code>, preserve the textual dictionary as a GZip module input, provide source metadata and a license, apply <code>org.egothor.radixor.model</code>, and run the model validation tasks. The resulting JAR has an index, descriptor, namespaced textual dictionary, checksum, and license. Detailed packaging is documented in <a href="../stemmer-models/">Stemmer Models</a>; selection is documented in <a href="../model-selection-and-loading/">Model Selection and Loading</a>.</p>
 <h2 id="basic-usage">Basic usage</h2>
 <div class="highlight"><pre><span></span><code>java<span class="w"> </span>org.egothor.stemmer.Compile<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--input<span class="w"> </span>./data/stemmer.tsv<span class="w"> </span><span class="se">\</span>
@@ -3077,6 +3214,7 @@ runtime lookup depth without changing the preferred result returned by the stand
 <p>The ranked <code>getAll()</code> mode is the safest default. The unordered and dominant modes should be chosen only when their trade-offs are acceptable for the consuming application.</p>
 <h3 id="expect-memory-pressure-during-preparation-not-runtime">Expect memory pressure during preparation, not runtime</h3>
 <p>Compilation is usually a one-time step and is generally fast. The more important operational consideration is memory usage during preparation, because the dictionary-derived mutable structure exists before reduction compacts it into the final read-only trie. This is especially relevant for very large source dictionaries.</p>
+<p>The complete PoliMorf model is the current exceptional case: registered-model verification uses <code>runtimeModelIntegrationTest</code> with a 6 GiB maximum heap, configurable through <code>-PradixorLargeModelMaxHeap=&lt;size&gt;</code>. This setting applies only to that isolated test process, not the Gradle daemon or ordinary tests.</p>
 <h2 id="example-workflow">Example workflow</h2>
 <h3 id="1-prepare-a-dictionary">1. Prepare a dictionary</h3>
 <div class="highlight"><pre><span></span><code>run running runs    ran
@@ -3125,6 +3263,10 @@ connect connected   connecting
 <li><a href="../programmatic-usage/">Programmatic usage</a></li>
 <li><a href="../architecture-and-reduction/">Architecture and reduction</a></li>
 </ul>
+<div class="admonition note">
+<p class="admonition-title">Radixor 4 model artifacts</p>
+<p>Language dictionaries are independently versioned runtime model artifacts, not resources embedded in <code>radixor</code>. Language-based APIs resolve deterministic defaults through <code>StemmerModelRegistry</code>; see <a href="../stemmer-models/">Stemmer Models</a>.</p>
+</div>
 
 
 

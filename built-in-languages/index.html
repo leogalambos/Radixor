@@ -13,7 +13,7 @@
         <link rel="canonical" href="https://leogalambos.github.io/Radixor/built-in-languages/">
       
       
-        <link rel="prev" href="../cli-compilation/">
+        <link rel="prev" href="../stemmer-model-catalog/">
       
       
         <link rel="next" href="../dictionary-format/">
@@ -80,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#built-in-languages" class="md-skip">
+        <a href="#built-in-languages-and-default-models" class="md-skip">
           Skip to content
         </a>
       
@@ -500,6 +500,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../model-selection-and-loading/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model Selection and Loading
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../programmatic-loading-and-building/" class="md-nav__link">
         
   
@@ -698,6 +726,62 @@
                 
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../stemmer-models/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stemmer Models
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../stemmer-model-catalog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Published Model Catalog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
     
   
   
@@ -761,10 +845,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
+  <a href="#defaults-and-variants" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Overview
+        Defaults and variants
       
     </span>
   </a>
@@ -772,10 +856,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#supported-bundled-languages" class="md-nav__link">
+  <a href="#the-polish-dual-model-case" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Supported bundled languages
+        The Polish dual-model case
       
     </span>
   </a>
@@ -783,10 +867,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#basic-usage" class="md-nav__link">
+  <a href="#dependency-patterns" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Basic usage
+        Dependency patterns
       
     </span>
   </a>
@@ -794,10 +878,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#example-stemming-with-a-bundled-dictionary" class="md-nav__link">
+  <a href="#loading-a-language-default" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Example: stemming with a bundled dictionary
+        Loading a language default
       
     </span>
   </a>
@@ -805,10 +889,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#traversal-behavior-and-right-to-left-languages" class="md-nav__link">
+  <a href="#writing-direction" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Traversal behavior and right-to-left languages
+        Writing direction
       
     </span>
   </a>
@@ -816,10 +900,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#reduction-behavior" class="md-nav__link">
+  <a href="#custom-and-persisted-alternatives" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Reduction behavior
+        Custom and persisted alternatives
       
     </span>
   </a>
@@ -827,98 +911,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#intended-role-of-bundled-dictionaries" class="md-nav__link">
+  <a href="#benchmark-interpretation" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Intended role of bundled dictionaries
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#character-representation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Character representation
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#when-to-prefer-custom-dictionaries" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        When to prefer custom dictionaries
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#production-recommendation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Production recommendation
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#example-refinement-workflow" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Example refinement workflow
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#extending-language-support" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Extending language support
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#related-api-surface" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Related API surface
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#next-steps" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Next steps
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#summary" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Summary
+        Benchmark interpretation
       
     </span>
   </a>
@@ -2352,6 +2348,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../builds/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Historical Builds
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../test-taxonomy-and-filtering/" class="md-nav__link">
         
   
@@ -2407,10 +2431,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
+  <a href="#defaults-and-variants" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Overview
+        Defaults and variants
       
     </span>
   </a>
@@ -2418,10 +2442,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#supported-bundled-languages" class="md-nav__link">
+  <a href="#the-polish-dual-model-case" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Supported bundled languages
+        The Polish dual-model case
       
     </span>
   </a>
@@ -2429,10 +2453,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#basic-usage" class="md-nav__link">
+  <a href="#dependency-patterns" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Basic usage
+        Dependency patterns
       
     </span>
   </a>
@@ -2440,10 +2464,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#example-stemming-with-a-bundled-dictionary" class="md-nav__link">
+  <a href="#loading-a-language-default" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Example: stemming with a bundled dictionary
+        Loading a language default
       
     </span>
   </a>
@@ -2451,10 +2475,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#traversal-behavior-and-right-to-left-languages" class="md-nav__link">
+  <a href="#writing-direction" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Traversal behavior and right-to-left languages
+        Writing direction
       
     </span>
   </a>
@@ -2462,10 +2486,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#reduction-behavior" class="md-nav__link">
+  <a href="#custom-and-persisted-alternatives" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Reduction behavior
+        Custom and persisted alternatives
       
     </span>
   </a>
@@ -2473,98 +2497,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#intended-role-of-bundled-dictionaries" class="md-nav__link">
+  <a href="#benchmark-interpretation" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Intended role of bundled dictionaries
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#character-representation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Character representation
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#when-to-prefer-custom-dictionaries" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        When to prefer custom dictionaries
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#production-recommendation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Production recommendation
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#example-refinement-workflow" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Example refinement workflow
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#extending-language-support" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Extending language support
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#related-api-surface" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Related API surface
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#next-steps" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Next steps
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#summary" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Summary
+        Benchmark interpretation
       
     </span>
   </a>
@@ -2591,358 +2527,215 @@
   
 
 
-<h1 id="built-in-languages">Built-in Languages</h1>
-<p>Radixor ships with a curated set of bundled stemmer dictionaries that can be loaded directly from the library distribution. These resources are intended to provide an immediately usable baseline for evaluation, prototyping, integration, and general-purpose stemming workloads, while still fitting naturally into workflows where the bundled baseline is later refined, extended, or replaced with custom lexical data.</p>
-<h2 id="overview">Overview</h2>
-<p>Bundled dictionaries are exposed through:</p>
-<div class="highlight"><pre><span></span><code><span class="n">org</span><span class="p">.</span><span class="na">egothor</span><span class="p">.</span><span class="na">stemmer</span><span class="p">.</span><span class="na">StemmerPatchTrieLoader</span><span class="p">.</span><span class="na">Language</span>
-</code></pre></div>
-<p>Each bundled dictionary is packaged with the library as a compressed UTF-8 text resource. When loaded through the runtime API, the resource is parsed by <code>StemmerDictionaryParser</code>, transformed into patch-command mappings, and compiled into a read-only <code>FrequencyTrie&lt;CompiledPatchCommand&gt;</code> by <code>StemmerPatchTrieLoader</code>.</p>
-<p>The bundled language definition also carries a language-level right-to-left flag. That flag is used by the loader to derive the <code>WordTraversalDirection</code> used for both trie-key construction and patch-command generation. In practice, left-to-right bundled languages use historical backward Egothor traversal, while right-to-left bundled languages use forward traversal over the stored form.</p>
-<h2 id="supported-bundled-languages">Supported bundled languages</h2>
-<p>The following bundled language identifiers are currently available:</p>
+<h1 id="built-in-languages-and-default-models">Built-in Languages and Default Models</h1>
+<p>“Supported language” means that Radixor defines a language enum value and publishes a corresponding default model artifact. It does not mean that a dictionary is embedded in the core JAR. Applications add model artifacts explicitly or use the optional standard pack.</p>
+<p>The language enum carries language identity, writing direction, a legacy resource-directory name, and the stable default model ID. A model descriptor carries the independently versioned model identity and resource. See <a href="../model-selection-and-loading/">Model Selection and Loading</a> for the API and the generated <a href="../stemmer-model-catalog/">model catalog</a> for versions, provenance, checksums, and sizes.</p>
+<h2 id="defaults-and-variants">Defaults and variants</h2>
 <table>
 <thead>
 <tr>
 <th>Language</th>
-<th>Enum constant</th>
-<th style="text-align: right;">Writing direction</th>
-<th>Notes</th>
-<th>Benchmark page</th>
+<th>Enum</th>
+<th>Default model ID</th>
+<th>Default artifact</th>
+<th>Optional variants</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>Czech</td>
 <td><code>CS_CZ</code></td>
-<td style="text-align: right;">LTR</td>
-<td>Bundled general-purpose dictionary</td>
-<td><a href="../benchmarks/languages/czech/">Czech</a></td>
+<td><code>cs-cz-default</code></td>
+<td><code>org.egothor:radixor-model-cs-cz-default</code></td>
+<td>—</td>
 </tr>
 <tr>
 <td>Danish</td>
 <td><code>DA_DK</code></td>
-<td style="text-align: right;">LTR</td>
-<td>Bundled general-purpose dictionary</td>
-<td><a href="../benchmarks/languages/danish/">Danish</a></td>
+<td><code>da-dk-default</code></td>
+<td><code>org.egothor:radixor-model-da-dk-default</code></td>
+<td>—</td>
 </tr>
 <tr>
 <td>German</td>
 <td><code>DE_DE</code></td>
-<td style="text-align: right;">LTR</td>
-<td>Bundled general-purpose dictionary</td>
-<td><a href="../benchmarks/languages/german/">German</a></td>
+<td><code>de-de-default</code></td>
+<td><code>org.egothor:radixor-model-de-de-default</code></td>
+<td>—</td>
 </tr>
 <tr>
 <td>Spanish</td>
 <td><code>ES_ES</code></td>
-<td style="text-align: right;">LTR</td>
-<td>Bundled general-purpose dictionary</td>
-<td><a href="../benchmarks/languages/spanish/">Spanish</a></td>
+<td><code>es-es-default</code></td>
+<td><code>org.egothor:radixor-model-es-es-default</code></td>
+<td>—</td>
 </tr>
 <tr>
 <td>Persian</td>
 <td><code>FA_IR</code></td>
-<td style="text-align: right;">RTL</td>
-<td>Bundled dictionary uses forward traversal over the stored form</td>
-<td><a href="../benchmarks/languages/persian/">Persian</a></td>
+<td><code>fa-ir-default</code></td>
+<td><code>org.egothor:radixor-model-fa-ir-default</code></td>
+<td>—</td>
 </tr>
 <tr>
 <td>Finnish</td>
 <td><code>FI_FI</code></td>
-<td style="text-align: right;">LTR</td>
-<td>Bundled general-purpose dictionary</td>
-<td><a href="../benchmarks/languages/finnish/">Finnish</a></td>
+<td><code>fi-fi-default</code></td>
+<td><code>org.egothor:radixor-model-fi-fi-default</code></td>
+<td>—</td>
 </tr>
 <tr>
 <td>French</td>
 <td><code>FR_FR</code></td>
-<td style="text-align: right;">LTR</td>
-<td>Bundled general-purpose dictionary</td>
-<td><a href="../benchmarks/languages/french/">French</a></td>
+<td><code>fr-fr-default</code></td>
+<td><code>org.egothor:radixor-model-fr-fr-default</code></td>
+<td>—</td>
 </tr>
 <tr>
 <td>Hebrew</td>
 <td><code>HE_IL</code></td>
-<td style="text-align: right;">RTL</td>
-<td>Bundled dictionary uses forward traversal over the stored form</td>
-<td>No same-language external benchmark in this run</td>
+<td><code>he-il-default</code></td>
+<td><code>org.egothor:radixor-model-he-il-default</code></td>
+<td>—</td>
 </tr>
 <tr>
 <td>Hungarian</td>
 <td><code>HU_HU</code></td>
-<td style="text-align: right;">LTR</td>
-<td>Bundled general-purpose dictionary</td>
-<td><a href="../benchmarks/languages/hungarian/">Hungarian</a></td>
+<td><code>hu-hu-default</code></td>
+<td><code>org.egothor:radixor-model-hu-hu-default</code></td>
+<td>—</td>
 </tr>
 <tr>
 <td>Italian</td>
 <td><code>IT_IT</code></td>
-<td style="text-align: right;">LTR</td>
-<td>Bundled general-purpose dictionary</td>
-<td><a href="../benchmarks/languages/italian/">Italian</a></td>
+<td><code>it-it-default</code></td>
+<td><code>org.egothor:radixor-model-it-it-default</code></td>
+<td>—</td>
 </tr>
 <tr>
 <td>Norwegian Bokmål</td>
 <td><code>NB_NO</code></td>
-<td style="text-align: right;">LTR</td>
-<td>Bundled general-purpose dictionary</td>
-<td><a href="../benchmarks/languages/norwegian-bokmal/">Norwegian Bokmal</a></td>
+<td><code>nb-no-default</code></td>
+<td><code>org.egothor:radixor-model-nb-no-default</code></td>
+<td>—</td>
 </tr>
 <tr>
 <td>Dutch</td>
 <td><code>NL_NL</code></td>
-<td style="text-align: right;">LTR</td>
-<td>Bundled general-purpose dictionary</td>
-<td><a href="../benchmarks/languages/dutch/">Dutch</a></td>
+<td><code>nl-nl-default</code></td>
+<td><code>org.egothor:radixor-model-nl-nl-default</code></td>
+<td>—</td>
 </tr>
 <tr>
 <td>Norwegian Nynorsk</td>
 <td><code>NN_NO</code></td>
-<td style="text-align: right;">LTR</td>
-<td>Bundled general-purpose dictionary</td>
-<td><a href="../benchmarks/languages/norwegian-nynorsk/">Norwegian Nynorsk</a></td>
+<td><code>nn-no-default</code></td>
+<td><code>org.egothor:radixor-model-nn-no-default</code></td>
+<td>—</td>
 </tr>
 <tr>
 <td>Polish</td>
 <td><code>PL_PL</code></td>
-<td style="text-align: right;">LTR</td>
-<td>Bundled general-purpose dictionary</td>
-<td><a href="../benchmarks/languages/polish/">Polish</a></td>
+<td><code>pl-pl-unimorph</code></td>
+<td><code>org.egothor:radixor-model-pl-pl-unimorph</code></td>
+<td><code>pl-pl-polimorf</code> / <code>org.egothor:radixor-model-pl-pl-polimorf</code></td>
 </tr>
 <tr>
 <td>Portuguese</td>
 <td><code>PT_PT</code></td>
-<td style="text-align: right;">LTR</td>
-<td>Bundled general-purpose dictionary</td>
-<td><a href="../benchmarks/languages/portuguese/">Portuguese</a></td>
+<td><code>pt-pt-default</code></td>
+<td><code>org.egothor:radixor-model-pt-pt-default</code></td>
+<td>—</td>
 </tr>
 <tr>
 <td>Russian</td>
 <td><code>RU_RU</code></td>
-<td style="text-align: right;">LTR</td>
-<td>Bundled general-purpose dictionary</td>
-<td><a href="../benchmarks/languages/russian/">Russian</a></td>
+<td><code>ru-ru-default</code></td>
+<td><code>org.egothor:radixor-model-ru-ru-default</code></td>
+<td>—</td>
 </tr>
 <tr>
 <td>Swedish</td>
 <td><code>SV_SE</code></td>
-<td style="text-align: right;">LTR</td>
-<td>Bundled general-purpose dictionary</td>
-<td><a href="../benchmarks/languages/swedish/">Swedish</a></td>
+<td><code>sv-se-default</code></td>
+<td><code>org.egothor:radixor-model-sv-se-default</code></td>
+<td>—</td>
 </tr>
 <tr>
 <td>Ukrainian</td>
 <td><code>UK_UA</code></td>
-<td style="text-align: right;">LTR</td>
-<td>Bundled general-purpose dictionary</td>
-<td><a href="../benchmarks/languages/ukrainian/">Ukrainian</a></td>
+<td><code>uk-ua-default</code></td>
+<td><code>org.egothor:radixor-model-uk-ua-default</code></td>
+<td>—</td>
 </tr>
 <tr>
 <td>English</td>
 <td><code>US_UK</code></td>
-<td style="text-align: right;">LTR</td>
-<td>Bundled general-purpose dictionary</td>
-<td><a href="../benchmarks/languages/english/">English</a></td>
+<td><code>us-uk-default</code></td>
+<td><code>org.egothor:radixor-model-us-uk-default</code></td>
+<td>—</td>
 </tr>
 <tr>
 <td>Yiddish</td>
 <td><code>YI</code></td>
-<td style="text-align: right;">RTL</td>
-<td>Bundled dictionary uses forward traversal over the stored form</td>
-<td><a href="../benchmarks/languages/yiddish/">Yiddish</a></td>
+<td><code>yi-default</code></td>
+<td><code>org.egothor:radixor-model-yi-default</code></td>
+<td>—</td>
 </tr>
 </tbody>
 </table>
-<h2 id="basic-usage">Basic usage</h2>
-<p>Load a bundled dictionary like this:</p>
-<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">java.io.IOException</span><span class="p">;</span>
-
-<span class="kn">import</span><span class="w"> </span><span class="nn">org.egothor.stemmer.CompiledPatchCommand</span><span class="p">;</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">org.egothor.stemmer.FrequencyTrie</span><span class="p">;</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">org.egothor.stemmer.ReductionMode</span><span class="p">;</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">org.egothor.stemmer.StemmerPatchTrieLoader</span><span class="p">;</span>
-
-<span class="kd">public</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kd">class</span> <span class="nc">BuiltInExample</span><span class="w"> </span><span class="p">{</span>
-
-<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="nf">BuiltInExample</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">throw</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">AssertionError</span><span class="p">(</span><span class="s">&quot;No instances.&quot;</span><span class="p">);</span>
-<span class="w">    </span><span class="p">}</span>
-
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kd">final</span><span class="w"> </span><span class="n">String</span><span class="o">[]</span><span class="w"> </span><span class="n">arguments</span><span class="p">)</span><span class="w"> </span><span class="kd">throws</span><span class="w"> </span><span class="n">IOException</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="kd">final</span><span class="w"> </span><span class="n">FrequencyTrie</span><span class="o">&lt;</span><span class="n">CompiledPatchCommand</span><span class="o">&gt;</span><span class="w"> </span><span class="n">trie</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">StemmerPatchTrieLoader</span><span class="p">.</span><span class="na">loadCompiled</span><span class="p">(</span>
+<p>The maintained table deliberately avoids duplicating mutable provenance and checksum fields. Those values come from module metadata and are generated into the model catalog.</p>
+<h2 id="the-polish-dual-model-case">The Polish dual-model case</h2>
+<p><code>PL_PL</code> represents Polish. It is not an alias for either source dictionary.</p>
+<ul>
+<li><code>loadCompiled(Language.PL_PL, ...)</code> resolves <code>pl-pl-unimorph</code>.</li>
+<li><code>registry.require("pl-pl-polimorf")</code> resolves the optional PoliMorf model.</li>
+<li><code>StemmerPatchTrieLoader.loadCompiled("pl-pl-polimorf", true, reductionMode)</code> constructs its compiled trie explicitly; complete construction is verified with a dedicated 6 GiB test heap.</li>
+<li>Both artifacts may be present and loaded independently.</li>
+<li>Adding PoliMorf does not change the language default.</li>
+<li>Radixor does not merge their dictionaries or outputs automatically.</li>
+</ul>
+<p>UniMorph and PoliMorf have different lexical sources and provenance. Applications should compare outputs with application-specific regression tests before changing an explicit model choice.</p>
+<h2 id="dependency-patterns">Dependency patterns</h2>
+<p>Minimal English:</p>
+<div class="highlight"><pre><span></span><code><span class="n">dependencies</span><span class="w"> </span><span class="o">{</span>
+<span class="w">    </span><span class="n">implementation</span><span class="w"> </span><span class="s1">&#39;org.egothor:radixor:&lt;radixor-version&gt;&#39;</span>
+<span class="w">    </span><span class="n">runtimeOnly</span><span class="w"> </span><span class="s1">&#39;org.egothor:radixor-model-us-uk-default:1.0.0&#39;</span>
+<span class="o">}</span>
+</code></pre></div>
+<p>All documented defaults:</p>
+<div class="highlight"><pre><span></span><code><span class="n">dependencies</span><span class="w"> </span><span class="o">{</span>
+<span class="w">    </span><span class="n">implementation</span><span class="w"> </span><span class="s1">&#39;org.egothor:radixor:&lt;radixor-version&gt;&#39;</span>
+<span class="w">    </span><span class="n">runtimeOnly</span><span class="w"> </span><span class="s1">&#39;org.egothor:radixor-models-standard:&lt;catalog-version&gt;&#39;</span>
+<span class="o">}</span>
+</code></pre></div>
+<p>The standard pack is metadata-only and excludes optional PoliMorf.</p>
+<p>Every individual model artifact carries its own provenance and licensing material. UniMorph
+models carry different model-specific CC BY-SA 3.0 notices because their official language
+repositories identify different lexical sources and contributors. Each notice preserves upstream
+attribution and records the Radixor transformations and Leo Galambos contribution statement.
+Legacy imports disclose when an exact historical revision was not recorded; this is a
+reproducibility limitation, not a claim that the source or license is unknown.</p>
+<h2 id="loading-a-language-default">Loading a language default</h2>
+<div class="highlight"><pre><span></span><code><span class="kd">final</span><span class="w"> </span><span class="n">FrequencyTrie</span><span class="o">&lt;</span><span class="n">CompiledPatchCommand</span><span class="o">&gt;</span><span class="w"> </span><span class="n">trie</span><span class="w"> </span><span class="o">=</span>
+<span class="w">        </span><span class="n">StemmerPatchTrieLoader</span><span class="p">.</span><span class="na">loadCompiled</span><span class="p">(</span>
 <span class="w">                </span><span class="n">StemmerPatchTrieLoader</span><span class="p">.</span><span class="na">Language</span><span class="p">.</span><span class="na">US_UK</span><span class="p">,</span>
 <span class="w">                </span><span class="kc">true</span><span class="p">,</span>
 <span class="w">                </span><span class="n">ReductionMode</span><span class="p">.</span><span class="na">MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS</span><span class="p">);</span>
-
-<span class="w">        </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="n">trie</span><span class="p">.</span><span class="na">traversalDirection</span><span class="p">());</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="p">}</span>
 </code></pre></div>
-<p>This call loads the bundled dictionary resource for the selected language, parses its lexical entries, derives patch-command mappings, and compiles the result into a read-only trie.</p>
-<h2 id="example-stemming-with-a-bundled-dictionary">Example: stemming with a bundled dictionary</h2>
-<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">java.io.IOException</span><span class="p">;</span>
-
-<span class="kn">import</span><span class="w"> </span><span class="nn">org.egothor.stemmer.CompiledPatchCommand</span><span class="p">;</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">org.egothor.stemmer.FrequencyTrie</span><span class="p">;</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">org.egothor.stemmer.ReductionMode</span><span class="p">;</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">org.egothor.stemmer.StemmerPatchTrieLoader</span><span class="p">;</span>
-
-<span class="kd">public</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kd">class</span> <span class="nc">EnglishExample</span><span class="w"> </span><span class="p">{</span>
-
-<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="nf">EnglishExample</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">throw</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">AssertionError</span><span class="p">(</span><span class="s">&quot;No instances.&quot;</span><span class="p">);</span>
-<span class="w">    </span><span class="p">}</span>
-
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kd">final</span><span class="w"> </span><span class="n">String</span><span class="o">[]</span><span class="w"> </span><span class="n">arguments</span><span class="p">)</span><span class="w"> </span><span class="kd">throws</span><span class="w"> </span><span class="n">IOException</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="kd">final</span><span class="w"> </span><span class="n">FrequencyTrie</span><span class="o">&lt;</span><span class="n">CompiledPatchCommand</span><span class="o">&gt;</span><span class="w"> </span><span class="n">trie</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">StemmerPatchTrieLoader</span><span class="p">.</span><span class="na">loadCompiled</span><span class="p">(</span>
-<span class="w">                </span><span class="n">StemmerPatchTrieLoader</span><span class="p">.</span><span class="na">Language</span><span class="p">.</span><span class="na">US_UK</span><span class="p">,</span>
-<span class="w">                </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">                </span><span class="n">ReductionMode</span><span class="p">.</span><span class="na">MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS</span><span class="p">);</span>
-
-<span class="w">        </span><span class="kd">final</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">word</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;running&quot;</span><span class="p">;</span>
-<span class="w">        </span><span class="kd">final</span><span class="w"> </span><span class="n">CompiledPatchCommand</span><span class="w"> </span><span class="n">patch</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">trie</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">word</span><span class="p">);</span>
-<span class="w">        </span><span class="kd">final</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">stem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">patch</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">word</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">patch</span><span class="p">.</span><span class="na">apply</span><span class="p">(</span><span class="n">word</span><span class="p">);</span>
-
-<span class="w">        </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="n">word</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot; -&gt; &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">stem</span><span class="p">);</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div>
-<p><code>CompiledPatchCommand</code> values are compiled with the traversal direction used when the trie and its patch commands were produced.</p>
-<h2 id="traversal-behavior-and-right-to-left-languages">Traversal behavior and right-to-left languages</h2>
-<p>Bundled dictionaries are not all processed identically.</p>
-<p>For traditional left-to-right suffix-oriented resources, Radixor preserves historical Egothor behavior and traverses logical word characters backward. That means trie paths are constructed from the logical end of the stored word toward its beginning, and patch commands are interpreted with the same backward traversal model.</p>
-<p>For bundled right-to-left languages such as Persian, Hebrew, and Yiddish, Radixor uses forward traversal over the stored form. In those cases:</p>
+<p>The call discovers the default descriptor from the runtime classpath, verifies its compressed resource, parses the GZip UTF-8 dictionary, and constructs a read-only trie. A missing default throws <code>StemmerModelNotFoundException</code>; there is no arbitrary fallback.</p>
+<h2 id="writing-direction">Writing direction</h2>
+<p>Persian, Hebrew, and Yiddish declare right-to-left language metadata and use forward traversal over stored forms. Other defaults use historical backward Egothor traversal. This setting must remain aligned across dictionary parsing, trie lookup, patch generation, persistence, and application. Model identity remains separate from writing direction.</p>
+<h2 id="custom-and-persisted-alternatives">Custom and persisted alternatives</h2>
+<p>Registered model artifacts are a convenient reproducible baseline. Applications may instead load caller-owned textual dictionaries or persist compiled <code>.radixor.gz</code> tries. Those paths are distinct from model artifact discovery:</p>
 <ul>
-<li>trie keys are traversed from the logical beginning of the stored form,</li>
-<li>patch commands are generated in that same forward direction,</li>
-<li>compiled patch-command application uses <code>WordTraversalDirection.FORWARD</code>, which is naturally captured when <code>loadCompiled(...)</code> creates <code>CompiledPatchCommand</code> values.</li>
+<li>a model <code>stemmer.gz</code> is a compressed textual dictionary plus descriptor/index metadata;</li>
+<li>a <code>.radixor.gz</code> created by the binary writer is a persisted compiled trie;</li>
+<li>a source dictionary is upstream input, not automatically a valid model artifact.</li>
 </ul>
-<p>This design keeps the traversal policy explicit and consistent across dictionary loading, trie lookup, binary persistence, builder reconstruction, and patch application.</p>
-<h2 id="reduction-behavior">Reduction behavior</h2>
-<p>Bundled dictionaries can be compiled using any supported <code>ReductionMode</code>. The reduction configuration controls how semantically equivalent subtrees are merged during trie compilation, while preserving the contract of the selected mode.</p>
-<p>Typical entry points are:</p>
-<ul>
-<li><code>StemmerPatchTrieLoader.loadCompiled(language, storeOriginal, reductionMode)</code></li>
-<li><code>StemmerPatchTrieLoader.loadCompiled(language, storeOriginal, reductionSettings)</code></li>
-</ul>
-<p>For most users, <code>ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS</code> is the most conservative general-purpose choice because it preserves ranked <code>getAll(...)</code> behavior.</p>
-<p>Compiled bundled dictionaries also use internal uniform-subtree contraction. If a whole subtree
-would return the same preferred patch command, Radixor stores that subtree as an accepting leaf and
-removes the deeper branches. This is the contracted trie representation used by the published
-benchmark tables and is independent of the public reduction mode selected by the caller.</p>
-<h2 id="intended-role-of-bundled-dictionaries">Intended role of bundled dictionaries</h2>
-<p>Bundled dictionaries should be understood as practical default resources.</p>
-<p>They are a good fit when:</p>
-<ul>
-<li>a supported language is already available,</li>
-<li>immediate usability matters,</li>
-<li>a reasonable baseline is sufficient,</li>
-<li>the goal is evaluation, prototyping, or straightforward integration.</li>
-</ul>
-<p>They are also well suited to staged refinement workflows in which a bundled base is loaded first, then extended with domain-specific vocabulary, and finally persisted as a custom binary artifact.</p>
-<h2 id="character-representation">Character representation</h2>
-<p>Bundled dictionaries are ordinary UTF-8 lexical resources. The parser reads them as text, the trie stores standard Java strings, and the patch-command model operates on general character sequences.</p>
-<p>This is important for two reasons:</p>
-<ol>
-<li>the built-in resources are not limited to ASCII-only processing,</li>
-<li>the traversal model is orthogonal to character encoding and script choice.</li>
-</ol>
-<p>In other words, right-to-left handling in the loader is about logical traversal strategy, not about introducing a separate character model.</p>
-<h2 id="when-to-prefer-custom-dictionaries">When to prefer custom dictionaries</h2>
-<p>A custom dictionary is usually the better choice when:</p>
-<ul>
-<li>domain-specific vocabulary materially affects stemming quality,</li>
-<li>lexical coverage must be controlled more precisely,</li>
-<li>a stronger lexical resource is available than the bundled baseline,</li>
-<li>operational requirements demand an explicitly curated, versioned artifact.</li>
-</ul>
-<p>Typical examples include:</p>
-<ul>
-<li>technical terminology,</li>
-<li>biomedical language,</li>
-<li>legal or financial vocabulary,</li>
-<li>organization-specific product and process names,</li>
-<li>dictionaries maintained with project-specific validation rules.</li>
-</ul>
-<h2 id="production-recommendation">Production recommendation</h2>
-<p>For production systems, the most robust workflow is usually:</p>
-<ol>
-<li>start from a bundled dictionary when it is suitable,</li>
-<li>extend it with domain-specific forms if needed,</li>
-<li>rebuild it into a binary artifact,</li>
-<li>deploy that compiled binary artifact,</li>
-<li>load it at runtime through <code>loadBinaryCompiled(...)</code>.</li>
-</ol>
-<p>This avoids repeated startup parsing and makes the deployed stemming behavior explicit, reproducible, and versionable.</p>
-<h2 id="example-refinement-workflow">Example refinement workflow</h2>
-<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">java.io.IOException</span><span class="p">;</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">java.nio.file.Path</span><span class="p">;</span>
-
-<span class="kn">import</span><span class="w"> </span><span class="nn">org.egothor.stemmer.FrequencyTrie</span><span class="p">;</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">org.egothor.stemmer.FrequencyTrieBuilders</span><span class="p">;</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">org.egothor.stemmer.PatchCommandEncoder</span><span class="p">;</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">org.egothor.stemmer.ReductionMode</span><span class="p">;</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">org.egothor.stemmer.ReductionSettings</span><span class="p">;</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">org.egothor.stemmer.StemmerPatchTrieBinaryIO</span><span class="p">;</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">org.egothor.stemmer.StemmerPatchTrieLoader</span><span class="p">;</span>
-
-<span class="kd">public</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kd">class</span> <span class="nc">BundledRefinementExample</span><span class="w"> </span><span class="p">{</span>
-
-<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="nf">BundledRefinementExample</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">throw</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">AssertionError</span><span class="p">(</span><span class="s">&quot;No instances.&quot;</span><span class="p">);</span>
-<span class="w">    </span><span class="p">}</span>
-
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kd">final</span><span class="w"> </span><span class="n">String</span><span class="o">[]</span><span class="w"> </span><span class="n">arguments</span><span class="p">)</span><span class="w"> </span><span class="kd">throws</span><span class="w"> </span><span class="n">IOException</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="kd">final</span><span class="w"> </span><span class="n">FrequencyTrie</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">base</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">StemmerPatchTrieLoader</span><span class="p">.</span><span class="na">load</span><span class="p">(</span>
-<span class="w">                </span><span class="n">StemmerPatchTrieLoader</span><span class="p">.</span><span class="na">Language</span><span class="p">.</span><span class="na">US_UK</span><span class="p">,</span>
-<span class="w">                </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">                </span><span class="n">ReductionMode</span><span class="p">.</span><span class="na">MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS</span><span class="p">);</span>
-
-<span class="w">        </span><span class="kd">final</span><span class="w"> </span><span class="n">FrequencyTrie</span><span class="p">.</span><span class="na">Builder</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">builder</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FrequencyTrieBuilders</span><span class="p">.</span><span class="na">copyOf</span><span class="p">(</span>
-<span class="w">                </span><span class="n">base</span><span class="p">,</span>
-<span class="w">                </span><span class="n">String</span><span class="o">[]</span><span class="p">::</span><span class="k">new</span><span class="p">,</span>
-<span class="w">                </span><span class="n">ReductionSettings</span><span class="p">.</span><span class="na">withDefaults</span><span class="p">(</span>
-<span class="w">                        </span><span class="n">ReductionMode</span><span class="p">.</span><span class="na">MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS</span><span class="p">));</span>
-
-<span class="w">        </span><span class="kd">final</span><span class="w"> </span><span class="n">PatchCommandEncoder</span><span class="w"> </span><span class="n">encoder</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PatchCommandEncoder</span><span class="p">.</span><span class="na">builder</span><span class="p">()</span>
-<span class="w">                </span><span class="p">.</span><span class="na">traversalDirection</span><span class="p">(</span><span class="n">base</span><span class="p">.</span><span class="na">traversalDirection</span><span class="p">())</span>
-<span class="w">                </span><span class="p">.</span><span class="na">build</span><span class="p">();</span>
-
-<span class="w">        </span><span class="n">builder</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">&quot;microservices&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">encoder</span><span class="p">.</span><span class="na">encode</span><span class="p">(</span><span class="s">&quot;microservices&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;microservice&quot;</span><span class="p">));</span>
-
-<span class="w">        </span><span class="kd">final</span><span class="w"> </span><span class="n">FrequencyTrie</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">compiled</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">builder</span><span class="p">.</span><span class="na">build</span><span class="p">();</span>
-
-<span class="w">        </span><span class="n">StemmerPatchTrieBinaryIO</span><span class="p">.</span><span class="na">write</span><span class="p">(</span><span class="n">compiled</span><span class="p">,</span><span class="w"> </span><span class="n">Path</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="s">&quot;english-custom.radixor.gz&quot;</span><span class="p">));</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div>
-<p>The reconstructed builder preserves the traversal direction of the source trie, so refinements remain semantically aligned with the original bundled dictionary.</p>
-<h2 id="extending-language-support">Extending language support</h2>
-<p>The built-in set is intentionally a practical baseline rather than a closed catalog. Additional languages, stronger lexical coverage, and improved dictionaries for currently supported languages are all natural extension paths.</p>
-<p>What matters most is not only the number of entries, but the quality, consistency, maintainability, and operational usefulness of the lexical resource being added.</p>
-<h2 id="related-api-surface">Related API surface</h2>
-<p>The following types are typically involved when working with bundled dictionaries:</p>
-<ul>
-<li><code>StemmerPatchTrieLoader</code></li>
-<li><code>StemmerPatchTrieLoader.Language</code></li>
-<li><code>FrequencyTrie</code></li>
-<li><code>PatchCommandEncoder</code></li>
-<li><code>WordTraversalDirection</code></li>
-<li><code>ReductionMode</code></li>
-<li><code>ReductionSettings</code></li>
-<li><code>StemmerPatchTrieBinaryIO</code></li>
-<li><code>FrequencyTrieBuilders</code></li>
-</ul>
-<h2 id="next-steps">Next steps</h2>
-<ul>
-<li><a href="../quick-start/">Quick start</a></li>
-<li><a href="../dictionary-format/">Dictionary format</a></li>
-<li><a href="../cli-compilation/">CLI compilation</a></li>
-<li><a href="../programmatic-usage/">Programmatic usage</a></li>
-</ul>
-<h2 id="summary">Summary</h2>
-<p>Radixor’s built-in language support provides immediate usability, a professionally defined baseline API, and a practical starting point for custom refinement. The bundled set now includes both left-to-right and right-to-left languages, and the library models that distinction explicitly through <code>WordTraversalDirection</code> so that trie construction, lookup, and patch application remain consistent.</p>
+<p>See <a href="../dictionary-format/">Dictionary Format</a>, <a href="../cli-compilation/">CLI Compilation</a>, and <a href="../stemmer-models/">Stemmer Models</a>.</p>
+<h2 id="benchmark-interpretation">Benchmark interpretation</h2>
+<p>Benchmark rows must identify the Radixor model ID used. Default rows use the default IDs above. Optional Polish PoliMorf comparisons must be labeled <code>pl-pl-polimorf</code>; they are not interchangeable with the historical default Polish row. Continue with <a href="../benchmarking/">Benchmarking</a> and <a href="../benchmarks/reference/reproducibility/">Reproducibility</a>.</p>
 
 
 

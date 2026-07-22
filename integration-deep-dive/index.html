@@ -469,10 +469,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#bundled-dictionaries" class="md-nav__link">
+  <a href="#runtime-model-artifacts" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Bundled Dictionaries
+        Runtime Model Artifacts
       
     </span>
   </a>
@@ -513,10 +513,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#choosing-bundled-versus-custom-dictionaries" class="md-nav__link">
+  <a href="#choosing-registered-versus-custom-dictionaries" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Choosing Bundled Versus Custom Dictionaries
+        Choosing Registered Versus Custom Dictionaries
       
     </span>
   </a>
@@ -639,6 +639,34 @@
     
   
     Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../model-selection-and-loading/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model Selection and Loading
   
 
     
@@ -850,6 +878,62 @@
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../stemmer-models/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stemmer Models
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../stemmer-model-catalog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Published Model Catalog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -2297,6 +2381,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../builds/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Historical Builds
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../test-taxonomy-and-filtering/" class="md-nav__link">
         
   
@@ -2374,10 +2486,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#bundled-dictionaries" class="md-nav__link">
+  <a href="#runtime-model-artifacts" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Bundled Dictionaries
+        Runtime Model Artifacts
       
     </span>
   </a>
@@ -2418,10 +2530,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#choosing-bundled-versus-custom-dictionaries" class="md-nav__link">
+  <a href="#choosing-registered-versus-custom-dictionaries" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Choosing Bundled Versus Custom Dictionaries
+        Choosing Registered Versus Custom Dictionaries
       
     </span>
   </a>
@@ -2483,7 +2595,7 @@
 
 <h1 id="integration-deep-dive">Integration Deep Dive</h1>
 <p>This page explains how to integrate Radixor into a real Java application after the first
-fast-track experiment works. It covers dependencies, bundled dictionaries, runtime lifecycle,
+fast-track experiment works. It covers dependencies, external model artifacts, runtime lifecycle,
 deployment artifacts, and the decisions that matter in search or text-processing systems.</p>
 <h2 id="integration-model">Integration Model</h2>
 <p>Radixor has two separate phases:</p>
@@ -2509,26 +2621,34 @@ deployment artifacts, and the decisions that matter in search or text-processing
 </tbody>
 </table>
 <p>The practical rule is simple: compile rarely, stem often.</p>
-<p>For production systems, prefer a startup-owned or dependency-injected singleton
-<code>FrequencyTrie&lt;CompiledPatchCommand&gt;</code> per language/configuration. The trie is immutable after
-construction and is suitable for concurrent reads.</p>
+<p>For production systems, prefer a startup-owned or dependency-injected
+<code>FrequencyTrie&lt;CompiledPatchCommand&gt;</code> per language/configuration. The compiled structure has no
+mutating API. The project does not currently publish a formal cross-thread safety guarantee, so
+applications should use normal safe-publication practices when sharing a loaded trie.</p>
 <h2 id="dependency-coordinates">Dependency Coordinates</h2>
 <p>The Maven coordinates are:</p>
 <div class="highlight"><pre><span></span><code>org.egothor:radixor
 </code></pre></div>
 <p>Gradle:</p>
 <div class="highlight"><pre><span></span><code><span class="n">dependencies</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">implementation</span><span class="p">(</span><span class="s">&quot;org.egothor:radixor:3.0.0&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="n">implementation</span><span class="p">(</span><span class="s">&quot;org.egothor:radixor:&lt;radixor-version&gt;&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="n">runtimeOnly</span><span class="p">(</span><span class="s">&quot;org.egothor:radixor-models-standard:&lt;catalog-version&gt;&quot;</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>Maven:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">&lt;dependency&gt;</span>
 <span class="w">    </span><span class="nt">&lt;groupId&gt;</span>org.egothor<span class="nt">&lt;/groupId&gt;</span>
 <span class="w">    </span><span class="nt">&lt;artifactId&gt;</span>radixor<span class="nt">&lt;/artifactId&gt;</span>
-<span class="w">    </span><span class="nt">&lt;version&gt;</span>3.0.0<span class="nt">&lt;/version&gt;</span>
+<span class="w">    </span><span class="nt">&lt;version&gt;</span>${radixor.version}<span class="nt">&lt;/version&gt;</span>
+<span class="nt">&lt;/dependency&gt;</span>
+<span class="nt">&lt;dependency&gt;</span>
+<span class="w">    </span><span class="nt">&lt;groupId&gt;</span>org.egothor<span class="nt">&lt;/groupId&gt;</span>
+<span class="w">    </span><span class="nt">&lt;artifactId&gt;</span>radixor-models-standard<span class="nt">&lt;/artifactId&gt;</span>
+<span class="w">    </span><span class="nt">&lt;version&gt;</span>${model.catalog.version}<span class="nt">&lt;/version&gt;</span>
+<span class="w">    </span><span class="nt">&lt;scope&gt;</span>runtime<span class="nt">&lt;/scope&gt;</span>
 <span class="nt">&lt;/dependency&gt;</span>
 </code></pre></div>
-<p>Replace <code>3.0.0</code> with the current release selected for your deployment.</p>
+<p>Replace the example versions with the independently selected core and catalog releases for your deployment.</p>
 <p>The core Java module is:</p>
 <div class="highlight"><pre><span></span><code><span class="kd">module</span> <span class="nc">org</span><span class="p">.</span><span class="na">egothor</span><span class="p">.</span><span class="na">radixor</span><span class="p">;</span>
 </code></pre></div>
@@ -2537,22 +2657,11 @@ construction and is suitable for concurrent reads.</p>
 <span class="w">    </span><span class="kd">requires</span><span class="w"> </span><span class="n">org</span><span class="p">.</span><span class="na">egothor</span><span class="p">.</span><span class="na">radixor</span><span class="p">;</span>
 <span class="p">}</span>
 </code></pre></div>
-<h2 id="bundled-dictionaries">Bundled Dictionaries</h2>
-<p>Radixor ships bundled dictionaries inside the library artifact. The public API exposes them through:</p>
-<div class="highlight"><pre><span></span><code><span class="n">StemmerPatchTrieLoader</span><span class="p">.</span><span class="na">Language</span>
-</code></pre></div>
-<p>The physical resources are packaged as compressed UTF-8 dictionaries under resource directories
-such as:</p>
-<div class="highlight"><pre><span></span><code>us_uk/stemmer.gz
-de_de/stemmer.gz
-fr_fr/stemmer.gz
-pl_pl/stemmer.gz
-</code></pre></div>
-<p>Treat those resource paths as implementation details. Application code should load bundled
-dictionaries through <code>StemmerPatchTrieLoader.Language</code>, because the enum also carries the language
-metadata needed for correct traversal.</p>
-<p>See <a href="../built-in-languages/">Built-in Languages</a> for the complete language list, writing-direction
-notes, and links to per-language benchmark pages.</p>
+<h2 id="runtime-model-artifacts">Runtime Model Artifacts</h2>
+<p>The core ships no language dictionary. Add one or more <code>radixor-model-&lt;model-id&gt;</code> artifacts, or the optional metadata-only standard pack. Each model JAR contains an indexed descriptor and a namespaced GZip dictionary. <code>StemmerPatchTrieLoader.Language</code> represents language properties and a stable default model ID; it does not own embedded data.</p>
+<p>The standard option is specifically a POM-only runtime dependency aggregate, not an all-model binary JAR. It resolves one default model JAR per language and excludes optional PoliMorf. The separate POM-only <code>radixor-models-bom</code> manages recommended versions without adding runtime artifacts. Repository tests and JMH attach individual model projects directly to non-production configurations, so neither path changes the root publication's dependency graph.</p>
+<p>For minimal deployments choose only required model artifacts. For multiple Polish variants add both <code>pl-pl-unimorph</code> and <code>pl-pl-polimorf</code>, retain UniMorph as the language default, and request PoliMorf explicitly. See <a href="../model-selection-and-loading/">Model Selection and Loading</a> for complete dependencies and <a href="../built-in-languages/">Built-in Languages</a> for mappings.</p>
+<p>Use <code>loadCompiled("pl-pl-polimorf", true, reductionMode)</code> for direct exact selection, or discover once and call <code>loadCompiled(descriptor, true, reductionMode)</code>. Neither form caches the trie. Complete PoliMorf startup is memory-intensive and is verified with a dedicated 6 GiB heap; construct it once during application initialization and retain the immutable result.</p>
 <h2 id="minimal-service-wrapper">Minimal Service Wrapper</h2>
 <p>A small service wrapper keeps loading, null handling, and fallback behavior in one place.</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">java.io.IOException</span><span class="p">;</span>
@@ -2587,7 +2696,7 @@ searchable.</p>
 <h2 id="production-artifact-workflow">Production Artifact Workflow</h2>
 <p>For a controlled deployment, compile once and deploy the binary artifact:</p>
 <ol>
-<li>choose a bundled or custom dictionary,</li>
+<li>choose a registered model resource or caller-owned custom dictionary,</li>
 <li>optionally extend it with domain vocabulary,</li>
 <li>compile a contracted trie,</li>
 <li>persist it as <code>.radixor.gz</code>,</li>
@@ -2628,8 +2737,8 @@ programmatic artifact generation.</p>
 </ul>
 <p>For multilingual content, do not run every token through every language. Route text by field,
 document metadata, or language detection before stemming.</p>
-<h2 id="choosing-bundled-versus-custom-dictionaries">Choosing Bundled Versus Custom Dictionaries</h2>
-<p>Start with bundled dictionaries when:</p>
+<h2 id="choosing-registered-versus-custom-dictionaries">Choosing Registered Versus Custom Dictionaries</h2>
+<p>Start with registered model artifacts when:</p>
 <ul>
 <li>the language is supported,</li>
 <li>the application needs a strong baseline quickly,</li>
@@ -2665,7 +2774,7 @@ use <a href="../benchmarks/">Benchmark Results</a> for the detailed reference tr
 <p>Before production rollout:</p>
 <ul>
 <li>dependency version is pinned,</li>
-<li>language resource and reduction mode are documented,</li>
+<li>language, model ID, model artifact version, checksum, and reduction mode are documented,</li>
 <li>indexing and query pipelines use the same stemming configuration,</li>
 <li>custom artifacts are versioned and reproducible,</li>
 <li>fallback behavior for unknown tokens is explicit,</li>
@@ -2678,6 +2787,7 @@ use <a href="../benchmarks/">Benchmark Results</a> for the detailed reference tr
 <li><a href="../quick-start/">Quick Start</a></li>
 <li><a href="../built-in-languages/">Built-in Languages</a></li>
 <li><a href="../programmatic-usage/">Programmatic Usage</a></li>
+<li><a href="../model-selection-and-loading/">Model Selection and Loading</a></li>
 <li><a href="../cli-compilation/">CLI Compilation</a></li>
 <li><a href="../benchmarking/">Benchmarking</a></li>
 </ul>

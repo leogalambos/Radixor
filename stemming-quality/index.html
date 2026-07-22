@@ -500,6 +500,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../model-selection-and-loading/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model Selection and Loading
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../programmatic-loading-and-building/" class="md-nav__link">
         
   
@@ -691,6 +719,62 @@
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../stemmer-models/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stemmer Models
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../stemmer-model-catalog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Published Model Catalog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -2275,6 +2359,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../builds/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Historical Builds
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../test-taxonomy-and-filtering/" class="md-nav__link">
         
   
@@ -2438,10 +2550,12 @@
 
 
 <h1 id="stemming-quality-evaluation">Stemming quality evaluation</h1>
-<p>The explicit <code>stemmingQuality</code> analysis measures agreement between stemmer outputs and gold-standard equivalence classes represented by bundled multilingual dictionary rows. Dictionary text remains unchanged; reports and diagnostics use English.</p>
+<p>The explicit <code>stemmingQuality</code> analysis measures agreement between stemmer outputs and gold-standard equivalence classes represented by registered multilingual model dictionary rows. Dictionary text remains unchanged; reports and diagnostics use English.</p>
 <p>JMH adapters, registries, third-party versions, language mappings, and preparation remain in <code>src/jmh</code>. The evaluator, reports, audits, and tests reside in the standard <code>src/test</code> source set. The former <code>src/stemmingQualityTest</code> source set was removed, and neither analytical nor JMH classes enter the production JAR.</p>
 <h2 id="language-and-adapter-coverage">Language and adapter coverage</h2>
-<p>The authoritative Radixor universe is the validated one-to-one reconciliation of <code>src/main/resources/*/stemmer.gz</code> and every <code>StemmerPatchTrieLoader.Language</code> value. All 20 current values have exactly one resource; no sentinel or alias is excluded. Radixor is evaluated for all 20 languages, independently of third-party support. Third-party combinations come only from explicit JMH adapter metadata. Unsupported combinations are documented and never fabricated as zero-valued rows.</p>
+<p>The authoritative Radixor universe is the validated one-to-one reconciliation of every <code>StemmerPatchTrieLoader.Language</code> value with its registered default model descriptor. All 20 current values have exactly one documented default. Optional comparison models, including <code>pl-pl-polimorf</code>, are identified separately and never replace default benchmark rows. Third-party combinations come only from explicit JMH adapter metadata.</p>
+<p>Default Polish evaluation is therefore <code>Radixor</code> with model <code>pl-pl-unimorph</code>. A future PoliMorf evaluation is a distinct <code>Radixor</code> / <code>pl-pl-polimorf</code> row. Evaluation classpaths receive individual models through direct non-production Gradle dependencies; ordinary applications inherit none of them from the core.</p>
+<p>Complete PoliMorf trie construction and deterministic stemming smoke fixtures are runtime-verified separately. That functional verification is not a linguistic-quality measurement and does not justify rewriting the historical quality snapshot.</p>
 <p>The expected matrix is constructed before evaluation from stemmer, language, dictionary mode, and supported output policy. Generation fails on missing, duplicate, unexpected, or stale keys.</p>
 <h2 id="dictionary-groups-and-modes">Dictionary groups and modes</h2>
 <p>Every usable parsed row is one gold-standard group. Exact duplicate strings are removed only within that row; identical forms in different rows remain distinct. <code>ALL_WORDS</code> preserves every valid form. <code>LOWERCASE_GROUPS_ONLY</code> excludes a complete group containing an uppercase or titlecase Unicode code point. Retained words are not lowercased or normalized by the evaluator.</p>
@@ -2482,7 +2596,8 @@ TN = overPossible - overError
 <p>Optional properties are <code>stemmingQualityLanguage</code>, <code>stemmingQualityStemmer</code>, <code>stemmingQualityMode</code>, <code>stemmingQualityOutputPolicy</code>, <code>stemmingQualityRankMetric</code>, <code>stemmingQualityAudit</code>, and <code>stemmingQualityAuditLimit</code>. Policies are <code>PRIMARY_OUTPUT</code>, <code>ANY_CANDIDATE</code>, and <code>ALL_CANDIDATES</code>. Filtered reports carry <code>-filtered</code> and cannot overwrite complete output.</p>
 <p>Generated files under <code>build/reports/stemming-quality/</code> include <code>stemming-quality.md</code>, <code>stemming-quality.csv</code>, <code>metric-correlations-pearson.csv</code>, <code>metric-correlations-spearman.csv</code>, and optional audit Markdown.</p>
 <h2 id="limitations">Limitations</h2>
-<p>These measurements evaluate agreement with the available dictionary grouping. They do not capture every semantic, morphological, downstream, or dataset-specific property. <code>ANY_CANDIDATE</code> is optimistic and may not be globally realizable. <code>ALL_CANDIDATES</code> measures an overlap graph rather than a partition. Language coverage must remain visible in cross-stemmer comparisons. No single published metric establishes universal superiority; multiple metrics and their correlations are provided for transparent scientific assessment.</p>
+<p>These measurements evaluate agreement with the available dictionary grouping. They do not capture every semantic, morphological, downstream, or dataset-specific property. <code>ANY_CANDIDATE</code> is optimistic and may not be globally realizable. <code>ALL_CANDIDATES</code> measures an overlap graph rather than a partition. Language coverage must remain visible in cross-stemmer comparisons. No single published metric establishes universal superiority; multiple metrics and their correlations are provided for transparent scientific assessment.
+Historical checked-in quality results retain their original inputs and claims. The optional PoliMorf model is not attributed to snapshots that predate it. See <a href="../model-selection-and-loading/">Model Selection and Loading</a> and the generated <a href="../stemmer-model-catalog/">model catalog</a>.</p>
 
 
 

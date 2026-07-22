@@ -500,6 +500,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../model-selection-and-loading/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model Selection and Loading
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../programmatic-loading-and-building/" class="md-nav__link">
         
   
@@ -691,6 +719,62 @@
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../stemmer-models/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stemmer Models
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../stemmer-model-catalog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Published Model Catalog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -2255,6 +2339,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../builds/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Historical Builds
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../test-taxonomy-and-filtering/" class="md-nav__link">
         
   
@@ -2412,7 +2524,8 @@
 ./gradlew<span class="w"> </span>publishStemmingQualityDocumentation
 ./gradlew<span class="w"> </span>verifyStemmingQualityDocumentation
 ./gradlew<span class="w"> </span><span class="nb">test</span>
-mkdocs<span class="w"> </span>build<span class="w"> </span>--strict
+./gradlew<span class="w"> </span>prepareMkDocsSource
+mkdocs<span class="w"> </span>build<span class="w"> </span>--strict<span class="w"> </span>--config-file<span class="w"> </span>build/mkdocs/mkdocs.yml
 </code></pre></div>
 <p><code>stemmingQuality</code> performs the expensive complete evaluation and is intentionally not attached to <code>test</code> or <code>check</code>. It prepares JMH third-party dependencies automatically and writes:</p>
 <ul>
@@ -2423,19 +2536,34 @@ mkdocs<span class="w"> </span>build<span class="w"> </span>--strict
 </ul>
 <p>Audit mode is enabled with <code>-PstemmingQualityAudit=true</code>. Language, stemmer, dictionary-mode, output-policy, and ranking filters are documented on the central <a href="../../../stemming-quality/">stemming-quality page</a>. Filtered reports use separate filenames and cannot be accepted as publication sources.</p>
 <p><code>publishStemmingQualityDocumentation</code> validates the complete build CSV, copies a versioned documentation snapshot, and replaces only marked generated sections. <code>verifyStemmingQualityDocumentation</code> re-renders from the checked-in snapshot and fails on changed values, ordering, missing pages, duplicate keys, arithmetic inconsistencies, policy violations, or stale sections.</p>
+<p>The model catalog and rendered site are build outputs under <code>build/</code>. They are generated for publication and are never maintained in Git.</p>
+<p>For new measurements, record language, stable model ID, model artifact version, descriptor checksum, source dictionary identity/version, core revision, and benchmark configuration. JMH resolves the required default models and optional PoliMorf directly from their individual model JARs; these benchmark-only dependencies are not transitive to ordinary users.</p>
+<p>Current model descriptors also record the official repository, dataset, license, attribution,
+verification date, transformations, and source-revision status. Exact historical revisions were
+not recorded for the legacy UniMorph imports; that limitation is disclosed with
+<code>not-recorded-in-legacy-import</code> rather than reconstructed. Future imports must record the exact
+upstream revision and source-archive checksum. This reproducibility limitation does not replace or
+weaken the packaged license and attribution requirements.</p>
+<p>Each UniMorph-derived model artifact carries its own notice with the canonical CC BY-SA 3.0 URI,
+upstream attribution, transformations, ShareAlike statement, and Leo Galambos contribution notice.
+The full CC legal text is not duplicated or presented as a root-project license. PoliMorf retains
+its separately packaged BSD-2-Clause license.</p>
+<p>For a future full PoliMorf measurement, also record the startup heap separately from benchmark parameters. Complete runtime construction is currently verified with a dedicated 6 GiB maximum heap; this limit is neither a retained-trie measurement nor a setting applied to ordinary JMH runs.</p>
+<p>The Pages workflow publishes that staged documentation together with Javadoc, JUnit, PMD, JaCoCo, PIT, representative JMH, SBOM, optional dependency-check output, badge metadata, and retained build history. Its filesystem merge explicitly preserves the <code>builds/</code> tree in the separate <code>gh-pages</code> publication branch, so documentation regeneration cannot erase durable report URLs.</p>
 <h2 id="performance-benchmark-reproduction">Performance benchmark reproduction</h2>
 <p>The JMH comparison command family is:</p>
 <div class="highlight"><pre><span></span><code>./gradlew<span class="w"> </span>jmh<span class="w"> </span>-Pjmh.includes<span class="o">=</span><span class="s1">&#39;.*StemmerComparisonBenchmark.*&#39;</span><span class="w"> </span>--no-daemon
 </code></pre></div>
 <p>The exact JMH configuration, hardware, operating system, and JDK captured for the published performance tables are listed in <a href="../environment/">Environment and reports</a>. Quality and performance reports are separate datasets and are not combined into an undocumented scalar.</p>
 <h2 id="recorded-and-unavailable-provenance">Recorded and unavailable provenance</h2>
-<p>The performance documentation records its 2026-07-06 environment, JDK 25.0.3, operating system, and hardware. The quality CSV records the evaluated identifiers and counts but does not embed the Radixor Git revision, generation date, JDK, operating system, dictionary content hash, or immutable upstream revisions for every downloaded source. These fields are explicitly unavailable for this snapshot and are not reconstructed from filesystem timestamps.</p>
+<p>The performance documentation records its 2026-07-06 environment, JDK 25.0.3, operating system, and hardware. The quality CSV records the evaluated identifiers and counts but does not embed the Radixor Git revision, generation date, JDK, operating system, model ID, dictionary content hash, or immutable upstream revisions for every downloaded source. These fields are explicitly unavailable for this historical snapshot and are not reconstructed from filesystem timestamps. In particular, the snapshot predates the optional PoliMorf integration and must not be relabeled as <code>pl-pl-polimorf</code>.</p>
 <p>Dependency versions that are reproducible from repository configuration include Apache Lucene 10.5.0, Morfologik 2.1.9, the Ukrainian dictionary artifact 4.9.1, and JMH 1.37. Other upstream branches or downloaded dictionary revisions should be pinned and embedded in a future result schema.</p>
 <h2 id="correlation-and-audit-data">Correlation and audit data</h2>
 <p>Pearson and Spearman files are generated from unrounded metric values in cohorts separated by dictionary mode and output policy. A missing coefficient means too few observations, undefined input, or zero variance. Correlation is descriptive and does not demonstrate that two metrics are scientifically interchangeable.</p>
 <p>Audit reports preserve original multilingual forms and identify high-contributing dictionary groups. They are build artifacts rather than checked-in publication data because of their size. No documentation value is manually altered after generation.</p>
 <h2 id="jmh-badge-compatibility">JMH badge compatibility</h2>
-<p>The quality documentation generator does not invoke JMH, change JMH result formats, or modify badge tooling. Existing JMH result paths and historical badge-compatible inputs remain independent. The repository currently publishes coverage and mutation badge metadata and retains JMH TXT/CSV artifacts as documented in <a href="../environment/">Environment and reports</a>.</p>
+<p>The quality documentation generator does not invoke JMH, change JMH result formats, or modify badge tooling. Existing JMH result paths and historical badge-compatible inputs remain independent. The repository currently publishes coverage and mutation badge metadata and retains JMH TXT/CSV artifacts as documented in <a href="../environment/">Environment and reports</a>.
+See <a href="../../../model-selection-and-loading/">Model Selection and Loading</a>, <a href="../../../stemmer-models/">Stemmer Models</a>, and the generated <a href="../../../stemmer-model-catalog/">model catalog</a> for current model identities.</p>
 
 
 

@@ -500,6 +500,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../model-selection-and-loading/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model Selection and Loading
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../programmatic-loading-and-building/" class="md-nav__link">
         
   
@@ -701,6 +729,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../stemmer-models/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stemmer Models
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../stemmer-model-catalog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Published Model Catalog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../built-in-languages/" class="md-nav__link">
         
   
@@ -851,10 +935,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#1-stronger-dictionaries-for-already-bundled-languages" class="md-nav__link">
+  <a href="#1-stronger-models-for-already-supported-languages" class="md-nav__link">
     <span class="md-ellipsis">
       
-        1. Stronger dictionaries for already bundled languages
+        1. Stronger models for already supported languages
       
     </span>
   </a>
@@ -2391,6 +2475,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../builds/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Historical Builds
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../test-taxonomy-and-filtering/" class="md-nav__link">
         
   
@@ -2480,10 +2592,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#1-stronger-dictionaries-for-already-bundled-languages" class="md-nav__link">
+  <a href="#1-stronger-models-for-already-supported-languages" class="md-nav__link">
     <span class="md-ellipsis">
       
-        1. Stronger dictionaries for already bundled languages
+        1. Stronger models for already supported languages
       
     </span>
   </a>
@@ -2671,7 +2783,7 @@
 
 <h1 id="contributing-dictionaries">Contributing Dictionaries</h1>
 <p>High-quality dictionaries are one of the most valuable ways to improve <strong>Radixor</strong>.</p>
-<p>The project already includes practical bundled dictionaries for common use, but the long-term quality and language reach of the stemmer depend heavily on the quality of its lexical resources. Contributions are therefore welcome not only in the form of code changes, but also in the form of well-prepared dictionary data for existing or additional languages.</p>
+<p>The project already publishes practical model dictionaries for common use, but long-term quality and language reach depend heavily on lexical-resource quality. Contributions may provide well-prepared model inputs for existing or additional languages.</p>
 <p>This document explains what makes a dictionary contribution useful, how to structure it, and how to prepare it so that it integrates cleanly with the project.</p>
 <h2 id="what-a-good-dictionary-contribution-looks-like">What a good dictionary contribution looks like</h2>
 <p>A good dictionary contribution is not defined only by the number of entries.</p>
@@ -2705,7 +2817,7 @@ connect connected   connecting  connection
 <p>For full format details, see <a href="../dictionary-format/">Dictionary format</a>.</p>
 <h2 id="contribution-priorities">Contribution priorities</h2>
 <p>The most useful dictionary contributions generally fall into one of four categories.</p>
-<h3 id="1-stronger-dictionaries-for-already-bundled-languages">1. Stronger dictionaries for already bundled languages</h3>
+<h3 id="1-stronger-models-for-already-supported-languages">1. Stronger models for already supported languages</h3>
 <p>Improving lexical quality for already supported languages is often more valuable than merely expanding the language list. Better coverage, cleaner canonicalization, and improved consistency directly improve practical stemming outcomes.</p>
 <h3 id="2-additional-languages">2. Additional languages</h3>
 <p>New language support is welcome when the submitted resource is strong enough to be useful as a maintainable bundled baseline rather than as an incomplete demonstration artifact.</p>
@@ -2713,7 +2825,7 @@ connect connected   connecting  connection
 <p>The current bundled resources follow a pragmatic normalization convention and may use transliterated or otherwise normalized forms. This is especially visible for languages such as Russian.</p>
 <p>That convention belongs to the supplied dictionaries, not to the underlying algorithm. The parser, trie, and patch-command model are not fundamentally restricted to plain ASCII. Contributions of high-quality native-script dictionaries in full UTF-8 text are therefore particularly valuable, because they would enable more direct language support without transliteration-based workflows.</p>
 <h3 id="4-domain-quality-refinements">4. Domain-quality refinements</h3>
-<p>Some contributions may be more appropriate as curated domain extensions than as replacements for a general-purpose bundled dictionary. These are still useful when they are clearly scoped and operationally coherent.</p>
+<p>Some contributions may be more appropriate as curated domain extensions than as replacements for a general-purpose default model. These are still useful when clearly scoped and operationally coherent.</p>
 <h2 id="normalization-guidance">Normalization guidance</h2>
 <p>A dictionary should follow one normalization convention consistently.</p>
 <p>For current general-purpose bundled resources, the safest convention remains normalized plain-ASCII lexical input where that is already the established project style. For languages where a stronger native-script resource exists, a coherent UTF-8 dictionary may be preferable, provided that the contribution is deliberate, well-structured, and consistently normalized.</p>
@@ -2763,6 +2875,13 @@ connect connected   connecting  connection
 </ul>
 <p>A dictionary should read like a curated lexical resource, not like an unfiltered export.</p>
 <h2 id="practical-preparation-workflow">Practical preparation workflow</h2>
+<p>Before conversion, record the official source project and repository, exact revision or release,
+source-archive checksum, retrieval date, dataset license and URI, supplied attribution, and any
+required upstream notice. Add a model-specific notice describing every material transformation and
+the license applied to the derived data, including its canonical URI. Record any protectable
+Radixor-specific contribution without claiming ownership over the upstream data. A legacy model
+may disclose that its historical revision was not recorded; new imports must record an exact
+revision and source-archive checksum rather than using that sentinel.</p>
 <p>A disciplined dictionary contribution should typically follow this path:</p>
 <ol>
 <li>prepare or normalize the lexical source,</li>
@@ -2803,7 +2922,7 @@ connect connected   connecting  connection
 </ul>
 <p>This note does not need to be long. It simply needs to make the resource intelligible.</p>
 <h2 id="bundled-resource-expectations">Bundled-resource expectations</h2>
-<p>Not every useful dictionary must automatically become a bundled language resource.</p>
+<p>Not every useful dictionary must automatically become a published default model.</p>
 <p>To be suitable for bundling, a dictionary should generally be:</p>
 <ul>
 <li>broadly useful,</li>

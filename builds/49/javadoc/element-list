@@ -1,0 +1,3 @@
+module:org.egothor.radixor
+org.egothor.stemmer
+org.egothor.stemmer.trie

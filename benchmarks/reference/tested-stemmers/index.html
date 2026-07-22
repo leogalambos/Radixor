@@ -500,6 +500,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../model-selection-and-loading/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model Selection and Loading
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../programmatic-loading-and-building/" class="md-nav__link">
         
   
@@ -691,6 +719,62 @@
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../stemmer-models/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stemmer Models
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../stemmer-model-catalog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Published Model Catalog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -2211,6 +2295,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../builds/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Historical Builds
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../test-taxonomy-and-filtering/" class="md-nav__link">
         
   
@@ -2325,9 +2437,9 @@
 <td>Radixor</td>
 <td>Egothor / Radixor project</td>
 <td>Current repository revision; exact revision was not embedded in the quality CSV</td>
-<td>All 20 reconciled Radixor dictionary languages; 19 have benchmark pages</td>
+<td>All 20 reconciled default model languages; 19 have benchmark pages</td>
 <td>Deterministic preferred patch via <code>get</code>; ranked distinct alternatives via <code>getAll</code>; primary is always included</td>
-<td>Dictionary-derived compiled patch trie. Quality depends on dictionary coverage and annotation.</td>
+<td>Model-dictionary-derived compiled patch trie. Default rows use each language's stable default model ID.</td>
 </tr>
 <tr>
 <td>Apache Lucene language stem filters</td>
@@ -2415,8 +2527,9 @@
 <p>The quality evaluator calls the same adapter matrix used by JMH. Each language mapping is explicit. Retained dictionary forms are not evaluation-lowercased or normalized. Where an implementation requires preprocessing, such as Lucene German or Persian normalization, that operation is part of its documented adapter path. Stateful TokenFilters are reset through the same sequential lifecycle used by the benchmark and are not invoked concurrently.</p>
 <p>Candidate sets are non-null, non-empty, contain the deterministic primary output, contain no null strings, and are deduplicated using exact Java string equality. Gold-standard group identity never selects, removes, or ranks a candidate.</p>
 <h2 id="coverage-fairness">Coverage fairness</h2>
-<p>Radixor coverage is derived independently from its resources and language enumeration. Third-party coverage is the intersection of that universe with actual adapter support. Absence therefore means “not supported or not configured for this language,” not “zero quality.” Consult each language page for the exact evaluated rows.</p>
-<p>Project authors and organizations are named only where repository configuration or source notices establish attribution. No broader authorship or license claim is inferred when metadata was not captured.</p>
+<p>Radixor coverage is derived from registered default descriptors reconciled with language enumeration. Third-party coverage is the intersection of that universe with actual adapter support. Absence therefore means “not supported or not configured for this language,” not “zero quality.” Optional <code>pl-pl-polimorf</code> is a separate model row and does not replace default <code>pl-pl-unimorph</code>. Consult each language page for the exact evaluated rows.</p>
+<p>Project authors and organizations are named only where repository configuration or source notices establish attribution. No broader authorship or license claim is inferred when metadata was not captured.
+The JMH runtime configuration directly includes optional models needed for controlled comparisons; ordinary users do not receive these benchmark-only dependencies transitively. Historical rows retain their original model inputs. See <a href="../../../model-selection-and-loading/">Model Selection and Loading</a>.</p>
 
 
 

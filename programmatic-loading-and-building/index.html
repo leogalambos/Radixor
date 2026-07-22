@@ -13,7 +13,7 @@
         <link rel="canonical" href="https://leogalambos.github.io/Radixor/programmatic-loading-and-building/">
       
       
-        <link rel="prev" href="../programmatic-usage/">
+        <link rel="prev" href="../model-selection-and-loading/">
       
       
         <link rel="next" href="../programmatic-querying-and-ambiguity/">
@@ -499,6 +499,34 @@
                 
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../model-selection-and-loading/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model Selection and Loading
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
     
   
   
@@ -562,10 +590,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#load-a-bundled-language-dictionary" class="md-nav__link">
+  <a href="#load-a-registered-default-model" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Load a bundled language dictionary
+        Load a registered default model
       
     </span>
   </a>
@@ -817,6 +845,62 @@
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../stemmer-models/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stemmer Models
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../stemmer-model-catalog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Published Model Catalog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -2264,6 +2348,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../builds/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Historical Builds
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../test-taxonomy-and-filtering/" class="md-nav__link">
         
   
@@ -2319,10 +2431,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#load-a-bundled-language-dictionary" class="md-nav__link">
+  <a href="#load-a-registered-default-model" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Load a bundled language dictionary
+        Load a registered default model
       
     </span>
   </a>
@@ -2417,8 +2529,8 @@
 
 <h1 id="loading-and-building-stemmers">Loading and Building Stemmers</h1>
 <p>This document explains how to acquire a compiled Radixor stemmer in Java.</p>
-<h2 id="load-a-bundled-language-dictionary">Load a bundled language dictionary</h2>
-<p>Bundled language resources are simple to use and compile directly into a <code>FrequencyTrie&lt;CompiledPatchCommand&gt;</code> during loading.</p>
+<h2 id="load-a-registered-default-model">Load a registered default model</h2>
+<p>Language-oriented entry points resolve a registered default model and compile its GZip textual dictionary into a <code>FrequencyTrie&lt;CompiledPatchCommand&gt;</code>. The corresponding model JAR must be on the runtime classpath; the core contains no dictionary.</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">java.io.IOException</span><span class="p">;</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">org.egothor.stemmer.CompiledPatchCommand</span><span class="p">;</span>
@@ -2426,9 +2538,9 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">org.egothor.stemmer.ReductionMode</span><span class="p">;</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">org.egothor.stemmer.StemmerPatchTrieLoader</span><span class="p">;</span>
 
-<span class="kd">public</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kd">class</span> <span class="nc">BundledLanguageExample</span><span class="w"> </span><span class="p">{</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kd">class</span> <span class="nc">RegisteredLanguageModelExample</span><span class="w"> </span><span class="p">{</span>
 
-<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="nf">BundledLanguageExample</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="nf">RegisteredLanguageModelExample</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="k">throw</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">AssertionError</span><span class="p">(</span><span class="s">&quot;No instances.&quot;</span><span class="p">);</span>
 <span class="w">    </span><span class="p">}</span>
 
@@ -2441,12 +2553,13 @@
 <span class="p">}</span>
 </code></pre></div>
 <p>The <code>storeOriginal</code> flag controls whether the canonical stem is inserted as a no-op patch entry for the stem itself.</p>
-<p>Bundled <code>loadCompiled(...)</code> entry points build the runtime trie with the same contracted
+<p>Language-oriented <code>loadCompiled(...)</code> entry points build the runtime trie with the same contracted
 representation used by the published benchmarks. During compilation, uniform preferred-command
 subtrees are collapsed into accepting leaves, so lookup can stop before consuming the entire input
 when the remaining characters cannot change the selected patch command.</p>
 <h2 id="load-a-textual-dictionary">Load a textual dictionary</h2>
-<p>Loading from a dictionary file follows the same preparation model as bundled resources, but the source comes from your own file or path. The input may be plain UTF-8 text or GZip-compressed UTF-8 text; the loader detects GZip data from the stream header. The textual format is tab-separated values, meaning that columns are separated by the tab character. Each non-empty logical line starts with the stem column and may contain zero or more variant columns. Input case normalization is controlled by <code>CaseProcessingMode</code> (default: <code>LOWERCASE_WITH_LOCALE_ROOT</code>), trailing remarks introduced by <code>#</code> or <code>//</code> are ignored, and dictionary items containing embedded whitespace are currently ignored with warning-level diagnostics.</p>
+<p>Loading from a dictionary file follows the same trie preparation model as registered model resources, but the source comes from your own file or path and bypasses registry metadata. The input may be plain UTF-8 text or GZip-compressed UTF-8 text; the loader detects GZip data from the stream header. The textual format is tab-separated values, meaning that columns are separated by the tab character. Each non-empty logical line starts with the stem column and may contain zero or more variant columns. Input case normalization is controlled by <code>CaseProcessingMode</code> (default: <code>LOWERCASE_WITH_LOCALE_ROOT</code>), trailing remarks introduced by <code>#</code> or <code>//</code> are ignored, and dictionary items containing embedded whitespace are currently ignored with warning-level diagnostics.</p>
+<p>For explicit model IDs, multiple variants, and ClassLoader control, see <a href="../model-selection-and-loading/">Model Selection and Loading</a>.</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">java.io.IOException</span><span class="p">;</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">java.nio.file.Path</span><span class="p">;</span>
 

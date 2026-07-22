@@ -431,10 +431,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#use-a-bundled-language-dictionary" class="md-nav__link">
+  <a href="#use-an-external-language-model" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Use a bundled language dictionary
+        Use an external language model
       
     </span>
   </a>
@@ -693,6 +693,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../model-selection-and-loading/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model Selection and Loading
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../programmatic-loading-and-building/" class="md-nav__link">
         
   
@@ -884,6 +912,62 @@
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../stemmer-models/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stemmer Models
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../stemmer-model-catalog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Published Model Catalog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -2331,6 +2415,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../builds/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Historical Builds
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../test-taxonomy-and-filtering/" class="md-nav__link">
         
   
@@ -2398,10 +2510,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#use-a-bundled-language-dictionary" class="md-nav__link">
+  <a href="#use-an-external-language-model" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Use a bundled language dictionary
+        Use an external language model
       
     </span>
   </a>
@@ -2553,8 +2665,16 @@
 <p>This guide introduces the fastest practical path to using <strong>Radixor</strong>.</p>
 <p>If you are new to Radixor and want the shortest possible path to a first working stem, start with
 <a href="../fast-track/">Fast Track</a>. This Quick Start is a broader developer walkthrough: it introduces the
-main loading options, query methods, artifact workflow, and metadata model.</p>
+main loading options, query methods, artifact workflow, and metadata model. For model-ID selection and failures, use <a href="../model-selection-and-loading/">Model Selection and Loading</a>.</p>
 <p>Radixor separates preparation from runtime usage. Source dictionaries are used to derive patch commands and reduce them into a compact read-only trie. Runtime stemming then operates on that compiled structure rather than on the original dictionary text. A richer dictionary usually improves the quality and coverage of inferred transformations, including transformations that are applicable to words not explicitly present in the source material. The reduction step also removes a large amount of redundant lexical information, which is why very large dictionaries can still produce compact runtime artifacts. These artifacts can be persisted and loaded directly when needed.</p>
+<p>From version 4 onward, the core and models are explicit dependencies:</p>
+<div class="highlight"><pre><span></span><code><span class="n">dependencies</span><span class="w"> </span><span class="o">{</span>
+<span class="w">    </span><span class="n">implementation</span><span class="w"> </span><span class="s1">&#39;org.egothor:radixor:&lt;radixor-version&gt;&#39;</span>
+<span class="w">    </span><span class="n">runtimeOnly</span><span class="w"> </span><span class="s1">&#39;org.egothor:radixor-models-standard:&lt;catalog-version&gt;&#39;</span>
+<span class="o">}</span>
+</code></pre></div>
+<p>The core JAR contains no dictionary. Replace the standard pack with <code>runtimeOnly 'org.egothor:radixor-model-us-uk-default:1.0.0'</code> for the minimal English example below. For Polish, <code>Language.PL_PL</code> resolves <code>pl-pl-unimorph</code>; installing optional <code>pl-pl-polimorf</code> does not select it automatically.</p>
+<p>Explicit PoliMorf loading uses <code>StemmerPatchTrieLoader.loadCompiled("pl-pl-polimorf", true, reductionMode)</code>. Its complete dictionary is supported, but construction is exceptional enough that repository verification runs it separately with a 6 GiB maximum heap. See <a href="../model-selection-and-loading/#load-polimorf-explicitly">Model Selection and Loading</a> for the complete dependency and Java example.</p>
 <p>A practical workflow usually consists of two independent phases:</p>
 <ol>
 <li>obtain a compiled stemmer,</li>
@@ -2562,8 +2682,8 @@ main loading options, query methods, artifact workflow, and metadata model.</p>
 </ol>
 <h2 id="1-obtain-a-compiled-stemmer">1. Obtain a compiled stemmer</h2>
 <p>A compiled stemmer can be obtained in three common ways.</p>
-<h3 id="use-a-bundled-language-dictionary">Use a bundled language dictionary</h3>
-<p>Radixor ships with bundled dictionaries for a set of supported languages. These resources are line-oriented dictionaries stored with the library and compiled into a <code>FrequencyTrie&lt;CompiledPatchCommand&gt;</code> when loaded through the runtime API. The loader can also store the canonical stem itself as a no-op patch command. Compiled trie artifacts now persist self-describing metadata, including the traversal direction and compilation reduction settings used to build the artifact.</p>
+<h3 id="use-an-external-language-model">Use an external language model</h3>
+<p>Language dictionaries are independently versioned model JARs discovered by <code>StemmerModelRegistry</code>. The root <code>org.egothor:radixor</code> JAR contains no dictionary bytes. The loader compiles a selected model into a <code>FrequencyTrie&lt;CompiledPatchCommand&gt;</code>; compiled trie artifacts retain self-describing traversal and reduction metadata.</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">java.io.IOException</span><span class="p">;</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">org.egothor.stemmer.CompiledPatchCommand</span><span class="p">;</span>
@@ -2571,9 +2691,9 @@ main loading options, query methods, artifact workflow, and metadata model.</p>
 <span class="kn">import</span><span class="w"> </span><span class="nn">org.egothor.stemmer.ReductionMode</span><span class="p">;</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">org.egothor.stemmer.StemmerPatchTrieLoader</span><span class="p">;</span>
 
-<span class="kd">public</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kd">class</span> <span class="nc">BundledStemmerExample</span><span class="w"> </span><span class="p">{</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kd">class</span> <span class="nc">RegisteredModelExample</span><span class="w"> </span><span class="p">{</span>
 
-<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="nf">BundledStemmerExample</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="nf">RegisteredModelExample</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="k">throw</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">AssertionError</span><span class="p">(</span><span class="s">&quot;No instances.&quot;</span><span class="p">);</span>
 <span class="w">    </span><span class="p">}</span>
 
@@ -2757,6 +2877,10 @@ main loading options, query methods, artifact workflow, and metadata model.</p>
 <h2 id="persisted-trie-metadata">Persisted trie metadata</h2>
 <p>Every compiled trie artifact stores a <code>TrieMetadata</code> descriptor together with the immutable trie payload. That metadata currently records the binary format version, the <code>WordTraversalDirection</code>, the <code>ReductionSettings</code> used during compilation, the declared <code>DiacriticProcessingMode</code>, and the selected <code>CaseProcessingMode</code>. Traversal, case processing, and diacritic processing are applied during runtime lookup (<code>get</code>, <code>getAll</code>), and case/diacritic processing are also applied during dictionary insertion when a trie is built.</p>
 <p><code>DiacriticProcessingMode.AS_IS</code> keeps dictionary keys and lookup keys unchanged. <code>DiacriticProcessingMode.REMOVE</code> strips diacritics from dictionary keys and lookup keys (for Czech diacritics and broad European Latin-script variants). <code>DiacriticProcessingMode.AS_IS_AND_STRIPPED_FALLBACK</code> is currently not supported and raises an <code>UnsupportedOperationException</code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Radixor 4 model artifacts</p>
+<p>Language dictionaries are independently versioned runtime model artifacts, not resources embedded in <code>radixor</code>. Language-based APIs resolve deterministic defaults through <code>StemmerModelRegistry</code>; see <a href="../stemmer-models/">Stemmer Models</a>.</p>
+</div>
 
 
 

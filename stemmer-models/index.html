@@ -1,0 +1,2977 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="High-performance multi-language stemming toolkit for Java">
+      
+      
+      
+        <link rel="canonical" href="https://leogalambos.github.io/Radixor/stemmer-models/">
+      
+      
+        <link rel="prev" href="../cli-compilation/">
+      
+      
+        <link rel="next" href="../stemmer-model-catalog/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Stemmer Models - Radixor</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#stemmer-models" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Radixor" class="md-header__button md-logo" aria-label="Radixor" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Radixor
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Stemmer Models
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/leogalambos/Radixor" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    leogalambos/Radixor
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Radixor" class="md-nav__button md-logo" aria-label="Radixor" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Radixor
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/leogalambos/Radixor" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    leogalambos/Radixor
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Start
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Start
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../fast-track/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Fast Track
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quick-start/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../integration-deep-dive/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Integration Deep Dive
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Integration
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Integration
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../programmatic-usage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../model-selection-and-loading/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model Selection and Loading
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../programmatic-loading-and-building/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Loading and Building Stemmers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../programmatic-querying-and-ambiguity/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Querying and Ambiguity Handling
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../programmatic-extending-and-persistence/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Extending and Persisting Compiled Tries
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../migration-and-backward-compatibility/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Migration and Backward Compatibility
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli-compilation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Compilation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dictionaries and Languages
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Dictionaries and Languages
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stemmer Models
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stemmer Models
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#terminology" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Terminology
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#model-artifact-identity-and-layout" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Model artifact identity and layout
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#discovery-and-integrity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Discovery and integrity
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#descriptor-fields" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Descriptor fields
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#immutable-input-to-runtime-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Immutable input to runtime model
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#aggregate-projects" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Aggregate projects
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#create-or-update-a-model-module" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Create or update a model module
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#release-boundaries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Release boundaries
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#documentation-and-troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Documentation and troubleshooting
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../stemmer-model-catalog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Published Model Catalog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../built-in-languages/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Built-in Languages
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dictionary-format/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dictionary Format
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing-dictionaries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing Dictionaries
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture and Semantics
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture and Semantics
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture-and-reduction/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reduction-semantics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reduction Semantics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lookup-edge-optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lookup Edge Optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../compatibility-and-guarantees/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compatibility and Guarantees
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Benchmarks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Benchmarks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarking/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How to Read Benchmarks
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Benchmark Results
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_3" id="__nav_6_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/reference/methodology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Methodology
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/reference/linguistic-quality/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Linguistic Quality Methodology
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/reference/tested-stemmers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tested Stemmers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/reference/reproducibility/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reproducibility and Raw Data
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/reference/corpora/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Corpora
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/reference/environment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Environment and Reports
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/reference/english-coverage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    English Dictionary Coverage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/reference/candidates/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Candidate Evaluation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_4" id="__nav_6_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Language Results
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Language Results
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/languages/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/languages/czech/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Czech
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/languages/danish/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Danish
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/languages/dutch/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dutch
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/languages/english/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    English
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/languages/finnish/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Finnish
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/languages/french/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    French
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/languages/german/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    German
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/languages/hungarian/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hungarian
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/languages/italian/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Italian
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/languages/norwegian-bokmal/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Norwegian Bokmal
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/languages/norwegian-nynorsk/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Norwegian Nynorsk
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/languages/persian/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Persian
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/languages/polish/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Polish
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/languages/portuguese/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Portuguese
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/languages/russian/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Russian
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/languages/spanish/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Spanish
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/languages/swedish/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Swedish
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/languages/ukrainian/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ukrainian
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/languages/yiddish/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Yiddish
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quality and Operations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Quality and Operations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quality-and-operations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quality and Operations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../stemming-quality/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stemming Quality
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reports/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reports
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../builds/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Historical Builds
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../test-taxonomy-and-filtering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Test taxonomy and execution filtering
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#terminology" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Terminology
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#model-artifact-identity-and-layout" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Model artifact identity and layout
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#discovery-and-integrity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Discovery and integrity
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#descriptor-fields" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Descriptor fields
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#immutable-input-to-runtime-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Immutable input to runtime model
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#aggregate-projects" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Aggregate projects
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#create-or-update-a-model-module" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Create or update a model module
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#release-boundaries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Release boundaries
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#documentation-and-troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Documentation and troubleshooting
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="stemmer-models">Stemmer Models</h1>
+<p>This page defines the model artifact and its maintenance lifecycle. Application developers should begin with <a href="../model-selection-and-loading/">Model Selection and Loading</a>; the generated <a href="../stemmer-model-catalog/">model catalog</a> is the detailed inventory.</p>
+<h2 id="terminology">Terminology</h2>
+<table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Definition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Radixor core</td>
+<td>Java parsing, patch-command, trie, registry, descriptor, and loader code in <code>org.egothor:radixor</code></td>
+</tr>
+<tr>
+<td>Language</td>
+<td>Locale-level identity such as <code>PL_PL</code>; not a dictionary or model</td>
+</tr>
+<tr>
+<td>Model ID</td>
+<td>Stable identity of one concrete model, such as <code>pl-pl-unimorph</code></td>
+</tr>
+<tr>
+<td>Model artifact</td>
+<td>Independently versioned JAR containing one descriptor, one runtime dictionary, and licensing material</td>
+</tr>
+<tr>
+<td>Source dictionary</td>
+<td>Upstream lexical or morphological source recorded in provenance</td>
+</tr>
+<tr>
+<td>Runtime dictionary</td>
+<td>GZip-compressed UTF-8 Radixor tab-separated data consumed during trie construction</td>
+</tr>
+<tr>
+<td>Compiled trie</td>
+<td>In-memory lookup structure built by the loader; not the <code>stemmer.gz</code> resource</td>
+</tr>
+<tr>
+<td>Default model</td>
+<td>Stable ID selected by a language-oriented loader call</td>
+</tr>
+<tr>
+<td>Optional model</td>
+<td>Discoverable only when installed and selected explicitly; PoliMorf is optional for Polish</td>
+</tr>
+</tbody>
+</table>
+<p>Core version, model artifact version, catalog version, source dictionary version, and model format version are separate compatibility axes. Updating Java code need not republish unchanged model bytes; updating one model need not release core or every other model.</p>
+<h2 id="model-artifact-identity-and-layout">Model artifact identity and layout</h2>
+<p>A module named <code>models/&lt;model-id&gt;</code> publishes:</p>
+<div class="highlight"><pre><span></span><code>org.egothor:radixor-model-&lt;model-id&gt;:&lt;model-version&gt;
+</code></pre></div>
+<p>The built PoliMorf JAR has this effective tree:</p>
+<div class="highlight"><pre><span></span><code>META-INF/
+  LICENSES/PoliMorf-BSD-2-Clause.txt
+  MANIFEST.MF
+  radixor/
+    models.index
+    models/pl-pl-polimorf.properties
+org/egothor/stemmer/models/pl-pl-polimorf/stemmer.gz
+</code></pre></div>
+<p>Each UniMorph-derived model instead contains one model-specific
+<code>META-INF/NOTICE/&lt;model-id&gt;-data.txt</code>. That notice records the upstream attribution, the Radixor
+transformations and contribution statement, the ShareAlike distribution terms, and the canonical
+CC BY-SA 3.0 URI. The repository has no root CC license directory because CC BY-SA applies to
+these model-data artifacts, not to the BSD-3-Clause Radixor Java software. PoliMorf retains only
+its BSD-2-Clause data license.</p>
+<p><code>models.index</code> contains the descriptor path. The descriptor contains the exact resource path. No Java provider class is required, and model modules do not compile against a core API.</p>
+<h2 id="discovery-and-integrity">Discovery and integrity</h2>
+<p><code>StemmerModelRegistry</code> asks the selected <code>ClassLoader</code> for every <code>META-INF/radixor/models.index</code>. It sorts index URLs, validates each non-comment entry, loads the named descriptors, sorts descriptors by model ID, and rejects duplicate IDs. It does not scan arbitrary JAR entries.</p>
+<p>Descriptor parsing verifies:</p>
+<ul>
+<li>the model-ID syntax;</li>
+<li>required nonblank runtime properties;</li>
+<li>a known <code>Language</code> enum name;</li>
+<li>format <code>radixor-dictionary-tsv-gzip</code> and format version <code>1</code>;</li>
+<li>the exact namespaced resource path;</li>
+<li>presence of the runtime resource;</li>
+<li>a lowercase 64-character SHA-256 value.</li>
+</ul>
+<p>Loading then reads the compressed resource bytes through the descriptor's discovering class loader, compares their SHA-256 digest, opens GZip, parses UTF-8 Radixor dictionary rows, and constructs a trie. Duplicate-ID and checksum checks make selection independent of classpath order.</p>
+<h2 id="descriptor-fields">Descriptor fields</h2>
+<p>The convention plugin generates these fields:</p>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Role</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>model.id</code></td>
+<td>Authoritative runtime identity</td>
+<td>Stable model ID</td>
+</tr>
+<tr>
+<td><code>model.version</code></td>
+<td>Authoritative artifact identity</td>
+<td>Independently managed model version</td>
+</tr>
+<tr>
+<td><code>model.language</code></td>
+<td>Authoritative selection metadata</td>
+<td>Existing <code>Language</code> enum value</td>
+</tr>
+<tr>
+<td><code>model.displayName</code></td>
+<td>Display metadata</td>
+<td>Human-readable name</td>
+</tr>
+<tr>
+<td><code>model.resource</code></td>
+<td>Authoritative loading metadata</td>
+<td>Namespaced GZip resource</td>
+</tr>
+<tr>
+<td><code>model.default</code></td>
+<td>Catalog/build declaration</td>
+<td>Whether the module declares itself a default; runtime language selection uses <code>Language.defaultModelId()</code></td>
+</tr>
+<tr>
+<td><code>model.format</code></td>
+<td>Authoritative compatibility metadata</td>
+<td><code>radixor-dictionary-tsv-gzip</code></td>
+</tr>
+<tr>
+<td><code>model.formatVersion</code></td>
+<td>Authoritative compatibility metadata</td>
+<td>Currently <code>1</code></td>
+</tr>
+<tr>
+<td><code>model.sha256</code></td>
+<td>Authoritative integrity metadata</td>
+<td>Digest of the compressed source bytes</td>
+</tr>
+<tr>
+<td><code>model.rightToLeft</code></td>
+<td>Processing metadata</td>
+<td>Language direction recorded by the build</td>
+</tr>
+<tr>
+<td><code>model.caseProcessing</code></td>
+<td>Processing metadata</td>
+<td><code>LOWERCASE_WITH_LOCALE_ROOT</code></td>
+</tr>
+<tr>
+<td><code>model.diacriticProcessing</code></td>
+<td>Processing metadata</td>
+<td><code>AS_IS</code></td>
+</tr>
+<tr>
+<td><code>model.storeOriginal</code></td>
+<td>Processing metadata</td>
+<td>Currently <code>true</code></td>
+</tr>
+<tr>
+<td><code>source.name</code></td>
+<td>Provenance</td>
+<td>Source dictionary name</td>
+</tr>
+<tr>
+<td><code>source.version</code></td>
+<td>Provenance</td>
+<td>Upstream version or the legacy-import sentinel</td>
+</tr>
+<tr>
+<td><code>source.project</code></td>
+<td>Provenance</td>
+<td>Upstream project</td>
+</tr>
+<tr>
+<td><code>source.repository</code></td>
+<td>Provenance</td>
+<td>Official language repository</td>
+</tr>
+<tr>
+<td><code>source.dataset</code></td>
+<td>Provenance</td>
+<td>Upstream dataset and lexical-source identity</td>
+</tr>
+<tr>
+<td><code>source.revision</code></td>
+<td>Provenance</td>
+<td>Exact revision or <code>not-recorded-in-legacy-import</code></td>
+</tr>
+<tr>
+<td><code>source.revisionStatus</code></td>
+<td>Provenance</td>
+<td><code>recorded</code> or <code>not-recorded-in-legacy-import</code></td>
+</tr>
+<tr>
+<td><code>source.license</code></td>
+<td>Provenance</td>
+<td>SPDX or project license reference</td>
+</tr>
+<tr>
+<td><code>source.licenseUri</code></td>
+<td>Provenance</td>
+<td>Canonical license URI</td>
+</tr>
+<tr>
+<td><code>source.attribution</code></td>
+<td>Provenance</td>
+<td>Attribution supplied by the official source</td>
+</tr>
+<tr>
+<td><code>source.verificationDate</code></td>
+<td>Provenance</td>
+<td>Date the maintained upstream information was checked</td>
+</tr>
+<tr>
+<td><code>transformations.summary</code></td>
+<td>Provenance</td>
+<td>Material Radixor conversion operations</td>
+</tr>
+<tr>
+<td><code>compiler.radixorVersion</code></td>
+<td>Provenance</td>
+<td>Compiler lineage recorded by the plugin</td>
+</tr>
+<tr>
+<td><code>compiler.radixorCommit</code></td>
+<td>Provenance</td>
+<td>Commit when available; currently <code>unavailable</code></td>
+</tr>
+<tr>
+<td><code>statistics.groups</code></td>
+<td>Provenance/statistics</td>
+<td>Currently <code>unavailable</code></td>
+</tr>
+<tr>
+<td><code>statistics.forms</code></td>
+<td>Provenance/statistics</td>
+<td>Currently <code>unavailable</code></td>
+</tr>
+</tbody>
+</table>
+<p>The current registry consumes the authoritative <code>model.*</code> identity, format, resource, and checksum fields. Processing and provenance fields remain packaged for audit and catalog generation but are not all exposed as typed <code>StemmerModelDescriptor</code> accessors. The generated catalog is the supported documentation view of source name, version, license, checksum, and size.</p>
+<h2 id="immutable-input-to-runtime-model">Immutable input to runtime model</h2>
+<p>The packaging sequence is:</p>
+<div class="highlight"><pre><span></span><code>models/&lt;id&gt;/src/modelInput/stemmer.gz
+  -&gt; validate GZip, strict UTF-8, rows, metadata, version, and license
+  -&gt; copy identical bytes into build/generated/modelResources
+  -&gt; generate descriptor, index, and packaged license
+  -&gt; package radixor-model-&lt;id&gt;-&lt;version&gt;.jar
+  -&gt; discover from the application&#39;s runtime classpath
+  -&gt; verify checksum, parse dictionary, and build a trie
+</code></pre></div>
+<p>Application runtime never reads <code>src/modelInput</code> from a source checkout.</p>
+<p>For PoliMorf, the immutable input is exactly:</p>
+<p><code>models/pl-pl-polimorf/src/modelInput/stemmer.gz</code></p>
+<p>Its required upstream license is:</p>
+<p><code>models/pl-pl-polimorf/src/modelInput/LICENSE-BSD-2-Clause.txt</code></p>
+<p>The final runtime resource is exactly:</p>
+<p><code>org/egothor/stemmer/models/pl-pl-polimorf/stemmer.gz</code></p>
+<h2 id="aggregate-projects">Aggregate projects</h2>
+<table>
+<thead>
+<tr>
+<th>Project</th>
+<th>Published coordinate</th>
+<th>Contents and purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>models/standard</code></td>
+<td><code>org.egothor:radixor-models-standard:&lt;catalog-version&gt;</code></td>
+<td>POM-only aggregate with one transitive runtime default per language; excludes PoliMorf</td>
+</tr>
+<tr>
+<td><code>models/bom</code></td>
+<td><code>org.egothor:radixor-models-bom:&lt;catalog-version&gt;</code></td>
+<td>POM-only Maven dependency-management constraints for all individual published model versions</td>
+</tr>
+</tbody>
+</table>
+<p>Neither catalog artifact publishes a binary, sources, or Javadoc JAR. The standard aggregate resolves model JARs because its POM contains runtime dependencies. Importing the BOM only manages versions and resolves no model by itself. JMH, tests, and quality evaluation depend directly on individual model projects through non-production Gradle configurations.</p>
+<p>The Maven dependency BOM is not a software bill of materials. The root <code>cyclonedxDirectBom</code> task generates the project-wide CycloneDX SBOM under <code>build/reports/sbom/</code>; it does not write into <code>models/bom/build/</code>.</p>
+<p><code>models/build/</code> is an ignored Gradle output directory for the implicit lifecycle parent <code>:models</code>, not a source module. CycloneDX direct tasks exposed on subprojects by the root plugin are disabled, so the supported build does not write an SBOM there. Aggregate model reports are owned by the root project under <code>build/reports/models/</code>; individual model reports and publication files stay under <code>models/&lt;model-id&gt;/build/</code>.</p>
+<h2 id="create-or-update-a-model-module">Create or update a model module</h2>
+<ol>
+<li>Choose a stable lowercase model ID matching the module directory.</li>
+<li>Add <code>models/&lt;id&gt;/model-version.txt</code>; do not derive it from core.</li>
+<li>Apply <code>org.egothor.radixor.model</code> in the module build script.</li>
+<li>Declare <code>modelId</code>, <code>language</code>, <code>displayName</code>, <code>defaultModel</code>, repository, dataset, revision and status, license URI, attribution, verification date, and transformations.</li>
+<li>Put immutable <code>stemmer.gz</code> and a model-specific <code>NOTICE-model-data.txt</code> under <code>src/modelInput/</code>. The notice must identify the applicable data license and canonical URI, upstream attribution, transformations, and derived-data contributions without implying that the core software uses that license.</li>
+<li>Add the module ID and its <code>default</code> or <code>optional</code> build-topology role to <code>models/model-projects.properties</code>. <code>settings.gradle</code>, verification, standard membership, BOM constraints, tests, and JMH all consume that list; descriptor metadata remains authoritative for model identity and language properties.</li>
+<li>Run:</li>
+</ol>
+<div class="highlight"><pre><span></span><code>./gradlew<span class="w"> </span>--no-daemon<span class="w"> </span>:models:&lt;model-id&gt;:validateModelInput
+./gradlew<span class="w"> </span>--no-daemon<span class="w"> </span>:models:&lt;model-id&gt;:prepareModelResources
+./gradlew<span class="w"> </span>--no-daemon<span class="w"> </span>:models:&lt;model-id&gt;:verifyModelDescriptor
+./gradlew<span class="w"> </span>--no-daemon<span class="w"> </span>:models:&lt;model-id&gt;:verifyModelJar
+./gradlew<span class="w"> </span>--no-daemon<span class="w"> </span>:models:&lt;model-id&gt;:check
+./gradlew<span class="w"> </span>--no-daemon<span class="w"> </span>runtimeModelIntegrationTest<span class="w"> </span>-PmodelId<span class="o">=</span>&lt;model-id&gt;
+</code></pre></div>
+<p>Validation fails for missing inputs, notices, attribution, repository, revision status, Radixor contribution and transformation disclosures, ShareAlike and no-endorsement statements, notice byte identity, unsafe or mismatched ID, invalid semantic version, invalid GZip/UTF-8, invalid dictionary rows, checksum mismatch, wrong packaged path, duplicate dictionaries, or dictionaries in sources/Javadoc artifacts. The explicit legacy revision sentinel is valid; an absent revision or status is not. The PoliMorf module separately validates its complete BSD-2-Clause license and attribution.</p>
+<p>Copying an arbitrary <code>stemmer.gz</code> into an application is insufficient: registry discovery requires an index, a valid descriptor, namespaced resource, checksum, version, language, format declaration, and licensing material.</p>
+<h2 id="release-boundaries">Release boundaries</h2>
+<table>
+<thead>
+<tr>
+<th>Tag</th>
+<th>Publishes</th>
+<th>Does not publish</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>release@&lt;core-version&gt;</code></td>
+<td>Root <code>org.egothor:radixor</code> software artifacts</td>
+<td>Model JARs, standard pack, or BOM</td>
+</tr>
+<tr>
+<td><code>model/&lt;model-id&gt;@&lt;model-version&gt;</code></td>
+<td>Exactly the matching independently versioned model</td>
+<td>Core, other models, standard pack, BOM, JMH, or full quality suite</td>
+</tr>
+<tr>
+<td><code>models-catalog@&lt;catalog-version&gt;</code></td>
+<td>Standard aggregate and models BOM</td>
+<td>Individual model JARs or core</td>
+</tr>
+</tbody>
+</table>
+<p>Local validation for PoliMorf 1.0.0 is:</p>
+<div class="highlight"><pre><span></span><code>./tools/parse-model-release-tag.sh<span class="w"> </span><span class="s2">&quot;model/pl-pl-polimorf@1.0.0&quot;</span><span class="w"> </span>.
+./gradlew<span class="w"> </span>--no-daemon<span class="w"> </span>:models:pl-pl-polimorf:check
+./gradlew<span class="w"> </span>--no-daemon<span class="w"> </span>runtimeModelIntegrationTest<span class="w"> </span>-PmodelId<span class="o">=</span>pl-pl-polimorf
+./gradlew<span class="w"> </span>--no-daemon<span class="w"> </span>:models:pl-pl-polimorf:validateModelRelease<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-PmodelReleaseVersion<span class="o">=</span><span class="m">1</span>.0.0
+./gradlew<span class="w"> </span>--no-daemon<span class="w"> </span>:models:pl-pl-polimorf:packageModelReleaseCandidate<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-PmodelReleaseVersion<span class="o">=</span><span class="m">1</span>.0.0
+</code></pre></div>
+<p><code>runtimeModelIntegrationTest</code> uses an isolated JVM, defaults to a 6 GiB maximum heap, and can be overridden with <code>-PradixorLargeModelMaxHeap=10g</code>. For PoliMorf, <code>validateModelRelease</code> depends on this complete runtime construction and real stemming smoke verification in addition to descriptor, checksum, license, and package validation. The generic release workflow still selects and publishes only the requested model. The commands above are local validation only; repository owners control tags and publication.</p>
+<h2 id="documentation-and-troubleshooting">Documentation and troubleshooting</h2>
+<p><code>prepareMkDocsSource</code> generates the catalog only at <code>build/mkdocs-source/stemmer-model-catalog.md</code>; generated Markdown and rendered site content are not tracked. For runtime failures, dependency inspection, ClassLoader isolation, and fat-JAR guidance, see <a href="../model-selection-and-loading/#troubleshooting">Model Selection and Loading</a>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      &copy; 2026 Egothor. Licensed under <a href='https://github.com/leogalambos/Radixor/blob/main/LICENSE'>BSD-3-Clause</a>.
+    </div>
+  
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.instant", "navigation.sections", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

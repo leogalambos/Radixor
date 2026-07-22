@@ -402,10 +402,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#2-load-a-bundled-dictionary" class="md-nav__link">
+  <a href="#2-load-an-external-model-dictionary" class="md-nav__link">
     <span class="md-ellipsis">
       
-        2. Load A Bundled Dictionary
+        2. Load An External Model Dictionary
       
     </span>
   </a>
@@ -413,10 +413,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#3-choose-a-language-resource" class="md-nav__link">
+  <a href="#3-choose-a-language-default-or-explicit-model" class="md-nav__link">
     <span class="md-ellipsis">
       
-        3. Choose A Language Resource
+        3. Choose a Language Default or Explicit Model
       
     </span>
   </a>
@@ -584,6 +584,34 @@
     
   
     Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../model-selection-and-loading/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model Selection and Loading
   
 
     
@@ -795,6 +823,62 @@
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../stemmer-models/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stemmer Models
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../stemmer-model-catalog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Published Model Catalog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -2242,6 +2326,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../builds/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Historical Builds
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../test-taxonomy-and-filtering/" class="md-nav__link">
         
   
@@ -2308,10 +2420,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#2-load-a-bundled-dictionary" class="md-nav__link">
+  <a href="#2-load-an-external-model-dictionary" class="md-nav__link">
     <span class="md-ellipsis">
       
-        2. Load A Bundled Dictionary
+        2. Load An External Model Dictionary
       
     </span>
   </a>
@@ -2319,10 +2431,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#3-choose-a-language-resource" class="md-nav__link">
+  <a href="#3-choose-a-language-default-or-explicit-model" class="md-nav__link">
     <span class="md-ellipsis">
       
-        3. Choose A Language Resource
+        3. Choose a Language Default or Explicit Model
       
     </span>
   </a>
@@ -2373,13 +2485,13 @@
 
 <h1 id="fast-track">Fast Track</h1>
 <p>This page is the shortest path from an empty Java project to a working Radixor stemmer.
-It deliberately uses a bundled dictionary and the preferred compiled-command runtime API, so the
+It deliberately uses an external model artifact and the preferred compiled-command runtime API, so the
 first result does not require writing a dictionary, running the CLI compiler, or understanding
 reduction internals.</p>
 <p>Use this page when the goal is:</p>
 <ul>
 <li>add the dependency,</li>
-<li>load a bundled language resource,</li>
+<li>load a registered language model,</li>
 <li>stem a token,</li>
 <li>know where to go next.</li>
 </ul>
@@ -2389,25 +2501,31 @@ reduction internals.</p>
 <div class="highlight"><pre><span></span><code>groupId:    org.egothor
 artifactId: radixor
 </code></pre></div>
-<p>Use the current published version from Maven Central. The snippets below use <code>3.0.0</code>; replace it
-with the version you deploy if a newer release is available.</p>
+<p>Radixor 4 is not yet represented by a published release in this working tree. Replace the version placeholder with the reviewed release you deploy.</p>
 <p>For a Gradle project:</p>
 <div class="highlight"><pre><span></span><code><span class="n">dependencies</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">implementation</span><span class="p">(</span><span class="s">&quot;org.egothor:radixor:3.0.0&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="n">implementation</span><span class="p">(</span><span class="s">&quot;org.egothor:radixor:&lt;radixor-version&gt;&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="n">runtimeOnly</span><span class="p">(</span><span class="s">&quot;org.egothor:radixor-model-us-uk-default:1.0.0&quot;</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>For a Maven project:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">&lt;dependency&gt;</span>
 <span class="w">    </span><span class="nt">&lt;groupId&gt;</span>org.egothor<span class="nt">&lt;/groupId&gt;</span>
 <span class="w">    </span><span class="nt">&lt;artifactId&gt;</span>radixor<span class="nt">&lt;/artifactId&gt;</span>
-<span class="w">    </span><span class="nt">&lt;version&gt;</span>3.0.0<span class="nt">&lt;/version&gt;</span>
+<span class="w">    </span><span class="nt">&lt;version&gt;</span>${radixor.version}<span class="nt">&lt;/version&gt;</span>
+<span class="nt">&lt;/dependency&gt;</span>
+<span class="nt">&lt;dependency&gt;</span>
+<span class="w">    </span><span class="nt">&lt;groupId&gt;</span>org.egothor<span class="nt">&lt;/groupId&gt;</span>
+<span class="w">    </span><span class="nt">&lt;artifactId&gt;</span>radixor-model-us-uk-default<span class="nt">&lt;/artifactId&gt;</span>
+<span class="w">    </span><span class="nt">&lt;version&gt;</span>1.0.0<span class="nt">&lt;/version&gt;</span>
+<span class="w">    </span><span class="nt">&lt;scope&gt;</span>runtime<span class="nt">&lt;/scope&gt;</span>
 <span class="nt">&lt;/dependency&gt;</span>
 </code></pre></div>
 <p>Radixor targets modern Java and has a dependency-light runtime core. The project documentation and
 benchmarks assume a current JDK; Java 21 or newer is the practical baseline for current releases.</p>
-<h2 id="2-load-a-bundled-dictionary">2. Load A Bundled Dictionary</h2>
-<p>The fastest path is to use a bundled dictionary through <code>StemmerPatchTrieLoader.Language</code>.
-This example uses the bundled English resource, <code>US_UK</code>.</p>
+<h2 id="2-load-an-external-model-dictionary">2. Load An External Model Dictionary</h2>
+<p>The fastest path is to use a registered model through <code>StemmerPatchTrieLoader.Language</code>.
+This example uses <code>US_UK</code>, whose default ID is <code>us-uk-default</code>; the runtime model dependency above must be present.</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">java.io.IOException</span><span class="p">;</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">org.egothor.stemmer.CompiledPatchCommand</span><span class="p">;</span>
@@ -2435,10 +2553,9 @@ This example uses the bundled English resource, <code>US_UK</code>.</p>
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
-<p>The loaded <code>FrequencyTrie&lt;CompiledPatchCommand&gt;</code> is immutable and can be shared across request
-threads. Load it once during application startup and reuse it for indexing and query processing.</p>
-<h2 id="3-choose-a-language-resource">3. Choose A Language Resource</h2>
-<p>Bundled dictionaries are exposed as enum constants. Common examples:</p>
+<p>The loaded <code>FrequencyTrie&lt;CompiledPatchCommand&gt;</code> has no mutating API. Load it once during application startup, publish it safely through application-owned lifecycle code, and reuse it for indexing and query processing.</p>
+<h2 id="3-choose-a-language-default-or-explicit-model">3. Choose a Language Default or Explicit Model</h2>
+<p>Language defaults are exposed as enum constants. Common examples:</p>
 <table>
 <thead>
 <tr>
@@ -2483,6 +2600,7 @@ threads. Load it once during application startup and reuse it for indexing and q
 </table>
 <p>The full list, writing-direction notes, and benchmark links are in
 <a href="../built-in-languages/">Built-in Languages</a>.</p>
+<p>Polish has two models. <code>Language.PL_PL</code> selects <code>pl-pl-unimorph</code>; load the alternative explicitly with <code>StemmerPatchTrieLoader.loadCompiled("pl-pl-polimorf", true, reductionMode)</code>, or retain a registry and pass <code>registry.require("pl-pl-polimorf")</code> to the descriptor overload. See <a href="../model-selection-and-loading/">Model Selection and Loading</a>. Full PoliMorf construction requires substantially more startup heap than ordinary models; the repository verifies it in a dedicated 6 GiB test JVM.</p>
 <h2 id="4-use-the-same-stemmer-on-both-sides">4. Use The Same Stemmer On Both Sides</h2>
 <p>For search, use the same Radixor configuration during indexing and query processing. A typical
 minimal integration flow is:</p>
@@ -2496,14 +2614,15 @@ minimal integration flow is:</p>
 <p>Do not load the trie per token. The compiled trie is the runtime artifact; per-token work should be
 limited to lookup and patch application.</p>
 <h2 id="5-next-step-for-production">5. Next Step For Production</h2>
-<p>The fast path compiles a bundled dictionary during startup. That is convenient for evaluation and
+<p>The fast path parses and compiles a registered model dictionary during startup. That is convenient for evaluation and
 small services. For larger deployments, compile once, persist a <code>.radixor.gz</code> artifact, and load
 that binary artifact at runtime.</p>
 <p>Continue with:</p>
 <ul>
 <li><a href="../integration-deep-dive/">Integration Deep Dive</a> for production lifecycle guidance.</li>
 <li><a href="../programmatic-loading-and-building/">Loading and Building Stemmers</a> for all loading APIs.</li>
-<li><a href="../built-in-languages/">Built-in Languages</a> for bundled resources and dictionary locations.</li>
+<li><a href="../model-selection-and-loading/">Model Selection and Loading</a> for model dependencies, variants, and failures.</li>
+<li><a href="../built-in-languages/">Built-in Languages</a> for defaults and optional variants.</li>
 <li><a href="../benchmarking/">Benchmarking</a> for speed and quality interpretation.</li>
 </ul>
 

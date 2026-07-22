@@ -500,6 +500,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../model-selection-and-loading/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model Selection and Loading
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../programmatic-loading-and-building/" class="md-nav__link">
         
   
@@ -701,6 +729,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../stemmer-models/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stemmer Models
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../stemmer-model-catalog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Published Model Catalog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../built-in-languages/" class="md-nav__link">
         
   
@@ -789,6 +873,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#source-text-model-resource-and-compiled-trie" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Source text, model resource, and compiled trie
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#core-structure" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -870,6 +965,17 @@
     <span class="md-ellipsis">
       
         Character set, compression, and normalization
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#turn-a-dictionary-into-a-model-artifact" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Turn a dictionary into a model artifact
       
     </span>
   </a>
@@ -2391,6 +2497,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../builds/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Historical Builds
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../test-taxonomy-and-filtering/" class="md-nav__link">
         
   
@@ -2444,6 +2578,17 @@
       Table of contents
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#source-text-model-resource-and-compiled-trie" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Source text, model resource, and compiled trie
+      
+    </span>
+  </a>
+  
+</li>
       
         <li class="md-nav__item">
   <a href="#core-structure" class="md-nav__link">
@@ -2527,6 +2672,17 @@
     <span class="md-ellipsis">
       
         Character set, compression, and normalization
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#turn-a-dictionary-into-a-model-artifact" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Turn a dictionary into a model artifact
       
     </span>
   </a>
@@ -2671,6 +2827,42 @@
 
 <h1 id="dictionary-format">Dictionary Format</h1>
 <p>Radixor uses a simple line-oriented dictionary format designed for practical stemming workflows. The textual source format is tab-separated values, meaning that columns are separated by the tab character.</p>
+<h2 id="source-text-model-resource-and-compiled-trie">Source text, model resource, and compiled trie</h2>
+<p>Three artifacts must not be confused:</p>
+<table>
+<thead>
+<tr>
+<th>Artifact</th>
+<th>Representation</th>
+<th>Consumer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Source textual dictionary</td>
+<td>Plain UTF-8 tab-separated rows</td>
+<td>Authors, parser, CLI, or model preparation</td>
+</tr>
+<tr>
+<td>Registered model resource</td>
+<td>The same Radixor dictionary bytes under GZip, accompanied by index, descriptor, checksum, and license</td>
+<td><code>StemmerModelRegistry</code> and <code>StemmerPatchTrieLoader</code></td>
+</tr>
+<tr>
+<td>Persisted compiled trie</td>
+<td>GZip-compressed Radixor binary format, commonly <code>.radixor.gz</code></td>
+<td><code>loadBinaryCompiled(...)</code></td>
+</tr>
+</tbody>
+</table>
+<p>The model file named <code>stemmer.gz</code> is not Java serialization and is not a pre-instantiated or persisted trie. It is compressed textual dictionary input parsed when the model is loaded.</p>
+<p>Consequently, compressed size is not a construction-memory estimate. The PoliMorf resource is 12,624,997 bytes compressed and 68,093,680 bytes decompressed, while full parsing, trie construction, reduction, and patch compilation require a dedicated verification JVM with a 6 GiB maximum heap.</p>
+<p>Comment headers in maintained model inputs summarize provenance but do not replace packaged legal
+material. Each UniMorph-derived artifact includes a language-specific notice describing its
+official repository, lexical source, upstream attribution, CC BY-SA 3.0 canonical URI, ShareAlike
+status, Radixor transformations, and Leo Galambos's protectable model-data contributions. The
+notice does not claim ownership over the underlying data. GZip packaging and descriptor/checksum
+generation are disclosed transformations; the in-memory trie is a Radixor runtime structure.</p>
 <p>Each logical line describes one canonical stem and zero or more known word variants that should reduce to that stem. The format is intentionally lightweight, easy to maintain in source control, and directly consumable both by the programmatic loader and by the CLI compiler.</p>
 <h2 id="core-structure">Core structure</h2>
 <p>Each non-empty logical line has the following shape:</p>
@@ -2748,7 +2940,9 @@ connect connected   connecting // Common derived forms
 <div class="highlight"><pre><span></span><code>run running runs    ran
 </code></pre></div>
 <h2 id="character-set-compression-and-normalization">Character set, compression, and normalization</h2>
-<p>Dictionary files are read as UTF-8 text. Files loaded through <code>StemmerPatchTrieLoader.load(Path, ...)</code> may be either plain UTF-8 text or GZip-compressed UTF-8 text; the loader detects GZip input from the stream header instead of relying on the file extension. Bundled dictionaries are stored as GZip resources and are decoded as UTF-8 after decompression.</p>
+<p>Dictionary files are read as UTF-8 text. Files loaded through <code>StemmerPatchTrieLoader.load(Path, ...)</code> may be either plain UTF-8 text or GZip-compressed UTF-8 text; the loader detects GZip input from the stream header instead of relying on the file extension. Registered model dictionaries are stored as GZip resources and are decoded as UTF-8 after decompression.</p>
+<h2 id="turn-a-dictionary-into-a-model-artifact">Turn a dictionary into a model artifact</h2>
+<p>An arbitrary classpath copy is not a discoverable model. A model module places immutable input and its license under <code>models/&lt;model-id&gt;/src/modelInput/</code>, declares metadata and an independent version, and applies the model convention plugin. The build validates the input, copies identical bytes into a generated namespaced resource, generates <code>META-INF/radixor/models.index</code> and a descriptor, records SHA-256, and packages licensing material. See <a href="../stemmer-models/#create-or-update-a-model-module">Stemmer Models</a> for the complete procedure and <a href="../model-selection-and-loading/">Model Selection and Loading</a> for runtime use.</p>
 <p>The parser and trie are not restricted to ASCII. Dictionary items are ordinary Java <code>String</code> values, and trie traversal works over Java <code>char</code> sequences. This supports Latin-script data with diacritics, Cyrillic data, Hebrew, Persian, Yiddish, and other scripts represented in UTF-8, subject to the normal Java <code>String</code> model and the project’s traversal configuration.</p>
 <p>Case normalization is controlled by <code>CaseProcessingMode</code>. The default <code>LOWERCASE_WITH_LOCALE_ROOT</code> mode lowercases the line before columns are split into dictionary items. <code>AS_IS</code> preserves the original casing.</p>
 <p>Diacritic normalization is controlled at trie-build and lookup time by <code>DiacriticProcessingMode</code>:</p>
@@ -2820,6 +3014,10 @@ CONNECT Connected   Connecting
 <li><a href="../programmatic-usage/">Programmatic usage</a></li>
 <li><a href="../architecture-and-reduction/">Architecture and reduction</a></li>
 </ul>
+<div class="admonition note">
+<p class="admonition-title">Radixor 4 model artifacts</p>
+<p>Language dictionaries are independently versioned runtime model artifacts, not resources embedded in <code>radixor</code>. Language-based APIs resolve deterministic defaults through <code>StemmerModelRegistry</code>; see <a href="../stemmer-models/">Stemmer Models</a>.</p>
+</div>
 
 
 

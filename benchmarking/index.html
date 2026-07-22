@@ -500,6 +500,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../model-selection-and-loading/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model Selection and Loading
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../programmatic-loading-and-building/" class="md-nav__link">
         
   
@@ -691,6 +719,62 @@
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../stemmer-models/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stemmer Models
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../stemmer-model-catalog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Published Model Catalog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -2231,6 +2315,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../builds/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Historical Builds
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../test-taxonomy-and-filtering/" class="md-nav__link">
         
   
@@ -2351,6 +2463,8 @@
 
 <h1 id="benchmarking">Benchmarking</h1>
 <p>Radixor contains internal trie microbenchmarks, a separate stemmer comparison suite, and a dictionary coverage benchmark for Radixor itself. Published stemmer comparison results must come only from benchmark classes matching <code>.*StemmerComparisonBenchmark.*</code>; internal <code>FrequencyTrie*</code> microbenchmarks are not part of those results.</p>
+<p>Every current default Radixor benchmark scenario uses the model ID declared by its <code>Language.defaultModelId()</code>. The root JMH runtime configuration depends directly on all default model projects plus optional <code>pl-pl-polimorf</code>; no benchmark-pack project or artifact exists. These dependencies are benchmark-only and never enter the root published POM. A PoliMorf comparison must be labeled with model ID <code>pl-pl-polimorf</code>, while the default Polish row remains <code>pl-pl-unimorph</code>.</p>
+<p>The optional model now has a verified complete compiled loading path. This does not alter existing benchmark rows or make PoliMorf part of the representative English JMH run. Any future full PoliMorf benchmark must provision its documented startup heap independently and record the exact model artifact version and checksum.</p>
 <p>This page is the entry point for benchmark interpretation. Detailed tables and long reference material are split into focused subpages so that important points do not get buried.</p>
 <h2 id="key-takeaways">Key Takeaways</h2>
 <ul>
@@ -2414,7 +2528,8 @@
 <p>The <a href="../benchmarks/reference/english-coverage/">English dictionary coverage benchmark</a> shows the central operating curve explicitly: contracted tries preserve high quality even at reduced dictionary coverage, while changed-form exactness still reflects how much language knowledge was available during training. This is why Radixor performance should be discussed as a configurable quality/speed point, not as a single fixed ratio against Porter.</p>
 <h2 id="current-result-locations">Current Result Locations</h2>
 <p>The current measured language results are published in <a href="../benchmarks/languages/">Language Benchmark Pages</a>. Generated local report files for this benchmark update are listed in <a href="../benchmarks/reference/environment/">Benchmark environment and reports</a>.</p>
-<p>JMH TXT and CSV reports are still published as benchmark artifacts. They are no longer converted into a Shields endpoint benchmark badge.</p>
+<p>JMH TXT and CSV reports are still published as benchmark artifacts. They are no longer converted into a Shields endpoint benchmark badge.
+Model IDs, independent artifact versions, and descriptor checksums identify inputs for future reproducibility. Historical snapshots remain tied to the model inputs used when measured; the optional PoliMorf model must not be retroactively attributed to results that predate it. See <a href="../model-selection-and-loading/">Model Selection and Loading</a> and <a href="../benchmarks/reference/reproducibility/">Reproducibility</a>.</p>
 
 
 
