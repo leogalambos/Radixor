@@ -1911,6 +1911,34 @@
   
   
     <li class="md-nav__item">
+      <a href="languages/hebrew/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hebrew
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="languages/hungarian/" class="md-nav__link">
         
   
@@ -2638,7 +2666,7 @@ two layers:</p>
   candidate-policy, classification, and partition measurements from one checked result snapshot.</li>
 </ul>
 <p>This structure keeps methodology separate from per-language result pages, while preserving all
-measured data and the command-class analysis for each Radixor language resource.</p>
+measured data and the command-class analysis for each Radixor default model.</p>
 <h2 id="read-this-first">Read This First</h2>
 <p>Start with <a href="../benchmarking/">Benchmarking</a> for the high-level interpretation model. The most
 important rule is that speed and exact-root quality must be read together. Many competing stemmers
@@ -2703,20 +2731,20 @@ the preferred result measured by the accuracy pass.</p>
 <h2 id="key-published-result">Key Published Result</h2>
 <p>The English dictionary coverage benchmark shows the current contracted-trie operating curve. With
 the full English dictionary, Radixor reaches <code>97.478%</code> all-token exactness and <code>97.197%</code>
-changed-token exactness at <code>135.8 ns/token</code>. Even with a deterministic 10% dictionary slice, it
-keeps <code>92.868%</code> all-token exactness and <code>76.516%</code> changed-token exactness at <code>86.0 ns/token</code>.</p>
+changed-token exactness at <code>98.0 ns/token</code>. Even with a deterministic 10% dictionary slice, it
+keeps <code>92.868%</code> all-token exactness and <code>76.516%</code> changed-token exactness at <code>80.6 ns/token</code>.</p>
 <p>Those figures should not be reduced to a single speed badge. The professional interpretation is a
 quality/speed envelope: the amount and quality of dictionary knowledge affect stemming precision,
 while contracted tries reduce lookup cost in uniform regions of the compiled graph.</p>
 <h2 id="quality-versus-performance">Quality versus performance</h2>
-<p>Each language page keeps exact-root accuracy, JMH latency, and pairwise linguistic-quality results in separate tables. No undocumented scalar combines them. The current repository checkout does not contain the dated machine-readable JMH CSV files named by the performance provenance page, so this revision preserves the existing performance tables but does not regenerate a cross-language Pareto frontier from rounded Markdown values. A defensible Pareto analysis requires the original unrounded JMH snapshot on the same hardware and JVM. Readers can still inspect the quality and speed dimensions side by side on every language page.</p>
+<p>Each language page keeps exact-root accuracy, JMH latency, and pairwise linguistic-quality results in separate tables. No undocumented scalar combines them. The 2026-07-23 language tables are generated from the unrounded JMH comparison report produced on the environment documented for this refresh. Readers should inspect the quality and speed dimensions side by side; no cross-language Pareto ranking is inferred from workloads with different dictionaries and token counts.</p>
 <!-- STEMMING-QUALITY-OVERVIEW:START -->
 
 <h2 id="pairwise-quality-findings">Pairwise Quality Findings</h2>
-<p>The validated snapshot is a broad multilingual comparison covering the complete 20-language Radixor dictionary universe; 19 languages have existing benchmark pages. The direct ranking below uses only deterministic <code>PRIMARY_OUTPUT</code> rows over identical per-language inputs. Candidate-aware rows are intentionally excluded from this claim.</p>
+<p>The validated snapshot is a broad multilingual comparison covering the complete 20-language Radixor default-model universe, with one benchmark page per language. The direct ranking below uses only deterministic <code>PRIMARY_OUTPUT</code> rows over identical per-language inputs. Candidate-aware rows are intentionally excluded from this claim.</p>
 <div class="admonition success">
 <p class="admonition-title">Evidence-based primary-output result</p>
-<p>Radixor achieved the highest balanced accuracy among the evaluated deterministic stemmers for every documented language in both <code>ALL_WORDS</code> and <code>LOWERCASE_GROUPS_ONLY</code>: <strong>38 wins in 38 language-mode comparisons, with no exact first-place ties</strong>. This statement is limited to the evaluated implementations, versions, dictionaries, adapters, and balanced-accuracy metric; it is not a universal claim about every stemming use case.</p>
+<p>Radixor achieved the highest balanced accuracy among the evaluated deterministic stemmers for every documented language in both <code>ALL_WORDS</code> and <code>LOWERCASE_GROUPS_ONLY</code>: <strong>40 wins in 40 language-mode comparisons, with no exact first-place ties</strong>. This statement is limited to the evaluated implementations, versions, dictionaries, adapters, and balanced-accuracy metric; it is not a universal claim about every stemming use case.</p>
 </div>
 <h3 id="per-language-winner-matrix">Per-language winner matrix</h3>
 <table>
@@ -2737,9 +2765,9 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 <td>Czech (<code>CS_CZ</code>)</td>
 <td>ALL_WORDS</td>
 <td>Radixor</td>
-<td style="text-align: right;">0.996565</td>
+<td style="text-align: right;">0.996617</td>
 <td>HUNSPELL CZECH LUCENE FILTER</td>
-<td style="text-align: right;">0.142812638</td>
+<td style="text-align: right;">0.142485045</td>
 <td>no</td>
 <td style="text-align: right;">3</td>
 </tr>
@@ -2747,9 +2775,9 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 <td>Czech (<code>CS_CZ</code>)</td>
 <td>LOWERCASE_GROUPS_ONLY</td>
 <td>Radixor</td>
-<td style="text-align: right;">0.997139</td>
+<td style="text-align: right;">0.997195</td>
 <td>HUNSPELL CZECH LUCENE FILTER</td>
-<td style="text-align: right;">0.144369049</td>
+<td style="text-align: right;">0.144045088</td>
 <td>no</td>
 <td style="text-align: right;">3</td>
 </tr>
@@ -2757,9 +2785,9 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 <td>Danish (<code>DA_DK</code>)</td>
 <td>ALL_WORDS</td>
 <td>Radixor</td>
-<td style="text-align: right;">0.996066</td>
+<td style="text-align: right;">0.996243</td>
 <td>SNOWBALL DANISH LUCENE FILTER</td>
-<td style="text-align: right;">0.058096771</td>
+<td style="text-align: right;">0.058337376</td>
 <td>no</td>
 <td style="text-align: right;">3</td>
 </tr>
@@ -2767,9 +2795,9 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 <td>Danish (<code>DA_DK</code>)</td>
 <td>LOWERCASE_GROUPS_ONLY</td>
 <td>Radixor</td>
-<td style="text-align: right;">0.996305</td>
+<td style="text-align: right;">0.996482</td>
 <td>SNOWBALL DANISH DIRECT</td>
-<td style="text-align: right;">0.058230346</td>
+<td style="text-align: right;">0.058471663</td>
 <td>no</td>
 <td style="text-align: right;">3</td>
 </tr>
@@ -2777,9 +2805,9 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 <td>Dutch (<code>NL_NL</code>)</td>
 <td>ALL_WORDS</td>
 <td>Radixor</td>
-<td style="text-align: right;">0.988661</td>
+<td style="text-align: right;">0.988733</td>
 <td>SNOWBALL DUTCH DIRECT</td>
-<td style="text-align: right;">0.261574077</td>
+<td style="text-align: right;">0.261639748</td>
 <td>no</td>
 <td style="text-align: right;">4</td>
 </tr>
@@ -2787,9 +2815,9 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 <td>Dutch (<code>NL_NL</code>)</td>
 <td>LOWERCASE_GROUPS_ONLY</td>
 <td>Radixor</td>
-<td style="text-align: right;">0.989040</td>
+<td style="text-align: right;">0.989114</td>
 <td>SNOWBALL DUTCH DIRECT</td>
-<td style="text-align: right;">0.258544404</td>
+<td style="text-align: right;">0.258605347</td>
 <td>no</td>
 <td style="text-align: right;">4</td>
 </tr>
@@ -2797,9 +2825,9 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 <td>English (<code>US_UK</code>)</td>
 <td>ALL_WORDS</td>
 <td>Radixor</td>
-<td style="text-align: right;">0.965159</td>
+<td style="text-align: right;">0.965537</td>
 <td>ENGLISH LUCENE PORTER COPIED</td>
-<td style="text-align: right;">0.010532535</td>
+<td style="text-align: right;">0.010741250</td>
 <td>no</td>
 <td style="text-align: right;">11</td>
 </tr>
@@ -2807,9 +2835,9 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 <td>English (<code>US_UK</code>)</td>
 <td>LOWERCASE_GROUPS_ONLY</td>
 <td>Radixor</td>
-<td style="text-align: right;">0.965820</td>
+<td style="text-align: right;">0.966202</td>
 <td>ENGLISH LUCENE PORTER COPIED</td>
-<td style="text-align: right;">0.010920064</td>
+<td style="text-align: right;">0.011138557</td>
 <td>no</td>
 <td style="text-align: right;">11</td>
 </tr>
@@ -2817,9 +2845,9 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 <td>Finnish (<code>FI_FI</code>)</td>
 <td>ALL_WORDS</td>
 <td>Radixor</td>
-<td style="text-align: right;">0.984594</td>
+<td style="text-align: right;">0.984838</td>
 <td>SNOWBALL FINNISH LUCENE FILTER</td>
-<td style="text-align: right;">0.244241861</td>
+<td style="text-align: right;">0.244558928</td>
 <td>no</td>
 <td style="text-align: right;">4</td>
 </tr>
@@ -2827,9 +2855,9 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 <td>Finnish (<code>FI_FI</code>)</td>
 <td>LOWERCASE_GROUPS_ONLY</td>
 <td>Radixor</td>
-<td style="text-align: right;">0.988068</td>
+<td style="text-align: right;">0.988242</td>
 <td>SNOWBALL FINNISH DIRECT</td>
-<td style="text-align: right;">0.249668284</td>
+<td style="text-align: right;">0.249897933</td>
 <td>no</td>
 <td style="text-align: right;">4</td>
 </tr>
@@ -2837,9 +2865,9 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 <td>French (<code>FR_FR</code>)</td>
 <td>ALL_WORDS</td>
 <td>Radixor</td>
-<td style="text-align: right;">0.956992</td>
+<td style="text-align: right;">0.958627</td>
 <td>SNOWBALL FRENCH DIRECT</td>
-<td style="text-align: right;">0.111730673</td>
+<td style="text-align: right;">0.109964908</td>
 <td>no</td>
 <td style="text-align: right;">6</td>
 </tr>
@@ -2847,9 +2875,9 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 <td>French (<code>FR_FR</code>)</td>
 <td>LOWERCASE_GROUPS_ONLY</td>
 <td>Radixor</td>
-<td style="text-align: right;">0.957224</td>
+<td style="text-align: right;">0.958856</td>
 <td>SNOWBALL FRENCH DIRECT</td>
-<td style="text-align: right;">0.111809799</td>
+<td style="text-align: right;">0.110030565</td>
 <td>no</td>
 <td style="text-align: right;">6</td>
 </tr>
@@ -2857,9 +2885,9 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 <td>German (<code>DE_DE</code>)</td>
 <td>ALL_WORDS</td>
 <td>Radixor</td>
-<td style="text-align: right;">0.907901</td>
+<td style="text-align: right;">0.910445</td>
 <td>GERMAN CISTEM</td>
-<td style="text-align: right;">0.027131083</td>
+<td style="text-align: right;">0.031918024</td>
 <td>no</td>
 <td style="text-align: right;">8</td>
 </tr>
@@ -2867,19 +2895,39 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 <td>German (<code>DE_DE</code>)</td>
 <td>LOWERCASE_GROUPS_ONLY</td>
 <td>Radixor</td>
-<td style="text-align: right;">0.966157</td>
+<td style="text-align: right;">0.966959</td>
 <td>GERMAN CISTEM</td>
-<td style="text-align: right;">0.050868631</td>
+<td style="text-align: right;">0.052231588</td>
 <td>no</td>
 <td style="text-align: right;">8</td>
+</tr>
+<tr>
+<td>Hebrew (<code>HE_IL</code>)</td>
+<td>ALL_WORDS</td>
+<td>Radixor</td>
+<td style="text-align: right;">0.986075</td>
+<td>n/a</td>
+<td style="text-align: right;">n/a</td>
+<td>no</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr>
+<td>Hebrew (<code>HE_IL</code>)</td>
+<td>LOWERCASE_GROUPS_ONLY</td>
+<td>Radixor</td>
+<td style="text-align: right;">0.986075</td>
+<td>n/a</td>
+<td style="text-align: right;">n/a</td>
+<td>no</td>
+<td style="text-align: right;">1</td>
 </tr>
 <tr>
 <td>Hungarian (<code>HU_HU</code>)</td>
 <td>ALL_WORDS</td>
 <td>Radixor</td>
-<td style="text-align: right;">0.995491</td>
+<td style="text-align: right;">0.995555</td>
 <td>SNOWBALL HUNGARIAN LUCENE FILTER</td>
-<td style="text-align: right;">0.172884951</td>
+<td style="text-align: right;">0.172591951</td>
 <td>no</td>
 <td style="text-align: right;">4</td>
 </tr>
@@ -2887,9 +2935,9 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 <td>Hungarian (<code>HU_HU</code>)</td>
 <td>LOWERCASE_GROUPS_ONLY</td>
 <td>Radixor</td>
-<td style="text-align: right;">0.996163</td>
+<td style="text-align: right;">0.996227</td>
 <td>SNOWBALL HUNGARIAN DIRECT</td>
-<td style="text-align: right;">0.174455479</td>
+<td style="text-align: right;">0.174150583</td>
 <td>no</td>
 <td style="text-align: right;">4</td>
 </tr>
@@ -2897,9 +2945,9 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 <td>Italian (<code>IT_IT</code>)</td>
 <td>ALL_WORDS</td>
 <td>Radixor</td>
-<td style="text-align: right;">0.996507</td>
+<td style="text-align: right;">0.996651</td>
 <td>SNOWBALL ITALIAN DIRECT</td>
-<td style="text-align: right;">0.130318040</td>
+<td style="text-align: right;">0.130360651</td>
 <td>no</td>
 <td style="text-align: right;">4</td>
 </tr>
@@ -2907,9 +2955,9 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 <td>Italian (<code>IT_IT</code>)</td>
 <td>LOWERCASE_GROUPS_ONLY</td>
 <td>Radixor</td>
-<td style="text-align: right;">0.996512</td>
+<td style="text-align: right;">0.996656</td>
 <td>SNOWBALL ITALIAN DIRECT</td>
-<td style="text-align: right;">0.130307087</td>
+<td style="text-align: right;">0.130349693</td>
 <td>no</td>
 <td style="text-align: right;">4</td>
 </tr>
@@ -2917,9 +2965,9 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 <td>Norwegian Bokmal (<code>NB_NO</code>)</td>
 <td>ALL_WORDS</td>
 <td>Radixor</td>
-<td style="text-align: right;">0.974783</td>
+<td style="text-align: right;">0.976021</td>
 <td>SNOWBALL NORWEGIAN BOKMAL DIRECT</td>
-<td style="text-align: right;">0.099819340</td>
+<td style="text-align: right;">0.101762107</td>
 <td>no</td>
 <td style="text-align: right;">5</td>
 </tr>
@@ -2927,9 +2975,9 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 <td>Norwegian Bokmal (<code>NB_NO</code>)</td>
 <td>LOWERCASE_GROUPS_ONLY</td>
 <td>Radixor</td>
-<td style="text-align: right;">0.975000</td>
+<td style="text-align: right;">0.976240</td>
 <td>SNOWBALL NORWEGIAN BOKMAL DIRECT</td>
-<td style="text-align: right;">0.100008544</td>
+<td style="text-align: right;">0.101954266</td>
 <td>no</td>
 <td style="text-align: right;">5</td>
 </tr>
@@ -2937,9 +2985,9 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 <td>Norwegian Nynorsk (<code>NN_NO</code>)</td>
 <td>ALL_WORDS</td>
 <td>Radixor</td>
-<td style="text-align: right;">0.935777</td>
+<td style="text-align: right;">0.950991</td>
 <td>SNOWBALL NORWEGIAN NYNORSK DIRECT</td>
-<td style="text-align: right;">0.076868986</td>
+<td style="text-align: right;">0.082896791</td>
 <td>no</td>
 <td style="text-align: right;">3</td>
 </tr>
@@ -2947,9 +2995,9 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 <td>Norwegian Nynorsk (<code>NN_NO</code>)</td>
 <td>LOWERCASE_GROUPS_ONLY</td>
 <td>Radixor</td>
-<td style="text-align: right;">0.935853</td>
+<td style="text-align: right;">0.951104</td>
 <td>SNOWBALL NORWEGIAN NYNORSK DIRECT</td>
-<td style="text-align: right;">0.076816096</td>
+<td style="text-align: right;">0.082851757</td>
 <td>no</td>
 <td style="text-align: right;">3</td>
 </tr>
@@ -2957,9 +3005,9 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 <td>Persian (<code>FA_IR</code>)</td>
 <td>ALL_WORDS</td>
 <td>Radixor</td>
-<td style="text-align: right;">0.974922</td>
+<td style="text-align: right;">0.976360</td>
 <td>PERSIAN LUCENE PERSIAN STEM FILTER</td>
-<td style="text-align: right;">0.472751327</td>
+<td style="text-align: right;">0.474147508</td>
 <td>no</td>
 <td style="text-align: right;">2</td>
 </tr>
@@ -2967,9 +3015,9 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 <td>Persian (<code>FA_IR</code>)</td>
 <td>LOWERCASE_GROUPS_ONLY</td>
 <td>Radixor</td>
-<td style="text-align: right;">0.974922</td>
+<td style="text-align: right;">0.976360</td>
 <td>PERSIAN LUCENE PERSIAN STEM FILTER</td>
-<td style="text-align: right;">0.472751327</td>
+<td style="text-align: right;">0.474147508</td>
 <td>no</td>
 <td style="text-align: right;">2</td>
 </tr>
@@ -2977,9 +3025,9 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 <td>Polish (<code>PL_PL</code>)</td>
 <td>ALL_WORDS</td>
 <td>Radixor</td>
-<td style="text-align: right;">0.990388</td>
+<td style="text-align: right;">0.991105</td>
 <td>POLISH LUCENE MORFOLOGIK FILTER</td>
-<td style="text-align: right;">0.042233990</td>
+<td style="text-align: right;">0.042712804</td>
 <td>no</td>
 <td style="text-align: right;">5</td>
 </tr>
@@ -2987,9 +3035,9 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 <td>Polish (<code>PL_PL</code>)</td>
 <td>LOWERCASE_GROUPS_ONLY</td>
 <td>Radixor</td>
-<td style="text-align: right;">0.990579</td>
+<td style="text-align: right;">0.991301</td>
 <td>POLISH LUCENE MORFOLOGIK FILTER</td>
-<td style="text-align: right;">0.042401633</td>
+<td style="text-align: right;">0.042883749</td>
 <td>no</td>
 <td style="text-align: right;">5</td>
 </tr>
@@ -2997,9 +3045,9 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 <td>Portuguese (<code>PT_PT</code>)</td>
 <td>ALL_WORDS</td>
 <td>Radixor</td>
-<td style="text-align: right;">0.998502</td>
+<td style="text-align: right;">0.998542</td>
 <td>SNOWBALL PORTUGUESE DIRECT</td>
-<td style="text-align: right;">0.059701750</td>
+<td style="text-align: right;">0.059619854</td>
 <td>no</td>
 <td style="text-align: right;">6</td>
 </tr>
@@ -3007,9 +3055,9 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 <td>Portuguese (<code>PT_PT</code>)</td>
 <td>LOWERCASE_GROUPS_ONLY</td>
 <td>Radixor</td>
-<td style="text-align: right;">0.998502</td>
+<td style="text-align: right;">0.998542</td>
 <td>SNOWBALL PORTUGUESE DIRECT</td>
-<td style="text-align: right;">0.059701750</td>
+<td style="text-align: right;">0.059619854</td>
 <td>no</td>
 <td style="text-align: right;">6</td>
 </tr>
@@ -3017,9 +3065,9 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 <td>Russian (<code>RU_RU</code>)</td>
 <td>ALL_WORDS</td>
 <td>Radixor</td>
-<td style="text-align: right;">0.989827</td>
+<td style="text-align: right;">0.990188</td>
 <td>SNOWBALL RUSSIAN LUCENE FILTER</td>
-<td style="text-align: right;">0.154951419</td>
+<td style="text-align: right;">0.155623602</td>
 <td>no</td>
 <td style="text-align: right;">4</td>
 </tr>
@@ -3027,9 +3075,9 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 <td>Russian (<code>RU_RU</code>)</td>
 <td>LOWERCASE_GROUPS_ONLY</td>
 <td>Radixor</td>
-<td style="text-align: right;">0.989852</td>
+<td style="text-align: right;">0.990213</td>
 <td>SNOWBALL RUSSIAN DIRECT</td>
-<td style="text-align: right;">0.154997931</td>
+<td style="text-align: right;">0.155670422</td>
 <td>no</td>
 <td style="text-align: right;">4</td>
 </tr>
@@ -3037,9 +3085,9 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 <td>Spanish (<code>ES_ES</code>)</td>
 <td>ALL_WORDS</td>
 <td>Radixor</td>
-<td style="text-align: right;">0.989295</td>
+<td style="text-align: right;">0.989448</td>
 <td>SNOWBALL SPANISH LUCENE FILTER</td>
-<td style="text-align: right;">0.336680479</td>
+<td style="text-align: right;">0.337009985</td>
 <td>no</td>
 <td style="text-align: right;">7</td>
 </tr>
@@ -3047,9 +3095,9 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 <td>Spanish (<code>ES_ES</code>)</td>
 <td>LOWERCASE_GROUPS_ONLY</td>
 <td>Radixor</td>
-<td style="text-align: right;">0.989429</td>
+<td style="text-align: right;">0.989580</td>
 <td>SNOWBALL SPANISH DIRECT</td>
-<td style="text-align: right;">0.336708826</td>
+<td style="text-align: right;">0.337037572</td>
 <td>no</td>
 <td style="text-align: right;">7</td>
 </tr>
@@ -3057,9 +3105,9 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 <td>Swedish (<code>SV_SE</code>)</td>
 <td>ALL_WORDS</td>
 <td>Radixor</td>
-<td style="text-align: right;">0.974636</td>
+<td style="text-align: right;">0.977619</td>
 <td>SNOWBALL SWEDISH DIRECT</td>
-<td style="text-align: right;">0.167101450</td>
+<td style="text-align: right;">0.169075635</td>
 <td>no</td>
 <td style="text-align: right;">5</td>
 </tr>
@@ -3067,9 +3115,9 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 <td>Swedish (<code>SV_SE</code>)</td>
 <td>LOWERCASE_GROUPS_ONLY</td>
 <td>Radixor</td>
-<td style="text-align: right;">0.974584</td>
+<td style="text-align: right;">0.977573</td>
 <td>SNOWBALL SWEDISH DIRECT</td>
-<td style="text-align: right;">0.166984893</td>
+<td style="text-align: right;">0.168961385</td>
 <td>no</td>
 <td style="text-align: right;">5</td>
 </tr>
@@ -3077,9 +3125,9 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 <td>Ukrainian (<code>UK_UA</code>)</td>
 <td>ALL_WORDS</td>
 <td>Radixor</td>
-<td style="text-align: right;">0.995343</td>
+<td style="text-align: right;">0.995816</td>
 <td>UKRAINIAN LUCENE MORFOLOGIK FILTER</td>
-<td style="text-align: right;">0.066574583</td>
+<td style="text-align: right;">0.066909929</td>
 <td>no</td>
 <td style="text-align: right;">4</td>
 </tr>
@@ -3087,9 +3135,9 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 <td>Ukrainian (<code>UK_UA</code>)</td>
 <td>LOWERCASE_GROUPS_ONLY</td>
 <td>Radixor</td>
-<td style="text-align: right;">0.995342</td>
+<td style="text-align: right;">0.995815</td>
 <td>UKRAINIAN LUCENE MORFOLOGIK FILTER</td>
-<td style="text-align: right;">0.066590889</td>
+<td style="text-align: right;">0.066926372</td>
 <td>no</td>
 <td style="text-align: right;">4</td>
 </tr>
@@ -3097,9 +3145,9 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 <td>Yiddish (<code>YI</code>)</td>
 <td>ALL_WORDS</td>
 <td>Radixor</td>
-<td style="text-align: right;">0.988241</td>
+<td style="text-align: right;">0.989079</td>
 <td>SNOWBALL YIDDISH DIRECT</td>
-<td style="text-align: right;">0.097253207</td>
+<td style="text-align: right;">0.097960961</td>
 <td>no</td>
 <td style="text-align: right;">3</td>
 </tr>
@@ -3107,16 +3155,16 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 <td>Yiddish (<code>YI</code>)</td>
 <td>LOWERCASE_GROUPS_ONLY</td>
 <td>Radixor</td>
-<td style="text-align: right;">0.988241</td>
+<td style="text-align: right;">0.989079</td>
 <td>SNOWBALL YIDDISH DIRECT</td>
-<td style="text-align: right;">0.097253207</td>
+<td style="text-align: right;">0.097960961</td>
 <td>no</td>
 <td style="text-align: right;">3</td>
 </tr>
 </tbody>
 </table>
 <h3 id="secondary-metric-trade-offs">Secondary-metric trade-offs</h3>
-<p>Balanced-accuracy leadership does not imply leadership on every error trade-off. The table below lists all <strong>15</strong> deterministic primary-output language-mode-metric cases where a non-Radixor adapter has the best displayed value. Equal values are resolved by the authoritative row ordering and should be read as ties when the unrounded values are equal. Throughput leadership remains in the separate performance tables.</p>
+<p>Balanced-accuracy leadership does not imply leadership on every error trade-off. The table below lists all <strong>0</strong> deterministic primary-output language-mode-metric cases where a non-Radixor adapter has the best displayed value. Equal values are resolved by the authoritative row ordering and should be read as ties when the unrounded values are equal. Throughput leadership remains in the separate performance tables.</p>
 <details class="quality-details">
 <summary>Non-Radixor secondary-metric leaders</summary>
 <table>
@@ -3131,109 +3179,11 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 </thead>
 <tbody>
 <tr>
-<td>English</td>
-<td>ALL_WORDS</td>
-<td>Over-stemming percentage</td>
-<td>ENGLISH LUCENE POSSESSIVE FILTER</td>
-<td style="text-align: right;">0.000604</td>
-</tr>
-<tr>
-<td>English</td>
-<td>LOWERCASE_GROUPS_ONLY</td>
-<td>Over-stemming percentage</td>
-<td>ENGLISH LUCENE POSSESSIVE FILTER</td>
-<td style="text-align: right;">0.000653</td>
-</tr>
-<tr>
-<td>French</td>
-<td>ALL_WORDS</td>
-<td>Over-stemming percentage</td>
-<td>FRENCH LUCENE FRENCH MINIMAL STEM FILTER</td>
-<td style="text-align: right;">0.000177</td>
-</tr>
-<tr>
-<td>French</td>
-<td>LOWERCASE_GROUPS_ONLY</td>
-<td>Over-stemming percentage</td>
-<td>FRENCH LUCENE FRENCH MINIMAL STEM FILTER</td>
-<td style="text-align: right;">0.000166</td>
-</tr>
-<tr>
-<td>German</td>
-<td>LOWERCASE_GROUPS_ONLY</td>
-<td>Over-stemming percentage</td>
-<td>GERMAN LUCENE GERMAN MINIMAL STEM FILTER</td>
-<td style="text-align: right;">0.000188</td>
-</tr>
-<tr>
-<td>Italian</td>
-<td>ALL_WORDS</td>
-<td>Over-stemming percentage</td>
-<td>ITALIAN LUCENE ITALIAN LIGHT STEM FILTER</td>
-<td style="text-align: right;">0.000020</td>
-</tr>
-<tr>
-<td>Italian</td>
-<td>LOWERCASE_GROUPS_ONLY</td>
-<td>Over-stemming percentage</td>
-<td>ITALIAN LUCENE ITALIAN LIGHT STEM FILTER</td>
-<td style="text-align: right;">0.000020</td>
-</tr>
-<tr>
-<td>Persian</td>
-<td>ALL_WORDS</td>
-<td>Over-stemming percentage</td>
-<td>PERSIAN LUCENE PERSIAN STEM FILTER</td>
-<td style="text-align: right;">0.002652</td>
-</tr>
-<tr>
-<td>Persian</td>
-<td>LOWERCASE_GROUPS_ONLY</td>
-<td>Over-stemming percentage</td>
-<td>PERSIAN LUCENE PERSIAN STEM FILTER</td>
-<td style="text-align: right;">0.002652</td>
-</tr>
-<tr>
-<td>Portuguese</td>
-<td>ALL_WORDS</td>
-<td>Over-stemming percentage</td>
-<td>PORTUGUESE LUCENE PORTUGUESE MINIMAL STEM FILTER</td>
-<td style="text-align: right;">0.000003</td>
-</tr>
-<tr>
-<td>Portuguese</td>
-<td>LOWERCASE_GROUPS_ONLY</td>
-<td>Over-stemming percentage</td>
-<td>PORTUGUESE LUCENE PORTUGUESE MINIMAL STEM FILTER</td>
-<td style="text-align: right;">0.000003</td>
-</tr>
-<tr>
-<td>Spanish</td>
-<td>ALL_WORDS</td>
-<td>Over-stemming percentage</td>
-<td>SPANISH LUCENE SPANISH MINIMAL STEM FILTER</td>
-<td style="text-align: right;">0.000013</td>
-</tr>
-<tr>
-<td>Spanish</td>
-<td>LOWERCASE_GROUPS_ONLY</td>
-<td>Over-stemming percentage</td>
-<td>SPANISH LUCENE SPANISH MINIMAL STEM FILTER</td>
-<td style="text-align: right;">0.000012</td>
-</tr>
-<tr>
-<td>Ukrainian</td>
-<td>ALL_WORDS</td>
-<td>Over-stemming percentage</td>
-<td>HUNSPELL UKRAINIAN LUCENE FILTER</td>
-<td style="text-align: right;">0.000783</td>
-</tr>
-<tr>
-<td>Ukrainian</td>
-<td>LOWERCASE_GROUPS_ONLY</td>
-<td>Over-stemming percentage</td>
-<td>HUNSPELL UKRAINIAN LUCENE FILTER</td>
-<td style="text-align: right;">0.000784</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
 </tr>
 </tbody>
 </table>
@@ -3257,10 +3207,10 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 <tbody>
 <tr>
 <td>Radixor</td>
-<td style="text-align: right;">19</td>
-<td style="text-align: right;">19</td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">20</td>
 <td style="text-align: right;">0</td>
-<td style="text-align: right;">19</td>
+<td style="text-align: right;">20</td>
 <td style="text-align: right;">1.000</td>
 <td style="text-align: right;">1.000</td>
 </tr>
@@ -3932,10 +3882,10 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 <tbody>
 <tr>
 <td>Radixor</td>
-<td style="text-align: right;">19</td>
-<td style="text-align: right;">19</td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">20</td>
 <td style="text-align: right;">0</td>
-<td style="text-align: right;">19</td>
+<td style="text-align: right;">20</td>
 <td style="text-align: right;">1.000</td>
 <td style="text-align: right;">1.000</td>
 </tr>
@@ -4591,7 +4541,7 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 </table>
 </details>
 <h3 id="radixor-full-coverage-aggregates">Radixor full-coverage aggregates</h3>
-<p>These aggregates cover all 19 documented languages. Macro balanced accuracy gives each language equal weight. Micro metrics first sum raw pair counts across languages. Unsupported third-party languages are never inserted as zero results, so this full-coverage table is not presented as a cross-stemmer common-language ranking.</p>
+<p>These aggregates cover all 20 documented languages. Macro balanced accuracy gives each language equal weight. Micro metrics first sum raw pair counts across languages. Unsupported third-party languages are never inserted as zero results, so this full-coverage table is not presented as a cross-stemmer common-language ranking.</p>
 <table>
 <thead>
 <tr>
@@ -4607,28 +4557,28 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 <tbody>
 <tr>
 <td>ALL_WORDS</td>
-<td style="text-align: right;">19</td>
-<td style="text-align: right;">0.978929</td>
-<td style="text-align: right;">0.987664</td>
-<td style="text-align: right;">0.975113</td>
-<td style="text-align: right;">0.975328</td>
-<td style="text-align: right;">0.975221</td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">0.980724</td>
+<td style="text-align: right;">0.987976</td>
+<td style="text-align: right;">0.999988</td>
+<td style="text-align: right;">0.975952</td>
+<td style="text-align: right;">0.987824</td>
 </tr>
 <tr>
 <td>LOWERCASE_GROUPS_ONLY</td>
-<td style="text-align: right;">19</td>
-<td style="text-align: right;">0.982354</td>
-<td style="text-align: right;">0.989366</td>
-<td style="text-align: right;">0.975322</td>
-<td style="text-align: right;">0.978734</td>
-<td style="text-align: right;">0.977025</td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">0.983891</td>
+<td style="text-align: right;">0.989614</td>
+<td style="text-align: right;">0.999992</td>
+<td style="text-align: right;">0.979228</td>
+<td style="text-align: right;">0.989501</td>
 </tr>
 </tbody>
 </table>
 <h3 id="reproducible-data">Reproducible data</h3>
 <ul>
 <li><a href="data/stemming-quality.csv">Machine-readable quality snapshot</a></li>
-<li>SHA-256: <code>5a93a6ab60e46489737cd649eb1ac48182114b9038f7f20195ab9d1c1fc0dd28</code></li>
+<li>SHA-256: <code>edf16b07be8a535943ddf37caeb8807755c95e9e1fb13244145f28be74b491d8</code></li>
 <li><a href="reference/linguistic-quality/">Linguistic quality methodology</a></li>
 <li><a href="reference/tested-stemmers/">Tested stemmer inventory</a></li>
 <li><a href="reference/reproducibility/">Reproducibility and raw data</a></li>

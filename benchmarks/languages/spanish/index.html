@@ -1739,6 +1739,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../hebrew/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hebrew
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../hungarian/" class="md-nav__link">
         
   
@@ -2124,10 +2152,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#any_candidate-ranking" class="md-nav__link">
+  <a href="#any_candidate-oracle-bounds" class="md-nav__link">
     <span class="md-ellipsis">
       
-        ANY_CANDIDATE ranking
+        ANY_CANDIDATE oracle bounds
       
     </span>
   </a>
@@ -2185,10 +2213,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#any_candidate-ranking_1" class="md-nav__link">
+  <a href="#any_candidate-oracle-bounds_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        ANY_CANDIDATE ranking
+        ANY_CANDIDATE oracle bounds
       
     </span>
   </a>
@@ -2684,10 +2712,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#any_candidate-ranking" class="md-nav__link">
+  <a href="#any_candidate-oracle-bounds" class="md-nav__link">
     <span class="md-ellipsis">
       
-        ANY_CANDIDATE ranking
+        ANY_CANDIDATE oracle bounds
       
     </span>
   </a>
@@ -2745,10 +2773,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#any_candidate-ranking_1" class="md-nav__link">
+  <a href="#any_candidate-oracle-bounds_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        ANY_CANDIDATE ranking
+        ANY_CANDIDATE oracle bounds
       
     </span>
   </a>
@@ -2837,7 +2865,9 @@
 <table>
 <thead>
 <tr>
-<th>Resource</th>
+<th>Model ID</th>
+<th>Model version</th>
+<th>Language</th>
 <th style="text-align: right;">Dictionary rows</th>
 <th style="text-align: right;">Complete quality tokens</th>
 <th style="text-align: right;">Already-root tokens</th>
@@ -2846,6 +2876,8 @@
 </thead>
 <tbody>
 <tr>
+<td><code>es-es-default</code></td>
+<td><code>1.0.0</code></td>
 <td><code>ES_ES</code></td>
 <td style="text-align: right;">65,059</td>
 <td style="text-align: right;">926,393</td>
@@ -2855,7 +2887,7 @@
 </tbody>
 </table>
 <h2 id="radixor-patch-command-distribution">Radixor Patch Command Distribution</h2>
-<p>Radixor stores the preferred transformation for each normalized dictionary word form as a compiled patch command. This distribution shows which runtime command class is selected by the trained trie for the complete language dictionary. The total number of preferred patch commands analyzed for this language is <strong>926,393</strong>.</p>
+<p>Radixor stores the preferred transformation for each normalized dictionary word form as a compiled patch command. This distribution shows which runtime command class is selected by the trained trie for the complete default-model dictionary. The total number of preferred patch commands analyzed for this language is <strong>926,393</strong>.</p>
 <table>
 <thead>
 <tr>
@@ -2869,32 +2901,32 @@
 <tr>
 <td><code>AppendCharacterCommand</code></td>
 <td>Appends one character to the end of the word form.</td>
-<td style="text-align: right;">5,367</td>
-<td style="text-align: right;">0.579%</td>
+<td style="text-align: right;">8,534</td>
+<td style="text-align: right;">0.921%</td>
 </tr>
 <tr>
 <td><code>BackwardCompoundCommand</code></td>
 <td>Applies a multi-step backward patch made from skip, delete, insert, and replace operations.</td>
-<td style="text-align: right;">524,682</td>
-<td style="text-align: right;">56.637%</td>
+<td style="text-align: right;">522,685</td>
+<td style="text-align: right;">56.422%</td>
 </tr>
 <tr>
 <td><code>DeleteSuffixCommand</code></td>
 <td>Deletes one or more trailing characters from the word form.</td>
-<td style="text-align: right;">240,872</td>
-<td style="text-align: right;">26.001%</td>
+<td style="text-align: right;">243,410</td>
+<td style="text-align: right;">26.275%</td>
 </tr>
 <tr>
 <td><code>PreserveCommand</code></td>
 <td>Returns the word form unchanged because it already matches the preferred root.</td>
-<td style="text-align: right;">130,089</td>
-<td style="text-align: right;">14.043%</td>
+<td style="text-align: right;">124,386</td>
+<td style="text-align: right;">13.427%</td>
 </tr>
 <tr>
 <td><code>ReplaceLastCharacterCommand</code></td>
 <td>Replaces the final character of the word form.</td>
-<td style="text-align: right;">25,383</td>
-<td style="text-align: right;">2.740%</td>
+<td style="text-align: right;">27,378</td>
+<td style="text-align: right;">2.955%</td>
 </tr>
 </tbody>
 </table>
@@ -2963,7 +2995,7 @@
 </tbody>
 </table>
 <h2 id="speed">Speed</h2>
-<p>Speed uses JMH average time, 3 warmup iterations, 5 measurement iterations, 1 fork, and 1 thread. Relative factor is computed against the single Radixor row on this language page. Values below 1.000 are faster than that Radixor baseline; values above 1.000 are slower.</p>
+<p>Speed uses JMH average time, 5 warmup iterations, 10 measurement iterations, 3 independent forks, and 1 thread. Relative factor is computed against the single Radixor row on this language page. Values below 1.000 are faster than that Radixor baseline; values above 1.000 are slower.</p>
 <table>
 <thead>
 <tr>
@@ -2980,64 +3012,64 @@
 <tr>
 <td>Radixor</td>
 <td><code>spanishRadixor</code></td>
-<td style="text-align: right;">78.919</td>
-<td style="text-align: right;">7.253</td>
-<td style="text-align: right;">97.9</td>
+<td style="text-align: right;">81.605</td>
+<td style="text-align: right;">1.347</td>
+<td style="text-align: right;">101.2</td>
 <td style="text-align: right;">1.000</td>
 <td>Full Radixor dictionary patch-command stemmer.</td>
 </tr>
 <tr>
 <td>Lucene HunspellStemFilter</td>
 <td><code>luceneHunspellStemFilter</code></td>
-<td style="text-align: right;">2079.041</td>
-<td style="text-align: right;">193.548</td>
-<td style="text-align: right;">2578.6</td>
-<td style="text-align: right;">26.344</td>
+<td style="text-align: right;">2033.430</td>
+<td style="text-align: right;">14.863</td>
+<td style="text-align: right;">2522.0</td>
+<td style="text-align: right;">24.918</td>
 <td>Benchmark-only Spanish Hunspell dictionary compared via Lucene HunspellStemFilter.</td>
 </tr>
 <tr>
 <td>Lucene SpanishMinimalStemFilter</td>
 <td><code>spanishLuceneSpanishMinimalStemFilter</code></td>
-<td style="text-align: right;">45.596</td>
-<td style="text-align: right;">4.639</td>
-<td style="text-align: right;">56.6</td>
-<td style="text-align: right;">0.578</td>
+<td style="text-align: right;">42.144</td>
+<td style="text-align: right;">1.556</td>
+<td style="text-align: right;">52.3</td>
+<td style="text-align: right;">0.516</td>
 <td>Minimal Spanish suffix reducer; narrow baseline.</td>
 </tr>
 <tr>
 <td>Lucene SpanishLightStemFilter</td>
 <td><code>spanishLuceneSpanishLightStemFilter</code></td>
-<td style="text-align: right;">42.003</td>
-<td style="text-align: right;">1.683</td>
-<td style="text-align: right;">52.1</td>
-<td style="text-align: right;">0.532</td>
+<td style="text-align: right;">44.479</td>
+<td style="text-align: right;">1.291</td>
+<td style="text-align: right;">55.2</td>
+<td style="text-align: right;">0.545</td>
 <td>Light Spanish suffix stemmer.</td>
 </tr>
 <tr>
 <td>Lucene SpanishPluralStemFilter</td>
 <td><code>spanishLuceneSpanishPluralStemFilter</code></td>
-<td style="text-align: right;">93.734</td>
-<td style="text-align: right;">6.247</td>
-<td style="text-align: right;">116.3</td>
-<td style="text-align: right;">1.188</td>
+<td style="text-align: right;">96.537</td>
+<td style="text-align: right;">3.418</td>
+<td style="text-align: right;">119.7</td>
+<td style="text-align: right;">1.183</td>
 <td>Plural-oriented Spanish suffix reducer.</td>
 </tr>
 <tr>
 <td>Official Snowball direct</td>
 <td><code>snowballDirect[SPANISH]</code></td>
-<td style="text-align: right;">171.995</td>
-<td style="text-align: right;">11.035</td>
-<td style="text-align: right;">213.3</td>
-<td style="text-align: right;">2.179</td>
+<td style="text-align: right;">172.151</td>
+<td style="text-align: right;">7.261</td>
+<td style="text-align: right;">213.5</td>
+<td style="text-align: right;">2.110</td>
 <td>Official Snowball generated Java stemmer; direct API.</td>
 </tr>
 <tr>
 <td>Lucene SnowballFilter</td>
 <td><code>luceneSnowballFilter[SPANISH]</code></td>
-<td style="text-align: right;">211.138</td>
-<td style="text-align: right;">17.940</td>
-<td style="text-align: right;">261.9</td>
-<td style="text-align: right;">2.675</td>
+<td style="text-align: right;">201.697</td>
+<td style="text-align: right;">9.363</td>
+<td style="text-align: right;">250.2</td>
+<td style="text-align: right;">2.472</td>
 <td>Lucene TokenFilter path around Snowball; includes TokenStream overhead.</td>
 </tr>
 </tbody>
@@ -3053,109 +3085,77 @@
 <!-- STEMMING-QUALITY:START -->
 
 <h2 id="stemming-quality">Stemming Quality</h2>
-<p>Runtime performance and linguistic grouping quality are independent dimensions. This section evaluates language <code>ES_ES</code> using the complete validated stemming-quality result matrix. Every usable dictionary row is one gold-standard group of forms expected to share a morphological family or lemma. Exact equality with a predetermined lemma is not required. Same-row pairs are positive pairs; pairs from different rows are negative pairs.</p>
+<p>Runtime performance and linguistic grouping quality are independent dimensions. This section evaluates language <code>ES_ES</code> using the complete validated stemming-quality result matrix. Every distinct surface form is one evaluated item and can belong to several dictionary groups. Two forms are a positive pair when their group-membership sets intersect and a negative pair when those sets are disjoint. A pair shared through several groups is counted once. Exact equality with a predetermined lemma is not required.</p>
 <p><code>ALL_WORDS</code> includes every valid group and its original forms. <code>LOWERCASE_GROUPS_ONLY</code> excludes an entire group when any Unicode code point is uppercase or titlecase; retained words are not lowercased or otherwise rewritten. This isolates case-handling effects without changing retained inputs. <a href="../../data/stemming-quality.csv">Download the complete machine-readable result snapshot</a>.</p>
 <h3 id="evaluation-scope-and-key-findings">Evaluation Scope and Key Findings</h3>
-<p>The dictionary resource is <code>src/main/resources/es_es/stemmer.gz</code>. The following findings compare only deterministic <code>PRIMARY_OUTPUT</code> rows over identical included groups; candidate policies are reported separately as capability analyses.</p>
+<p>The default model is <code>es-es-default</code>, loaded from classpath resource <code>org/egothor/stemmer/models/es-es-default/stemmer.gz</code>. The following findings compare only deterministic <code>PRIMARY_OUTPUT</code> rows over identical included groups; candidate policies are reported separately as capability analyses.</p>
 <ul>
-<li><strong>ALL_WORDS:</strong> <code>Radixor</code> ranks first by balanced accuracy at <strong>0.989295</strong> among 7 deterministic stemmers. The runner-up is <code>SNOWBALL SPANISH LUCENE FILTER</code> at 0.652614, a difference of 0.336680. This rank does not imply leadership in throughput or every secondary metric.</li>
-<li><strong>LOWERCASE_GROUPS_ONLY:</strong> <code>Radixor</code> ranks first by balanced accuracy at <strong>0.989429</strong> among 7 deterministic stemmers. The runner-up is <code>SNOWBALL SPANISH DIRECT</code> at 0.652720, a difference of 0.336709. This rank does not imply leadership in throughput or every secondary metric.</li>
+<li><strong>ALL_WORDS:</strong> <code>Radixor</code> ranks first by balanced accuracy at <strong>0.989448</strong> among 7 deterministic stemmers. The runner-up is <code>SNOWBALL SPANISH LUCENE FILTER</code> at 0.652438, a difference of 0.337010. This rank does not imply leadership in throughput or every secondary metric.</li>
+<li><strong>LOWERCASE_GROUPS_ONLY:</strong> <code>Radixor</code> ranks first by balanced accuracy at <strong>0.989580</strong> among 7 deterministic stemmers. The runner-up is <code>SNOWBALL SPANISH DIRECT</code> at 0.652542, a difference of 0.337038. This rank does not imply leadership in throughput or every secondary metric.</li>
 </ul>
 <h3 id="all_words"><code>ALL_WORDS</code></h3>
-<p>This mode contains <strong>11 result rows</strong>, <strong>7 evaluated stemmers</strong>, and <strong>3 output policies</strong>. Applied-row and form counts are shown per row because adapters share the language corpus but policy rows remain independently auditable. Rankings are separated by output policy and ordered by unrounded balanced accuracy, followed by MCC, F1, over-stemming rate, over-stemming count, under-stemming rate, and stemmer. Balanced accuracy is a navigation metric, not a universally authoritative quality score.</p>
+<p>This mode contains <strong>11 result rows</strong>, <strong>7 evaluated stemmers</strong>, and <strong>3 output policies</strong>. Applied-row and form counts are shown per row because adapters share the language corpus but policy rows remain independently auditable. <code>PRIMARY_OUTPUT</code> and <code>ALL_CANDIDATES</code> rankings are ordered by unrounded balanced accuracy, followed by MCC, F1, over-stemming rate, over-stemming count, under-stemming rate, and stemmer. <code>ANY_CANDIDATE</code> has no single rank metric and is listed alphabetically. Balanced accuracy is a navigation metric, not a universally authoritative quality score.</p>
 <h4 id="primary_output-ranking"><code>PRIMARY_OUTPUT</code> ranking</h4>
-<div aria-label="Compact stemming-quality ranking; scroll horizontally for additional columns" class="quality-table quality-table--compact" role="region" tabindex="0">
+<div class="quality-summary">
 <table>
 <thead>
 <tr>
 <th style="text-align: right;">Rank</th>
 <th>Stemmer</th>
-<th>Output policy</th>
 <th style="text-align: right;">Balanced accuracy</th>
-<th style="text-align: right;">Over-stemming</th>
-<th style="text-align: right;">Under-stemming</th>
-<th style="text-align: right;">F0.5</th>
-<th style="text-align: right;">F1</th>
-<th style="text-align: right;">MCC</th>
+<th style="text-align: right;">Over-stemming (OI)</th>
+<th style="text-align: right;">Under-stemming (UI)</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.989295</td>
-<td style="text-align: right;">288483 / 379567318110 (0.000076%)</td>
-<td style="text-align: right;">898652 / 41973336 (2.141007%)</td>
-<td style="text-align: right;">0.990105</td>
-<td style="text-align: right;">0.985755</td>
-<td style="text-align: right;">0.985780</td>
+<td style="text-align: right;">0.989448</td>
+<td style="text-align: right;">0.000000%</td>
+<td style="text-align: right;">2.110334%</td>
 </tr>
 <tr>
 <td style="text-align: right;">2</td>
 <td>SNOWBALL SPANISH LUCENE FILTER</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.652614</td>
-<td style="text-align: right;">2230481 / 379567318110 (0.000588%)</td>
-<td style="text-align: right;">29161643 / 41973336 (69.476591%)</td>
-<td style="text-align: right;">0.627151</td>
-<td style="text-align: right;">0.449411</td>
-<td style="text-align: right;">0.509848</td>
+<td style="text-align: right;">0.652438</td>
+<td style="text-align: right;">0.000414%</td>
+<td style="text-align: right;">69.511918%</td>
 </tr>
 <tr>
 <td style="text-align: right;">3</td>
 <td>SNOWBALL SPANISH DIRECT</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.652614</td>
-<td style="text-align: right;">2228819 / 379567318110 (0.000587%)</td>
-<td style="text-align: right;">29161649 / 41973336 (69.476605%)</td>
-<td style="text-align: right;">0.627192</td>
-<td style="text-align: right;">0.449424</td>
-<td style="text-align: right;">0.509876</td>
+<td style="text-align: right;">0.652438</td>
+<td style="text-align: right;">0.000413%</td>
+<td style="text-align: right;">69.511932%</td>
 </tr>
 <tr>
 <td style="text-align: right;">4</td>
 <td>HUNSPELL SPANISH LUCENE FILTER</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.615102</td>
-<td style="text-align: right;">536192 / 379567318110 (0.000141%)</td>
-<td style="text-align: right;">32310860 / 41973336 (76.979490%)</td>
-<td style="text-align: right;">0.583708</td>
-<td style="text-align: right;">0.370408</td>
-<td style="text-align: right;">0.466992</td>
+<td style="text-align: right;">0.615028</td>
+<td style="text-align: right;">0.000068%</td>
+<td style="text-align: right;">76.994273%</td>
 </tr>
 <tr>
 <td style="text-align: right;">5</td>
 <td>SPANISH LUCENE SPANISH LIGHT STEM FILTER</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.514823</td>
-<td style="text-align: right;">147956 / 379567318110 (0.000039%)</td>
-<td style="text-align: right;">40729019 / 41973336 (97.035458%)</td>
-<td style="text-align: right;">0.130864</td>
-<td style="text-align: right;">0.057387</td>
-<td style="text-align: right;">0.162762</td>
+<td style="text-align: right;">0.514565</td>
+<td style="text-align: right;">0.000009%</td>
+<td style="text-align: right;">97.087060%</td>
 </tr>
 <tr>
 <td style="text-align: right;">6</td>
 <td>SPANISH LUCENE SPANISH PLURAL STEM FILTER</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.503874</td>
-<td style="text-align: right;">58578 / 379567318110 (0.000015%)</td>
-<td style="text-align: right;">41648091 / 41973336 (99.225115%)</td>
-<td style="text-align: right;">0.037377</td>
-<td style="text-align: right;">0.015357</td>
-<td style="text-align: right;">0.081026</td>
+<td style="text-align: right;">0.503764</td>
+<td style="text-align: right;">0.000002%</td>
+<td style="text-align: right;">99.247265%</td>
 </tr>
 <tr>
 <td style="text-align: right;">7</td>
 <td>SPANISH LUCENE SPANISH MINIMAL STEM FILTER</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.501768</td>
-<td style="text-align: right;">47859 / 379567318110 (0.000013%)</td>
-<td style="text-align: right;">41824873 / 41973336 (99.646292%)</td>
-<td style="text-align: right;">0.017361</td>
-<td style="text-align: right;">0.007041</td>
-<td style="text-align: right;">0.051714</td>
+<td style="text-align: right;">0.501678</td>
+<td style="text-align: right;">0.000001%</td>
+<td style="text-align: right;">99.664470%</td>
 </tr>
 </tbody>
 </table>
@@ -3181,78 +3181,78 @@
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.993026</td>
-<td style="text-align: right;">0.978590</td>
-<td style="text-align: right;">0.999999</td>
-<td style="text-align: right;">0.989295</td>
-<td style="text-align: right;">0.999997</td>
-<td style="text-align: right;">0.000003</td>
+<td style="text-align: right;">1.000000</td>
+<td style="text-align: right;">0.978897</td>
+<td style="text-align: right;">1.000000</td>
+<td style="text-align: right;">0.989448</td>
+<td style="text-align: right;">0.999998</td>
+<td style="text-align: right;">0.000002</td>
 </tr>
 <tr>
 <td style="text-align: right;">2</td>
 <td>SNOWBALL SPANISH LUCENE FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.851718</td>
-<td style="text-align: right;">0.305234</td>
-<td style="text-align: right;">0.999994</td>
-<td style="text-align: right;">0.652614</td>
-<td style="text-align: right;">0.999917</td>
-<td style="text-align: right;">0.000083</td>
+<td style="text-align: right;">0.895438</td>
+<td style="text-align: right;">0.304881</td>
+<td style="text-align: right;">0.999996</td>
+<td style="text-align: right;">0.652438</td>
+<td style="text-align: right;">0.999915</td>
+<td style="text-align: right;">0.000085</td>
 </tr>
 <tr>
 <td style="text-align: right;">3</td>
 <td>SNOWBALL SPANISH DIRECT</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.851812</td>
-<td style="text-align: right;">0.305234</td>
-<td style="text-align: right;">0.999994</td>
-<td style="text-align: right;">0.652614</td>
-<td style="text-align: right;">0.999917</td>
-<td style="text-align: right;">0.000083</td>
+<td style="text-align: right;">0.895510</td>
+<td style="text-align: right;">0.304881</td>
+<td style="text-align: right;">0.999996</td>
+<td style="text-align: right;">0.652438</td>
+<td style="text-align: right;">0.999915</td>
+<td style="text-align: right;">0.000085</td>
 </tr>
 <tr>
 <td style="text-align: right;">4</td>
 <td>HUNSPELL SPANISH LUCENE FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.947425</td>
-<td style="text-align: right;">0.230205</td>
+<td style="text-align: right;">0.975281</td>
+<td style="text-align: right;">0.230057</td>
 <td style="text-align: right;">0.999999</td>
-<td style="text-align: right;">0.615102</td>
-<td style="text-align: right;">0.999913</td>
-<td style="text-align: right;">0.000087</td>
+<td style="text-align: right;">0.615028</td>
+<td style="text-align: right;">0.999910</td>
+<td style="text-align: right;">0.000090</td>
 </tr>
 <tr>
 <td style="text-align: right;">5</td>
 <td>SPANISH LUCENE SPANISH LIGHT STEM FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.893731</td>
-<td style="text-align: right;">0.029645</td>
+<td style="text-align: right;">0.974423</td>
+<td style="text-align: right;">0.029129</td>
 <td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">0.514823</td>
-<td style="text-align: right;">0.999892</td>
-<td style="text-align: right;">0.000108</td>
+<td style="text-align: right;">0.514565</td>
+<td style="text-align: right;">0.999887</td>
+<td style="text-align: right;">0.000113</td>
 </tr>
 <tr>
 <td style="text-align: right;">6</td>
 <td>SPANISH LUCENE SPANISH PLURAL STEM FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.847383</td>
-<td style="text-align: right;">0.007749</td>
+<td style="text-align: right;">0.979154</td>
+<td style="text-align: right;">0.007527</td>
 <td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">0.503874</td>
-<td style="text-align: right;">0.999890</td>
-<td style="text-align: right;">0.000110</td>
+<td style="text-align: right;">0.503764</td>
+<td style="text-align: right;">0.999885</td>
+<td style="text-align: right;">0.000115</td>
 </tr>
 <tr>
 <td style="text-align: right;">7</td>
 <td>SPANISH LUCENE SPANISH MINIMAL STEM FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.756222</td>
-<td style="text-align: right;">0.003537</td>
+<td style="text-align: right;">0.970596</td>
+<td style="text-align: right;">0.003355</td>
 <td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">0.501768</td>
-<td style="text-align: right;">0.999890</td>
-<td style="text-align: right;">0.000110</td>
+<td style="text-align: right;">0.501678</td>
+<td style="text-align: right;">0.999884</td>
+<td style="text-align: right;">0.000116</td>
 </tr>
 </tbody>
 </table>
@@ -3278,167 +3278,78 @@
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.990105</td>
-<td style="text-align: right;">0.985755</td>
-<td style="text-align: right;">0.981443</td>
-<td style="text-align: right;">0.971910</td>
-<td style="text-align: right;">0.985781</td>
-<td style="text-align: right;">0.985780</td>
+<td style="text-align: right;">0.995707</td>
+<td style="text-align: right;">0.989336</td>
+<td style="text-align: right;">0.983046</td>
+<td style="text-align: right;">0.978897</td>
+<td style="text-align: right;">0.989392</td>
+<td style="text-align: right;">0.989391</td>
 </tr>
 <tr>
 <td style="text-align: right;">2</td>
 <td>SNOWBALL SPANISH LUCENE FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.627151</td>
-<td style="text-align: right;">0.449411</td>
-<td style="text-align: right;">0.350170</td>
-<td style="text-align: right;">0.289832</td>
-<td style="text-align: right;">0.509876</td>
-<td style="text-align: right;">0.509848</td>
+<td style="text-align: right;">0.645406</td>
+<td style="text-align: right;">0.454882</td>
+<td style="text-align: right;">0.351206</td>
+<td style="text-align: right;">0.294400</td>
+<td style="text-align: right;">0.522496</td>
+<td style="text-align: right;">0.522469</td>
 </tr>
 <tr>
 <td style="text-align: right;">3</td>
 <td>SNOWBALL SPANISH DIRECT</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.627192</td>
-<td style="text-align: right;">0.449424</td>
-<td style="text-align: right;">0.350173</td>
-<td style="text-align: right;">0.289843</td>
-<td style="text-align: right;">0.509904</td>
-<td style="text-align: right;">0.509876</td>
+<td style="text-align: right;">0.645436</td>
+<td style="text-align: right;">0.454891</td>
+<td style="text-align: right;">0.351208</td>
+<td style="text-align: right;">0.294407</td>
+<td style="text-align: right;">0.522517</td>
+<td style="text-align: right;">0.522490</td>
 </tr>
 <tr>
 <td style="text-align: right;">4</td>
 <td>HUNSPELL SPANISH LUCENE FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.583708</td>
-<td style="text-align: right;">0.370408</td>
-<td style="text-align: right;">0.271278</td>
-<td style="text-align: right;">0.227301</td>
-<td style="text-align: right;">0.467014</td>
-<td style="text-align: right;">0.466992</td>
+<td style="text-align: right;">0.591847</td>
+<td style="text-align: right;">0.372295</td>
+<td style="text-align: right;">0.271557</td>
+<td style="text-align: right;">0.228724</td>
+<td style="text-align: right;">0.473678</td>
+<td style="text-align: right;">0.473655</td>
 </tr>
 <tr>
 <td style="text-align: right;">5</td>
 <td>SPANISH LUCENE SPANISH LIGHT STEM FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.130864</td>
-<td style="text-align: right;">0.057387</td>
-<td style="text-align: right;">0.036752</td>
-<td style="text-align: right;">0.029541</td>
-<td style="text-align: right;">0.162773</td>
-<td style="text-align: right;">0.162762</td>
+<td style="text-align: right;">0.130091</td>
+<td style="text-align: right;">0.056568</td>
+<td style="text-align: right;">0.036142</td>
+<td style="text-align: right;">0.029107</td>
+<td style="text-align: right;">0.168477</td>
+<td style="text-align: right;">0.168467</td>
 </tr>
 <tr>
 <td style="text-align: right;">6</td>
 <td>SPANISH LUCENE SPANISH PLURAL STEM FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.037377</td>
-<td style="text-align: right;">0.015357</td>
-<td style="text-align: right;">0.009664</td>
-<td style="text-align: right;">0.007738</td>
-<td style="text-align: right;">0.081032</td>
-<td style="text-align: right;">0.081026</td>
+<td style="text-align: right;">0.036514</td>
+<td style="text-align: right;">0.014940</td>
+<td style="text-align: right;">0.009391</td>
+<td style="text-align: right;">0.007526</td>
+<td style="text-align: right;">0.085851</td>
+<td style="text-align: right;">0.085846</td>
 </tr>
 <tr>
 <td style="text-align: right;">7</td>
 <td>SPANISH LUCENE SPANISH MINIMAL STEM FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.017361</td>
-<td style="text-align: right;">0.007041</td>
-<td style="text-align: right;">0.004416</td>
-<td style="text-align: right;">0.003533</td>
-<td style="text-align: right;">0.051719</td>
-<td style="text-align: right;">0.051714</td>
-</tr>
-</tbody>
-</table>
-</details>
-<details class="quality-details">
-<summary>Partition metrics (PRIMARY_OUTPUT only)</summary>
-<table>
-<thead>
-<tr>
-<th style="text-align: right;">Rank</th>
-<th>Stemmer</th>
-<th>Output policy</th>
-<th style="text-align: right;">Adjusted Rand Index</th>
-<th style="text-align: right;">Homogeneity</th>
-<th style="text-align: right;">Completeness</th>
-<th style="text-align: right;">V-measure</th>
-<th style="text-align: right;">Normalized mutual information</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: right;">1</td>
-<td>Radixor</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.985753</td>
-<td style="text-align: right;">0.995418</td>
-<td style="text-align: right;">0.993266</td>
-<td style="text-align: right;">0.994341</td>
-<td style="text-align: right;">0.994341</td>
-</tr>
-<tr>
-<td style="text-align: right;">2</td>
-<td>SNOWBALL SPANISH LUCENE FILTER</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.449379</td>
-<td style="text-align: right;">0.981386</td>
-<td style="text-align: right;">0.852461</td>
-<td style="text-align: right;">0.912391</td>
-<td style="text-align: right;">0.912391</td>
-</tr>
-<tr>
-<td style="text-align: right;">3</td>
-<td>SNOWBALL SPANISH DIRECT</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.449392</td>
-<td style="text-align: right;">0.981406</td>
-<td style="text-align: right;">0.852463</td>
-<td style="text-align: right;">0.912401</td>
-<td style="text-align: right;">0.912401</td>
-</tr>
-<tr>
-<td style="text-align: right;">4</td>
-<td>HUNSPELL SPANISH LUCENE FILTER</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.370381</td>
-<td style="text-align: right;">0.993314</td>
-<td style="text-align: right;">0.790558</td>
-<td style="text-align: right;">0.880414</td>
-<td style="text-align: right;">0.880414</td>
-</tr>
-<tr>
-<td style="text-align: right;">5</td>
-<td>SPANISH LUCENE SPANISH LIGHT STEM FILTER</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.057381</td>
-<td style="text-align: right;">0.993824</td>
-<td style="text-align: right;">0.756690</td>
-<td style="text-align: right;">0.859195</td>
-<td style="text-align: right;">0.859195</td>
-</tr>
-<tr>
-<td style="text-align: right;">6</td>
-<td>SPANISH LUCENE SPANISH PLURAL STEM FILTER</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.015355</td>
-<td style="text-align: right;">0.995442</td>
-<td style="text-align: right;">0.723731</td>
-<td style="text-align: right;">0.838115</td>
-<td style="text-align: right;">0.838115</td>
-</tr>
-<tr>
-<td style="text-align: right;">7</td>
-<td>SPANISH LUCENE SPANISH MINIMAL STEM FILTER</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.007040</td>
-<td style="text-align: right;">0.995635</td>
-<td style="text-align: right;">0.710610</td>
-<td style="text-align: right;">0.829316</td>
-<td style="text-align: right;">0.829316</td>
+<td style="text-align: right;">0.016548</td>
+<td style="text-align: right;">0.006687</td>
+<td style="text-align: right;">0.004191</td>
+<td style="text-align: right;">0.003355</td>
+<td style="text-align: right;">0.057067</td>
+<td style="text-align: right;">0.057063</td>
 </tr>
 </tbody>
 </table>
@@ -3464,120 +3375,157 @@
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">41074684</td>
-<td style="text-align: right;">288483</td>
-<td style="text-align: right;">898652</td>
-<td style="text-align: right;">379567029627</td>
-<td style="text-align: right;">288483 / 379567318110</td>
-<td style="text-align: right;">898652 / 41973336</td>
+<td style="text-align: right;">41053986</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">885054</td>
+<td style="text-align: right;">360919543590</td>
+<td style="text-align: right;">0 / 360919543590</td>
+<td style="text-align: right;">885054 / 41939040</td>
 </tr>
 <tr>
 <td style="text-align: right;">2</td>
 <td>SNOWBALL SPANISH LUCENE FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">12811693</td>
-<td style="text-align: right;">2230481</td>
-<td style="text-align: right;">29161643</td>
-<td style="text-align: right;">379565087629</td>
-<td style="text-align: right;">2230481 / 379567318110</td>
-<td style="text-align: right;">29161643 / 41973336</td>
+<td style="text-align: right;">12786409</td>
+<td style="text-align: right;">1493087</td>
+<td style="text-align: right;">29152631</td>
+<td style="text-align: right;">360918050503</td>
+<td style="text-align: right;">1493087 / 360919543590</td>
+<td style="text-align: right;">29152631 / 41939040</td>
 </tr>
 <tr>
 <td style="text-align: right;">3</td>
 <td>SNOWBALL SPANISH DIRECT</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">12811687</td>
-<td style="text-align: right;">2228819</td>
-<td style="text-align: right;">29161649</td>
-<td style="text-align: right;">379565089291</td>
-<td style="text-align: right;">2228819 / 379567318110</td>
-<td style="text-align: right;">29161649 / 41973336</td>
+<td style="text-align: right;">12786403</td>
+<td style="text-align: right;">1491944</td>
+<td style="text-align: right;">29152637</td>
+<td style="text-align: right;">360918051646</td>
+<td style="text-align: right;">1491944 / 360919543590</td>
+<td style="text-align: right;">29152637 / 41939040</td>
 </tr>
 <tr>
 <td style="text-align: right;">4</td>
 <td>HUNSPELL SPANISH LUCENE FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">9662476</td>
-<td style="text-align: right;">536192</td>
-<td style="text-align: right;">32310860</td>
-<td style="text-align: right;">379566781918</td>
-<td style="text-align: right;">536192 / 379567318110</td>
-<td style="text-align: right;">32310860 / 41973336</td>
+<td style="text-align: right;">9648381</td>
+<td style="text-align: right;">244539</td>
+<td style="text-align: right;">32290659</td>
+<td style="text-align: right;">360919299051</td>
+<td style="text-align: right;">244539 / 360919543590</td>
+<td style="text-align: right;">32290659 / 41939040</td>
 </tr>
 <tr>
 <td style="text-align: right;">5</td>
 <td>SPANISH LUCENE SPANISH LIGHT STEM FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">1244317</td>
-<td style="text-align: right;">147956</td>
-<td style="text-align: right;">40729019</td>
-<td style="text-align: right;">379567170154</td>
-<td style="text-align: right;">147956 / 379567318110</td>
-<td style="text-align: right;">40729019 / 41973336</td>
+<td style="text-align: right;">1221659</td>
+<td style="text-align: right;">32066</td>
+<td style="text-align: right;">40717381</td>
+<td style="text-align: right;">360919511524</td>
+<td style="text-align: right;">32066 / 360919543590</td>
+<td style="text-align: right;">40717381 / 41939040</td>
 </tr>
 <tr>
 <td style="text-align: right;">6</td>
 <td>SPANISH LUCENE SPANISH PLURAL STEM FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">325245</td>
-<td style="text-align: right;">58578</td>
-<td style="text-align: right;">41648091</td>
-<td style="text-align: right;">379567259532</td>
-<td style="text-align: right;">58578 / 379567318110</td>
-<td style="text-align: right;">41648091 / 41973336</td>
+<td style="text-align: right;">315690</td>
+<td style="text-align: right;">6721</td>
+<td style="text-align: right;">41623350</td>
+<td style="text-align: right;">360919536869</td>
+<td style="text-align: right;">6721 / 360919543590</td>
+<td style="text-align: right;">41623350 / 41939040</td>
 </tr>
 <tr>
 <td style="text-align: right;">7</td>
 <td>SPANISH LUCENE SPANISH MINIMAL STEM FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">148463</td>
-<td style="text-align: right;">47859</td>
-<td style="text-align: right;">41824873</td>
-<td style="text-align: right;">379567270251</td>
-<td style="text-align: right;">47859 / 379567318110</td>
-<td style="text-align: right;">41824873 / 41973336</td>
+<td style="text-align: right;">140718</td>
+<td style="text-align: right;">4263</td>
+<td style="text-align: right;">41798322</td>
+<td style="text-align: right;">360919539327</td>
+<td style="text-align: right;">4263 / 360919543590</td>
+<td style="text-align: right;">41798322 / 41939040</td>
 </tr>
 </tbody>
 </table>
 </details>
-<h4 id="any_candidate-ranking"><code>ANY_CANDIDATE</code> ranking</h4>
-<div aria-label="Compact stemming-quality ranking; scroll horizontally for additional columns" class="quality-table quality-table--compact" role="region" tabindex="0">
+<h4 id="any_candidate-oracle-bounds"><code>ANY_CANDIDATE</code> oracle bounds</h4>
+<p>These results are measured, not missing. <code>ANY_CANDIDATE</code> answers two separate optimistic questions for each pair: a gold-related pair avoids under-stemming when the candidate sets intersect, while a gold-negative pair avoids over-stemming when some non-colliding candidate selection exists. The oracle may choose a different candidate for the same word in different pairs. Consequently, these decisions do not form one globally realizable predicted relation or one TP/FP/FN/TN confusion matrix. Balanced accuracy, F-scores, Jaccard, Fowlkes–Mallows, and MCC are therefore mathematically <strong>not applicable</strong>, rather than unknown.</p>
+<div class="quality-summary quality-summary--oracle">
+<table>
+<thead>
+<tr>
+<th>Stemmer</th>
+<th style="text-align: right;">Optimistic over-stemming (OI)</th>
+<th style="text-align: right;">Optimistic under-stemming (UI)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HUNSPELL SPANISH LUCENE FILTER</td>
+<td style="text-align: right;">0.000062%</td>
+<td style="text-align: right;">76.009935%</td>
+</tr>
+<tr>
+<td>Radixor</td>
+<td style="text-align: right;">0.000000%</td>
+<td style="text-align: right;">0.001493%</td>
+</tr>
+</tbody>
+</table>
+</div>
+<details class="quality-details">
+<summary>Oracle-bound pair counts</summary>
+<table>
+<thead>
+<tr>
+<th>Stemmer</th>
+<th style="text-align: right;">Unavoidable over errors / gold-negative pairs</th>
+<th style="text-align: right;">Unrepairable under errors / gold-related pairs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HUNSPELL SPANISH LUCENE FILTER</td>
+<td style="text-align: right;">223500 / 360919543590</td>
+<td style="text-align: right;">31877837 / 41939040</td>
+</tr>
+<tr>
+<td>Radixor</td>
+<td style="text-align: right;">0 / 360919543590</td>
+<td style="text-align: right;">626 / 41939040</td>
+</tr>
+</tbody>
+</table>
+</details>
+<h4 id="all_candidates-ranking"><code>ALL_CANDIDATES</code> ranking</h4>
+<div class="quality-summary">
 <table>
 <thead>
 <tr>
 <th style="text-align: right;">Rank</th>
 <th>Stemmer</th>
-<th>Output policy</th>
 <th style="text-align: right;">Balanced accuracy</th>
-<th style="text-align: right;">Over-stemming</th>
-<th style="text-align: right;">Under-stemming</th>
-<th style="text-align: right;">F0.5</th>
-<th style="text-align: right;">F1</th>
-<th style="text-align: right;">MCC</th>
+<th style="text-align: right;">Over-stemming (OI)</th>
+<th style="text-align: right;">Under-stemming (UI)</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
-<td>ANY_CANDIDATE</td>
 <td style="text-align: right;">0.999993</td>
-<td style="text-align: right;">2 / 379567318110 (0.000000%)</td>
-<td style="text-align: right;">626 / 41973336 (0.001491%)</td>
-<td style="text-align: right;">0.999997</td>
-<td style="text-align: right;">0.999993</td>
-<td style="text-align: right;">0.999993</td>
+<td style="text-align: right;">&lt;0.000001%</td>
+<td style="text-align: right;">0.001493%</td>
 </tr>
 <tr>
 <td style="text-align: right;">2</td>
 <td>HUNSPELL SPANISH LUCENE FILTER</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">0.620065</td>
-<td style="text-align: right;">416345 / 379567318110 (0.000110%)</td>
-<td style="text-align: right;">31894218 / 41973336 (75.986855%)</td>
-<td style="text-align: right;">0.600268</td>
-<td style="text-align: right;">0.384195</td>
-<td style="text-align: right;">0.480192</td>
+<td style="text-align: right;">0.619950</td>
+<td style="text-align: right;">0.000073%</td>
+<td style="text-align: right;">76.009935%</td>
 </tr>
 </tbody>
 </table>
@@ -3602,8 +3550,8 @@
 <tr>
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">1.000000</td>
+<td>ALL_CANDIDATES</td>
+<td style="text-align: right;">0.999959</td>
 <td style="text-align: right;">0.999985</td>
 <td style="text-align: right;">1.000000</td>
 <td style="text-align: right;">0.999993</td>
@@ -3613,220 +3561,13 @@
 <tr>
 <td style="text-align: right;">2</td>
 <td>HUNSPELL SPANISH LUCENE FILTER</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">0.960331</td>
-<td style="text-align: right;">0.240131</td>
+<td>ALL_CANDIDATES</td>
+<td style="text-align: right;">0.974467</td>
+<td style="text-align: right;">0.239901</td>
 <td style="text-align: right;">0.999999</td>
-<td style="text-align: right;">0.620065</td>
-<td style="text-align: right;">0.999915</td>
-<td style="text-align: right;">0.000085</td>
-</tr>
-</tbody>
-</table>
-</details>
-<details class="quality-details">
-<summary>Pair-relation metrics</summary>
-<table>
-<thead>
-<tr>
-<th style="text-align: right;">Rank</th>
-<th>Stemmer</th>
-<th>Output policy</th>
-<th style="text-align: right;">F0.5</th>
-<th style="text-align: right;">F1</th>
-<th style="text-align: right;">F2</th>
-<th style="text-align: right;">Jaccard</th>
-<th style="text-align: right;">Fowlkes–Mallows</th>
-<th style="text-align: right;">MCC</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: right;">1</td>
-<td>Radixor</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">0.999997</td>
-<td style="text-align: right;">0.999993</td>
-<td style="text-align: right;">0.999988</td>
-<td style="text-align: right;">0.999985</td>
-<td style="text-align: right;">0.999993</td>
-<td style="text-align: right;">0.999993</td>
-</tr>
-<tr>
-<td style="text-align: right;">2</td>
-<td>HUNSPELL SPANISH LUCENE FILTER</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">0.600268</td>
-<td style="text-align: right;">0.384195</td>
-<td style="text-align: right;">0.282504</td>
-<td style="text-align: right;">0.237773</td>
-<td style="text-align: right;">0.480214</td>
-<td style="text-align: right;">0.480192</td>
-</tr>
-</tbody>
-</table>
-</details>
-<details class="quality-details">
-<summary>Partition metrics (PRIMARY_OUTPUT only)</summary>
-<table>
-<thead>
-<tr>
-<th style="text-align: right;">Rank</th>
-<th>Stemmer</th>
-<th>Output policy</th>
-<th style="text-align: right;">Adjusted Rand Index</th>
-<th style="text-align: right;">Homogeneity</th>
-<th style="text-align: right;">Completeness</th>
-<th style="text-align: right;">V-measure</th>
-<th style="text-align: right;">Normalized mutual information</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: right;">1</td>
-<td>Radixor</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-</tr>
-<tr>
-<td style="text-align: right;">2</td>
-<td>HUNSPELL SPANISH LUCENE FILTER</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-</tr>
-</tbody>
-</table>
-</details>
-<details class="quality-details">
-<summary>Raw pair counts</summary>
-<table>
-<thead>
-<tr>
-<th style="text-align: right;">Rank</th>
-<th>Stemmer</th>
-<th>Output policy</th>
-<th style="text-align: right;">TP</th>
-<th style="text-align: right;">FP</th>
-<th style="text-align: right;">FN</th>
-<th style="text-align: right;">TN</th>
-<th style="text-align: right;">Over error / possible</th>
-<th style="text-align: right;">Under error / possible</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: right;">1</td>
-<td>Radixor</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">41972710</td>
-<td style="text-align: right;">2</td>
-<td style="text-align: right;">626</td>
-<td style="text-align: right;">379567318108</td>
-<td style="text-align: right;">2 / 379567318110</td>
-<td style="text-align: right;">626 / 41973336</td>
-</tr>
-<tr>
-<td style="text-align: right;">2</td>
-<td>HUNSPELL SPANISH LUCENE FILTER</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">10079118</td>
-<td style="text-align: right;">416345</td>
-<td style="text-align: right;">31894218</td>
-<td style="text-align: right;">379566901765</td>
-<td style="text-align: right;">416345 / 379567318110</td>
-<td style="text-align: right;">31894218 / 41973336</td>
-</tr>
-</tbody>
-</table>
-</details>
-<h4 id="all_candidates-ranking"><code>ALL_CANDIDATES</code> ranking</h4>
-<div aria-label="Compact stemming-quality ranking; scroll horizontally for additional columns" class="quality-table quality-table--compact" role="region" tabindex="0">
-<table>
-<thead>
-<tr>
-<th style="text-align: right;">Rank</th>
-<th>Stemmer</th>
-<th>Output policy</th>
-<th style="text-align: right;">Balanced accuracy</th>
-<th style="text-align: right;">Over-stemming</th>
-<th style="text-align: right;">Under-stemming</th>
-<th style="text-align: right;">F0.5</th>
-<th style="text-align: right;">F1</th>
-<th style="text-align: right;">MCC</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: right;">1</td>
-<td>Radixor</td>
-<td>ALL_CANDIDATES</td>
-<td style="text-align: right;">0.999991</td>
-<td style="text-align: right;">1349800 / 379567318110 (0.000356%)</td>
-<td style="text-align: right;">626 / 41973336 (0.001491%)</td>
-<td style="text-align: right;">0.974915</td>
-<td style="text-align: right;">0.984168</td>
-<td style="text-align: right;">0.984289</td>
-</tr>
-<tr>
-<td style="text-align: right;">2</td>
-<td>HUNSPELL SPANISH LUCENE FILTER</td>
-<td>ALL_CANDIDATES</td>
-<td style="text-align: right;">0.620065</td>
-<td style="text-align: right;">888077 / 379567318110 (0.000234%)</td>
-<td style="text-align: right;">31894218 / 41973336 (75.986855%)</td>
-<td style="text-align: right;">0.587073</td>
-<td style="text-align: right;">0.380771</td>
-<td style="text-align: right;">0.469749</td>
-</tr>
-</tbody>
-</table>
-</div>
-<details class="quality-details">
-<summary>Classification metrics</summary>
-<table>
-<thead>
-<tr>
-<th style="text-align: right;">Rank</th>
-<th>Stemmer</th>
-<th>Output policy</th>
-<th style="text-align: right;">Precision</th>
-<th style="text-align: right;">Recall</th>
-<th style="text-align: right;">Specificity</th>
-<th style="text-align: right;">Balanced accuracy</th>
-<th style="text-align: right;">Pairwise accuracy</th>
-<th style="text-align: right;">Error rate</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: right;">1</td>
-<td>Radixor</td>
-<td>ALL_CANDIDATES</td>
-<td style="text-align: right;">0.968843</td>
-<td style="text-align: right;">0.999985</td>
-<td style="text-align: right;">0.999996</td>
-<td style="text-align: right;">0.999991</td>
-<td style="text-align: right;">0.999996</td>
-<td style="text-align: right;">0.000004</td>
-</tr>
-<tr>
-<td style="text-align: right;">2</td>
-<td>HUNSPELL SPANISH LUCENE FILTER</td>
-<td>ALL_CANDIDATES</td>
-<td style="text-align: right;">0.919024</td>
-<td style="text-align: right;">0.240131</td>
-<td style="text-align: right;">0.999998</td>
-<td style="text-align: right;">0.620065</td>
-<td style="text-align: right;">0.999914</td>
-<td style="text-align: right;">0.000086</td>
+<td style="text-align: right;">0.619950</td>
+<td style="text-align: right;">0.999911</td>
+<td style="text-align: right;">0.000089</td>
 </tr>
 </tbody>
 </table>
@@ -3852,62 +3593,23 @@
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
 <td>ALL_CANDIDATES</td>
-<td style="text-align: right;">0.974915</td>
-<td style="text-align: right;">0.984168</td>
-<td style="text-align: right;">0.993598</td>
-<td style="text-align: right;">0.968829</td>
-<td style="text-align: right;">0.984291</td>
-<td style="text-align: right;">0.984289</td>
+<td style="text-align: right;">0.999964</td>
+<td style="text-align: right;">0.999972</td>
+<td style="text-align: right;">0.999980</td>
+<td style="text-align: right;">0.999944</td>
+<td style="text-align: right;">0.999972</td>
+<td style="text-align: right;">0.999972</td>
 </tr>
 <tr>
 <td style="text-align: right;">2</td>
 <td>HUNSPELL SPANISH LUCENE FILTER</td>
 <td>ALL_CANDIDATES</td>
-<td style="text-align: right;">0.587073</td>
-<td style="text-align: right;">0.380771</td>
-<td style="text-align: right;">0.281759</td>
-<td style="text-align: right;">0.235156</td>
-<td style="text-align: right;">0.469773</td>
-<td style="text-align: right;">0.469749</td>
-</tr>
-</tbody>
-</table>
-</details>
-<details class="quality-details">
-<summary>Partition metrics (PRIMARY_OUTPUT only)</summary>
-<table>
-<thead>
-<tr>
-<th style="text-align: right;">Rank</th>
-<th>Stemmer</th>
-<th>Output policy</th>
-<th style="text-align: right;">Adjusted Rand Index</th>
-<th style="text-align: right;">Homogeneity</th>
-<th style="text-align: right;">Completeness</th>
-<th style="text-align: right;">V-measure</th>
-<th style="text-align: right;">Normalized mutual information</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: right;">1</td>
-<td>Radixor</td>
-<td>ALL_CANDIDATES</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-</tr>
-<tr>
-<td style="text-align: right;">2</td>
-<td>HUNSPELL SPANISH LUCENE FILTER</td>
-<td>ALL_CANDIDATES</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">0.604361</td>
+<td style="text-align: right;">0.385016</td>
+<td style="text-align: right;">0.282490</td>
+<td style="text-align: right;">0.238402</td>
+<td style="text-align: right;">0.483503</td>
+<td style="text-align: right;">0.483480</td>
 </tr>
 </tbody>
 </table>
@@ -3933,23 +3635,23 @@
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
 <td>ALL_CANDIDATES</td>
-<td style="text-align: right;">41972710</td>
-<td style="text-align: right;">1349800</td>
+<td style="text-align: right;">41938414</td>
+<td style="text-align: right;">1737</td>
 <td style="text-align: right;">626</td>
-<td style="text-align: right;">379565968310</td>
-<td style="text-align: right;">1349800 / 379567318110</td>
-<td style="text-align: right;">626 / 41973336</td>
+<td style="text-align: right;">360919541853</td>
+<td style="text-align: right;">1737 / 360919543590</td>
+<td style="text-align: right;">626 / 41939040</td>
 </tr>
 <tr>
 <td style="text-align: right;">2</td>
 <td>HUNSPELL SPANISH LUCENE FILTER</td>
 <td>ALL_CANDIDATES</td>
-<td style="text-align: right;">10079118</td>
-<td style="text-align: right;">888077</td>
-<td style="text-align: right;">31894218</td>
-<td style="text-align: right;">379566430033</td>
-<td style="text-align: right;">888077 / 379567318110</td>
-<td style="text-align: right;">31894218 / 41973336</td>
+<td style="text-align: right;">10061203</td>
+<td style="text-align: right;">263629</td>
+<td style="text-align: right;">31877837</td>
+<td style="text-align: right;">360919279961</td>
+<td style="text-align: right;">263629 / 360919543590</td>
+<td style="text-align: right;">31877837 / 41939040</td>
 </tr>
 </tbody>
 </table>
@@ -3972,121 +3674,89 @@
 <tbody>
 <tr>
 <td>HUNSPELL SPANISH LUCENE FILTER</td>
-<td style="text-align: right;">416642</td>
-<td style="text-align: right;">119847</td>
-<td style="text-align: right;">351885</td>
-<td style="text-align: right;">17877</td>
-<td style="text-align: right;">2.051686%</td>
+<td style="text-align: right;">412822</td>
+<td style="text-align: right;">21039</td>
+<td style="text-align: right;">19090</td>
+<td style="text-align: right;">11309</td>
+<td style="text-align: right;">1.331001%</td>
 <td style="text-align: right;">5</td>
-<td style="text-align: right;">890999</td>
+<td style="text-align: right;">861853</td>
 </tr>
 <tr>
 <td>Radixor</td>
-<td style="text-align: right;">898026</td>
-<td style="text-align: right;">288481</td>
-<td style="text-align: right;">1061317</td>
-<td style="text-align: right;">42637</td>
-<td style="text-align: right;">4.893313%</td>
+<td style="text-align: right;">884428</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1737</td>
+<td style="text-align: right;">20967</td>
+<td style="text-align: right;">2.467690%</td>
 <td style="text-align: right;">21</td>
-<td style="text-align: right;">916797</td>
+<td style="text-align: right;">871404</td>
 </tr>
 </tbody>
 </table>
 <h3 id="lowercase_groups_only"><code>LOWERCASE_GROUPS_ONLY</code></h3>
-<p>This mode contains <strong>11 result rows</strong>, <strong>7 evaluated stemmers</strong>, and <strong>3 output policies</strong>. Applied-row and form counts are shown per row because adapters share the language corpus but policy rows remain independently auditable. Rankings are separated by output policy and ordered by unrounded balanced accuracy, followed by MCC, F1, over-stemming rate, over-stemming count, under-stemming rate, and stemmer. Balanced accuracy is a navigation metric, not a universally authoritative quality score.</p>
+<p>This mode contains <strong>11 result rows</strong>, <strong>7 evaluated stemmers</strong>, and <strong>3 output policies</strong>. Applied-row and form counts are shown per row because adapters share the language corpus but policy rows remain independently auditable. <code>PRIMARY_OUTPUT</code> and <code>ALL_CANDIDATES</code> rankings are ordered by unrounded balanced accuracy, followed by MCC, F1, over-stemming rate, over-stemming count, under-stemming rate, and stemmer. <code>ANY_CANDIDATE</code> has no single rank metric and is listed alphabetically. Balanced accuracy is a navigation metric, not a universally authoritative quality score.</p>
 <h4 id="primary_output-ranking_1"><code>PRIMARY_OUTPUT</code> ranking</h4>
-<div aria-label="Compact stemming-quality ranking; scroll horizontally for additional columns" class="quality-table quality-table--compact" role="region" tabindex="0">
+<div class="quality-summary">
 <table>
 <thead>
 <tr>
 <th style="text-align: right;">Rank</th>
 <th>Stemmer</th>
-<th>Output policy</th>
 <th style="text-align: right;">Balanced accuracy</th>
-<th style="text-align: right;">Over-stemming</th>
-<th style="text-align: right;">Under-stemming</th>
-<th style="text-align: right;">F0.5</th>
-<th style="text-align: right;">F1</th>
-<th style="text-align: right;">MCC</th>
+<th style="text-align: right;">Over-stemming (OI)</th>
+<th style="text-align: right;">Under-stemming (UI)</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.989429</td>
-<td style="text-align: right;">276044 / 377860669765 (0.000073%)</td>
-<td style="text-align: right;">885033 / 41863370 (2.114099%)</td>
-<td style="text-align: right;">0.990385</td>
-<td style="text-align: right;">0.986031</td>
-<td style="text-align: right;">0.986056</td>
+<td style="text-align: right;">0.989580</td>
+<td style="text-align: right;">&lt;0.000001%</td>
+<td style="text-align: right;">2.084022%</td>
 </tr>
 <tr>
 <td style="text-align: right;">2</td>
 <td>SNOWBALL SPANISH DIRECT</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.652720</td>
-<td style="text-align: right;">2201196 / 377860669765 (0.000583%)</td>
-<td style="text-align: right;">29076352 / 41863370 (69.455354%)</td>
-<td style="text-align: right;">0.627946</td>
-<td style="text-align: right;">0.449839</td>
-<td style="text-align: right;">0.510450</td>
+<td style="text-align: right;">0.652542</td>
+<td style="text-align: right;">0.000410%</td>
+<td style="text-align: right;">69.491126%</td>
 </tr>
 <tr>
 <td style="text-align: right;">3</td>
 <td>SNOWBALL SPANISH LUCENE FILTER</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.652720</td>
-<td style="text-align: right;">2201196 / 377860669765 (0.000583%)</td>
-<td style="text-align: right;">29076352 / 41863370 (69.455354%)</td>
-<td style="text-align: right;">0.627946</td>
-<td style="text-align: right;">0.449839</td>
-<td style="text-align: right;">0.510450</td>
+<td style="text-align: right;">0.652542</td>
+<td style="text-align: right;">0.000410%</td>
+<td style="text-align: right;">69.491126%</td>
 </tr>
 <tr>
 <td style="text-align: right;">4</td>
 <td>HUNSPELL SPANISH LUCENE FILTER</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.614999</td>
-<td style="text-align: right;">531181 / 377860669765 (0.000141%)</td>
-<td style="text-align: right;">32234855 / 41863370 (77.000144%)</td>
-<td style="text-align: right;">0.583531</td>
-<td style="text-align: right;">0.370163</td>
-<td style="text-align: right;">0.466854</td>
+<td style="text-align: right;">0.614924</td>
+<td style="text-align: right;">0.000068%</td>
+<td style="text-align: right;">77.015229%</td>
 </tr>
 <tr>
 <td style="text-align: right;">5</td>
 <td>SPANISH LUCENE SPANISH LIGHT STEM FILTER</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.514832</td>
-<td style="text-align: right;">146613 / 377860669765 (0.000039%)</td>
-<td style="text-align: right;">40621522 / 41863370 (97.033569%)</td>
-<td style="text-align: right;">0.130949</td>
-<td style="text-align: right;">0.057424</td>
-<td style="text-align: right;">0.162875</td>
+<td style="text-align: right;">0.514575</td>
+<td style="text-align: right;">0.000009%</td>
+<td style="text-align: right;">97.085003%</td>
 </tr>
 <tr>
 <td style="text-align: right;">6</td>
 <td>SPANISH LUCENE SPANISH PLURAL STEM FILTER</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.503877</td>
-<td style="text-align: right;">57716 / 377860669765 (0.000015%)</td>
-<td style="text-align: right;">41538714 / 41863370 (99.224487%)</td>
-<td style="text-align: right;">0.037409</td>
-<td style="text-align: right;">0.015370</td>
-<td style="text-align: right;">0.081139</td>
+<td style="text-align: right;">0.503767</td>
+<td style="text-align: right;">0.000002%</td>
+<td style="text-align: right;">99.246590%</td>
 </tr>
 <tr>
 <td style="text-align: right;">7</td>
 <td>SPANISH LUCENE SPANISH MINIMAL STEM FILTER</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.501770</td>
-<td style="text-align: right;">47148 / 377860669765 (0.000012%)</td>
-<td style="text-align: right;">41715144 / 41863370 (99.645929%)</td>
-<td style="text-align: right;">0.017379</td>
-<td style="text-align: right;">0.007049</td>
-<td style="text-align: right;">0.051824</td>
+<td style="text-align: right;">0.501679</td>
+<td style="text-align: right;">0.000001%</td>
+<td style="text-align: right;">99.664108%</td>
 </tr>
 </tbody>
 </table>
@@ -4112,78 +3782,78 @@
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.993309</td>
-<td style="text-align: right;">0.978859</td>
 <td style="text-align: right;">0.999999</td>
-<td style="text-align: right;">0.989429</td>
-<td style="text-align: right;">0.999997</td>
-<td style="text-align: right;">0.000003</td>
+<td style="text-align: right;">0.979160</td>
+<td style="text-align: right;">1.000000</td>
+<td style="text-align: right;">0.989580</td>
+<td style="text-align: right;">0.999998</td>
+<td style="text-align: right;">0.000002</td>
 </tr>
 <tr>
 <td style="text-align: right;">2</td>
 <td>SNOWBALL SPANISH DIRECT</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.853138</td>
-<td style="text-align: right;">0.305446</td>
-<td style="text-align: right;">0.999994</td>
-<td style="text-align: right;">0.652720</td>
-<td style="text-align: right;">0.999917</td>
-<td style="text-align: right;">0.000083</td>
+<td style="text-align: right;">0.896551</td>
+<td style="text-align: right;">0.305089</td>
+<td style="text-align: right;">0.999996</td>
+<td style="text-align: right;">0.652542</td>
+<td style="text-align: right;">0.999915</td>
+<td style="text-align: right;">0.000085</td>
 </tr>
 <tr>
 <td style="text-align: right;">3</td>
 <td>SNOWBALL SPANISH LUCENE FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.853138</td>
-<td style="text-align: right;">0.305446</td>
-<td style="text-align: right;">0.999994</td>
-<td style="text-align: right;">0.652720</td>
-<td style="text-align: right;">0.999917</td>
-<td style="text-align: right;">0.000083</td>
+<td style="text-align: right;">0.896551</td>
+<td style="text-align: right;">0.305089</td>
+<td style="text-align: right;">0.999996</td>
+<td style="text-align: right;">0.652542</td>
+<td style="text-align: right;">0.999915</td>
+<td style="text-align: right;">0.000085</td>
 </tr>
 <tr>
 <td style="text-align: right;">4</td>
 <td>HUNSPELL SPANISH LUCENE FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.947717</td>
-<td style="text-align: right;">0.229999</td>
+<td style="text-align: right;">0.975224</td>
+<td style="text-align: right;">0.229848</td>
 <td style="text-align: right;">0.999999</td>
-<td style="text-align: right;">0.614999</td>
-<td style="text-align: right;">0.999913</td>
-<td style="text-align: right;">0.000087</td>
+<td style="text-align: right;">0.614924</td>
+<td style="text-align: right;">0.999910</td>
+<td style="text-align: right;">0.000090</td>
 </tr>
 <tr>
 <td style="text-align: right;">5</td>
 <td>SPANISH LUCENE SPANISH LIGHT STEM FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.894406</td>
-<td style="text-align: right;">0.029664</td>
+<td style="text-align: right;">0.974539</td>
+<td style="text-align: right;">0.029150</td>
 <td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">0.514832</td>
-<td style="text-align: right;">0.999892</td>
-<td style="text-align: right;">0.000108</td>
+<td style="text-align: right;">0.514575</td>
+<td style="text-align: right;">0.999887</td>
+<td style="text-align: right;">0.000113</td>
 </tr>
 <tr>
 <td style="text-align: right;">6</td>
 <td>SPANISH LUCENE SPANISH PLURAL STEM FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.849058</td>
-<td style="text-align: right;">0.007755</td>
+<td style="text-align: right;">0.979521</td>
+<td style="text-align: right;">0.007534</td>
 <td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">0.503877</td>
-<td style="text-align: right;">0.999890</td>
-<td style="text-align: right;">0.000110</td>
+<td style="text-align: right;">0.503767</td>
+<td style="text-align: right;">0.999884</td>
+<td style="text-align: right;">0.000116</td>
 </tr>
 <tr>
 <td style="text-align: right;">7</td>
 <td>SPANISH LUCENE SPANISH MINIMAL STEM FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.758678</td>
-<td style="text-align: right;">0.003541</td>
+<td style="text-align: right;">0.971230</td>
+<td style="text-align: right;">0.003359</td>
 <td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">0.501770</td>
-<td style="text-align: right;">0.999889</td>
-<td style="text-align: right;">0.000111</td>
+<td style="text-align: right;">0.501679</td>
+<td style="text-align: right;">0.999884</td>
+<td style="text-align: right;">0.000116</td>
 </tr>
 </tbody>
 </table>
@@ -4209,167 +3879,78 @@
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.990385</td>
-<td style="text-align: right;">0.986031</td>
-<td style="text-align: right;">0.981715</td>
-<td style="text-align: right;">0.972447</td>
-<td style="text-align: right;">0.986057</td>
-<td style="text-align: right;">0.986056</td>
+<td style="text-align: right;">0.995761</td>
+<td style="text-align: right;">0.989470</td>
+<td style="text-align: right;">0.983258</td>
+<td style="text-align: right;">0.979159</td>
+<td style="text-align: right;">0.989525</td>
+<td style="text-align: right;">0.989523</td>
 </tr>
 <tr>
 <td style="text-align: right;">2</td>
 <td>SNOWBALL SPANISH DIRECT</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.627946</td>
-<td style="text-align: right;">0.449839</td>
-<td style="text-align: right;">0.350441</td>
-<td style="text-align: right;">0.290188</td>
-<td style="text-align: right;">0.510478</td>
-<td style="text-align: right;">0.510450</td>
+<td style="text-align: right;">0.646055</td>
+<td style="text-align: right;">0.455257</td>
+<td style="text-align: right;">0.351461</td>
+<td style="text-align: right;">0.294714</td>
+<td style="text-align: right;">0.522999</td>
+<td style="text-align: right;">0.522972</td>
 </tr>
 <tr>
 <td style="text-align: right;">3</td>
 <td>SNOWBALL SPANISH LUCENE FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.627946</td>
-<td style="text-align: right;">0.449839</td>
-<td style="text-align: right;">0.350441</td>
-<td style="text-align: right;">0.290188</td>
-<td style="text-align: right;">0.510478</td>
-<td style="text-align: right;">0.510450</td>
+<td style="text-align: right;">0.646055</td>
+<td style="text-align: right;">0.455257</td>
+<td style="text-align: right;">0.351461</td>
+<td style="text-align: right;">0.294714</td>
+<td style="text-align: right;">0.522999</td>
+<td style="text-align: right;">0.522972</td>
 </tr>
 <tr>
 <td style="text-align: right;">4</td>
 <td>HUNSPELL SPANISH LUCENE FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.583531</td>
-<td style="text-align: right;">0.370163</td>
-<td style="text-align: right;">0.271053</td>
-<td style="text-align: right;">0.227117</td>
-<td style="text-align: right;">0.466876</td>
-<td style="text-align: right;">0.466854</td>
+<td style="text-align: right;">0.591553</td>
+<td style="text-align: right;">0.372016</td>
+<td style="text-align: right;">0.271323</td>
+<td style="text-align: right;">0.228513</td>
+<td style="text-align: right;">0.473448</td>
+<td style="text-align: right;">0.473426</td>
 </tr>
 <tr>
 <td style="text-align: right;">5</td>
 <td>SPANISH LUCENE SPANISH LIGHT STEM FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.130949</td>
-<td style="text-align: right;">0.057424</td>
-<td style="text-align: right;">0.036775</td>
-<td style="text-align: right;">0.029561</td>
-<td style="text-align: right;">0.162886</td>
-<td style="text-align: right;">0.162875</td>
+<td style="text-align: right;">0.130175</td>
+<td style="text-align: right;">0.056607</td>
+<td style="text-align: right;">0.036167</td>
+<td style="text-align: right;">0.029128</td>
+<td style="text-align: right;">0.168546</td>
+<td style="text-align: right;">0.168536</td>
 </tr>
 <tr>
 <td style="text-align: right;">6</td>
 <td>SPANISH LUCENE SPANISH PLURAL STEM FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.037409</td>
-<td style="text-align: right;">0.015370</td>
-<td style="text-align: right;">0.009672</td>
-<td style="text-align: right;">0.007744</td>
-<td style="text-align: right;">0.081145</td>
-<td style="text-align: right;">0.081139</td>
+<td style="text-align: right;">0.036546</td>
+<td style="text-align: right;">0.014953</td>
+<td style="text-align: right;">0.009400</td>
+<td style="text-align: right;">0.007533</td>
+<td style="text-align: right;">0.085906</td>
+<td style="text-align: right;">0.085901</td>
 </tr>
 <tr>
 <td style="text-align: right;">7</td>
 <td>SPANISH LUCENE SPANISH MINIMAL STEM FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.017379</td>
-<td style="text-align: right;">0.007049</td>
-<td style="text-align: right;">0.004421</td>
-<td style="text-align: right;">0.003537</td>
-<td style="text-align: right;">0.051829</td>
-<td style="text-align: right;">0.051824</td>
-</tr>
-</tbody>
-</table>
-</details>
-<details class="quality-details">
-<summary>Partition metrics (PRIMARY_OUTPUT only)</summary>
-<table>
-<thead>
-<tr>
-<th style="text-align: right;">Rank</th>
-<th>Stemmer</th>
-<th>Output policy</th>
-<th style="text-align: right;">Adjusted Rand Index</th>
-<th style="text-align: right;">Homogeneity</th>
-<th style="text-align: right;">Completeness</th>
-<th style="text-align: right;">V-measure</th>
-<th style="text-align: right;">Normalized mutual information</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: right;">1</td>
-<td>Radixor</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.986029</td>
-<td style="text-align: right;">0.995464</td>
-<td style="text-align: right;">0.993323</td>
-<td style="text-align: right;">0.994392</td>
-<td style="text-align: right;">0.994392</td>
-</tr>
-<tr>
-<td style="text-align: right;">2</td>
-<td>SNOWBALL SPANISH DIRECT</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.449806</td>
-<td style="text-align: right;">0.981469</td>
-<td style="text-align: right;">0.852556</td>
-<td style="text-align: right;">0.912482</td>
-<td style="text-align: right;">0.912482</td>
-</tr>
-<tr>
-<td style="text-align: right;">3</td>
-<td>SNOWBALL SPANISH LUCENE FILTER</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.449806</td>
-<td style="text-align: right;">0.981469</td>
-<td style="text-align: right;">0.852556</td>
-<td style="text-align: right;">0.912482</td>
-<td style="text-align: right;">0.912482</td>
-</tr>
-<tr>
-<td style="text-align: right;">4</td>
-<td>HUNSPELL SPANISH LUCENE FILTER</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.370136</td>
-<td style="text-align: right;">0.993362</td>
-<td style="text-align: right;">0.790500</td>
-<td style="text-align: right;">0.880396</td>
-<td style="text-align: right;">0.880396</td>
-</tr>
-<tr>
-<td style="text-align: right;">5</td>
-<td>SPANISH LUCENE SPANISH LIGHT STEM FILTER</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.057417</td>
-<td style="text-align: right;">0.993866</td>
-<td style="text-align: right;">0.756725</td>
-<td style="text-align: right;">0.859234</td>
-<td style="text-align: right;">0.859234</td>
-</tr>
-<tr>
-<td style="text-align: right;">6</td>
-<td>SPANISH LUCENE SPANISH PLURAL STEM FILTER</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.015368</td>
-<td style="text-align: right;">0.995484</td>
-<td style="text-align: right;">0.723753</td>
-<td style="text-align: right;">0.838145</td>
-<td style="text-align: right;">0.838145</td>
-</tr>
-<tr>
-<td style="text-align: right;">7</td>
-<td>SPANISH LUCENE SPANISH MINIMAL STEM FILTER</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.007048</td>
-<td style="text-align: right;">0.995676</td>
-<td style="text-align: right;">0.710626</td>
-<td style="text-align: right;">0.829341</td>
-<td style="text-align: right;">0.829341</td>
+<td style="text-align: right;">0.016565</td>
+<td style="text-align: right;">0.006695</td>
+<td style="text-align: right;">0.004195</td>
+<td style="text-align: right;">0.003359</td>
+<td style="text-align: right;">0.057116</td>
+<td style="text-align: right;">0.057113</td>
 </tr>
 </tbody>
 </table>
@@ -4395,120 +3976,157 @@
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">40978337</td>
-<td style="text-align: right;">276044</td>
-<td style="text-align: right;">885033</td>
-<td style="text-align: right;">377860393721</td>
-<td style="text-align: right;">276044 / 377860669765</td>
-<td style="text-align: right;">885033 / 41863370</td>
+<td style="text-align: right;">40958710</td>
+<td style="text-align: right;">34</td>
+<td style="text-align: right;">871756</td>
+<td style="text-align: right;">359407144881</td>
+<td style="text-align: right;">34 / 359407144915</td>
+<td style="text-align: right;">871756 / 41830466</td>
 </tr>
 <tr>
 <td style="text-align: right;">2</td>
 <td>SNOWBALL SPANISH DIRECT</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">12787018</td>
-<td style="text-align: right;">2201196</td>
-<td style="text-align: right;">29076352</td>
-<td style="text-align: right;">377858468569</td>
-<td style="text-align: right;">2201196 / 377860669765</td>
-<td style="text-align: right;">29076352 / 41863370</td>
+<td style="text-align: right;">12762004</td>
+<td style="text-align: right;">1472547</td>
+<td style="text-align: right;">29068462</td>
+<td style="text-align: right;">359405672368</td>
+<td style="text-align: right;">1472547 / 359407144915</td>
+<td style="text-align: right;">29068462 / 41830466</td>
 </tr>
 <tr>
 <td style="text-align: right;">3</td>
 <td>SNOWBALL SPANISH LUCENE FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">12787018</td>
-<td style="text-align: right;">2201196</td>
-<td style="text-align: right;">29076352</td>
-<td style="text-align: right;">377858468569</td>
-<td style="text-align: right;">2201196 / 377860669765</td>
-<td style="text-align: right;">29076352 / 41863370</td>
+<td style="text-align: right;">12762004</td>
+<td style="text-align: right;">1472547</td>
+<td style="text-align: right;">29068462</td>
+<td style="text-align: right;">359405672368</td>
+<td style="text-align: right;">1472547 / 359407144915</td>
+<td style="text-align: right;">29068462 / 41830466</td>
 </tr>
 <tr>
 <td style="text-align: right;">4</td>
 <td>HUNSPELL SPANISH LUCENE FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">9628515</td>
-<td style="text-align: right;">531181</td>
-<td style="text-align: right;">32234855</td>
-<td style="text-align: right;">377860138584</td>
-<td style="text-align: right;">531181 / 377860669765</td>
-<td style="text-align: right;">32234855 / 41863370</td>
+<td style="text-align: right;">9614637</td>
+<td style="text-align: right;">244260</td>
+<td style="text-align: right;">32215829</td>
+<td style="text-align: right;">359406900655</td>
+<td style="text-align: right;">244260 / 359407144915</td>
+<td style="text-align: right;">32215829 / 41830466</td>
 </tr>
 <tr>
 <td style="text-align: right;">5</td>
 <td>SPANISH LUCENE SPANISH LIGHT STEM FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">1241848</td>
-<td style="text-align: right;">146613</td>
-<td style="text-align: right;">40621522</td>
-<td style="text-align: right;">377860523152</td>
-<td style="text-align: right;">146613 / 377860669765</td>
-<td style="text-align: right;">40621522 / 41863370</td>
+<td style="text-align: right;">1219357</td>
+<td style="text-align: right;">31857</td>
+<td style="text-align: right;">40611109</td>
+<td style="text-align: right;">359407113058</td>
+<td style="text-align: right;">31857 / 359407144915</td>
+<td style="text-align: right;">40611109 / 41830466</td>
 </tr>
 <tr>
 <td style="text-align: right;">6</td>
 <td>SPANISH LUCENE SPANISH PLURAL STEM FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">324656</td>
-<td style="text-align: right;">57716</td>
-<td style="text-align: right;">41538714</td>
-<td style="text-align: right;">377860612049</td>
-<td style="text-align: right;">57716 / 377860669765</td>
-<td style="text-align: right;">41538714 / 41863370</td>
+<td style="text-align: right;">315155</td>
+<td style="text-align: right;">6589</td>
+<td style="text-align: right;">41515311</td>
+<td style="text-align: right;">359407138326</td>
+<td style="text-align: right;">6589 / 359407144915</td>
+<td style="text-align: right;">41515311 / 41830466</td>
 </tr>
 <tr>
 <td style="text-align: right;">7</td>
 <td>SPANISH LUCENE SPANISH MINIMAL STEM FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">148226</td>
-<td style="text-align: right;">47148</td>
-<td style="text-align: right;">41715144</td>
-<td style="text-align: right;">377860622617</td>
-<td style="text-align: right;">47148 / 377860669765</td>
-<td style="text-align: right;">41715144 / 41863370</td>
+<td style="text-align: right;">140505</td>
+<td style="text-align: right;">4162</td>
+<td style="text-align: right;">41689961</td>
+<td style="text-align: right;">359407140753</td>
+<td style="text-align: right;">4162 / 359407144915</td>
+<td style="text-align: right;">41689961 / 41830466</td>
 </tr>
 </tbody>
 </table>
 </details>
-<h4 id="any_candidate-ranking_1"><code>ANY_CANDIDATE</code> ranking</h4>
-<div aria-label="Compact stemming-quality ranking; scroll horizontally for additional columns" class="quality-table quality-table--compact" role="region" tabindex="0">
+<h4 id="any_candidate-oracle-bounds_1"><code>ANY_CANDIDATE</code> oracle bounds</h4>
+<p>These results are measured, not missing. <code>ANY_CANDIDATE</code> answers two separate optimistic questions for each pair: a gold-related pair avoids under-stemming when the candidate sets intersect, while a gold-negative pair avoids over-stemming when some non-colliding candidate selection exists. The oracle may choose a different candidate for the same word in different pairs. Consequently, these decisions do not form one globally realizable predicted relation or one TP/FP/FN/TN confusion matrix. Balanced accuracy, F-scores, Jaccard, Fowlkes–Mallows, and MCC are therefore mathematically <strong>not applicable</strong>, rather than unknown.</p>
+<div class="quality-summary quality-summary--oracle">
+<table>
+<thead>
+<tr>
+<th>Stemmer</th>
+<th style="text-align: right;">Optimistic over-stemming (OI)</th>
+<th style="text-align: right;">Optimistic under-stemming (UI)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HUNSPELL SPANISH LUCENE FILTER</td>
+<td style="text-align: right;">0.000062%</td>
+<td style="text-align: right;">76.037484%</td>
+</tr>
+<tr>
+<td>Radixor</td>
+<td style="text-align: right;">0.000000%</td>
+<td style="text-align: right;">0.000000%</td>
+</tr>
+</tbody>
+</table>
+</div>
+<details class="quality-details">
+<summary>Oracle-bound pair counts</summary>
+<table>
+<thead>
+<tr>
+<th>Stemmer</th>
+<th style="text-align: right;">Unavoidable over errors / gold-negative pairs</th>
+<th style="text-align: right;">Unrepairable under errors / gold-related pairs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HUNSPELL SPANISH LUCENE FILTER</td>
+<td style="text-align: right;">223274 / 359407144915</td>
+<td style="text-align: right;">31806834 / 41830466</td>
+</tr>
+<tr>
+<td>Radixor</td>
+<td style="text-align: right;">0 / 359407144915</td>
+<td style="text-align: right;">0 / 41830466</td>
+</tr>
+</tbody>
+</table>
+</details>
+<h4 id="all_candidates-ranking_1"><code>ALL_CANDIDATES</code> ranking</h4>
+<div class="quality-summary">
 <table>
 <thead>
 <tr>
 <th style="text-align: right;">Rank</th>
 <th>Stemmer</th>
-<th>Output policy</th>
 <th style="text-align: right;">Balanced accuracy</th>
-<th style="text-align: right;">Over-stemming</th>
-<th style="text-align: right;">Under-stemming</th>
-<th style="text-align: right;">F0.5</th>
-<th style="text-align: right;">F1</th>
-<th style="text-align: right;">MCC</th>
+<th style="text-align: right;">Over-stemming (OI)</th>
+<th style="text-align: right;">Under-stemming (UI)</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
-<td>ANY_CANDIDATE</td>
 <td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">0 / 377860669765 (0.000000%)</td>
-<td style="text-align: right;">0 / 41863370 (0.000000%)</td>
-<td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">1.000000</td>
+<td style="text-align: right;">&lt;0.000001%</td>
+<td style="text-align: right;">0.000000%</td>
 </tr>
 <tr>
 <td style="text-align: right;">2</td>
 <td>HUNSPELL SPANISH LUCENE FILTER</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">0.619928</td>
-<td style="text-align: right;">412198 / 377860669765 (0.000109%)</td>
-<td style="text-align: right;">31822108 / 41863370 (76.014205%)</td>
-<td style="text-align: right;">0.600000</td>
-<td style="text-align: right;">0.383864</td>
-<td style="text-align: right;">0.479978</td>
+<td style="text-align: right;">0.619812</td>
+<td style="text-align: right;">0.000073%</td>
+<td style="text-align: right;">76.037484%</td>
 </tr>
 </tbody>
 </table>
@@ -4533,8 +4151,8 @@
 <tr>
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">1.000000</td>
+<td>ALL_CANDIDATES</td>
+<td style="text-align: right;">0.999987</td>
 <td style="text-align: right;">1.000000</td>
 <td style="text-align: right;">1.000000</td>
 <td style="text-align: right;">1.000000</td>
@@ -4544,220 +4162,13 @@
 <tr>
 <td style="text-align: right;">2</td>
 <td>HUNSPELL SPANISH LUCENE FILTER</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">0.960568</td>
-<td style="text-align: right;">0.239858</td>
+<td>ALL_CANDIDATES</td>
+<td style="text-align: right;">0.974405</td>
+<td style="text-align: right;">0.239625</td>
 <td style="text-align: right;">0.999999</td>
-<td style="text-align: right;">0.619928</td>
-<td style="text-align: right;">0.999915</td>
-<td style="text-align: right;">0.000085</td>
-</tr>
-</tbody>
-</table>
-</details>
-<details class="quality-details">
-<summary>Pair-relation metrics</summary>
-<table>
-<thead>
-<tr>
-<th style="text-align: right;">Rank</th>
-<th>Stemmer</th>
-<th>Output policy</th>
-<th style="text-align: right;">F0.5</th>
-<th style="text-align: right;">F1</th>
-<th style="text-align: right;">F2</th>
-<th style="text-align: right;">Jaccard</th>
-<th style="text-align: right;">Fowlkes–Mallows</th>
-<th style="text-align: right;">MCC</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: right;">1</td>
-<td>Radixor</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">1.000000</td>
-</tr>
-<tr>
-<td style="text-align: right;">2</td>
-<td>HUNSPELL SPANISH LUCENE FILTER</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">0.600000</td>
-<td style="text-align: right;">0.383864</td>
-<td style="text-align: right;">0.282205</td>
-<td style="text-align: right;">0.237519</td>
-<td style="text-align: right;">0.480000</td>
-<td style="text-align: right;">0.479978</td>
-</tr>
-</tbody>
-</table>
-</details>
-<details class="quality-details">
-<summary>Partition metrics (PRIMARY_OUTPUT only)</summary>
-<table>
-<thead>
-<tr>
-<th style="text-align: right;">Rank</th>
-<th>Stemmer</th>
-<th>Output policy</th>
-<th style="text-align: right;">Adjusted Rand Index</th>
-<th style="text-align: right;">Homogeneity</th>
-<th style="text-align: right;">Completeness</th>
-<th style="text-align: right;">V-measure</th>
-<th style="text-align: right;">Normalized mutual information</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: right;">1</td>
-<td>Radixor</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-</tr>
-<tr>
-<td style="text-align: right;">2</td>
-<td>HUNSPELL SPANISH LUCENE FILTER</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-</tr>
-</tbody>
-</table>
-</details>
-<details class="quality-details">
-<summary>Raw pair counts</summary>
-<table>
-<thead>
-<tr>
-<th style="text-align: right;">Rank</th>
-<th>Stemmer</th>
-<th>Output policy</th>
-<th style="text-align: right;">TP</th>
-<th style="text-align: right;">FP</th>
-<th style="text-align: right;">FN</th>
-<th style="text-align: right;">TN</th>
-<th style="text-align: right;">Over error / possible</th>
-<th style="text-align: right;">Under error / possible</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: right;">1</td>
-<td>Radixor</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">41863370</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">377860669765</td>
-<td style="text-align: right;">0 / 377860669765</td>
-<td style="text-align: right;">0 / 41863370</td>
-</tr>
-<tr>
-<td style="text-align: right;">2</td>
-<td>HUNSPELL SPANISH LUCENE FILTER</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">10041262</td>
-<td style="text-align: right;">412198</td>
-<td style="text-align: right;">31822108</td>
-<td style="text-align: right;">377860257567</td>
-<td style="text-align: right;">412198 / 377860669765</td>
-<td style="text-align: right;">31822108 / 41863370</td>
-</tr>
-</tbody>
-</table>
-</details>
-<h4 id="all_candidates-ranking_1"><code>ALL_CANDIDATES</code> ranking</h4>
-<div aria-label="Compact stemming-quality ranking; scroll horizontally for additional columns" class="quality-table quality-table--compact" role="region" tabindex="0">
-<table>
-<thead>
-<tr>
-<th style="text-align: right;">Rank</th>
-<th>Stemmer</th>
-<th>Output policy</th>
-<th style="text-align: right;">Balanced accuracy</th>
-<th style="text-align: right;">Over-stemming</th>
-<th style="text-align: right;">Under-stemming</th>
-<th style="text-align: right;">F0.5</th>
-<th style="text-align: right;">F1</th>
-<th style="text-align: right;">MCC</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: right;">1</td>
-<td>Radixor</td>
-<td>ALL_CANDIDATES</td>
-<td style="text-align: right;">0.999998</td>
-<td style="text-align: right;">1255381 / 377860669765 (0.000332%)</td>
-<td style="text-align: right;">0 / 41863370 (0.000000%)</td>
-<td style="text-align: right;">0.976572</td>
-<td style="text-align: right;">0.985228</td>
-<td style="text-align: right;">0.985334</td>
-</tr>
-<tr>
-<td style="text-align: right;">2</td>
-<td>HUNSPELL SPANISH LUCENE FILTER</td>
-<td>ALL_CANDIDATES</td>
-<td style="text-align: right;">0.619928</td>
-<td style="text-align: right;">878949 / 377860669765 (0.000233%)</td>
-<td style="text-align: right;">31822108 / 41863370 (76.014205%)</td>
-<td style="text-align: right;">0.586905</td>
-<td style="text-align: right;">0.380469</td>
-<td style="text-align: right;">0.469606</td>
-</tr>
-</tbody>
-</table>
-</div>
-<details class="quality-details">
-<summary>Classification metrics</summary>
-<table>
-<thead>
-<tr>
-<th style="text-align: right;">Rank</th>
-<th>Stemmer</th>
-<th>Output policy</th>
-<th style="text-align: right;">Precision</th>
-<th style="text-align: right;">Recall</th>
-<th style="text-align: right;">Specificity</th>
-<th style="text-align: right;">Balanced accuracy</th>
-<th style="text-align: right;">Pairwise accuracy</th>
-<th style="text-align: right;">Error rate</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: right;">1</td>
-<td>Radixor</td>
-<td>ALL_CANDIDATES</td>
-<td style="text-align: right;">0.970885</td>
-<td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">0.999997</td>
-<td style="text-align: right;">0.999998</td>
-<td style="text-align: right;">0.999997</td>
-<td style="text-align: right;">0.000003</td>
-</tr>
-<tr>
-<td style="text-align: right;">2</td>
-<td>HUNSPELL SPANISH LUCENE FILTER</td>
-<td>ALL_CANDIDATES</td>
-<td style="text-align: right;">0.919512</td>
-<td style="text-align: right;">0.239858</td>
-<td style="text-align: right;">0.999998</td>
-<td style="text-align: right;">0.619928</td>
-<td style="text-align: right;">0.999913</td>
-<td style="text-align: right;">0.000087</td>
+<td style="text-align: right;">0.619812</td>
+<td style="text-align: right;">0.999911</td>
+<td style="text-align: right;">0.000089</td>
 </tr>
 </tbody>
 </table>
@@ -4783,62 +4194,23 @@
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
 <td>ALL_CANDIDATES</td>
-<td style="text-align: right;">0.976572</td>
-<td style="text-align: right;">0.985228</td>
-<td style="text-align: right;">0.994038</td>
-<td style="text-align: right;">0.970885</td>
-<td style="text-align: right;">0.985335</td>
-<td style="text-align: right;">0.985334</td>
+<td style="text-align: right;">0.999989</td>
+<td style="text-align: right;">0.999993</td>
+<td style="text-align: right;">0.999997</td>
+<td style="text-align: right;">0.999987</td>
+<td style="text-align: right;">0.999993</td>
+<td style="text-align: right;">0.999993</td>
 </tr>
 <tr>
 <td style="text-align: right;">2</td>
 <td>HUNSPELL SPANISH LUCENE FILTER</td>
 <td>ALL_CANDIDATES</td>
-<td style="text-align: right;">0.586905</td>
-<td style="text-align: right;">0.380469</td>
-<td style="text-align: right;">0.281467</td>
-<td style="text-align: right;">0.234926</td>
-<td style="text-align: right;">0.469630</td>
-<td style="text-align: right;">0.469606</td>
-</tr>
-</tbody>
-</table>
-</details>
-<details class="quality-details">
-<summary>Partition metrics (PRIMARY_OUTPUT only)</summary>
-<table>
-<thead>
-<tr>
-<th style="text-align: right;">Rank</th>
-<th>Stemmer</th>
-<th>Output policy</th>
-<th style="text-align: right;">Adjusted Rand Index</th>
-<th style="text-align: right;">Homogeneity</th>
-<th style="text-align: right;">Completeness</th>
-<th style="text-align: right;">V-measure</th>
-<th style="text-align: right;">Normalized mutual information</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: right;">1</td>
-<td>Radixor</td>
-<td>ALL_CANDIDATES</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-</tr>
-<tr>
-<td style="text-align: right;">2</td>
-<td>HUNSPELL SPANISH LUCENE FILTER</td>
-<td>ALL_CANDIDATES</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">0.603992</td>
+<td style="text-align: right;">0.384656</td>
+<td style="text-align: right;">0.282183</td>
+<td style="text-align: right;">0.238126</td>
+<td style="text-align: right;">0.483210</td>
+<td style="text-align: right;">0.483187</td>
 </tr>
 </tbody>
 </table>
@@ -4864,23 +4236,23 @@
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
 <td>ALL_CANDIDATES</td>
-<td style="text-align: right;">41863370</td>
-<td style="text-align: right;">1255381</td>
+<td style="text-align: right;">41830466</td>
+<td style="text-align: right;">560</td>
 <td style="text-align: right;">0</td>
-<td style="text-align: right;">377859414384</td>
-<td style="text-align: right;">1255381 / 377860669765</td>
-<td style="text-align: right;">0 / 41863370</td>
+<td style="text-align: right;">359407144355</td>
+<td style="text-align: right;">560 / 359407144915</td>
+<td style="text-align: right;">0 / 41830466</td>
 </tr>
 <tr>
 <td style="text-align: right;">2</td>
 <td>HUNSPELL SPANISH LUCENE FILTER</td>
 <td>ALL_CANDIDATES</td>
-<td style="text-align: right;">10041262</td>
-<td style="text-align: right;">878949</td>
-<td style="text-align: right;">31822108</td>
-<td style="text-align: right;">377859790816</td>
-<td style="text-align: right;">878949 / 377860669765</td>
-<td style="text-align: right;">31822108 / 41863370</td>
+<td style="text-align: right;">10023632</td>
+<td style="text-align: right;">263289</td>
+<td style="text-align: right;">31806834</td>
+<td style="text-align: right;">359406881626</td>
+<td style="text-align: right;">263289 / 359407144915</td>
+<td style="text-align: right;">31806834 / 41830466</td>
 </tr>
 </tbody>
 </table>
@@ -4903,35 +4275,35 @@
 <tbody>
 <tr>
 <td>HUNSPELL SPANISH LUCENE FILTER</td>
-<td style="text-align: right;">412747</td>
-<td style="text-align: right;">118983</td>
-<td style="text-align: right;">347768</td>
-<td style="text-align: right;">17807</td>
-<td style="text-align: right;">2.048262%</td>
+<td style="text-align: right;">408995</td>
+<td style="text-align: right;">20986</td>
+<td style="text-align: right;">19029</td>
+<td style="text-align: right;">11287</td>
+<td style="text-align: right;">1.331204%</td>
 <td style="text-align: right;">5</td>
-<td style="text-align: right;">888962</td>
+<td style="text-align: right;">860048</td>
 </tr>
 <tr>
 <td>Radixor</td>
-<td style="text-align: right;">885033</td>
-<td style="text-align: right;">276044</td>
-<td style="text-align: right;">979337</td>
-<td style="text-align: right;">42403</td>
-<td style="text-align: right;">4.877434%</td>
+<td style="text-align: right;">871756</td>
+<td style="text-align: right;">34</td>
+<td style="text-align: right;">526</td>
+<td style="text-align: right;">20911</td>
+<td style="text-align: right;">2.466272%</td>
 <td style="text-align: right;">21</td>
-<td style="text-align: right;">914127</td>
+<td style="text-align: right;">869542</td>
 </tr>
 </tbody>
 </table>
 <h3 id="output-policies-and-metric-definitions">Output Policies and Metric Definitions</h3>
-<p><code>PRIMARY_OUTPUT</code> uses one deterministic stem per form and therefore defines a strict partition. <code>ANY_CANDIDATE</code> is an optimistic oracle-assisted pairwise upper bound: a same-group pair succeeds when candidates intersect, while a different-group pair succeeds when a non-colliding selection exists. Candidate choices may differ between pairs, so this is not deterministic runtime behaviour and need not represent one globally consistent assignment. <code>ALL_CANDIDATES</code> activates every returned candidate; forms are related when candidate sets intersect. Alternatives can reduce under-stemming but can introduce cross-group collisions, and the resulting relation can overlap and need not be a partition.</p>
-<p>For each row, <code>TP = underPossiblePairs - underErrorPairs</code>, <code>FN = underErrorPairs</code>, <code>FP = overErrorPairs</code>, and <code>TN = overPossiblePairs - overErrorPairs</code>. TP and FN concern same-group pairs; FP and TN concern different-group pairs. Consequently, under-stemming and over-stemming use different denominators. Undefined values are rendered as <code>n/a</code>.</p>
+<p>Each distinct surface form is one item and may belong to several gold groups. Two forms are gold-related when their membership sets intersect; a relation shared by several groups is counted once. <code>PRIMARY_OUTPUT</code> uses one deterministic stem per form. <code>ANY_CANDIDATE</code> is an optimistic oracle-assisted pairwise upper bound: a gold-related pair succeeds when candidates intersect, while a gold-negative pair succeeds when a non-colliding selection exists. Candidate choices may differ between pairs, so this is not deterministic runtime behaviour and does not define one confusion matrix. <code>ALL_CANDIDATES</code> activates every returned candidate; forms are related when candidate sets intersect.</p>
+<p>For <code>PRIMARY_OUTPUT</code> and <code>ALL_CANDIDATES</code>, <code>TP = underPossiblePairs - underErrorPairs</code>, <code>FN = underErrorPairs</code>, <code>FP = overErrorPairs</code>, and <code>TN = overPossiblePairs - overErrorPairs</code>. <code>ANY_CANDIDATE</code> publishes only its separate oracle-assisted under/over bounds; confusion-derived metrics are mathematically inapplicable and are not presented in its language-page section. Their machine-readable CSV fields remain empty. Undefined metric denominators in otherwise applicable policies are rendered as <code>n/a</code>.</p>
 <ul>
-<li>Under-stemming rate: <code>FN / (TP + FN)</code>, the false-negative rate over same-group pairs.</li>
-<li>Over-stemming rate: <code>FP / (TN + FP)</code>, the false-positive rate over different-group pairs.</li>
+<li>Under-stemming rate (Paice UI): <code>FN / (TP + FN)</code>, the false-negative rate over gold-related pairs.</li>
+<li>Over-stemming rate (Paice OI): <code>FP / (TN + FP)</code>, the false-positive rate over gold-negative pairs.</li>
 <li>Pairwise precision: <code>TP / (TP + FP)</code>, the fraction of predicted conflations that are gold-standard positive pairs.</li>
 <li>Pairwise recall: <code>TP / (TP + FN)</code>, the fraction of gold-standard positive pairs successfully connected.</li>
-<li>Pairwise specificity: <code>TN / (TN + FP)</code>, the fraction of different-group pairs correctly separated.</li>
+<li>Pairwise specificity: <code>TN / (TN + FP)</code>, the fraction of gold-negative pairs correctly separated.</li>
 <li>Balanced accuracy: <code>(recall + specificity) / 2</code>. It gives equal weight to positive and negative pair classes and is less dominated by the large true-negative class than ordinary accuracy. It does not replace the raw errors or other metrics.</li>
 <li>Pairwise F-beta: <code>((1 + betaSquared) * TP) / (((1 + betaSquared) * TP) + (betaSquared * FN) + FP)</code>. F0.5 emphasizes precision and penalizes over-stemming more; F1 weights precision and recall equally; F2 emphasizes recall and penalizes under-stemming more.</li>
 <li>MCC: <code>(TP * TN - FP * FN) / sqrt((TP + FP) * (TP + FN) * (TN + FP) * (TN + FN))</code>. It uses all confusion counts and remains useful under class imbalance, except when its denominator is degenerate.</li>
@@ -4940,16 +4312,17 @@
 <li>Pairwise accuracy: <code>(TP + TN) / (TP + TN + FP + FN)</code>. It can be dominated by true-negative cross-group pairs.</li>
 <li>Pairwise error rate: <code>(FP + FN) / (TP + TN + FP + FN)</code>.</li>
 </ul>
-<p>Adjusted Rand Index uses the gold/predicted contingency table and chance correction. Homogeneity is <code>1 - H(gold | predicted) / H(gold)</code>; completeness is <code>1 - H(predicted | gold) / H(predicted)</code>; V-measure is their harmonic mean; normalized mutual information uses the arithmetic-mean entropy normalization <code>MI / ((H(gold) + H(predicted)) / 2)</code>. These partition-only metrics apply to <code>PRIMARY_OUTPUT</code>; candidate-relation rows show <code>n/a</code>.</p>
+<p>Standard ARI, homogeneity, completeness, V-measure, and NMI are not calculated: their usual contingency-table definitions require an exclusive gold partition, while this gold standard is an overlapping cover.</p>
 <h3 id="provenance">Provenance</h3>
 <ul>
 <li>Authoritative source: <code>docs/benchmarks/data/stemming-quality.csv</code></li>
-<li>Source SHA-256: <code>5a93a6ab60e46489737cd649eb1ac48182114b9038f7f20195ab9d1c1fc0dd28</code></li>
-<li>Evaluation command: <code>./gradlew stemmingQuality</code></li>
+<li>Source SHA-256: <code>edf16b07be8a535943ddf37caeb8807755c95e9e1fb13244145f28be74b491d8</code></li>
+<li>Evaluation command: <code>./gradlew stemmingQuality --no-daemon</code></li>
 <li>Dictionary language: <code>ES_ES</code></li>
 <li>Processing modes: <code>ALL_WORDS</code>, <code>LOWERCASE_GROUPS_ONLY</code></li>
 <li>Stemmer versions and transitive artifacts: resolved by the repository's JMH Gradle configuration and <code>gradle.lockfile</code></li>
-<li>Radixor version, Git revision, generation date, JDK version, operating system, and dictionary revision: not recorded in the authoritative CSV</li>
+<li>Model ID, version, and SHA-256: recorded in every CSV row</li>
+<li>Run date, core source state, JDK, operating system, and hardware: recorded on the <a href="../../reference/environment/">benchmark environment page</a></li>
 </ul>
 <!-- STEMMING-QUALITY:END -->
 

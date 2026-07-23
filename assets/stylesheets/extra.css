@@ -67,64 +67,62 @@
   padding: 0.45rem 0.7rem;
 }
 
-/* Publication-quality benchmark tables retain identity columns while scrolling. */
-.quality-table {
-  max-width: 100%;
-  overflow-x: auto;
+/* Primary quality rankings fit the content column; raw counts remain in details. */
+.quality-summary {
+  width: 100%;
   margin: 0.65rem 0 1rem;
-  border: 1px solid var(--md-default-fg-color--lightest);
-  border-radius: 0.2rem;
-  scrollbar-gutter: stable;
+  font-size: 0.72rem;
 }
 
-.quality-table:focus {
-  outline: 0.15rem solid var(--md-accent-fg-color);
-  outline-offset: 0.1rem;
-}
-
-.quality-table::before {
-  content: "Scrollable table: Rank, Stemmer, and Output policy remain visible.";
+.quality-summary .md-typeset__table,
+.quality-summary table {
   display: block;
-  padding: 0.35rem 0.55rem;
-  color: var(--md-default-fg-color--light);
-  font-size: 0.68rem;
-}
-
-.quality-table .md-typeset__table,
-.quality-table table {
+  width: 100%;
   margin: 0;
+  overflow: visible;
 }
 
-.quality-table table th:nth-child(1),
-.quality-table table td:nth-child(1),
-.quality-table table th:nth-child(2),
-.quality-table table td:nth-child(2),
-.quality-table table th:nth-child(3),
-.quality-table table td:nth-child(3) {
-  position: sticky;
-  z-index: 2;
-  background: var(--md-default-bg-color);
-  background-clip: padding-box;
+.quality-summary table {
+  display: table;
+  table-layout: fixed;
 }
 
-.quality-table table th:nth-child(1),
-.quality-table table td:nth-child(1) {
-  left: 0;
-  min-width: 2.8rem;
+.quality-summary th,
+.quality-summary td {
+  padding: 0.4rem 0.45rem !important;
+  line-height: 1.3;
+  letter-spacing: 0;
 }
 
-.quality-table table th:nth-child(2),
-.quality-table table td:nth-child(2) {
-  left: 2.8rem;
-  min-width: 13rem;
-  white-space: normal;
+.quality-summary th:nth-child(1),
+.quality-summary td:nth-child(1) {
+  width: 7%;
 }
 
-.quality-table table th:nth-child(3),
-.quality-table table td:nth-child(3) {
-  left: 15.8rem;
-  min-width: 8.5rem;
-  box-shadow: 0.2rem 0 0.25rem rgb(0 0 0 / 8%);
+.quality-summary th:nth-child(2),
+.quality-summary td:nth-child(2) {
+  width: 39%;
+  overflow-wrap: anywhere;
+}
+
+.quality-summary th:nth-child(n + 3),
+.quality-summary td:nth-child(n + 3) {
+  width: 18%;
+}
+
+.quality-summary td:nth-child(n + 3) {
+  white-space: nowrap;
+}
+
+.quality-summary--oracle th:nth-child(1),
+.quality-summary--oracle td:nth-child(1) {
+  width: 46%;
+  overflow-wrap: anywhere;
+}
+
+.quality-summary--oracle th:nth-child(n + 2),
+.quality-summary--oracle td:nth-child(n + 2) {
+  width: 27%;
 }
 
 .quality-details > summary {
@@ -132,34 +130,17 @@
 }
 
 @media screen and (max-width: 44.99em) {
-  .quality-table table th:nth-child(2),
-  .quality-table table td:nth-child(2) {
-    min-width: 10rem;
+  .quality-summary {
+    font-size: 0.62rem;
   }
 
-  .quality-table table th:nth-child(3),
-  .quality-table table td:nth-child(3) {
-    position: static;
-    min-width: 7.5rem;
-    box-shadow: none;
+  .quality-summary th,
+  .quality-summary td {
+    padding: 0.3rem 0.2rem !important;
   }
 }
 
 @media print {
-  .quality-table {
-    overflow: visible;
-    border: 0;
-  }
-
-  .quality-table::before {
-    display: none;
-  }
-
-  .quality-table table th,
-  .quality-table table td {
-    position: static !important;
-  }
-
   .quality-details:not([open]) > *:not(summary) {
     display: block;
   }

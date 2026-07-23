@@ -1739,6 +1739,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../hebrew/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hebrew
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../hungarian/" class="md-nav__link">
         
   
@@ -1984,10 +2012,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#any_candidate-ranking" class="md-nav__link">
+  <a href="#any_candidate-oracle-bounds" class="md-nav__link">
     <span class="md-ellipsis">
       
-        ANY_CANDIDATE ranking
+        ANY_CANDIDATE oracle bounds
       
     </span>
   </a>
@@ -2045,10 +2073,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#any_candidate-ranking_1" class="md-nav__link">
+  <a href="#any_candidate-oracle-bounds_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        ANY_CANDIDATE ranking
+        ANY_CANDIDATE oracle bounds
       
     </span>
   </a>
@@ -2684,10 +2712,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#any_candidate-ranking" class="md-nav__link">
+  <a href="#any_candidate-oracle-bounds" class="md-nav__link">
     <span class="md-ellipsis">
       
-        ANY_CANDIDATE ranking
+        ANY_CANDIDATE oracle bounds
       
     </span>
   </a>
@@ -2745,10 +2773,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#any_candidate-ranking_1" class="md-nav__link">
+  <a href="#any_candidate-oracle-bounds_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        ANY_CANDIDATE ranking
+        ANY_CANDIDATE oracle bounds
       
     </span>
   </a>
@@ -2837,7 +2865,9 @@
 <table>
 <thead>
 <tr>
-<th>Resource</th>
+<th>Model ID</th>
+<th>Model version</th>
+<th>Language</th>
 <th style="text-align: right;">Dictionary rows</th>
 <th style="text-align: right;">Complete quality tokens</th>
 <th style="text-align: right;">Already-root tokens</th>
@@ -2846,6 +2876,8 @@
 </thead>
 <tbody>
 <tr>
+<td><code>nn-no-default</code></td>
+<td><code>1.0.0</code></td>
 <td><code>NN_NO</code></td>
 <td style="text-align: right;">4,688</td>
 <td style="text-align: right;">19,651</td>
@@ -2855,7 +2887,7 @@
 </tbody>
 </table>
 <h2 id="radixor-patch-command-distribution">Radixor Patch Command Distribution</h2>
-<p>Radixor stores the preferred transformation for each normalized dictionary word form as a compiled patch command. This distribution shows which runtime command class is selected by the trained trie for the complete language dictionary. The total number of preferred patch commands analyzed for this language is <strong>19,651</strong>.</p>
+<p>Radixor stores the preferred transformation for each normalized dictionary word form as a compiled patch command. This distribution shows which runtime command class is selected by the trained trie for the complete default-model dictionary. The total number of preferred patch commands analyzed for this language is <strong>19,651</strong>.</p>
 <table>
 <thead>
 <tr>
@@ -2869,32 +2901,32 @@
 <tr>
 <td><code>AppendCharacterCommand</code></td>
 <td>Appends one character to the end of the word form.</td>
-<td style="text-align: right;">224</td>
-<td style="text-align: right;">1.140%</td>
+<td style="text-align: right;">312</td>
+<td style="text-align: right;">1.588%</td>
 </tr>
 <tr>
 <td><code>BackwardCompoundCommand</code></td>
 <td>Applies a multi-step backward patch made from skip, delete, insert, and replace operations.</td>
-<td style="text-align: right;">1,505</td>
-<td style="text-align: right;">7.659%</td>
+<td style="text-align: right;">1,456</td>
+<td style="text-align: right;">7.409%</td>
 </tr>
 <tr>
 <td><code>DeleteSuffixCommand</code></td>
 <td>Deletes one or more trailing characters from the word form.</td>
-<td style="text-align: right;">11,017</td>
-<td style="text-align: right;">56.063%</td>
+<td style="text-align: right;">11,325</td>
+<td style="text-align: right;">57.631%</td>
 </tr>
 <tr>
 <td><code>PreserveCommand</code></td>
 <td>Returns the word form unchanged because it already matches the preferred root.</td>
-<td style="text-align: right;">6,427</td>
-<td style="text-align: right;">32.706%</td>
+<td style="text-align: right;">6,031</td>
+<td style="text-align: right;">30.691%</td>
 </tr>
 <tr>
 <td><code>ReplaceLastCharacterCommand</code></td>
 <td>Replaces the final character of the word form.</td>
-<td style="text-align: right;">478</td>
-<td style="text-align: right;">2.432%</td>
+<td style="text-align: right;">527</td>
+<td style="text-align: right;">2.682%</td>
 </tr>
 </tbody>
 </table>
@@ -2935,7 +2967,7 @@
 </tbody>
 </table>
 <h2 id="speed">Speed</h2>
-<p>Speed uses JMH average time, 3 warmup iterations, 5 measurement iterations, 1 fork, and 1 thread. Relative factor is computed against the single Radixor row on this language page. Values below 1.000 are faster than that Radixor baseline; values above 1.000 are slower.</p>
+<p>Speed uses JMH average time, 5 warmup iterations, 10 measurement iterations, 3 independent forks, and 1 thread. Relative factor is computed against the single Radixor row on this language page. Values below 1.000 are faster than that Radixor baseline; values above 1.000 are slower.</p>
 <table>
 <thead>
 <tr>
@@ -2952,28 +2984,28 @@
 <tr>
 <td>Radixor</td>
 <td><code>radixor[NORWEGIAN_NYNORSK]</code></td>
-<td style="text-align: right;">0.571</td>
-<td style="text-align: right;">0.012</td>
-<td style="text-align: right;">42.1</td>
+<td style="text-align: right;">0.617</td>
+<td style="text-align: right;">0.062</td>
+<td style="text-align: right;">45.5</td>
 <td style="text-align: right;">1.000</td>
 <td>Full Radixor dictionary patch-command stemmer.</td>
 </tr>
 <tr>
 <td>Official Snowball direct</td>
 <td><code>snowballDirect[NORWEGIAN_NYNORSK]</code></td>
-<td style="text-align: right;">0.919</td>
-<td style="text-align: right;">0.038</td>
-<td style="text-align: right;">67.7</td>
-<td style="text-align: right;">1.609</td>
+<td style="text-align: right;">0.955</td>
+<td style="text-align: right;">0.076</td>
+<td style="text-align: right;">70.4</td>
+<td style="text-align: right;">1.548</td>
 <td>Official Snowball generated Java stemmer; direct API.</td>
 </tr>
 <tr>
 <td>Lucene SnowballFilter</td>
 <td><code>luceneSnowballFilter[NORWEGIAN_NYNORSK]</code></td>
-<td style="text-align: right;">1.309</td>
-<td style="text-align: right;">0.015</td>
-<td style="text-align: right;">96.5</td>
-<td style="text-align: right;">2.292</td>
+<td style="text-align: right;">1.352</td>
+<td style="text-align: right;">0.106</td>
+<td style="text-align: right;">99.7</td>
+<td style="text-align: right;">2.191</td>
 <td>Lucene TokenFilter path around Snowball; includes TokenStream overhead.</td>
 </tr>
 </tbody>
@@ -2989,65 +3021,49 @@
 <!-- STEMMING-QUALITY:START -->
 
 <h2 id="stemming-quality">Stemming Quality</h2>
-<p>Runtime performance and linguistic grouping quality are independent dimensions. This section evaluates language <code>NN_NO</code> using the complete validated stemming-quality result matrix. Every usable dictionary row is one gold-standard group of forms expected to share a morphological family or lemma. Exact equality with a predetermined lemma is not required. Same-row pairs are positive pairs; pairs from different rows are negative pairs.</p>
+<p>Runtime performance and linguistic grouping quality are independent dimensions. This section evaluates language <code>NN_NO</code> using the complete validated stemming-quality result matrix. Every distinct surface form is one evaluated item and can belong to several dictionary groups. Two forms are a positive pair when their group-membership sets intersect and a negative pair when those sets are disjoint. A pair shared through several groups is counted once. Exact equality with a predetermined lemma is not required.</p>
 <p><code>ALL_WORDS</code> includes every valid group and its original forms. <code>LOWERCASE_GROUPS_ONLY</code> excludes an entire group when any Unicode code point is uppercase or titlecase; retained words are not lowercased or otherwise rewritten. This isolates case-handling effects without changing retained inputs. <a href="../../data/stemming-quality.csv">Download the complete machine-readable result snapshot</a>.</p>
 <h3 id="evaluation-scope-and-key-findings">Evaluation Scope and Key Findings</h3>
-<p>The dictionary resource is <code>src/main/resources/nn_no/stemmer.gz</code>. The following findings compare only deterministic <code>PRIMARY_OUTPUT</code> rows over identical included groups; candidate policies are reported separately as capability analyses.</p>
+<p>The default model is <code>nn-no-default</code>, loaded from classpath resource <code>org/egothor/stemmer/models/nn-no-default/stemmer.gz</code>. The following findings compare only deterministic <code>PRIMARY_OUTPUT</code> rows over identical included groups; candidate policies are reported separately as capability analyses.</p>
 <ul>
-<li><strong>ALL_WORDS:</strong> <code>Radixor</code> ranks first by balanced accuracy at <strong>0.935777</strong> among 3 deterministic stemmers. The runner-up is <code>SNOWBALL NORWEGIAN NYNORSK DIRECT</code> at 0.858908, a difference of 0.076869. This rank does not imply leadership in throughput or every secondary metric.</li>
-<li><strong>LOWERCASE_GROUPS_ONLY:</strong> <code>Radixor</code> ranks first by balanced accuracy at <strong>0.935853</strong> among 3 deterministic stemmers. The runner-up is <code>SNOWBALL NORWEGIAN NYNORSK DIRECT</code> at 0.859037, a difference of 0.076816. This rank does not imply leadership in throughput or every secondary metric.</li>
+<li><strong>ALL_WORDS:</strong> <code>Radixor</code> ranks first by balanced accuracy at <strong>0.950991</strong> among 3 deterministic stemmers. The runner-up is <code>SNOWBALL NORWEGIAN NYNORSK DIRECT</code> at 0.868094, a difference of 0.082897. This rank does not imply leadership in throughput or every secondary metric.</li>
+<li><strong>LOWERCASE_GROUPS_ONLY:</strong> <code>Radixor</code> ranks first by balanced accuracy at <strong>0.951104</strong> among 3 deterministic stemmers. The runner-up is <code>SNOWBALL NORWEGIAN NYNORSK DIRECT</code> at 0.868252, a difference of 0.082852. This rank does not imply leadership in throughput or every secondary metric.</li>
 </ul>
 <h3 id="all_words"><code>ALL_WORDS</code></h3>
-<p>This mode contains <strong>5 result rows</strong>, <strong>3 evaluated stemmers</strong>, and <strong>3 output policies</strong>. Applied-row and form counts are shown per row because adapters share the language corpus but policy rows remain independently auditable. Rankings are separated by output policy and ordered by unrounded balanced accuracy, followed by MCC, F1, over-stemming rate, over-stemming count, under-stemming rate, and stemmer. Balanced accuracy is a navigation metric, not a universally authoritative quality score.</p>
+<p>This mode contains <strong>5 result rows</strong>, <strong>3 evaluated stemmers</strong>, and <strong>3 output policies</strong>. Applied-row and form counts are shown per row because adapters share the language corpus but policy rows remain independently auditable. <code>PRIMARY_OUTPUT</code> and <code>ALL_CANDIDATES</code> rankings are ordered by unrounded balanced accuracy, followed by MCC, F1, over-stemming rate, over-stemming count, under-stemming rate, and stemmer. <code>ANY_CANDIDATE</code> has no single rank metric and is listed alphabetically. Balanced accuracy is a navigation metric, not a universally authoritative quality score.</p>
 <h4 id="primary_output-ranking"><code>PRIMARY_OUTPUT</code> ranking</h4>
-<div aria-label="Compact stemming-quality ranking; scroll horizontally for additional columns" class="quality-table quality-table--compact" role="region" tabindex="0">
+<div class="quality-summary">
 <table>
 <thead>
 <tr>
 <th style="text-align: right;">Rank</th>
 <th>Stemmer</th>
-<th>Output policy</th>
 <th style="text-align: right;">Balanced accuracy</th>
-<th style="text-align: right;">Over-stemming</th>
-<th style="text-align: right;">Under-stemming</th>
-<th style="text-align: right;">F0.5</th>
-<th style="text-align: right;">F1</th>
-<th style="text-align: right;">MCC</th>
+<th style="text-align: right;">Over-stemming (OI)</th>
+<th style="text-align: right;">Under-stemming (UI)</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.935777</td>
-<td style="text-align: right;">6230 / 166491473 (0.003742%)</td>
-<td style="text-align: right;">3936 / 30652 (12.840924%)</td>
-<td style="text-align: right;">0.822355</td>
-<td style="text-align: right;">0.840152</td>
-<td style="text-align: right;">0.840669</td>
+<td style="text-align: right;">0.950991</td>
+<td style="text-align: right;">0.000000%</td>
+<td style="text-align: right;">9.801848%</td>
 </tr>
 <tr>
 <td style="text-align: right;">2</td>
 <td>SNOWBALL NORWEGIAN NYNORSK DIRECT</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.858908</td>
-<td style="text-align: right;">8274 / 166491473 (0.004970%)</td>
-<td style="text-align: right;">8648 / 30652 (28.213493%)</td>
-<td style="text-align: right;">0.724941</td>
-<td style="text-align: right;">0.722271</td>
-<td style="text-align: right;">0.722234</td>
+<td style="text-align: right;">0.868094</td>
+<td style="text-align: right;">0.000838%</td>
+<td style="text-align: right;">26.380368%</td>
 </tr>
 <tr>
 <td style="text-align: right;">3</td>
 <td>SNOWBALL NORWEGIAN NYNORSK LUCENE FILTER</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.858484</td>
-<td style="text-align: right;">8295 / 166491473 (0.004982%)</td>
-<td style="text-align: right;">8674 / 30652 (28.298317%)</td>
-<td style="text-align: right;">0.724180</td>
-<td style="text-align: right;">0.721477</td>
-<td style="text-align: right;">0.721440</td>
+<td style="text-align: right;">0.867636</td>
+<td style="text-align: right;">0.000852%</td>
+<td style="text-align: right;">26.472040%</td>
 </tr>
 </tbody>
 </table>
@@ -3073,34 +3089,34 @@
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.810903</td>
-<td style="text-align: right;">0.871591</td>
-<td style="text-align: right;">0.999963</td>
-<td style="text-align: right;">0.935777</td>
-<td style="text-align: right;">0.999939</td>
-<td style="text-align: right;">0.000061</td>
+<td style="text-align: right;">1.000000</td>
+<td style="text-align: right;">0.901982</td>
+<td style="text-align: right;">1.000000</td>
+<td style="text-align: right;">0.950991</td>
+<td style="text-align: right;">0.999981</td>
+<td style="text-align: right;">0.000019</td>
 </tr>
 <tr>
 <td style="text-align: right;">2</td>
 <td>SNOWBALL NORWEGIAN NYNORSK DIRECT</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.726732</td>
-<td style="text-align: right;">0.717865</td>
-<td style="text-align: right;">0.999950</td>
-<td style="text-align: right;">0.858908</td>
-<td style="text-align: right;">0.999898</td>
-<td style="text-align: right;">0.000102</td>
+<td style="text-align: right;">0.945609</td>
+<td style="text-align: right;">0.736196</td>
+<td style="text-align: right;">0.999992</td>
+<td style="text-align: right;">0.868094</td>
+<td style="text-align: right;">0.999939</td>
+<td style="text-align: right;">0.000061</td>
 </tr>
 <tr>
 <td style="text-align: right;">3</td>
 <td>SNOWBALL NORWEGIAN NYNORSK LUCENE FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.725993</td>
-<td style="text-align: right;">0.717017</td>
-<td style="text-align: right;">0.999950</td>
-<td style="text-align: right;">0.858484</td>
-<td style="text-align: right;">0.999898</td>
-<td style="text-align: right;">0.000102</td>
+<td style="text-align: right;">0.944646</td>
+<td style="text-align: right;">0.735280</td>
+<td style="text-align: right;">0.999991</td>
+<td style="text-align: right;">0.867636</td>
+<td style="text-align: right;">0.999939</td>
+<td style="text-align: right;">0.000061</td>
 </tr>
 </tbody>
 </table>
@@ -3126,83 +3142,34 @@
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.822355</td>
-<td style="text-align: right;">0.840152</td>
-<td style="text-align: right;">0.858737</td>
-<td style="text-align: right;">0.724364</td>
-<td style="text-align: right;">0.840699</td>
-<td style="text-align: right;">0.840669</td>
+<td style="text-align: right;">0.978728</td>
+<td style="text-align: right;">0.948465</td>
+<td style="text-align: right;">0.920017</td>
+<td style="text-align: right;">0.901982</td>
+<td style="text-align: right;">0.949727</td>
+<td style="text-align: right;">0.949718</td>
 </tr>
 <tr>
 <td style="text-align: right;">2</td>
 <td>SNOWBALL NORWEGIAN NYNORSK DIRECT</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.724941</td>
-<td style="text-align: right;">0.722271</td>
-<td style="text-align: right;">0.719621</td>
-<td style="text-align: right;">0.565278</td>
-<td style="text-align: right;">0.722285</td>
-<td style="text-align: right;">0.722234</td>
+<td style="text-align: right;">0.894709</td>
+<td style="text-align: right;">0.827865</td>
+<td style="text-align: right;">0.770315</td>
+<td style="text-align: right;">0.706288</td>
+<td style="text-align: right;">0.834359</td>
+<td style="text-align: right;">0.834331</td>
 </tr>
 <tr>
 <td style="text-align: right;">3</td>
 <td>SNOWBALL NORWEGIAN NYNORSK LUCENE FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.724180</td>
-<td style="text-align: right;">0.721477</td>
-<td style="text-align: right;">0.718794</td>
-<td style="text-align: right;">0.564305</td>
-<td style="text-align: right;">0.721491</td>
-<td style="text-align: right;">0.721440</td>
-</tr>
-</tbody>
-</table>
-</details>
-<details class="quality-details">
-<summary>Partition metrics (PRIMARY_OUTPUT only)</summary>
-<table>
-<thead>
-<tr>
-<th style="text-align: right;">Rank</th>
-<th>Stemmer</th>
-<th>Output policy</th>
-<th style="text-align: right;">Adjusted Rand Index</th>
-<th style="text-align: right;">Homogeneity</th>
-<th style="text-align: right;">Completeness</th>
-<th style="text-align: right;">V-measure</th>
-<th style="text-align: right;">Normalized mutual information</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: right;">1</td>
-<td>Radixor</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.840122</td>
-<td style="text-align: right;">0.983845</td>
-<td style="text-align: right;">0.986802</td>
-<td style="text-align: right;">0.985321</td>
-<td style="text-align: right;">0.985321</td>
-</tr>
-<tr>
-<td style="text-align: right;">2</td>
-<td>SNOWBALL NORWEGIAN NYNORSK DIRECT</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.722221</td>
-<td style="text-align: right;">0.980542</td>
-<td style="text-align: right;">0.964998</td>
-<td style="text-align: right;">0.972708</td>
-<td style="text-align: right;">0.972708</td>
-</tr>
-<tr>
-<td style="text-align: right;">3</td>
-<td>SNOWBALL NORWEGIAN NYNORSK LUCENE FILTER</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.721426</td>
-<td style="text-align: right;">0.980461</td>
-<td style="text-align: right;">0.964862</td>
-<td style="text-align: right;">0.972599</td>
-<td style="text-align: right;">0.972599</td>
+<td style="text-align: right;">0.893748</td>
+<td style="text-align: right;">0.826916</td>
+<td style="text-align: right;">0.769384</td>
+<td style="text-align: right;">0.704908</td>
+<td style="text-align: right;">0.833414</td>
+<td style="text-align: right;">0.833386</td>
 </tr>
 </tbody>
 </table>
@@ -3228,65 +3195,96 @@
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">26716</td>
-<td style="text-align: right;">6230</td>
-<td style="text-align: right;">3936</td>
-<td style="text-align: right;">166485243</td>
-<td style="text-align: right;">6230 / 166491473</td>
-<td style="text-align: right;">3936 / 30652</td>
+<td style="text-align: right;">25582</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">2780</td>
+<td style="text-align: right;">143394154</td>
+<td style="text-align: right;">0 / 143394154</td>
+<td style="text-align: right;">2780 / 28362</td>
 </tr>
 <tr>
 <td style="text-align: right;">2</td>
 <td>SNOWBALL NORWEGIAN NYNORSK DIRECT</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">22004</td>
-<td style="text-align: right;">8274</td>
-<td style="text-align: right;">8648</td>
-<td style="text-align: right;">166483199</td>
-<td style="text-align: right;">8274 / 166491473</td>
-<td style="text-align: right;">8648 / 30652</td>
+<td style="text-align: right;">20880</td>
+<td style="text-align: right;">1201</td>
+<td style="text-align: right;">7482</td>
+<td style="text-align: right;">143392953</td>
+<td style="text-align: right;">1201 / 143394154</td>
+<td style="text-align: right;">7482 / 28362</td>
 </tr>
 <tr>
 <td style="text-align: right;">3</td>
 <td>SNOWBALL NORWEGIAN NYNORSK LUCENE FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">21978</td>
-<td style="text-align: right;">8295</td>
-<td style="text-align: right;">8674</td>
-<td style="text-align: right;">166483178</td>
-<td style="text-align: right;">8295 / 166491473</td>
-<td style="text-align: right;">8674 / 30652</td>
+<td style="text-align: right;">20854</td>
+<td style="text-align: right;">1222</td>
+<td style="text-align: right;">7508</td>
+<td style="text-align: right;">143392932</td>
+<td style="text-align: right;">1222 / 143394154</td>
+<td style="text-align: right;">7508 / 28362</td>
 </tr>
 </tbody>
 </table>
 </details>
-<h4 id="any_candidate-ranking"><code>ANY_CANDIDATE</code> ranking</h4>
-<div aria-label="Compact stemming-quality ranking; scroll horizontally for additional columns" class="quality-table quality-table--compact" role="region" tabindex="0">
+<h4 id="any_candidate-oracle-bounds"><code>ANY_CANDIDATE</code> oracle bounds</h4>
+<p>These results are measured, not missing. <code>ANY_CANDIDATE</code> answers two separate optimistic questions for each pair: a gold-related pair avoids under-stemming when the candidate sets intersect, while a gold-negative pair avoids over-stemming when some non-colliding candidate selection exists. The oracle may choose a different candidate for the same word in different pairs. Consequently, these decisions do not form one globally realizable predicted relation or one TP/FP/FN/TN confusion matrix. Balanced accuracy, F-scores, Jaccard, Fowlkes–Mallows, and MCC are therefore mathematically <strong>not applicable</strong>, rather than unknown.</p>
+<div class="quality-summary quality-summary--oracle">
+<table>
+<thead>
+<tr>
+<th>Stemmer</th>
+<th style="text-align: right;">Optimistic over-stemming (OI)</th>
+<th style="text-align: right;">Optimistic under-stemming (UI)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Radixor</td>
+<td style="text-align: right;">0.000000%</td>
+<td style="text-align: right;">0.000000%</td>
+</tr>
+</tbody>
+</table>
+</div>
+<details class="quality-details">
+<summary>Oracle-bound pair counts</summary>
+<table>
+<thead>
+<tr>
+<th>Stemmer</th>
+<th style="text-align: right;">Unavoidable over errors / gold-negative pairs</th>
+<th style="text-align: right;">Unrepairable under errors / gold-related pairs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Radixor</td>
+<td style="text-align: right;">0 / 143394154</td>
+<td style="text-align: right;">0 / 28362</td>
+</tr>
+</tbody>
+</table>
+</details>
+<h4 id="all_candidates-ranking"><code>ALL_CANDIDATES</code> ranking</h4>
+<div class="quality-summary">
 <table>
 <thead>
 <tr>
 <th style="text-align: right;">Rank</th>
 <th>Stemmer</th>
-<th>Output policy</th>
 <th style="text-align: right;">Balanced accuracy</th>
-<th style="text-align: right;">Over-stemming</th>
-<th style="text-align: right;">Under-stemming</th>
-<th style="text-align: right;">F0.5</th>
-<th style="text-align: right;">F1</th>
-<th style="text-align: right;">MCC</th>
+<th style="text-align: right;">Over-stemming (OI)</th>
+<th style="text-align: right;">Under-stemming (UI)</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
-<td>ANY_CANDIDATE</td>
 <td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">0 / 166491473 (0.000000%)</td>
-<td style="text-align: right;">0 / 30652 (0.000000%)</td>
-<td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">1.000000</td>
+<td style="text-align: right;">0.000000%</td>
+<td style="text-align: right;">0.000000%</td>
 </tr>
 </tbody>
 </table>
@@ -3311,7 +3309,7 @@
 <tr>
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
-<td>ANY_CANDIDATE</td>
+<td>ALL_CANDIDATES</td>
 <td style="text-align: right;">1.000000</td>
 <td style="text-align: right;">1.000000</td>
 <td style="text-align: right;">1.000000</td>
@@ -3342,195 +3340,13 @@
 <tr>
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">1.000000</td>
-</tr>
-</tbody>
-</table>
-</details>
-<details class="quality-details">
-<summary>Partition metrics (PRIMARY_OUTPUT only)</summary>
-<table>
-<thead>
-<tr>
-<th style="text-align: right;">Rank</th>
-<th>Stemmer</th>
-<th>Output policy</th>
-<th style="text-align: right;">Adjusted Rand Index</th>
-<th style="text-align: right;">Homogeneity</th>
-<th style="text-align: right;">Completeness</th>
-<th style="text-align: right;">V-measure</th>
-<th style="text-align: right;">Normalized mutual information</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: right;">1</td>
-<td>Radixor</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-</tr>
-</tbody>
-</table>
-</details>
-<details class="quality-details">
-<summary>Raw pair counts</summary>
-<table>
-<thead>
-<tr>
-<th style="text-align: right;">Rank</th>
-<th>Stemmer</th>
-<th>Output policy</th>
-<th style="text-align: right;">TP</th>
-<th style="text-align: right;">FP</th>
-<th style="text-align: right;">FN</th>
-<th style="text-align: right;">TN</th>
-<th style="text-align: right;">Over error / possible</th>
-<th style="text-align: right;">Under error / possible</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: right;">1</td>
-<td>Radixor</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">30652</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">166491473</td>
-<td style="text-align: right;">0 / 166491473</td>
-<td style="text-align: right;">0 / 30652</td>
-</tr>
-</tbody>
-</table>
-</details>
-<h4 id="all_candidates-ranking"><code>ALL_CANDIDATES</code> ranking</h4>
-<div aria-label="Compact stemming-quality ranking; scroll horizontally for additional columns" class="quality-table quality-table--compact" role="region" tabindex="0">
-<table>
-<thead>
-<tr>
-<th style="text-align: right;">Rank</th>
-<th>Stemmer</th>
-<th>Output policy</th>
-<th style="text-align: right;">Balanced accuracy</th>
-<th style="text-align: right;">Over-stemming</th>
-<th style="text-align: right;">Under-stemming</th>
-<th style="text-align: right;">F0.5</th>
-<th style="text-align: right;">F1</th>
-<th style="text-align: right;">MCC</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: right;">1</td>
-<td>Radixor</td>
 <td>ALL_CANDIDATES</td>
-<td style="text-align: right;">0.999960</td>
-<td style="text-align: right;">13214 / 166491473 (0.007937%)</td>
-<td style="text-align: right;">0 / 30652 (0.000000%)</td>
-<td style="text-align: right;">0.743562</td>
-<td style="text-align: right;">0.822674</td>
-<td style="text-align: right;">0.835888</td>
-</tr>
-</tbody>
-</table>
-</div>
-<details class="quality-details">
-<summary>Classification metrics</summary>
-<table>
-<thead>
-<tr>
-<th style="text-align: right;">Rank</th>
-<th>Stemmer</th>
-<th>Output policy</th>
-<th style="text-align: right;">Precision</th>
-<th style="text-align: right;">Recall</th>
-<th style="text-align: right;">Specificity</th>
-<th style="text-align: right;">Balanced accuracy</th>
-<th style="text-align: right;">Pairwise accuracy</th>
-<th style="text-align: right;">Error rate</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: right;">1</td>
-<td>Radixor</td>
-<td>ALL_CANDIDATES</td>
-<td style="text-align: right;">0.698764</td>
 <td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">0.999921</td>
-<td style="text-align: right;">0.999960</td>
-<td style="text-align: right;">0.999921</td>
-<td style="text-align: right;">0.000079</td>
-</tr>
-</tbody>
-</table>
-</details>
-<details class="quality-details">
-<summary>Pair-relation metrics</summary>
-<table>
-<thead>
-<tr>
-<th style="text-align: right;">Rank</th>
-<th>Stemmer</th>
-<th>Output policy</th>
-<th style="text-align: right;">F0.5</th>
-<th style="text-align: right;">F1</th>
-<th style="text-align: right;">F2</th>
-<th style="text-align: right;">Jaccard</th>
-<th style="text-align: right;">Fowlkes–Mallows</th>
-<th style="text-align: right;">MCC</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: right;">1</td>
-<td>Radixor</td>
-<td>ALL_CANDIDATES</td>
-<td style="text-align: right;">0.743562</td>
-<td style="text-align: right;">0.822674</td>
-<td style="text-align: right;">0.920624</td>
-<td style="text-align: right;">0.698764</td>
-<td style="text-align: right;">0.835921</td>
-<td style="text-align: right;">0.835888</td>
-</tr>
-</tbody>
-</table>
-</details>
-<details class="quality-details">
-<summary>Partition metrics (PRIMARY_OUTPUT only)</summary>
-<table>
-<thead>
-<tr>
-<th style="text-align: right;">Rank</th>
-<th>Stemmer</th>
-<th>Output policy</th>
-<th style="text-align: right;">Adjusted Rand Index</th>
-<th style="text-align: right;">Homogeneity</th>
-<th style="text-align: right;">Completeness</th>
-<th style="text-align: right;">V-measure</th>
-<th style="text-align: right;">Normalized mutual information</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: right;">1</td>
-<td>Radixor</td>
-<td>ALL_CANDIDATES</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">1.000000</td>
+<td style="text-align: right;">1.000000</td>
+<td style="text-align: right;">1.000000</td>
+<td style="text-align: right;">1.000000</td>
+<td style="text-align: right;">1.000000</td>
 </tr>
 </tbody>
 </table>
@@ -3556,12 +3372,12 @@
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
 <td>ALL_CANDIDATES</td>
-<td style="text-align: right;">30652</td>
-<td style="text-align: right;">13214</td>
+<td style="text-align: right;">28362</td>
 <td style="text-align: right;">0</td>
-<td style="text-align: right;">166478259</td>
-<td style="text-align: right;">13214 / 166491473</td>
-<td style="text-align: right;">0 / 30652</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">143394154</td>
+<td style="text-align: right;">0 / 143394154</td>
+<td style="text-align: right;">0 / 28362</td>
 </tr>
 </tbody>
 </table>
@@ -3584,67 +3400,51 @@
 <tbody>
 <tr>
 <td>Radixor</td>
-<td style="text-align: right;">3936</td>
-<td style="text-align: right;">6230</td>
-<td style="text-align: right;">6984</td>
-<td style="text-align: right;">2404</td>
-<td style="text-align: right;">13.172603%</td>
+<td style="text-align: right;">2780</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1091</td>
+<td style="text-align: right;">6.441519%</td>
 <td style="text-align: right;">5</td>
-<td style="text-align: right;">21513</td>
+<td style="text-align: right;">18255</td>
 </tr>
 </tbody>
 </table>
 <h3 id="lowercase_groups_only"><code>LOWERCASE_GROUPS_ONLY</code></h3>
-<p>This mode contains <strong>5 result rows</strong>, <strong>3 evaluated stemmers</strong>, and <strong>3 output policies</strong>. Applied-row and form counts are shown per row because adapters share the language corpus but policy rows remain independently auditable. Rankings are separated by output policy and ordered by unrounded balanced accuracy, followed by MCC, F1, over-stemming rate, over-stemming count, under-stemming rate, and stemmer. Balanced accuracy is a navigation metric, not a universally authoritative quality score.</p>
+<p>This mode contains <strong>5 result rows</strong>, <strong>3 evaluated stemmers</strong>, and <strong>3 output policies</strong>. Applied-row and form counts are shown per row because adapters share the language corpus but policy rows remain independently auditable. <code>PRIMARY_OUTPUT</code> and <code>ALL_CANDIDATES</code> rankings are ordered by unrounded balanced accuracy, followed by MCC, F1, over-stemming rate, over-stemming count, under-stemming rate, and stemmer. <code>ANY_CANDIDATE</code> has no single rank metric and is listed alphabetically. Balanced accuracy is a navigation metric, not a universally authoritative quality score.</p>
 <h4 id="primary_output-ranking_1"><code>PRIMARY_OUTPUT</code> ranking</h4>
-<div aria-label="Compact stemming-quality ranking; scroll horizontally for additional columns" class="quality-table quality-table--compact" role="region" tabindex="0">
+<div class="quality-summary">
 <table>
 <thead>
 <tr>
 <th style="text-align: right;">Rank</th>
 <th>Stemmer</th>
-<th>Output policy</th>
 <th style="text-align: right;">Balanced accuracy</th>
-<th style="text-align: right;">Over-stemming</th>
-<th style="text-align: right;">Under-stemming</th>
-<th style="text-align: right;">F0.5</th>
-<th style="text-align: right;">F1</th>
-<th style="text-align: right;">MCC</th>
+<th style="text-align: right;">Over-stemming (OI)</th>
+<th style="text-align: right;">Under-stemming (UI)</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.935853</td>
-<td style="text-align: right;">6230 / 165926276 (0.003755%)</td>
-<td style="text-align: right;">3924 / 30595 (12.825625%)</td>
-<td style="text-align: right;">0.822169</td>
-<td style="text-align: right;">0.840084</td>
-<td style="text-align: right;">0.840609</td>
+<td style="text-align: right;">0.951104</td>
+<td style="text-align: right;">0.000000%</td>
+<td style="text-align: right;">9.779191%</td>
 </tr>
 <tr>
 <td style="text-align: right;">2</td>
 <td>SNOWBALL NORWEGIAN NYNORSK DIRECT</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.859037</td>
-<td style="text-align: right;">8274 / 165926276 (0.004987%)</td>
-<td style="text-align: right;">8624 / 30595 (28.187612%)</td>
-<td style="text-align: right;">0.724757</td>
-<td style="text-align: right;">0.722255</td>
-<td style="text-align: right;">0.722216</td>
+<td style="text-align: right;">0.868252</td>
+<td style="text-align: right;">0.000841%</td>
+<td style="text-align: right;">26.348702%</td>
 </tr>
 <tr>
 <td style="text-align: right;">3</td>
 <td>SNOWBALL NORWEGIAN NYNORSK LUCENE FILTER</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.858661</td>
-<td style="text-align: right;">8274 / 165926276 (0.004987%)</td>
-<td style="text-align: right;">8647 / 30595 (28.262788%)</td>
-<td style="text-align: right;">0.724438</td>
-<td style="text-align: right;">0.721772</td>
-<td style="text-align: right;">0.721734</td>
+<td style="text-align: right;">0.867846</td>
+<td style="text-align: right;">0.000841%</td>
+<td style="text-align: right;">26.429959%</td>
 </tr>
 </tbody>
 </table>
@@ -3670,34 +3470,34 @@
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.810644</td>
-<td style="text-align: right;">0.871744</td>
-<td style="text-align: right;">0.999962</td>
-<td style="text-align: right;">0.935853</td>
-<td style="text-align: right;">0.999939</td>
-<td style="text-align: right;">0.000061</td>
+<td style="text-align: right;">1.000000</td>
+<td style="text-align: right;">0.902208</td>
+<td style="text-align: right;">1.000000</td>
+<td style="text-align: right;">0.951104</td>
+<td style="text-align: right;">0.999981</td>
+<td style="text-align: right;">0.000019</td>
 </tr>
 <tr>
 <td style="text-align: right;">2</td>
 <td>SNOWBALL NORWEGIAN NYNORSK DIRECT</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.726434</td>
-<td style="text-align: right;">0.718124</td>
-<td style="text-align: right;">0.999950</td>
-<td style="text-align: right;">0.859037</td>
-<td style="text-align: right;">0.999898</td>
-<td style="text-align: right;">0.000102</td>
+<td style="text-align: right;">0.945528</td>
+<td style="text-align: right;">0.736513</td>
+<td style="text-align: right;">0.999992</td>
+<td style="text-align: right;">0.868252</td>
+<td style="text-align: right;">0.999939</td>
+<td style="text-align: right;">0.000061</td>
 </tr>
 <tr>
 <td style="text-align: right;">3</td>
 <td>SNOWBALL NORWEGIAN NYNORSK LUCENE FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.726226</td>
-<td style="text-align: right;">0.717372</td>
-<td style="text-align: right;">0.999950</td>
-<td style="text-align: right;">0.858661</td>
-<td style="text-align: right;">0.999898</td>
-<td style="text-align: right;">0.000102</td>
+<td style="text-align: right;">0.945471</td>
+<td style="text-align: right;">0.735700</td>
+<td style="text-align: right;">0.999992</td>
+<td style="text-align: right;">0.867846</td>
+<td style="text-align: right;">0.999939</td>
+<td style="text-align: right;">0.000061</td>
 </tr>
 </tbody>
 </table>
@@ -3723,83 +3523,34 @@
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.822169</td>
-<td style="text-align: right;">0.840084</td>
-<td style="text-align: right;">0.858798</td>
-<td style="text-align: right;">0.724263</td>
-<td style="text-align: right;">0.840639</td>
-<td style="text-align: right;">0.840609</td>
+<td style="text-align: right;">0.978782</td>
+<td style="text-align: right;">0.948590</td>
+<td style="text-align: right;">0.920206</td>
+<td style="text-align: right;">0.902208</td>
+<td style="text-align: right;">0.949846</td>
+<td style="text-align: right;">0.949837</td>
 </tr>
 <tr>
 <td style="text-align: right;">2</td>
 <td>SNOWBALL NORWEGIAN NYNORSK DIRECT</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.724757</td>
-<td style="text-align: right;">0.722255</td>
-<td style="text-align: right;">0.719771</td>
-<td style="text-align: right;">0.565258</td>
-<td style="text-align: right;">0.722267</td>
-<td style="text-align: right;">0.722216</td>
+<td style="text-align: right;">0.894744</td>
+<td style="text-align: right;">0.828034</td>
+<td style="text-align: right;">0.770581</td>
+<td style="text-align: right;">0.706534</td>
+<td style="text-align: right;">0.834502</td>
+<td style="text-align: right;">0.834474</td>
 </tr>
 <tr>
 <td style="text-align: right;">3</td>
 <td>SNOWBALL NORWEGIAN NYNORSK LUCENE FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.724438</td>
-<td style="text-align: right;">0.721772</td>
-<td style="text-align: right;">0.719126</td>
-<td style="text-align: right;">0.564666</td>
-<td style="text-align: right;">0.721785</td>
-<td style="text-align: right;">0.721734</td>
-</tr>
-</tbody>
-</table>
-</details>
-<details class="quality-details">
-<summary>Partition metrics (PRIMARY_OUTPUT only)</summary>
-<table>
-<thead>
-<tr>
-<th style="text-align: right;">Rank</th>
-<th>Stemmer</th>
-<th>Output policy</th>
-<th style="text-align: right;">Adjusted Rand Index</th>
-<th style="text-align: right;">Homogeneity</th>
-<th style="text-align: right;">Completeness</th>
-<th style="text-align: right;">V-measure</th>
-<th style="text-align: right;">Normalized mutual information</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: right;">1</td>
-<td>Radixor</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.840054</td>
-<td style="text-align: right;">0.983815</td>
-<td style="text-align: right;">0.986842</td>
-<td style="text-align: right;">0.985326</td>
-<td style="text-align: right;">0.985326</td>
-</tr>
-<tr>
-<td style="text-align: right;">2</td>
-<td>SNOWBALL NORWEGIAN NYNORSK DIRECT</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.722204</td>
-<td style="text-align: right;">0.980506</td>
-<td style="text-align: right;">0.965065</td>
-<td style="text-align: right;">0.972724</td>
-<td style="text-align: right;">0.972724</td>
-</tr>
-<tr>
-<td style="text-align: right;">3</td>
-<td>SNOWBALL NORWEGIAN NYNORSK LUCENE FILTER</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.721721</td>
-<td style="text-align: right;">0.980506</td>
-<td style="text-align: right;">0.964945</td>
-<td style="text-align: right;">0.972663</td>
-<td style="text-align: right;">0.972663</td>
+<td style="text-align: right;">0.894463</td>
+<td style="text-align: right;">0.827499</td>
+<td style="text-align: right;">0.769862</td>
+<td style="text-align: right;">0.705755</td>
+<td style="text-align: right;">0.834016</td>
+<td style="text-align: right;">0.833989</td>
 </tr>
 </tbody>
 </table>
@@ -3825,65 +3576,96 @@
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">26671</td>
-<td style="text-align: right;">6230</td>
-<td style="text-align: right;">3924</td>
-<td style="text-align: right;">165920046</td>
-<td style="text-align: right;">6230 / 165926276</td>
-<td style="text-align: right;">3924 / 30595</td>
+<td style="text-align: right;">25537</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">2768</td>
+<td style="text-align: right;">142869660</td>
+<td style="text-align: right;">0 / 142869660</td>
+<td style="text-align: right;">2768 / 28305</td>
 </tr>
 <tr>
 <td style="text-align: right;">2</td>
 <td>SNOWBALL NORWEGIAN NYNORSK DIRECT</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">21971</td>
-<td style="text-align: right;">8274</td>
-<td style="text-align: right;">8624</td>
-<td style="text-align: right;">165918002</td>
-<td style="text-align: right;">8274 / 165926276</td>
-<td style="text-align: right;">8624 / 30595</td>
+<td style="text-align: right;">20847</td>
+<td style="text-align: right;">1201</td>
+<td style="text-align: right;">7458</td>
+<td style="text-align: right;">142868459</td>
+<td style="text-align: right;">1201 / 142869660</td>
+<td style="text-align: right;">7458 / 28305</td>
 </tr>
 <tr>
 <td style="text-align: right;">3</td>
 <td>SNOWBALL NORWEGIAN NYNORSK LUCENE FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">21948</td>
-<td style="text-align: right;">8274</td>
-<td style="text-align: right;">8647</td>
-<td style="text-align: right;">165918002</td>
-<td style="text-align: right;">8274 / 165926276</td>
-<td style="text-align: right;">8647 / 30595</td>
+<td style="text-align: right;">20824</td>
+<td style="text-align: right;">1201</td>
+<td style="text-align: right;">7481</td>
+<td style="text-align: right;">142868459</td>
+<td style="text-align: right;">1201 / 142869660</td>
+<td style="text-align: right;">7481 / 28305</td>
 </tr>
 </tbody>
 </table>
 </details>
-<h4 id="any_candidate-ranking_1"><code>ANY_CANDIDATE</code> ranking</h4>
-<div aria-label="Compact stemming-quality ranking; scroll horizontally for additional columns" class="quality-table quality-table--compact" role="region" tabindex="0">
+<h4 id="any_candidate-oracle-bounds_1"><code>ANY_CANDIDATE</code> oracle bounds</h4>
+<p>These results are measured, not missing. <code>ANY_CANDIDATE</code> answers two separate optimistic questions for each pair: a gold-related pair avoids under-stemming when the candidate sets intersect, while a gold-negative pair avoids over-stemming when some non-colliding candidate selection exists. The oracle may choose a different candidate for the same word in different pairs. Consequently, these decisions do not form one globally realizable predicted relation or one TP/FP/FN/TN confusion matrix. Balanced accuracy, F-scores, Jaccard, Fowlkes–Mallows, and MCC are therefore mathematically <strong>not applicable</strong>, rather than unknown.</p>
+<div class="quality-summary quality-summary--oracle">
+<table>
+<thead>
+<tr>
+<th>Stemmer</th>
+<th style="text-align: right;">Optimistic over-stemming (OI)</th>
+<th style="text-align: right;">Optimistic under-stemming (UI)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Radixor</td>
+<td style="text-align: right;">0.000000%</td>
+<td style="text-align: right;">0.000000%</td>
+</tr>
+</tbody>
+</table>
+</div>
+<details class="quality-details">
+<summary>Oracle-bound pair counts</summary>
+<table>
+<thead>
+<tr>
+<th>Stemmer</th>
+<th style="text-align: right;">Unavoidable over errors / gold-negative pairs</th>
+<th style="text-align: right;">Unrepairable under errors / gold-related pairs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Radixor</td>
+<td style="text-align: right;">0 / 142869660</td>
+<td style="text-align: right;">0 / 28305</td>
+</tr>
+</tbody>
+</table>
+</details>
+<h4 id="all_candidates-ranking_1"><code>ALL_CANDIDATES</code> ranking</h4>
+<div class="quality-summary">
 <table>
 <thead>
 <tr>
 <th style="text-align: right;">Rank</th>
 <th>Stemmer</th>
-<th>Output policy</th>
 <th style="text-align: right;">Balanced accuracy</th>
-<th style="text-align: right;">Over-stemming</th>
-<th style="text-align: right;">Under-stemming</th>
-<th style="text-align: right;">F0.5</th>
-<th style="text-align: right;">F1</th>
-<th style="text-align: right;">MCC</th>
+<th style="text-align: right;">Over-stemming (OI)</th>
+<th style="text-align: right;">Under-stemming (UI)</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
-<td>ANY_CANDIDATE</td>
 <td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">0 / 165926276 (0.000000%)</td>
-<td style="text-align: right;">0 / 30595 (0.000000%)</td>
-<td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">1.000000</td>
+<td style="text-align: right;">0.000000%</td>
+<td style="text-align: right;">0.000000%</td>
 </tr>
 </tbody>
 </table>
@@ -3908,7 +3690,7 @@
 <tr>
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
-<td>ANY_CANDIDATE</td>
+<td>ALL_CANDIDATES</td>
 <td style="text-align: right;">1.000000</td>
 <td style="text-align: right;">1.000000</td>
 <td style="text-align: right;">1.000000</td>
@@ -3939,195 +3721,13 @@
 <tr>
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">1.000000</td>
-</tr>
-</tbody>
-</table>
-</details>
-<details class="quality-details">
-<summary>Partition metrics (PRIMARY_OUTPUT only)</summary>
-<table>
-<thead>
-<tr>
-<th style="text-align: right;">Rank</th>
-<th>Stemmer</th>
-<th>Output policy</th>
-<th style="text-align: right;">Adjusted Rand Index</th>
-<th style="text-align: right;">Homogeneity</th>
-<th style="text-align: right;">Completeness</th>
-<th style="text-align: right;">V-measure</th>
-<th style="text-align: right;">Normalized mutual information</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: right;">1</td>
-<td>Radixor</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-</tr>
-</tbody>
-</table>
-</details>
-<details class="quality-details">
-<summary>Raw pair counts</summary>
-<table>
-<thead>
-<tr>
-<th style="text-align: right;">Rank</th>
-<th>Stemmer</th>
-<th>Output policy</th>
-<th style="text-align: right;">TP</th>
-<th style="text-align: right;">FP</th>
-<th style="text-align: right;">FN</th>
-<th style="text-align: right;">TN</th>
-<th style="text-align: right;">Over error / possible</th>
-<th style="text-align: right;">Under error / possible</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: right;">1</td>
-<td>Radixor</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">30595</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">165926276</td>
-<td style="text-align: right;">0 / 165926276</td>
-<td style="text-align: right;">0 / 30595</td>
-</tr>
-</tbody>
-</table>
-</details>
-<h4 id="all_candidates-ranking_1"><code>ALL_CANDIDATES</code> ranking</h4>
-<div aria-label="Compact stemming-quality ranking; scroll horizontally for additional columns" class="quality-table quality-table--compact" role="region" tabindex="0">
-<table>
-<thead>
-<tr>
-<th style="text-align: right;">Rank</th>
-<th>Stemmer</th>
-<th>Output policy</th>
-<th style="text-align: right;">Balanced accuracy</th>
-<th style="text-align: right;">Over-stemming</th>
-<th style="text-align: right;">Under-stemming</th>
-<th style="text-align: right;">F0.5</th>
-<th style="text-align: right;">F1</th>
-<th style="text-align: right;">MCC</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: right;">1</td>
-<td>Radixor</td>
 <td>ALL_CANDIDATES</td>
-<td style="text-align: right;">0.999960</td>
-<td style="text-align: right;">13214 / 165926276 (0.007964%)</td>
-<td style="text-align: right;">0 / 30595 (0.000000%)</td>
-<td style="text-align: right;">0.743207</td>
-<td style="text-align: right;">0.822402</td>
-<td style="text-align: right;">0.835654</td>
-</tr>
-</tbody>
-</table>
-</div>
-<details class="quality-details">
-<summary>Classification metrics</summary>
-<table>
-<thead>
-<tr>
-<th style="text-align: right;">Rank</th>
-<th>Stemmer</th>
-<th>Output policy</th>
-<th style="text-align: right;">Precision</th>
-<th style="text-align: right;">Recall</th>
-<th style="text-align: right;">Specificity</th>
-<th style="text-align: right;">Balanced accuracy</th>
-<th style="text-align: right;">Pairwise accuracy</th>
-<th style="text-align: right;">Error rate</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: right;">1</td>
-<td>Radixor</td>
-<td>ALL_CANDIDATES</td>
-<td style="text-align: right;">0.698372</td>
 <td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">0.999920</td>
-<td style="text-align: right;">0.999960</td>
-<td style="text-align: right;">0.999920</td>
-<td style="text-align: right;">0.000080</td>
-</tr>
-</tbody>
-</table>
-</details>
-<details class="quality-details">
-<summary>Pair-relation metrics</summary>
-<table>
-<thead>
-<tr>
-<th style="text-align: right;">Rank</th>
-<th>Stemmer</th>
-<th>Output policy</th>
-<th style="text-align: right;">F0.5</th>
-<th style="text-align: right;">F1</th>
-<th style="text-align: right;">F2</th>
-<th style="text-align: right;">Jaccard</th>
-<th style="text-align: right;">Fowlkes–Mallows</th>
-<th style="text-align: right;">MCC</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: right;">1</td>
-<td>Radixor</td>
-<td>ALL_CANDIDATES</td>
-<td style="text-align: right;">0.743207</td>
-<td style="text-align: right;">0.822402</td>
-<td style="text-align: right;">0.920488</td>
-<td style="text-align: right;">0.698372</td>
-<td style="text-align: right;">0.835687</td>
-<td style="text-align: right;">0.835654</td>
-</tr>
-</tbody>
-</table>
-</details>
-<details class="quality-details">
-<summary>Partition metrics (PRIMARY_OUTPUT only)</summary>
-<table>
-<thead>
-<tr>
-<th style="text-align: right;">Rank</th>
-<th>Stemmer</th>
-<th>Output policy</th>
-<th style="text-align: right;">Adjusted Rand Index</th>
-<th style="text-align: right;">Homogeneity</th>
-<th style="text-align: right;">Completeness</th>
-<th style="text-align: right;">V-measure</th>
-<th style="text-align: right;">Normalized mutual information</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: right;">1</td>
-<td>Radixor</td>
-<td>ALL_CANDIDATES</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">1.000000</td>
+<td style="text-align: right;">1.000000</td>
+<td style="text-align: right;">1.000000</td>
+<td style="text-align: right;">1.000000</td>
+<td style="text-align: right;">1.000000</td>
 </tr>
 </tbody>
 </table>
@@ -4153,12 +3753,12 @@
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
 <td>ALL_CANDIDATES</td>
-<td style="text-align: right;">30595</td>
-<td style="text-align: right;">13214</td>
+<td style="text-align: right;">28305</td>
 <td style="text-align: right;">0</td>
-<td style="text-align: right;">165913062</td>
-<td style="text-align: right;">13214 / 165926276</td>
-<td style="text-align: right;">0 / 30595</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">142869660</td>
+<td style="text-align: right;">0 / 142869660</td>
+<td style="text-align: right;">0 / 28305</td>
 </tr>
 </tbody>
 </table>
@@ -4181,25 +3781,25 @@
 <tbody>
 <tr>
 <td>Radixor</td>
-<td style="text-align: right;">3924</td>
-<td style="text-align: right;">6230</td>
-<td style="text-align: right;">6984</td>
-<td style="text-align: right;">2399</td>
-<td style="text-align: right;">13.167572%</td>
+<td style="text-align: right;">2768</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1086</td>
+<td style="text-align: right;">6.423755%</td>
 <td style="text-align: right;">5</td>
-<td style="text-align: right;">21477</td>
+<td style="text-align: right;">18219</td>
 </tr>
 </tbody>
 </table>
 <h3 id="output-policies-and-metric-definitions">Output Policies and Metric Definitions</h3>
-<p><code>PRIMARY_OUTPUT</code> uses one deterministic stem per form and therefore defines a strict partition. <code>ANY_CANDIDATE</code> is an optimistic oracle-assisted pairwise upper bound: a same-group pair succeeds when candidates intersect, while a different-group pair succeeds when a non-colliding selection exists. Candidate choices may differ between pairs, so this is not deterministic runtime behaviour and need not represent one globally consistent assignment. <code>ALL_CANDIDATES</code> activates every returned candidate; forms are related when candidate sets intersect. Alternatives can reduce under-stemming but can introduce cross-group collisions, and the resulting relation can overlap and need not be a partition.</p>
-<p>For each row, <code>TP = underPossiblePairs - underErrorPairs</code>, <code>FN = underErrorPairs</code>, <code>FP = overErrorPairs</code>, and <code>TN = overPossiblePairs - overErrorPairs</code>. TP and FN concern same-group pairs; FP and TN concern different-group pairs. Consequently, under-stemming and over-stemming use different denominators. Undefined values are rendered as <code>n/a</code>.</p>
+<p>Each distinct surface form is one item and may belong to several gold groups. Two forms are gold-related when their membership sets intersect; a relation shared by several groups is counted once. <code>PRIMARY_OUTPUT</code> uses one deterministic stem per form. <code>ANY_CANDIDATE</code> is an optimistic oracle-assisted pairwise upper bound: a gold-related pair succeeds when candidates intersect, while a gold-negative pair succeeds when a non-colliding selection exists. Candidate choices may differ between pairs, so this is not deterministic runtime behaviour and does not define one confusion matrix. <code>ALL_CANDIDATES</code> activates every returned candidate; forms are related when candidate sets intersect.</p>
+<p>For <code>PRIMARY_OUTPUT</code> and <code>ALL_CANDIDATES</code>, <code>TP = underPossiblePairs - underErrorPairs</code>, <code>FN = underErrorPairs</code>, <code>FP = overErrorPairs</code>, and <code>TN = overPossiblePairs - overErrorPairs</code>. <code>ANY_CANDIDATE</code> publishes only its separate oracle-assisted under/over bounds; confusion-derived metrics are mathematically inapplicable and are not presented in its language-page section. Their machine-readable CSV fields remain empty. Undefined metric denominators in otherwise applicable policies are rendered as <code>n/a</code>.</p>
 <ul>
-<li>Under-stemming rate: <code>FN / (TP + FN)</code>, the false-negative rate over same-group pairs.</li>
-<li>Over-stemming rate: <code>FP / (TN + FP)</code>, the false-positive rate over different-group pairs.</li>
+<li>Under-stemming rate (Paice UI): <code>FN / (TP + FN)</code>, the false-negative rate over gold-related pairs.</li>
+<li>Over-stemming rate (Paice OI): <code>FP / (TN + FP)</code>, the false-positive rate over gold-negative pairs.</li>
 <li>Pairwise precision: <code>TP / (TP + FP)</code>, the fraction of predicted conflations that are gold-standard positive pairs.</li>
 <li>Pairwise recall: <code>TP / (TP + FN)</code>, the fraction of gold-standard positive pairs successfully connected.</li>
-<li>Pairwise specificity: <code>TN / (TN + FP)</code>, the fraction of different-group pairs correctly separated.</li>
+<li>Pairwise specificity: <code>TN / (TN + FP)</code>, the fraction of gold-negative pairs correctly separated.</li>
 <li>Balanced accuracy: <code>(recall + specificity) / 2</code>. It gives equal weight to positive and negative pair classes and is less dominated by the large true-negative class than ordinary accuracy. It does not replace the raw errors or other metrics.</li>
 <li>Pairwise F-beta: <code>((1 + betaSquared) * TP) / (((1 + betaSquared) * TP) + (betaSquared * FN) + FP)</code>. F0.5 emphasizes precision and penalizes over-stemming more; F1 weights precision and recall equally; F2 emphasizes recall and penalizes under-stemming more.</li>
 <li>MCC: <code>(TP * TN - FP * FN) / sqrt((TP + FP) * (TP + FN) * (TN + FP) * (TN + FN))</code>. It uses all confusion counts and remains useful under class imbalance, except when its denominator is degenerate.</li>
@@ -4208,16 +3808,17 @@
 <li>Pairwise accuracy: <code>(TP + TN) / (TP + TN + FP + FN)</code>. It can be dominated by true-negative cross-group pairs.</li>
 <li>Pairwise error rate: <code>(FP + FN) / (TP + TN + FP + FN)</code>.</li>
 </ul>
-<p>Adjusted Rand Index uses the gold/predicted contingency table and chance correction. Homogeneity is <code>1 - H(gold | predicted) / H(gold)</code>; completeness is <code>1 - H(predicted | gold) / H(predicted)</code>; V-measure is their harmonic mean; normalized mutual information uses the arithmetic-mean entropy normalization <code>MI / ((H(gold) + H(predicted)) / 2)</code>. These partition-only metrics apply to <code>PRIMARY_OUTPUT</code>; candidate-relation rows show <code>n/a</code>.</p>
+<p>Standard ARI, homogeneity, completeness, V-measure, and NMI are not calculated: their usual contingency-table definitions require an exclusive gold partition, while this gold standard is an overlapping cover.</p>
 <h3 id="provenance">Provenance</h3>
 <ul>
 <li>Authoritative source: <code>docs/benchmarks/data/stemming-quality.csv</code></li>
-<li>Source SHA-256: <code>5a93a6ab60e46489737cd649eb1ac48182114b9038f7f20195ab9d1c1fc0dd28</code></li>
-<li>Evaluation command: <code>./gradlew stemmingQuality</code></li>
+<li>Source SHA-256: <code>edf16b07be8a535943ddf37caeb8807755c95e9e1fb13244145f28be74b491d8</code></li>
+<li>Evaluation command: <code>./gradlew stemmingQuality --no-daemon</code></li>
 <li>Dictionary language: <code>NN_NO</code></li>
 <li>Processing modes: <code>ALL_WORDS</code>, <code>LOWERCASE_GROUPS_ONLY</code></li>
 <li>Stemmer versions and transitive artifacts: resolved by the repository's JMH Gradle configuration and <code>gradle.lockfile</code></li>
-<li>Radixor version, Git revision, generation date, JDK version, operating system, and dictionary revision: not recorded in the authoritative CSV</li>
+<li>Model ID, version, and SHA-256: recorded in every CSV row</li>
+<li>Run date, core source state, JDK, operating system, and hardware: recorded on the <a href="../../reference/environment/">benchmark environment page</a></li>
 </ul>
 <!-- STEMMING-QUALITY:END -->
 

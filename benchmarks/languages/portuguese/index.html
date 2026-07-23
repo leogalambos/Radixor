@@ -1739,6 +1739,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../hebrew/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hebrew
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../hungarian/" class="md-nav__link">
         
   
@@ -2068,10 +2096,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#any_candidate-ranking" class="md-nav__link">
+  <a href="#any_candidate-oracle-bounds" class="md-nav__link">
     <span class="md-ellipsis">
       
-        ANY_CANDIDATE ranking
+        ANY_CANDIDATE oracle bounds
       
     </span>
   </a>
@@ -2129,10 +2157,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#any_candidate-ranking_1" class="md-nav__link">
+  <a href="#any_candidate-oracle-bounds_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        ANY_CANDIDATE ranking
+        ANY_CANDIDATE oracle bounds
       
     </span>
   </a>
@@ -2684,10 +2712,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#any_candidate-ranking" class="md-nav__link">
+  <a href="#any_candidate-oracle-bounds" class="md-nav__link">
     <span class="md-ellipsis">
       
-        ANY_CANDIDATE ranking
+        ANY_CANDIDATE oracle bounds
       
     </span>
   </a>
@@ -2745,10 +2773,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#any_candidate-ranking_1" class="md-nav__link">
+  <a href="#any_candidate-oracle-bounds_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        ANY_CANDIDATE ranking
+        ANY_CANDIDATE oracle bounds
       
     </span>
   </a>
@@ -2837,7 +2865,9 @@
 <table>
 <thead>
 <tr>
-<th>Resource</th>
+<th>Model ID</th>
+<th>Model version</th>
+<th>Language</th>
 <th style="text-align: right;">Dictionary rows</th>
 <th style="text-align: right;">Complete quality tokens</th>
 <th style="text-align: right;">Already-root tokens</th>
@@ -2846,6 +2876,8 @@
 </thead>
 <tbody>
 <tr>
+<td><code>pt-pt-default</code></td>
+<td><code>1.0.0</code></td>
 <td><code>PT_PT</code></td>
 <td style="text-align: right;">4,001</td>
 <td style="text-align: right;">215,490</td>
@@ -2855,7 +2887,7 @@
 </tbody>
 </table>
 <h2 id="radixor-patch-command-distribution">Radixor Patch Command Distribution</h2>
-<p>Radixor stores the preferred transformation for each normalized dictionary word form as a compiled patch command. This distribution shows which runtime command class is selected by the trained trie for the complete language dictionary. The total number of preferred patch commands analyzed for this language is <strong>215,490</strong>.</p>
+<p>Radixor stores the preferred transformation for each normalized dictionary word form as a compiled patch command. This distribution shows which runtime command class is selected by the trained trie for the complete default-model dictionary. The total number of preferred patch commands analyzed for this language is <strong>215,490</strong>.</p>
 <table>
 <thead>
 <tr>
@@ -2875,8 +2907,8 @@
 <tr>
 <td><code>BackwardCompoundCommand</code></td>
 <td>Applies a multi-step backward patch made from skip, delete, insert, and replace operations.</td>
-<td style="text-align: right;">120,691</td>
-<td style="text-align: right;">56.008%</td>
+<td style="text-align: right;">120,535</td>
+<td style="text-align: right;">55.935%</td>
 </tr>
 <tr>
 <td><code>DeleteSuffixCommand</code></td>
@@ -2893,8 +2925,8 @@
 <tr>
 <td><code>ReplaceLastCharacterCommand</code></td>
 <td>Replaces the final character of the word form.</td>
-<td style="text-align: right;">11,706</td>
-<td style="text-align: right;">5.432%</td>
+<td style="text-align: right;">11,862</td>
+<td style="text-align: right;">5.505%</td>
 </tr>
 </tbody>
 </table>
@@ -2956,7 +2988,7 @@
 </tbody>
 </table>
 <h2 id="speed">Speed</h2>
-<p>Speed uses JMH average time, 3 warmup iterations, 5 measurement iterations, 1 fork, and 1 thread. Relative factor is computed against the single Radixor row on this language page. Values below 1.000 are faster than that Radixor baseline; values above 1.000 are slower.</p>
+<p>Speed uses JMH average time, 5 warmup iterations, 10 measurement iterations, 3 independent forks, and 1 thread. Relative factor is computed against the single Radixor row on this language page. Values below 1.000 are faster than that Radixor baseline; values above 1.000 are slower.</p>
 <table>
 <thead>
 <tr>
@@ -2973,55 +3005,55 @@
 <tr>
 <td>Radixor</td>
 <td><code>portugueseRadixor</code></td>
-<td style="text-align: right;">12.109</td>
-<td style="text-align: right;">0.698</td>
-<td style="text-align: right;">58.4</td>
+<td style="text-align: right;">12.301</td>
+<td style="text-align: right;">0.252</td>
+<td style="text-align: right;">59.3</td>
 <td style="text-align: right;">1.000</td>
 <td>Full Radixor dictionary patch-command stemmer.</td>
 </tr>
 <tr>
 <td>Lucene PortugueseLightStemFilter</td>
 <td><code>portugueseLucenePortugueseLightStemFilter</code></td>
-<td style="text-align: right;">11.172</td>
-<td style="text-align: right;">1.870</td>
-<td style="text-align: right;">53.8</td>
-<td style="text-align: right;">0.923</td>
+<td style="text-align: right;">11.409</td>
+<td style="text-align: right;">0.151</td>
+<td style="text-align: right;">55.0</td>
+<td style="text-align: right;">0.927</td>
 <td>Light Portuguese suffix stemmer.</td>
 </tr>
 <tr>
 <td>Lucene PortugueseMinimalStemFilter</td>
 <td><code>portugueseLucenePortugueseMinimalStemFilter</code></td>
-<td style="text-align: right;">16.038</td>
-<td style="text-align: right;">1.752</td>
-<td style="text-align: right;">77.3</td>
-<td style="text-align: right;">1.325</td>
+<td style="text-align: right;">15.619</td>
+<td style="text-align: right;">0.084</td>
+<td style="text-align: right;">75.3</td>
+<td style="text-align: right;">1.270</td>
 <td>Minimal Portuguese suffix reducer.</td>
 </tr>
 <tr>
 <td>Official Snowball direct</td>
 <td><code>snowballDirect[PORTUGUESE]</code></td>
-<td style="text-align: right;">53.725</td>
-<td style="text-align: right;">5.356</td>
-<td style="text-align: right;">258.9</td>
-<td style="text-align: right;">4.437</td>
+<td style="text-align: right;">57.577</td>
+<td style="text-align: right;">1.591</td>
+<td style="text-align: right;">277.5</td>
+<td style="text-align: right;">4.681</td>
 <td>Official Snowball generated Java stemmer; direct API.</td>
 </tr>
 <tr>
 <td>Lucene SnowballFilter</td>
 <td><code>luceneSnowballFilter[PORTUGUESE]</code></td>
-<td style="text-align: right;">57.457</td>
-<td style="text-align: right;">1.182</td>
-<td style="text-align: right;">276.9</td>
-<td style="text-align: right;">4.745</td>
+<td style="text-align: right;">63.403</td>
+<td style="text-align: right;">2.720</td>
+<td style="text-align: right;">305.6</td>
+<td style="text-align: right;">5.154</td>
 <td>Lucene TokenFilter path around Snowball; includes TokenStream overhead.</td>
 </tr>
 <tr>
 <td>Lucene PortugueseStemFilter</td>
 <td><code>portugueseLucenePortugueseStemFilter</code></td>
-<td style="text-align: right;">165.447</td>
-<td style="text-align: right;">40.334</td>
-<td style="text-align: right;">797.4</td>
-<td style="text-align: right;">13.663</td>
+<td style="text-align: right;">158.014</td>
+<td style="text-align: right;">5.150</td>
+<td style="text-align: right;">761.6</td>
+<td style="text-align: right;">12.845</td>
 <td>Portuguese RSLP-style Lucene TokenFilter.</td>
 </tr>
 </tbody>
@@ -3037,98 +3069,70 @@
 <!-- STEMMING-QUALITY:START -->
 
 <h2 id="stemming-quality">Stemming Quality</h2>
-<p>Runtime performance and linguistic grouping quality are independent dimensions. This section evaluates language <code>PT_PT</code> using the complete validated stemming-quality result matrix. Every usable dictionary row is one gold-standard group of forms expected to share a morphological family or lemma. Exact equality with a predetermined lemma is not required. Same-row pairs are positive pairs; pairs from different rows are negative pairs.</p>
+<p>Runtime performance and linguistic grouping quality are independent dimensions. This section evaluates language <code>PT_PT</code> using the complete validated stemming-quality result matrix. Every distinct surface form is one evaluated item and can belong to several dictionary groups. Two forms are a positive pair when their group-membership sets intersect and a negative pair when those sets are disjoint. A pair shared through several groups is counted once. Exact equality with a predetermined lemma is not required.</p>
 <p><code>ALL_WORDS</code> includes every valid group and its original forms. <code>LOWERCASE_GROUPS_ONLY</code> excludes an entire group when any Unicode code point is uppercase or titlecase; retained words are not lowercased or otherwise rewritten. This isolates case-handling effects without changing retained inputs. <a href="../../data/stemming-quality.csv">Download the complete machine-readable result snapshot</a>.</p>
 <h3 id="evaluation-scope-and-key-findings">Evaluation Scope and Key Findings</h3>
-<p>The dictionary resource is <code>src/main/resources/pt_pt/stemmer.gz</code>. The following findings compare only deterministic <code>PRIMARY_OUTPUT</code> rows over identical included groups; candidate policies are reported separately as capability analyses.</p>
+<p>The default model is <code>pt-pt-default</code>, loaded from classpath resource <code>org/egothor/stemmer/models/pt-pt-default/stemmer.gz</code>. The following findings compare only deterministic <code>PRIMARY_OUTPUT</code> rows over identical included groups; candidate policies are reported separately as capability analyses.</p>
 <ul>
-<li><strong>ALL_WORDS:</strong> <code>Radixor</code> ranks first by balanced accuracy at <strong>0.998502</strong> among 6 deterministic stemmers. The runner-up is <code>SNOWBALL PORTUGUESE DIRECT</code> at 0.938800, a difference of 0.059702. This rank does not imply leadership in throughput or every secondary metric.</li>
-<li><strong>LOWERCASE_GROUPS_ONLY:</strong> <code>Radixor</code> ranks first by balanced accuracy at <strong>0.998502</strong> among 6 deterministic stemmers. The runner-up is <code>SNOWBALL PORTUGUESE DIRECT</code> at 0.938800, a difference of 0.059702. This rank does not imply leadership in throughput or every secondary metric.</li>
+<li><strong>ALL_WORDS:</strong> <code>Radixor</code> ranks first by balanced accuracy at <strong>0.998542</strong> among 6 deterministic stemmers. The runner-up is <code>SNOWBALL PORTUGUESE DIRECT</code> at 0.938922, a difference of 0.059620. This rank does not imply leadership in throughput or every secondary metric.</li>
+<li><strong>LOWERCASE_GROUPS_ONLY:</strong> <code>Radixor</code> ranks first by balanced accuracy at <strong>0.998542</strong> among 6 deterministic stemmers. The runner-up is <code>SNOWBALL PORTUGUESE DIRECT</code> at 0.938922, a difference of 0.059620. This rank does not imply leadership in throughput or every secondary metric.</li>
 </ul>
 <h3 id="all_words"><code>ALL_WORDS</code></h3>
-<p>This mode contains <strong>8 result rows</strong>, <strong>6 evaluated stemmers</strong>, and <strong>3 output policies</strong>. Applied-row and form counts are shown per row because adapters share the language corpus but policy rows remain independently auditable. Rankings are separated by output policy and ordered by unrounded balanced accuracy, followed by MCC, F1, over-stemming rate, over-stemming count, under-stemming rate, and stemmer. Balanced accuracy is a navigation metric, not a universally authoritative quality score.</p>
+<p>This mode contains <strong>8 result rows</strong>, <strong>6 evaluated stemmers</strong>, and <strong>3 output policies</strong>. Applied-row and form counts are shown per row because adapters share the language corpus but policy rows remain independently auditable. <code>PRIMARY_OUTPUT</code> and <code>ALL_CANDIDATES</code> rankings are ordered by unrounded balanced accuracy, followed by MCC, F1, over-stemming rate, over-stemming count, under-stemming rate, and stemmer. <code>ANY_CANDIDATE</code> has no single rank metric and is listed alphabetically. Balanced accuracy is a navigation metric, not a universally authoritative quality score.</p>
 <h4 id="primary_output-ranking"><code>PRIMARY_OUTPUT</code> ranking</h4>
-<div aria-label="Compact stemming-quality ranking; scroll horizontally for additional columns" class="quality-table quality-table--compact" role="region" tabindex="0">
+<div class="quality-summary">
 <table>
 <thead>
 <tr>
 <th style="text-align: right;">Rank</th>
 <th>Stemmer</th>
-<th>Output policy</th>
 <th style="text-align: right;">Balanced accuracy</th>
-<th style="text-align: right;">Over-stemming</th>
-<th style="text-align: right;">Under-stemming</th>
-<th style="text-align: right;">F0.5</th>
-<th style="text-align: right;">F1</th>
-<th style="text-align: right;">MCC</th>
+<th style="text-align: right;">Over-stemming (OI)</th>
+<th style="text-align: right;">Under-stemming (UI)</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.998502</td>
-<td style="text-align: right;">20678 / 22358203756 (0.000092%)</td>
-<td style="text-align: right;">16444 / 5489060 (0.299578%)</td>
-<td style="text-align: right;">0.996389</td>
-<td style="text-align: right;">0.996620</td>
-<td style="text-align: right;">0.996619</td>
+<td style="text-align: right;">0.998542</td>
+<td style="text-align: right;">0.000000%</td>
+<td style="text-align: right;">0.291615%</td>
 </tr>
 <tr>
 <td style="text-align: right;">2</td>
 <td>SNOWBALL PORTUGUESE DIRECT</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.938800</td>
-<td style="text-align: right;">167230 / 22358203756 (0.000748%)</td>
-<td style="text-align: right;">671821 / 5489060 (12.239272%)</td>
-<td style="text-align: right;">0.947271</td>
-<td style="text-align: right;">0.919888</td>
-<td style="text-align: right;">0.920940</td>
+<td style="text-align: right;">0.938922</td>
+<td style="text-align: right;">0.000656%</td>
+<td style="text-align: right;">12.214929%</td>
 </tr>
 <tr>
 <td style="text-align: right;">3</td>
 <td>SNOWBALL PORTUGUESE LUCENE FILTER</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.938800</td>
-<td style="text-align: right;">167230 / 22358203756 (0.000748%)</td>
-<td style="text-align: right;">671821 / 5489060 (12.239272%)</td>
-<td style="text-align: right;">0.947271</td>
-<td style="text-align: right;">0.919888</td>
-<td style="text-align: right;">0.920940</td>
+<td style="text-align: right;">0.938922</td>
+<td style="text-align: right;">0.000656%</td>
+<td style="text-align: right;">12.214929%</td>
 </tr>
 <tr>
 <td style="text-align: right;">4</td>
 <td>PORTUGUESE LUCENE PORTUGUESE STEM FILTER</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.846459</td>
-<td style="text-align: right;">99075 / 22358203756 (0.000443%)</td>
-<td style="text-align: right;">1685572 / 5489060 (30.707844%)</td>
-<td style="text-align: right;">0.901330</td>
-<td style="text-align: right;">0.809975</td>
-<td style="text-align: right;">0.821750</td>
+<td style="text-align: right;">0.846554</td>
+<td style="text-align: right;">0.000364%</td>
+<td style="text-align: right;">30.688771%</td>
 </tr>
 <tr>
 <td style="text-align: right;">5</td>
 <td>PORTUGUESE LUCENE PORTUGUESE LIGHT STEM FILTER</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.513648</td>
-<td style="text-align: right;">2511 / 22358203756 (0.000011%)</td>
-<td style="text-align: right;">5339230 / 5489060 (97.270389%)</td>
-<td style="text-align: right;">0.122843</td>
-<td style="text-align: right;">0.053118</td>
-<td style="text-align: right;">0.163828</td>
+<td style="text-align: right;">0.513632</td>
+<td style="text-align: right;">0.000006%</td>
+<td style="text-align: right;">97.273598%</td>
 </tr>
 <tr>
 <td style="text-align: right;">6</td>
 <td>PORTUGUESE LUCENE PORTUGUESE MINIMAL STEM FILTER</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.503954</td>
-<td style="text-align: right;">598 / 22358203756 (0.000003%)</td>
-<td style="text-align: right;">5445654 / 5489060 (99.209227%)</td>
-<td style="text-align: right;">0.038310</td>
-<td style="text-align: right;">0.015690</td>
-<td style="text-align: right;">0.088308</td>
+<td style="text-align: right;">0.503949</td>
+<td style="text-align: right;">&lt;0.000001%</td>
+<td style="text-align: right;">99.210240%</td>
 </tr>
 </tbody>
 </table>
@@ -3154,65 +3158,65 @@
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.996236</td>
-<td style="text-align: right;">0.997004</td>
+<td style="text-align: right;">1.000000</td>
+<td style="text-align: right;">0.997084</td>
+<td style="text-align: right;">1.000000</td>
+<td style="text-align: right;">0.998542</td>
 <td style="text-align: right;">0.999999</td>
-<td style="text-align: right;">0.998502</td>
-<td style="text-align: right;">0.999998</td>
-<td style="text-align: right;">0.000002</td>
+<td style="text-align: right;">0.000001</td>
 </tr>
 <tr>
 <td style="text-align: right;">2</td>
 <td>SNOWBALL PORTUGUESE DIRECT</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.966450</td>
-<td style="text-align: right;">0.877607</td>
+<td style="text-align: right;">0.970538</td>
+<td style="text-align: right;">0.877851</td>
 <td style="text-align: right;">0.999993</td>
-<td style="text-align: right;">0.938800</td>
-<td style="text-align: right;">0.999962</td>
-<td style="text-align: right;">0.000038</td>
+<td style="text-align: right;">0.938922</td>
+<td style="text-align: right;">0.999963</td>
+<td style="text-align: right;">0.000037</td>
 </tr>
 <tr>
 <td style="text-align: right;">3</td>
 <td>SNOWBALL PORTUGUESE LUCENE FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.966450</td>
-<td style="text-align: right;">0.877607</td>
+<td style="text-align: right;">0.970538</td>
+<td style="text-align: right;">0.877851</td>
 <td style="text-align: right;">0.999993</td>
-<td style="text-align: right;">0.938800</td>
-<td style="text-align: right;">0.999962</td>
-<td style="text-align: right;">0.000038</td>
+<td style="text-align: right;">0.938922</td>
+<td style="text-align: right;">0.999963</td>
+<td style="text-align: right;">0.000037</td>
 </tr>
 <tr>
 <td style="text-align: right;">4</td>
 <td>PORTUGUESE LUCENE PORTUGUESE STEM FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.974613</td>
-<td style="text-align: right;">0.692922</td>
+<td style="text-align: right;">0.979145</td>
+<td style="text-align: right;">0.693112</td>
 <td style="text-align: right;">0.999996</td>
-<td style="text-align: right;">0.846459</td>
-<td style="text-align: right;">0.999920</td>
-<td style="text-align: right;">0.000080</td>
+<td style="text-align: right;">0.846554</td>
+<td style="text-align: right;">0.999921</td>
+<td style="text-align: right;">0.000079</td>
 </tr>
 <tr>
 <td style="text-align: right;">5</td>
 <td>PORTUGUESE LUCENE PORTUGUESE LIGHT STEM FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.983517</td>
-<td style="text-align: right;">0.027296</td>
+<td style="text-align: right;">0.991719</td>
+<td style="text-align: right;">0.027264</td>
 <td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">0.513648</td>
-<td style="text-align: right;">0.999761</td>
-<td style="text-align: right;">0.000239</td>
+<td style="text-align: right;">0.513632</td>
+<td style="text-align: right;">0.999760</td>
+<td style="text-align: right;">0.000240</td>
 </tr>
 <tr>
 <td style="text-align: right;">6</td>
 <td>PORTUGUESE LUCENE PORTUGUESE MINIMAL STEM FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.986410</td>
-<td style="text-align: right;">0.007908</td>
+<td style="text-align: right;">0.999608</td>
+<td style="text-align: right;">0.007898</td>
 <td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">0.503954</td>
+<td style="text-align: right;">0.503949</td>
 <td style="text-align: right;">0.999756</td>
 <td style="text-align: right;">0.000244</td>
 </tr>
@@ -3240,146 +3244,67 @@
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.996389</td>
-<td style="text-align: right;">0.996620</td>
-<td style="text-align: right;">0.996850</td>
-<td style="text-align: right;">0.993262</td>
-<td style="text-align: right;">0.996620</td>
-<td style="text-align: right;">0.996619</td>
+<td style="text-align: right;">0.999415</td>
+<td style="text-align: right;">0.998540</td>
+<td style="text-align: right;">0.997666</td>
+<td style="text-align: right;">0.997084</td>
+<td style="text-align: right;">0.998541</td>
+<td style="text-align: right;">0.998541</td>
 </tr>
 <tr>
 <td style="text-align: right;">2</td>
 <td>SNOWBALL PORTUGUESE DIRECT</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.947271</td>
-<td style="text-align: right;">0.919888</td>
-<td style="text-align: right;">0.894045</td>
-<td style="text-align: right;">0.851661</td>
-<td style="text-align: right;">0.920958</td>
-<td style="text-align: right;">0.920940</td>
+<td style="text-align: right;">0.950467</td>
+<td style="text-align: right;">0.921871</td>
+<td style="text-align: right;">0.894944</td>
+<td style="text-align: right;">0.855065</td>
+<td style="text-align: right;">0.923032</td>
+<td style="text-align: right;">0.923014</td>
 </tr>
 <tr>
 <td style="text-align: right;">3</td>
 <td>SNOWBALL PORTUGUESE LUCENE FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.947271</td>
-<td style="text-align: right;">0.919888</td>
-<td style="text-align: right;">0.894045</td>
-<td style="text-align: right;">0.851661</td>
-<td style="text-align: right;">0.920958</td>
-<td style="text-align: right;">0.920940</td>
+<td style="text-align: right;">0.950467</td>
+<td style="text-align: right;">0.921871</td>
+<td style="text-align: right;">0.894944</td>
+<td style="text-align: right;">0.855065</td>
+<td style="text-align: right;">0.923032</td>
+<td style="text-align: right;">0.923014</td>
 </tr>
 <tr>
 <td style="text-align: right;">4</td>
 <td>PORTUGUESE LUCENE PORTUGUESE STEM FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.901330</td>
-<td style="text-align: right;">0.809975</td>
-<td style="text-align: right;">0.735434</td>
-<td style="text-align: right;">0.680636</td>
-<td style="text-align: right;">0.821785</td>
-<td style="text-align: right;">0.821750</td>
+<td style="text-align: right;">0.904492</td>
+<td style="text-align: right;">0.811666</td>
+<td style="text-align: right;">0.736120</td>
+<td style="text-align: right;">0.683029</td>
+<td style="text-align: right;">0.823807</td>
+<td style="text-align: right;">0.823773</td>
 </tr>
 <tr>
 <td style="text-align: right;">5</td>
 <td>PORTUGUESE LUCENE PORTUGUESE LIGHT STEM FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.122843</td>
-<td style="text-align: right;">0.053118</td>
-<td style="text-align: right;">0.033885</td>
-<td style="text-align: right;">0.027284</td>
-<td style="text-align: right;">0.163848</td>
-<td style="text-align: right;">0.163828</td>
+<td style="text-align: right;">0.122815</td>
+<td style="text-align: right;">0.053069</td>
+<td style="text-align: right;">0.033847</td>
+<td style="text-align: right;">0.027258</td>
+<td style="text-align: right;">0.164433</td>
+<td style="text-align: right;">0.164413</td>
 </tr>
 <tr>
 <td style="text-align: right;">6</td>
 <td>PORTUGUESE LUCENE PORTUGUESE MINIMAL STEM FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.038310</td>
-<td style="text-align: right;">0.015690</td>
-<td style="text-align: right;">0.009865</td>
-<td style="text-align: right;">0.007907</td>
-<td style="text-align: right;">0.088319</td>
-<td style="text-align: right;">0.088308</td>
-</tr>
-</tbody>
-</table>
-</details>
-<details class="quality-details">
-<summary>Partition metrics (PRIMARY_OUTPUT only)</summary>
-<table>
-<thead>
-<tr>
-<th style="text-align: right;">Rank</th>
-<th>Stemmer</th>
-<th>Output policy</th>
-<th style="text-align: right;">Adjusted Rand Index</th>
-<th style="text-align: right;">Homogeneity</th>
-<th style="text-align: right;">Completeness</th>
-<th style="text-align: right;">V-measure</th>
-<th style="text-align: right;">Normalized mutual information</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: right;">1</td>
-<td>Radixor</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.996619</td>
-<td style="text-align: right;">0.999299</td>
-<td style="text-align: right;">0.999347</td>
-<td style="text-align: right;">0.999323</td>
-<td style="text-align: right;">0.999323</td>
-</tr>
-<tr>
-<td style="text-align: right;">2</td>
-<td>SNOWBALL PORTUGUESE DIRECT</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.919870</td>
-<td style="text-align: right;">0.996663</td>
-<td style="text-align: right;">0.967924</td>
-<td style="text-align: right;">0.982083</td>
-<td style="text-align: right;">0.982083</td>
-</tr>
-<tr>
-<td style="text-align: right;">3</td>
-<td>SNOWBALL PORTUGUESE LUCENE FILTER</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.919870</td>
-<td style="text-align: right;">0.996663</td>
-<td style="text-align: right;">0.967924</td>
-<td style="text-align: right;">0.982083</td>
-<td style="text-align: right;">0.982083</td>
-</tr>
-<tr>
-<td style="text-align: right;">4</td>
-<td>PORTUGUESE LUCENE PORTUGUESE STEM FILTER</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.809936</td>
-<td style="text-align: right;">0.996729</td>
-<td style="text-align: right;">0.918475</td>
-<td style="text-align: right;">0.956003</td>
-<td style="text-align: right;">0.956003</td>
-</tr>
-<tr>
-<td style="text-align: right;">5</td>
-<td>PORTUGUESE LUCENE PORTUGUESE LIGHT STEM FILTER</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.053105</td>
-<td style="text-align: right;">0.999226</td>
-<td style="text-align: right;">0.720580</td>
-<td style="text-align: right;">0.837330</td>
-<td style="text-align: right;">0.837330</td>
-</tr>
-<tr>
-<td style="text-align: right;">6</td>
-<td>PORTUGUESE LUCENE PORTUGUESE MINIMAL STEM FILTER</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.015686</td>
-<td style="text-align: right;">0.999664</td>
-<td style="text-align: right;">0.692383</td>
-<td style="text-align: right;">0.818122</td>
-<td style="text-align: right;">0.818122</td>
+<td style="text-align: right;">0.038278</td>
+<td style="text-align: right;">0.015671</td>
+<td style="text-align: right;">0.009853</td>
+<td style="text-align: right;">0.007898</td>
+<td style="text-align: right;">0.088851</td>
+<td style="text-align: right;">0.088840</td>
 </tr>
 </tbody>
 </table>
@@ -3405,98 +3330,129 @@
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">5472616</td>
-<td style="text-align: right;">20678</td>
-<td style="text-align: right;">16444</td>
-<td style="text-align: right;">22358183078</td>
-<td style="text-align: right;">20678 / 22358203756</td>
-<td style="text-align: right;">16444 / 5489060</td>
+<td style="text-align: right;">5470353</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">15999</td>
+<td style="text-align: right;">22274113243</td>
+<td style="text-align: right;">0 / 22274113243</td>
+<td style="text-align: right;">15999 / 5486352</td>
 </tr>
 <tr>
 <td style="text-align: right;">2</td>
 <td>SNOWBALL PORTUGUESE DIRECT</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">4817239</td>
-<td style="text-align: right;">167230</td>
-<td style="text-align: right;">671821</td>
-<td style="text-align: right;">22358036526</td>
-<td style="text-align: right;">167230 / 22358203756</td>
-<td style="text-align: right;">671821 / 5489060</td>
+<td style="text-align: right;">4816198</td>
+<td style="text-align: right;">146201</td>
+<td style="text-align: right;">670154</td>
+<td style="text-align: right;">22273967042</td>
+<td style="text-align: right;">146201 / 22274113243</td>
+<td style="text-align: right;">670154 / 5486352</td>
 </tr>
 <tr>
 <td style="text-align: right;">3</td>
 <td>SNOWBALL PORTUGUESE LUCENE FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">4817239</td>
-<td style="text-align: right;">167230</td>
-<td style="text-align: right;">671821</td>
-<td style="text-align: right;">22358036526</td>
-<td style="text-align: right;">167230 / 22358203756</td>
-<td style="text-align: right;">671821 / 5489060</td>
+<td style="text-align: right;">4816198</td>
+<td style="text-align: right;">146201</td>
+<td style="text-align: right;">670154</td>
+<td style="text-align: right;">22273967042</td>
+<td style="text-align: right;">146201 / 22274113243</td>
+<td style="text-align: right;">670154 / 5486352</td>
 </tr>
 <tr>
 <td style="text-align: right;">4</td>
 <td>PORTUGUESE LUCENE PORTUGUESE STEM FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">3803488</td>
-<td style="text-align: right;">99075</td>
-<td style="text-align: right;">1685572</td>
-<td style="text-align: right;">22358104681</td>
-<td style="text-align: right;">99075 / 22358203756</td>
-<td style="text-align: right;">1685572 / 5489060</td>
+<td style="text-align: right;">3802658</td>
+<td style="text-align: right;">80995</td>
+<td style="text-align: right;">1683694</td>
+<td style="text-align: right;">22274032248</td>
+<td style="text-align: right;">80995 / 22274113243</td>
+<td style="text-align: right;">1683694 / 5486352</td>
 </tr>
 <tr>
 <td style="text-align: right;">5</td>
 <td>PORTUGUESE LUCENE PORTUGUESE LIGHT STEM FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">149830</td>
-<td style="text-align: right;">2511</td>
-<td style="text-align: right;">5339230</td>
-<td style="text-align: right;">22358201245</td>
-<td style="text-align: right;">2511 / 22358203756</td>
-<td style="text-align: right;">5339230 / 5489060</td>
+<td style="text-align: right;">149580</td>
+<td style="text-align: right;">1249</td>
+<td style="text-align: right;">5336772</td>
+<td style="text-align: right;">22274111994</td>
+<td style="text-align: right;">1249 / 22274113243</td>
+<td style="text-align: right;">5336772 / 5486352</td>
 </tr>
 <tr>
 <td style="text-align: right;">6</td>
 <td>PORTUGUESE LUCENE PORTUGUESE MINIMAL STEM FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">43406</td>
-<td style="text-align: right;">598</td>
-<td style="text-align: right;">5445654</td>
-<td style="text-align: right;">22358203158</td>
-<td style="text-align: right;">598 / 22358203756</td>
-<td style="text-align: right;">5445654 / 5489060</td>
+<td style="text-align: right;">43329</td>
+<td style="text-align: right;">17</td>
+<td style="text-align: right;">5443023</td>
+<td style="text-align: right;">22274113226</td>
+<td style="text-align: right;">17 / 22274113243</td>
+<td style="text-align: right;">5443023 / 5486352</td>
 </tr>
 </tbody>
 </table>
 </details>
-<h4 id="any_candidate-ranking"><code>ANY_CANDIDATE</code> ranking</h4>
-<div aria-label="Compact stemming-quality ranking; scroll horizontally for additional columns" class="quality-table quality-table--compact" role="region" tabindex="0">
+<h4 id="any_candidate-oracle-bounds"><code>ANY_CANDIDATE</code> oracle bounds</h4>
+<p>These results are measured, not missing. <code>ANY_CANDIDATE</code> answers two separate optimistic questions for each pair: a gold-related pair avoids under-stemming when the candidate sets intersect, while a gold-negative pair avoids over-stemming when some non-colliding candidate selection exists. The oracle may choose a different candidate for the same word in different pairs. Consequently, these decisions do not form one globally realizable predicted relation or one TP/FP/FN/TN confusion matrix. Balanced accuracy, F-scores, Jaccard, Fowlkes–Mallows, and MCC are therefore mathematically <strong>not applicable</strong>, rather than unknown.</p>
+<div class="quality-summary quality-summary--oracle">
+<table>
+<thead>
+<tr>
+<th>Stemmer</th>
+<th style="text-align: right;">Optimistic over-stemming (OI)</th>
+<th style="text-align: right;">Optimistic under-stemming (UI)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Radixor</td>
+<td style="text-align: right;">0.000000%</td>
+<td style="text-align: right;">0.000000%</td>
+</tr>
+</tbody>
+</table>
+</div>
+<details class="quality-details">
+<summary>Oracle-bound pair counts</summary>
+<table>
+<thead>
+<tr>
+<th>Stemmer</th>
+<th style="text-align: right;">Unavoidable over errors / gold-negative pairs</th>
+<th style="text-align: right;">Unrepairable under errors / gold-related pairs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Radixor</td>
+<td style="text-align: right;">0 / 22274113243</td>
+<td style="text-align: right;">0 / 5486352</td>
+</tr>
+</tbody>
+</table>
+</details>
+<h4 id="all_candidates-ranking"><code>ALL_CANDIDATES</code> ranking</h4>
+<div class="quality-summary">
 <table>
 <thead>
 <tr>
 <th style="text-align: right;">Rank</th>
 <th>Stemmer</th>
-<th>Output policy</th>
 <th style="text-align: right;">Balanced accuracy</th>
-<th style="text-align: right;">Over-stemming</th>
-<th style="text-align: right;">Under-stemming</th>
-<th style="text-align: right;">F0.5</th>
-<th style="text-align: right;">F1</th>
-<th style="text-align: right;">MCC</th>
+<th style="text-align: right;">Over-stemming (OI)</th>
+<th style="text-align: right;">Under-stemming (UI)</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
-<td>ANY_CANDIDATE</td>
 <td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">0 / 22358203756 (0.000000%)</td>
-<td style="text-align: right;">0 / 5489060 (0.000000%)</td>
-<td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">1.000000</td>
+<td style="text-align: right;">0.000000%</td>
+<td style="text-align: right;">0.000000%</td>
 </tr>
 </tbody>
 </table>
@@ -3521,7 +3477,7 @@
 <tr>
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
-<td>ANY_CANDIDATE</td>
+<td>ALL_CANDIDATES</td>
 <td style="text-align: right;">1.000000</td>
 <td style="text-align: right;">1.000000</td>
 <td style="text-align: right;">1.000000</td>
@@ -3552,195 +3508,13 @@
 <tr>
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">1.000000</td>
-</tr>
-</tbody>
-</table>
-</details>
-<details class="quality-details">
-<summary>Partition metrics (PRIMARY_OUTPUT only)</summary>
-<table>
-<thead>
-<tr>
-<th style="text-align: right;">Rank</th>
-<th>Stemmer</th>
-<th>Output policy</th>
-<th style="text-align: right;">Adjusted Rand Index</th>
-<th style="text-align: right;">Homogeneity</th>
-<th style="text-align: right;">Completeness</th>
-<th style="text-align: right;">V-measure</th>
-<th style="text-align: right;">Normalized mutual information</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: right;">1</td>
-<td>Radixor</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-</tr>
-</tbody>
-</table>
-</details>
-<details class="quality-details">
-<summary>Raw pair counts</summary>
-<table>
-<thead>
-<tr>
-<th style="text-align: right;">Rank</th>
-<th>Stemmer</th>
-<th>Output policy</th>
-<th style="text-align: right;">TP</th>
-<th style="text-align: right;">FP</th>
-<th style="text-align: right;">FN</th>
-<th style="text-align: right;">TN</th>
-<th style="text-align: right;">Over error / possible</th>
-<th style="text-align: right;">Under error / possible</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: right;">1</td>
-<td>Radixor</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">5489060</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">22358203756</td>
-<td style="text-align: right;">0 / 22358203756</td>
-<td style="text-align: right;">0 / 5489060</td>
-</tr>
-</tbody>
-</table>
-</details>
-<h4 id="all_candidates-ranking"><code>ALL_CANDIDATES</code> ranking</h4>
-<div aria-label="Compact stemming-quality ranking; scroll horizontally for additional columns" class="quality-table quality-table--compact" role="region" tabindex="0">
-<table>
-<thead>
-<tr>
-<th style="text-align: right;">Rank</th>
-<th>Stemmer</th>
-<th>Output policy</th>
-<th style="text-align: right;">Balanced accuracy</th>
-<th style="text-align: right;">Over-stemming</th>
-<th style="text-align: right;">Under-stemming</th>
-<th style="text-align: right;">F0.5</th>
-<th style="text-align: right;">F1</th>
-<th style="text-align: right;">MCC</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: right;">1</td>
-<td>Radixor</td>
 <td>ALL_CANDIDATES</td>
-<td style="text-align: right;">0.999999</td>
-<td style="text-align: right;">38310 / 22358203756 (0.000171%)</td>
-<td style="text-align: right;">0 / 5489060 (0.000000%)</td>
-<td style="text-align: right;">0.994448</td>
-<td style="text-align: right;">0.996522</td>
-<td style="text-align: right;">0.996528</td>
-</tr>
-</tbody>
-</table>
-</div>
-<details class="quality-details">
-<summary>Classification metrics</summary>
-<table>
-<thead>
-<tr>
-<th style="text-align: right;">Rank</th>
-<th>Stemmer</th>
-<th>Output policy</th>
-<th style="text-align: right;">Precision</th>
-<th style="text-align: right;">Recall</th>
-<th style="text-align: right;">Specificity</th>
-<th style="text-align: right;">Balanced accuracy</th>
-<th style="text-align: right;">Pairwise accuracy</th>
-<th style="text-align: right;">Error rate</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: right;">1</td>
-<td>Radixor</td>
-<td>ALL_CANDIDATES</td>
-<td style="text-align: right;">0.993069</td>
 <td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">0.999998</td>
-<td style="text-align: right;">0.999999</td>
-<td style="text-align: right;">0.999998</td>
-<td style="text-align: right;">0.000002</td>
-</tr>
-</tbody>
-</table>
-</details>
-<details class="quality-details">
-<summary>Pair-relation metrics</summary>
-<table>
-<thead>
-<tr>
-<th style="text-align: right;">Rank</th>
-<th>Stemmer</th>
-<th>Output policy</th>
-<th style="text-align: right;">F0.5</th>
-<th style="text-align: right;">F1</th>
-<th style="text-align: right;">F2</th>
-<th style="text-align: right;">Jaccard</th>
-<th style="text-align: right;">Fowlkes–Mallows</th>
-<th style="text-align: right;">MCC</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: right;">1</td>
-<td>Radixor</td>
-<td>ALL_CANDIDATES</td>
-<td style="text-align: right;">0.994448</td>
-<td style="text-align: right;">0.996522</td>
-<td style="text-align: right;">0.998606</td>
-<td style="text-align: right;">0.993069</td>
-<td style="text-align: right;">0.996528</td>
-<td style="text-align: right;">0.996528</td>
-</tr>
-</tbody>
-</table>
-</details>
-<details class="quality-details">
-<summary>Partition metrics (PRIMARY_OUTPUT only)</summary>
-<table>
-<thead>
-<tr>
-<th style="text-align: right;">Rank</th>
-<th>Stemmer</th>
-<th>Output policy</th>
-<th style="text-align: right;">Adjusted Rand Index</th>
-<th style="text-align: right;">Homogeneity</th>
-<th style="text-align: right;">Completeness</th>
-<th style="text-align: right;">V-measure</th>
-<th style="text-align: right;">Normalized mutual information</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: right;">1</td>
-<td>Radixor</td>
-<td>ALL_CANDIDATES</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">1.000000</td>
+<td style="text-align: right;">1.000000</td>
+<td style="text-align: right;">1.000000</td>
+<td style="text-align: right;">1.000000</td>
+<td style="text-align: right;">1.000000</td>
 </tr>
 </tbody>
 </table>
@@ -3766,12 +3540,12 @@
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
 <td>ALL_CANDIDATES</td>
-<td style="text-align: right;">5489060</td>
-<td style="text-align: right;">38310</td>
+<td style="text-align: right;">5486352</td>
 <td style="text-align: right;">0</td>
-<td style="text-align: right;">22358165446</td>
-<td style="text-align: right;">38310 / 22358203756</td>
-<td style="text-align: right;">0 / 5489060</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">22274113243</td>
+<td style="text-align: right;">0 / 22274113243</td>
+<td style="text-align: right;">0 / 5486352</td>
 </tr>
 </tbody>
 </table>
@@ -3794,100 +3568,72 @@
 <tbody>
 <tr>
 <td>Radixor</td>
-<td style="text-align: right;">16444</td>
-<td style="text-align: right;">20678</td>
-<td style="text-align: right;">17632</td>
-<td style="text-align: right;">790</td>
-<td style="text-align: right;">0.373542%</td>
+<td style="text-align: right;">15999</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">392</td>
+<td style="text-align: right;">0.185702%</td>
 <td style="text-align: right;">3</td>
-<td style="text-align: right;">212297</td>
+<td style="text-align: right;">211489</td>
 </tr>
 </tbody>
 </table>
 <h3 id="lowercase_groups_only"><code>LOWERCASE_GROUPS_ONLY</code></h3>
-<p>This mode contains <strong>8 result rows</strong>, <strong>6 evaluated stemmers</strong>, and <strong>3 output policies</strong>. Applied-row and form counts are shown per row because adapters share the language corpus but policy rows remain independently auditable. Rankings are separated by output policy and ordered by unrounded balanced accuracy, followed by MCC, F1, over-stemming rate, over-stemming count, under-stemming rate, and stemmer. Balanced accuracy is a navigation metric, not a universally authoritative quality score.</p>
+<p>This mode contains <strong>8 result rows</strong>, <strong>6 evaluated stemmers</strong>, and <strong>3 output policies</strong>. Applied-row and form counts are shown per row because adapters share the language corpus but policy rows remain independently auditable. <code>PRIMARY_OUTPUT</code> and <code>ALL_CANDIDATES</code> rankings are ordered by unrounded balanced accuracy, followed by MCC, F1, over-stemming rate, over-stemming count, under-stemming rate, and stemmer. <code>ANY_CANDIDATE</code> has no single rank metric and is listed alphabetically. Balanced accuracy is a navigation metric, not a universally authoritative quality score.</p>
 <h4 id="primary_output-ranking_1"><code>PRIMARY_OUTPUT</code> ranking</h4>
-<div aria-label="Compact stemming-quality ranking; scroll horizontally for additional columns" class="quality-table quality-table--compact" role="region" tabindex="0">
+<div class="quality-summary">
 <table>
 <thead>
 <tr>
 <th style="text-align: right;">Rank</th>
 <th>Stemmer</th>
-<th>Output policy</th>
 <th style="text-align: right;">Balanced accuracy</th>
-<th style="text-align: right;">Over-stemming</th>
-<th style="text-align: right;">Under-stemming</th>
-<th style="text-align: right;">F0.5</th>
-<th style="text-align: right;">F1</th>
-<th style="text-align: right;">MCC</th>
+<th style="text-align: right;">Over-stemming (OI)</th>
+<th style="text-align: right;">Under-stemming (UI)</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.998502</td>
-<td style="text-align: right;">20678 / 22358203756 (0.000092%)</td>
-<td style="text-align: right;">16444 / 5489060 (0.299578%)</td>
-<td style="text-align: right;">0.996389</td>
-<td style="text-align: right;">0.996620</td>
-<td style="text-align: right;">0.996619</td>
+<td style="text-align: right;">0.998542</td>
+<td style="text-align: right;">0.000000%</td>
+<td style="text-align: right;">0.291615%</td>
 </tr>
 <tr>
 <td style="text-align: right;">2</td>
 <td>SNOWBALL PORTUGUESE DIRECT</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.938800</td>
-<td style="text-align: right;">167230 / 22358203756 (0.000748%)</td>
-<td style="text-align: right;">671821 / 5489060 (12.239272%)</td>
-<td style="text-align: right;">0.947271</td>
-<td style="text-align: right;">0.919888</td>
-<td style="text-align: right;">0.920940</td>
+<td style="text-align: right;">0.938922</td>
+<td style="text-align: right;">0.000656%</td>
+<td style="text-align: right;">12.214929%</td>
 </tr>
 <tr>
 <td style="text-align: right;">3</td>
 <td>SNOWBALL PORTUGUESE LUCENE FILTER</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.938800</td>
-<td style="text-align: right;">167230 / 22358203756 (0.000748%)</td>
-<td style="text-align: right;">671821 / 5489060 (12.239272%)</td>
-<td style="text-align: right;">0.947271</td>
-<td style="text-align: right;">0.919888</td>
-<td style="text-align: right;">0.920940</td>
+<td style="text-align: right;">0.938922</td>
+<td style="text-align: right;">0.000656%</td>
+<td style="text-align: right;">12.214929%</td>
 </tr>
 <tr>
 <td style="text-align: right;">4</td>
 <td>PORTUGUESE LUCENE PORTUGUESE STEM FILTER</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.846459</td>
-<td style="text-align: right;">99075 / 22358203756 (0.000443%)</td>
-<td style="text-align: right;">1685572 / 5489060 (30.707844%)</td>
-<td style="text-align: right;">0.901330</td>
-<td style="text-align: right;">0.809975</td>
-<td style="text-align: right;">0.821750</td>
+<td style="text-align: right;">0.846554</td>
+<td style="text-align: right;">0.000364%</td>
+<td style="text-align: right;">30.688771%</td>
 </tr>
 <tr>
 <td style="text-align: right;">5</td>
 <td>PORTUGUESE LUCENE PORTUGUESE LIGHT STEM FILTER</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.513648</td>
-<td style="text-align: right;">2511 / 22358203756 (0.000011%)</td>
-<td style="text-align: right;">5339230 / 5489060 (97.270389%)</td>
-<td style="text-align: right;">0.122843</td>
-<td style="text-align: right;">0.053118</td>
-<td style="text-align: right;">0.163828</td>
+<td style="text-align: right;">0.513632</td>
+<td style="text-align: right;">0.000006%</td>
+<td style="text-align: right;">97.273598%</td>
 </tr>
 <tr>
 <td style="text-align: right;">6</td>
 <td>PORTUGUESE LUCENE PORTUGUESE MINIMAL STEM FILTER</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.503954</td>
-<td style="text-align: right;">598 / 22358203756 (0.000003%)</td>
-<td style="text-align: right;">5445654 / 5489060 (99.209227%)</td>
-<td style="text-align: right;">0.038310</td>
-<td style="text-align: right;">0.015690</td>
-<td style="text-align: right;">0.088308</td>
+<td style="text-align: right;">0.503949</td>
+<td style="text-align: right;">&lt;0.000001%</td>
+<td style="text-align: right;">99.210240%</td>
 </tr>
 </tbody>
 </table>
@@ -3913,65 +3659,65 @@
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.996236</td>
-<td style="text-align: right;">0.997004</td>
+<td style="text-align: right;">1.000000</td>
+<td style="text-align: right;">0.997084</td>
+<td style="text-align: right;">1.000000</td>
+<td style="text-align: right;">0.998542</td>
 <td style="text-align: right;">0.999999</td>
-<td style="text-align: right;">0.998502</td>
-<td style="text-align: right;">0.999998</td>
-<td style="text-align: right;">0.000002</td>
+<td style="text-align: right;">0.000001</td>
 </tr>
 <tr>
 <td style="text-align: right;">2</td>
 <td>SNOWBALL PORTUGUESE DIRECT</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.966450</td>
-<td style="text-align: right;">0.877607</td>
+<td style="text-align: right;">0.970538</td>
+<td style="text-align: right;">0.877851</td>
 <td style="text-align: right;">0.999993</td>
-<td style="text-align: right;">0.938800</td>
-<td style="text-align: right;">0.999962</td>
-<td style="text-align: right;">0.000038</td>
+<td style="text-align: right;">0.938922</td>
+<td style="text-align: right;">0.999963</td>
+<td style="text-align: right;">0.000037</td>
 </tr>
 <tr>
 <td style="text-align: right;">3</td>
 <td>SNOWBALL PORTUGUESE LUCENE FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.966450</td>
-<td style="text-align: right;">0.877607</td>
+<td style="text-align: right;">0.970538</td>
+<td style="text-align: right;">0.877851</td>
 <td style="text-align: right;">0.999993</td>
-<td style="text-align: right;">0.938800</td>
-<td style="text-align: right;">0.999962</td>
-<td style="text-align: right;">0.000038</td>
+<td style="text-align: right;">0.938922</td>
+<td style="text-align: right;">0.999963</td>
+<td style="text-align: right;">0.000037</td>
 </tr>
 <tr>
 <td style="text-align: right;">4</td>
 <td>PORTUGUESE LUCENE PORTUGUESE STEM FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.974613</td>
-<td style="text-align: right;">0.692922</td>
+<td style="text-align: right;">0.979145</td>
+<td style="text-align: right;">0.693112</td>
 <td style="text-align: right;">0.999996</td>
-<td style="text-align: right;">0.846459</td>
-<td style="text-align: right;">0.999920</td>
-<td style="text-align: right;">0.000080</td>
+<td style="text-align: right;">0.846554</td>
+<td style="text-align: right;">0.999921</td>
+<td style="text-align: right;">0.000079</td>
 </tr>
 <tr>
 <td style="text-align: right;">5</td>
 <td>PORTUGUESE LUCENE PORTUGUESE LIGHT STEM FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.983517</td>
-<td style="text-align: right;">0.027296</td>
+<td style="text-align: right;">0.991719</td>
+<td style="text-align: right;">0.027264</td>
 <td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">0.513648</td>
-<td style="text-align: right;">0.999761</td>
-<td style="text-align: right;">0.000239</td>
+<td style="text-align: right;">0.513632</td>
+<td style="text-align: right;">0.999760</td>
+<td style="text-align: right;">0.000240</td>
 </tr>
 <tr>
 <td style="text-align: right;">6</td>
 <td>PORTUGUESE LUCENE PORTUGUESE MINIMAL STEM FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.986410</td>
-<td style="text-align: right;">0.007908</td>
+<td style="text-align: right;">0.999608</td>
+<td style="text-align: right;">0.007898</td>
 <td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">0.503954</td>
+<td style="text-align: right;">0.503949</td>
 <td style="text-align: right;">0.999756</td>
 <td style="text-align: right;">0.000244</td>
 </tr>
@@ -3999,146 +3745,67 @@
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.996389</td>
-<td style="text-align: right;">0.996620</td>
-<td style="text-align: right;">0.996850</td>
-<td style="text-align: right;">0.993262</td>
-<td style="text-align: right;">0.996620</td>
-<td style="text-align: right;">0.996619</td>
+<td style="text-align: right;">0.999415</td>
+<td style="text-align: right;">0.998540</td>
+<td style="text-align: right;">0.997666</td>
+<td style="text-align: right;">0.997084</td>
+<td style="text-align: right;">0.998541</td>
+<td style="text-align: right;">0.998541</td>
 </tr>
 <tr>
 <td style="text-align: right;">2</td>
 <td>SNOWBALL PORTUGUESE DIRECT</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.947271</td>
-<td style="text-align: right;">0.919888</td>
-<td style="text-align: right;">0.894045</td>
-<td style="text-align: right;">0.851661</td>
-<td style="text-align: right;">0.920958</td>
-<td style="text-align: right;">0.920940</td>
+<td style="text-align: right;">0.950467</td>
+<td style="text-align: right;">0.921871</td>
+<td style="text-align: right;">0.894944</td>
+<td style="text-align: right;">0.855065</td>
+<td style="text-align: right;">0.923032</td>
+<td style="text-align: right;">0.923014</td>
 </tr>
 <tr>
 <td style="text-align: right;">3</td>
 <td>SNOWBALL PORTUGUESE LUCENE FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.947271</td>
-<td style="text-align: right;">0.919888</td>
-<td style="text-align: right;">0.894045</td>
-<td style="text-align: right;">0.851661</td>
-<td style="text-align: right;">0.920958</td>
-<td style="text-align: right;">0.920940</td>
+<td style="text-align: right;">0.950467</td>
+<td style="text-align: right;">0.921871</td>
+<td style="text-align: right;">0.894944</td>
+<td style="text-align: right;">0.855065</td>
+<td style="text-align: right;">0.923032</td>
+<td style="text-align: right;">0.923014</td>
 </tr>
 <tr>
 <td style="text-align: right;">4</td>
 <td>PORTUGUESE LUCENE PORTUGUESE STEM FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.901330</td>
-<td style="text-align: right;">0.809975</td>
-<td style="text-align: right;">0.735434</td>
-<td style="text-align: right;">0.680636</td>
-<td style="text-align: right;">0.821785</td>
-<td style="text-align: right;">0.821750</td>
+<td style="text-align: right;">0.904492</td>
+<td style="text-align: right;">0.811666</td>
+<td style="text-align: right;">0.736120</td>
+<td style="text-align: right;">0.683029</td>
+<td style="text-align: right;">0.823807</td>
+<td style="text-align: right;">0.823773</td>
 </tr>
 <tr>
 <td style="text-align: right;">5</td>
 <td>PORTUGUESE LUCENE PORTUGUESE LIGHT STEM FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.122843</td>
-<td style="text-align: right;">0.053118</td>
-<td style="text-align: right;">0.033885</td>
-<td style="text-align: right;">0.027284</td>
-<td style="text-align: right;">0.163848</td>
-<td style="text-align: right;">0.163828</td>
+<td style="text-align: right;">0.122815</td>
+<td style="text-align: right;">0.053069</td>
+<td style="text-align: right;">0.033847</td>
+<td style="text-align: right;">0.027258</td>
+<td style="text-align: right;">0.164433</td>
+<td style="text-align: right;">0.164413</td>
 </tr>
 <tr>
 <td style="text-align: right;">6</td>
 <td>PORTUGUESE LUCENE PORTUGUESE MINIMAL STEM FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.038310</td>
-<td style="text-align: right;">0.015690</td>
-<td style="text-align: right;">0.009865</td>
-<td style="text-align: right;">0.007907</td>
-<td style="text-align: right;">0.088319</td>
-<td style="text-align: right;">0.088308</td>
-</tr>
-</tbody>
-</table>
-</details>
-<details class="quality-details">
-<summary>Partition metrics (PRIMARY_OUTPUT only)</summary>
-<table>
-<thead>
-<tr>
-<th style="text-align: right;">Rank</th>
-<th>Stemmer</th>
-<th>Output policy</th>
-<th style="text-align: right;">Adjusted Rand Index</th>
-<th style="text-align: right;">Homogeneity</th>
-<th style="text-align: right;">Completeness</th>
-<th style="text-align: right;">V-measure</th>
-<th style="text-align: right;">Normalized mutual information</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: right;">1</td>
-<td>Radixor</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.996619</td>
-<td style="text-align: right;">0.999299</td>
-<td style="text-align: right;">0.999347</td>
-<td style="text-align: right;">0.999323</td>
-<td style="text-align: right;">0.999323</td>
-</tr>
-<tr>
-<td style="text-align: right;">2</td>
-<td>SNOWBALL PORTUGUESE DIRECT</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.919870</td>
-<td style="text-align: right;">0.996663</td>
-<td style="text-align: right;">0.967924</td>
-<td style="text-align: right;">0.982083</td>
-<td style="text-align: right;">0.982083</td>
-</tr>
-<tr>
-<td style="text-align: right;">3</td>
-<td>SNOWBALL PORTUGUESE LUCENE FILTER</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.919870</td>
-<td style="text-align: right;">0.996663</td>
-<td style="text-align: right;">0.967924</td>
-<td style="text-align: right;">0.982083</td>
-<td style="text-align: right;">0.982083</td>
-</tr>
-<tr>
-<td style="text-align: right;">4</td>
-<td>PORTUGUESE LUCENE PORTUGUESE STEM FILTER</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.809936</td>
-<td style="text-align: right;">0.996729</td>
-<td style="text-align: right;">0.918475</td>
-<td style="text-align: right;">0.956003</td>
-<td style="text-align: right;">0.956003</td>
-</tr>
-<tr>
-<td style="text-align: right;">5</td>
-<td>PORTUGUESE LUCENE PORTUGUESE LIGHT STEM FILTER</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.053105</td>
-<td style="text-align: right;">0.999226</td>
-<td style="text-align: right;">0.720580</td>
-<td style="text-align: right;">0.837330</td>
-<td style="text-align: right;">0.837330</td>
-</tr>
-<tr>
-<td style="text-align: right;">6</td>
-<td>PORTUGUESE LUCENE PORTUGUESE MINIMAL STEM FILTER</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.015686</td>
-<td style="text-align: right;">0.999664</td>
-<td style="text-align: right;">0.692383</td>
-<td style="text-align: right;">0.818122</td>
-<td style="text-align: right;">0.818122</td>
+<td style="text-align: right;">0.038278</td>
+<td style="text-align: right;">0.015671</td>
+<td style="text-align: right;">0.009853</td>
+<td style="text-align: right;">0.007898</td>
+<td style="text-align: right;">0.088851</td>
+<td style="text-align: right;">0.088840</td>
 </tr>
 </tbody>
 </table>
@@ -4164,98 +3831,129 @@
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">5472616</td>
-<td style="text-align: right;">20678</td>
-<td style="text-align: right;">16444</td>
-<td style="text-align: right;">22358183078</td>
-<td style="text-align: right;">20678 / 22358203756</td>
-<td style="text-align: right;">16444 / 5489060</td>
+<td style="text-align: right;">5470353</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">15999</td>
+<td style="text-align: right;">22274113243</td>
+<td style="text-align: right;">0 / 22274113243</td>
+<td style="text-align: right;">15999 / 5486352</td>
 </tr>
 <tr>
 <td style="text-align: right;">2</td>
 <td>SNOWBALL PORTUGUESE DIRECT</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">4817239</td>
-<td style="text-align: right;">167230</td>
-<td style="text-align: right;">671821</td>
-<td style="text-align: right;">22358036526</td>
-<td style="text-align: right;">167230 / 22358203756</td>
-<td style="text-align: right;">671821 / 5489060</td>
+<td style="text-align: right;">4816198</td>
+<td style="text-align: right;">146201</td>
+<td style="text-align: right;">670154</td>
+<td style="text-align: right;">22273967042</td>
+<td style="text-align: right;">146201 / 22274113243</td>
+<td style="text-align: right;">670154 / 5486352</td>
 </tr>
 <tr>
 <td style="text-align: right;">3</td>
 <td>SNOWBALL PORTUGUESE LUCENE FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">4817239</td>
-<td style="text-align: right;">167230</td>
-<td style="text-align: right;">671821</td>
-<td style="text-align: right;">22358036526</td>
-<td style="text-align: right;">167230 / 22358203756</td>
-<td style="text-align: right;">671821 / 5489060</td>
+<td style="text-align: right;">4816198</td>
+<td style="text-align: right;">146201</td>
+<td style="text-align: right;">670154</td>
+<td style="text-align: right;">22273967042</td>
+<td style="text-align: right;">146201 / 22274113243</td>
+<td style="text-align: right;">670154 / 5486352</td>
 </tr>
 <tr>
 <td style="text-align: right;">4</td>
 <td>PORTUGUESE LUCENE PORTUGUESE STEM FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">3803488</td>
-<td style="text-align: right;">99075</td>
-<td style="text-align: right;">1685572</td>
-<td style="text-align: right;">22358104681</td>
-<td style="text-align: right;">99075 / 22358203756</td>
-<td style="text-align: right;">1685572 / 5489060</td>
+<td style="text-align: right;">3802658</td>
+<td style="text-align: right;">80995</td>
+<td style="text-align: right;">1683694</td>
+<td style="text-align: right;">22274032248</td>
+<td style="text-align: right;">80995 / 22274113243</td>
+<td style="text-align: right;">1683694 / 5486352</td>
 </tr>
 <tr>
 <td style="text-align: right;">5</td>
 <td>PORTUGUESE LUCENE PORTUGUESE LIGHT STEM FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">149830</td>
-<td style="text-align: right;">2511</td>
-<td style="text-align: right;">5339230</td>
-<td style="text-align: right;">22358201245</td>
-<td style="text-align: right;">2511 / 22358203756</td>
-<td style="text-align: right;">5339230 / 5489060</td>
+<td style="text-align: right;">149580</td>
+<td style="text-align: right;">1249</td>
+<td style="text-align: right;">5336772</td>
+<td style="text-align: right;">22274111994</td>
+<td style="text-align: right;">1249 / 22274113243</td>
+<td style="text-align: right;">5336772 / 5486352</td>
 </tr>
 <tr>
 <td style="text-align: right;">6</td>
 <td>PORTUGUESE LUCENE PORTUGUESE MINIMAL STEM FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">43406</td>
-<td style="text-align: right;">598</td>
-<td style="text-align: right;">5445654</td>
-<td style="text-align: right;">22358203158</td>
-<td style="text-align: right;">598 / 22358203756</td>
-<td style="text-align: right;">5445654 / 5489060</td>
+<td style="text-align: right;">43329</td>
+<td style="text-align: right;">17</td>
+<td style="text-align: right;">5443023</td>
+<td style="text-align: right;">22274113226</td>
+<td style="text-align: right;">17 / 22274113243</td>
+<td style="text-align: right;">5443023 / 5486352</td>
 </tr>
 </tbody>
 </table>
 </details>
-<h4 id="any_candidate-ranking_1"><code>ANY_CANDIDATE</code> ranking</h4>
-<div aria-label="Compact stemming-quality ranking; scroll horizontally for additional columns" class="quality-table quality-table--compact" role="region" tabindex="0">
+<h4 id="any_candidate-oracle-bounds_1"><code>ANY_CANDIDATE</code> oracle bounds</h4>
+<p>These results are measured, not missing. <code>ANY_CANDIDATE</code> answers two separate optimistic questions for each pair: a gold-related pair avoids under-stemming when the candidate sets intersect, while a gold-negative pair avoids over-stemming when some non-colliding candidate selection exists. The oracle may choose a different candidate for the same word in different pairs. Consequently, these decisions do not form one globally realizable predicted relation or one TP/FP/FN/TN confusion matrix. Balanced accuracy, F-scores, Jaccard, Fowlkes–Mallows, and MCC are therefore mathematically <strong>not applicable</strong>, rather than unknown.</p>
+<div class="quality-summary quality-summary--oracle">
+<table>
+<thead>
+<tr>
+<th>Stemmer</th>
+<th style="text-align: right;">Optimistic over-stemming (OI)</th>
+<th style="text-align: right;">Optimistic under-stemming (UI)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Radixor</td>
+<td style="text-align: right;">0.000000%</td>
+<td style="text-align: right;">0.000000%</td>
+</tr>
+</tbody>
+</table>
+</div>
+<details class="quality-details">
+<summary>Oracle-bound pair counts</summary>
+<table>
+<thead>
+<tr>
+<th>Stemmer</th>
+<th style="text-align: right;">Unavoidable over errors / gold-negative pairs</th>
+<th style="text-align: right;">Unrepairable under errors / gold-related pairs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Radixor</td>
+<td style="text-align: right;">0 / 22274113243</td>
+<td style="text-align: right;">0 / 5486352</td>
+</tr>
+</tbody>
+</table>
+</details>
+<h4 id="all_candidates-ranking_1"><code>ALL_CANDIDATES</code> ranking</h4>
+<div class="quality-summary">
 <table>
 <thead>
 <tr>
 <th style="text-align: right;">Rank</th>
 <th>Stemmer</th>
-<th>Output policy</th>
 <th style="text-align: right;">Balanced accuracy</th>
-<th style="text-align: right;">Over-stemming</th>
-<th style="text-align: right;">Under-stemming</th>
-<th style="text-align: right;">F0.5</th>
-<th style="text-align: right;">F1</th>
-<th style="text-align: right;">MCC</th>
+<th style="text-align: right;">Over-stemming (OI)</th>
+<th style="text-align: right;">Under-stemming (UI)</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
-<td>ANY_CANDIDATE</td>
 <td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">0 / 22358203756 (0.000000%)</td>
-<td style="text-align: right;">0 / 5489060 (0.000000%)</td>
-<td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">1.000000</td>
+<td style="text-align: right;">0.000000%</td>
+<td style="text-align: right;">0.000000%</td>
 </tr>
 </tbody>
 </table>
@@ -4280,7 +3978,7 @@
 <tr>
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
-<td>ANY_CANDIDATE</td>
+<td>ALL_CANDIDATES</td>
 <td style="text-align: right;">1.000000</td>
 <td style="text-align: right;">1.000000</td>
 <td style="text-align: right;">1.000000</td>
@@ -4311,195 +4009,13 @@
 <tr>
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">1.000000</td>
-</tr>
-</tbody>
-</table>
-</details>
-<details class="quality-details">
-<summary>Partition metrics (PRIMARY_OUTPUT only)</summary>
-<table>
-<thead>
-<tr>
-<th style="text-align: right;">Rank</th>
-<th>Stemmer</th>
-<th>Output policy</th>
-<th style="text-align: right;">Adjusted Rand Index</th>
-<th style="text-align: right;">Homogeneity</th>
-<th style="text-align: right;">Completeness</th>
-<th style="text-align: right;">V-measure</th>
-<th style="text-align: right;">Normalized mutual information</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: right;">1</td>
-<td>Radixor</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-</tr>
-</tbody>
-</table>
-</details>
-<details class="quality-details">
-<summary>Raw pair counts</summary>
-<table>
-<thead>
-<tr>
-<th style="text-align: right;">Rank</th>
-<th>Stemmer</th>
-<th>Output policy</th>
-<th style="text-align: right;">TP</th>
-<th style="text-align: right;">FP</th>
-<th style="text-align: right;">FN</th>
-<th style="text-align: right;">TN</th>
-<th style="text-align: right;">Over error / possible</th>
-<th style="text-align: right;">Under error / possible</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: right;">1</td>
-<td>Radixor</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">5489060</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">22358203756</td>
-<td style="text-align: right;">0 / 22358203756</td>
-<td style="text-align: right;">0 / 5489060</td>
-</tr>
-</tbody>
-</table>
-</details>
-<h4 id="all_candidates-ranking_1"><code>ALL_CANDIDATES</code> ranking</h4>
-<div aria-label="Compact stemming-quality ranking; scroll horizontally for additional columns" class="quality-table quality-table--compact" role="region" tabindex="0">
-<table>
-<thead>
-<tr>
-<th style="text-align: right;">Rank</th>
-<th>Stemmer</th>
-<th>Output policy</th>
-<th style="text-align: right;">Balanced accuracy</th>
-<th style="text-align: right;">Over-stemming</th>
-<th style="text-align: right;">Under-stemming</th>
-<th style="text-align: right;">F0.5</th>
-<th style="text-align: right;">F1</th>
-<th style="text-align: right;">MCC</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: right;">1</td>
-<td>Radixor</td>
 <td>ALL_CANDIDATES</td>
-<td style="text-align: right;">0.999999</td>
-<td style="text-align: right;">38310 / 22358203756 (0.000171%)</td>
-<td style="text-align: right;">0 / 5489060 (0.000000%)</td>
-<td style="text-align: right;">0.994448</td>
-<td style="text-align: right;">0.996522</td>
-<td style="text-align: right;">0.996528</td>
-</tr>
-</tbody>
-</table>
-</div>
-<details class="quality-details">
-<summary>Classification metrics</summary>
-<table>
-<thead>
-<tr>
-<th style="text-align: right;">Rank</th>
-<th>Stemmer</th>
-<th>Output policy</th>
-<th style="text-align: right;">Precision</th>
-<th style="text-align: right;">Recall</th>
-<th style="text-align: right;">Specificity</th>
-<th style="text-align: right;">Balanced accuracy</th>
-<th style="text-align: right;">Pairwise accuracy</th>
-<th style="text-align: right;">Error rate</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: right;">1</td>
-<td>Radixor</td>
-<td>ALL_CANDIDATES</td>
-<td style="text-align: right;">0.993069</td>
 <td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">0.999998</td>
-<td style="text-align: right;">0.999999</td>
-<td style="text-align: right;">0.999998</td>
-<td style="text-align: right;">0.000002</td>
-</tr>
-</tbody>
-</table>
-</details>
-<details class="quality-details">
-<summary>Pair-relation metrics</summary>
-<table>
-<thead>
-<tr>
-<th style="text-align: right;">Rank</th>
-<th>Stemmer</th>
-<th>Output policy</th>
-<th style="text-align: right;">F0.5</th>
-<th style="text-align: right;">F1</th>
-<th style="text-align: right;">F2</th>
-<th style="text-align: right;">Jaccard</th>
-<th style="text-align: right;">Fowlkes–Mallows</th>
-<th style="text-align: right;">MCC</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: right;">1</td>
-<td>Radixor</td>
-<td>ALL_CANDIDATES</td>
-<td style="text-align: right;">0.994448</td>
-<td style="text-align: right;">0.996522</td>
-<td style="text-align: right;">0.998606</td>
-<td style="text-align: right;">0.993069</td>
-<td style="text-align: right;">0.996528</td>
-<td style="text-align: right;">0.996528</td>
-</tr>
-</tbody>
-</table>
-</details>
-<details class="quality-details">
-<summary>Partition metrics (PRIMARY_OUTPUT only)</summary>
-<table>
-<thead>
-<tr>
-<th style="text-align: right;">Rank</th>
-<th>Stemmer</th>
-<th>Output policy</th>
-<th style="text-align: right;">Adjusted Rand Index</th>
-<th style="text-align: right;">Homogeneity</th>
-<th style="text-align: right;">Completeness</th>
-<th style="text-align: right;">V-measure</th>
-<th style="text-align: right;">Normalized mutual information</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: right;">1</td>
-<td>Radixor</td>
-<td>ALL_CANDIDATES</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">1.000000</td>
+<td style="text-align: right;">1.000000</td>
+<td style="text-align: right;">1.000000</td>
+<td style="text-align: right;">1.000000</td>
+<td style="text-align: right;">1.000000</td>
 </tr>
 </tbody>
 </table>
@@ -4525,12 +4041,12 @@
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
 <td>ALL_CANDIDATES</td>
-<td style="text-align: right;">5489060</td>
-<td style="text-align: right;">38310</td>
+<td style="text-align: right;">5486352</td>
 <td style="text-align: right;">0</td>
-<td style="text-align: right;">22358165446</td>
-<td style="text-align: right;">38310 / 22358203756</td>
-<td style="text-align: right;">0 / 5489060</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">22274113243</td>
+<td style="text-align: right;">0 / 22274113243</td>
+<td style="text-align: right;">0 / 5486352</td>
 </tr>
 </tbody>
 </table>
@@ -4553,25 +4069,25 @@
 <tbody>
 <tr>
 <td>Radixor</td>
-<td style="text-align: right;">16444</td>
-<td style="text-align: right;">20678</td>
-<td style="text-align: right;">17632</td>
-<td style="text-align: right;">790</td>
-<td style="text-align: right;">0.373542%</td>
+<td style="text-align: right;">15999</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">392</td>
+<td style="text-align: right;">0.185702%</td>
 <td style="text-align: right;">3</td>
-<td style="text-align: right;">212297</td>
+<td style="text-align: right;">211489</td>
 </tr>
 </tbody>
 </table>
 <h3 id="output-policies-and-metric-definitions">Output Policies and Metric Definitions</h3>
-<p><code>PRIMARY_OUTPUT</code> uses one deterministic stem per form and therefore defines a strict partition. <code>ANY_CANDIDATE</code> is an optimistic oracle-assisted pairwise upper bound: a same-group pair succeeds when candidates intersect, while a different-group pair succeeds when a non-colliding selection exists. Candidate choices may differ between pairs, so this is not deterministic runtime behaviour and need not represent one globally consistent assignment. <code>ALL_CANDIDATES</code> activates every returned candidate; forms are related when candidate sets intersect. Alternatives can reduce under-stemming but can introduce cross-group collisions, and the resulting relation can overlap and need not be a partition.</p>
-<p>For each row, <code>TP = underPossiblePairs - underErrorPairs</code>, <code>FN = underErrorPairs</code>, <code>FP = overErrorPairs</code>, and <code>TN = overPossiblePairs - overErrorPairs</code>. TP and FN concern same-group pairs; FP and TN concern different-group pairs. Consequently, under-stemming and over-stemming use different denominators. Undefined values are rendered as <code>n/a</code>.</p>
+<p>Each distinct surface form is one item and may belong to several gold groups. Two forms are gold-related when their membership sets intersect; a relation shared by several groups is counted once. <code>PRIMARY_OUTPUT</code> uses one deterministic stem per form. <code>ANY_CANDIDATE</code> is an optimistic oracle-assisted pairwise upper bound: a gold-related pair succeeds when candidates intersect, while a gold-negative pair succeeds when a non-colliding selection exists. Candidate choices may differ between pairs, so this is not deterministic runtime behaviour and does not define one confusion matrix. <code>ALL_CANDIDATES</code> activates every returned candidate; forms are related when candidate sets intersect.</p>
+<p>For <code>PRIMARY_OUTPUT</code> and <code>ALL_CANDIDATES</code>, <code>TP = underPossiblePairs - underErrorPairs</code>, <code>FN = underErrorPairs</code>, <code>FP = overErrorPairs</code>, and <code>TN = overPossiblePairs - overErrorPairs</code>. <code>ANY_CANDIDATE</code> publishes only its separate oracle-assisted under/over bounds; confusion-derived metrics are mathematically inapplicable and are not presented in its language-page section. Their machine-readable CSV fields remain empty. Undefined metric denominators in otherwise applicable policies are rendered as <code>n/a</code>.</p>
 <ul>
-<li>Under-stemming rate: <code>FN / (TP + FN)</code>, the false-negative rate over same-group pairs.</li>
-<li>Over-stemming rate: <code>FP / (TN + FP)</code>, the false-positive rate over different-group pairs.</li>
+<li>Under-stemming rate (Paice UI): <code>FN / (TP + FN)</code>, the false-negative rate over gold-related pairs.</li>
+<li>Over-stemming rate (Paice OI): <code>FP / (TN + FP)</code>, the false-positive rate over gold-negative pairs.</li>
 <li>Pairwise precision: <code>TP / (TP + FP)</code>, the fraction of predicted conflations that are gold-standard positive pairs.</li>
 <li>Pairwise recall: <code>TP / (TP + FN)</code>, the fraction of gold-standard positive pairs successfully connected.</li>
-<li>Pairwise specificity: <code>TN / (TN + FP)</code>, the fraction of different-group pairs correctly separated.</li>
+<li>Pairwise specificity: <code>TN / (TN + FP)</code>, the fraction of gold-negative pairs correctly separated.</li>
 <li>Balanced accuracy: <code>(recall + specificity) / 2</code>. It gives equal weight to positive and negative pair classes and is less dominated by the large true-negative class than ordinary accuracy. It does not replace the raw errors or other metrics.</li>
 <li>Pairwise F-beta: <code>((1 + betaSquared) * TP) / (((1 + betaSquared) * TP) + (betaSquared * FN) + FP)</code>. F0.5 emphasizes precision and penalizes over-stemming more; F1 weights precision and recall equally; F2 emphasizes recall and penalizes under-stemming more.</li>
 <li>MCC: <code>(TP * TN - FP * FN) / sqrt((TP + FP) * (TP + FN) * (TN + FP) * (TN + FN))</code>. It uses all confusion counts and remains useful under class imbalance, except when its denominator is degenerate.</li>
@@ -4580,16 +4096,17 @@
 <li>Pairwise accuracy: <code>(TP + TN) / (TP + TN + FP + FN)</code>. It can be dominated by true-negative cross-group pairs.</li>
 <li>Pairwise error rate: <code>(FP + FN) / (TP + TN + FP + FN)</code>.</li>
 </ul>
-<p>Adjusted Rand Index uses the gold/predicted contingency table and chance correction. Homogeneity is <code>1 - H(gold | predicted) / H(gold)</code>; completeness is <code>1 - H(predicted | gold) / H(predicted)</code>; V-measure is their harmonic mean; normalized mutual information uses the arithmetic-mean entropy normalization <code>MI / ((H(gold) + H(predicted)) / 2)</code>. These partition-only metrics apply to <code>PRIMARY_OUTPUT</code>; candidate-relation rows show <code>n/a</code>.</p>
+<p>Standard ARI, homogeneity, completeness, V-measure, and NMI are not calculated: their usual contingency-table definitions require an exclusive gold partition, while this gold standard is an overlapping cover.</p>
 <h3 id="provenance">Provenance</h3>
 <ul>
 <li>Authoritative source: <code>docs/benchmarks/data/stemming-quality.csv</code></li>
-<li>Source SHA-256: <code>5a93a6ab60e46489737cd649eb1ac48182114b9038f7f20195ab9d1c1fc0dd28</code></li>
-<li>Evaluation command: <code>./gradlew stemmingQuality</code></li>
+<li>Source SHA-256: <code>edf16b07be8a535943ddf37caeb8807755c95e9e1fb13244145f28be74b491d8</code></li>
+<li>Evaluation command: <code>./gradlew stemmingQuality --no-daemon</code></li>
 <li>Dictionary language: <code>PT_PT</code></li>
 <li>Processing modes: <code>ALL_WORDS</code>, <code>LOWERCASE_GROUPS_ONLY</code></li>
 <li>Stemmer versions and transitive artifacts: resolved by the repository's JMH Gradle configuration and <code>gradle.lockfile</code></li>
-<li>Radixor version, Git revision, generation date, JDK version, operating system, and dictionary revision: not recorded in the authoritative CSV</li>
+<li>Model ID, version, and SHA-256: recorded in every CSV row</li>
+<li>Run date, core source state, JDK, operating system, and hardware: recorded on the <a href="../../reference/environment/">benchmark environment page</a></li>
 </ul>
 <!-- STEMMING-QUALITY:END -->
 

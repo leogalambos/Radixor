@@ -1739,6 +1739,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../hebrew/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hebrew
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../hungarian/" class="md-nav__link">
         
   
@@ -2180,10 +2208,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#any_candidate-ranking" class="md-nav__link">
+  <a href="#any_candidate-oracle-bounds" class="md-nav__link">
     <span class="md-ellipsis">
       
-        ANY_CANDIDATE ranking
+        ANY_CANDIDATE oracle bounds
       
     </span>
   </a>
@@ -2241,10 +2269,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#any_candidate-ranking_1" class="md-nav__link">
+  <a href="#any_candidate-oracle-bounds_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        ANY_CANDIDATE ranking
+        ANY_CANDIDATE oracle bounds
       
     </span>
   </a>
@@ -2684,10 +2712,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#any_candidate-ranking" class="md-nav__link">
+  <a href="#any_candidate-oracle-bounds" class="md-nav__link">
     <span class="md-ellipsis">
       
-        ANY_CANDIDATE ranking
+        ANY_CANDIDATE oracle bounds
       
     </span>
   </a>
@@ -2745,10 +2773,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#any_candidate-ranking_1" class="md-nav__link">
+  <a href="#any_candidate-oracle-bounds_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        ANY_CANDIDATE ranking
+        ANY_CANDIDATE oracle bounds
       
     </span>
   </a>
@@ -2837,7 +2865,9 @@
 <table>
 <thead>
 <tr>
-<th>Resource</th>
+<th>Model ID</th>
+<th>Model version</th>
+<th>Language</th>
 <th style="text-align: right;">Dictionary rows</th>
 <th style="text-align: right;">Complete quality tokens</th>
 <th style="text-align: right;">Already-root tokens</th>
@@ -2846,6 +2876,8 @@
 </thead>
 <tbody>
 <tr>
+<td><code>uk-ua-default</code></td>
+<td><code>1.0.0</code></td>
 <td><code>UK_UA</code></td>
 <td style="text-align: right;">1,493</td>
 <td style="text-align: right;">15,737</td>
@@ -2855,7 +2887,7 @@
 </tbody>
 </table>
 <h2 id="radixor-patch-command-distribution">Radixor Patch Command Distribution</h2>
-<p>Radixor stores the preferred transformation for each normalized dictionary word form as a compiled patch command. This distribution shows which runtime command class is selected by the trained trie for the complete language dictionary. The total number of preferred patch commands analyzed for this language is <strong>15,737</strong>.</p>
+<p>Radixor stores the preferred transformation for each normalized dictionary word form as a compiled patch command. This distribution shows which runtime command class is selected by the trained trie for the complete default-model dictionary. The total number of preferred patch commands analyzed for this language is <strong>15,737</strong>.</p>
 <table>
 <thead>
 <tr>
@@ -2869,32 +2901,32 @@
 <tr>
 <td><code>AppendCharacterCommand</code></td>
 <td>Appends one character to the end of the word form.</td>
-<td style="text-align: right;">249</td>
-<td style="text-align: right;">1.582%</td>
+<td style="text-align: right;">267</td>
+<td style="text-align: right;">1.697%</td>
 </tr>
 <tr>
 <td><code>BackwardCompoundCommand</code></td>
 <td>Applies a multi-step backward patch made from skip, delete, insert, and replace operations.</td>
-<td style="text-align: right;">4,160</td>
-<td style="text-align: right;">26.435%</td>
+<td style="text-align: right;">4,156</td>
+<td style="text-align: right;">26.409%</td>
 </tr>
 <tr>
 <td><code>DeleteSuffixCommand</code></td>
 <td>Deletes one or more trailing characters from the word form.</td>
-<td style="text-align: right;">5,859</td>
-<td style="text-align: right;">37.231%</td>
+<td style="text-align: right;">5,883</td>
+<td style="text-align: right;">37.383%</td>
 </tr>
 <tr>
 <td><code>PreserveCommand</code></td>
 <td>Returns the word form unchanged because it already matches the preferred root.</td>
-<td style="text-align: right;">3,004</td>
-<td style="text-align: right;">19.089%</td>
+<td style="text-align: right;">2,962</td>
+<td style="text-align: right;">18.822%</td>
 </tr>
 <tr>
 <td><code>ReplaceLastCharacterCommand</code></td>
 <td>Replaces the final character of the word form.</td>
-<td style="text-align: right;">2,465</td>
-<td style="text-align: right;">15.664%</td>
+<td style="text-align: right;">2,469</td>
+<td style="text-align: right;">15.689%</td>
 </tr>
 </tbody>
 </table>
@@ -2942,7 +2974,7 @@
 </tbody>
 </table>
 <h2 id="speed">Speed</h2>
-<p>Speed uses JMH average time, 3 warmup iterations, 5 measurement iterations, 1 fork, and 1 thread. Relative factor is computed against the single Radixor row on this language page. Values below 1.000 are faster than that Radixor baseline; values above 1.000 are slower.</p>
+<p>Speed uses JMH average time, 5 warmup iterations, 10 measurement iterations, 3 independent forks, and 1 thread. Relative factor is computed against the single Radixor row on this language page. Values below 1.000 are faster than that Radixor baseline; values above 1.000 are slower.</p>
 <table>
 <thead>
 <tr>
@@ -2959,37 +2991,37 @@
 <tr>
 <td>Radixor</td>
 <td><code>ukrainianRadixor</code></td>
-<td style="text-align: right;">0.682</td>
-<td style="text-align: right;">0.057</td>
-<td style="text-align: right;">53.5</td>
+<td style="text-align: right;">0.639</td>
+<td style="text-align: right;">0.009</td>
+<td style="text-align: right;">50.1</td>
 <td style="text-align: right;">1.000</td>
 <td>Full Radixor dictionary patch-command stemmer.</td>
 </tr>
 <tr>
 <td>Lucene HunspellStemFilter</td>
 <td><code>luceneHunspellStemFilter</code></td>
-<td style="text-align: right;">43.527</td>
-<td style="text-align: right;">1.207</td>
-<td style="text-align: right;">3413.3</td>
-<td style="text-align: right;">63.799</td>
+<td style="text-align: right;">47.919</td>
+<td style="text-align: right;">5.308</td>
+<td style="text-align: right;">3757.8</td>
+<td style="text-align: right;">74.957</td>
 <td>Benchmark-only Ukrainian Hunspell dictionary compared via Lucene HunspellStemFilter.</td>
 </tr>
 <tr>
 <td>Morfologik direct</td>
 <td><code>ukrainianMorfologikDirect</code></td>
-<td style="text-align: right;">8.680</td>
-<td style="text-align: right;">0.073</td>
-<td style="text-align: right;">680.7</td>
-<td style="text-align: right;">12.723</td>
+<td style="text-align: right;">8.662</td>
+<td style="text-align: right;">0.105</td>
+<td style="text-align: right;">679.3</td>
+<td style="text-align: right;">13.550</td>
 <td>Direct Morfologik dictionary lookup; first returned stem is used for quality.</td>
 </tr>
 <tr>
 <td>Lucene MorfologikFilter</td>
 <td><code>ukrainianLuceneMorfologikFilter</code></td>
-<td style="text-align: right;">14.575</td>
-<td style="text-align: right;">0.248</td>
-<td style="text-align: right;">1143.0</td>
-<td style="text-align: right;">21.364</td>
+<td style="text-align: right;">15.367</td>
+<td style="text-align: right;">0.219</td>
+<td style="text-align: right;">1205.1</td>
+<td style="text-align: right;">24.038</td>
 <td>Dictionary-based Morfologik TokenFilter; may emit multiple terms.</td>
 </tr>
 </tbody>
@@ -3005,76 +3037,56 @@
 <!-- STEMMING-QUALITY:START -->
 
 <h2 id="stemming-quality">Stemming Quality</h2>
-<p>Runtime performance and linguistic grouping quality are independent dimensions. This section evaluates language <code>UK_UA</code> using the complete validated stemming-quality result matrix. Every usable dictionary row is one gold-standard group of forms expected to share a morphological family or lemma. Exact equality with a predetermined lemma is not required. Same-row pairs are positive pairs; pairs from different rows are negative pairs.</p>
+<p>Runtime performance and linguistic grouping quality are independent dimensions. This section evaluates language <code>UK_UA</code> using the complete validated stemming-quality result matrix. Every distinct surface form is one evaluated item and can belong to several dictionary groups. Two forms are a positive pair when their group-membership sets intersect and a negative pair when those sets are disjoint. A pair shared through several groups is counted once. Exact equality with a predetermined lemma is not required.</p>
 <p><code>ALL_WORDS</code> includes every valid group and its original forms. <code>LOWERCASE_GROUPS_ONLY</code> excludes an entire group when any Unicode code point is uppercase or titlecase; retained words are not lowercased or otherwise rewritten. This isolates case-handling effects without changing retained inputs. <a href="../../data/stemming-quality.csv">Download the complete machine-readable result snapshot</a>.</p>
 <h3 id="evaluation-scope-and-key-findings">Evaluation Scope and Key Findings</h3>
-<p>The dictionary resource is <code>src/main/resources/uk_ua/stemmer.gz</code>. The following findings compare only deterministic <code>PRIMARY_OUTPUT</code> rows over identical included groups; candidate policies are reported separately as capability analyses.</p>
+<p>The default model is <code>uk-ua-default</code>, loaded from classpath resource <code>org/egothor/stemmer/models/uk-ua-default/stemmer.gz</code>. The following findings compare only deterministic <code>PRIMARY_OUTPUT</code> rows over identical included groups; candidate policies are reported separately as capability analyses.</p>
 <ul>
-<li><strong>ALL_WORDS:</strong> <code>Radixor</code> ranks first by balanced accuracy at <strong>0.995343</strong> among 4 deterministic stemmers. The runner-up is <code>UKRAINIAN LUCENE MORFOLOGIK FILTER</code> at 0.928768, a difference of 0.066575. This rank does not imply leadership in throughput or every secondary metric.</li>
-<li><strong>LOWERCASE_GROUPS_ONLY:</strong> <code>Radixor</code> ranks first by balanced accuracy at <strong>0.995342</strong> among 4 deterministic stemmers. The runner-up is <code>UKRAINIAN LUCENE MORFOLOGIK FILTER</code> at 0.928751, a difference of 0.066591. This rank does not imply leadership in throughput or every secondary metric.</li>
+<li><strong>ALL_WORDS:</strong> <code>Radixor</code> ranks first by balanced accuracy at <strong>0.995816</strong> among 4 deterministic stemmers. The runner-up is <code>UKRAINIAN LUCENE MORFOLOGIK FILTER</code> at 0.928906, a difference of 0.066910. This rank does not imply leadership in throughput or every secondary metric.</li>
+<li><strong>LOWERCASE_GROUPS_ONLY:</strong> <code>Radixor</code> ranks first by balanced accuracy at <strong>0.995815</strong> among 4 deterministic stemmers. The runner-up is <code>UKRAINIAN LUCENE MORFOLOGIK FILTER</code> at 0.928888, a difference of 0.066926. This rank does not imply leadership in throughput or every secondary metric.</li>
 </ul>
 <h3 id="all_words"><code>ALL_WORDS</code></h3>
-<p>This mode contains <strong>12 result rows</strong>, <strong>4 evaluated stemmers</strong>, and <strong>3 output policies</strong>. Applied-row and form counts are shown per row because adapters share the language corpus but policy rows remain independently auditable. Rankings are separated by output policy and ordered by unrounded balanced accuracy, followed by MCC, F1, over-stemming rate, over-stemming count, under-stemming rate, and stemmer. Balanced accuracy is a navigation metric, not a universally authoritative quality score.</p>
+<p>This mode contains <strong>12 result rows</strong>, <strong>4 evaluated stemmers</strong>, and <strong>3 output policies</strong>. Applied-row and form counts are shown per row because adapters share the language corpus but policy rows remain independently auditable. <code>PRIMARY_OUTPUT</code> and <code>ALL_CANDIDATES</code> rankings are ordered by unrounded balanced accuracy, followed by MCC, F1, over-stemming rate, over-stemming count, under-stemming rate, and stemmer. <code>ANY_CANDIDATE</code> has no single rank metric and is listed alphabetically. Balanced accuracy is a navigation metric, not a universally authoritative quality score.</p>
 <h4 id="primary_output-ranking"><code>PRIMARY_OUTPUT</code> ranking</h4>
-<div aria-label="Compact stemming-quality ranking; scroll horizontally for additional columns" class="quality-table quality-table--compact" role="region" tabindex="0">
+<div class="quality-summary">
 <table>
 <thead>
 <tr>
 <th style="text-align: right;">Rank</th>
 <th>Stemmer</th>
-<th>Output policy</th>
 <th style="text-align: right;">Balanced accuracy</th>
-<th style="text-align: right;">Over-stemming</th>
-<th style="text-align: right;">Under-stemming</th>
-<th style="text-align: right;">F0.5</th>
-<th style="text-align: right;">F1</th>
-<th style="text-align: right;">MCC</th>
+<th style="text-align: right;">Over-stemming (OI)</th>
+<th style="text-align: right;">Under-stemming (UI)</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.995343</td>
-<td style="text-align: right;">880 / 101387550 (0.000868%)</td>
-<td style="text-align: right;">608 / 65340 (0.930517%)</td>
-<td style="text-align: right;">0.987406</td>
-<td style="text-align: right;">0.988637</td>
-<td style="text-align: right;">0.988632</td>
+<td style="text-align: right;">0.995816</td>
+<td style="text-align: right;">0.000000%</td>
+<td style="text-align: right;">0.836852%</td>
 </tr>
 <tr>
 <td style="text-align: right;">2</td>
 <td>UKRAINIAN LUCENE MORFOLOGIK FILTER</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.928768</td>
-<td style="text-align: right;">828 / 101387550 (0.000817%)</td>
-<td style="text-align: right;">9308 / 65340 (14.245485%)</td>
-<td style="text-align: right;">0.956896</td>
-<td style="text-align: right;">0.917054</td>
-<td style="text-align: right;">0.919223</td>
+<td style="text-align: right;">0.928906</td>
+<td style="text-align: right;">0.000028%</td>
+<td style="text-align: right;">14.218810%</td>
 </tr>
 <tr>
 <td style="text-align: right;">3</td>
 <td>UKRAINIAN MORFOLOGIK DIRECT</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.928646</td>
-<td style="text-align: right;">828 / 101387550 (0.000817%)</td>
-<td style="text-align: right;">9324 / 65340 (14.269972%)</td>
-<td style="text-align: right;">0.956832</td>
-<td style="text-align: right;">0.916912</td>
-<td style="text-align: right;">0.919090</td>
+<td style="text-align: right;">0.928783</td>
+<td style="text-align: right;">0.000028%</td>
+<td style="text-align: right;">14.243378%</td>
 </tr>
 <tr>
 <td style="text-align: right;">4</td>
 <td>HUNSPELL UKRAINIAN LUCENE FILTER</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.885793</td>
-<td style="text-align: right;">794 / 101387550 (0.000783%)</td>
-<td style="text-align: right;">14924 / 65340 (22.840526%)</td>
-<td style="text-align: right;">0.933008</td>
-<td style="text-align: right;">0.865139</td>
-<td style="text-align: right;">0.871499</td>
+<td style="text-align: right;">0.885789</td>
+<td style="text-align: right;">0.000006%</td>
+<td style="text-align: right;">22.842226%</td>
 </tr>
 </tbody>
 </table>
@@ -3100,45 +3112,45 @@
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.986588</td>
-<td style="text-align: right;">0.990695</td>
-<td style="text-align: right;">0.999991</td>
-<td style="text-align: right;">0.995343</td>
-<td style="text-align: right;">0.999985</td>
-<td style="text-align: right;">0.000015</td>
+<td style="text-align: right;">1.000000</td>
+<td style="text-align: right;">0.991631</td>
+<td style="text-align: right;">1.000000</td>
+<td style="text-align: right;">0.995816</td>
+<td style="text-align: right;">0.999995</td>
+<td style="text-align: right;">0.000005</td>
 </tr>
 <tr>
 <td style="text-align: right;">2</td>
 <td>UKRAINIAN LUCENE MORFOLOGIK FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.985438</td>
-<td style="text-align: right;">0.857545</td>
-<td style="text-align: right;">0.999992</td>
-<td style="text-align: right;">0.928768</td>
-<td style="text-align: right;">0.999900</td>
-<td style="text-align: right;">0.000100</td>
+<td style="text-align: right;">0.999499</td>
+<td style="text-align: right;">0.857812</td>
+<td style="text-align: right;">1.000000</td>
+<td style="text-align: right;">0.928906</td>
+<td style="text-align: right;">0.999907</td>
+<td style="text-align: right;">0.000093</td>
 </tr>
 <tr>
 <td style="text-align: right;">3</td>
 <td>UKRAINIAN MORFOLOGIK DIRECT</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.985434</td>
-<td style="text-align: right;">0.857300</td>
-<td style="text-align: right;">0.999992</td>
-<td style="text-align: right;">0.928646</td>
-<td style="text-align: right;">0.999900</td>
-<td style="text-align: right;">0.000100</td>
+<td style="text-align: right;">0.999499</td>
+<td style="text-align: right;">0.857566</td>
+<td style="text-align: right;">1.000000</td>
+<td style="text-align: right;">0.928783</td>
+<td style="text-align: right;">0.999907</td>
+<td style="text-align: right;">0.000093</td>
 </tr>
 <tr>
 <td style="text-align: right;">4</td>
 <td>HUNSPELL UKRAINIAN LUCENE FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.984495</td>
-<td style="text-align: right;">0.771595</td>
-<td style="text-align: right;">0.999992</td>
-<td style="text-align: right;">0.885793</td>
-<td style="text-align: right;">0.999845</td>
-<td style="text-align: right;">0.000155</td>
+<td style="text-align: right;">0.999881</td>
+<td style="text-align: right;">0.771578</td>
+<td style="text-align: right;">1.000000</td>
+<td style="text-align: right;">0.885789</td>
+<td style="text-align: right;">0.999851</td>
+<td style="text-align: right;">0.000149</td>
 </tr>
 </tbody>
 </table>
@@ -3164,104 +3176,45 @@
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.987406</td>
-<td style="text-align: right;">0.988637</td>
-<td style="text-align: right;">0.989871</td>
-<td style="text-align: right;">0.977529</td>
-<td style="text-align: right;">0.988639</td>
-<td style="text-align: right;">0.988632</td>
+<td style="text-align: right;">0.998315</td>
+<td style="text-align: right;">0.995798</td>
+<td style="text-align: right;">0.993294</td>
+<td style="text-align: right;">0.991631</td>
+<td style="text-align: right;">0.995807</td>
+<td style="text-align: right;">0.995804</td>
 </tr>
 <tr>
 <td style="text-align: right;">2</td>
 <td>UKRAINIAN LUCENE MORFOLOGIK FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.956896</td>
-<td style="text-align: right;">0.917054</td>
-<td style="text-align: right;">0.880397</td>
-<td style="text-align: right;">0.846814</td>
-<td style="text-align: right;">0.919270</td>
-<td style="text-align: right;">0.919223</td>
+<td style="text-align: right;">0.967537</td>
+<td style="text-align: right;">0.923251</td>
+<td style="text-align: right;">0.882842</td>
+<td style="text-align: right;">0.857443</td>
+<td style="text-align: right;">0.925949</td>
+<td style="text-align: right;">0.925906</td>
 </tr>
 <tr>
 <td style="text-align: right;">3</td>
 <td>UKRAINIAN MORFOLOGIK DIRECT</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.956832</td>
-<td style="text-align: right;">0.916912</td>
-<td style="text-align: right;">0.880190</td>
-<td style="text-align: right;">0.846572</td>
-<td style="text-align: right;">0.919137</td>
-<td style="text-align: right;">0.919090</td>
+<td style="text-align: right;">0.967474</td>
+<td style="text-align: right;">0.923109</td>
+<td style="text-align: right;">0.882634</td>
+<td style="text-align: right;">0.857198</td>
+<td style="text-align: right;">0.925817</td>
+<td style="text-align: right;">0.925774</td>
 </tr>
 <tr>
 <td style="text-align: right;">4</td>
 <td>HUNSPELL UKRAINIAN LUCENE FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.933008</td>
-<td style="text-align: right;">0.865139</td>
-<td style="text-align: right;">0.806475</td>
-<td style="text-align: right;">0.762331</td>
-<td style="text-align: right;">0.871568</td>
-<td style="text-align: right;">0.871499</td>
-</tr>
-</tbody>
-</table>
-</details>
-<details class="quality-details">
-<summary>Partition metrics (PRIMARY_OUTPUT only)</summary>
-<table>
-<thead>
-<tr>
-<th style="text-align: right;">Rank</th>
-<th>Stemmer</th>
-<th>Output policy</th>
-<th style="text-align: right;">Adjusted Rand Index</th>
-<th style="text-align: right;">Homogeneity</th>
-<th style="text-align: right;">Completeness</th>
-<th style="text-align: right;">V-measure</th>
-<th style="text-align: right;">Normalized mutual information</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: right;">1</td>
-<td>Radixor</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.988630</td>
-<td style="text-align: right;">0.997994</td>
-<td style="text-align: right;">0.998266</td>
-<td style="text-align: right;">0.998130</td>
-<td style="text-align: right;">0.998130</td>
-</tr>
-<tr>
-<td style="text-align: right;">2</td>
-<td>UKRAINIAN LUCENE MORFOLOGIK FILTER</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.917004</td>
-<td style="text-align: right;">0.997990</td>
-<td style="text-align: right;">0.971000</td>
-<td style="text-align: right;">0.984310</td>
-<td style="text-align: right;">0.984310</td>
-</tr>
-<tr>
-<td style="text-align: right;">3</td>
-<td>UKRAINIAN MORFOLOGIK DIRECT</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.916862</td>
-<td style="text-align: right;">0.997990</td>
-<td style="text-align: right;">0.970876</td>
-<td style="text-align: right;">0.984246</td>
-<td style="text-align: right;">0.984246</td>
-</tr>
-<tr>
-<td style="text-align: right;">4</td>
-<td>HUNSPELL UKRAINIAN LUCENE FILTER</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.865063</td>
-<td style="text-align: right;">0.998114</td>
-<td style="text-align: right;">0.949804</td>
-<td style="text-align: right;">0.973360</td>
-<td style="text-align: right;">0.973360</td>
+<td style="text-align: right;">0.944015</td>
+<td style="text-align: right;">0.871018</td>
+<td style="text-align: right;">0.808499</td>
+<td style="text-align: right;">0.771507</td>
+<td style="text-align: right;">0.878343</td>
+<td style="text-align: right;">0.878277</td>
 </tr>
 </tbody>
 </table>
@@ -3287,109 +3240,158 @@
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">64732</td>
-<td style="text-align: right;">880</td>
-<td style="text-align: right;">608</td>
-<td style="text-align: right;">101386670</td>
-<td style="text-align: right;">880 / 101387550</td>
-<td style="text-align: right;">608 / 65340</td>
+<td style="text-align: right;">64580</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">545</td>
+<td style="text-align: right;">100039050</td>
+<td style="text-align: right;">0 / 100039050</td>
+<td style="text-align: right;">545 / 65125</td>
 </tr>
 <tr>
 <td style="text-align: right;">2</td>
 <td>UKRAINIAN LUCENE MORFOLOGIK FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">56032</td>
-<td style="text-align: right;">828</td>
-<td style="text-align: right;">9308</td>
-<td style="text-align: right;">101386722</td>
-<td style="text-align: right;">828 / 101387550</td>
-<td style="text-align: right;">9308 / 65340</td>
+<td style="text-align: right;">55865</td>
+<td style="text-align: right;">28</td>
+<td style="text-align: right;">9260</td>
+<td style="text-align: right;">100039022</td>
+<td style="text-align: right;">28 / 100039050</td>
+<td style="text-align: right;">9260 / 65125</td>
 </tr>
 <tr>
 <td style="text-align: right;">3</td>
 <td>UKRAINIAN MORFOLOGIK DIRECT</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">56016</td>
-<td style="text-align: right;">828</td>
-<td style="text-align: right;">9324</td>
-<td style="text-align: right;">101386722</td>
-<td style="text-align: right;">828 / 101387550</td>
-<td style="text-align: right;">9324 / 65340</td>
+<td style="text-align: right;">55849</td>
+<td style="text-align: right;">28</td>
+<td style="text-align: right;">9276</td>
+<td style="text-align: right;">100039022</td>
+<td style="text-align: right;">28 / 100039050</td>
+<td style="text-align: right;">9276 / 65125</td>
 </tr>
 <tr>
 <td style="text-align: right;">4</td>
 <td>HUNSPELL UKRAINIAN LUCENE FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">50416</td>
-<td style="text-align: right;">794</td>
-<td style="text-align: right;">14924</td>
-<td style="text-align: right;">101386756</td>
-<td style="text-align: right;">794 / 101387550</td>
-<td style="text-align: right;">14924 / 65340</td>
+<td style="text-align: right;">50249</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">14876</td>
+<td style="text-align: right;">100039044</td>
+<td style="text-align: right;">6 / 100039050</td>
+<td style="text-align: right;">14876 / 65125</td>
 </tr>
 </tbody>
 </table>
 </details>
-<h4 id="any_candidate-ranking"><code>ANY_CANDIDATE</code> ranking</h4>
-<div aria-label="Compact stemming-quality ranking; scroll horizontally for additional columns" class="quality-table quality-table--compact" role="region" tabindex="0">
+<h4 id="any_candidate-oracle-bounds"><code>ANY_CANDIDATE</code> oracle bounds</h4>
+<p>These results are measured, not missing. <code>ANY_CANDIDATE</code> answers two separate optimistic questions for each pair: a gold-related pair avoids under-stemming when the candidate sets intersect, while a gold-negative pair avoids over-stemming when some non-colliding candidate selection exists. The oracle may choose a different candidate for the same word in different pairs. Consequently, these decisions do not form one globally realizable predicted relation or one TP/FP/FN/TN confusion matrix. Balanced accuracy, F-scores, Jaccard, Fowlkes–Mallows, and MCC are therefore mathematically <strong>not applicable</strong>, rather than unknown.</p>
+<div class="quality-summary quality-summary--oracle">
+<table>
+<thead>
+<tr>
+<th>Stemmer</th>
+<th style="text-align: right;">Optimistic over-stemming (OI)</th>
+<th style="text-align: right;">Optimistic under-stemming (UI)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HUNSPELL UKRAINIAN LUCENE FILTER</td>
+<td style="text-align: right;">0.000000%</td>
+<td style="text-align: right;">14.533589%</td>
+</tr>
+<tr>
+<td>UKRAINIAN LUCENE MORFOLOGIK FILTER</td>
+<td style="text-align: right;">0.000000%</td>
+<td style="text-align: right;">7.594626%</td>
+</tr>
+<tr>
+<td>UKRAINIAN MORFOLOGIK DIRECT</td>
+<td style="text-align: right;">0.000000%</td>
+<td style="text-align: right;">7.619194%</td>
+</tr>
+<tr>
+<td>Radixor</td>
+<td style="text-align: right;">0.000000%</td>
+<td style="text-align: right;">0.000000%</td>
+</tr>
+</tbody>
+</table>
+</div>
+<details class="quality-details">
+<summary>Oracle-bound pair counts</summary>
+<table>
+<thead>
+<tr>
+<th>Stemmer</th>
+<th style="text-align: right;">Unavoidable over errors / gold-negative pairs</th>
+<th style="text-align: right;">Unrepairable under errors / gold-related pairs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HUNSPELL UKRAINIAN LUCENE FILTER</td>
+<td style="text-align: right;">0 / 100039050</td>
+<td style="text-align: right;">9465 / 65125</td>
+</tr>
+<tr>
+<td>UKRAINIAN LUCENE MORFOLOGIK FILTER</td>
+<td style="text-align: right;">0 / 100039050</td>
+<td style="text-align: right;">4946 / 65125</td>
+</tr>
+<tr>
+<td>UKRAINIAN MORFOLOGIK DIRECT</td>
+<td style="text-align: right;">0 / 100039050</td>
+<td style="text-align: right;">4962 / 65125</td>
+</tr>
+<tr>
+<td>Radixor</td>
+<td style="text-align: right;">0 / 100039050</td>
+<td style="text-align: right;">0 / 65125</td>
+</tr>
+</tbody>
+</table>
+</details>
+<h4 id="all_candidates-ranking"><code>ALL_CANDIDATES</code> ranking</h4>
+<div class="quality-summary">
 <table>
 <thead>
 <tr>
 <th style="text-align: right;">Rank</th>
 <th>Stemmer</th>
-<th>Output policy</th>
 <th style="text-align: right;">Balanced accuracy</th>
-<th style="text-align: right;">Over-stemming</th>
-<th style="text-align: right;">Under-stemming</th>
-<th style="text-align: right;">F0.5</th>
-<th style="text-align: right;">F1</th>
-<th style="text-align: right;">MCC</th>
+<th style="text-align: right;">Over-stemming (OI)</th>
+<th style="text-align: right;">Under-stemming (UI)</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
-<td>ANY_CANDIDATE</td>
 <td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">0 / 101387550 (0.000000%)</td>
-<td style="text-align: right;">0 / 65340 (0.000000%)</td>
-<td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">1.000000</td>
+<td style="text-align: right;">0.000000%</td>
+<td style="text-align: right;">0.000000%</td>
 </tr>
 <tr>
 <td style="text-align: right;">2</td>
 <td>UKRAINIAN LUCENE MORFOLOGIK FILTER</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">0.962151</td>
-<td style="text-align: right;">122 / 101387550 (0.000120%)</td>
-<td style="text-align: right;">4946 / 65340 (7.569636%)</td>
-<td style="text-align: right;">0.982323</td>
-<td style="text-align: right;">0.959732</td>
-<td style="text-align: right;">0.960413</td>
+<td style="text-align: right;">0.962027</td>
+<td style="text-align: right;">0.000059%</td>
+<td style="text-align: right;">7.594626%</td>
 </tr>
 <tr>
 <td style="text-align: right;">3</td>
 <td>UKRAINIAN MORFOLOGIK DIRECT</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">0.962029</td>
-<td style="text-align: right;">122 / 101387550 (0.000120%)</td>
-<td style="text-align: right;">4962 / 65340 (7.594123%)</td>
-<td style="text-align: right;">0.982267</td>
-<td style="text-align: right;">0.959599</td>
-<td style="text-align: right;">0.960286</td>
+<td style="text-align: right;">0.961904</td>
+<td style="text-align: right;">0.000059%</td>
+<td style="text-align: right;">7.619194%</td>
 </tr>
 <tr>
 <td style="text-align: right;">4</td>
 <td>HUNSPELL UKRAINIAN LUCENE FILTER</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">0.927570</td>
-<td style="text-align: right;">326 / 101387550 (0.000322%)</td>
-<td style="text-align: right;">9465 / 65340 (14.485767%)</td>
-<td style="text-align: right;">0.962884</td>
-<td style="text-align: right;">0.919443</td>
-<td style="text-align: right;">0.922008</td>
+<td style="text-align: right;">0.927332</td>
+<td style="text-align: right;">0.000047%</td>
+<td style="text-align: right;">14.533589%</td>
 </tr>
 </tbody>
 </table>
@@ -3414,7 +3416,7 @@
 <tr>
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
-<td>ANY_CANDIDATE</td>
+<td>ALL_CANDIDATES</td>
 <td style="text-align: right;">1.000000</td>
 <td style="text-align: right;">1.000000</td>
 <td style="text-align: right;">1.000000</td>
@@ -3425,350 +3427,35 @@
 <tr>
 <td style="text-align: right;">2</td>
 <td>UKRAINIAN LUCENE MORFOLOGIK FILTER</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">0.997984</td>
-<td style="text-align: right;">0.924304</td>
+<td>ALL_CANDIDATES</td>
+<td style="text-align: right;">0.999021</td>
+<td style="text-align: right;">0.924054</td>
 <td style="text-align: right;">0.999999</td>
-<td style="text-align: right;">0.962151</td>
+<td style="text-align: right;">0.962027</td>
 <td style="text-align: right;">0.999950</td>
 <td style="text-align: right;">0.000050</td>
 </tr>
 <tr>
 <td style="text-align: right;">3</td>
 <td>UKRAINIAN MORFOLOGIK DIRECT</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">0.997983</td>
-<td style="text-align: right;">0.924059</td>
+<td>ALL_CANDIDATES</td>
+<td style="text-align: right;">0.999020</td>
+<td style="text-align: right;">0.923808</td>
 <td style="text-align: right;">0.999999</td>
-<td style="text-align: right;">0.962029</td>
+<td style="text-align: right;">0.961904</td>
 <td style="text-align: right;">0.999950</td>
 <td style="text-align: right;">0.000050</td>
 </tr>
 <tr>
 <td style="text-align: right;">4</td>
 <td>HUNSPELL UKRAINIAN LUCENE FILTER</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">0.994199</td>
-<td style="text-align: right;">0.855142</td>
-<td style="text-align: right;">0.999997</td>
-<td style="text-align: right;">0.927570</td>
-<td style="text-align: right;">0.999903</td>
-<td style="text-align: right;">0.000097</td>
-</tr>
-</tbody>
-</table>
-</details>
-<details class="quality-details">
-<summary>Pair-relation metrics</summary>
-<table>
-<thead>
-<tr>
-<th style="text-align: right;">Rank</th>
-<th>Stemmer</th>
-<th>Output policy</th>
-<th style="text-align: right;">F0.5</th>
-<th style="text-align: right;">F1</th>
-<th style="text-align: right;">F2</th>
-<th style="text-align: right;">Jaccard</th>
-<th style="text-align: right;">Fowlkes–Mallows</th>
-<th style="text-align: right;">MCC</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: right;">1</td>
-<td>Radixor</td>
-<td>ANY_CANDIDATE</td>
+<td>ALL_CANDIDATES</td>
+<td style="text-align: right;">0.999156</td>
+<td style="text-align: right;">0.854664</td>
 <td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">1.000000</td>
-</tr>
-<tr>
-<td style="text-align: right;">2</td>
-<td>UKRAINIAN LUCENE MORFOLOGIK FILTER</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">0.982323</td>
-<td style="text-align: right;">0.959732</td>
-<td style="text-align: right;">0.938156</td>
-<td style="text-align: right;">0.922581</td>
-<td style="text-align: right;">0.960438</td>
-<td style="text-align: right;">0.960413</td>
-</tr>
-<tr>
-<td style="text-align: right;">3</td>
-<td>UKRAINIAN MORFOLOGIK DIRECT</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">0.982267</td>
-<td style="text-align: right;">0.959599</td>
-<td style="text-align: right;">0.937954</td>
-<td style="text-align: right;">0.922337</td>
-<td style="text-align: right;">0.960310</td>
-<td style="text-align: right;">0.960286</td>
-</tr>
-<tr>
-<td style="text-align: right;">4</td>
-<td>HUNSPELL UKRAINIAN LUCENE FILTER</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">0.962884</td>
-<td style="text-align: right;">0.919443</td>
-<td style="text-align: right;">0.879752</td>
-<td style="text-align: right;">0.850897</td>
-<td style="text-align: right;">0.922053</td>
-<td style="text-align: right;">0.922008</td>
-</tr>
-</tbody>
-</table>
-</details>
-<details class="quality-details">
-<summary>Partition metrics (PRIMARY_OUTPUT only)</summary>
-<table>
-<thead>
-<tr>
-<th style="text-align: right;">Rank</th>
-<th>Stemmer</th>
-<th>Output policy</th>
-<th style="text-align: right;">Adjusted Rand Index</th>
-<th style="text-align: right;">Homogeneity</th>
-<th style="text-align: right;">Completeness</th>
-<th style="text-align: right;">V-measure</th>
-<th style="text-align: right;">Normalized mutual information</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: right;">1</td>
-<td>Radixor</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-</tr>
-<tr>
-<td style="text-align: right;">2</td>
-<td>UKRAINIAN LUCENE MORFOLOGIK FILTER</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-</tr>
-<tr>
-<td style="text-align: right;">3</td>
-<td>UKRAINIAN MORFOLOGIK DIRECT</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-</tr>
-<tr>
-<td style="text-align: right;">4</td>
-<td>HUNSPELL UKRAINIAN LUCENE FILTER</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-</tr>
-</tbody>
-</table>
-</details>
-<details class="quality-details">
-<summary>Raw pair counts</summary>
-<table>
-<thead>
-<tr>
-<th style="text-align: right;">Rank</th>
-<th>Stemmer</th>
-<th>Output policy</th>
-<th style="text-align: right;">TP</th>
-<th style="text-align: right;">FP</th>
-<th style="text-align: right;">FN</th>
-<th style="text-align: right;">TN</th>
-<th style="text-align: right;">Over error / possible</th>
-<th style="text-align: right;">Under error / possible</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: right;">1</td>
-<td>Radixor</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">65340</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">101387550</td>
-<td style="text-align: right;">0 / 101387550</td>
-<td style="text-align: right;">0 / 65340</td>
-</tr>
-<tr>
-<td style="text-align: right;">2</td>
-<td>UKRAINIAN LUCENE MORFOLOGIK FILTER</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">60394</td>
-<td style="text-align: right;">122</td>
-<td style="text-align: right;">4946</td>
-<td style="text-align: right;">101387428</td>
-<td style="text-align: right;">122 / 101387550</td>
-<td style="text-align: right;">4946 / 65340</td>
-</tr>
-<tr>
-<td style="text-align: right;">3</td>
-<td>UKRAINIAN MORFOLOGIK DIRECT</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">60378</td>
-<td style="text-align: right;">122</td>
-<td style="text-align: right;">4962</td>
-<td style="text-align: right;">101387428</td>
-<td style="text-align: right;">122 / 101387550</td>
-<td style="text-align: right;">4962 / 65340</td>
-</tr>
-<tr>
-<td style="text-align: right;">4</td>
-<td>HUNSPELL UKRAINIAN LUCENE FILTER</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">55875</td>
-<td style="text-align: right;">326</td>
-<td style="text-align: right;">9465</td>
-<td style="text-align: right;">101387224</td>
-<td style="text-align: right;">326 / 101387550</td>
-<td style="text-align: right;">9465 / 65340</td>
-</tr>
-</tbody>
-</table>
-</details>
-<h4 id="all_candidates-ranking"><code>ALL_CANDIDATES</code> ranking</h4>
-<div aria-label="Compact stemming-quality ranking; scroll horizontally for additional columns" class="quality-table quality-table--compact" role="region" tabindex="0">
-<table>
-<thead>
-<tr>
-<th style="text-align: right;">Rank</th>
-<th>Stemmer</th>
-<th>Output policy</th>
-<th style="text-align: right;">Balanced accuracy</th>
-<th style="text-align: right;">Over-stemming</th>
-<th style="text-align: right;">Under-stemming</th>
-<th style="text-align: right;">F0.5</th>
-<th style="text-align: right;">F1</th>
-<th style="text-align: right;">MCC</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: right;">1</td>
-<td>Radixor</td>
-<td>ALL_CANDIDATES</td>
-<td style="text-align: right;">0.999993</td>
-<td style="text-align: right;">1490 / 101387550 (0.001470%)</td>
-<td style="text-align: right;">0 / 65340 (0.000000%)</td>
-<td style="text-align: right;">0.982084</td>
-<td style="text-align: right;">0.988727</td>
-<td style="text-align: right;">0.988782</td>
-</tr>
-<tr>
-<td style="text-align: right;">2</td>
-<td>UKRAINIAN LUCENE MORFOLOGIK FILTER</td>
-<td>ALL_CANDIDATES</td>
-<td style="text-align: right;">0.962145</td>
-<td style="text-align: right;">1368 / 101387550 (0.001349%)</td>
-<td style="text-align: right;">4946 / 65340 (7.569636%)</td>
-<td style="text-align: right;">0.966650</td>
-<td style="text-align: right;">0.950323</td>
-<td style="text-align: right;">0.950669</td>
-</tr>
-<tr>
-<td style="text-align: right;">3</td>
-<td>UKRAINIAN MORFOLOGIK DIRECT</td>
-<td>ALL_CANDIDATES</td>
-<td style="text-align: right;">0.962023</td>
-<td style="text-align: right;">1368 / 101387550 (0.001349%)</td>
-<td style="text-align: right;">4962 / 65340 (7.594123%)</td>
-<td style="text-align: right;">0.966592</td>
-<td style="text-align: right;">0.950191</td>
-<td style="text-align: right;">0.950541</td>
-</tr>
-<tr>
-<td style="text-align: right;">4</td>
-<td>HUNSPELL UKRAINIAN LUCENE FILTER</td>
-<td>ALL_CANDIDATES</td>
-<td style="text-align: right;">0.927565</td>
-<td style="text-align: right;">1271 / 101387550 (0.001254%)</td>
-<td style="text-align: right;">9465 / 65340 (14.485767%)</td>
-<td style="text-align: right;">0.950501</td>
-<td style="text-align: right;">0.912349</td>
-<td style="text-align: right;">0.914347</td>
-</tr>
-</tbody>
-</table>
-</div>
-<details class="quality-details">
-<summary>Classification metrics</summary>
-<table>
-<thead>
-<tr>
-<th style="text-align: right;">Rank</th>
-<th>Stemmer</th>
-<th>Output policy</th>
-<th style="text-align: right;">Precision</th>
-<th style="text-align: right;">Recall</th>
-<th style="text-align: right;">Specificity</th>
-<th style="text-align: right;">Balanced accuracy</th>
-<th style="text-align: right;">Pairwise accuracy</th>
-<th style="text-align: right;">Error rate</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: right;">1</td>
-<td>Radixor</td>
-<td>ALL_CANDIDATES</td>
-<td style="text-align: right;">0.977705</td>
-<td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">0.999985</td>
-<td style="text-align: right;">0.999993</td>
-<td style="text-align: right;">0.999985</td>
-<td style="text-align: right;">0.000015</td>
-</tr>
-<tr>
-<td style="text-align: right;">2</td>
-<td>UKRAINIAN LUCENE MORFOLOGIK FILTER</td>
-<td>ALL_CANDIDATES</td>
-<td style="text-align: right;">0.977850</td>
-<td style="text-align: right;">0.924304</td>
-<td style="text-align: right;">0.999987</td>
-<td style="text-align: right;">0.962145</td>
-<td style="text-align: right;">0.999938</td>
-<td style="text-align: right;">0.000062</td>
-</tr>
-<tr>
-<td style="text-align: right;">3</td>
-<td>UKRAINIAN MORFOLOGIK DIRECT</td>
-<td>ALL_CANDIDATES</td>
-<td style="text-align: right;">0.977845</td>
-<td style="text-align: right;">0.924059</td>
-<td style="text-align: right;">0.999987</td>
-<td style="text-align: right;">0.962023</td>
-<td style="text-align: right;">0.999938</td>
-<td style="text-align: right;">0.000062</td>
-</tr>
-<tr>
-<td style="text-align: right;">4</td>
-<td>HUNSPELL UKRAINIAN LUCENE FILTER</td>
-<td>ALL_CANDIDATES</td>
-<td style="text-align: right;">0.977759</td>
-<td style="text-align: right;">0.855142</td>
-<td style="text-align: right;">0.999987</td>
-<td style="text-align: right;">0.927565</td>
-<td style="text-align: right;">0.999894</td>
-<td style="text-align: right;">0.000106</td>
+<td style="text-align: right;">0.927332</td>
+<td style="text-align: right;">0.999905</td>
+<td style="text-align: right;">0.000095</td>
 </tr>
 </tbody>
 </table>
@@ -3794,104 +3481,45 @@
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
 <td>ALL_CANDIDATES</td>
-<td style="text-align: right;">0.982084</td>
-<td style="text-align: right;">0.988727</td>
-<td style="text-align: right;">0.995460</td>
-<td style="text-align: right;">0.977705</td>
-<td style="text-align: right;">0.988789</td>
-<td style="text-align: right;">0.988782</td>
+<td style="text-align: right;">1.000000</td>
+<td style="text-align: right;">1.000000</td>
+<td style="text-align: right;">1.000000</td>
+<td style="text-align: right;">1.000000</td>
+<td style="text-align: right;">1.000000</td>
+<td style="text-align: right;">1.000000</td>
 </tr>
 <tr>
 <td style="text-align: right;">2</td>
 <td>UKRAINIAN LUCENE MORFOLOGIK FILTER</td>
 <td>ALL_CANDIDATES</td>
-<td style="text-align: right;">0.966650</td>
-<td style="text-align: right;">0.950323</td>
-<td style="text-align: right;">0.934539</td>
-<td style="text-align: right;">0.905349</td>
-<td style="text-align: right;">0.950700</td>
-<td style="text-align: right;">0.950669</td>
+<td style="text-align: right;">0.983070</td>
+<td style="text-align: right;">0.960076</td>
+<td style="text-align: right;">0.938133</td>
+<td style="text-align: right;">0.923217</td>
+<td style="text-align: right;">0.960806</td>
+<td style="text-align: right;">0.960782</td>
 </tr>
 <tr>
 <td style="text-align: right;">3</td>
 <td>UKRAINIAN MORFOLOGIK DIRECT</td>
 <td>ALL_CANDIDATES</td>
-<td style="text-align: right;">0.966592</td>
-<td style="text-align: right;">0.950191</td>
-<td style="text-align: right;">0.934337</td>
-<td style="text-align: right;">0.905109</td>
-<td style="text-align: right;">0.950571</td>
-<td style="text-align: right;">0.950541</td>
+<td style="text-align: right;">0.983014</td>
+<td style="text-align: right;">0.959943</td>
+<td style="text-align: right;">0.937931</td>
+<td style="text-align: right;">0.922972</td>
+<td style="text-align: right;">0.960678</td>
+<td style="text-align: right;">0.960654</td>
 </tr>
 <tr>
 <td style="text-align: right;">4</td>
 <td>HUNSPELL UKRAINIAN LUCENE FILTER</td>
 <td>ALL_CANDIDATES</td>
-<td style="text-align: right;">0.950501</td>
-<td style="text-align: right;">0.912349</td>
-<td style="text-align: right;">0.877142</td>
-<td style="text-align: right;">0.838825</td>
-<td style="text-align: right;">0.914398</td>
-<td style="text-align: right;">0.914347</td>
-</tr>
-</tbody>
-</table>
-</details>
-<details class="quality-details">
-<summary>Partition metrics (PRIMARY_OUTPUT only)</summary>
-<table>
-<thead>
-<tr>
-<th style="text-align: right;">Rank</th>
-<th>Stemmer</th>
-<th>Output policy</th>
-<th style="text-align: right;">Adjusted Rand Index</th>
-<th style="text-align: right;">Homogeneity</th>
-<th style="text-align: right;">Completeness</th>
-<th style="text-align: right;">V-measure</th>
-<th style="text-align: right;">Normalized mutual information</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: right;">1</td>
-<td>Radixor</td>
-<td>ALL_CANDIDATES</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-</tr>
-<tr>
-<td style="text-align: right;">2</td>
-<td>UKRAINIAN LUCENE MORFOLOGIK FILTER</td>
-<td>ALL_CANDIDATES</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-</tr>
-<tr>
-<td style="text-align: right;">3</td>
-<td>UKRAINIAN MORFOLOGIK DIRECT</td>
-<td>ALL_CANDIDATES</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-</tr>
-<tr>
-<td style="text-align: right;">4</td>
-<td>HUNSPELL UKRAINIAN LUCENE FILTER</td>
-<td>ALL_CANDIDATES</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">0.966477</td>
+<td style="text-align: right;">0.921279</td>
+<td style="text-align: right;">0.880120</td>
+<td style="text-align: right;">0.854048</td>
+<td style="text-align: right;">0.924090</td>
+<td style="text-align: right;">0.924046</td>
 </tr>
 </tbody>
 </table>
@@ -3917,45 +3545,45 @@
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
 <td>ALL_CANDIDATES</td>
-<td style="text-align: right;">65340</td>
-<td style="text-align: right;">1490</td>
+<td style="text-align: right;">65125</td>
 <td style="text-align: right;">0</td>
-<td style="text-align: right;">101386060</td>
-<td style="text-align: right;">1490 / 101387550</td>
-<td style="text-align: right;">0 / 65340</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">100039050</td>
+<td style="text-align: right;">0 / 100039050</td>
+<td style="text-align: right;">0 / 65125</td>
 </tr>
 <tr>
 <td style="text-align: right;">2</td>
 <td>UKRAINIAN LUCENE MORFOLOGIK FILTER</td>
 <td>ALL_CANDIDATES</td>
-<td style="text-align: right;">60394</td>
-<td style="text-align: right;">1368</td>
+<td style="text-align: right;">60179</td>
+<td style="text-align: right;">59</td>
 <td style="text-align: right;">4946</td>
-<td style="text-align: right;">101386182</td>
-<td style="text-align: right;">1368 / 101387550</td>
-<td style="text-align: right;">4946 / 65340</td>
+<td style="text-align: right;">100038991</td>
+<td style="text-align: right;">59 / 100039050</td>
+<td style="text-align: right;">4946 / 65125</td>
 </tr>
 <tr>
 <td style="text-align: right;">3</td>
 <td>UKRAINIAN MORFOLOGIK DIRECT</td>
 <td>ALL_CANDIDATES</td>
-<td style="text-align: right;">60378</td>
-<td style="text-align: right;">1368</td>
+<td style="text-align: right;">60163</td>
+<td style="text-align: right;">59</td>
 <td style="text-align: right;">4962</td>
-<td style="text-align: right;">101386182</td>
-<td style="text-align: right;">1368 / 101387550</td>
-<td style="text-align: right;">4962 / 65340</td>
+<td style="text-align: right;">100038991</td>
+<td style="text-align: right;">59 / 100039050</td>
+<td style="text-align: right;">4962 / 65125</td>
 </tr>
 <tr>
 <td style="text-align: right;">4</td>
 <td>HUNSPELL UKRAINIAN LUCENE FILTER</td>
 <td>ALL_CANDIDATES</td>
-<td style="text-align: right;">55875</td>
-<td style="text-align: right;">1271</td>
+<td style="text-align: right;">55660</td>
+<td style="text-align: right;">47</td>
 <td style="text-align: right;">9465</td>
-<td style="text-align: right;">101386279</td>
-<td style="text-align: right;">1271 / 101387550</td>
-<td style="text-align: right;">9465 / 65340</td>
+<td style="text-align: right;">100039003</td>
+<td style="text-align: right;">47 / 100039050</td>
+<td style="text-align: right;">9465 / 65125</td>
 </tr>
 </tbody>
 </table>
@@ -3978,108 +3606,88 @@
 <tbody>
 <tr>
 <td>HUNSPELL UKRAINIAN LUCENE FILTER</td>
-<td style="text-align: right;">5459</td>
-<td style="text-align: right;">468</td>
-<td style="text-align: right;">477</td>
-<td style="text-align: right;">1322</td>
-<td style="text-align: right;">9.280449%</td>
+<td style="text-align: right;">5411</td>
 <td style="text-align: right;">6</td>
-<td style="text-align: right;">15740</td>
+<td style="text-align: right;">41</td>
+<td style="text-align: right;">1259</td>
+<td style="text-align: right;">8.897527%</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">15577</td>
 </tr>
 <tr>
 <td>UKRAINIAN LUCENE MORFOLOGIK FILTER</td>
-<td style="text-align: right;">4362</td>
-<td style="text-align: right;">706</td>
-<td style="text-align: right;">540</td>
-<td style="text-align: right;">2207</td>
-<td style="text-align: right;">15.493155%</td>
+<td style="text-align: right;">4314</td>
+<td style="text-align: right;">28</td>
+<td style="text-align: right;">31</td>
+<td style="text-align: right;">2130</td>
+<td style="text-align: right;">15.053004%</td>
 <td style="text-align: right;">6</td>
-<td style="text-align: right;">16937</td>
+<td style="text-align: right;">16748</td>
 </tr>
 <tr>
 <td>UKRAINIAN MORFOLOGIK DIRECT</td>
-<td style="text-align: right;">4362</td>
-<td style="text-align: right;">706</td>
-<td style="text-align: right;">540</td>
-<td style="text-align: right;">2207</td>
-<td style="text-align: right;">15.493155%</td>
+<td style="text-align: right;">4314</td>
+<td style="text-align: right;">28</td>
+<td style="text-align: right;">31</td>
+<td style="text-align: right;">2130</td>
+<td style="text-align: right;">15.053004%</td>
 <td style="text-align: right;">6</td>
-<td style="text-align: right;">16937</td>
+<td style="text-align: right;">16748</td>
 </tr>
 <tr>
 <td>Radixor</td>
-<td style="text-align: right;">608</td>
-<td style="text-align: right;">880</td>
-<td style="text-align: right;">610</td>
-<td style="text-align: right;">190</td>
-<td style="text-align: right;">1.333801%</td>
+<td style="text-align: right;">545</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">95</td>
+<td style="text-align: right;">0.671378%</td>
 <td style="text-align: right;">2</td>
-<td style="text-align: right;">14435</td>
+<td style="text-align: right;">14245</td>
 </tr>
 </tbody>
 </table>
 <h3 id="lowercase_groups_only"><code>LOWERCASE_GROUPS_ONLY</code></h3>
-<p>This mode contains <strong>12 result rows</strong>, <strong>4 evaluated stemmers</strong>, and <strong>3 output policies</strong>. Applied-row and form counts are shown per row because adapters share the language corpus but policy rows remain independently auditable. Rankings are separated by output policy and ordered by unrounded balanced accuracy, followed by MCC, F1, over-stemming rate, over-stemming count, under-stemming rate, and stemmer. Balanced accuracy is a navigation metric, not a universally authoritative quality score.</p>
+<p>This mode contains <strong>12 result rows</strong>, <strong>4 evaluated stemmers</strong>, and <strong>3 output policies</strong>. Applied-row and form counts are shown per row because adapters share the language corpus but policy rows remain independently auditable. <code>PRIMARY_OUTPUT</code> and <code>ALL_CANDIDATES</code> rankings are ordered by unrounded balanced accuracy, followed by MCC, F1, over-stemming rate, over-stemming count, under-stemming rate, and stemmer. <code>ANY_CANDIDATE</code> has no single rank metric and is listed alphabetically. Balanced accuracy is a navigation metric, not a universally authoritative quality score.</p>
 <h4 id="primary_output-ranking_1"><code>PRIMARY_OUTPUT</code> ranking</h4>
-<div aria-label="Compact stemming-quality ranking; scroll horizontally for additional columns" class="quality-table quality-table--compact" role="region" tabindex="0">
+<div class="quality-summary">
 <table>
 <thead>
 <tr>
 <th style="text-align: right;">Rank</th>
 <th>Stemmer</th>
-<th>Output policy</th>
 <th style="text-align: right;">Balanced accuracy</th>
-<th style="text-align: right;">Over-stemming</th>
-<th style="text-align: right;">Under-stemming</th>
-<th style="text-align: right;">F0.5</th>
-<th style="text-align: right;">F1</th>
-<th style="text-align: right;">MCC</th>
+<th style="text-align: right;">Over-stemming (OI)</th>
+<th style="text-align: right;">Under-stemming (UI)</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.995342</td>
-<td style="text-align: right;">880 / 101259406 (0.000869%)</td>
-<td style="text-align: right;">608 / 65324 (0.930745%)</td>
-<td style="text-align: right;">0.987403</td>
-<td style="text-align: right;">0.988634</td>
-<td style="text-align: right;">0.988629</td>
+<td style="text-align: right;">0.995815</td>
+<td style="text-align: right;">0.000000%</td>
+<td style="text-align: right;">0.837058%</td>
 </tr>
 <tr>
 <td style="text-align: right;">2</td>
 <td>UKRAINIAN LUCENE MORFOLOGIK FILTER</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.928751</td>
-<td style="text-align: right;">828 / 101259406 (0.000818%)</td>
-<td style="text-align: right;">9308 / 65324 (14.248974%)</td>
-<td style="text-align: right;">0.956884</td>
-<td style="text-align: right;">0.917032</td>
-<td style="text-align: right;">0.919202</td>
+<td style="text-align: right;">0.928888</td>
+<td style="text-align: right;">0.000028%</td>
+<td style="text-align: right;">14.222304%</td>
 </tr>
 <tr>
 <td style="text-align: right;">3</td>
 <td>UKRAINIAN MORFOLOGIK DIRECT</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.928751</td>
-<td style="text-align: right;">828 / 101259406 (0.000818%)</td>
-<td style="text-align: right;">9308 / 65324 (14.248974%)</td>
-<td style="text-align: right;">0.956884</td>
-<td style="text-align: right;">0.917032</td>
-<td style="text-align: right;">0.919202</td>
+<td style="text-align: right;">0.928888</td>
+<td style="text-align: right;">0.000028%</td>
+<td style="text-align: right;">14.222304%</td>
 </tr>
 <tr>
 <td style="text-align: right;">4</td>
 <td>HUNSPELL UKRAINIAN LUCENE FILTER</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.885796</td>
-<td style="text-align: right;">794 / 101259406 (0.000784%)</td>
-<td style="text-align: right;">14920 / 65324 (22.839998%)</td>
-<td style="text-align: right;">0.933007</td>
-<td style="text-align: right;">0.865141</td>
-<td style="text-align: right;">0.871500</td>
+<td style="text-align: right;">0.885791</td>
+<td style="text-align: right;">0.000006%</td>
+<td style="text-align: right;">22.841696%</td>
 </tr>
 </tbody>
 </table>
@@ -4105,45 +3713,45 @@
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.986585</td>
-<td style="text-align: right;">0.990693</td>
-<td style="text-align: right;">0.999991</td>
-<td style="text-align: right;">0.995342</td>
-<td style="text-align: right;">0.999985</td>
-<td style="text-align: right;">0.000015</td>
+<td style="text-align: right;">1.000000</td>
+<td style="text-align: right;">0.991629</td>
+<td style="text-align: right;">1.000000</td>
+<td style="text-align: right;">0.995815</td>
+<td style="text-align: right;">0.999995</td>
+<td style="text-align: right;">0.000005</td>
 </tr>
 <tr>
 <td style="text-align: right;">2</td>
 <td>UKRAINIAN LUCENE MORFOLOGIK FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.985434</td>
-<td style="text-align: right;">0.857510</td>
-<td style="text-align: right;">0.999992</td>
-<td style="text-align: right;">0.928751</td>
-<td style="text-align: right;">0.999900</td>
-<td style="text-align: right;">0.000100</td>
+<td style="text-align: right;">0.999499</td>
+<td style="text-align: right;">0.857777</td>
+<td style="text-align: right;">1.000000</td>
+<td style="text-align: right;">0.928888</td>
+<td style="text-align: right;">0.999907</td>
+<td style="text-align: right;">0.000093</td>
 </tr>
 <tr>
 <td style="text-align: right;">3</td>
 <td>UKRAINIAN MORFOLOGIK DIRECT</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.985434</td>
-<td style="text-align: right;">0.857510</td>
-<td style="text-align: right;">0.999992</td>
-<td style="text-align: right;">0.928751</td>
-<td style="text-align: right;">0.999900</td>
-<td style="text-align: right;">0.000100</td>
+<td style="text-align: right;">0.999499</td>
+<td style="text-align: right;">0.857777</td>
+<td style="text-align: right;">1.000000</td>
+<td style="text-align: right;">0.928888</td>
+<td style="text-align: right;">0.999907</td>
+<td style="text-align: right;">0.000093</td>
 </tr>
 <tr>
 <td style="text-align: right;">4</td>
 <td>HUNSPELL UKRAINIAN LUCENE FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.984492</td>
-<td style="text-align: right;">0.771600</td>
-<td style="text-align: right;">0.999992</td>
-<td style="text-align: right;">0.885796</td>
-<td style="text-align: right;">0.999845</td>
-<td style="text-align: right;">0.000155</td>
+<td style="text-align: right;">0.999881</td>
+<td style="text-align: right;">0.771583</td>
+<td style="text-align: right;">1.000000</td>
+<td style="text-align: right;">0.885791</td>
+<td style="text-align: right;">0.999851</td>
+<td style="text-align: right;">0.000149</td>
 </tr>
 </tbody>
 </table>
@@ -4169,104 +3777,45 @@
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.987403</td>
-<td style="text-align: right;">0.988634</td>
-<td style="text-align: right;">0.989868</td>
-<td style="text-align: right;">0.977524</td>
-<td style="text-align: right;">0.988636</td>
-<td style="text-align: right;">0.988629</td>
+<td style="text-align: right;">0.998315</td>
+<td style="text-align: right;">0.995797</td>
+<td style="text-align: right;">0.993292</td>
+<td style="text-align: right;">0.991629</td>
+<td style="text-align: right;">0.995806</td>
+<td style="text-align: right;">0.995803</td>
 </tr>
 <tr>
 <td style="text-align: right;">2</td>
 <td>UKRAINIAN LUCENE MORFOLOGIK FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.956884</td>
-<td style="text-align: right;">0.917032</td>
-<td style="text-align: right;">0.880367</td>
-<td style="text-align: right;">0.846777</td>
-<td style="text-align: right;">0.919249</td>
-<td style="text-align: right;">0.919202</td>
+<td style="text-align: right;">0.967528</td>
+<td style="text-align: right;">0.923231</td>
+<td style="text-align: right;">0.882812</td>
+<td style="text-align: right;">0.857408</td>
+<td style="text-align: right;">0.925930</td>
+<td style="text-align: right;">0.925887</td>
 </tr>
 <tr>
 <td style="text-align: right;">3</td>
 <td>UKRAINIAN MORFOLOGIK DIRECT</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.956884</td>
-<td style="text-align: right;">0.917032</td>
-<td style="text-align: right;">0.880367</td>
-<td style="text-align: right;">0.846777</td>
-<td style="text-align: right;">0.919249</td>
-<td style="text-align: right;">0.919202</td>
+<td style="text-align: right;">0.967528</td>
+<td style="text-align: right;">0.923231</td>
+<td style="text-align: right;">0.882812</td>
+<td style="text-align: right;">0.857408</td>
+<td style="text-align: right;">0.925930</td>
+<td style="text-align: right;">0.925887</td>
 </tr>
 <tr>
 <td style="text-align: right;">4</td>
 <td>HUNSPELL UKRAINIAN LUCENE FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.933007</td>
-<td style="text-align: right;">0.865141</td>
-<td style="text-align: right;">0.806479</td>
-<td style="text-align: right;">0.762334</td>
-<td style="text-align: right;">0.871570</td>
-<td style="text-align: right;">0.871500</td>
-</tr>
-</tbody>
-</table>
-</details>
-<details class="quality-details">
-<summary>Partition metrics (PRIMARY_OUTPUT only)</summary>
-<table>
-<thead>
-<tr>
-<th style="text-align: right;">Rank</th>
-<th>Stemmer</th>
-<th>Output policy</th>
-<th style="text-align: right;">Adjusted Rand Index</th>
-<th style="text-align: right;">Homogeneity</th>
-<th style="text-align: right;">Completeness</th>
-<th style="text-align: right;">V-measure</th>
-<th style="text-align: right;">Normalized mutual information</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: right;">1</td>
-<td>Radixor</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.988627</td>
-<td style="text-align: right;">0.997992</td>
-<td style="text-align: right;">0.998264</td>
-<td style="text-align: right;">0.998128</td>
-<td style="text-align: right;">0.998128</td>
-</tr>
-<tr>
-<td style="text-align: right;">2</td>
-<td>UKRAINIAN LUCENE MORFOLOGIK FILTER</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.916982</td>
-<td style="text-align: right;">0.997988</td>
-<td style="text-align: right;">0.970978</td>
-<td style="text-align: right;">0.984298</td>
-<td style="text-align: right;">0.984298</td>
-</tr>
-<tr>
-<td style="text-align: right;">3</td>
-<td>UKRAINIAN MORFOLOGIK DIRECT</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.916982</td>
-<td style="text-align: right;">0.997988</td>
-<td style="text-align: right;">0.970978</td>
-<td style="text-align: right;">0.984298</td>
-<td style="text-align: right;">0.984298</td>
-</tr>
-<tr>
-<td style="text-align: right;">4</td>
-<td>HUNSPELL UKRAINIAN LUCENE FILTER</td>
-<td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.865065</td>
-<td style="text-align: right;">0.998113</td>
-<td style="text-align: right;">0.949788</td>
-<td style="text-align: right;">0.973351</td>
-<td style="text-align: right;">0.973351</td>
+<td style="text-align: right;">0.944017</td>
+<td style="text-align: right;">0.871021</td>
+<td style="text-align: right;">0.808503</td>
+<td style="text-align: right;">0.771512</td>
+<td style="text-align: right;">0.878346</td>
+<td style="text-align: right;">0.878280</td>
 </tr>
 </tbody>
 </table>
@@ -4292,109 +3841,158 @@
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">64716</td>
-<td style="text-align: right;">880</td>
-<td style="text-align: right;">608</td>
-<td style="text-align: right;">101258526</td>
-<td style="text-align: right;">880 / 101259406</td>
-<td style="text-align: right;">608 / 65324</td>
+<td style="text-align: right;">64564</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">545</td>
+<td style="text-align: right;">99911761</td>
+<td style="text-align: right;">0 / 99911761</td>
+<td style="text-align: right;">545 / 65109</td>
 </tr>
 <tr>
 <td style="text-align: right;">2</td>
 <td>UKRAINIAN LUCENE MORFOLOGIK FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">56016</td>
-<td style="text-align: right;">828</td>
-<td style="text-align: right;">9308</td>
-<td style="text-align: right;">101258578</td>
-<td style="text-align: right;">828 / 101259406</td>
-<td style="text-align: right;">9308 / 65324</td>
+<td style="text-align: right;">55849</td>
+<td style="text-align: right;">28</td>
+<td style="text-align: right;">9260</td>
+<td style="text-align: right;">99911733</td>
+<td style="text-align: right;">28 / 99911761</td>
+<td style="text-align: right;">9260 / 65109</td>
 </tr>
 <tr>
 <td style="text-align: right;">3</td>
 <td>UKRAINIAN MORFOLOGIK DIRECT</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">56016</td>
-<td style="text-align: right;">828</td>
-<td style="text-align: right;">9308</td>
-<td style="text-align: right;">101258578</td>
-<td style="text-align: right;">828 / 101259406</td>
-<td style="text-align: right;">9308 / 65324</td>
+<td style="text-align: right;">55849</td>
+<td style="text-align: right;">28</td>
+<td style="text-align: right;">9260</td>
+<td style="text-align: right;">99911733</td>
+<td style="text-align: right;">28 / 99911761</td>
+<td style="text-align: right;">9260 / 65109</td>
 </tr>
 <tr>
 <td style="text-align: right;">4</td>
 <td>HUNSPELL UKRAINIAN LUCENE FILTER</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">50404</td>
-<td style="text-align: right;">794</td>
-<td style="text-align: right;">14920</td>
-<td style="text-align: right;">101258612</td>
-<td style="text-align: right;">794 / 101259406</td>
-<td style="text-align: right;">14920 / 65324</td>
+<td style="text-align: right;">50237</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">14872</td>
+<td style="text-align: right;">99911755</td>
+<td style="text-align: right;">6 / 99911761</td>
+<td style="text-align: right;">14872 / 65109</td>
 </tr>
 </tbody>
 </table>
 </details>
-<h4 id="any_candidate-ranking_1"><code>ANY_CANDIDATE</code> ranking</h4>
-<div aria-label="Compact stemming-quality ranking; scroll horizontally for additional columns" class="quality-table quality-table--compact" role="region" tabindex="0">
+<h4 id="any_candidate-oracle-bounds_1"><code>ANY_CANDIDATE</code> oracle bounds</h4>
+<p>These results are measured, not missing. <code>ANY_CANDIDATE</code> answers two separate optimistic questions for each pair: a gold-related pair avoids under-stemming when the candidate sets intersect, while a gold-negative pair avoids over-stemming when some non-colliding candidate selection exists. The oracle may choose a different candidate for the same word in different pairs. Consequently, these decisions do not form one globally realizable predicted relation or one TP/FP/FN/TN confusion matrix. Balanced accuracy, F-scores, Jaccard, Fowlkes–Mallows, and MCC are therefore mathematically <strong>not applicable</strong>, rather than unknown.</p>
+<div class="quality-summary quality-summary--oracle">
+<table>
+<thead>
+<tr>
+<th>Stemmer</th>
+<th style="text-align: right;">Optimistic over-stemming (OI)</th>
+<th style="text-align: right;">Optimistic under-stemming (UI)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HUNSPELL UKRAINIAN LUCENE FILTER</td>
+<td style="text-align: right;">0.000000%</td>
+<td style="text-align: right;">14.537161%</td>
+</tr>
+<tr>
+<td>UKRAINIAN LUCENE MORFOLOGIK FILTER</td>
+<td style="text-align: right;">0.000000%</td>
+<td style="text-align: right;">7.596492%</td>
+</tr>
+<tr>
+<td>UKRAINIAN MORFOLOGIK DIRECT</td>
+<td style="text-align: right;">0.000000%</td>
+<td style="text-align: right;">7.596492%</td>
+</tr>
+<tr>
+<td>Radixor</td>
+<td style="text-align: right;">0.000000%</td>
+<td style="text-align: right;">0.000000%</td>
+</tr>
+</tbody>
+</table>
+</div>
+<details class="quality-details">
+<summary>Oracle-bound pair counts</summary>
+<table>
+<thead>
+<tr>
+<th>Stemmer</th>
+<th style="text-align: right;">Unavoidable over errors / gold-negative pairs</th>
+<th style="text-align: right;">Unrepairable under errors / gold-related pairs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HUNSPELL UKRAINIAN LUCENE FILTER</td>
+<td style="text-align: right;">0 / 99911761</td>
+<td style="text-align: right;">9465 / 65109</td>
+</tr>
+<tr>
+<td>UKRAINIAN LUCENE MORFOLOGIK FILTER</td>
+<td style="text-align: right;">0 / 99911761</td>
+<td style="text-align: right;">4946 / 65109</td>
+</tr>
+<tr>
+<td>UKRAINIAN MORFOLOGIK DIRECT</td>
+<td style="text-align: right;">0 / 99911761</td>
+<td style="text-align: right;">4946 / 65109</td>
+</tr>
+<tr>
+<td>Radixor</td>
+<td style="text-align: right;">0 / 99911761</td>
+<td style="text-align: right;">0 / 65109</td>
+</tr>
+</tbody>
+</table>
+</details>
+<h4 id="all_candidates-ranking_1"><code>ALL_CANDIDATES</code> ranking</h4>
+<div class="quality-summary">
 <table>
 <thead>
 <tr>
 <th style="text-align: right;">Rank</th>
 <th>Stemmer</th>
-<th>Output policy</th>
 <th style="text-align: right;">Balanced accuracy</th>
-<th style="text-align: right;">Over-stemming</th>
-<th style="text-align: right;">Under-stemming</th>
-<th style="text-align: right;">F0.5</th>
-<th style="text-align: right;">F1</th>
-<th style="text-align: right;">MCC</th>
+<th style="text-align: right;">Over-stemming (OI)</th>
+<th style="text-align: right;">Under-stemming (UI)</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
-<td>ANY_CANDIDATE</td>
 <td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">0 / 101259406 (0.000000%)</td>
-<td style="text-align: right;">0 / 65324 (0.000000%)</td>
-<td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">1.000000</td>
+<td style="text-align: right;">0.000000%</td>
+<td style="text-align: right;">0.000000%</td>
 </tr>
 <tr>
 <td style="text-align: right;">2</td>
 <td>UKRAINIAN LUCENE MORFOLOGIK FILTER</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">0.962142</td>
-<td style="text-align: right;">122 / 101259406 (0.000120%)</td>
-<td style="text-align: right;">4946 / 65324 (7.571490%)</td>
-<td style="text-align: right;">0.982318</td>
-<td style="text-align: right;">0.959722</td>
-<td style="text-align: right;">0.960404</td>
+<td style="text-align: right;">0.962017</td>
+<td style="text-align: right;">0.000059%</td>
+<td style="text-align: right;">7.596492%</td>
 </tr>
 <tr>
 <td style="text-align: right;">3</td>
 <td>UKRAINIAN MORFOLOGIK DIRECT</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">0.962142</td>
-<td style="text-align: right;">122 / 101259406 (0.000120%)</td>
-<td style="text-align: right;">4946 / 65324 (7.571490%)</td>
-<td style="text-align: right;">0.982318</td>
-<td style="text-align: right;">0.959722</td>
-<td style="text-align: right;">0.960404</td>
+<td style="text-align: right;">0.962017</td>
+<td style="text-align: right;">0.000059%</td>
+<td style="text-align: right;">7.596492%</td>
 </tr>
 <tr>
 <td style="text-align: right;">4</td>
 <td>HUNSPELL UKRAINIAN LUCENE FILTER</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">0.927552</td>
-<td style="text-align: right;">326 / 101259406 (0.000322%)</td>
-<td style="text-align: right;">9465 / 65324 (14.489315%)</td>
-<td style="text-align: right;">0.962874</td>
-<td style="text-align: right;">0.919422</td>
-<td style="text-align: right;">0.921988</td>
+<td style="text-align: right;">0.927314</td>
+<td style="text-align: right;">0.000047%</td>
+<td style="text-align: right;">14.537161%</td>
 </tr>
 </tbody>
 </table>
@@ -4419,7 +4017,7 @@
 <tr>
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
-<td>ANY_CANDIDATE</td>
+<td>ALL_CANDIDATES</td>
 <td style="text-align: right;">1.000000</td>
 <td style="text-align: right;">1.000000</td>
 <td style="text-align: right;">1.000000</td>
@@ -4430,350 +4028,35 @@
 <tr>
 <td style="text-align: right;">2</td>
 <td>UKRAINIAN LUCENE MORFOLOGIK FILTER</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">0.997983</td>
-<td style="text-align: right;">0.924285</td>
+<td>ALL_CANDIDATES</td>
+<td style="text-align: right;">0.999020</td>
+<td style="text-align: right;">0.924035</td>
 <td style="text-align: right;">0.999999</td>
-<td style="text-align: right;">0.962142</td>
+<td style="text-align: right;">0.962017</td>
 <td style="text-align: right;">0.999950</td>
 <td style="text-align: right;">0.000050</td>
 </tr>
 <tr>
 <td style="text-align: right;">3</td>
 <td>UKRAINIAN MORFOLOGIK DIRECT</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">0.997983</td>
-<td style="text-align: right;">0.924285</td>
+<td>ALL_CANDIDATES</td>
+<td style="text-align: right;">0.999020</td>
+<td style="text-align: right;">0.924035</td>
 <td style="text-align: right;">0.999999</td>
-<td style="text-align: right;">0.962142</td>
+<td style="text-align: right;">0.962017</td>
 <td style="text-align: right;">0.999950</td>
 <td style="text-align: right;">0.000050</td>
 </tr>
 <tr>
 <td style="text-align: right;">4</td>
 <td>HUNSPELL UKRAINIAN LUCENE FILTER</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">0.994198</td>
-<td style="text-align: right;">0.855107</td>
-<td style="text-align: right;">0.999997</td>
-<td style="text-align: right;">0.927552</td>
-<td style="text-align: right;">0.999903</td>
-<td style="text-align: right;">0.000097</td>
-</tr>
-</tbody>
-</table>
-</details>
-<details class="quality-details">
-<summary>Pair-relation metrics</summary>
-<table>
-<thead>
-<tr>
-<th style="text-align: right;">Rank</th>
-<th>Stemmer</th>
-<th>Output policy</th>
-<th style="text-align: right;">F0.5</th>
-<th style="text-align: right;">F1</th>
-<th style="text-align: right;">F2</th>
-<th style="text-align: right;">Jaccard</th>
-<th style="text-align: right;">Fowlkes–Mallows</th>
-<th style="text-align: right;">MCC</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: right;">1</td>
-<td>Radixor</td>
-<td>ANY_CANDIDATE</td>
+<td>ALL_CANDIDATES</td>
+<td style="text-align: right;">0.999156</td>
+<td style="text-align: right;">0.854628</td>
 <td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">1.000000</td>
-</tr>
-<tr>
-<td style="text-align: right;">2</td>
-<td>UKRAINIAN LUCENE MORFOLOGIK FILTER</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">0.982318</td>
-<td style="text-align: right;">0.959722</td>
-<td style="text-align: right;">0.938141</td>
-<td style="text-align: right;">0.922562</td>
-<td style="text-align: right;">0.960428</td>
-<td style="text-align: right;">0.960404</td>
-</tr>
-<tr>
-<td style="text-align: right;">3</td>
-<td>UKRAINIAN MORFOLOGIK DIRECT</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">0.982318</td>
-<td style="text-align: right;">0.959722</td>
-<td style="text-align: right;">0.938141</td>
-<td style="text-align: right;">0.922562</td>
-<td style="text-align: right;">0.960428</td>
-<td style="text-align: right;">0.960404</td>
-</tr>
-<tr>
-<td style="text-align: right;">4</td>
-<td>HUNSPELL UKRAINIAN LUCENE FILTER</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">0.962874</td>
-<td style="text-align: right;">0.919422</td>
-<td style="text-align: right;">0.879722</td>
-<td style="text-align: right;">0.850861</td>
-<td style="text-align: right;">0.922033</td>
-<td style="text-align: right;">0.921988</td>
-</tr>
-</tbody>
-</table>
-</details>
-<details class="quality-details">
-<summary>Partition metrics (PRIMARY_OUTPUT only)</summary>
-<table>
-<thead>
-<tr>
-<th style="text-align: right;">Rank</th>
-<th>Stemmer</th>
-<th>Output policy</th>
-<th style="text-align: right;">Adjusted Rand Index</th>
-<th style="text-align: right;">Homogeneity</th>
-<th style="text-align: right;">Completeness</th>
-<th style="text-align: right;">V-measure</th>
-<th style="text-align: right;">Normalized mutual information</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: right;">1</td>
-<td>Radixor</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-</tr>
-<tr>
-<td style="text-align: right;">2</td>
-<td>UKRAINIAN LUCENE MORFOLOGIK FILTER</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-</tr>
-<tr>
-<td style="text-align: right;">3</td>
-<td>UKRAINIAN MORFOLOGIK DIRECT</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-</tr>
-<tr>
-<td style="text-align: right;">4</td>
-<td>HUNSPELL UKRAINIAN LUCENE FILTER</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-</tr>
-</tbody>
-</table>
-</details>
-<details class="quality-details">
-<summary>Raw pair counts</summary>
-<table>
-<thead>
-<tr>
-<th style="text-align: right;">Rank</th>
-<th>Stemmer</th>
-<th>Output policy</th>
-<th style="text-align: right;">TP</th>
-<th style="text-align: right;">FP</th>
-<th style="text-align: right;">FN</th>
-<th style="text-align: right;">TN</th>
-<th style="text-align: right;">Over error / possible</th>
-<th style="text-align: right;">Under error / possible</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: right;">1</td>
-<td>Radixor</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">65324</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">101259406</td>
-<td style="text-align: right;">0 / 101259406</td>
-<td style="text-align: right;">0 / 65324</td>
-</tr>
-<tr>
-<td style="text-align: right;">2</td>
-<td>UKRAINIAN LUCENE MORFOLOGIK FILTER</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">60378</td>
-<td style="text-align: right;">122</td>
-<td style="text-align: right;">4946</td>
-<td style="text-align: right;">101259284</td>
-<td style="text-align: right;">122 / 101259406</td>
-<td style="text-align: right;">4946 / 65324</td>
-</tr>
-<tr>
-<td style="text-align: right;">3</td>
-<td>UKRAINIAN MORFOLOGIK DIRECT</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">60378</td>
-<td style="text-align: right;">122</td>
-<td style="text-align: right;">4946</td>
-<td style="text-align: right;">101259284</td>
-<td style="text-align: right;">122 / 101259406</td>
-<td style="text-align: right;">4946 / 65324</td>
-</tr>
-<tr>
-<td style="text-align: right;">4</td>
-<td>HUNSPELL UKRAINIAN LUCENE FILTER</td>
-<td>ANY_CANDIDATE</td>
-<td style="text-align: right;">55859</td>
-<td style="text-align: right;">326</td>
-<td style="text-align: right;">9465</td>
-<td style="text-align: right;">101259080</td>
-<td style="text-align: right;">326 / 101259406</td>
-<td style="text-align: right;">9465 / 65324</td>
-</tr>
-</tbody>
-</table>
-</details>
-<h4 id="all_candidates-ranking_1"><code>ALL_CANDIDATES</code> ranking</h4>
-<div aria-label="Compact stemming-quality ranking; scroll horizontally for additional columns" class="quality-table quality-table--compact" role="region" tabindex="0">
-<table>
-<thead>
-<tr>
-<th style="text-align: right;">Rank</th>
-<th>Stemmer</th>
-<th>Output policy</th>
-<th style="text-align: right;">Balanced accuracy</th>
-<th style="text-align: right;">Over-stemming</th>
-<th style="text-align: right;">Under-stemming</th>
-<th style="text-align: right;">F0.5</th>
-<th style="text-align: right;">F1</th>
-<th style="text-align: right;">MCC</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: right;">1</td>
-<td>Radixor</td>
-<td>ALL_CANDIDATES</td>
-<td style="text-align: right;">0.999993</td>
-<td style="text-align: right;">1490 / 101259406 (0.001471%)</td>
-<td style="text-align: right;">0 / 65324 (0.000000%)</td>
-<td style="text-align: right;">0.982079</td>
-<td style="text-align: right;">0.988724</td>
-<td style="text-align: right;">0.988779</td>
-</tr>
-<tr>
-<td style="text-align: right;">2</td>
-<td>UKRAINIAN LUCENE MORFOLOGIK FILTER</td>
-<td>ALL_CANDIDATES</td>
-<td style="text-align: right;">0.962136</td>
-<td style="text-align: right;">1368 / 101259406 (0.001351%)</td>
-<td style="text-align: right;">4946 / 65324 (7.571490%)</td>
-<td style="text-align: right;">0.966642</td>
-<td style="text-align: right;">0.950311</td>
-<td style="text-align: right;">0.950657</td>
-</tr>
-<tr>
-<td style="text-align: right;">3</td>
-<td>UKRAINIAN MORFOLOGIK DIRECT</td>
-<td>ALL_CANDIDATES</td>
-<td style="text-align: right;">0.962136</td>
-<td style="text-align: right;">1368 / 101259406 (0.001351%)</td>
-<td style="text-align: right;">4946 / 65324 (7.571490%)</td>
-<td style="text-align: right;">0.966642</td>
-<td style="text-align: right;">0.950311</td>
-<td style="text-align: right;">0.950657</td>
-</tr>
-<tr>
-<td style="text-align: right;">4</td>
-<td>HUNSPELL UKRAINIAN LUCENE FILTER</td>
-<td>ALL_CANDIDATES</td>
-<td style="text-align: right;">0.927547</td>
-<td style="text-align: right;">1271 / 101259406 (0.001255%)</td>
-<td style="text-align: right;">9465 / 65324 (14.489315%)</td>
-<td style="text-align: right;">0.950487</td>
-<td style="text-align: right;">0.912326</td>
-<td style="text-align: right;">0.914325</td>
-</tr>
-</tbody>
-</table>
-</div>
-<details class="quality-details">
-<summary>Classification metrics</summary>
-<table>
-<thead>
-<tr>
-<th style="text-align: right;">Rank</th>
-<th>Stemmer</th>
-<th>Output policy</th>
-<th style="text-align: right;">Precision</th>
-<th style="text-align: right;">Recall</th>
-<th style="text-align: right;">Specificity</th>
-<th style="text-align: right;">Balanced accuracy</th>
-<th style="text-align: right;">Pairwise accuracy</th>
-<th style="text-align: right;">Error rate</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: right;">1</td>
-<td>Radixor</td>
-<td>ALL_CANDIDATES</td>
-<td style="text-align: right;">0.977699</td>
-<td style="text-align: right;">1.000000</td>
-<td style="text-align: right;">0.999985</td>
-<td style="text-align: right;">0.999993</td>
-<td style="text-align: right;">0.999985</td>
-<td style="text-align: right;">0.000015</td>
-</tr>
-<tr>
-<td style="text-align: right;">2</td>
-<td>UKRAINIAN LUCENE MORFOLOGIK FILTER</td>
-<td>ALL_CANDIDATES</td>
-<td style="text-align: right;">0.977845</td>
-<td style="text-align: right;">0.924285</td>
-<td style="text-align: right;">0.999986</td>
-<td style="text-align: right;">0.962136</td>
-<td style="text-align: right;">0.999938</td>
-<td style="text-align: right;">0.000062</td>
-</tr>
-<tr>
-<td style="text-align: right;">3</td>
-<td>UKRAINIAN MORFOLOGIK DIRECT</td>
-<td>ALL_CANDIDATES</td>
-<td style="text-align: right;">0.977845</td>
-<td style="text-align: right;">0.924285</td>
-<td style="text-align: right;">0.999986</td>
-<td style="text-align: right;">0.962136</td>
-<td style="text-align: right;">0.999938</td>
-<td style="text-align: right;">0.000062</td>
-</tr>
-<tr>
-<td style="text-align: right;">4</td>
-<td>HUNSPELL UKRAINIAN LUCENE FILTER</td>
-<td>ALL_CANDIDATES</td>
-<td style="text-align: right;">0.977752</td>
-<td style="text-align: right;">0.855107</td>
-<td style="text-align: right;">0.999987</td>
-<td style="text-align: right;">0.927547</td>
-<td style="text-align: right;">0.999894</td>
-<td style="text-align: right;">0.000106</td>
+<td style="text-align: right;">0.927314</td>
+<td style="text-align: right;">0.999905</td>
+<td style="text-align: right;">0.000095</td>
 </tr>
 </tbody>
 </table>
@@ -4799,104 +4082,45 @@
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
 <td>ALL_CANDIDATES</td>
-<td style="text-align: right;">0.982079</td>
-<td style="text-align: right;">0.988724</td>
-<td style="text-align: right;">0.995459</td>
-<td style="text-align: right;">0.977699</td>
-<td style="text-align: right;">0.988787</td>
-<td style="text-align: right;">0.988779</td>
+<td style="text-align: right;">1.000000</td>
+<td style="text-align: right;">1.000000</td>
+<td style="text-align: right;">1.000000</td>
+<td style="text-align: right;">1.000000</td>
+<td style="text-align: right;">1.000000</td>
+<td style="text-align: right;">1.000000</td>
 </tr>
 <tr>
 <td style="text-align: right;">2</td>
 <td>UKRAINIAN LUCENE MORFOLOGIK FILTER</td>
 <td>ALL_CANDIDATES</td>
-<td style="text-align: right;">0.966642</td>
-<td style="text-align: right;">0.950311</td>
-<td style="text-align: right;">0.934522</td>
-<td style="text-align: right;">0.905326</td>
-<td style="text-align: right;">0.950688</td>
-<td style="text-align: right;">0.950657</td>
+<td style="text-align: right;">0.983065</td>
+<td style="text-align: right;">0.960066</td>
+<td style="text-align: right;">0.938118</td>
+<td style="text-align: right;">0.923199</td>
+<td style="text-align: right;">0.960796</td>
+<td style="text-align: right;">0.960772</td>
 </tr>
 <tr>
 <td style="text-align: right;">3</td>
 <td>UKRAINIAN MORFOLOGIK DIRECT</td>
 <td>ALL_CANDIDATES</td>
-<td style="text-align: right;">0.966642</td>
-<td style="text-align: right;">0.950311</td>
-<td style="text-align: right;">0.934522</td>
-<td style="text-align: right;">0.905326</td>
-<td style="text-align: right;">0.950688</td>
-<td style="text-align: right;">0.950657</td>
+<td style="text-align: right;">0.983065</td>
+<td style="text-align: right;">0.960066</td>
+<td style="text-align: right;">0.938118</td>
+<td style="text-align: right;">0.923199</td>
+<td style="text-align: right;">0.960796</td>
+<td style="text-align: right;">0.960772</td>
 </tr>
 <tr>
 <td style="text-align: right;">4</td>
 <td>HUNSPELL UKRAINIAN LUCENE FILTER</td>
 <td>ALL_CANDIDATES</td>
-<td style="text-align: right;">0.950487</td>
-<td style="text-align: right;">0.912326</td>
-<td style="text-align: right;">0.877111</td>
-<td style="text-align: right;">0.838787</td>
-<td style="text-align: right;">0.914376</td>
-<td style="text-align: right;">0.914325</td>
-</tr>
-</tbody>
-</table>
-</details>
-<details class="quality-details">
-<summary>Partition metrics (PRIMARY_OUTPUT only)</summary>
-<table>
-<thead>
-<tr>
-<th style="text-align: right;">Rank</th>
-<th>Stemmer</th>
-<th>Output policy</th>
-<th style="text-align: right;">Adjusted Rand Index</th>
-<th style="text-align: right;">Homogeneity</th>
-<th style="text-align: right;">Completeness</th>
-<th style="text-align: right;">V-measure</th>
-<th style="text-align: right;">Normalized mutual information</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: right;">1</td>
-<td>Radixor</td>
-<td>ALL_CANDIDATES</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-</tr>
-<tr>
-<td style="text-align: right;">2</td>
-<td>UKRAINIAN LUCENE MORFOLOGIK FILTER</td>
-<td>ALL_CANDIDATES</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-</tr>
-<tr>
-<td style="text-align: right;">3</td>
-<td>UKRAINIAN MORFOLOGIK DIRECT</td>
-<td>ALL_CANDIDATES</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-</tr>
-<tr>
-<td style="text-align: right;">4</td>
-<td>HUNSPELL UKRAINIAN LUCENE FILTER</td>
-<td>ALL_CANDIDATES</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
-<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">0.966468</td>
+<td style="text-align: right;">0.921258</td>
+<td style="text-align: right;">0.880089</td>
+<td style="text-align: right;">0.854012</td>
+<td style="text-align: right;">0.924071</td>
+<td style="text-align: right;">0.924027</td>
 </tr>
 </tbody>
 </table>
@@ -4922,45 +4146,45 @@
 <td style="text-align: right;">1</td>
 <td>Radixor</td>
 <td>ALL_CANDIDATES</td>
-<td style="text-align: right;">65324</td>
-<td style="text-align: right;">1490</td>
+<td style="text-align: right;">65109</td>
 <td style="text-align: right;">0</td>
-<td style="text-align: right;">101257916</td>
-<td style="text-align: right;">1490 / 101259406</td>
-<td style="text-align: right;">0 / 65324</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">99911761</td>
+<td style="text-align: right;">0 / 99911761</td>
+<td style="text-align: right;">0 / 65109</td>
 </tr>
 <tr>
 <td style="text-align: right;">2</td>
 <td>UKRAINIAN LUCENE MORFOLOGIK FILTER</td>
 <td>ALL_CANDIDATES</td>
-<td style="text-align: right;">60378</td>
-<td style="text-align: right;">1368</td>
+<td style="text-align: right;">60163</td>
+<td style="text-align: right;">59</td>
 <td style="text-align: right;">4946</td>
-<td style="text-align: right;">101258038</td>
-<td style="text-align: right;">1368 / 101259406</td>
-<td style="text-align: right;">4946 / 65324</td>
+<td style="text-align: right;">99911702</td>
+<td style="text-align: right;">59 / 99911761</td>
+<td style="text-align: right;">4946 / 65109</td>
 </tr>
 <tr>
 <td style="text-align: right;">3</td>
 <td>UKRAINIAN MORFOLOGIK DIRECT</td>
 <td>ALL_CANDIDATES</td>
-<td style="text-align: right;">60378</td>
-<td style="text-align: right;">1368</td>
+<td style="text-align: right;">60163</td>
+<td style="text-align: right;">59</td>
 <td style="text-align: right;">4946</td>
-<td style="text-align: right;">101258038</td>
-<td style="text-align: right;">1368 / 101259406</td>
-<td style="text-align: right;">4946 / 65324</td>
+<td style="text-align: right;">99911702</td>
+<td style="text-align: right;">59 / 99911761</td>
+<td style="text-align: right;">4946 / 65109</td>
 </tr>
 <tr>
 <td style="text-align: right;">4</td>
 <td>HUNSPELL UKRAINIAN LUCENE FILTER</td>
 <td>ALL_CANDIDATES</td>
-<td style="text-align: right;">55859</td>
-<td style="text-align: right;">1271</td>
+<td style="text-align: right;">55644</td>
+<td style="text-align: right;">47</td>
 <td style="text-align: right;">9465</td>
-<td style="text-align: right;">101258135</td>
-<td style="text-align: right;">1271 / 101259406</td>
-<td style="text-align: right;">9465 / 65324</td>
+<td style="text-align: right;">99911714</td>
+<td style="text-align: right;">47 / 99911761</td>
+<td style="text-align: right;">9465 / 65109</td>
 </tr>
 </tbody>
 </table>
@@ -4983,55 +4207,55 @@
 <tbody>
 <tr>
 <td>HUNSPELL UKRAINIAN LUCENE FILTER</td>
-<td style="text-align: right;">5455</td>
-<td style="text-align: right;">468</td>
-<td style="text-align: right;">477</td>
-<td style="text-align: right;">1321</td>
-<td style="text-align: right;">9.279292%</td>
+<td style="text-align: right;">5407</td>
 <td style="text-align: right;">6</td>
-<td style="text-align: right;">15730</td>
+<td style="text-align: right;">41</td>
+<td style="text-align: right;">1258</td>
+<td style="text-align: right;">8.896118%</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">15567</td>
 </tr>
 <tr>
 <td>UKRAINIAN LUCENE MORFOLOGIK FILTER</td>
-<td style="text-align: right;">4362</td>
-<td style="text-align: right;">706</td>
-<td style="text-align: right;">540</td>
-<td style="text-align: right;">2207</td>
-<td style="text-align: right;">15.502950%</td>
+<td style="text-align: right;">4314</td>
+<td style="text-align: right;">28</td>
+<td style="text-align: right;">31</td>
+<td style="text-align: right;">2130</td>
+<td style="text-align: right;">15.062584%</td>
 <td style="text-align: right;">6</td>
-<td style="text-align: right;">16928</td>
+<td style="text-align: right;">16739</td>
 </tr>
 <tr>
 <td>UKRAINIAN MORFOLOGIK DIRECT</td>
-<td style="text-align: right;">4362</td>
-<td style="text-align: right;">706</td>
-<td style="text-align: right;">540</td>
-<td style="text-align: right;">2207</td>
-<td style="text-align: right;">15.502950%</td>
+<td style="text-align: right;">4314</td>
+<td style="text-align: right;">28</td>
+<td style="text-align: right;">31</td>
+<td style="text-align: right;">2130</td>
+<td style="text-align: right;">15.062584%</td>
 <td style="text-align: right;">6</td>
-<td style="text-align: right;">16928</td>
+<td style="text-align: right;">16739</td>
 </tr>
 <tr>
 <td>Radixor</td>
-<td style="text-align: right;">608</td>
-<td style="text-align: right;">880</td>
-<td style="text-align: right;">610</td>
-<td style="text-align: right;">190</td>
-<td style="text-align: right;">1.334645%</td>
+<td style="text-align: right;">545</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">95</td>
+<td style="text-align: right;">0.671805%</td>
 <td style="text-align: right;">2</td>
-<td style="text-align: right;">14426</td>
+<td style="text-align: right;">14236</td>
 </tr>
 </tbody>
 </table>
 <h3 id="output-policies-and-metric-definitions">Output Policies and Metric Definitions</h3>
-<p><code>PRIMARY_OUTPUT</code> uses one deterministic stem per form and therefore defines a strict partition. <code>ANY_CANDIDATE</code> is an optimistic oracle-assisted pairwise upper bound: a same-group pair succeeds when candidates intersect, while a different-group pair succeeds when a non-colliding selection exists. Candidate choices may differ between pairs, so this is not deterministic runtime behaviour and need not represent one globally consistent assignment. <code>ALL_CANDIDATES</code> activates every returned candidate; forms are related when candidate sets intersect. Alternatives can reduce under-stemming but can introduce cross-group collisions, and the resulting relation can overlap and need not be a partition.</p>
-<p>For each row, <code>TP = underPossiblePairs - underErrorPairs</code>, <code>FN = underErrorPairs</code>, <code>FP = overErrorPairs</code>, and <code>TN = overPossiblePairs - overErrorPairs</code>. TP and FN concern same-group pairs; FP and TN concern different-group pairs. Consequently, under-stemming and over-stemming use different denominators. Undefined values are rendered as <code>n/a</code>.</p>
+<p>Each distinct surface form is one item and may belong to several gold groups. Two forms are gold-related when their membership sets intersect; a relation shared by several groups is counted once. <code>PRIMARY_OUTPUT</code> uses one deterministic stem per form. <code>ANY_CANDIDATE</code> is an optimistic oracle-assisted pairwise upper bound: a gold-related pair succeeds when candidates intersect, while a gold-negative pair succeeds when a non-colliding selection exists. Candidate choices may differ between pairs, so this is not deterministic runtime behaviour and does not define one confusion matrix. <code>ALL_CANDIDATES</code> activates every returned candidate; forms are related when candidate sets intersect.</p>
+<p>For <code>PRIMARY_OUTPUT</code> and <code>ALL_CANDIDATES</code>, <code>TP = underPossiblePairs - underErrorPairs</code>, <code>FN = underErrorPairs</code>, <code>FP = overErrorPairs</code>, and <code>TN = overPossiblePairs - overErrorPairs</code>. <code>ANY_CANDIDATE</code> publishes only its separate oracle-assisted under/over bounds; confusion-derived metrics are mathematically inapplicable and are not presented in its language-page section. Their machine-readable CSV fields remain empty. Undefined metric denominators in otherwise applicable policies are rendered as <code>n/a</code>.</p>
 <ul>
-<li>Under-stemming rate: <code>FN / (TP + FN)</code>, the false-negative rate over same-group pairs.</li>
-<li>Over-stemming rate: <code>FP / (TN + FP)</code>, the false-positive rate over different-group pairs.</li>
+<li>Under-stemming rate (Paice UI): <code>FN / (TP + FN)</code>, the false-negative rate over gold-related pairs.</li>
+<li>Over-stemming rate (Paice OI): <code>FP / (TN + FP)</code>, the false-positive rate over gold-negative pairs.</li>
 <li>Pairwise precision: <code>TP / (TP + FP)</code>, the fraction of predicted conflations that are gold-standard positive pairs.</li>
 <li>Pairwise recall: <code>TP / (TP + FN)</code>, the fraction of gold-standard positive pairs successfully connected.</li>
-<li>Pairwise specificity: <code>TN / (TN + FP)</code>, the fraction of different-group pairs correctly separated.</li>
+<li>Pairwise specificity: <code>TN / (TN + FP)</code>, the fraction of gold-negative pairs correctly separated.</li>
 <li>Balanced accuracy: <code>(recall + specificity) / 2</code>. It gives equal weight to positive and negative pair classes and is less dominated by the large true-negative class than ordinary accuracy. It does not replace the raw errors or other metrics.</li>
 <li>Pairwise F-beta: <code>((1 + betaSquared) * TP) / (((1 + betaSquared) * TP) + (betaSquared * FN) + FP)</code>. F0.5 emphasizes precision and penalizes over-stemming more; F1 weights precision and recall equally; F2 emphasizes recall and penalizes under-stemming more.</li>
 <li>MCC: <code>(TP * TN - FP * FN) / sqrt((TP + FP) * (TP + FN) * (TN + FP) * (TN + FN))</code>. It uses all confusion counts and remains useful under class imbalance, except when its denominator is degenerate.</li>
@@ -5040,16 +4264,17 @@
 <li>Pairwise accuracy: <code>(TP + TN) / (TP + TN + FP + FN)</code>. It can be dominated by true-negative cross-group pairs.</li>
 <li>Pairwise error rate: <code>(FP + FN) / (TP + TN + FP + FN)</code>.</li>
 </ul>
-<p>Adjusted Rand Index uses the gold/predicted contingency table and chance correction. Homogeneity is <code>1 - H(gold | predicted) / H(gold)</code>; completeness is <code>1 - H(predicted | gold) / H(predicted)</code>; V-measure is their harmonic mean; normalized mutual information uses the arithmetic-mean entropy normalization <code>MI / ((H(gold) + H(predicted)) / 2)</code>. These partition-only metrics apply to <code>PRIMARY_OUTPUT</code>; candidate-relation rows show <code>n/a</code>.</p>
+<p>Standard ARI, homogeneity, completeness, V-measure, and NMI are not calculated: their usual contingency-table definitions require an exclusive gold partition, while this gold standard is an overlapping cover.</p>
 <h3 id="provenance">Provenance</h3>
 <ul>
 <li>Authoritative source: <code>docs/benchmarks/data/stemming-quality.csv</code></li>
-<li>Source SHA-256: <code>5a93a6ab60e46489737cd649eb1ac48182114b9038f7f20195ab9d1c1fc0dd28</code></li>
-<li>Evaluation command: <code>./gradlew stemmingQuality</code></li>
+<li>Source SHA-256: <code>edf16b07be8a535943ddf37caeb8807755c95e9e1fb13244145f28be74b491d8</code></li>
+<li>Evaluation command: <code>./gradlew stemmingQuality --no-daemon</code></li>
 <li>Dictionary language: <code>UK_UA</code></li>
 <li>Processing modes: <code>ALL_WORDS</code>, <code>LOWERCASE_GROUPS_ONLY</code></li>
 <li>Stemmer versions and transitive artifacts: resolved by the repository's JMH Gradle configuration and <code>gradle.lockfile</code></li>
-<li>Radixor version, Git revision, generation date, JDK version, operating system, and dictionary revision: not recorded in the authoritative CSV</li>
+<li>Model ID, version, and SHA-256: recorded in every CSV row</li>
+<li>Run date, core source state, JDK, operating system, and hardware: recorded on the <a href="../../reference/environment/">benchmark environment page</a></li>
 </ul>
 <!-- STEMMING-QUALITY:END -->
 

@@ -1883,6 +1883,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../benchmarks/languages/hebrew/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hebrew
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../benchmarks/languages/hungarian/" class="md-nav__link">
         
   
@@ -2912,7 +2940,11 @@ its BSD-2-Clause data license.</p>
 </code></pre></div>
 <p><code>runtimeModelIntegrationTest</code> uses an isolated JVM, defaults to a 6 GiB maximum heap, and can be overridden with <code>-PradixorLargeModelMaxHeap=10g</code>. For PoliMorf, <code>validateModelRelease</code> depends on this complete runtime construction and real stemming smoke verification in addition to descriptor, checksum, license, and package validation. The generic release workflow still selects and publishes only the requested model. The commands above are local validation only; repository owners control tags and publication.</p>
 <h2 id="documentation-and-troubleshooting">Documentation and troubleshooting</h2>
-<p><code>prepareMkDocsSource</code> generates the catalog only at <code>build/mkdocs-source/stemmer-model-catalog.md</code>; generated Markdown and rendered site content are not tracked. For runtime failures, dependency inspection, ClassLoader isolation, and fat-JAR guidance, see <a href="../model-selection-and-loading/#troubleshooting">Model Selection and Loading</a>.</p>
+<p><code>publishModelCatalogDocumentation</code> updates the checked-in catalog used by a direct local <code>mkdocs serve</code>.
+<code>prepareMkDocsSource</code> independently regenerates the same catalog under <code>build/mkdocs-source/</code> for the
+publication workflow, and <code>verifyModelCatalogDocumentation</code> fails when the two copies differ. Rendered
+site content remains untracked. For runtime failures, dependency inspection, ClassLoader isolation, and
+fat-JAR guidance, see <a href="../model-selection-and-loading/#troubleshooting">Model Selection and Loading</a>.</p>
 
 
 

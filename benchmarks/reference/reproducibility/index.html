@@ -1852,6 +1852,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../languages/hebrew/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hebrew
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../languages/hungarian/" class="md-nav__link">
         
   
@@ -2512,13 +2540,12 @@
 <ul>
 <li>Machine-readable CSV: <a href="../../data/stemming-quality.csv">stemming-quality.csv</a></li>
 <li>SHA-256 record: <a href="../../data/stemming-quality.sha256">stemming-quality.sha256</a></li>
-<li>SHA-256: <code>5a93a6ab60e46489737cd649eb1ac48182114b9038f7f20195ab9d1c1fc0dd28</code></li>
+<li>SHA-256: <code>edf16b07be8a535943ddf37caeb8807755c95e9e1fb13244145f28be74b491d8</code></li>
 <li>Complete scenarios: 308</li>
 <li>Authoritative language universe: 20 languages</li>
-<li>Language-page scenarios: 302 across 19 existing benchmark pages</li>
+<li>Language-page scenarios: 308 across 20 benchmark pages</li>
 </ul>
-<p>The six remaining scenarios are the three Radixor policies in two modes for <code>HE_IL</code>. Hebrew is present in the complete result snapshot but has no existing language benchmark page.</p>
-<p>The CSV contains raw TP, FP, FN, and TN counts; raw over/under numerators and denominators; candidate statistics; relation metrics; and partition-only metrics. Documentation is regenerated from this file rather than manually transcribed.</p>
+<p>The CSV contains the model ID, independent model version, descriptor SHA-256, raw pair counts, raw over/under numerators and denominators, candidate statistics, and relation metrics. Reserved partition-metric columns remain empty because the gold standard is an overlapping cover. Documentation is regenerated from this file rather than manually transcribed. Publication fails when any row uses a model other than the language's registered default.</p>
 <h2 id="commands">Commands</h2>
 <div class="highlight"><pre><span></span><code>./gradlew<span class="w"> </span>stemmingQuality
 ./gradlew<span class="w"> </span>publishStemmingQualityDocumentation
@@ -2527,6 +2554,9 @@
 ./gradlew<span class="w"> </span>prepareMkDocsSource
 mkdocs<span class="w"> </span>build<span class="w"> </span>--strict<span class="w"> </span>--config-file<span class="w"> </span>build/mkdocs/mkdocs.yml
 </code></pre></div>
+<p>For an immediate local preview, <code>mkdocs serve</code> works directly from the repository root. The checked-in
+model catalog makes that source tree complete. After changing model metadata or model bytes, refresh it
+with <code>./gradlew publishModelCatalogDocumentation</code>; verification rejects a stale checked-in catalog.</p>
 <p><code>stemmingQuality</code> performs the expensive complete evaluation and is intentionally not attached to <code>test</code> or <code>check</code>. It prepares JMH third-party dependencies automatically and writes:</p>
 <ul>
 <li><code>build/reports/stemming-quality/stemming-quality.csv</code></li>
@@ -2551,13 +2581,14 @@ its separately packaged BSD-2-Clause license.</p>
 <p>For a future full PoliMorf measurement, also record the startup heap separately from benchmark parameters. Complete runtime construction is currently verified with a dedicated 6 GiB maximum heap; this limit is neither a retained-trie measurement nor a setting applied to ordinary JMH runs.</p>
 <p>The Pages workflow publishes that staged documentation together with Javadoc, JUnit, PMD, JaCoCo, PIT, representative JMH, SBOM, optional dependency-check output, badge metadata, and retained build history. Its filesystem merge explicitly preserves the <code>builds/</code> tree in the separate <code>gh-pages</code> publication branch, so documentation regeneration cannot erase durable report URLs.</p>
 <h2 id="performance-benchmark-reproduction">Performance benchmark reproduction</h2>
-<p>The JMH comparison command family is:</p>
-<div class="highlight"><pre><span></span><code>./gradlew<span class="w"> </span>jmh<span class="w"> </span>-Pjmh.includes<span class="o">=</span><span class="s1">&#39;.*StemmerComparisonBenchmark.*&#39;</span><span class="w"> </span>--no-daemon
+<p>The current speed and coverage-speed command is:</p>
+<div class="highlight"><pre><span></span><code>./gradlew<span class="w"> </span>writeJmhRuntimeClasspath<span class="w"> </span>--no-daemon
+tools/run-published-speed-benchmarks.sh<span class="w"> </span><span class="m">2026</span>-07-23
 </code></pre></div>
-<p>The exact JMH configuration, hardware, operating system, and JDK captured for the published performance tables are listed in <a href="../environment/">Environment and reports</a>. Quality and performance reports are separate datasets and are not combined into an undocumented scalar.</p>
+<p>The runner refuses to start unless every CPU uses the <code>performance</code> governor, materializes the exact selected benchmark list, rejects quality/Polimorf/gold-standard methods, and requires the Hebrew speed path. It records hardware, JVM, source-state, JAR, classpath, corpus, quality, load, temperature, and governor provenance before running. The exact JMH configuration is listed in <a href="../environment/">Environment and reports</a>. Quality and performance reports are separate datasets and are not combined into an undocumented scalar.</p>
 <h2 id="recorded-and-unavailable-provenance">Recorded and unavailable provenance</h2>
-<p>The performance documentation records its 2026-07-06 environment, JDK 25.0.3, operating system, and hardware. The quality CSV records the evaluated identifiers and counts but does not embed the Radixor Git revision, generation date, JDK, operating system, model ID, dictionary content hash, or immutable upstream revisions for every downloaded source. These fields are explicitly unavailable for this historical snapshot and are not reconstructed from filesystem timestamps. In particular, the snapshot predates the optional PoliMorf integration and must not be relabeled as <code>pl-pl-polimorf</code>.</p>
-<p>Dependency versions that are reproducible from repository configuration include Apache Lucene 10.5.0, Morfologik 2.1.9, the Ukrainian dictionary artifact 4.9.1, and JMH 1.37. Other upstream branches or downloaded dictionary revisions should be pinned and embedded in a future result schema.</p>
+<p>The performance documentation records its 2026-07-23 environment, JDK 25.0.3, operating system, hardware, base revision, exact dirty patch, untracked-source checksums, executable JMH JAR checksum, and model descriptor checksums. The quality CSV embeds model identity and checksum in every row; run date, core source state, JVM, OS, and hardware are shared provenance on the environment page.</p>
+<p>Exact immutable upstream revisions were not recorded for every legacy UniMorph import. That limitation remains explicit in model descriptors and cannot be repaired from filesystem timestamps. Dependency versions reproducible from repository configuration include Apache Lucene 10.5.0, Morfologik 2.1.9, the Ukrainian dictionary artifact 4.9.1, and JMH 1.37.</p>
 <h2 id="correlation-and-audit-data">Correlation and audit data</h2>
 <p>Pearson and Spearman files are generated from unrounded metric values in cohorts separated by dictionary mode and output policy. A missing coefficient means too few observations, undefined input, or zero variance. Correlation is descriptive and does not demonstrate that two metrics are scientifically interchangeable.</p>
 <p>Audit reports preserve original multilingual forms and identify high-contributing dictionary groups. They are build artifacts rather than checked-in publication data because of their size. No documentation value is manually altered after generation.</p>
