@@ -12,5 +12,13 @@ final class RadixorBuildSupportPlugin implements Plugin<Project> {
             group = 'verification'
             description = 'Creates an isolated local Maven repository for model dependency-resolution integration tests.'
         }
+        project.tasks.register('prepareModelCatalogReleaseCandidate', PrepareModelCatalogBundleInputTask) {
+            group = 'publishing'
+            description = 'Prepares the isolated POM-only model catalog input for Maven Central.'
+        }
+        project.tasks.register('verifyModelCatalogReleaseCandidate', VerifyModelCatalogReleaseCandidateTask) {
+            group = 'verification'
+            description = 'Verifies catalog bundle contents, checksums, coordinates, and dependency semantics.'
+        }
     }
 }

@@ -85,28 +85,31 @@ signing {
     }
 }
 
+def standardPublicationPom = layout.buildDirectory.file('publications/standard/pom-default.xml')
+def expectedStandardArtifactIds = defaultModelIds.collect { String modelId -> "radixor-model-${modelId}" }
+def standardHasJarTasks = !tasks.withType(Jar).isEmpty()
 tasks.register('verifyPomOnlyAggregate') {
     group = 'verification'
     description = 'Verifies the standard POM-only aggregate and its runtime model dependencies.'
     dependsOn(tasks.named('generatePomFileForStandardPublication'))
+    inputs.file(standardPublicationPom)
     doLast {
-        File pomFile = layout.buildDirectory.file('publications/standard/pom-default.xml').get().asFile
+        File pomFile = standardPublicationPom.get().asFile
         Node pom = new XmlParser().parse(pomFile)
         List<Node> dependencies = pom.dependencies.dependency as List<Node>
         List<String> artifactIds = dependencies.collect { Node dependency ->
             dependency.artifactId.text()
         }
-        List<String> expected = defaultModelIds.collect { String modelId -> "radixor-model-${modelId}" }
         if (pom.packaging.text() != 'pom') {
             throw new GradleException('radixor-models-standard must publish Maven packaging pom.')
         }
-        if (artifactIds != expected || dependencies.any { Node dependency -> dependency.scope.text() != 'runtime' }) {
+        if (artifactIds != expectedStandardArtifactIds || dependencies.any { Node dependency -> dependency.scope.text() != 'runtime' }) {
             throw new GradleException('radixor-models-standard must contain exactly the ordered default model runtime dependencies.')
         }
         if (artifactIds.contains('radixor-model-pl-pl-polimorf')) {
             throw new GradleException('radixor-models-standard must exclude the optional PoliMorf model.')
         }
-        if (!tasks.withType(Jar).isEmpty()) {
+        if (standardHasJarTasks) {
             throw new GradleException('radixor-models-standard must not create binary, sources, or Javadoc JARs.')
         }
     }

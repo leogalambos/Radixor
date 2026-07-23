@@ -603,12 +603,13 @@ tasks.named('prepareModelConsumerTestRepository') {
     repositoryDirectory = layout.buildDirectory.dir('model-consumer-repository')
 }
 
-def cleanModelCatalogStaging = tasks.register('cleanModelCatalogStaging') {
+def rawModelCatalogRepository = layout.buildDirectory.dir('model-catalog-staging-repository')
+def preparedModelCatalogBundleInput = layout.buildDirectory.dir('model-catalog-bundle-input')
+
+def cleanModelCatalogStaging = tasks.register('cleanModelCatalogStaging', Delete) {
     group = 'publishing'
     description = 'Cleans the isolated model catalog Maven staging repository.'
-    doLast {
-        project.delete(layout.buildDirectory.dir('model-catalog-staging-repository'))
-    }
+    delete(rawModelCatalogRepository)
 }
 
 gradle.projectsEvaluated {
@@ -620,40 +621,28 @@ gradle.projectsEvaluated {
     }
 }
 
-tasks.register('prepareModelCatalogReleaseCandidate') {
-    group = 'publishing'
-    description = 'Stages the POM-only standard aggregate and model BOM with Central checksums.'
+def prepareModelCatalogReleaseCandidate = tasks.named('prepareModelCatalogReleaseCandidate') {
     dependsOn(project(':models:standard').tasks.named('check'))
     dependsOn(project(':models:bom').tasks.named('check'))
     dependsOn(':models:standard:publishStandardPublicationToCatalogStagingRepository')
     dependsOn(':models:bom:publishBomPublicationToCatalogStagingRepository')
-    outputs.dir(layout.buildDirectory.dir('model-catalog-staging-repository'))
-    doLast {
-        File repository = layout.buildDirectory.dir('model-catalog-staging-repository').get().asFile
-        repository.eachFileRecurse { File artifact ->
-            if (artifact.isFile() && !['.md5', '.sha1', '.sha256', '.sha512'].any {
-                String extension -> artifact.name.endsWith(extension)
-            }) {
-                ['MD5': 'md5', 'SHA-1': 'sha1'].each { String algorithm, String extension ->
-                    String digest = java.security.MessageDigest.getInstance(algorithm)
-                            .digest(artifact.bytes).encodeHex().toString()
-                    new File(artifact.absolutePath + ".${extension}").setText(digest, 'US-ASCII')
-                }
-            }
-        }
-    }
+    rawRepositoryDirectory = rawModelCatalogRepository
+    preparedBundleDirectory = preparedModelCatalogBundleInput
+    catalogVersion = project(':models:standard').version.toString()
 }
 
-tasks.register('modelCatalogCentralBundle', Zip) {
+def modelCatalogCentralBundle = tasks.register('modelCatalogCentralBundle', Zip) {
     group = 'publishing'
     description = 'Builds the local POM-only model catalog bundle without remote publication.'
-    dependsOn(tasks.named('prepareModelCatalogReleaseCandidate'))
-    from(layout.buildDirectory.dir('model-catalog-staging-repository')) {
-        exclude('**/maven-metadata*.xml*', '**/*.module*')
-    }
+    dependsOn(prepareModelCatalogReleaseCandidate)
+    from(preparedModelCatalogBundleInput)
     destinationDirectory = layout.buildDirectory.dir('model-catalog-release-candidate')
     archiveFileName = "radixor-models-catalog-${project(':models:standard').version}-central-bundle.zip"
     doFirst {
+        File preparedInput = preparedModelCatalogBundleInput.get().asFile
+        if (!preparedInput.isDirectory() || preparedInput.listFiles() == null || preparedInput.listFiles().length == 0) {
+            throw new GradleException("The prepared model catalog bundle input is missing or empty: ${preparedInput}.")
+        }
         if (providers.environmentVariable('GITHUB_REF_TYPE').orNull == 'tag'
                 && (providers.environmentVariable('SIGNING_KEY').orNull?.isBlank() != false
                 || providers.environmentVariable('SIGNING_PASSWORD').orNull?.isBlank() != false)) {
@@ -662,45 +651,20 @@ tasks.register('modelCatalogCentralBundle', Zip) {
     }
 }
 
-tasks.register('verifyModelCatalogReleaseCandidate') {
-    group = 'verification'
-    description = 'Verifies that the local catalog bundle contains only two POM publications, signatures when configured, and checksums.'
-    dependsOn(tasks.named('modelCatalogCentralBundle'))
-    outputs.file(layout.buildDirectory.file('reports/models/catalog-release-candidate.txt'))
-    doLast {
-        File bundle = tasks.named('modelCatalogCentralBundle', Zip).get().archiveFile.get().asFile
-        List<String> entries = []
-        new java.util.zip.ZipFile(bundle).withCloseable { java.util.zip.ZipFile archive ->
-            archive.entries().each { java.util.zip.ZipEntry entry ->
-                if (!entry.directory) entries.add(entry.name)
-            }
-        }
-        entries.sort()
-        List<String> poms = entries.findAll { String entry -> entry.endsWith('.pom') }
-        if (poms.size() != 2 || entries.any { String entry ->
-            entry.endsWith('.jar') || entry.endsWith('/stemmer.gz') || entry.contains('benchmark-pack')
-        }) {
-            throw new GradleException('The model catalog bundle must contain only the standard and BOM POM publications.')
-        }
-        List<String> unsupported = entries.findAll { String entry ->
-            !(entry.endsWith('.pom') || entry.endsWith('.pom.md5') || entry.endsWith('.pom.sha1')
-                    || entry.endsWith('.pom.sha256') || entry.endsWith('.pom.sha512')
-                    || entry.endsWith('.pom.asc') || entry.endsWith('.pom.asc.md5')
-                    || entry.endsWith('.pom.asc.sha1') || entry.endsWith('.pom.asc.sha256')
-                    || entry.endsWith('.pom.asc.sha512'))
-        }
-        if (!unsupported.isEmpty()) {
-            throw new GradleException("The model catalog bundle contains unsupported files: ${unsupported}.")
-        }
-        poms.each { String pom ->
-            if (!entries.contains(pom + '.md5') || !entries.contains(pom + '.sha1')) {
-                throw new GradleException("The model catalog POM is missing Central checksums: ${pom}.")
-            }
-        }
-        File report = layout.buildDirectory.file('reports/models/catalog-release-candidate.txt').get().asFile
-        report.parentFile.mkdirs()
-        report.setText("Bundle: ${bundle.name}\nBytes: ${bundle.length()}\n" + entries.join('\n') + '\n', 'UTF-8')
-    }
+def publishedModelVersions = modelProjects().collect { Project modelProject ->
+    modelProject.file('model-version.txt').getText('UTF-8').trim()
+}.toSet()
+if (publishedModelVersions.size() != 1) {
+    throw new GradleException("The catalog verifier requires one common model version; found ${publishedModelVersions}.")
+}
+
+tasks.named('verifyModelCatalogReleaseCandidate') {
+    bundleFile = modelCatalogCentralBundle.flatMap { Zip archive -> archive.archiveFile }
+    reportFile = layout.buildDirectory.file('reports/models/catalog-release-candidate.txt')
+    catalogVersion = project(':models:standard').version.toString()
+    modelVersion = publishedModelVersions.first()
+    defaultModelIds = defaultModelProjects().collect { Project modelProject -> modelProject.name }
+    allModelIds = modelProjects().collect { Project modelProject -> modelProject.name }
 }
 
 tasks.register('verifyArtifactSizes') {

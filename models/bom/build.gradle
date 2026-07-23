@@ -74,23 +74,26 @@ signing {
     }
 }
 
+def bomPublicationPom = layout.buildDirectory.file('publications/bom/pom-default.xml')
+def expectedBomArtifactIds = modelIds.collect { String modelId -> "radixor-model-${modelId}" }
+def bomHasJarTasks = !tasks.withType(Jar).isEmpty()
 tasks.register('verifyPomOnlyPlatform') {
     group = 'verification'
     description = 'Verifies the POM-only model dependency-management platform.'
     dependsOn(tasks.named('generatePomFileForBomPublication'))
+    inputs.file(bomPublicationPom)
     doLast {
-        File pomFile = layout.buildDirectory.file('publications/bom/pom-default.xml').get().asFile
+        File pomFile = bomPublicationPom.get().asFile
         Node pom = new XmlParser().parse(pomFile)
         List<Node> constraints = pom.dependencyManagement.dependencies.dependency as List<Node>
         List<String> artifactIds = constraints.collect { Node dependency -> dependency.artifactId.text() }
-        List<String> expected = modelIds.collect { String modelId -> "radixor-model-${modelId}" }
-        if (pom.packaging.text() != 'pom' || artifactIds != expected) {
+        if (pom.packaging.text() != 'pom' || artifactIds != expectedBomArtifactIds) {
             throw new GradleException('radixor-models-bom must publish exactly the ordered model constraints as Maven packaging pom.')
         }
         if (!pom.dependencies.isEmpty()) {
             throw new GradleException('radixor-models-bom must not introduce runtime model dependencies.')
         }
-        if (!tasks.withType(Jar).isEmpty()) {
+        if (bomHasJarTasks) {
             throw new GradleException('radixor-models-bom must not create binary, sources, or Javadoc JARs.')
         }
     }
