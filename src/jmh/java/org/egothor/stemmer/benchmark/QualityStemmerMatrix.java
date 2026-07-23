@@ -41,6 +41,9 @@ import org.egothor.stemmer.StemmerPatchTrieLoader.Language;
 
 /** Authoritative analytical view of the candidate matrix defined by the JMH quality benchmark. */
 public final class QualityStemmerMatrix {
+    /** Optional Polish PoliMorf model included as an explicit non-default comparison. */
+    private static final String POLISH_POLIMORF_MODEL_ID = "pl-pl-polimorf";
+
     /** Utility class. */
     private QualityStemmerMatrix() {
         throw new AssertionError("No instances.");
@@ -81,6 +84,15 @@ public final class QualityStemmerMatrix {
                             @Override public boolean supportsMultipleOutputs() { return true; }
                         }))
                 .forEach(candidates::add);
+        final List<Candidate> defaultPolishCandidates = candidates.stream()
+                .filter(candidate -> candidate.language() == Language.PL_PL)
+                .toList();
+        candidates.add(new Candidate("POLISH_POLIMORF_RADIXOR", Language.PL_PL,
+                POLISH_POLIMORF_MODEL_ID, POLISH_POLIMORF_MODEL_ID,
+                () -> adapt(StemmerComparisonBenchmarkQuality.createRadixorQualityStemmer(POLISH_POLIMORF_MODEL_ID))));
+        defaultPolishCandidates
+                .forEach(candidate -> candidates.add(new Candidate(candidate.name(), candidate.language(),
+                        POLISH_POLIMORF_MODEL_ID, POLISH_POLIMORF_MODEL_ID, candidate.factory)));
         return List.copyOf(candidates);
     }
 
@@ -102,13 +114,23 @@ public final class QualityStemmerMatrix {
     public static final class Candidate {
         private final String name;
         private final Language language;
+        private final String resultLanguage;
+        private final String dictionaryModelId;
         private final StemmerFactory factory;
 
         /** Creates an immutable facade over one benchmark candidate. */
         private Candidate(final String name, final Language language,
                 final StemmerFactory factory) {
+            this(name, language, language.name(), language.defaultModelId(), factory);
+        }
+
+        /** Creates an immutable facade over one benchmark candidate and dictionary model. */
+        private Candidate(final String name, final Language language, final String resultLanguage,
+                final String dictionaryModelId, final StemmerFactory factory) {
             this.name = Objects.requireNonNull(name, "name");
             this.language = Objects.requireNonNull(language, "language");
+            this.resultLanguage = Objects.requireNonNull(resultLanguage, "resultLanguage");
+            this.dictionaryModelId = Objects.requireNonNull(dictionaryModelId, "dictionaryModelId");
             this.factory = Objects.requireNonNull(factory, "factory");
         }
 
@@ -120,6 +142,16 @@ public final class QualityStemmerMatrix {
         /** @return registered Radixor gold-standard dictionary language */
         public Language language() {
             return this.language;
+        }
+
+        /** @return stable report language or model label */
+        public String resultLanguage() {
+            return this.resultLanguage;
+        }
+
+        /** @return exact dictionary model used as the gold-standard grouping source */
+        public String dictionaryModelId() {
+            return this.dictionaryModelId;
         }
 
         /**

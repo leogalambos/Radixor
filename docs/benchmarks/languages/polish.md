@@ -8,21 +8,21 @@ Radixor must not be read as simply "slower" when a narrow competitor has a lower
 
 ## Dictionary Corpus
 
-| Resource | Dictionary rows | Complete quality tokens | Already-root tokens | Changed speed tokens |
-| --- | ---: | ---: | ---: | ---: |
-| `PL_PL` | 9,990 | 132,308 | 19,957 | 112,351 |
+| Model ID | Model version | Language | Dictionary rows | Complete quality tokens | Already-root tokens | Changed speed tokens |
+| --- | --- | --- | ---: | ---: | ---: | ---: |
+| `pl-pl-unimorph` | `1.0.0` | `PL_PL` | 9,990 | 132,308 | 19,957 | 112,351 |
 
 ## Radixor Patch Command Distribution
 
-Radixor stores the preferred transformation for each normalized dictionary word form as a compiled patch command. This distribution shows which runtime command class is selected by the trained trie for the complete language dictionary. The total number of preferred patch commands analyzed for this language is **132,308**.
+Radixor stores the preferred transformation for each normalized dictionary word form as a compiled patch command. This distribution shows which runtime command class is selected by the trained trie for the complete default-model dictionary. The total number of preferred patch commands analyzed for this language is **132,308**.
 
 | Command class | Meaning | Word forms | Share |
 | --- | --- | ---: | ---: |
-| `AppendCharacterCommand` | Appends one character to the end of the word form. | 1,719 | 1.299% |
-| `BackwardCompoundCommand` | Applies a multi-step backward patch made from skip, delete, insert, and replace operations. | 53,303 | 40.287% |
-| `DeleteSuffixCommand` | Deletes one or more trailing characters from the word form. | 37,051 | 28.004% |
-| `PreserveCommand` | Returns the word form unchanged because it already matches the preferred root. | 20,415 | 15.430% |
-| `ReplaceLastCharacterCommand` | Replaces the final character of the word form. | 19,820 | 14.980% |
+| `AppendCharacterCommand` | Appends one character to the end of the word form. | 1,836 | 1.388% |
+| `BackwardCompoundCommand` | Applies a multi-step backward patch made from skip, delete, insert, and replace operations. | 52,996 | 40.055% |
+| `DeleteSuffixCommand` | Deletes one or more trailing characters from the word form. | 37,137 | 28.069% |
+| `PreserveCommand` | Returns the word form unchanged because it already matches the preferred root. | 20,219 | 15.282% |
+| `ReplaceLastCharacterCommand` | Replaces the final character of the word form. | 20,120 | 15.207% |
 
 ## Accuracy
 
@@ -36,17 +36,23 @@ Accuracy is computed from JMH auxiliary counters in the current report. The coun
 | Lucene StempelFilter | 70.009% | 69.262% | 74.220% | Lucene TokenFilter integration path for table-driven Polish Stempel. |
 | Lucene StempelStemmer direct | 70.009% | 69.262% | 74.220% | Direct table-driven Polish Stempel stemmer API. |
 
+
+
+
 ## Speed
 
-Speed uses JMH average time, 3 warmup iterations, 5 measurement iterations, 1 fork, and 1 thread. Relative factor is computed against the single Radixor row on this language page. Values below 1.000 are faster than that Radixor baseline; values above 1.000 are slower.
+Speed uses JMH average time, 5 warmup iterations, 10 measurement iterations, 3 independent forks, and 1 thread. Relative factor is computed against the single Radixor row on this language page. Values below 1.000 are faster than that Radixor baseline; values above 1.000 are slower.
 
 | Stemmer | Benchmark method | Score ms/op | Error ms | ns/token | Relative vs Radixor | Note |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
-| Radixor | `polishRadixor` | 9.049 | 0.485 | 80.5 | 1.000 | Full Radixor dictionary patch-command stemmer. |
-| Lucene HunspellStemFilter | `luceneHunspellStemFilter` | 483.316 | 11.455 | 4301.8 | 53.408 | Benchmark-only Polish Hunspell dictionary compared via Lucene HunspellStemFilter. |
-| Lucene StempelStemmer direct | `polishLuceneStempelStemmerDirect` | 41.932 | 1.916 | 373.2 | 4.634 | Direct table-driven Polish Stempel stemmer API. |
-| Lucene StempelFilter | `polishLuceneStempelFilter` | 45.277 | 13.693 | 403.0 | 5.003 | Lucene TokenFilter integration path for table-driven Polish Stempel. |
-| Lucene MorfologikFilter | `polishLuceneMorfologikFilter` | 135.763 | 31.634 | 1208.4 | 15.002 | Dictionary-based Morfologik TokenFilter; may emit multiple terms. |
+| Radixor | `polishRadixor` | 8.972 | 0.203 | 79.9 | 1.000 | Full Radixor dictionary patch-command stemmer. |
+| Lucene HunspellStemFilter | `luceneHunspellStemFilter` | 524.081 | 35.121 | 4664.7 | 58.412 | Benchmark-only Polish Hunspell dictionary compared via Lucene HunspellStemFilter. |
+| Lucene StempelStemmer direct | `polishLuceneStempelStemmerDirect` | 37.947 | 0.335 | 337.8 | 4.229 | Direct table-driven Polish Stempel stemmer API. |
+| Lucene StempelFilter | `polishLuceneStempelFilter` | 43.090 | 0.411 | 383.5 | 4.803 | Lucene TokenFilter integration path for table-driven Polish Stempel. |
+| Lucene MorfologikFilter | `polishLuceneMorfologikFilter` | 143.527 | 1.176 | 1277.5 | 15.997 | Dictionary-based Morfologik TokenFilter; may emit multiple terms. |
+
+
+
 
 ## Interpretation Notes
 
@@ -60,91 +66,31 @@ Speed uses JMH average time, 3 warmup iterations, 5 measurement iterations, 1 fo
 
 ## Stemming Quality
 
-Runtime performance and linguistic grouping quality are independent dimensions. This section evaluates language `PL_PL` using the complete validated stemming-quality result matrix. Every usable dictionary row is one gold-standard group of forms expected to share a morphological family or lemma. Exact equality with a predetermined lemma is not required. Same-row pairs are positive pairs; pairs from different rows are negative pairs.
+Runtime performance and linguistic grouping quality are independent dimensions. This section evaluates language `PL_PL` using the complete validated stemming-quality result matrix. Every distinct surface form is one evaluated item and can belong to several dictionary groups. Two forms are a positive pair when their group-membership sets intersect and a negative pair when those sets are disjoint. A pair shared through several groups is counted once. Exact equality with a predetermined lemma is not required.
 
 `ALL_WORDS` includes every valid group and its original forms. `LOWERCASE_GROUPS_ONLY` excludes an entire group when any Unicode code point is uppercase or titlecase; retained words are not lowercased or otherwise rewritten. This isolates case-handling effects without changing retained inputs. [Download the complete machine-readable result snapshot](../data/stemming-quality.csv).
 
 ### Evaluation Scope and Key Findings
 
-The dictionary resource is `src/main/resources/pl_pl/stemmer.gz`. The following findings compare only deterministic `PRIMARY_OUTPUT` rows over identical included groups; candidate policies are reported separately as capability analyses.
+The default model is `pl-pl-unimorph`, loaded from classpath resource `org/egothor/stemmer/models/pl-pl-unimorph/stemmer.gz`. The following findings compare only deterministic `PRIMARY_OUTPUT` rows over identical included groups; candidate policies are reported separately as capability analyses.
 
-- **ALL_WORDS:** `Radixor` ranks first by balanced accuracy at **0.990388** among 5 deterministic stemmers. The runner-up is `POLISH LUCENE MORFOLOGIK FILTER` at 0.948154, a difference of 0.042234. This rank does not imply leadership in throughput or every secondary metric.
-- **LOWERCASE_GROUPS_ONLY:** `Radixor` ranks first by balanced accuracy at **0.990579** among 5 deterministic stemmers. The runner-up is `POLISH LUCENE MORFOLOGIK FILTER` at 0.948177, a difference of 0.042402. This rank does not imply leadership in throughput or every secondary metric.
+- **ALL_WORDS:** `Radixor` ranks first by balanced accuracy at **0.991105** among 5 deterministic stemmers. The runner-up is `POLISH LUCENE MORFOLOGIK FILTER` at 0.948392, a difference of 0.042713. This rank does not imply leadership in throughput or every secondary metric.
+- **LOWERCASE_GROUPS_ONLY:** `Radixor` ranks first by balanced accuracy at **0.991301** among 5 deterministic stemmers. The runner-up is `POLISH LUCENE MORFOLOGIK FILTER` at 0.948417, a difference of 0.042884. This rank does not imply leadership in throughput or every secondary metric.
 ### `ALL_WORDS`
 
-This mode contains **11 result rows**, **5 evaluated stemmers**, and **3 output policies**. Applied-row and form counts are shown per row because adapters share the language corpus but policy rows remain independently auditable. Rankings are separated by output policy and ordered by unrounded balanced accuracy, followed by MCC, F1, over-stemming rate, over-stemming count, under-stemming rate, and stemmer. Balanced accuracy is a navigation metric, not a universally authoritative quality score.
+This mode contains **11 result rows**, **5 evaluated stemmers**, and **3 output policies**. Applied-row and form counts are shown per row because adapters share the language corpus but policy rows remain independently auditable. `PRIMARY_OUTPUT` and `ALL_CANDIDATES` rankings are ordered by unrounded balanced accuracy, followed by MCC, F1, over-stemming rate, over-stemming count, under-stemming rate, and stemmer. `ANY_CANDIDATE` has no single rank metric and is listed alphabetically. Balanced accuracy is a navigation metric, not a universally authoritative quality score.
 
 #### `PRIMARY_OUTPUT` ranking
 
-<div class="quality-table quality-table--compact" role="region" aria-label="Compact stemming-quality ranking; scroll horizontally for additional columns" tabindex="0" markdown="1">
+<div class="quality-summary" markdown="1">
 
-| Rank | Stemmer | Output policy | Balanced accuracy | Over-stemming | Under-stemming | F0.5 | F1 | MCC |
-|---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|PRIMARY_OUTPUT|0.990388|13669 / 7482478003 (0.000183%)|21547 / 1120967 (1.922180%)|0.986324|0.984237|0.984241|
-|2|POLISH LUCENE MORFOLOGIK FILTER|PRIMARY_OUTPUT|0.948154|99228 / 7482478003 (0.001326%)|116220 / 1120967 (10.367834%)|0.907324|0.903167|0.903179|
-|3|HUNSPELL POLISH LUCENE FILTER|PRIMARY_OUTPUT|0.933222|52652 / 7482478003 (0.000704%)|149705 / 1120967 (13.354987%)|0.930930|0.905656|0.906571|
-|4|POLISH LUCENE STEMPEL DIRECT|PRIMARY_OUTPUT|0.855748|66669 / 7482478003 (0.000891%)|323394 / 1120967 (28.849556%)|0.871106|0.803515|0.810296|
-|5|POLISH LUCENE STEMPEL FILTER|PRIMARY_OUTPUT|0.855748|66669 / 7482478003 (0.000891%)|323394 / 1120967 (28.849556%)|0.871106|0.803515|0.810296|
-
-</div>
-
-<details class="quality-details" markdown="1"><summary>Classification metrics</summary>
-
-| Rank | Stemmer | Output policy | Precision | Recall | Specificity | Balanced accuracy | Pairwise accuracy | Error rate |
-|---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|PRIMARY_OUTPUT|0.987720|0.980778|0.999998|0.990388|0.999995|0.000005|
-|2|POLISH LUCENE MORFOLOGIK FILTER|PRIMARY_OUTPUT|0.910118|0.896322|0.999987|0.948154|0.999971|0.000029|
-|3|HUNSPELL POLISH LUCENE FILTER|PRIMARY_OUTPUT|0.948578|0.866450|0.999993|0.933222|0.999973|0.000027|
-|4|POLISH LUCENE STEMPEL DIRECT|PRIMARY_OUTPUT|0.922858|0.711504|0.999991|0.855748|0.999948|0.000052|
-|5|POLISH LUCENE STEMPEL FILTER|PRIMARY_OUTPUT|0.922858|0.711504|0.999991|0.855748|0.999948|0.000052|
-
-</details>
-
-<details class="quality-details" markdown="1"><summary>Pair-relation metrics</summary>
-
-| Rank | Stemmer | Output policy | F0.5 | F1 | F2 | Jaccard | Fowlkes–Mallows | MCC |
-|---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|PRIMARY_OUTPUT|0.986324|0.984237|0.982159|0.968963|0.984243|0.984241|
-|2|POLISH LUCENE MORFOLOGIK FILTER|PRIMARY_OUTPUT|0.907324|0.903167|0.899047|0.823432|0.903193|0.903179|
-|3|HUNSPELL POLISH LUCENE FILTER|PRIMARY_OUTPUT|0.930930|0.905656|0.881718|0.827579|0.906584|0.906571|
-|4|POLISH LUCENE STEMPEL DIRECT|PRIMARY_OUTPUT|0.871106|0.803515|0.745659|0.671564|0.810320|0.810296|
-|5|POLISH LUCENE STEMPEL FILTER|PRIMARY_OUTPUT|0.871106|0.803515|0.745659|0.671564|0.810320|0.810296|
-
-</details>
-
-<details class="quality-details" markdown="1"><summary>Partition metrics (PRIMARY_OUTPUT only)</summary>
-
-| Rank | Stemmer | Output policy | Adjusted Rand Index | Homogeneity | Completeness | V-measure | Normalized mutual information |
-|---:|---|---|---:|---:|---:|---:|---:|
-|1|Radixor|PRIMARY_OUTPUT|0.984234|0.996967|0.996469|0.996718|0.996718|
-|2|POLISH LUCENE MORFOLOGIK FILTER|PRIMARY_OUTPUT|0.903153|0.990022|0.977054|0.983495|0.983495|
-|3|HUNSPELL POLISH LUCENE FILTER|PRIMARY_OUTPUT|0.905642|0.994546|0.970520|0.982386|0.982386|
-|4|POLISH LUCENE STEMPEL DIRECT|PRIMARY_OUTPUT|0.803490|0.991767|0.931069|0.960460|0.960460|
-|5|POLISH LUCENE STEMPEL FILTER|PRIMARY_OUTPUT|0.803490|0.991767|0.931069|0.960460|0.960460|
-
-</details>
-
-<details class="quality-details" markdown="1"><summary>Raw pair counts</summary>
-
-| Rank | Stemmer | Output policy | TP | FP | FN | TN | Over error / possible | Under error / possible |
-|---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|PRIMARY_OUTPUT|1099420|13669|21547|7482464334|13669 / 7482478003|21547 / 1120967|
-|2|POLISH LUCENE MORFOLOGIK FILTER|PRIMARY_OUTPUT|1004747|99228|116220|7482378775|99228 / 7482478003|116220 / 1120967|
-|3|HUNSPELL POLISH LUCENE FILTER|PRIMARY_OUTPUT|971262|52652|149705|7482425351|52652 / 7482478003|149705 / 1120967|
-|4|POLISH LUCENE STEMPEL DIRECT|PRIMARY_OUTPUT|797573|66669|323394|7482411334|66669 / 7482478003|323394 / 1120967|
-|5|POLISH LUCENE STEMPEL FILTER|PRIMARY_OUTPUT|797573|66669|323394|7482411334|66669 / 7482478003|323394 / 1120967|
-
-</details>
-
-#### `ANY_CANDIDATE` ranking
-
-<div class="quality-table quality-table--compact" role="region" aria-label="Compact stemming-quality ranking; scroll horizontally for additional columns" tabindex="0" markdown="1">
-
-| Rank | Stemmer | Output policy | Balanced accuracy | Over-stemming | Under-stemming | F0.5 | F1 | MCC |
-|---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ANY_CANDIDATE|1.000000|0 / 7482478003 (0.000000%)|0 / 1120967 (0.000000%)|1.000000|1.000000|1.000000|
-|2|POLISH LUCENE MORFOLOGIK FILTER|ANY_CANDIDATE|0.987570|85532 / 7482478003 (0.001143%)|27855 / 1120967 (2.484908%)|0.936598|0.950693|0.950985|
-|3|HUNSPELL POLISH LUCENE FILTER|ANY_CANDIDATE|0.963982|42213 / 7482478003 (0.000564%)|80743 / 1120967 (7.202977%)|0.954209|0.944197|0.944333|
+| Rank | Stemmer | Balanced accuracy | Over-stemming (OI) | Under-stemming (UI) |
+|---:|---|---:|---:|---:|
+|1|Radixor|0.991105|0.000000%|1.779024%|
+|2|POLISH LUCENE MORFOLOGIK FILTER|0.948392|0.001042%|10.320543%|
+|3|HUNSPELL POLISH LUCENE FILTER|0.933457|0.000383%|13.308172%|
+|4|POLISH LUCENE STEMPEL DIRECT|0.855699|0.000602%|28.859618%|
+|5|POLISH LUCENE STEMPEL FILTER|0.855699|0.000602%|28.859618%|
 
 </div>
 
@@ -152,9 +98,11 @@ This mode contains **11 result rows**, **5 evaluated stemmers**, and **3 output 
 
 | Rank | Stemmer | Output policy | Precision | Recall | Specificity | Balanced accuracy | Pairwise accuracy | Error rate |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ANY_CANDIDATE|1.000000|1.000000|1.000000|1.000000|1.000000|0.000000|
-|2|POLISH LUCENE MORFOLOGIK FILTER|ANY_CANDIDATE|0.927432|0.975151|0.999989|0.987570|0.999985|0.000015|
-|3|HUNSPELL POLISH LUCENE FILTER|ANY_CANDIDATE|0.961002|0.927970|0.999994|0.963982|0.999984|0.000016|
+|1|Radixor|PRIMARY_OUTPUT|1.000000|0.982210|1.000000|0.991105|0.999997|0.000003|
+|2|POLISH LUCENE MORFOLOGIK FILTER|PRIMARY_OUTPUT|0.929398|0.896795|0.999990|0.948392|0.999974|0.000026|
+|3|HUNSPELL POLISH LUCENE FILTER|PRIMARY_OUTPUT|0.971931|0.866918|0.999996|0.933457|0.999976|0.000024|
+|4|POLISH LUCENE STEMPEL DIRECT|PRIMARY_OUTPUT|0.947549|0.711404|0.999994|0.855699|0.999950|0.000050|
+|5|POLISH LUCENE STEMPEL FILTER|PRIMARY_OUTPUT|0.947549|0.711404|0.999994|0.855699|0.999950|0.000050|
 
 </details>
 
@@ -162,19 +110,11 @@ This mode contains **11 result rows**, **5 evaluated stemmers**, and **3 output 
 
 | Rank | Stemmer | Output policy | F0.5 | F1 | F2 | Jaccard | Fowlkes–Mallows | MCC |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ANY_CANDIDATE|1.000000|1.000000|1.000000|1.000000|1.000000|1.000000|
-|2|POLISH LUCENE MORFOLOGIK FILTER|ANY_CANDIDATE|0.936598|0.950693|0.965218|0.906020|0.950992|0.950985|
-|3|HUNSPELL POLISH LUCENE FILTER|ANY_CANDIDATE|0.954209|0.944197|0.934394|0.894293|0.944342|0.944333|
-
-</details>
-
-<details class="quality-details" markdown="1"><summary>Partition metrics (PRIMARY_OUTPUT only)</summary>
-
-| Rank | Stemmer | Output policy | Adjusted Rand Index | Homogeneity | Completeness | V-measure | Normalized mutual information |
-|---:|---|---|---:|---:|---:|---:|---:|
-|1|Radixor|ANY_CANDIDATE|n/a|n/a|n/a|n/a|n/a|
-|2|POLISH LUCENE MORFOLOGIK FILTER|ANY_CANDIDATE|n/a|n/a|n/a|n/a|n/a|
-|3|HUNSPELL POLISH LUCENE FILTER|ANY_CANDIDATE|n/a|n/a|n/a|n/a|n/a|
+|1|Radixor|PRIMARY_OUTPUT|0.996391|0.991025|0.985717|0.982210|0.991065|0.991064|
+|2|POLISH LUCENE MORFOLOGIK FILTER|PRIMARY_OUTPUT|0.922689|0.912805|0.903131|0.839597|0.912951|0.912938|
+|3|HUNSPELL POLISH LUCENE FILTER|PRIMARY_OUTPUT|0.948942|0.916426|0.886065|0.845744|0.917924|0.917913|
+|4|POLISH LUCENE STEMPEL DIRECT|PRIMARY_OUTPUT|0.888559|0.812669|0.748723|0.684450|0.821030|0.821007|
+|5|POLISH LUCENE STEMPEL FILTER|PRIMARY_OUTPUT|0.888559|0.812669|0.748723|0.684450|0.821030|0.821007|
 
 </details>
 
@@ -182,21 +122,47 @@ This mode contains **11 result rows**, **5 evaluated stemmers**, and **3 output 
 
 | Rank | Stemmer | Output policy | TP | FP | FN | TN | Over error / possible | Under error / possible |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ANY_CANDIDATE|1120967|0|0|7482478003|0 / 7482478003|0 / 1120967|
-|2|POLISH LUCENE MORFOLOGIK FILTER|ANY_CANDIDATE|1093112|85532|27855|7482392471|85532 / 7482478003|27855 / 1120967|
-|3|HUNSPELL POLISH LUCENE FILTER|ANY_CANDIDATE|1040224|42213|80743|7482435790|42213 / 7482478003|80743 / 1120967|
+|1|Radixor|PRIMARY_OUTPUT|1097200|0|19873|7303238338|0 / 7303238338|19873 / 1117073|
+|2|POLISH LUCENE MORFOLOGIK FILTER|PRIMARY_OUTPUT|1001785|76101|115288|7303162237|76101 / 7303238338|115288 / 1117073|
+|3|HUNSPELL POLISH LUCENE FILTER|PRIMARY_OUTPUT|968411|27967|148662|7303210371|27967 / 7303238338|148662 / 1117073|
+|4|POLISH LUCENE STEMPEL DIRECT|PRIMARY_OUTPUT|794690|43990|322383|7303194348|43990 / 7303238338|322383 / 1117073|
+|5|POLISH LUCENE STEMPEL FILTER|PRIMARY_OUTPUT|794690|43990|322383|7303194348|43990 / 7303238338|322383 / 1117073|
+
+</details>
+
+#### `ANY_CANDIDATE` oracle bounds
+
+These results are measured, not missing. `ANY_CANDIDATE` answers two separate optimistic questions for each pair: a gold-related pair avoids under-stemming when the candidate sets intersect, while a gold-negative pair avoids over-stemming when some non-colliding candidate selection exists. The oracle may choose a different candidate for the same word in different pairs. Consequently, these decisions do not form one globally realizable predicted relation or one TP/FP/FN/TN confusion matrix. Balanced accuracy, F-scores, Jaccard, Fowlkes–Mallows, and MCC are therefore mathematically **not applicable**, rather than unknown.
+
+<div class="quality-summary quality-summary--oracle" markdown="1">
+
+| Stemmer | Optimistic over-stemming (OI) | Optimistic under-stemming (UI) |
+|---|---:|---:|
+|HUNSPELL POLISH LUCENE FILTER|0.000356%|7.227639%|
+|POLISH LUCENE MORFOLOGIK FILTER|0.001000%|2.493123%|
+|Radixor|0.000000%|0.000000%|
+
+</div>
+
+<details class="quality-details" markdown="1"><summary>Oracle-bound pair counts</summary>
+
+| Stemmer | Unavoidable over errors / gold-negative pairs | Unrepairable under errors / gold-related pairs |
+|---|---:|---:|
+|HUNSPELL POLISH LUCENE FILTER|25967 / 7303238338|80738 / 1117073|
+|POLISH LUCENE MORFOLOGIK FILTER|73019 / 7303238338|27850 / 1117073|
+|Radixor|0 / 7303238338|0 / 1117073|
 
 </details>
 
 #### `ALL_CANDIDATES` ranking
 
-<div class="quality-table quality-table--compact" role="region" aria-label="Compact stemming-quality ranking; scroll horizontally for additional columns" tabindex="0" markdown="1">
+<div class="quality-summary" markdown="1">
 
-| Rank | Stemmer | Output policy | Balanced accuracy | Over-stemming | Under-stemming | F0.5 | F1 | MCC |
-|---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ALL_CANDIDATES|0.999997|38073 / 7482478003 (0.000509%)|0 / 1120967 (0.000000%)|0.973547|0.983301|0.983436|
-|2|POLISH LUCENE MORFOLOGIK FILTER|ALL_CANDIDATES|0.987566|143096 / 7482478003 (0.001912%)|27855 / 1120967 (2.484908%)|0.901045|0.927476|0.928576|
-|3|HUNSPELL POLISH LUCENE FILTER|ALL_CANDIDATES|0.963980|82745 / 7482478003 (0.001106%)|80743 / 1120967 (7.202977%)|0.926646|0.927142|0.927132|
+| Rank | Stemmer | Balanced accuracy | Over-stemming (OI) | Under-stemming (UI) |
+|---:|---|---:|---:|---:|
+|1|Radixor|1.000000|0.000000%|0.000000%|
+|2|POLISH LUCENE MORFOLOGIK FILTER|0.987528|0.001376%|2.493123%|
+|3|HUNSPELL POLISH LUCENE FILTER|0.963859|0.000609%|7.227639%|
 
 </div>
 
@@ -204,9 +170,9 @@ This mode contains **11 result rows**, **5 evaluated stemmers**, and **3 output 
 
 | Rank | Stemmer | Output policy | Precision | Recall | Specificity | Balanced accuracy | Pairwise accuracy | Error rate |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ALL_CANDIDATES|0.967151|1.000000|0.999995|0.999997|0.999995|0.000005|
-|2|POLISH LUCENE MORFOLOGIK FILTER|ALL_CANDIDATES|0.884246|0.975151|0.999981|0.987566|0.999977|0.000023|
-|3|HUNSPELL POLISH LUCENE FILTER|ALL_CANDIDATES|0.926316|0.927970|0.999989|0.963980|0.999978|0.000022|
+|1|Radixor|ALL_CANDIDATES|1.000000|1.000000|1.000000|1.000000|1.000000|0.000000|
+|2|POLISH LUCENE MORFOLOGIK FILTER|ALL_CANDIDATES|0.915516|0.975069|0.999986|0.987528|0.999982|0.000018|
+|3|HUNSPELL POLISH LUCENE FILTER|ALL_CANDIDATES|0.958830|0.927724|0.999994|0.963859|0.999983|0.000017|
 
 </details>
 
@@ -214,19 +180,9 @@ This mode contains **11 result rows**, **5 evaluated stemmers**, and **3 output 
 
 | Rank | Stemmer | Output policy | F0.5 | F1 | F2 | Jaccard | Fowlkes–Mallows | MCC |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ALL_CANDIDATES|0.973547|0.983301|0.993253|0.967151|0.983438|0.983436|
-|2|POLISH LUCENE MORFOLOGIK FILTER|ALL_CANDIDATES|0.901045|0.927476|0.955505|0.864761|0.928587|0.928576|
-|3|HUNSPELL POLISH LUCENE FILTER|ALL_CANDIDATES|0.926646|0.927142|0.927639|0.864180|0.927143|0.927132|
-
-</details>
-
-<details class="quality-details" markdown="1"><summary>Partition metrics (PRIMARY_OUTPUT only)</summary>
-
-| Rank | Stemmer | Output policy | Adjusted Rand Index | Homogeneity | Completeness | V-measure | Normalized mutual information |
-|---:|---|---|---:|---:|---:|---:|---:|
-|1|Radixor|ALL_CANDIDATES|n/a|n/a|n/a|n/a|n/a|
-|2|POLISH LUCENE MORFOLOGIK FILTER|ALL_CANDIDATES|n/a|n/a|n/a|n/a|n/a|
-|3|HUNSPELL POLISH LUCENE FILTER|ALL_CANDIDATES|n/a|n/a|n/a|n/a|n/a|
+|1|Radixor|ALL_CANDIDATES|1.000000|1.000000|1.000000|1.000000|1.000000|1.000000|
+|2|POLISH LUCENE MORFOLOGIK FILTER|ALL_CANDIDATES|0.926837|0.944354|0.962546|0.894575|0.944823|0.944815|
+|3|HUNSPELL POLISH LUCENE FILTER|ALL_CANDIDATES|0.952443|0.943020|0.933782|0.892184|0.943149|0.943140|
 
 </details>
 
@@ -234,9 +190,9 @@ This mode contains **11 result rows**, **5 evaluated stemmers**, and **3 output 
 
 | Rank | Stemmer | Output policy | TP | FP | FN | TN | Over error / possible | Under error / possible |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ALL_CANDIDATES|1120967|38073|0|7482439930|38073 / 7482478003|0 / 1120967|
-|2|POLISH LUCENE MORFOLOGIK FILTER|ALL_CANDIDATES|1093112|143096|27855|7482334907|143096 / 7482478003|27855 / 1120967|
-|3|HUNSPELL POLISH LUCENE FILTER|ALL_CANDIDATES|1040224|82745|80743|7482395258|82745 / 7482478003|80743 / 1120967|
+|1|Radixor|ALL_CANDIDATES|1117073|0|0|7303238338|0 / 7303238338|0 / 1117073|
+|2|POLISH LUCENE MORFOLOGIK FILTER|ALL_CANDIDATES|1089223|100514|27850|7303137824|100514 / 7303238338|27850 / 1117073|
+|3|HUNSPELL POLISH LUCENE FILTER|ALL_CANDIDATES|1036335|44498|80738|7303193840|44498 / 7303238338|80738 / 1117073|
 
 </details>
 
@@ -246,85 +202,25 @@ Alternative candidates are capability analyses, not replacements for the determi
 
 | Stemmer | Under pairs repaired | Best-case over pairs avoided | All-candidate collisions added | Multi-candidate forms | Multi-candidate share | Maximum candidates | Total candidate assignments |
 |---|---:|---:|---:|---:|---:|---:|---:|
-|HUNSPELL POLISH LUCENE FILTER|68962|10439|30093|11447|9.356634%|6|135231|
-|POLISH LUCENE MORFOLOGIK FILTER|88365|13696|43868|12873|10.522229%|5|136636|
-|Radixor|21547|13669|24404|2866|2.342632%|4|125778|
+|HUNSPELL POLISH LUCENE FILTER|67924|2000|16531|10485|8.674824%|6|132492|
+|POLISH LUCENE MORFOLOGIK FILTER|87438|3082|24413|11776|9.742941%|5|133810|
+|Radixor|19873|0|0|1392|1.151679%|4|122430|
 
 ### `LOWERCASE_GROUPS_ONLY`
 
-This mode contains **11 result rows**, **5 evaluated stemmers**, and **3 output policies**. Applied-row and form counts are shown per row because adapters share the language corpus but policy rows remain independently auditable. Rankings are separated by output policy and ordered by unrounded balanced accuracy, followed by MCC, F1, over-stemming rate, over-stemming count, under-stemming rate, and stemmer. Balanced accuracy is a navigation metric, not a universally authoritative quality score.
+This mode contains **11 result rows**, **5 evaluated stemmers**, and **3 output policies**. Applied-row and form counts are shown per row because adapters share the language corpus but policy rows remain independently auditable. `PRIMARY_OUTPUT` and `ALL_CANDIDATES` rankings are ordered by unrounded balanced accuracy, followed by MCC, F1, over-stemming rate, over-stemming count, under-stemming rate, and stemmer. `ANY_CANDIDATE` has no single rank metric and is listed alphabetically. Balanced accuracy is a navigation metric, not a universally authoritative quality score.
 
 #### `PRIMARY_OUTPUT` ranking
 
-<div class="quality-table quality-table--compact" role="region" aria-label="Compact stemming-quality ranking; scroll horizontally for additional columns" tabindex="0" markdown="1">
+<div class="quality-summary" markdown="1">
 
-| Rank | Stemmer | Output policy | Balanced accuracy | Over-stemming | Under-stemming | F0.5 | F1 | MCC |
-|---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|PRIMARY_OUTPUT|0.990579|13669 / 7310252699 (0.000187%)|21000 / 1114651 (1.883998%)|0.986350|0.984397|0.984400|
-|2|POLISH LUCENE MORFOLOGIK FILTER|PRIMARY_OUTPUT|0.948177|99224 / 7310252699 (0.001357%)|115513 / 1114651 (10.363154%)|0.906972|0.902966|0.902976|
-|3|HUNSPELL POLISH LUCENE FILTER|PRIMARY_OUTPUT|0.933309|51950 / 7310252699 (0.000711%)|148667 / 1114651 (13.337538%)|0.931269|0.905928|0.906847|
-|4|POLISH LUCENE STEMPEL DIRECT|PRIMARY_OUTPUT|0.856382|66274 / 7310252699 (0.000907%)|320158 / 1114651 (28.722712%)|0.871591|0.804380|0.811082|
-|5|POLISH LUCENE STEMPEL FILTER|PRIMARY_OUTPUT|0.856382|66274 / 7310252699 (0.000907%)|320158 / 1114651 (28.722712%)|0.871591|0.804380|0.811082|
-
-</div>
-
-<details class="quality-details" markdown="1"><summary>Classification metrics</summary>
-
-| Rank | Stemmer | Output policy | Precision | Recall | Specificity | Balanced accuracy | Pairwise accuracy | Error rate |
-|---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|PRIMARY_OUTPUT|0.987656|0.981160|0.999998|0.990579|0.999995|0.000005|
-|2|POLISH LUCENE MORFOLOGIK FILTER|PRIMARY_OUTPUT|0.909662|0.896368|0.999986|0.948177|0.999971|0.000029|
-|3|HUNSPELL POLISH LUCENE FILTER|PRIMARY_OUTPUT|0.948965|0.866625|0.999993|0.933309|0.999973|0.000027|
-|4|POLISH LUCENE STEMPEL DIRECT|PRIMARY_OUTPUT|0.923006|0.712773|0.999991|0.856382|0.999947|0.000053|
-|5|POLISH LUCENE STEMPEL FILTER|PRIMARY_OUTPUT|0.923006|0.712773|0.999991|0.856382|0.999947|0.000053|
-
-</details>
-
-<details class="quality-details" markdown="1"><summary>Pair-relation metrics</summary>
-
-| Rank | Stemmer | Output policy | F0.5 | F1 | F2 | Jaccard | Fowlkes–Mallows | MCC |
-|---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|PRIMARY_OUTPUT|0.986350|0.984397|0.982452|0.969274|0.984403|0.984400|
-|2|POLISH LUCENE MORFOLOGIK FILTER|PRIMARY_OUTPUT|0.906972|0.902966|0.898996|0.823098|0.902991|0.902976|
-|3|HUNSPELL POLISH LUCENE FILTER|PRIMARY_OUTPUT|0.931269|0.905928|0.881929|0.828033|0.906861|0.906847|
-|4|POLISH LUCENE STEMPEL DIRECT|PRIMARY_OUTPUT|0.871591|0.804380|0.746792|0.672772|0.811106|0.811082|
-|5|POLISH LUCENE STEMPEL FILTER|PRIMARY_OUTPUT|0.871591|0.804380|0.746792|0.672772|0.811106|0.811082|
-
-</details>
-
-<details class="quality-details" markdown="1"><summary>Partition metrics (PRIMARY_OUTPUT only)</summary>
-
-| Rank | Stemmer | Output policy | Adjusted Rand Index | Homogeneity | Completeness | V-measure | Normalized mutual information |
-|---:|---|---|---:|---:|---:|---:|---:|
-|1|Radixor|PRIMARY_OUTPUT|0.984395|0.996926|0.996647|0.996786|0.996786|
-|2|POLISH LUCENE MORFOLOGIK FILTER|PRIMARY_OUTPUT|0.902952|0.989889|0.977012|0.983408|0.983408|
-|3|HUNSPELL POLISH LUCENE FILTER|PRIMARY_OUTPUT|0.905914|0.994584|0.970514|0.982402|0.982402|
-|4|POLISH LUCENE STEMPEL DIRECT|PRIMARY_OUTPUT|0.804354|0.991711|0.931318|0.960566|0.960566|
-|5|POLISH LUCENE STEMPEL FILTER|PRIMARY_OUTPUT|0.804354|0.991711|0.931318|0.960566|0.960566|
-
-</details>
-
-<details class="quality-details" markdown="1"><summary>Raw pair counts</summary>
-
-| Rank | Stemmer | Output policy | TP | FP | FN | TN | Over error / possible | Under error / possible |
-|---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|PRIMARY_OUTPUT|1093651|13669|21000|7310239030|13669 / 7310252699|21000 / 1114651|
-|2|POLISH LUCENE MORFOLOGIK FILTER|PRIMARY_OUTPUT|999138|99224|115513|7310153475|99224 / 7310252699|115513 / 1114651|
-|3|HUNSPELL POLISH LUCENE FILTER|PRIMARY_OUTPUT|965984|51950|148667|7310200749|51950 / 7310252699|148667 / 1114651|
-|4|POLISH LUCENE STEMPEL DIRECT|PRIMARY_OUTPUT|794493|66274|320158|7310186425|66274 / 7310252699|320158 / 1114651|
-|5|POLISH LUCENE STEMPEL FILTER|PRIMARY_OUTPUT|794493|66274|320158|7310186425|66274 / 7310252699|320158 / 1114651|
-
-</details>
-
-#### `ANY_CANDIDATE` ranking
-
-<div class="quality-table quality-table--compact" role="region" aria-label="Compact stemming-quality ranking; scroll horizontally for additional columns" tabindex="0" markdown="1">
-
-| Rank | Stemmer | Output policy | Balanced accuracy | Over-stemming | Under-stemming | F0.5 | F1 | MCC |
-|---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ANY_CANDIDATE|1.000000|0 / 7310252699 (0.000000%)|0 / 1114651 (0.000000%)|1.000000|1.000000|1.000000|
-|2|POLISH LUCENE MORFOLOGIK FILTER|ANY_CANDIDATE|0.987661|85532 / 7310252699 (0.001170%)|27494 / 1114651 (2.466602%)|0.936331|0.950586|0.950885|
-|3|HUNSPELL POLISH LUCENE FILTER|ANY_CANDIDATE|0.963946|41671 / 7310252699 (0.000570%)|80368 / 1114651 (7.210149%)|0.954406|0.944290|0.944429|
+| Rank | Stemmer | Balanced accuracy | Over-stemming (OI) | Under-stemming (UI) |
+|---:|---|---:|---:|---:|
+|1|Radixor|0.991301|0.000000%|1.739895%|
+|2|POLISH LUCENE MORFOLOGIK FILTER|0.948417|0.001067%|10.315578%|
+|3|HUNSPELL POLISH LUCENE FILTER|0.933546|0.000382%|13.290396%|
+|4|POLISH LUCENE STEMPEL DIRECT|0.856335|0.000611%|28.732387%|
+|5|POLISH LUCENE STEMPEL FILTER|0.856335|0.000611%|28.732387%|
 
 </div>
 
@@ -332,9 +228,11 @@ This mode contains **11 result rows**, **5 evaluated stemmers**, and **3 output 
 
 | Rank | Stemmer | Output policy | Precision | Recall | Specificity | Balanced accuracy | Pairwise accuracy | Error rate |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ANY_CANDIDATE|1.000000|1.000000|1.000000|1.000000|1.000000|0.000000|
-|2|POLISH LUCENE MORFOLOGIK FILTER|ANY_CANDIDATE|0.927063|0.975334|0.999988|0.987661|0.999985|0.000015|
-|3|HUNSPELL POLISH LUCENE FILTER|ANY_CANDIDATE|0.961271|0.927899|0.999994|0.963946|0.999983|0.000017|
+|1|Radixor|PRIMARY_OUTPUT|1.000000|0.982601|1.000000|0.991301|0.999997|0.000003|
+|2|POLISH LUCENE MORFOLOGIK FILTER|PRIMARY_OUTPUT|0.929032|0.896844|0.999989|0.948417|0.999973|0.000027|
+|3|HUNSPELL POLISH LUCENE FILTER|PRIMARY_OUTPUT|0.972469|0.867096|0.999996|0.933546|0.999975|0.000025|
+|4|POLISH LUCENE STEMPEL DIRECT|PRIMARY_OUTPUT|0.947796|0.712676|0.999994|0.856335|0.999949|0.000051|
+|5|POLISH LUCENE STEMPEL FILTER|PRIMARY_OUTPUT|0.947796|0.712676|0.999994|0.856335|0.999949|0.000051|
 
 </details>
 
@@ -342,19 +240,11 @@ This mode contains **11 result rows**, **5 evaluated stemmers**, and **3 output 
 
 | Rank | Stemmer | Output policy | F0.5 | F1 | F2 | Jaccard | Fowlkes–Mallows | MCC |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ANY_CANDIDATE|1.000000|1.000000|1.000000|1.000000|1.000000|1.000000|
-|2|POLISH LUCENE MORFOLOGIK FILTER|ANY_CANDIDATE|0.936331|0.950586|0.965282|0.905826|0.950892|0.950885|
-|3|HUNSPELL POLISH LUCENE FILTER|ANY_CANDIDATE|0.954406|0.944290|0.934386|0.894459|0.944437|0.944429|
-
-</details>
-
-<details class="quality-details" markdown="1"><summary>Partition metrics (PRIMARY_OUTPUT only)</summary>
-
-| Rank | Stemmer | Output policy | Adjusted Rand Index | Homogeneity | Completeness | V-measure | Normalized mutual information |
-|---:|---|---|---:|---:|---:|---:|---:|
-|1|Radixor|ANY_CANDIDATE|n/a|n/a|n/a|n/a|n/a|
-|2|POLISH LUCENE MORFOLOGIK FILTER|ANY_CANDIDATE|n/a|n/a|n/a|n/a|n/a|
-|3|HUNSPELL POLISH LUCENE FILTER|ANY_CANDIDATE|n/a|n/a|n/a|n/a|n/a|
+|1|Radixor|PRIMARY_OUTPUT|0.996471|0.991224|0.986032|0.982601|0.991262|0.991261|
+|2|POLISH LUCENE MORFOLOGIK FILTER|PRIMARY_OUTPUT|0.922411|0.912654|0.903102|0.839342|0.912796|0.912783|
+|3|HUNSPELL POLISH LUCENE FILTER|PRIMARY_OUTPUT|0.949394|0.916764|0.886303|0.846320|0.918272|0.918260|
+|4|POLISH LUCENE STEMPEL DIRECT|PRIMARY_OUTPUT|0.889130|0.813590|0.749881|0.685758|0.821871|0.821848|
+|5|POLISH LUCENE STEMPEL FILTER|PRIMARY_OUTPUT|0.889130|0.813590|0.749881|0.685758|0.821871|0.821848|
 
 </details>
 
@@ -362,21 +252,47 @@ This mode contains **11 result rows**, **5 evaluated stemmers**, and **3 output 
 
 | Rank | Stemmer | Output policy | TP | FP | FN | TN | Over error / possible | Under error / possible |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ANY_CANDIDATE|1114651|0|0|7310252699|0 / 7310252699|0 / 1114651|
-|2|POLISH LUCENE MORFOLOGIK FILTER|ANY_CANDIDATE|1087157|85532|27494|7310167167|85532 / 7310252699|27494 / 1114651|
-|3|HUNSPELL POLISH LUCENE FILTER|ANY_CANDIDATE|1034283|41671|80368|7310211028|41671 / 7310252699|80368 / 1114651|
+|1|Radixor|PRIMARY_OUTPUT|1091431|0|19326|7133100218|0 / 7133100218|19326 / 1110757|
+|2|POLISH LUCENE MORFOLOGIK FILTER|PRIMARY_OUTPUT|996176|76097|114581|7133024121|76097 / 7133100218|114581 / 1110757|
+|3|HUNSPELL POLISH LUCENE FILTER|PRIMARY_OUTPUT|963133|27267|147624|7133072951|27267 / 7133100218|147624 / 1110757|
+|4|POLISH LUCENE STEMPEL DIRECT|PRIMARY_OUTPUT|791610|43601|319147|7133056617|43601 / 7133100218|319147 / 1110757|
+|5|POLISH LUCENE STEMPEL FILTER|PRIMARY_OUTPUT|791610|43601|319147|7133056617|43601 / 7133100218|319147 / 1110757|
+
+</details>
+
+#### `ANY_CANDIDATE` oracle bounds
+
+These results are measured, not missing. `ANY_CANDIDATE` answers two separate optimistic questions for each pair: a gold-related pair avoids under-stemming when the candidate sets intersect, while a gold-negative pair avoids over-stemming when some non-colliding candidate selection exists. The oracle may choose a different candidate for the same word in different pairs. Consequently, these decisions do not form one globally realizable predicted relation or one TP/FP/FN/TN confusion matrix. Balanced accuracy, F-scores, Jaccard, Fowlkes–Mallows, and MCC are therefore mathematically **not applicable**, rather than unknown.
+
+<div class="quality-summary quality-summary--oracle" markdown="1">
+
+| Stemmer | Optimistic over-stemming (OI) | Optimistic under-stemming (UI) |
+|---|---:|---:|
+|HUNSPELL POLISH LUCENE FILTER|0.000356%|7.234976%|
+|POLISH LUCENE MORFOLOGIK FILTER|0.001024%|2.474799%|
+|Radixor|0.000000%|0.000000%|
+
+</div>
+
+<details class="quality-details" markdown="1"><summary>Oracle-bound pair counts</summary>
+
+| Stemmer | Unavoidable over errors / gold-negative pairs | Unrepairable under errors / gold-related pairs |
+|---|---:|---:|
+|HUNSPELL POLISH LUCENE FILTER|25425 / 7133100218|80363 / 1110757|
+|POLISH LUCENE MORFOLOGIK FILTER|73019 / 7133100218|27489 / 1110757|
+|Radixor|0 / 7133100218|0 / 1110757|
 
 </details>
 
 #### `ALL_CANDIDATES` ranking
 
-<div class="quality-table quality-table--compact" role="region" aria-label="Compact stemming-quality ranking; scroll horizontally for additional columns" tabindex="0" markdown="1">
+<div class="quality-summary" markdown="1">
 
-| Rank | Stemmer | Output policy | Balanced accuracy | Over-stemming | Under-stemming | F0.5 | F1 | MCC |
-|---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ALL_CANDIDATES|0.999997|38073 / 7310252699 (0.000521%)|0 / 1114651 (0.000000%)|0.973401|0.983208|0.983344|
-|2|POLISH LUCENE MORFOLOGIK FILTER|ALL_CANDIDATES|0.987657|143085 / 7310252699 (0.001957%)|27494 / 1114651 (2.466602%)|0.900618|0.927255|0.928372|
-|3|HUNSPELL POLISH LUCENE FILTER|ALL_CANDIDATES|0.963944|81865 / 7310252699 (0.001120%)|80368 / 1114651 (7.210149%)|0.926903|0.927276|0.927265|
+| Rank | Stemmer | Balanced accuracy | Over-stemming (OI) | Under-stemming (UI) |
+|---:|---|---:|---:|---:|
+|1|Radixor|1.000000|0.000000%|0.000000%|
+|2|POLISH LUCENE MORFOLOGIK FILTER|0.987619|0.001409%|2.474799%|
+|3|HUNSPELL POLISH LUCENE FILTER|0.963822|0.000612%|7.234976%|
 
 </div>
 
@@ -384,9 +300,9 @@ This mode contains **11 result rows**, **5 evaluated stemmers**, and **3 output 
 
 | Rank | Stemmer | Output policy | Precision | Recall | Specificity | Balanced accuracy | Pairwise accuracy | Error rate |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ALL_CANDIDATES|0.966971|1.000000|0.999995|0.999997|0.999995|0.000005|
-|2|POLISH LUCENE MORFOLOGIK FILTER|ALL_CANDIDATES|0.883694|0.975334|0.999980|0.987657|0.999977|0.000023|
-|3|HUNSPELL POLISH LUCENE FILTER|ALL_CANDIDATES|0.926654|0.927899|0.999989|0.963944|0.999978|0.000022|
+|1|Radixor|ALL_CANDIDATES|1.000000|1.000000|1.000000|1.000000|1.000000|0.000000|
+|2|POLISH LUCENE MORFOLOGIK FILTER|ALL_CANDIDATES|0.915099|0.975252|0.999986|0.987619|0.999982|0.000018|
+|3|HUNSPELL POLISH LUCENE FILTER|ALL_CANDIDATES|0.959377|0.927650|0.999994|0.963822|0.999983|0.000017|
 
 </details>
 
@@ -394,19 +310,9 @@ This mode contains **11 result rows**, **5 evaluated stemmers**, and **3 output 
 
 | Rank | Stemmer | Output policy | F0.5 | F1 | F2 | Jaccard | Fowlkes–Mallows | MCC |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ALL_CANDIDATES|0.973401|0.983208|0.993215|0.966971|0.983347|0.983344|
-|2|POLISH LUCENE MORFOLOGIK FILTER|ALL_CANDIDATES|0.900618|0.927255|0.955516|0.864376|0.928384|0.928372|
-|3|HUNSPELL POLISH LUCENE FILTER|ALL_CANDIDATES|0.926903|0.927276|0.927649|0.864412|0.927276|0.927265|
-
-</details>
-
-<details class="quality-details" markdown="1"><summary>Partition metrics (PRIMARY_OUTPUT only)</summary>
-
-| Rank | Stemmer | Output policy | Adjusted Rand Index | Homogeneity | Completeness | V-measure | Normalized mutual information |
-|---:|---|---|---:|---:|---:|---:|---:|
-|1|Radixor|ALL_CANDIDATES|n/a|n/a|n/a|n/a|n/a|
-|2|POLISH LUCENE MORFOLOGIK FILTER|ALL_CANDIDATES|n/a|n/a|n/a|n/a|n/a|
-|3|HUNSPELL POLISH LUCENE FILTER|ALL_CANDIDATES|n/a|n/a|n/a|n/a|n/a|
+|1|Radixor|ALL_CANDIDATES|1.000000|1.000000|1.000000|1.000000|1.000000|1.000000|
+|2|POLISH LUCENE MORFOLOGIK FILTER|ALL_CANDIDATES|0.926529|0.944219|0.962597|0.894332|0.944697|0.944688|
+|3|HUNSPELL POLISH LUCENE FILTER|ALL_CANDIDATES|0.952859|0.943247|0.933827|0.892590|0.943380|0.943372|
 
 </details>
 
@@ -414,9 +320,9 @@ This mode contains **11 result rows**, **5 evaluated stemmers**, and **3 output 
 
 | Rank | Stemmer | Output policy | TP | FP | FN | TN | Over error / possible | Under error / possible |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ALL_CANDIDATES|1114651|38073|0|7310214626|38073 / 7310252699|0 / 1114651|
-|2|POLISH LUCENE MORFOLOGIK FILTER|ALL_CANDIDATES|1087157|143085|27494|7310109614|143085 / 7310252699|27494 / 1114651|
-|3|HUNSPELL POLISH LUCENE FILTER|ALL_CANDIDATES|1034283|81865|80368|7310170834|81865 / 7310252699|80368 / 1114651|
+|1|Radixor|ALL_CANDIDATES|1110757|0|0|7133100218|0 / 7133100218|0 / 1110757|
+|2|POLISH LUCENE MORFOLOGIK FILTER|ALL_CANDIDATES|1083268|100503|27489|7132999715|100503 / 7133100218|27489 / 1110757|
+|3|HUNSPELL POLISH LUCENE FILTER|ALL_CANDIDATES|1030394|43630|80363|7133056588|43630 / 7133100218|80363 / 1110757|
 
 </details>
 
@@ -426,21 +332,21 @@ Alternative candidates are capability analyses, not replacements for the determi
 
 | Stemmer | Under pairs repaired | Best-case over pairs avoided | All-candidate collisions added | Multi-candidate forms | Multi-candidate share | Maximum candidates | Total candidate assignments |
 |---|---:|---:|---:|---:|---:|---:|---:|
-|HUNSPELL POLISH LUCENE FILTER|68299|10279|29915|11265|9.315692%|6|133595|
-|POLISH LUCENE MORFOLOGIK FILTER|88019|13692|43861|12763|10.554476%|5|135105|
-|Radixor|21000|13669|24404|2780|2.298946%|4|124274|
+|HUNSPELL POLISH LUCENE FILTER|67261|1842|16363|10303|8.625294%|6|130856|
+|POLISH LUCENE MORFOLOGIK FILTER|87092|3078|24406|11666|9.766348%|5|132279|
+|Radixor|19326|0|0|1306|1.093335%|4|120926|
 
 ### Output Policies and Metric Definitions
 
-`PRIMARY_OUTPUT` uses one deterministic stem per form and therefore defines a strict partition. `ANY_CANDIDATE` is an optimistic oracle-assisted pairwise upper bound: a same-group pair succeeds when candidates intersect, while a different-group pair succeeds when a non-colliding selection exists. Candidate choices may differ between pairs, so this is not deterministic runtime behaviour and need not represent one globally consistent assignment. `ALL_CANDIDATES` activates every returned candidate; forms are related when candidate sets intersect. Alternatives can reduce under-stemming but can introduce cross-group collisions, and the resulting relation can overlap and need not be a partition.
+Each distinct surface form is one item and may belong to several gold groups. Two forms are gold-related when their membership sets intersect; a relation shared by several groups is counted once. `PRIMARY_OUTPUT` uses one deterministic stem per form. `ANY_CANDIDATE` is an optimistic oracle-assisted pairwise upper bound: a gold-related pair succeeds when candidates intersect, while a gold-negative pair succeeds when a non-colliding selection exists. Candidate choices may differ between pairs, so this is not deterministic runtime behaviour and does not define one confusion matrix. `ALL_CANDIDATES` activates every returned candidate; forms are related when candidate sets intersect.
 
-For each row, `TP = underPossiblePairs - underErrorPairs`, `FN = underErrorPairs`, `FP = overErrorPairs`, and `TN = overPossiblePairs - overErrorPairs`. TP and FN concern same-group pairs; FP and TN concern different-group pairs. Consequently, under-stemming and over-stemming use different denominators. Undefined values are rendered as `n/a`.
+For `PRIMARY_OUTPUT` and `ALL_CANDIDATES`, `TP = underPossiblePairs - underErrorPairs`, `FN = underErrorPairs`, `FP = overErrorPairs`, and `TN = overPossiblePairs - overErrorPairs`. `ANY_CANDIDATE` publishes only its separate oracle-assisted under/over bounds; confusion-derived metrics are mathematically inapplicable and are not presented in its language-page section. Their machine-readable CSV fields remain empty. Undefined metric denominators in otherwise applicable policies are rendered as `n/a`.
 
-- Under-stemming rate: `FN / (TP + FN)`, the false-negative rate over same-group pairs.
-- Over-stemming rate: `FP / (TN + FP)`, the false-positive rate over different-group pairs.
+- Under-stemming rate (Paice UI): `FN / (TP + FN)`, the false-negative rate over gold-related pairs.
+- Over-stemming rate (Paice OI): `FP / (TN + FP)`, the false-positive rate over gold-negative pairs.
 - Pairwise precision: `TP / (TP + FP)`, the fraction of predicted conflations that are gold-standard positive pairs.
 - Pairwise recall: `TP / (TP + FN)`, the fraction of gold-standard positive pairs successfully connected.
-- Pairwise specificity: `TN / (TN + FP)`, the fraction of different-group pairs correctly separated.
+- Pairwise specificity: `TN / (TN + FP)`, the fraction of gold-negative pairs correctly separated.
 - Balanced accuracy: `(recall + specificity) / 2`. It gives equal weight to positive and negative pair classes and is less dominated by the large true-negative class than ordinary accuracy. It does not replace the raw errors or other metrics.
 - Pairwise F-beta: `((1 + betaSquared) * TP) / (((1 + betaSquared) * TP) + (betaSquared * FN) + FP)`. F0.5 emphasizes precision and penalizes over-stemming more; F1 weights precision and recall equally; F2 emphasizes recall and penalizes under-stemming more.
 - MCC: `(TP * TN - FP * FN) / sqrt((TP + FP) * (TP + FN) * (TN + FP) * (TN + FN))`. It uses all confusion counts and remains useful under class imbalance, except when its denominator is degenerate.
@@ -449,16 +355,17 @@ For each row, `TP = underPossiblePairs - underErrorPairs`, `FN = underErrorPairs
 - Pairwise accuracy: `(TP + TN) / (TP + TN + FP + FN)`. It can be dominated by true-negative cross-group pairs.
 - Pairwise error rate: `(FP + FN) / (TP + TN + FP + FN)`.
 
-Adjusted Rand Index uses the gold/predicted contingency table and chance correction. Homogeneity is `1 - H(gold | predicted) / H(gold)`; completeness is `1 - H(predicted | gold) / H(predicted)`; V-measure is their harmonic mean; normalized mutual information uses the arithmetic-mean entropy normalization `MI / ((H(gold) + H(predicted)) / 2)`. These partition-only metrics apply to `PRIMARY_OUTPUT`; candidate-relation rows show `n/a`.
+Standard ARI, homogeneity, completeness, V-measure, and NMI are not calculated: their usual contingency-table definitions require an exclusive gold partition, while this gold standard is an overlapping cover.
 
 ### Provenance
 
 - Authoritative source: `docs/benchmarks/data/stemming-quality.csv`
-- Source SHA-256: `5a93a6ab60e46489737cd649eb1ac48182114b9038f7f20195ab9d1c1fc0dd28`
-- Evaluation command: `./gradlew stemmingQuality`
+- Source SHA-256: `edf16b07be8a535943ddf37caeb8807755c95e9e1fb13244145f28be74b491d8`
+- Evaluation command: `./gradlew stemmingQuality --no-daemon`
 - Dictionary language: `PL_PL`
 - Processing modes: `ALL_WORDS`, `LOWERCASE_GROUPS_ONLY`
 - Stemmer versions and transitive artifacts: resolved by the repository's JMH Gradle configuration and `gradle.lockfile`
-- Radixor version, Git revision, generation date, JDK version, operating system, and dictionary revision: not recorded in the authoritative CSV
+- Model ID, version, and SHA-256: recorded in every CSV row
+- Run date, core source state, JDK, operating system, and hardware: recorded on the [benchmark environment page](../reference/environment.md)
 
 <!-- STEMMING-QUALITY:END -->

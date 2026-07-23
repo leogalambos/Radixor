@@ -8,21 +8,21 @@ Radixor must not be read as simply "slower" when a narrow competitor has a lower
 
 ## Dictionary Corpus
 
-| Resource | Dictionary rows | Complete quality tokens | Already-root tokens | Changed speed tokens |
-| --- | ---: | ---: | ---: | ---: |
-| `DE_DE` | 39,315 | 213,440 | 73,799 | 139,641 |
+| Model ID | Model version | Language | Dictionary rows | Complete quality tokens | Already-root tokens | Changed speed tokens |
+| --- | --- | --- | ---: | ---: | ---: | ---: |
+| `de-de-default` | `1.0.0` | `DE_DE` | 54,092 | 333,036 | 90,535 | 242,501 |
 
 ## Radixor Patch Command Distribution
 
-Radixor stores the preferred transformation for each normalized dictionary word form as a compiled patch command. This distribution shows which runtime command class is selected by the trained trie for the complete language dictionary. The total number of preferred patch commands analyzed for this language is **213,440**.
+Radixor stores the preferred transformation for each normalized dictionary word form as a compiled patch command. This distribution shows which runtime command class is selected by the trained trie for the complete default-model dictionary. The total number of preferred patch commands analyzed for this language is **333,036**.
 
 | Command class | Meaning | Word forms | Share |
 | --- | --- | ---: | ---: |
-| `AppendCharacterCommand` | Appends one character to the end of the word form. | 3,627 | 1.699% |
-| `BackwardCompoundCommand` | Applies a multi-step backward patch made from skip, delete, insert, and replace operations. | 48,605 | 22.772% |
-| `DeleteSuffixCommand` | Deletes one or more trailing characters from the word form. | 80,443 | 37.689% |
-| `PreserveCommand` | Returns the word form unchanged because it already matches the preferred root. | 75,717 | 35.475% |
-| `ReplaceLastCharacterCommand` | Replaces the final character of the word form. | 5,048 | 2.365% |
+| `AppendCharacterCommand` | Appends one character to the end of the word form. | 12,107 | 3.635% |
+| `BackwardCompoundCommand` | Applies a multi-step backward patch made from skip, delete, insert, and replace operations. | 81,805 | 24.563% |
+| `DeleteSuffixCommand` | Deletes one or more trailing characters from the word form. | 142,376 | 42.751% |
+| `PreserveCommand` | Returns the word form unchanged because it already matches the preferred root. | 88,820 | 26.670% |
+| `ReplaceLastCharacterCommand` | Replaces the final character of the word form. | 7,928 | 2.381% |
 
 ## Accuracy
 
@@ -39,20 +39,28 @@ Accuracy is computed from JMH auxiliary counters in the current report. The coun
 | Official Snowball direct | 30.481% | 29.027% | 34.376% | Official Snowball generated Java stemmer; rule-based suffix algorithm. |
 | Lucene GermanStemFilter | 21.559% | 19.312% | 27.576% | German Lucene stemming TokenFilter; broader than minimal/light variants. |
 
+
+
+
+
 ## Speed
 
-Speed uses JMH average time, 3 warmup iterations, 5 measurement iterations, 1 fork, and 1 thread. Relative factor is computed against the single Radixor row on this language page. Values below 1.000 are faster than that Radixor baseline; values above 1.000 are slower.
+Speed uses JMH average time, 5 warmup iterations, 10 measurement iterations, 3 independent forks, and 1 thread. Relative factor is computed against the single Radixor row on this language page. Values below 1.000 are faster than that Radixor baseline; values above 1.000 are slower.
 
 | Stemmer | Benchmark method | Score ms/op | Error ms | ns/token | Relative vs Radixor | Note |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
-| Radixor | `germanRadixor` | 41.166 | 2.396 | 294.8 | 1.000 | Full Radixor dictionary patch-command stemmer. |
-| CISTEM | `germanCistem` | 248.392 | 12.294 | 1778.8 | 6.034 | Benchmark-only CISTEM implementation. |
-| Lucene HunspellStemFilter | `luceneHunspellStemFilter` | 281.322 | 3.411 | 2014.6 | 6.834 | Benchmark-only German Hunspell dictionary compared via Lucene HunspellStemFilter. |
-| Lucene GermanMinimalStemFilter | `germanLuceneGermanMinimalStemFilter` | 23.562 | 0.969 | 168.7 | 0.572 | Minimal German suffix reduction; narrow baseline. |
-| Lucene GermanLightStemFilter | `germanLuceneGermanLightStemFilter` | 24.410 | 1.034 | 174.8 | 0.593 | Light German suffix stemmer; narrower than a dictionary stemmer. |
-| Lucene GermanStemFilter | `germanLuceneGermanStemFilter` | 71.039 | 4.443 | 508.7 | 1.726 | Older German stemming TokenFilter with normalization requirements. |
-| Lucene SnowballFilter | `luceneSnowballFilter[GERMAN]` | 105.771 | 9.617 | 757.4 | 2.569 | Lucene TokenFilter path around Snowball; includes TokenStream overhead. |
-| Official Snowball direct | `snowballDirect[GERMAN]` | 100.688 | 9.018 | 721.0 | 2.446 | Official Snowball generated Java stemmer; direct API. |
+| Radixor | `germanRadixor` | 40.571 | 1.647 | 167.3 | 1.000 | Full Radixor dictionary patch-command stemmer. |
+| CISTEM | `germanCistem` | 305.166 | 4.590 | 1258.4 | 7.522 | Benchmark-only CISTEM implementation. |
+| Lucene HunspellStemFilter | `luceneHunspellStemFilter` | 291.791 | 21.769 | 1203.3 | 7.192 | Benchmark-only German Hunspell dictionary compared via Lucene HunspellStemFilter. |
+| Lucene GermanMinimalStemFilter | `germanLuceneGermanMinimalStemFilter` | 23.903 | 0.208 | 98.6 | 0.589 | Minimal German suffix reduction; narrow baseline. |
+| Lucene GermanLightStemFilter | `germanLuceneGermanLightStemFilter` | 24.695 | 0.322 | 101.8 | 0.609 | Light German suffix stemmer; narrower than a dictionary stemmer. |
+| Lucene GermanStemFilter | `germanLuceneGermanStemFilter` | 72.140 | 1.544 | 297.5 | 1.778 | Older German stemming TokenFilter with normalization requirements. |
+| Lucene SnowballFilter | `luceneSnowballFilter[GERMAN]` | 110.086 | 2.315 | 454.0 | 2.713 | Lucene TokenFilter path around Snowball; includes TokenStream overhead. |
+| Official Snowball direct | `snowballDirect[GERMAN]` | 100.122 | 2.623 | 412.9 | 2.468 | Official Snowball generated Java stemmer; direct API. |
+
+
+
+
 
 ## Interpretation Notes
 
@@ -66,105 +74,34 @@ Speed uses JMH average time, 3 warmup iterations, 5 measurement iterations, 1 fo
 
 ## Stemming Quality
 
-Runtime performance and linguistic grouping quality are independent dimensions. This section evaluates language `DE_DE` using the complete validated stemming-quality result matrix. Every usable dictionary row is one gold-standard group of forms expected to share a morphological family or lemma. Exact equality with a predetermined lemma is not required. Same-row pairs are positive pairs; pairs from different rows are negative pairs.
+Runtime performance and linguistic grouping quality are independent dimensions. This section evaluates language `DE_DE` using the complete validated stemming-quality result matrix. Every distinct surface form is one evaluated item and can belong to several dictionary groups. Two forms are a positive pair when their group-membership sets intersect and a negative pair when those sets are disjoint. A pair shared through several groups is counted once. Exact equality with a predetermined lemma is not required.
 
 `ALL_WORDS` includes every valid group and its original forms. `LOWERCASE_GROUPS_ONLY` excludes an entire group when any Unicode code point is uppercase or titlecase; retained words are not lowercased or otherwise rewritten. This isolates case-handling effects without changing retained inputs. [Download the complete machine-readable result snapshot](../data/stemming-quality.csv).
 
 ### Evaluation Scope and Key Findings
 
-The dictionary resource is `src/main/resources/de_de/stemmer.gz`. The following findings compare only deterministic `PRIMARY_OUTPUT` rows over identical included groups; candidate policies are reported separately as capability analyses.
+The default model is `de-de-default`, loaded from classpath resource `org/egothor/stemmer/models/de-de-default/stemmer.gz`. The following findings compare only deterministic `PRIMARY_OUTPUT` rows over identical included groups; candidate policies are reported separately as capability analyses.
 
-- **ALL_WORDS:** `Radixor` ranks first by balanced accuracy at **0.907901** among 8 deterministic stemmers. The runner-up is `GERMAN CISTEM` at 0.880770, a difference of 0.027131. This rank does not imply leadership in throughput or every secondary metric.
-- **LOWERCASE_GROUPS_ONLY:** `Radixor` ranks first by balanced accuracy at **0.966157** among 8 deterministic stemmers. The runner-up is `GERMAN CISTEM` at 0.915288, a difference of 0.050869. This rank does not imply leadership in throughput or every secondary metric.
+- **ALL_WORDS:** `Radixor` ranks first by balanced accuracy at **0.910445** among 8 deterministic stemmers. The runner-up is `GERMAN CISTEM` at 0.878527, a difference of 0.031918. This rank does not imply leadership in throughput or every secondary metric.
+- **LOWERCASE_GROUPS_ONLY:** `Radixor` ranks first by balanced accuracy at **0.966959** among 8 deterministic stemmers. The runner-up is `GERMAN CISTEM` at 0.914727, a difference of 0.052232. This rank does not imply leadership in throughput or every secondary metric.
 ### `ALL_WORDS`
 
-This mode contains **12 result rows**, **8 evaluated stemmers**, and **3 output policies**. Applied-row and form counts are shown per row because adapters share the language corpus but policy rows remain independently auditable. Rankings are separated by output policy and ordered by unrounded balanced accuracy, followed by MCC, F1, over-stemming rate, over-stemming count, under-stemming rate, and stemmer. Balanced accuracy is a navigation metric, not a universally authoritative quality score.
+This mode contains **12 result rows**, **8 evaluated stemmers**, and **3 output policies**. Applied-row and form counts are shown per row because adapters share the language corpus but policy rows remain independently auditable. `PRIMARY_OUTPUT` and `ALL_CANDIDATES` rankings are ordered by unrounded balanced accuracy, followed by MCC, F1, over-stemming rate, over-stemming count, under-stemming rate, and stemmer. `ANY_CANDIDATE` has no single rank metric and is listed alphabetically. Balanced accuracy is a navigation metric, not a universally authoritative quality score.
 
 #### `PRIMARY_OUTPUT` ranking
 
-<div class="quality-table quality-table--compact" role="region" aria-label="Compact stemming-quality ranking; scroll horizontally for additional columns" tabindex="0" markdown="1">
+<div class="quality-summary" markdown="1">
 
-| Rank | Stemmer | Output policy | Balanced accuracy | Over-stemming | Under-stemming | F0.5 | F1 | MCC |
-|---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|PRIMARY_OUTPUT|0.907901|98192 / 44095245979 (0.000223%)|254903 / 1383872 (18.419550%)|0.897073|0.864768|0.866326|
-|2|GERMAN CISTEM|PRIMARY_OUTPUT|0.880770|477122 / 44095245979 (0.001082%)|329983 / 1383872 (23.844908%)|0.701852|0.723109|0.724023|
-|3|SNOWBALL GERMAN DIRECT|PRIMARY_OUTPUT|0.778614|190680 / 44095245979 (0.000432%)|612734 / 1383872 (44.276783%)|0.737064|0.657494|0.668394|
-|4|SNOWBALL GERMAN LUCENE FILTER|PRIMARY_OUTPUT|0.771357|295701 / 44095245979 (0.000671%)|632816 / 1383872 (45.727929%)|0.674089|0.617993|0.624014|
-|5|GERMAN LUCENE GERMAN LIGHT STEM FILTER|PRIMARY_OUTPUT|0.756258|205740 / 44095245979 (0.000467%)|674609 / 1383872 (48.747933%)|0.703092|0.617052|0.630292|
-|6|GERMAN LUCENE GERMAN STEM FILTER|PRIMARY_OUTPUT|0.723772|331871 / 44095245979 (0.000753%)|764518 / 1383872 (55.244849%)|0.596821|0.530474|0.539809|
-|7|HUNSPELL GERMAN LUCENE FILTER|PRIMARY_OUTPUT|0.641579|203883 / 44095245979 (0.000462%)|992010 / 1383872 (71.683653%)|0.520145|0.395897|0.431563|
-|8|GERMAN LUCENE GERMAN MINIMAL STEM FILTER|PRIMARY_OUTPUT|0.598139|110840 / 44095245979 (0.000251%)|1112246 / 1383872 (80.372029%)|0.466113|0.307558|0.373350|
-
-</div>
-
-<details class="quality-details" markdown="1"><summary>Classification metrics</summary>
-
-| Rank | Stemmer | Output policy | Precision | Recall | Specificity | Balanced accuracy | Pairwise accuracy | Error rate |
-|---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|PRIMARY_OUTPUT|0.919984|0.815804|0.999998|0.907901|0.999992|0.000008|
-|2|GERMAN CISTEM|PRIMARY_OUTPUT|0.688361|0.761551|0.999989|0.880770|0.999982|0.000018|
-|3|SNOWBALL GERMAN DIRECT|PRIMARY_OUTPUT|0.801750|0.557232|0.999996|0.778614|0.999982|0.000018|
-|4|SNOWBALL GERMAN LUCENE FILTER|PRIMARY_OUTPUT|0.717508|0.542721|0.999993|0.771357|0.999979|0.000021|
-|5|GERMAN LUCENE GERMAN LIGHT STEM FILTER|PRIMARY_OUTPUT|0.775148|0.512521|0.999995|0.756258|0.999980|0.000020|
-|6|GERMAN LUCENE GERMAN STEM FILTER|PRIMARY_OUTPUT|0.651112|0.447552|0.999992|0.723772|0.999975|0.000025|
-|7|HUNSPELL GERMAN LUCENE FILTER|PRIMARY_OUTPUT|0.657768|0.283163|0.999995|0.641579|0.999973|0.000027|
-|8|GERMAN LUCENE GERMAN MINIMAL STEM FILTER|PRIMARY_OUTPUT|0.710196|0.196280|0.999997|0.598139|0.999972|0.000028|
-
-</details>
-
-<details class="quality-details" markdown="1"><summary>Pair-relation metrics</summary>
-
-| Rank | Stemmer | Output policy | F0.5 | F1 | F2 | Jaccard | Fowlkes–Mallows | MCC |
-|---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|PRIMARY_OUTPUT|0.897073|0.864768|0.834709|0.761755|0.866330|0.866326|
-|2|GERMAN CISTEM|PRIMARY_OUTPUT|0.701852|0.723109|0.745694|0.566304|0.724032|0.724023|
-|3|SNOWBALL GERMAN DIRECT|PRIMARY_OUTPUT|0.737064|0.657494|0.593429|0.489751|0.668402|0.668394|
-|4|SNOWBALL GERMAN LUCENE FILTER|PRIMARY_OUTPUT|0.674089|0.617993|0.570517|0.447171|0.624024|0.624014|
-|5|GERMAN LUCENE GERMAN LIGHT STEM FILTER|PRIMARY_OUTPUT|0.703092|0.617052|0.549774|0.446186|0.630301|0.630292|
-|6|GERMAN LUCENE GERMAN STEM FILTER|PRIMARY_OUTPUT|0.596821|0.530474|0.477402|0.360983|0.539820|0.539809|
-|7|HUNSPELL GERMAN LUCENE FILTER|PRIMARY_OUTPUT|0.520145|0.395897|0.319562|0.246803|0.431574|0.431563|
-|8|GERMAN LUCENE GERMAN MINIMAL STEM FILTER|PRIMARY_OUTPUT|0.466113|0.307558|0.229493|0.181725|0.373359|0.373350|
-
-</details>
-
-<details class="quality-details" markdown="1"><summary>Partition metrics (PRIMARY_OUTPUT only)</summary>
-
-| Rank | Stemmer | Output policy | Adjusted Rand Index | Homogeneity | Completeness | V-measure | Normalized mutual information |
-|---:|---|---|---:|---:|---:|---:|---:|
-|1|Radixor|PRIMARY_OUTPUT|0.864764|0.989946|0.975085|0.982460|0.982460|
-|2|GERMAN CISTEM|PRIMARY_OUTPUT|0.723100|0.974048|0.975147|0.974597|0.974597|
-|3|SNOWBALL GERMAN DIRECT|PRIMARY_OUTPUT|0.657485|0.983725|0.949324|0.966218|0.966218|
-|4|SNOWBALL GERMAN LUCENE FILTER|PRIMARY_OUTPUT|0.617983|0.975845|0.942925|0.959102|0.959102|
-|5|GERMAN LUCENE GERMAN LIGHT STEM FILTER|PRIMARY_OUTPUT|0.617043|0.980753|0.936533|0.958133|0.958133|
-|6|GERMAN LUCENE GERMAN STEM FILTER|PRIMARY_OUTPUT|0.530462|0.975550|0.942890|0.958942|0.958942|
-|7|HUNSPELL GERMAN LUCENE FILTER|PRIMARY_OUTPUT|0.395885|0.980463|0.886873|0.931322|0.931322|
-|8|GERMAN LUCENE GERMAN MINIMAL STEM FILTER|PRIMARY_OUTPUT|0.307549|0.983615|0.896264|0.937910|0.937910|
-
-</details>
-
-<details class="quality-details" markdown="1"><summary>Raw pair counts</summary>
-
-| Rank | Stemmer | Output policy | TP | FP | FN | TN | Over error / possible | Under error / possible |
-|---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|PRIMARY_OUTPUT|1128969|98192|254903|44095147787|98192 / 44095245979|254903 / 1383872|
-|2|GERMAN CISTEM|PRIMARY_OUTPUT|1053889|477122|329983|44094768857|477122 / 44095245979|329983 / 1383872|
-|3|SNOWBALL GERMAN DIRECT|PRIMARY_OUTPUT|771138|190680|612734|44095055299|190680 / 44095245979|612734 / 1383872|
-|4|SNOWBALL GERMAN LUCENE FILTER|PRIMARY_OUTPUT|751056|295701|632816|44094950278|295701 / 44095245979|632816 / 1383872|
-|5|GERMAN LUCENE GERMAN LIGHT STEM FILTER|PRIMARY_OUTPUT|709263|205740|674609|44095040239|205740 / 44095245979|674609 / 1383872|
-|6|GERMAN LUCENE GERMAN STEM FILTER|PRIMARY_OUTPUT|619354|331871|764518|44094914108|331871 / 44095245979|764518 / 1383872|
-|7|HUNSPELL GERMAN LUCENE FILTER|PRIMARY_OUTPUT|391862|203883|992010|44095042096|203883 / 44095245979|992010 / 1383872|
-|8|GERMAN LUCENE GERMAN MINIMAL STEM FILTER|PRIMARY_OUTPUT|271626|110840|1112246|44095135139|110840 / 44095245979|1112246 / 1383872|
-
-</details>
-
-#### `ANY_CANDIDATE` ranking
-
-<div class="quality-table quality-table--compact" role="region" aria-label="Compact stemming-quality ranking; scroll horizontally for additional columns" tabindex="0" markdown="1">
-
-| Rank | Stemmer | Output policy | Balanced accuracy | Over-stemming | Under-stemming | F0.5 | F1 | MCC |
-|---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ANY_CANDIDATE|0.959835|1375 / 44095245979 (0.000003%)|111167 / 1383872 (8.033041%)|0.981996|0.957658|0.958475|
-|2|HUNSPELL GERMAN LUCENE FILTER|ANY_CANDIDATE|0.647474|158403 / 44095245979 (0.000359%)|975697 / 1383872 (70.504859%)|0.559116|0.418544|0.460956|
+| Rank | Stemmer | Balanced accuracy | Over-stemming (OI) | Under-stemming (UI) |
+|---:|---|---:|---:|---:|
+|1|Radixor|0.910445|0.000002%|17.910967%|
+|2|GERMAN CISTEM|0.878527|0.000674%|24.293900%|
+|3|SNOWBALL GERMAN DIRECT|0.776006|0.000171%|44.798684%|
+|4|SNOWBALL GERMAN LUCENE FILTER|0.769071|0.000371%|46.185528%|
+|5|GERMAN LUCENE GERMAN LIGHT STEM FILTER|0.753833|0.000191%|49.233299%|
+|6|GERMAN LUCENE GERMAN STEM FILTER|0.720992|0.000443%|55.801084%|
+|7|HUNSPELL GERMAN LUCENE FILTER|0.640308|0.000290%|71.938102%|
+|8|GERMAN LUCENE GERMAN MINIMAL STEM FILTER|0.595748|0.000088%|80.850384%|
 
 </div>
 
@@ -172,8 +109,14 @@ This mode contains **12 result rows**, **8 evaluated stemmers**, and **3 output 
 
 | Rank | Stemmer | Output policy | Precision | Recall | Specificity | Balanced accuracy | Pairwise accuracy | Error rate |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ANY_CANDIDATE|0.998921|0.919670|1.000000|0.959835|0.999997|0.000003|
-|2|HUNSPELL GERMAN LUCENE FILTER|ANY_CANDIDATE|0.720422|0.294951|0.999996|0.647474|0.999974|0.000026|
+|1|Radixor|PRIMARY_OUTPUT|0.999400|0.820890|1.000000|0.910445|0.999994|0.000006|
+|2|GERMAN CISTEM|PRIMARY_OUTPUT|0.797231|0.757061|0.999993|0.878527|0.999985|0.000015|
+|3|SNOWBALL GERMAN DIRECT|PRIMARY_OUTPUT|0.918570|0.552013|0.999998|0.776006|0.999983|0.000017|
+|4|SNOWBALL GERMAN LUCENE FILTER|PRIMARY_OUTPUT|0.835220|0.538145|0.999996|0.769071|0.999980|0.000020|
+|5|GERMAN LUCENE GERMAN LIGHT STEM FILTER|PRIMARY_OUTPUT|0.902792|0.507667|0.999998|0.753833|0.999981|0.000019|
+|6|GERMAN LUCENE GERMAN STEM FILTER|PRIMARY_OUTPUT|0.777304|0.441989|0.999996|0.720992|0.999976|0.000024|
+|7|HUNSPELL GERMAN LUCENE FILTER|PRIMARY_OUTPUT|0.771720|0.280619|0.999997|0.640308|0.999972|0.000028|
+|8|GERMAN LUCENE GERMAN MINIMAL STEM FILTER|PRIMARY_OUTPUT|0.883845|0.191496|0.999999|0.595748|0.999971|0.000029|
 
 </details>
 
@@ -181,17 +124,14 @@ This mode contains **12 result rows**, **8 evaluated stemmers**, and **3 output 
 
 | Rank | Stemmer | Output policy | F0.5 | F1 | F2 | Jaccard | Fowlkes–Mallows | MCC |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ANY_CANDIDATE|0.981996|0.957658|0.934498|0.918757|0.958476|0.958475|
-|2|HUNSPELL GERMAN LUCENE FILTER|ANY_CANDIDATE|0.559116|0.418544|0.334456|0.264658|0.460966|0.460956|
-
-</details>
-
-<details class="quality-details" markdown="1"><summary>Partition metrics (PRIMARY_OUTPUT only)</summary>
-
-| Rank | Stemmer | Output policy | Adjusted Rand Index | Homogeneity | Completeness | V-measure | Normalized mutual information |
-|---:|---|---|---:|---:|---:|---:|---:|
-|1|Radixor|ANY_CANDIDATE|n/a|n/a|n/a|n/a|n/a|
-|2|HUNSPELL GERMAN LUCENE FILTER|ANY_CANDIDATE|n/a|n/a|n/a|n/a|n/a|
+|1|Radixor|PRIMARY_OUTPUT|0.957746|0.901392|0.851302|0.820486|0.905758|0.905755|
+|2|GERMAN CISTEM|PRIMARY_OUTPUT|0.788860|0.776627|0.764768|0.634824|0.776886|0.776879|
+|3|SNOWBALL GERMAN DIRECT|PRIMARY_OUTPUT|0.810879|0.689608|0.599891|0.526260|0.712083|0.712076|
+|4|SNOWBALL GERMAN LUCENE FILTER|PRIMARY_OUTPUT|0.752175|0.654552|0.579359|0.486494|0.670425|0.670416|
+|5|GERMAN LUCENE GERMAN LIGHT STEM FILTER|PRIMARY_OUTPUT|0.781189|0.649884|0.556368|0.481355|0.676991|0.676984|
+|6|GERMAN LUCENE GERMAN STEM FILTER|PRIMARY_OUTPUT|0.674901|0.563540|0.483723|0.392311|0.586140|0.586130|
+|7|HUNSPELL GERMAN LUCENE FILTER|PRIMARY_OUTPUT|0.571639|0.411577|0.321543|0.259110|0.465359|0.465349|
+|8|GERMAN LUCENE GERMAN MINIMAL STEM FILTER|PRIMARY_OUTPUT|0.512941|0.314789|0.227071|0.186795|0.411404|0.411396|
 
 </details>
 
@@ -199,19 +139,47 @@ This mode contains **12 result rows**, **8 evaluated stemmers**, and **3 output 
 
 | Rank | Stemmer | Output policy | TP | FP | FN | TN | Over error / possible | Under error / possible |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ANY_CANDIDATE|1272705|1375|111167|44095244604|1375 / 44095245979|111167 / 1383872|
-|2|HUNSPELL GERMAN LUCENE FILTER|ANY_CANDIDATE|408175|158403|975697|44095087576|158403 / 44095245979|975697 / 1383872|
+|1|Radixor|PRIMARY_OUTPUT|1103976|663|240876|38436733230|663 / 38436733893|240876 / 1344852|
+|2|GERMAN CISTEM|PRIMARY_OUTPUT|1018135|258954|326717|38436474939|258954 / 38436733893|326717 / 1344852|
+|3|SNOWBALL GERMAN DIRECT|PRIMARY_OUTPUT|742376|65811|602476|38436668082|65811 / 38436733893|602476 / 1344852|
+|4|SNOWBALL GERMAN LUCENE FILTER|PRIMARY_OUTPUT|723725|142783|621127|38436591110|142783 / 38436733893|621127 / 1344852|
+|5|GERMAN LUCENE GERMAN LIGHT STEM FILTER|PRIMARY_OUTPUT|682737|73514|662115|38436660379|73514 / 38436733893|662115 / 1344852|
+|6|GERMAN LUCENE GERMAN STEM FILTER|PRIMARY_OUTPUT|594410|170297|750442|38436563596|170297 / 38436733893|750442 / 1344852|
+|7|HUNSPELL GERMAN LUCENE FILTER|PRIMARY_OUTPUT|377391|111635|967461|38436622258|111635 / 38436733893|967461 / 1344852|
+|8|GERMAN LUCENE GERMAN MINIMAL STEM FILTER|PRIMARY_OUTPUT|257534|33845|1087318|38436700048|33845 / 38436733893|1087318 / 1344852|
+
+</details>
+
+#### `ANY_CANDIDATE` oracle bounds
+
+These results are measured, not missing. `ANY_CANDIDATE` answers two separate optimistic questions for each pair: a gold-related pair avoids under-stemming when the candidate sets intersect, while a gold-negative pair avoids over-stemming when some non-colliding candidate selection exists. The oracle may choose a different candidate for the same word in different pairs. Consequently, these decisions do not form one globally realizable predicted relation or one TP/FP/FN/TN confusion matrix. Balanced accuracy, F-scores, Jaccard, Fowlkes–Mallows, and MCC are therefore mathematically **not applicable**, rather than unknown.
+
+<div class="quality-summary quality-summary--oracle" markdown="1">
+
+| Stemmer | Optimistic over-stemming (OI) | Optimistic under-stemming (UI) |
+|---|---:|---:|
+|Radixor|0.000001%|8.261653%|
+|HUNSPELL GERMAN LUCENE FILTER|0.000216%|70.811435%|
+
+</div>
+
+<details class="quality-details" markdown="1"><summary>Oracle-bound pair counts</summary>
+
+| Stemmer | Unavoidable over errors / gold-negative pairs | Unrepairable under errors / gold-related pairs |
+|---|---:|---:|
+|Radixor|502 / 38436733893|111107 / 1344852|
+|HUNSPELL GERMAN LUCENE FILTER|83073 / 38436733893|952309 / 1344852|
 
 </details>
 
 #### `ALL_CANDIDATES` ranking
 
-<div class="quality-table quality-table--compact" role="region" aria-label="Compact stemming-quality ranking; scroll horizontally for additional columns" tabindex="0" markdown="1">
+<div class="quality-summary" markdown="1">
 
-| Rank | Stemmer | Output policy | Balanced accuracy | Over-stemming | Under-stemming | F0.5 | F1 | MCC |
-|---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ALL_CANDIDATES|0.959832|244817 / 44095245979 (0.000555%)|111167 / 1383872 (8.033041%)|0.853711|0.877306|0.878234|
-|2|HUNSPELL GERMAN LUCENE FILTER|ALL_CANDIDATES|0.647473|242551 / 44095245979 (0.000550%)|975697 / 1383872 (70.504859%)|0.511911|0.401234|0.430118|
+| Rank | Stemmer | Balanced accuracy | Over-stemming (OI) | Under-stemming (UI) |
+|---:|---|---:|---:|---:|
+|1|Radixor|0.958692|0.000018%|8.261653%|
+|2|HUNSPELL GERMAN LUCENE FILTER|0.645941|0.000354%|70.811435%|
 
 </div>
 
@@ -219,8 +187,8 @@ This mode contains **12 result rows**, **8 evaluated stemmers**, and **3 output 
 
 | Rank | Stemmer | Output policy | Precision | Recall | Specificity | Balanced accuracy | Pairwise accuracy | Error rate |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ALL_CANDIDATES|0.838673|0.919670|0.999994|0.959832|0.999992|0.000008|
-|2|HUNSPELL GERMAN LUCENE FILTER|ALL_CANDIDATES|0.627261|0.294951|0.999994|0.647473|0.999972|0.000028|
+|1|Radixor|ALL_CANDIDATES|0.994469|0.917383|1.000000|0.958692|0.999997|0.000003|
+|2|HUNSPELL GERMAN LUCENE FILTER|ALL_CANDIDATES|0.742744|0.291886|0.999996|0.645941|0.999972|0.000028|
 
 </details>
 
@@ -228,17 +196,8 @@ This mode contains **12 result rows**, **8 evaluated stemmers**, and **3 output 
 
 | Rank | Stemmer | Output policy | F0.5 | F1 | F2 | Jaccard | Fowlkes–Mallows | MCC |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ALL_CANDIDATES|0.853711|0.877306|0.902242|0.781429|0.878238|0.878234|
-|2|HUNSPELL GERMAN LUCENE FILTER|ALL_CANDIDATES|0.511911|0.401234|0.329907|0.250965|0.430130|0.430118|
-
-</details>
-
-<details class="quality-details" markdown="1"><summary>Partition metrics (PRIMARY_OUTPUT only)</summary>
-
-| Rank | Stemmer | Output policy | Adjusted Rand Index | Homogeneity | Completeness | V-measure | Normalized mutual information |
-|---:|---|---|---:|---:|---:|---:|---:|
-|1|Radixor|ALL_CANDIDATES|n/a|n/a|n/a|n/a|n/a|
-|2|HUNSPELL GERMAN LUCENE FILTER|ALL_CANDIDATES|n/a|n/a|n/a|n/a|n/a|
+|1|Radixor|ALL_CANDIDATES|0.978033|0.954372|0.931829|0.912726|0.955149|0.955147|
+|2|HUNSPELL GERMAN LUCENE FILTER|ALL_CANDIDATES|0.567444|0.419080|0.332218|0.265086|0.465614|0.465603|
 
 </details>
 
@@ -246,8 +205,8 @@ This mode contains **12 result rows**, **8 evaluated stemmers**, and **3 output 
 
 | Rank | Stemmer | Output policy | TP | FP | FN | TN | Over error / possible | Under error / possible |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ALL_CANDIDATES|1272705|244817|111167|44095001162|244817 / 44095245979|111167 / 1383872|
-|2|HUNSPELL GERMAN LUCENE FILTER|ALL_CANDIDATES|408175|242551|975697|44095003428|242551 / 44095245979|975697 / 1383872|
+|1|Radixor|ALL_CANDIDATES|1233745|6862|111107|38436727031|6862 / 38436733893|111107 / 1344852|
+|2|HUNSPELL GERMAN LUCENE FILTER|ALL_CANDIDATES|392543|135961|952309|38436597932|135961 / 38436733893|952309 / 1344852|
 
 </details>
 
@@ -257,98 +216,27 @@ Alternative candidates are capability analyses, not replacements for the determi
 
 | Stemmer | Under pairs repaired | Best-case over pairs avoided | All-candidate collisions added | Multi-candidate forms | Multi-candidate share | Maximum candidates | Total candidate assignments |
 |---|---:|---:|---:|---:|---:|---:|---:|
-|Radixor|143736|96817|146625|48574|16.356314%|8|361016|
-|HUNSPELL GERMAN LUCENE FILTER|16313|45480|38668|7891|2.657135%|3|305052|
+|Radixor|129769|161|6199|29035|10.471893%|8|313927|
+|HUNSPELL GERMAN LUCENE FILTER|15152|28562|24326|6482|2.337827%|3|283881|
 
 ### `LOWERCASE_GROUPS_ONLY`
 
-This mode contains **12 result rows**, **8 evaluated stemmers**, and **3 output policies**. Applied-row and form counts are shown per row because adapters share the language corpus but policy rows remain independently auditable. Rankings are separated by output policy and ordered by unrounded balanced accuracy, followed by MCC, F1, over-stemming rate, over-stemming count, under-stemming rate, and stemmer. Balanced accuracy is a navigation metric, not a universally authoritative quality score.
+This mode contains **12 result rows**, **8 evaluated stemmers**, and **3 output policies**. Applied-row and form counts are shown per row because adapters share the language corpus but policy rows remain independently auditable. `PRIMARY_OUTPUT` and `ALL_CANDIDATES` rankings are ordered by unrounded balanced accuracy, followed by MCC, F1, over-stemming rate, over-stemming count, under-stemming rate, and stemmer. `ANY_CANDIDATE` has no single rank metric and is listed alphabetically. Balanced accuracy is a navigation metric, not a universally authoritative quality score.
 
 #### `PRIMARY_OUTPUT` ranking
 
-<div class="quality-table quality-table--compact" role="region" aria-label="Compact stemming-quality ranking; scroll horizontally for additional columns" tabindex="0" markdown="1">
+<div class="quality-summary" markdown="1">
 
-| Rank | Stemmer | Output policy | Balanced accuracy | Over-stemming | Under-stemming | F0.5 | F1 | MCC |
-|---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|PRIMARY_OUTPUT|0.966157|47898 / 11263756342 (0.000425%)|59114 / 873411 (6.768177%)|0.941996|0.938343|0.938358|
-|2|GERMAN CISTEM|PRIMARY_OUTPUT|0.915288|156784 / 11263756342 (0.001392%)|147964 / 873411 (16.940936%)|0.823934|0.826418|0.826415|
-|3|SNOWBALL GERMAN DIRECT|PRIMARY_OUTPUT|0.795926|87697 / 11263756342 (0.000779%)|356475 / 873411 (40.814118%)|0.785153|0.699487|0.711329|
-|4|SNOWBALL GERMAN LUCENE FILTER|PRIMARY_OUTPUT|0.775641|77653 / 11263756342 (0.000689%)|391910 / 873411 (44.871200%)|0.774111|0.672222|0.688986|
-|5|GERMAN LUCENE GERMAN LIGHT STEM FILTER|PRIMARY_OUTPUT|0.769953|55477 / 11263756342 (0.000493%)|401846 / 873411 (46.008809%)|0.790797|0.673446|0.695023|
-|6|GERMAN LUCENE GERMAN STEM FILTER|PRIMARY_OUTPUT|0.716810|78723 / 11263756342 (0.000699%)|494677 / 873411 (56.637368%)|0.700519|0.569153|0.599149|
-|7|HUNSPELL GERMAN LUCENE FILTER|PRIMARY_OUTPUT|0.659196|84679 / 11263756342 (0.000752%)|595318 / 873411 (68.160122%)|0.598178|0.449922|0.494019|
-|8|GERMAN LUCENE GERMAN MINIMAL STEM FILTER|PRIMARY_OUTPUT|0.575691|21214 / 11263756342 (0.000188%)|741190 / 873411 (84.861537%)|0.444545|0.257528|0.361168|
-
-</div>
-
-<details class="quality-details" markdown="1"><summary>Classification metrics</summary>
-
-| Rank | Stemmer | Output policy | Precision | Recall | Specificity | Balanced accuracy | Pairwise accuracy | Error rate |
-|---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|PRIMARY_OUTPUT|0.944446|0.932318|0.999996|0.966157|0.999991|0.000009|
-|2|GERMAN CISTEM|PRIMARY_OUTPUT|0.822287|0.830591|0.999986|0.915288|0.999973|0.000027|
-|3|SNOWBALL GERMAN DIRECT|PRIMARY_OUTPUT|0.854958|0.591859|0.999992|0.795926|0.999961|0.000039|
-|4|SNOWBALL GERMAN LUCENE FILTER|PRIMARY_OUTPUT|0.861124|0.551288|0.999993|0.775641|0.999958|0.000042|
-|5|GERMAN LUCENE GERMAN LIGHT STEM FILTER|PRIMARY_OUTPUT|0.894739|0.539912|0.999995|0.769953|0.999959|0.000041|
-|6|GERMAN LUCENE GERMAN STEM FILTER|PRIMARY_OUTPUT|0.827912|0.433626|0.999993|0.716810|0.999949|0.000051|
-|7|HUNSPELL GERMAN LUCENE FILTER|PRIMARY_OUTPUT|0.766578|0.318399|0.999992|0.659196|0.999940|0.000060|
-|8|GERMAN LUCENE GERMAN MINIMAL STEM FILTER|PRIMARY_OUTPUT|0.861739|0.151385|0.999998|0.575691|0.999932|0.000068|
-
-</details>
-
-<details class="quality-details" markdown="1"><summary>Pair-relation metrics</summary>
-
-| Rank | Stemmer | Output policy | F0.5 | F1 | F2 | Jaccard | Fowlkes–Mallows | MCC |
-|---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|PRIMARY_OUTPUT|0.941996|0.938343|0.934719|0.883848|0.938363|0.938358|
-|2|GERMAN CISTEM|PRIMARY_OUTPUT|0.823934|0.826418|0.828917|0.704184|0.826428|0.826415|
-|3|SNOWBALL GERMAN DIRECT|PRIMARY_OUTPUT|0.785153|0.699487|0.630675|0.537854|0.711347|0.711329|
-|4|SNOWBALL GERMAN LUCENE FILTER|PRIMARY_OUTPUT|0.774111|0.672222|0.594035|0.506276|0.689005|0.688986|
-|5|GERMAN LUCENE GERMAN LIGHT STEM FILTER|PRIMARY_OUTPUT|0.790797|0.673446|0.586424|0.507666|0.695040|0.695023|
-|6|GERMAN LUCENE GERMAN STEM FILTER|PRIMARY_OUTPUT|0.700519|0.569153|0.479277|0.397774|0.599170|0.599149|
-|7|HUNSPELL GERMAN LUCENE FILTER|PRIMARY_OUTPUT|0.598178|0.449922|0.360559|0.290258|0.494042|0.494019|
-|8|GERMAN LUCENE GERMAN MINIMAL STEM FILTER|PRIMARY_OUTPUT|0.444545|0.257528|0.181270|0.147795|0.361184|0.361168|
-
-</details>
-
-<details class="quality-details" markdown="1"><summary>Partition metrics (PRIMARY_OUTPUT only)</summary>
-
-| Rank | Stemmer | Output policy | Adjusted Rand Index | Homogeneity | Completeness | V-measure | Normalized mutual information |
-|---:|---|---|---:|---:|---:|---:|---:|
-|1|Radixor|PRIMARY_OUTPUT|0.938338|0.994062|0.990664|0.992360|0.992360|
-|2|GERMAN CISTEM|PRIMARY_OUTPUT|0.826404|0.985936|0.973570|0.979714|0.979714|
-|3|SNOWBALL GERMAN DIRECT|PRIMARY_OUTPUT|0.699468|0.988418|0.932452|0.959619|0.959619|
-|4|SNOWBALL GERMAN LUCENE FILTER|PRIMARY_OUTPUT|0.672202|0.989021|0.919542|0.953017|0.953017|
-|5|GERMAN LUCENE GERMAN LIGHT STEM FILTER|PRIMARY_OUTPUT|0.673427|0.991320|0.915070|0.951670|0.951670|
-|6|GERMAN LUCENE GERMAN STEM FILTER|PRIMARY_OUTPUT|0.569130|0.988584|0.918718|0.952371|0.952371|
-|7|HUNSPELL GERMAN LUCENE FILTER|PRIMARY_OUTPUT|0.449897|0.988041|0.865581|0.922766|0.922766|
-|8|GERMAN LUCENE GERMAN MINIMAL STEM FILTER|PRIMARY_OUTPUT|0.257511|0.992643|0.854403|0.918349|0.918349|
-
-</details>
-
-<details class="quality-details" markdown="1"><summary>Raw pair counts</summary>
-
-| Rank | Stemmer | Output policy | TP | FP | FN | TN | Over error / possible | Under error / possible |
-|---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|PRIMARY_OUTPUT|814297|47898|59114|11263708444|47898 / 11263756342|59114 / 873411|
-|2|GERMAN CISTEM|PRIMARY_OUTPUT|725447|156784|147964|11263599558|156784 / 11263756342|147964 / 873411|
-|3|SNOWBALL GERMAN DIRECT|PRIMARY_OUTPUT|516936|87697|356475|11263668645|87697 / 11263756342|356475 / 873411|
-|4|SNOWBALL GERMAN LUCENE FILTER|PRIMARY_OUTPUT|481501|77653|391910|11263678689|77653 / 11263756342|391910 / 873411|
-|5|GERMAN LUCENE GERMAN LIGHT STEM FILTER|PRIMARY_OUTPUT|471565|55477|401846|11263700865|55477 / 11263756342|401846 / 873411|
-|6|GERMAN LUCENE GERMAN STEM FILTER|PRIMARY_OUTPUT|378734|78723|494677|11263677619|78723 / 11263756342|494677 / 873411|
-|7|HUNSPELL GERMAN LUCENE FILTER|PRIMARY_OUTPUT|278093|84679|595318|11263671663|84679 / 11263756342|595318 / 873411|
-|8|GERMAN LUCENE GERMAN MINIMAL STEM FILTER|PRIMARY_OUTPUT|132221|21214|741190|11263735128|21214 / 11263756342|741190 / 873411|
-
-</details>
-
-#### `ANY_CANDIDATE` ranking
-
-<div class="quality-table quality-table--compact" role="region" aria-label="Compact stemming-quality ranking; scroll horizontally for additional columns" tabindex="0" markdown="1">
-
-| Rank | Stemmer | Output policy | Balanced accuracy | Over-stemming | Under-stemming | F0.5 | F1 | MCC |
-|---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ANY_CANDIDATE|1.000000|0 / 11263756342 (0.000000%)|0 / 873411 (0.000000%)|1.000000|1.000000|1.000000|
-|2|HUNSPELL GERMAN LUCENE FILTER|ANY_CANDIDATE|0.665363|60996 / 11263756342 (0.000542%)|584547 / 873411 (66.926911%)|0.635466|0.472281|0.522540|
+| Rank | Stemmer | Balanced accuracy | Over-stemming (OI) | Under-stemming (UI) |
+|---:|---|---:|---:|---:|
+|1|Radixor|0.966959|0.000001%|6.608210%|
+|2|GERMAN CISTEM|0.914727|0.000812%|17.053716%|
+|3|SNOWBALL GERMAN DIRECT|0.794994|0.000391%|41.000819%|
+|4|SNOWBALL GERMAN LUCENE FILTER|0.774716|0.000325%|45.056540%|
+|5|GERMAN LUCENE GERMAN LIGHT STEM FILTER|0.768968|0.000130%|46.206331%|
+|6|GERMAN LUCENE GERMAN STEM FILTER|0.716147|0.000358%|56.770194%|
+|7|HUNSPELL GERMAN LUCENE FILTER|0.659574|0.000556%|68.084626%|
+|8|GERMAN LUCENE GERMAN MINIMAL STEM FILTER|0.574999|0.000045%|85.000064%|
 
 </div>
 
@@ -356,8 +244,14 @@ This mode contains **12 result rows**, **8 evaluated stemmers**, and **3 output 
 
 | Rank | Stemmer | Output policy | Precision | Recall | Specificity | Balanced accuracy | Pairwise accuracy | Error rate |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ANY_CANDIDATE|1.000000|1.000000|1.000000|1.000000|1.000000|0.000000|
-|2|HUNSPELL GERMAN LUCENE FILTER|ANY_CANDIDATE|0.825656|0.330731|0.999995|0.665363|0.999943|0.000057|
+|1|Radixor|PRIMARY_OUTPUT|0.999900|0.933918|1.000000|0.966959|0.999995|0.000005|
+|2|GERMAN CISTEM|PRIMARY_OUTPUT|0.892172|0.829463|0.999992|0.914727|0.999978|0.000022|
+|3|SNOWBALL GERMAN DIRECT|PRIMARY_OUTPUT|0.924303|0.589992|0.999996|0.794994|0.999963|0.000037|
+|4|SNOWBALL GERMAN LUCENE FILTER|PRIMARY_OUTPUT|0.931871|0.549435|0.999997|0.774716|0.999960|0.000040|
+|5|GERMAN LUCENE GERMAN LIGHT STEM FILTER|PRIMARY_OUTPUT|0.971001|0.537937|0.999999|0.768968|0.999961|0.000039|
+|6|GERMAN LUCENE GERMAN STEM FILTER|PRIMARY_OUTPUT|0.907196|0.432298|0.999996|0.716147|0.999950|0.000050|
+|7|HUNSPELL GERMAN LUCENE FILTER|PRIMARY_OUTPUT|0.823043|0.319154|0.999994|0.659574|0.999939|0.000061|
+|8|GERMAN LUCENE GERMAN MINIMAL STEM FILTER|PRIMARY_OUTPUT|0.964480|0.149999|1.000000|0.574999|0.999931|0.000069|
 
 </details>
 
@@ -365,17 +259,14 @@ This mode contains **12 result rows**, **8 evaluated stemmers**, and **3 output 
 
 | Rank | Stemmer | Output policy | F0.5 | F1 | F2 | Jaccard | Fowlkes–Mallows | MCC |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ANY_CANDIDATE|1.000000|1.000000|1.000000|1.000000|1.000000|1.000000|
-|2|HUNSPELL GERMAN LUCENE FILTER|ANY_CANDIDATE|0.635466|0.472281|0.375782|0.309142|0.522561|0.522540|
-
-</details>
-
-<details class="quality-details" markdown="1"><summary>Partition metrics (PRIMARY_OUTPUT only)</summary>
-
-| Rank | Stemmer | Output policy | Adjusted Rand Index | Homogeneity | Completeness | V-measure | Normalized mutual information |
-|---:|---|---|---:|---:|---:|---:|---:|
-|1|Radixor|ANY_CANDIDATE|n/a|n/a|n/a|n/a|n/a|
-|2|HUNSPELL GERMAN LUCENE FILTER|ANY_CANDIDATE|n/a|n/a|n/a|n/a|n/a|
+|1|Radixor|PRIMARY_OUTPUT|0.985968|0.965783|0.946408|0.933831|0.966346|0.966343|
+|2|GERMAN CISTEM|PRIMARY_OUTPUT|0.878883|0.859676|0.841289|0.753887|0.860246|0.860236|
+|3|SNOWBALL GERMAN DIRECT|PRIMARY_OUTPUT|0.830217|0.720244|0.635999|0.562799|0.738466|0.738450|
+|4|SNOWBALL GERMAN LUCENE FILTER|PRIMARY_OUTPUT|0.817997|0.691285|0.598564|0.528217|0.715543|0.715527|
+|5|GERMAN LUCENE GERMAN LIGHT STEM FILTER|PRIMARY_OUTPUT|0.836342|0.692324|0.590620|0.529431|0.722729|0.722714|
+|6|GERMAN LUCENE GERMAN STEM FILTER|PRIMARY_OUTPUT|0.743781|0.585563|0.482850|0.413990|0.626242|0.626223|
+|7|HUNSPELL GERMAN LUCENE FILTER|PRIMARY_OUTPUT|0.625524|0.459951|0.363685|0.298660|0.512520|0.512499|
+|8|GERMAN LUCENE GERMAN MINIMAL STEM FILTER|PRIMARY_OUTPUT|0.462363|0.259621|0.180482|0.149175|0.380357|0.380343|
 
 </details>
 
@@ -383,19 +274,47 @@ This mode contains **12 result rows**, **8 evaluated stemmers**, and **3 output 
 
 | Rank | Stemmer | Output policy | TP | FP | FN | TN | Over error / possible | Under error / possible |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ANY_CANDIDATE|873411|0|0|11263756342|0 / 11263756342|0 / 873411|
-|2|HUNSPELL GERMAN LUCENE FILTER|ANY_CANDIDATE|288864|60996|584547|11263695346|60996 / 11263756342|584547 / 873411|
+|1|Radixor|PRIMARY_OUTPUT|801691|80|56726|10594963454|80 / 10594963534|56726 / 858417|
+|2|GERMAN CISTEM|PRIMARY_OUTPUT|712025|86055|146392|10594877479|86055 / 10594963534|146392 / 858417|
+|3|SNOWBALL GERMAN DIRECT|PRIMARY_OUTPUT|506459|41477|351958|10594922057|41477 / 10594963534|351958 / 858417|
+|4|SNOWBALL GERMAN LUCENE FILTER|PRIMARY_OUTPUT|471644|34482|386773|10594929052|34482 / 10594963534|386773 / 858417|
+|5|GERMAN LUCENE GERMAN LIGHT STEM FILTER|PRIMARY_OUTPUT|461774|13791|396643|10594949743|13791 / 10594963534|396643 / 858417|
+|6|GERMAN LUCENE GERMAN STEM FILTER|PRIMARY_OUTPUT|371092|37962|487325|10594925572|37962 / 10594963534|487325 / 858417|
+|7|HUNSPELL GERMAN LUCENE FILTER|PRIMARY_OUTPUT|273967|58904|584450|10594904630|58904 / 10594963534|584450 / 858417|
+|8|GERMAN LUCENE GERMAN MINIMAL STEM FILTER|PRIMARY_OUTPUT|128762|4742|729655|10594958792|4742 / 10594963534|729655 / 858417|
+
+</details>
+
+#### `ANY_CANDIDATE` oracle bounds
+
+These results are measured, not missing. `ANY_CANDIDATE` answers two separate optimistic questions for each pair: a gold-related pair avoids under-stemming when the candidate sets intersect, while a gold-negative pair avoids over-stemming when some non-colliding candidate selection exists. The oracle may choose a different candidate for the same word in different pairs. Consequently, these decisions do not form one globally realizable predicted relation or one TP/FP/FN/TN confusion matrix. Balanced accuracy, F-scores, Jaccard, Fowlkes–Mallows, and MCC are therefore mathematically **not applicable**, rather than unknown.
+
+<div class="quality-summary quality-summary--oracle" markdown="1">
+
+| Stemmer | Optimistic over-stemming (OI) | Optimistic under-stemming (UI) |
+|---|---:|---:|
+|Radixor|0.000000%|0.000000%|
+|HUNSPELL GERMAN LUCENE FILTER|0.000383%|66.866802%|
+
+</div>
+
+<details class="quality-details" markdown="1"><summary>Oracle-bound pair counts</summary>
+
+| Stemmer | Unavoidable over errors / gold-negative pairs | Unrepairable under errors / gold-related pairs |
+|---|---:|---:|
+|Radixor|0 / 10594963534|0 / 858417|
+|HUNSPELL GERMAN LUCENE FILTER|40608 / 10594963534|573996 / 858417|
 
 </details>
 
 #### `ALL_CANDIDATES` ranking
 
-<div class="quality-table quality-table--compact" role="region" aria-label="Compact stemming-quality ranking; scroll horizontally for additional columns" tabindex="0" markdown="1">
+<div class="quality-summary" markdown="1">
 
-| Rank | Stemmer | Output policy | Balanced accuracy | Over-stemming | Under-stemming | F0.5 | F1 | MCC |
-|---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ALL_CANDIDATES|0.999996|97544 / 11263756342 (0.000866%)|0 / 873411 (0.000000%)|0.917983|0.947112|0.948436|
-|2|HUNSPELL GERMAN LUCENE FILTER|ALL_CANDIDATES|0.665361|96545 / 11263756342 (0.000857%)|584547 / 873411 (66.926911%)|0.598050|0.458944|0.497855|
+| Rank | Stemmer | Balanced accuracy | Over-stemming (OI) | Under-stemming (UI) |
+|---:|---|---:|---:|---:|
+|1|Radixor|1.000000|0.000014%|0.000000%|
+|2|HUNSPELL GERMAN LUCENE FILTER|0.665663|0.000629%|66.866802%|
 
 </div>
 
@@ -403,8 +322,8 @@ This mode contains **12 result rows**, **8 evaluated stemmers**, and **3 output 
 
 | Rank | Stemmer | Output policy | Precision | Recall | Specificity | Balanced accuracy | Pairwise accuracy | Error rate |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ALL_CANDIDATES|0.899538|1.000000|0.999991|0.999996|0.999991|0.000009|
-|2|HUNSPELL GERMAN LUCENE FILTER|ALL_CANDIDATES|0.749500|0.330731|0.999991|0.665361|0.999940|0.000060|
+|1|Radixor|ALL_CANDIDATES|0.998267|1.000000|1.000000|1.000000|1.000000|0.000000|
+|2|HUNSPELL GERMAN LUCENE FILTER|ALL_CANDIDATES|0.810178|0.331332|0.999994|0.665663|0.999940|0.000060|
 
 </details>
 
@@ -412,17 +331,8 @@ This mode contains **12 result rows**, **8 evaluated stemmers**, and **3 output 
 
 | Rank | Stemmer | Output policy | F0.5 | F1 | F2 | Jaccard | Fowlkes–Mallows | MCC |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ALL_CANDIDATES|0.917983|0.947112|0.978152|0.899538|0.948440|0.948436|
-|2|HUNSPELL GERMAN LUCENE FILTER|ALL_CANDIDATES|0.598050|0.458944|0.372338|0.297811|0.497878|0.497855|
-
-</details>
-
-<details class="quality-details" markdown="1"><summary>Partition metrics (PRIMARY_OUTPUT only)</summary>
-
-| Rank | Stemmer | Output policy | Adjusted Rand Index | Homogeneity | Completeness | V-measure | Normalized mutual information |
-|---:|---|---|---:|---:|---:|---:|---:|
-|1|Radixor|ALL_CANDIDATES|n/a|n/a|n/a|n/a|n/a|
-|2|HUNSPELL GERMAN LUCENE FILTER|ALL_CANDIDATES|n/a|n/a|n/a|n/a|n/a|
+|1|Radixor|ALL_CANDIDATES|0.998613|0.999133|0.999653|0.998267|0.999133|0.999133|
+|2|HUNSPELL GERMAN LUCENE FILTER|ALL_CANDIDATES|0.628511|0.470321|0.375748|0.307464|0.518110|0.518088|
 
 </details>
 
@@ -430,8 +340,8 @@ This mode contains **12 result rows**, **8 evaluated stemmers**, and **3 output 
 
 | Rank | Stemmer | Output policy | TP | FP | FN | TN | Over error / possible | Under error / possible |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ALL_CANDIDATES|873411|97544|0|11263658798|97544 / 11263756342|0 / 873411|
-|2|HUNSPELL GERMAN LUCENE FILTER|ALL_CANDIDATES|288864|96545|584547|11263659797|96545 / 11263756342|584547 / 873411|
+|1|Radixor|ALL_CANDIDATES|858417|1490|0|10594962044|1490 / 10594963534|0 / 858417|
+|2|HUNSPELL GERMAN LUCENE FILTER|ALL_CANDIDATES|284421|66639|573996|10594896895|66639 / 10594963534|573996 / 858417|
 
 </details>
 
@@ -441,20 +351,20 @@ Alternative candidates are capability analyses, not replacements for the determi
 
 | Stemmer | Under pairs repaired | Best-case over pairs avoided | All-candidate collisions added | Multi-candidate forms | Multi-candidate share | Maximum candidates | Total candidate assignments |
 |---|---:|---:|---:|---:|---:|---:|---:|
-|Radixor|59114|47898|49646|14978|9.978814%|8|167157|
-|HUNSPELL GERMAN LUCENE FILTER|10771|23683|11866|4989|3.323828%|3|155207|
+|Radixor|56726|80|1410|10454|7.181227%|8|157137|
+|HUNSPELL GERMAN LUCENE FILTER|10454|18296|7735|4538|3.117315%|3|150205|
 
 ### Output Policies and Metric Definitions
 
-`PRIMARY_OUTPUT` uses one deterministic stem per form and therefore defines a strict partition. `ANY_CANDIDATE` is an optimistic oracle-assisted pairwise upper bound: a same-group pair succeeds when candidates intersect, while a different-group pair succeeds when a non-colliding selection exists. Candidate choices may differ between pairs, so this is not deterministic runtime behaviour and need not represent one globally consistent assignment. `ALL_CANDIDATES` activates every returned candidate; forms are related when candidate sets intersect. Alternatives can reduce under-stemming but can introduce cross-group collisions, and the resulting relation can overlap and need not be a partition.
+Each distinct surface form is one item and may belong to several gold groups. Two forms are gold-related when their membership sets intersect; a relation shared by several groups is counted once. `PRIMARY_OUTPUT` uses one deterministic stem per form. `ANY_CANDIDATE` is an optimistic oracle-assisted pairwise upper bound: a gold-related pair succeeds when candidates intersect, while a gold-negative pair succeeds when a non-colliding selection exists. Candidate choices may differ between pairs, so this is not deterministic runtime behaviour and does not define one confusion matrix. `ALL_CANDIDATES` activates every returned candidate; forms are related when candidate sets intersect.
 
-For each row, `TP = underPossiblePairs - underErrorPairs`, `FN = underErrorPairs`, `FP = overErrorPairs`, and `TN = overPossiblePairs - overErrorPairs`. TP and FN concern same-group pairs; FP and TN concern different-group pairs. Consequently, under-stemming and over-stemming use different denominators. Undefined values are rendered as `n/a`.
+For `PRIMARY_OUTPUT` and `ALL_CANDIDATES`, `TP = underPossiblePairs - underErrorPairs`, `FN = underErrorPairs`, `FP = overErrorPairs`, and `TN = overPossiblePairs - overErrorPairs`. `ANY_CANDIDATE` publishes only its separate oracle-assisted under/over bounds; confusion-derived metrics are mathematically inapplicable and are not presented in its language-page section. Their machine-readable CSV fields remain empty. Undefined metric denominators in otherwise applicable policies are rendered as `n/a`.
 
-- Under-stemming rate: `FN / (TP + FN)`, the false-negative rate over same-group pairs.
-- Over-stemming rate: `FP / (TN + FP)`, the false-positive rate over different-group pairs.
+- Under-stemming rate (Paice UI): `FN / (TP + FN)`, the false-negative rate over gold-related pairs.
+- Over-stemming rate (Paice OI): `FP / (TN + FP)`, the false-positive rate over gold-negative pairs.
 - Pairwise precision: `TP / (TP + FP)`, the fraction of predicted conflations that are gold-standard positive pairs.
 - Pairwise recall: `TP / (TP + FN)`, the fraction of gold-standard positive pairs successfully connected.
-- Pairwise specificity: `TN / (TN + FP)`, the fraction of different-group pairs correctly separated.
+- Pairwise specificity: `TN / (TN + FP)`, the fraction of gold-negative pairs correctly separated.
 - Balanced accuracy: `(recall + specificity) / 2`. It gives equal weight to positive and negative pair classes and is less dominated by the large true-negative class than ordinary accuracy. It does not replace the raw errors or other metrics.
 - Pairwise F-beta: `((1 + betaSquared) * TP) / (((1 + betaSquared) * TP) + (betaSquared * FN) + FP)`. F0.5 emphasizes precision and penalizes over-stemming more; F1 weights precision and recall equally; F2 emphasizes recall and penalizes under-stemming more.
 - MCC: `(TP * TN - FP * FN) / sqrt((TP + FP) * (TP + FN) * (TN + FP) * (TN + FN))`. It uses all confusion counts and remains useful under class imbalance, except when its denominator is degenerate.
@@ -463,16 +373,17 @@ For each row, `TP = underPossiblePairs - underErrorPairs`, `FN = underErrorPairs
 - Pairwise accuracy: `(TP + TN) / (TP + TN + FP + FN)`. It can be dominated by true-negative cross-group pairs.
 - Pairwise error rate: `(FP + FN) / (TP + TN + FP + FN)`.
 
-Adjusted Rand Index uses the gold/predicted contingency table and chance correction. Homogeneity is `1 - H(gold | predicted) / H(gold)`; completeness is `1 - H(predicted | gold) / H(predicted)`; V-measure is their harmonic mean; normalized mutual information uses the arithmetic-mean entropy normalization `MI / ((H(gold) + H(predicted)) / 2)`. These partition-only metrics apply to `PRIMARY_OUTPUT`; candidate-relation rows show `n/a`.
+Standard ARI, homogeneity, completeness, V-measure, and NMI are not calculated: their usual contingency-table definitions require an exclusive gold partition, while this gold standard is an overlapping cover.
 
 ### Provenance
 
 - Authoritative source: `docs/benchmarks/data/stemming-quality.csv`
-- Source SHA-256: `5a93a6ab60e46489737cd649eb1ac48182114b9038f7f20195ab9d1c1fc0dd28`
-- Evaluation command: `./gradlew stemmingQuality`
+- Source SHA-256: `edf16b07be8a535943ddf37caeb8807755c95e9e1fb13244145f28be74b491d8`
+- Evaluation command: `./gradlew stemmingQuality --no-daemon`
 - Dictionary language: `DE_DE`
 - Processing modes: `ALL_WORDS`, `LOWERCASE_GROUPS_ONLY`
 - Stemmer versions and transitive artifacts: resolved by the repository's JMH Gradle configuration and `gradle.lockfile`
-- Radixor version, Git revision, generation date, JDK version, operating system, and dictionary revision: not recorded in the authoritative CSV
+- Model ID, version, and SHA-256: recorded in every CSV row
+- Run date, core source state, JDK, operating system, and hardware: recorded on the [benchmark environment page](../reference/environment.md)
 
 <!-- STEMMING-QUALITY:END -->

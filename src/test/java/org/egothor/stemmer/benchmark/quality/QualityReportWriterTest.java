@@ -71,7 +71,7 @@ final class QualityReportWriterTest {
         final Path report = this.temporaryDirectory.resolve("report.csv");
         QualityReportWriter.writeCsv(report, List.of(result("Stemmer, \"quoted\"", "A", 0, 0)));
         final String text = Files.readString(report, StandardCharsets.UTF_8);
-        assertTrue(text.startsWith("Stemmer,Language,Dictionary mode,Output policy,Applied dictionary rows,Processed word forms,Singleton dictionary rows,Forms with one candidate,"));
+        assertTrue(text.startsWith("Stemmer,Language,Dictionary model ID,Dictionary model version,Dictionary model SHA-256,Dictionary mode,Output policy,Applied dictionary rows,Processed word forms,Singleton dictionary rows,Forms with one candidate,"));
         assertTrue(text.contains("\"Stemmer, \"\"quoted\"\"\""));
         assertTrue(text.contains("Adjusted Rand Index,Homogeneity,Completeness,V-measure,Normalized mutual information"));
     }

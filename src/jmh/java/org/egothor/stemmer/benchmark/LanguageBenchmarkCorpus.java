@@ -37,12 +37,15 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.zip.GZIPInputStream;
 
+import org.egothor.stemmer.StemmerModelDescriptor;
+import org.egothor.stemmer.StemmerModelRegistry;
 import org.egothor.stemmer.StemmerPatchTrieLoader;
 
 /**
@@ -74,6 +77,11 @@ final class LanguageBenchmarkCorpus {
      */
     private static final Map<StemmerPatchTrieLoader.Language, Corpus> CHANGED_TIMING_CORPORA =
             new EnumMap<>(StemmerPatchTrieLoader.Language.class);
+
+    /**
+     * Shared changed-token timing corpora keyed by explicit bundled model ID.
+     */
+    private static final Map<String, Corpus> MODEL_CHANGED_TIMING_CORPORA = new HashMap<>();
 
     /**
      * Shared complete corpora keyed by bundled Radixor language.
@@ -108,6 +116,25 @@ final class LanguageBenchmarkCorpus {
     }
 
     /**
+     * Creates a deterministic changed-token timing corpus from an explicitly
+     * selected bundled model dictionary.
+     *
+     * <p>
+     * Only token/root pairs where the token differs from the expected root are
+     * included. Smaller changed-token resources are repeated in stable order until
+     * the timing corpus reaches 5,000 tokens.
+     * </p>
+     *
+     * @param modelId exact bundled model identifier
+     * @return token array containing changed-token dictionary entries, repeated
+     *         only when the changed-token resource is smaller than 5,000 tokens
+     * @throws IOException if the resource cannot be read
+     */
+    static String[] createTokens(final String modelId) throws IOException {
+        return createChangedCorpus(modelId).tokens();
+    }
+
+    /**
      * Creates a deterministic changed-token timing corpus from a bundled language
      * dictionary.
      *
@@ -117,6 +144,18 @@ final class LanguageBenchmarkCorpus {
      */
     static Corpus createChangedCorpus(final StemmerPatchTrieLoader.Language language) throws IOException {
         return cachedChangedCorpus(language);
+    }
+
+    /**
+     * Creates a deterministic changed-token timing corpus from an explicitly
+     * selected bundled model dictionary.
+     *
+     * @param modelId exact bundled model identifier
+     * @return changed-token corpus with expected roots
+     * @throws IOException if the resource cannot be read
+     */
+    static Corpus createChangedCorpus(final String modelId) throws IOException {
+        return cachedChangedCorpus(modelId);
     }
 
     /**
@@ -221,6 +260,29 @@ final class LanguageBenchmarkCorpus {
     }
 
     /**
+     * Returns a cached changed-token timing corpus, creating it once per JVM when
+     * necessary.
+     *
+     * @param modelId exact bundled model identifier
+     * @return changed-token timing corpus
+     * @throws IOException if the resource cannot be read
+     */
+    private static Corpus cachedChangedCorpus(final String modelId) throws IOException {
+        Objects.requireNonNull(modelId, "modelId");
+
+        synchronized (LanguageBenchmarkCorpus.class) {
+            final Corpus existing = MODEL_CHANGED_TIMING_CORPORA.get(modelId);
+            if (existing != null) {
+                return existing;
+            }
+
+            final Corpus created = buildChangedTimingCorpus(modelId, MINIMUM_TIMING_TOKEN_COUNT);
+            MODEL_CHANGED_TIMING_CORPORA.put(modelId, created);
+            return created;
+        }
+    }
+
+    /**
      * Builds a deterministic timing corpus from a bundled language dictionary.
      *
      * @param language bundled Radixor language
@@ -263,11 +325,41 @@ final class LanguageBenchmarkCorpus {
     private static Corpus buildChangedTimingCorpus(final StemmerPatchTrieLoader.Language language,
             final int minimumTokenCount) throws IOException {
         Objects.requireNonNull(language, "language");
+        return buildChangedTimingCorpus(readCandidates(language, Integer.MAX_VALUE), language.toString(),
+                minimumTokenCount);
+    }
+
+    /**
+     * Builds a deterministic changed-token timing corpus from an explicitly
+     * selected bundled model dictionary.
+     *
+     * @param modelId exact bundled model identifier
+     * @param minimumTokenCount minimum token count for timing
+     * @return changed-token corpus with expected roots
+     * @throws IOException if the resource cannot be read
+     */
+    private static Corpus buildChangedTimingCorpus(final String modelId, final int minimumTokenCount)
+            throws IOException {
+        Objects.requireNonNull(modelId, "modelId");
+        return buildChangedTimingCorpus(readCandidates(modelId, Integer.MAX_VALUE), modelId, minimumTokenCount);
+    }
+
+    /**
+     * Builds a deterministic changed-token timing corpus from parsed entries.
+     *
+     * @param allCandidates all valid dictionary entries
+     * @param sourceLabel human-readable source label for diagnostics
+     * @param minimumTokenCount minimum token count for timing
+     * @return changed-token corpus with expected roots
+     */
+    private static Corpus buildChangedTimingCorpus(final List<Entry> allCandidates, final String sourceLabel,
+            final int minimumTokenCount) {
+        Objects.requireNonNull(allCandidates, "allCandidates");
+        Objects.requireNonNull(sourceLabel, "sourceLabel");
         if (minimumTokenCount < 1) {
             throw new IllegalArgumentException("minimumTokenCount must be at least 1.");
         }
 
-        final List<Entry> allCandidates = readCandidates(language, Integer.MAX_VALUE);
         final List<Entry> changedCandidates = new ArrayList<>(allCandidates.size());
         for (Entry entry : allCandidates) {
             if (!Objects.equals(entry.token(), entry.root())) {
@@ -276,7 +368,7 @@ final class LanguageBenchmarkCorpus {
         }
         if (changedCandidates.isEmpty()) {
             throw new IllegalStateException("No changed-token benchmark corpus tokens were available for "
-                    + language + ".");
+                    + sourceLabel + ".");
         }
 
         final int timingTokenCount = Math.max(changedCandidates.size(), minimumTokenCount);
@@ -332,8 +424,35 @@ final class LanguageBenchmarkCorpus {
      */
     private static List<Entry> readCandidates(final StemmerPatchTrieLoader.Language language, final int maximumTokenCount)
             throws IOException {
-        final String resourcePath = org.egothor.stemmer.StemmerModelRegistry.fromContextClassLoader()
-                .requireDefault(language).resource();
+        final StemmerModelDescriptor descriptor = StemmerModelRegistry.fromContextClassLoader()
+                .requireDefault(language);
+        return readCandidatesFromResource(descriptor.resource(), maximumTokenCount);
+    }
+
+    /**
+     * Reads token candidates from an explicitly selected bundled compressed
+     * dictionary.
+     *
+     * @param modelId exact bundled model identifier
+     * @param maximumTokenCount maximum token count to read
+     * @return deterministic candidate list
+     * @throws IOException if the resource cannot be read
+     */
+    private static List<Entry> readCandidates(final String modelId, final int maximumTokenCount) throws IOException {
+        final StemmerModelDescriptor descriptor = StemmerModelRegistry.fromContextClassLoader().require(modelId);
+        return readCandidatesFromResource(descriptor.resource(), maximumTokenCount);
+    }
+
+    /**
+     * Reads token candidates from a bundled compressed dictionary resource.
+     *
+     * @param resourcePath classpath resource path
+     * @param maximumTokenCount maximum token count to read
+     * @return deterministic candidate list
+     * @throws IOException if the resource cannot be read
+     */
+    private static List<Entry> readCandidatesFromResource(final String resourcePath, final int maximumTokenCount)
+            throws IOException {
         final InputStream resource = StemmerPatchTrieLoader.class.getClassLoader().getResourceAsStream(resourcePath);
         if (resource == null) {
             throw new IllegalStateException("Missing bundled benchmark resource " + resourcePath + ".");

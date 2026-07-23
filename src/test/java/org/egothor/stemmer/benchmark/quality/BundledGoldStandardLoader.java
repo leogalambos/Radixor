@@ -42,6 +42,8 @@ import java.util.Objects;
 import java.util.zip.GZIPInputStream;
 
 import org.egothor.stemmer.CaseProcessingMode;
+import org.egothor.stemmer.StemmerModelDescriptor;
+import org.egothor.stemmer.StemmerModelRegistry;
 import org.egothor.stemmer.StemmerDictionaryParser;
 import org.egothor.stemmer.StemmerPatchTrieLoader.Language;
 
@@ -58,10 +60,21 @@ public final class BundledGoldStandardLoader {
      */
     public static List<GoldStandardGroup> load(final Language language) throws IOException {
         Objects.requireNonNull(language, "language");
-        final String resource = org.egothor.stemmer.StemmerModelRegistry.fromContextClassLoader()
-                .requireDefault(language).resource();
+        return loadModel(StemmerModelRegistry.fromContextClassLoader().requireDefault(language).id());
+    }
+
+    /**
+     * Parses one explicitly selected compressed UTF-8 model dictionary with case preserved.
+     * @param modelId exact model identifier
+     * @return immutable groups in source-row order
+     * @throws IOException if the resource is absent, malformed, or unreadable
+     */
+    public static List<GoldStandardGroup> loadModel(final String modelId) throws IOException {
+        Objects.requireNonNull(modelId, "modelId");
+        final StemmerModelDescriptor descriptor = StemmerModelRegistry.fromContextClassLoader().require(modelId);
+        final String resource = descriptor.resource();
         final List<GoldStandardGroup> groups = new ArrayList<>();
-        try (InputStream raw = openResource(language, resource); InputStream gzip = new GZIPInputStream(raw);
+        try (InputStream raw = openResource(modelId, resource); InputStream gzip = new GZIPInputStream(raw);
                 BufferedReader reader = new BufferedReader(new InputStreamReader(gzip, StandardCharsets.UTF_8))) {
             StemmerDictionaryParser.parse(reader, resource, CaseProcessingMode.AS_IS, (stem, variants, row) -> {
                 final List<String> forms = new ArrayList<>(variants.length + 1);
@@ -70,7 +83,7 @@ public final class BundledGoldStandardLoader {
                 try {
                     groups.add(new GoldStandardGroup(row, forms));
                 } catch (IllegalArgumentException exception) {
-                    throw new IOException("Invalid dictionary group for language " + language + ", resource "
+                    throw new IOException("Invalid dictionary group for model " + modelId + ", resource "
                             + resource + ", row " + row + ": " + exception.getMessage(), exception);
                 }
             });
@@ -79,10 +92,10 @@ public final class BundledGoldStandardLoader {
     }
 
     /** Opens one required classpath resource with a precise language diagnostic. */
-    private static InputStream openResource(final Language language, final String resource) throws IOException {
+    private static InputStream openResource(final String modelId, final String resource) throws IOException {
         final InputStream input = Thread.currentThread().getContextClassLoader().getResourceAsStream(resource);
         if (input == null) {
-            throw new IOException("Dictionary resource is missing for language " + language + ": " + resource + ".");
+            throw new IOException("Dictionary resource is missing for model " + modelId + ": " + resource + ".");
         }
         return input;
     }

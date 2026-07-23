@@ -1,10 +1,10 @@
 # Benchmarking
 
-Radixor contains internal trie microbenchmarks, a separate stemmer comparison suite, and a dictionary coverage benchmark for Radixor itself. Published stemmer comparison results must come only from benchmark classes matching `.*StemmerComparisonBenchmark.*`; internal `FrequencyTrie*` microbenchmarks are not part of those results.
+Radixor contains internal trie microbenchmarks, a separate stemmer comparison suite, and a dictionary coverage benchmark for Radixor itself. The current default-model publication uses the same-language speed and exact-root methods selected by the command recorded on the [environment page](benchmarks/reference/environment.md). Internal `FrequencyTrie*` microbenchmarks, the optional `PolishPolimorfStemmerComparisonBenchmark`, and the separate German CISTEM gold-standard experiment are not part of these language tables.
 
 Every current default Radixor benchmark scenario uses the model ID declared by its `Language.defaultModelId()`. The root JMH runtime configuration depends directly on all default model projects plus optional `pl-pl-polimorf`; no benchmark-pack project or artifact exists. These dependencies are benchmark-only and never enter the root published POM. A PoliMorf comparison must be labeled with model ID `pl-pl-polimorf`, while the default Polish row remains `pl-pl-unimorph`.
 
-The optional model now has a verified complete compiled loading path. This does not alter existing benchmark rows or make PoliMorf part of the representative English JMH run. Any future full PoliMorf benchmark must provision its documented startup heap independently and record the exact model artifact version and checksum.
+The optional model now has a verified complete compiled loading path. It is not included in the 2026-07-23 corpus, accuracy, speed, coverage, or stemming-quality measurements. Any future full PoliMorf benchmark must provision its documented startup heap independently and record the exact model artifact version and checksum.
 
 This page is the entry point for benchmark interpretation. Detailed tables and long reference material are split into focused subpages so that important points do not get buried.
 
@@ -14,7 +14,7 @@ This page is the entry point for benchmark interpretation. Detailed tables and l
 - Radixor is the quality-oriented baseline in same-language comparisons. Its exact-root accuracy is often close to 100%, while many faster competitors are light, minimal, possessive, or aggressive rule-based stemmers with much lower root agreement.
 - The measured Radixor cost buys dictionary-trained stemming precision. That precision improves search quality by mapping inflected forms to intended dictionary roots instead of approximate or over-reduced stems.
 - Speed benchmarks process changed dictionary tokens where the surface form differs from the expected root. Accuracy benchmarks process the complete dictionary.
-- Accuracy tables use deterministic auxiliary counters from the current JMH reports. Repeated measurement samples duplicate the same exact-root accounting and are not interpreted as timing results.
+- Accuracy tables use deterministic auxiliary counters from a single non-timed JMH evaluation, while Radixor counters are independently cross-checked by the default-model corpus report. Runtime scores from accuracy methods are not interpreted.
 - The historical Porter performance badge is retired. Benchmark reporting now uses speed and quality tables rather than a single Porter ratio.
 
 ## Benchmark Documentation Map
@@ -44,4 +44,4 @@ The [English dictionary coverage benchmark](benchmarks/reference/english-coverag
 The current measured language results are published in [Language Benchmark Pages](benchmarks/languages/index.md). Generated local report files for this benchmark update are listed in [Benchmark environment and reports](benchmarks/reference/environment.md).
 
 JMH TXT and CSV reports are still published as benchmark artifacts. They are no longer converted into a Shields endpoint benchmark badge.
-Model IDs, independent artifact versions, and descriptor checksums identify inputs for future reproducibility. Historical snapshots remain tied to the model inputs used when measured; the optional PoliMorf model must not be retroactively attributed to results that predate it. See [Model Selection and Loading](model-selection-and-loading.md) and [Reproducibility](benchmarks/reference/reproducibility.md).
+Model IDs, independent artifact versions, and descriptor checksums identify the inputs in the checked corpus snapshot. The optional PoliMorf model must not be attributed to the default Polish results. See [Model Selection and Loading](model-selection-and-loading.md) and [Reproducibility](benchmarks/reference/reproducibility.md).

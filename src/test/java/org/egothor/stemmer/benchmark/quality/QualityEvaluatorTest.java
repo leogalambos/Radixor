@@ -32,6 +32,7 @@ package org.egothor.stemmer.benchmark.quality;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -58,11 +59,7 @@ final class QualityEvaluatorTest {
         assertEquals(0, result.overErrorPairs()); assertEquals(4, result.overPossiblePairs());
         assertEquals(0, result.underErrorPairs()); assertEquals(2, result.underPossiblePairs());
         assertEquals(2, result.distinctOutputStems());
-        assertEquals(1.0, result.partitionMetrics().adjustedRandIndex(), 1.0e-12);
-        assertEquals(1.0, result.partitionMetrics().homogeneity(), 1.0e-12);
-        assertEquals(1.0, result.partitionMetrics().completeness(), 1.0e-12);
-        assertEquals(1.0, result.partitionMetrics().vMeasure(), 1.0e-12);
-        assertEquals(1.0, result.partitionMetrics().normalizedMutualInformation(), 1.0e-12);
+        assertNull(result.partitionMetrics());
     }
     /** Verifies partial merge and pure under-stemming pair counts. */
     @Test @DisplayName("A partial within-group merge is counted by pairs")
@@ -88,12 +85,34 @@ final class QualityEvaluatorTest {
         assertEquals(2, result.overErrorPairs()); assertEquals(6, result.overPossiblePairs());
         assertEquals(2, result.underErrorPairs()); assertEquals(4, result.underPossiblePairs());
     }
-    /** Verifies duplicate scope and singleton undefined denominator. */
-    @Test @DisplayName("Duplicates are removed only within a group and singleton under-stemming is undefined")
+    /** Verifies unique-form identity across overlapping groups. */
+    @Test @DisplayName("The same form in several groups remains one corpus item")
     void duplicateScope() {
         final QualityResult result = evaluate(List.of(group(1, "same", "same"), group(2, "same")), Map.of("same", "x"));
-        assertEquals(2, result.processedWordForms()); assertEquals(1, result.overErrorPairs());
+        assertEquals(1, result.processedWordForms()); assertEquals(0, result.overErrorPairs());
         assertTrue(result.underPercentage().isEmpty());
+    }
+
+    /** Verifies a form can participate in several gold relations without duplication. */
+    @Test @DisplayName("Overlapping group memberships define a deduplicated gold relation")
+    void overlappingMemberships() {
+        final QualityResult result = evaluate(List.of(group(1, "a", "x"), group(2, "a", "y")),
+                Map.of("a", "s", "x", "s", "y", "t"));
+        assertEquals(3, result.processedWordForms());
+        assertEquals(2, result.underPossiblePairs());
+        assertEquals(1, result.underErrorPairs());
+        assertEquals(1, result.overPossiblePairs());
+        assertEquals(0, result.overErrorPairs());
+    }
+
+    /** Verifies a pair shared by several groups is counted only once. */
+    @Test @DisplayName("A relation shared by several groups is counted once")
+    void duplicateRelation() {
+        final QualityResult result = evaluate(List.of(group(1, "a", "b"), group(2, "a", "b", "c")),
+                Map.of("a", "s", "b", "s", "c", "t"));
+        assertEquals(3, result.underPossiblePairs());
+        assertEquals(2, result.underErrorPairs());
+        assertEquals(0, result.overPossiblePairs());
     }
     /** Verifies the zero over-stemming denominator. */
     @Test @DisplayName("One gold group has an undefined over-stemming percentage")

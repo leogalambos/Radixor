@@ -144,6 +144,11 @@ public class MultiLanguageStemmerComparisonBenchmark {
         private LanguageState french;
 
         /**
+         * Hebrew benchmark state.
+         */
+        private LanguageState hebrew;
+
+        /**
          * Hungarian benchmark state.
          */
         private LanguageState hungarian;
@@ -196,6 +201,7 @@ public class MultiLanguageStemmerComparisonBenchmark {
             this.persian = load(StemmerPatchTrieLoader.Language.FA_IR);
             this.finnish = load(StemmerPatchTrieLoader.Language.FI_FI);
             this.french = load(StemmerPatchTrieLoader.Language.FR_FR);
+            this.hebrew = load(StemmerPatchTrieLoader.Language.HE_IL);
             this.hungarian = load(StemmerPatchTrieLoader.Language.HU_HU);
             this.italian = load(StemmerPatchTrieLoader.Language.IT_IT);
             this.norwegianBokmal = load(StemmerPatchTrieLoader.Language.NB_NO);
@@ -598,6 +604,17 @@ public class MultiLanguageStemmerComparisonBenchmark {
     @Benchmark
     public void frenchRadixor(final SharedState sharedState, final Blackhole blackhole) {
         runRadixor(sharedState.french, blackhole);
+    }
+
+    /**
+     * Runs Radixor over the Hebrew corpus.
+     *
+     * @param sharedState shared benchmark state
+     * @param blackhole   result sink
+     */
+    @Benchmark
+    public void hebrewRadixor(final SharedState sharedState, final Blackhole blackhole) {
+        runRadixor(sharedState.hebrew, blackhole);
     }
 
     /**

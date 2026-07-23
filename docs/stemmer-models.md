@@ -189,4 +189,8 @@ Local validation for PoliMorf 1.0.0 is:
 
 ## Documentation and troubleshooting
 
-`prepareMkDocsSource` generates the catalog only at `build/mkdocs-source/stemmer-model-catalog.md`; generated Markdown and rendered site content are not tracked. For runtime failures, dependency inspection, ClassLoader isolation, and fat-JAR guidance, see [Model Selection and Loading](model-selection-and-loading.md#troubleshooting).
+`publishModelCatalogDocumentation` updates the checked-in catalog used by a direct local `mkdocs serve`.
+`prepareMkDocsSource` independently regenerates the same catalog under `build/mkdocs-source/` for the
+publication workflow, and `verifyModelCatalogDocumentation` fails when the two copies differ. Rendered
+site content remains untracked. For runtime failures, dependency inspection, ClassLoader isolation, and
+fat-JAR guidance, see [Model Selection and Loading](model-selection-and-loading.md#troubleshooting).

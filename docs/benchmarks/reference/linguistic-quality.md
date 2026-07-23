@@ -8,18 +8,24 @@ The authoritative Radixor language universe is the reconciliation of registered 
 
 Model identity is part of the candidate identity. Default Polish means `pl-pl-unimorph`; optional PoliMorf means `pl-pl-polimorf`. Results for those inputs must not be combined or relabeled, and historical snapshots cannot acquire a newer model identity retroactively.
 
-Within one language and dictionary mode, every adapter receives the same original included forms. Exact duplicates are removed only within one dictionary row. Identical surface forms in different rows remain distinct entries. Candidate strings use exact `String.equals`, with no evaluation-only lowercasing, normalization, accent removal, or gold-label-aware selection. Adapter preprocessing and lifecycle match the JMH comparison path.
+Within one language and dictionary mode, every adapter receives the same original included forms. A distinct surface string is one evaluated item even when it occurs in several rows; those occurrences become multiple gold-group memberships. Candidate strings use exact `String.equals`, with no evaluation-only lowercasing, normalization, accent removal, or gold-label-aware selection. Adapter preprocessing and lifecycle match the JMH comparison path.
 
 ## Gold-standard pairs
 
-Every usable dictionary row is a gold-standard equivalence group. An unordered pair from the same row is positive; a pair from different rows is negative. For group size `n`, `C2(n) = n * (n - 1) / 2`.
+Every usable dictionary row contributes one gold-standard group. The groups form an overlapping cover rather than an exclusive partition: one surface form may belong to several groups. For two distinct forms `u` and `v` with membership sets `G(u)` and `G(v)`:
 
-- `TP = underPossiblePairs - underErrorPairs`: same-group pairs correctly related.
-- `FN = underErrorPairs`: same-group pairs incorrectly separated.
-- `FP = overErrorPairs`: different-group pairs incorrectly related.
-- `TN = overPossiblePairs - overErrorPairs`: different-group pairs correctly separated.
+```text
+goldRelated(u, v) = (G(u) intersection G(v) is not empty)
+```
 
-Under-stemming is the false-negative relation among same-group pairs. Over-stemming is the false-positive relation among different-group pairs. Their percentages use different denominators and must not be added or averaged without an explicitly defined composite.
+A pair is counted once even if it shares several groups. Gold-negative pairs have disjoint membership sets. Thus:
+
+- `TP = underPossiblePairs - underErrorPairs`: gold-related pairs correctly related.
+- `FN = underErrorPairs`: gold-related pairs incorrectly separated.
+- `FP = overErrorPairs`: gold-negative pairs incorrectly related.
+- `TN = overPossiblePairs - overErrorPairs`: gold-negative pairs correctly separated.
+
+Under-stemming is Paice's Understemming Index (UI), the false-negative rate among gold-related pairs. Over-stemming is Paice's Overstemming Index (OI), the false-positive rate among gold-negative pairs. The original Paice formulation assumes disjoint lemma groups; this evaluator explicitly generalizes the pair relation to overlapping membership. Their percentages use different denominators and must not be added or averaged without an explicitly defined composite.
 
 ## Dictionary-processing modes
 
@@ -30,9 +36,9 @@ Under-stemming is the false-negative relation among same-group pairs. Over-stemm
 
 `PRIMARY_OUTPUT` uses the adapter's deterministic primary stem. It defines a strict predicted partition and is the principal direct comparison between implementations.
 
-`ANY_CANDIDATE` is an optimistic oracle-assisted pairwise upper bound. Same-group pairs succeed when candidate sets intersect. Different-group pairs avoid an error whenever a non-colliding candidate selection exists. Selection may differ between pairs, so this policy is not deterministic runtime behaviour and may not correspond to one globally realizable assignment.
+`ANY_CANDIDATE` is an optimistic oracle-assisted pairwise upper bound. Gold-related pairs succeed when candidate sets intersect. Gold-negative pairs avoid an error whenever a non-colliding candidate selection exists. Selection may differ between pairs, so this policy is not deterministic runtime behaviour and may not correspond to one globally realizable assignment. Because its positive and negative decisions use different oracle conditions, it does not define one confusion matrix; TP/FP/FN/TN and all confusion-derived scores are therefore `n/a`. Its separate under/over error counts and denominators remain defined.
 
-`ALL_CANDIDATES` treats every returned candidate as active. Two forms are related when their candidate sets intersect. Alternatives can recover same-group relationships while introducing cross-group collisions. This overlapping relation need not be transitive or form a partition.
+`ALL_CANDIDATES` treats every returned candidate as active. Two forms are related when their candidate sets intersect. Alternatives can recover gold-positive relationships while introducing gold-negative collisions. This overlapping relation need not be transitive or form a partition.
 
 Candidate-aware policies are reported as capability analyses. They are not mixed into the principal `PRIMARY_OUTPUT` ranking.
 
@@ -42,11 +48,11 @@ Undefined denominators produce `n/a`, never zero, `NaN`, or infinity. Metrics ar
 
 | Metric | Formula | Range and interpretation | Sensitivity and applicability |
 | --- | --- | --- | --- |
-| Under-stemming rate | `FN / (TP + FN)` | `[0, 1]`; lower is better. False-negative rate over same-group pairs. | Sensitive to splitting large gold groups. All policies. |
-| Over-stemming rate | `FP / (TN + FP)` | `[0, 1]`; lower is better. False-positive rate over different-group pairs. | The denominator is usually very large. All policies. |
-| Precision | `TP / (TP + FP)` | `[0, 1]`; higher is better. Fraction of predicted relations that are gold-positive. | Penalizes over-stemming. All policies, with oracle-assisted interpretation for `ANY_CANDIDATE`. |
-| Recall | `TP / (TP + FN)` | `[0, 1]`; higher is better. Fraction of gold-positive pairs recovered. | Equivalent to one minus the under-stemming rate. All policies. |
-| Specificity | `TN / (TN + FP)` | `[0, 1]`; higher is better. Fraction of negative pairs separated. | Sensitive to cross-group collisions. All policies. |
+| Under-stemming rate | `FN / (TP + FN)` | `[0, 1]`; lower is better. False-negative rate over gold-related pairs. | Sensitive to splitting large gold groups. All policies. |
+| Over-stemming rate | `FP / (TN + FP)` | `[0, 1]`; lower is better. False-positive rate over gold-negative pairs. | The denominator is usually very large. All policies. |
+| Precision | `TP / (TP + FP)` | `[0, 1]`; higher is better. Fraction of predicted relations that are gold-positive. | Penalizes over-stemming. `PRIMARY_OUTPUT` and `ALL_CANDIDATES`. |
+| Recall | `TP / (TP + FN)` | `[0, 1]`; higher is better. Fraction of gold-positive pairs recovered. | Equivalent to one minus the under-stemming rate. `PRIMARY_OUTPUT` and `ALL_CANDIDATES`. |
+| Specificity | `TN / (TN + FP)` | `[0, 1]`; higher is better. Fraction of negative pairs separated. | Sensitive to false conflations. `PRIMARY_OUTPUT` and `ALL_CANDIDATES`. |
 | Balanced accuracy | `(recall + specificity) / 2` | `[0, 1]`; higher is better. Equal weight for positive and negative classes. | Primary navigation metric; less dominated by TN than ordinary accuracy, but not uniquely authoritative. |
 | Pairwise accuracy | `(TP + TN) / (TP + TN + FP + FN)` | `[0, 1]`; higher is better. | Can be dominated by the very large TN class and is not the default ranking metric. |
 | Pairwise error rate | `(FP + FN) / (TP + TN + FP + FN)` | `[0, 1]`; lower is better. | Also sensitive to the number of negative pairs. |
@@ -59,17 +65,9 @@ Undefined denominators produce `n/a`, never zero, `NaN`, or infinity. Metrics ar
 
 The general F-beta formula is `((1 + betaSquared) * TP) / (((1 + betaSquared) * TP) + (betaSquared * FN) + FP)`.
 
-## Partition-only metrics
+## Inapplicable partition metrics
 
-These metrics apply only to `PRIMARY_OUTPUT`. Candidate relations are not forced into artificial partitions.
-
-- Adjusted Rand Index is the Rand agreement corrected for agreement expected from the gold/predicted contingency-table marginals. Its usual range is `[-1, 1]`, with `1` indicating identical partitions.
-- Homogeneity is `1 - H(gold | predicted) / H(gold)`, in `[0, 1]`; each predicted cluster ideally contains one gold group.
-- Completeness is `1 - H(predicted | gold) / H(predicted)`, in `[0, 1]`; each gold group ideally maps to one predicted cluster.
-- V-measure is the harmonic mean of homogeneity and completeness, in `[0, 1]`.
-- Normalized mutual information uses arithmetic-mean entropy normalization: `MI / ((H(gold) + H(predicted)) / 2)`, in `[0, 1]` under this implementation.
-
-Entropy zero cases follow the evaluator's explicit perfect/undefined conventions. Language tables render inapplicable candidate-policy values as `n/a`.
+Standard Adjusted Rand Index, homogeneity, completeness, V-measure, and normalized mutual information are not calculated. Their ordinary contingency-table definitions require every item to have one exclusive gold label. Assigning an arbitrary single label or duplicating a multi-membership form would change the scientific question and reintroduce the counting defect this methodology avoids. A future overlapping-clustering index would require a separately specified random model and interpretation; it must not be labelled as ordinary ARI or NMI.
 
 ## Aggregation and ranking
 
@@ -81,4 +79,4 @@ Multiple metrics and Pearson/Spearman correlation datasets are published because
 
 ## Limitations
 
-Dictionary groups encode the available annotation, not every linguistic distinction. Homographs may occur in different groups, singleton rows contribute no under-stemming pair, and group size affects pair counts. `ANY_CANDIDATE` is optimistic; `ALL_CANDIDATES` measures an overlapping graph; neither is a deterministic global assignment. Results characterize the tested versions, adapters, dictionaries, and preprocessing, not every deployment or domain.
+Dictionary groups encode the available annotation, not every linguistic distinction. Homographs and polyfunctional forms may have several memberships, singleton rows contribute no relation by themselves, and group size affects pair counts. `ANY_CANDIDATE` is optimistic; `ALL_CANDIDATES` measures an overlapping graph; neither is a deterministic global assignment. Results characterize the tested versions, adapters, dictionaries, and preprocessing, not every deployment or domain.

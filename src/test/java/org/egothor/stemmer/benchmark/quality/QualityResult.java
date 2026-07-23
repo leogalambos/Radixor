@@ -35,7 +35,9 @@ import java.util.Objects;
 import java.util.OptionalDouble;
 
 /** Immutable pairwise stemming-quality result; all pair quantities are counts. */
-public record QualityResult(String stemmer, String language, ProcessingMode processingMode,
+public record QualityResult(String stemmer, String language,
+        String dictionaryModelId, String dictionaryModelVersion, String dictionaryModelSha256,
+        ProcessingMode processingMode,
         OutputPolicy outputPolicy,
         long appliedDictionaryRows, long processedWordForms, long singletonDictionaryRows,
         long dictionaryRowsContributingUnderPairs, long formsWithOneCandidate, long formsWithMultipleCandidates,
@@ -51,6 +53,9 @@ public record QualityResult(String stemmer, String language, ProcessingMode proc
     public QualityResult {
         Objects.requireNonNull(stemmer, "stemmer");
         Objects.requireNonNull(language, "language");
+        Objects.requireNonNull(dictionaryModelId, "dictionaryModelId");
+        Objects.requireNonNull(dictionaryModelVersion, "dictionaryModelVersion");
+        Objects.requireNonNull(dictionaryModelSha256, "dictionaryModelSha256");
         Objects.requireNonNull(processingMode, "processingMode");
         Objects.requireNonNull(outputPolicy, "outputPolicy");
         final long[] counts = {appliedDictionaryRows, processedWordForms, singletonDictionaryRows,
@@ -68,6 +73,32 @@ public record QualityResult(String stemmer, String language, ProcessingMode proc
         if (outputPolicy != OutputPolicy.PRIMARY_OUTPUT && partitionMetrics != null) {
             throw new IllegalArgumentException("Partition metrics apply only to PRIMARY_OUTPUT.");
         }
+    }
+
+    /** Creates an evaluator result before model provenance is attached by the application. */
+    public QualityResult(final String stemmer, final String language, final ProcessingMode processingMode,
+            final OutputPolicy outputPolicy, final long appliedDictionaryRows, final long processedWordForms,
+            final long singletonDictionaryRows, final long dictionaryRowsContributingUnderPairs,
+            final long formsWithOneCandidate, final long formsWithMultipleCandidates,
+            final long maximumCandidatesForOneWord, final long totalCandidateAssignments,
+            final long distinctOutputStems, final long overErrorPairs, final long overPossiblePairs,
+            final long underErrorPairs, final long underPossiblePairs, final PartitionMetrics partitionMetrics) {
+        this(stemmer, language, "", "", "", processingMode, outputPolicy, appliedDictionaryRows,
+                processedWordForms, singletonDictionaryRows, dictionaryRowsContributingUnderPairs,
+                formsWithOneCandidate, formsWithMultipleCandidates, maximumCandidatesForOneWord,
+                totalCandidateAssignments, distinctOutputStems, overErrorPairs, overPossiblePairs,
+                underErrorPairs, underPossiblePairs, partitionMetrics);
+    }
+
+    /** Returns this result with immutable dictionary-model provenance attached. */
+    public QualityResult withModelProvenance(final String modelId, final String modelVersion,
+            final String modelSha256) {
+        return new QualityResult(stemmer, language, modelId, modelVersion, modelSha256,
+                processingMode, outputPolicy, appliedDictionaryRows, processedWordForms,
+                singletonDictionaryRows, dictionaryRowsContributingUnderPairs, formsWithOneCandidate,
+                formsWithMultipleCandidates, maximumCandidatesForOneWord, totalCandidateAssignments,
+                distinctOutputStems, overErrorPairs, overPossiblePairs, underErrorPairs,
+                underPossiblePairs, partitionMetrics);
     }
 
     /** @return over-stemming percentage, or empty when its denominator is zero */

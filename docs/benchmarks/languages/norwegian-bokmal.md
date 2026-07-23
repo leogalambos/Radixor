@@ -8,21 +8,21 @@ Radixor must not be read as simply "slower" when a narrow competitor has a lower
 
 ## Dictionary Corpus
 
-| Resource | Dictionary rows | Complete quality tokens | Already-root tokens | Changed speed tokens |
-| --- | ---: | ---: | ---: | ---: |
-| `NB_NO` | 17,929 | 90,757 | 33,376 | 57,381 |
+| Model ID | Model version | Language | Dictionary rows | Complete quality tokens | Already-root tokens | Changed speed tokens |
+| --- | --- | --- | ---: | ---: | ---: | ---: |
+| `nb-no-default` | `1.0.0` | `NB_NO` | 17,929 | 90,757 | 33,376 | 57,381 |
 
 ## Radixor Patch Command Distribution
 
-Radixor stores the preferred transformation for each normalized dictionary word form as a compiled patch command. This distribution shows which runtime command class is selected by the trained trie for the complete language dictionary. The total number of preferred patch commands analyzed for this language is **90,757**.
+Radixor stores the preferred transformation for each normalized dictionary word form as a compiled patch command. This distribution shows which runtime command class is selected by the trained trie for the complete default-model dictionary. The total number of preferred patch commands analyzed for this language is **90,757**.
 
 | Command class | Meaning | Word forms | Share |
 | --- | --- | ---: | ---: |
-| `AppendCharacterCommand` | Appends one character to the end of the word form. | 1,500 | 1.653% |
-| `BackwardCompoundCommand` | Applies a multi-step backward patch made from skip, delete, insert, and replace operations. | 4,296 | 4.734% |
-| `DeleteSuffixCommand` | Deletes one or more trailing characters from the word form. | 47,619 | 52.469% |
-| `PreserveCommand` | Returns the word form unchanged because it already matches the preferred root. | 34,420 | 37.925% |
-| `ReplaceLastCharacterCommand` | Replaces the final character of the word form. | 2,922 | 3.220% |
+| `AppendCharacterCommand` | Appends one character to the end of the word form. | 2,528 | 2.785% |
+| `BackwardCompoundCommand` | Applies a multi-step backward patch made from skip, delete, insert, and replace operations. | 4,258 | 4.692% |
+| `DeleteSuffixCommand` | Deletes one or more trailing characters from the word form. | 48,925 | 53.908% |
+| `PreserveCommand` | Returns the word form unchanged because it already matches the preferred root. | 32,086 | 35.354% |
+| `ReplaceLastCharacterCommand` | Replaces the final character of the word form. | 2,960 | 3.261% |
 
 ## Accuracy
 
@@ -36,17 +36,23 @@ Accuracy is computed from JMH auxiliary counters in the current report. The coun
 | Lucene SnowballFilter | 54.803% | 51.780% | 60.001% | Lucene TokenFilter integration path around the Snowball algorithm. |
 | Lucene NorwegianLightStemFilter | 52.136% | 50.616% | 54.749% | Light suffix stemmer; intentionally narrower than a dictionary-derived stemmer. |
 
+
+
+
 ## Speed
 
-Speed uses JMH average time, 3 warmup iterations, 5 measurement iterations, 1 fork, and 1 thread. Relative factor is computed against the single Radixor row on this language page. Values below 1.000 are faster than that Radixor baseline; values above 1.000 are slower.
+Speed uses JMH average time, 5 warmup iterations, 10 measurement iterations, 3 independent forks, and 1 thread. Relative factor is computed against the single Radixor row on this language page. Values below 1.000 are faster than that Radixor baseline; values above 1.000 are slower.
 
 | Stemmer | Benchmark method | Score ms/op | Error ms | ns/token | Relative vs Radixor | Note |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
-| Radixor | `norwegianBokmalRadixor` | 3.631 | 1.377 | 63.3 | 1.000 | Full Radixor dictionary patch-command stemmer. |
-| Lucene NorwegianMinimalStemFilter | `norwegianBokmalLuceneNorwegianMinimalStemFilter` | 2.910 | 0.177 | 50.7 | 0.801 | Minimal Norwegian suffix reducer. |
-| Lucene NorwegianLightStemFilter | `norwegianBokmalLuceneNorwegianLightStemFilter` | 3.335 | 0.116 | 58.1 | 0.919 | Light Norwegian suffix stemmer. |
-| Official Snowball direct | `snowballDirect[NORWEGIAN_BOKMAL]` | 4.277 | 0.082 | 74.5 | 1.178 | Official Snowball generated Java stemmer; direct API. |
-| Lucene SnowballFilter | `luceneSnowballFilter[NORWEGIAN_BOKMAL]` | 6.077 | 0.208 | 105.9 | 1.674 | Lucene TokenFilter path around Snowball; includes TokenStream overhead. |
+| Radixor | `norwegianBokmalRadixor` | 3.401 | 0.055 | 59.3 | 1.000 | Full Radixor dictionary patch-command stemmer. |
+| Lucene NorwegianMinimalStemFilter | `norwegianBokmalLuceneNorwegianMinimalStemFilter` | 2.943 | 0.023 | 51.3 | 0.865 | Minimal Norwegian suffix reducer. |
+| Lucene NorwegianLightStemFilter | `norwegianBokmalLuceneNorwegianLightStemFilter` | 3.358 | 0.036 | 58.5 | 0.987 | Light Norwegian suffix stemmer. |
+| Official Snowball direct | `snowballDirect[NORWEGIAN_BOKMAL]` | 4.378 | 0.295 | 76.3 | 1.287 | Official Snowball generated Java stemmer; direct API. |
+| Lucene SnowballFilter | `luceneSnowballFilter[NORWEGIAN_BOKMAL]` | 6.114 | 0.436 | 106.5 | 1.797 | Lucene TokenFilter path around Snowball; includes TokenStream overhead. |
+
+
+
 
 ## Interpretation Notes
 
@@ -60,89 +66,31 @@ Speed uses JMH average time, 3 warmup iterations, 5 measurement iterations, 1 fo
 
 ## Stemming Quality
 
-Runtime performance and linguistic grouping quality are independent dimensions. This section evaluates language `NB_NO` using the complete validated stemming-quality result matrix. Every usable dictionary row is one gold-standard group of forms expected to share a morphological family or lemma. Exact equality with a predetermined lemma is not required. Same-row pairs are positive pairs; pairs from different rows are negative pairs.
+Runtime performance and linguistic grouping quality are independent dimensions. This section evaluates language `NB_NO` using the complete validated stemming-quality result matrix. Every distinct surface form is one evaluated item and can belong to several dictionary groups. Two forms are a positive pair when their group-membership sets intersect and a negative pair when those sets are disjoint. A pair shared through several groups is counted once. Exact equality with a predetermined lemma is not required.
 
 `ALL_WORDS` includes every valid group and its original forms. `LOWERCASE_GROUPS_ONLY` excludes an entire group when any Unicode code point is uppercase or titlecase; retained words are not lowercased or otherwise rewritten. This isolates case-handling effects without changing retained inputs. [Download the complete machine-readable result snapshot](../data/stemming-quality.csv).
 
 ### Evaluation Scope and Key Findings
 
-The dictionary resource is `src/main/resources/nb_no/stemmer.gz`. The following findings compare only deterministic `PRIMARY_OUTPUT` rows over identical included groups; candidate policies are reported separately as capability analyses.
+The default model is `nb-no-default`, loaded from classpath resource `org/egothor/stemmer/models/nb-no-default/stemmer.gz`. The following findings compare only deterministic `PRIMARY_OUTPUT` rows over identical included groups; candidate policies are reported separately as capability analyses.
 
-- **ALL_WORDS:** `Radixor` ranks first by balanced accuracy at **0.974783** among 5 deterministic stemmers. The runner-up is `SNOWBALL NORWEGIAN BOKMAL DIRECT` at 0.874964, a difference of 0.099819. This rank does not imply leadership in throughput or every secondary metric.
-- **LOWERCASE_GROUPS_ONLY:** `Radixor` ranks first by balanced accuracy at **0.975000** among 5 deterministic stemmers. The runner-up is `SNOWBALL NORWEGIAN BOKMAL DIRECT` at 0.874991, a difference of 0.100009. This rank does not imply leadership in throughput or every secondary metric.
+- **ALL_WORDS:** `Radixor` ranks first by balanced accuracy at **0.976021** among 5 deterministic stemmers. The runner-up is `SNOWBALL NORWEGIAN BOKMAL DIRECT` at 0.874259, a difference of 0.101762. This rank does not imply leadership in throughput or every secondary metric.
+- **LOWERCASE_GROUPS_ONLY:** `Radixor` ranks first by balanced accuracy at **0.976240** among 5 deterministic stemmers. The runner-up is `SNOWBALL NORWEGIAN BOKMAL DIRECT` at 0.874286, a difference of 0.101954. This rank does not imply leadership in throughput or every secondary metric.
 ### `ALL_WORDS`
 
-This mode contains **7 result rows**, **5 evaluated stemmers**, and **3 output policies**. Applied-row and form counts are shown per row because adapters share the language corpus but policy rows remain independently auditable. Rankings are separated by output policy and ordered by unrounded balanced accuracy, followed by MCC, F1, over-stemming rate, over-stemming count, under-stemming rate, and stemmer. Balanced accuracy is a navigation metric, not a universally authoritative quality score.
+This mode contains **7 result rows**, **5 evaluated stemmers**, and **3 output policies**. Applied-row and form counts are shown per row because adapters share the language corpus but policy rows remain independently auditable. `PRIMARY_OUTPUT` and `ALL_CANDIDATES` rankings are ordered by unrounded balanced accuracy, followed by MCC, F1, over-stemming rate, over-stemming count, under-stemming rate, and stemmer. `ANY_CANDIDATE` has no single rank metric and is listed alphabetically. Balanced accuracy is a navigation metric, not a universally authoritative quality score.
 
 #### `PRIMARY_OUTPUT` ranking
 
-<div class="quality-table quality-table--compact" role="region" aria-label="Compact stemming-quality ranking; scroll horizontally for additional columns" tabindex="0" markdown="1">
+<div class="quality-summary" markdown="1">
 
-| Rank | Stemmer | Output policy | Balanced accuracy | Over-stemming | Under-stemming | F0.5 | F1 | MCC |
-|---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|PRIMARY_OUTPUT|0.974783|11482 / 2835618215 (0.000405%)|7170 / 142180 (5.042903%)|0.927078|0.935387|0.935488|
-|2|SNOWBALL NORWEGIAN BOKMAL DIRECT|PRIMARY_OUTPUT|0.874964|23997 / 2835618215 (0.000846%)|35554 / 142180 (25.006330%)|0.802095|0.781707|0.782399|
-|3|SNOWBALL NORWEGIAN BOKMAL LUCENE FILTER|PRIMARY_OUTPUT|0.874834|24046 / 2835618215 (0.000848%)|35591 / 142180 (25.032353%)|0.801759|0.781401|0.782091|
-|4|NORWEGIAN BOKMAL LUCENE NORWEGIAN LIGHT STEM FILTER|PRIMARY_OUTPUT|0.850006|25171 / 2835618215 (0.000888%)|42651 / 142180 (29.997890%)|0.776381|0.745871|0.747464|
-|5|NORWEGIAN BOKMAL LUCENE NORWEGIAN MINIMAL STEM FILTER|PRIMARY_OUTPUT|0.832414|14772 / 2835618215 (0.000521%)|47654 / 142180 (33.516669%)|0.815763|0.751764|0.758263|
-
-</div>
-
-<details class="quality-details" markdown="1"><summary>Classification metrics</summary>
-
-| Rank | Stemmer | Output policy | Precision | Recall | Specificity | Balanced accuracy | Pairwise accuracy | Error rate |
-|---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|PRIMARY_OUTPUT|0.921620|0.949571|0.999996|0.974783|0.999993|0.000007|
-|2|SNOWBALL NORWEGIAN BOKMAL DIRECT|PRIMARY_OUTPUT|0.816288|0.749937|0.999992|0.874964|0.999979|0.000021|
-|3|SNOWBALL NORWEGIAN BOKMAL LUCENE FILTER|PRIMARY_OUTPUT|0.815930|0.749676|0.999992|0.874834|0.999979|0.000021|
-|4|NORWEGIAN BOKMAL LUCENE NORWEGIAN LIGHT STEM FILTER|PRIMARY_OUTPUT|0.798148|0.700021|0.999991|0.850006|0.999976|0.000024|
-|5|NORWEGIAN BOKMAL LUCENE NORWEGIAN MINIMAL STEM FILTER|PRIMARY_OUTPUT|0.864847|0.664833|0.999995|0.832414|0.999978|0.000022|
-
-</details>
-
-<details class="quality-details" markdown="1"><summary>Pair-relation metrics</summary>
-
-| Rank | Stemmer | Output policy | F0.5 | F1 | F2 | Jaccard | Fowlkes–Mallows | MCC |
-|---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|PRIMARY_OUTPUT|0.927078|0.935387|0.943846|0.878617|0.935491|0.935488|
-|2|SNOWBALL NORWEGIAN BOKMAL DIRECT|PRIMARY_OUTPUT|0.802095|0.781707|0.762330|0.641641|0.782409|0.782399|
-|3|SNOWBALL NORWEGIAN BOKMAL LUCENE FILTER|PRIMARY_OUTPUT|0.801759|0.781401|0.762052|0.641229|0.782102|0.782091|
-|4|NORWEGIAN BOKMAL LUCENE NORWEGIAN LIGHT STEM FILTER|PRIMARY_OUTPUT|0.776381|0.745871|0.717668|0.594732|0.747476|0.747464|
-|5|NORWEGIAN BOKMAL LUCENE NORWEGIAN MINIMAL STEM FILTER|PRIMARY_OUTPUT|0.815763|0.751764|0.697076|0.602261|0.758274|0.758263|
-
-</details>
-
-<details class="quality-details" markdown="1"><summary>Partition metrics (PRIMARY_OUTPUT only)</summary>
-
-| Rank | Stemmer | Output policy | Adjusted Rand Index | Homogeneity | Completeness | V-measure | Normalized mutual information |
-|---:|---|---|---:|---:|---:|---:|---:|
-|1|Radixor|PRIMARY_OUTPUT|0.935384|0.993354|0.994615|0.993984|0.993984|
-|2|SNOWBALL NORWEGIAN BOKMAL DIRECT|PRIMARY_OUTPUT|0.781696|0.988328|0.971120|0.979648|0.979648|
-|3|SNOWBALL NORWEGIAN BOKMAL LUCENE FILTER|PRIMARY_OUTPUT|0.781391|0.988295|0.971086|0.979615|0.979615|
-|4|NORWEGIAN BOKMAL LUCENE NORWEGIAN LIGHT STEM FILTER|PRIMARY_OUTPUT|0.745859|0.987774|0.965622|0.976573|0.976573|
-|5|NORWEGIAN BOKMAL LUCENE NORWEGIAN MINIMAL STEM FILTER|PRIMARY_OUTPUT|0.751753|0.992089|0.962516|0.977079|0.977079|
-
-</details>
-
-<details class="quality-details" markdown="1"><summary>Raw pair counts</summary>
-
-| Rank | Stemmer | Output policy | TP | FP | FN | TN | Over error / possible | Under error / possible |
-|---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|PRIMARY_OUTPUT|135010|11482|7170|2835606733|11482 / 2835618215|7170 / 142180|
-|2|SNOWBALL NORWEGIAN BOKMAL DIRECT|PRIMARY_OUTPUT|106626|23997|35554|2835594218|23997 / 2835618215|35554 / 142180|
-|3|SNOWBALL NORWEGIAN BOKMAL LUCENE FILTER|PRIMARY_OUTPUT|106589|24046|35591|2835594169|24046 / 2835618215|35591 / 142180|
-|4|NORWEGIAN BOKMAL LUCENE NORWEGIAN LIGHT STEM FILTER|PRIMARY_OUTPUT|99529|25171|42651|2835593044|25171 / 2835618215|42651 / 142180|
-|5|NORWEGIAN BOKMAL LUCENE NORWEGIAN MINIMAL STEM FILTER|PRIMARY_OUTPUT|94526|14772|47654|2835603443|14772 / 2835618215|47654 / 142180|
-
-</details>
-
-#### `ANY_CANDIDATE` ranking
-
-<div class="quality-table quality-table--compact" role="region" aria-label="Compact stemming-quality ranking; scroll horizontally for additional columns" tabindex="0" markdown="1">
-
-| Rank | Stemmer | Output policy | Balanced accuracy | Over-stemming | Under-stemming | F0.5 | F1 | MCC |
-|---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ANY_CANDIDATE|1.000000|0 / 2835618215 (0.000000%)|0 / 142180 (0.000000%)|1.000000|1.000000|1.000000|
+| Rank | Stemmer | Balanced accuracy | Over-stemming (OI) | Under-stemming (UI) |
+|---:|---|---:|---:|---:|
+|1|Radixor|0.976021|0.000000%|4.795770%|
+|2|SNOWBALL NORWEGIAN BOKMAL DIRECT|0.874259|0.000386%|25.147805%|
+|3|SNOWBALL NORWEGIAN BOKMAL LUCENE FILTER|0.874138|0.000389%|25.171937%|
+|4|NORWEGIAN BOKMAL LUCENE NORWEGIAN LIGHT STEM FILTER|0.849389|0.000416%|30.121722%|
+|5|NORWEGIAN BOKMAL LUCENE NORWEGIAN MINIMAL STEM FILTER|0.831282|0.000110%|33.743568%|
 
 </div>
 
@@ -150,7 +98,11 @@ This mode contains **7 result rows**, **5 evaluated stemmers**, and **3 output p
 
 | Rank | Stemmer | Output policy | Precision | Recall | Specificity | Balanced accuracy | Pairwise accuracy | Error rate |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ANY_CANDIDATE|1.000000|1.000000|1.000000|1.000000|1.000000|0.000000|
+|1|Radixor|PRIMARY_OUTPUT|1.000000|0.952042|1.000000|0.976021|0.999997|0.000003|
+|2|SNOWBALL NORWEGIAN BOKMAL DIRECT|PRIMARY_OUTPUT|0.910734|0.748522|0.999996|0.874259|0.999983|0.000017|
+|3|SNOWBALL NORWEGIAN BOKMAL LUCENE FILTER|PRIMARY_OUTPUT|0.910189|0.748281|0.999996|0.874138|0.999983|0.000017|
+|4|NORWEGIAN BOKMAL LUCENE NORWEGIAN LIGHT STEM FILTER|PRIMARY_OUTPUT|0.898501|0.698783|0.999996|0.849389|0.999980|0.000020|
+|5|NORWEGIAN BOKMAL LUCENE NORWEGIAN MINIMAL STEM FILTER|PRIMARY_OUTPUT|0.969387|0.662564|0.999999|0.831282|0.999981|0.000019|
 
 </details>
 
@@ -158,15 +110,11 @@ This mode contains **7 result rows**, **5 evaluated stemmers**, and **3 output p
 
 | Rank | Stemmer | Output policy | F0.5 | F1 | F2 | Jaccard | Fowlkes–Mallows | MCC |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ANY_CANDIDATE|1.000000|1.000000|1.000000|1.000000|1.000000|1.000000|
-
-</details>
-
-<details class="quality-details" markdown="1"><summary>Partition metrics (PRIMARY_OUTPUT only)</summary>
-
-| Rank | Stemmer | Output policy | Adjusted Rand Index | Homogeneity | Completeness | V-measure | Normalized mutual information |
-|---:|---|---|---:|---:|---:|---:|---:|
-|1|Radixor|ANY_CANDIDATE|n/a|n/a|n/a|n/a|n/a|
+|1|Radixor|PRIMARY_OUTPUT|0.990026|0.975432|0.961262|0.952042|0.975727|0.975725|
+|2|SNOWBALL NORWEGIAN BOKMAL DIRECT|PRIMARY_OUTPUT|0.872901|0.821699|0.776171|0.697359|0.825654|0.825646|
+|3|SNOWBALL NORWEGIAN BOKMAL LUCENE FILTER|PRIMARY_OUTPUT|0.872435|0.821332|0.775884|0.696830|0.825274|0.825266|
+|4|NORWEGIAN BOKMAL LUCENE NORWEGIAN LIGHT STEM FILTER|PRIMARY_OUTPUT|0.849918|0.786156|0.731293|0.647658|0.792374|0.792365|
+|5|NORWEGIAN BOKMAL LUCENE NORWEGIAN MINIMAL STEM FILTER|PRIMARY_OUTPUT|0.887216|0.787133|0.707341|0.648985|0.801425|0.801417|
 
 </details>
 
@@ -174,17 +122,41 @@ This mode contains **7 result rows**, **5 evaluated stemmers**, and **3 output p
 
 | Rank | Stemmer | Output policy | TP | FP | FN | TN | Over error / possible | Under error / possible |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ANY_CANDIDATE|142180|0|0|2835618215|0 / 2835618215|0 / 142180|
+|1|Radixor|PRIMARY_OUTPUT|134138|0|6757|2676746970|0 / 2676746970|6757 / 140895|
+|2|SNOWBALL NORWEGIAN BOKMAL DIRECT|PRIMARY_OUTPUT|105463|10337|35432|2676736633|10337 / 2676746970|35432 / 140895|
+|3|SNOWBALL NORWEGIAN BOKMAL LUCENE FILTER|PRIMARY_OUTPUT|105429|10403|35466|2676736567|10403 / 2676746970|35466 / 140895|
+|4|NORWEGIAN BOKMAL LUCENE NORWEGIAN LIGHT STEM FILTER|PRIMARY_OUTPUT|98455|11122|42440|2676735848|11122 / 2676746970|42440 / 140895|
+|5|NORWEGIAN BOKMAL LUCENE NORWEGIAN MINIMAL STEM FILTER|PRIMARY_OUTPUT|93352|2948|47543|2676744022|2948 / 2676746970|47543 / 140895|
+
+</details>
+
+#### `ANY_CANDIDATE` oracle bounds
+
+These results are measured, not missing. `ANY_CANDIDATE` answers two separate optimistic questions for each pair: a gold-related pair avoids under-stemming when the candidate sets intersect, while a gold-negative pair avoids over-stemming when some non-colliding candidate selection exists. The oracle may choose a different candidate for the same word in different pairs. Consequently, these decisions do not form one globally realizable predicted relation or one TP/FP/FN/TN confusion matrix. Balanced accuracy, F-scores, Jaccard, Fowlkes–Mallows, and MCC are therefore mathematically **not applicable**, rather than unknown.
+
+<div class="quality-summary quality-summary--oracle" markdown="1">
+
+| Stemmer | Optimistic over-stemming (OI) | Optimistic under-stemming (UI) |
+|---|---:|---:|
+|Radixor|0.000000%|0.000000%|
+
+</div>
+
+<details class="quality-details" markdown="1"><summary>Oracle-bound pair counts</summary>
+
+| Stemmer | Unavoidable over errors / gold-negative pairs | Unrepairable under errors / gold-related pairs |
+|---|---:|---:|
+|Radixor|0 / 2676746970|0 / 140895|
 
 </details>
 
 #### `ALL_CANDIDATES` ranking
 
-<div class="quality-table quality-table--compact" role="region" aria-label="Compact stemming-quality ranking; scroll horizontally for additional columns" tabindex="0" markdown="1">
+<div class="quality-summary" markdown="1">
 
-| Rank | Stemmer | Output policy | Balanced accuracy | Over-stemming | Under-stemming | F0.5 | F1 | MCC |
-|---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ALL_CANDIDATES|0.999996|20161 / 2835618215 (0.000711%)|0 / 142180 (0.000000%)|0.898118|0.933794|0.935844|
+| Rank | Stemmer | Balanced accuracy | Over-stemming (OI) | Under-stemming (UI) |
+|---:|---|---:|---:|---:|
+|1|Radixor|1.000000|0.000000%|0.000000%|
 
 </div>
 
@@ -192,7 +164,7 @@ This mode contains **7 result rows**, **5 evaluated stemmers**, and **3 output p
 
 | Rank | Stemmer | Output policy | Precision | Recall | Specificity | Balanced accuracy | Pairwise accuracy | Error rate |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ALL_CANDIDATES|0.875811|1.000000|0.999993|0.999996|0.999993|0.000007|
+|1|Radixor|ALL_CANDIDATES|1.000000|1.000000|1.000000|1.000000|1.000000|0.000000|
 
 </details>
 
@@ -200,15 +172,7 @@ This mode contains **7 result rows**, **5 evaluated stemmers**, and **3 output p
 
 | Rank | Stemmer | Output policy | F0.5 | F1 | F2 | Jaccard | Fowlkes–Mallows | MCC |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ALL_CANDIDATES|0.898118|0.933794|0.972422|0.875811|0.935848|0.935844|
-
-</details>
-
-<details class="quality-details" markdown="1"><summary>Partition metrics (PRIMARY_OUTPUT only)</summary>
-
-| Rank | Stemmer | Output policy | Adjusted Rand Index | Homogeneity | Completeness | V-measure | Normalized mutual information |
-|---:|---|---|---:|---:|---:|---:|---:|
-|1|Radixor|ALL_CANDIDATES|n/a|n/a|n/a|n/a|n/a|
+|1|Radixor|ALL_CANDIDATES|1.000000|1.000000|1.000000|1.000000|1.000000|1.000000|
 
 </details>
 
@@ -216,7 +180,7 @@ This mode contains **7 result rows**, **5 evaluated stemmers**, and **3 output p
 
 | Rank | Stemmer | Output policy | TP | FP | FN | TN | Over error / possible | Under error / possible |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ALL_CANDIDATES|142180|20161|0|2835598054|20161 / 2835618215|0 / 142180|
+|1|Radixor|ALL_CANDIDATES|140895|0|0|2676746970|0 / 2676746970|0 / 140895|
 
 </details>
 
@@ -226,81 +190,23 @@ Alternative candidates are capability analyses, not replacements for the determi
 
 | Stemmer | Under pairs repaired | Best-case over pairs avoided | All-candidate collisions added | Multi-candidate forms | Multi-candidate share | Maximum candidates | Total candidate assignments |
 |---|---:|---:|---:|---:|---:|---:|---:|
-|Radixor|7170|11482|8679|4237|5.626079%|9|79825|
+|Radixor|6757|0|0|2097|2.865929%|9|75343|
 
 ### `LOWERCASE_GROUPS_ONLY`
 
-This mode contains **7 result rows**, **5 evaluated stemmers**, and **3 output policies**. Applied-row and form counts are shown per row because adapters share the language corpus but policy rows remain independently auditable. Rankings are separated by output policy and ordered by unrounded balanced accuracy, followed by MCC, F1, over-stemming rate, over-stemming count, under-stemming rate, and stemmer. Balanced accuracy is a navigation metric, not a universally authoritative quality score.
+This mode contains **7 result rows**, **5 evaluated stemmers**, and **3 output policies**. Applied-row and form counts are shown per row because adapters share the language corpus but policy rows remain independently auditable. `PRIMARY_OUTPUT` and `ALL_CANDIDATES` rankings are ordered by unrounded balanced accuracy, followed by MCC, F1, over-stemming rate, over-stemming count, under-stemming rate, and stemmer. `ANY_CANDIDATE` has no single rank metric and is listed alphabetically. Balanced accuracy is a navigation metric, not a universally authoritative quality score.
 
 #### `PRIMARY_OUTPUT` ranking
 
-<div class="quality-table quality-table--compact" role="region" aria-label="Compact stemming-quality ranking; scroll horizontally for additional columns" tabindex="0" markdown="1">
+<div class="quality-summary" markdown="1">
 
-| Rank | Stemmer | Output policy | Balanced accuracy | Over-stemming | Under-stemming | F0.5 | F1 | MCC |
-|---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|PRIMARY_OUTPUT|0.975000|11482 / 2831176784 (0.000406%)|7104 / 142091 (4.999613%)|0.927151|0.935591|0.935695|
-|2|SNOWBALL NORWEGIAN BOKMAL DIRECT|PRIMARY_OUTPUT|0.874991|23997 / 2831176784 (0.000848%)|35524 / 142091 (25.000880%)|0.802043|0.781698|0.782388|
-|3|SNOWBALL NORWEGIAN BOKMAL LUCENE FILTER|PRIMARY_OUTPUT|0.874798|23993 / 2831176784 (0.000847%)|35579 / 142091 (25.039587%)|0.801914|0.781464|0.782161|
-|4|NORWEGIAN BOKMAL LUCENE NORWEGIAN LIGHT STEM FILTER|PRIMARY_OUTPUT|0.849947|25118 / 2831176784 (0.000887%)|42641 / 142091 (30.009642%)|0.776513|0.745896|0.747500|
-|5|NORWEGIAN BOKMAL LUCENE NORWEGIAN MINIMAL STEM FILTER|PRIMARY_OUTPUT|0.832344|14719 / 2831176784 (0.000520%)|47644 / 142091 (33.530625%)|0.815950|0.751796|0.758325|
-
-</div>
-
-<details class="quality-details" markdown="1"><summary>Classification metrics</summary>
-
-| Rank | Stemmer | Output policy | Precision | Recall | Specificity | Balanced accuracy | Pairwise accuracy | Error rate |
-|---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|PRIMARY_OUTPUT|0.921608|0.950004|0.999996|0.975000|0.999993|0.000007|
-|2|SNOWBALL NORWEGIAN BOKMAL DIRECT|PRIMARY_OUTPUT|0.816205|0.749991|0.999992|0.874991|0.999979|0.000021|
-|3|SNOWBALL NORWEGIAN BOKMAL LUCENE FILTER|PRIMARY_OUTPUT|0.816153|0.749604|0.999992|0.874798|0.999979|0.000021|
-|4|NORWEGIAN BOKMAL LUCENE NORWEGIAN LIGHT STEM FILTER|PRIMARY_OUTPUT|0.798359|0.699904|0.999991|0.849947|0.999976|0.000024|
-|5|NORWEGIAN BOKMAL LUCENE NORWEGIAN MINIMAL STEM FILTER|PRIMARY_OUTPUT|0.865169|0.664694|0.999995|0.832344|0.999978|0.000022|
-
-</details>
-
-<details class="quality-details" markdown="1"><summary>Pair-relation metrics</summary>
-
-| Rank | Stemmer | Output policy | F0.5 | F1 | F2 | Jaccard | Fowlkes–Mallows | MCC |
-|---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|PRIMARY_OUTPUT|0.927151|0.935591|0.944186|0.878976|0.935698|0.935695|
-|2|SNOWBALL NORWEGIAN BOKMAL DIRECT|PRIMARY_OUTPUT|0.802043|0.781698|0.762360|0.641630|0.782398|0.782388|
-|3|SNOWBALL NORWEGIAN BOKMAL LUCENE FILTER|PRIMARY_OUTPUT|0.801914|0.781464|0.762031|0.641314|0.782171|0.782161|
-|4|NORWEGIAN BOKMAL LUCENE NORWEGIAN LIGHT STEM FILTER|PRIMARY_OUTPUT|0.776513|0.745896|0.717603|0.594765|0.747512|0.747500|
-|5|NORWEGIAN BOKMAL LUCENE NORWEGIAN MINIMAL STEM FILTER|PRIMARY_OUTPUT|0.815950|0.751796|0.696995|0.602302|0.758335|0.758325|
-
-</details>
-
-<details class="quality-details" markdown="1"><summary>Partition metrics (PRIMARY_OUTPUT only)</summary>
-
-| Rank | Stemmer | Output policy | Adjusted Rand Index | Homogeneity | Completeness | V-measure | Normalized mutual information |
-|---:|---|---|---:|---:|---:|---:|---:|
-|1|Radixor|PRIMARY_OUTPUT|0.935587|0.993348|0.994694|0.994020|0.994020|
-|2|SNOWBALL NORWEGIAN BOKMAL DIRECT|PRIMARY_OUTPUT|0.781688|0.988318|0.971127|0.979647|0.979647|
-|3|SNOWBALL NORWEGIAN BOKMAL LUCENE FILTER|PRIMARY_OUTPUT|0.781454|0.988310|0.971074|0.979616|0.979616|
-|4|NORWEGIAN BOKMAL LUCENE NORWEGIAN LIGHT STEM FILTER|PRIMARY_OUTPUT|0.745885|0.987789|0.965603|0.976570|0.976570|
-|5|NORWEGIAN BOKMAL LUCENE NORWEGIAN MINIMAL STEM FILTER|PRIMARY_OUTPUT|0.751785|0.992107|0.962494|0.977076|0.977076|
-
-</details>
-
-<details class="quality-details" markdown="1"><summary>Raw pair counts</summary>
-
-| Rank | Stemmer | Output policy | TP | FP | FN | TN | Over error / possible | Under error / possible |
-|---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|PRIMARY_OUTPUT|134987|11482|7104|2831165302|11482 / 2831176784|7104 / 142091|
-|2|SNOWBALL NORWEGIAN BOKMAL DIRECT|PRIMARY_OUTPUT|106567|23997|35524|2831152787|23997 / 2831176784|35524 / 142091|
-|3|SNOWBALL NORWEGIAN BOKMAL LUCENE FILTER|PRIMARY_OUTPUT|106512|23993|35579|2831152791|23993 / 2831176784|35579 / 142091|
-|4|NORWEGIAN BOKMAL LUCENE NORWEGIAN LIGHT STEM FILTER|PRIMARY_OUTPUT|99450|25118|42641|2831151666|25118 / 2831176784|42641 / 142091|
-|5|NORWEGIAN BOKMAL LUCENE NORWEGIAN MINIMAL STEM FILTER|PRIMARY_OUTPUT|94447|14719|47644|2831162065|14719 / 2831176784|47644 / 142091|
-
-</details>
-
-#### `ANY_CANDIDATE` ranking
-
-<div class="quality-table quality-table--compact" role="region" aria-label="Compact stemming-quality ranking; scroll horizontally for additional columns" tabindex="0" markdown="1">
-
-| Rank | Stemmer | Output policy | Balanced accuracy | Over-stemming | Under-stemming | F0.5 | F1 | MCC |
-|---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ANY_CANDIDATE|1.000000|0 / 2831176784 (0.000000%)|0 / 142091 (0.000000%)|1.000000|1.000000|1.000000|
+| Rank | Stemmer | Balanced accuracy | Over-stemming (OI) | Under-stemming (UI) |
+|---:|---|---:|---:|---:|
+|1|Radixor|0.976240|0.000000%|4.751928%|
+|2|SNOWBALL NORWEGIAN BOKMAL DIRECT|0.874286|0.000387%|25.142395%|
+|3|SNOWBALL NORWEGIAN BOKMAL LUCENE FILTER|0.874101|0.000387%|25.179325%|
+|4|NORWEGIAN BOKMAL LUCENE NORWEGIAN LIGHT STEM FILTER|0.849330|0.000414%|30.133659%|
+|5|NORWEGIAN BOKMAL LUCENE NORWEGIAN MINIMAL STEM FILTER|0.831210|0.000108%|33.757794%|
 
 </div>
 
@@ -308,7 +214,11 @@ This mode contains **7 result rows**, **5 evaluated stemmers**, and **3 output p
 
 | Rank | Stemmer | Output policy | Precision | Recall | Specificity | Balanced accuracy | Pairwise accuracy | Error rate |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ANY_CANDIDATE|1.000000|1.000000|1.000000|1.000000|1.000000|0.000000|
+|1|Radixor|PRIMARY_OUTPUT|1.000000|0.952481|1.000000|0.976240|0.999997|0.000003|
+|2|SNOWBALL NORWEGIAN BOKMAL DIRECT|PRIMARY_OUTPUT|0.910689|0.748576|0.999996|0.874286|0.999983|0.000017|
+|3|SNOWBALL NORWEGIAN BOKMAL LUCENE FILTER|PRIMARY_OUTPUT|0.910546|0.748207|0.999996|0.874101|0.999983|0.000017|
+|4|NORWEGIAN BOKMAL LUCENE NORWEGIAN LIGHT STEM FILTER|PRIMARY_OUTPUT|0.898862|0.698663|0.999996|0.849330|0.999980|0.000020|
+|5|NORWEGIAN BOKMAL LUCENE NORWEGIAN MINIMAL STEM FILTER|PRIMARY_OUTPUT|0.969896|0.662422|0.999999|0.831210|0.999981|0.000019|
 
 </details>
 
@@ -316,15 +226,11 @@ This mode contains **7 result rows**, **5 evaluated stemmers**, and **3 output p
 
 | Rank | Stemmer | Output policy | F0.5 | F1 | F2 | Jaccard | Fowlkes–Mallows | MCC |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ANY_CANDIDATE|1.000000|1.000000|1.000000|1.000000|1.000000|1.000000|
-
-</details>
-
-<details class="quality-details" markdown="1"><summary>Partition metrics (PRIMARY_OUTPUT only)</summary>
-
-| Rank | Stemmer | Output policy | Adjusted Rand Index | Homogeneity | Completeness | V-measure | Normalized mutual information |
-|---:|---|---|---:|---:|---:|---:|---:|
-|1|Radixor|ANY_CANDIDATE|n/a|n/a|n/a|n/a|n/a|
+|1|Radixor|PRIMARY_OUTPUT|0.990121|0.975662|0.961620|0.952481|0.975951|0.975950|
+|2|SNOWBALL NORWEGIAN BOKMAL DIRECT|PRIMARY_OUTPUT|0.872882|0.821713|0.776211|0.697379|0.825663|0.825655|
+|3|SNOWBALL NORWEGIAN BOKMAL LUCENE FILTER|PRIMARY_OUTPUT|0.872677|0.821432|0.775872|0.696975|0.825395|0.825387|
+|4|NORWEGIAN BOKMAL LUCENE NORWEGIAN LIGHT STEM FILTER|PRIMARY_OUTPUT|0.850142|0.786219|0.731236|0.647743|0.792466|0.792457|
+|5|NORWEGIAN BOKMAL LUCENE NORWEGIAN MINIMAL STEM FILTER|PRIMARY_OUTPUT|0.887506|0.787200|0.707265|0.649077|0.801549|0.801541|
 
 </details>
 
@@ -332,17 +238,41 @@ This mode contains **7 result rows**, **5 evaluated stemmers**, and **3 output p
 
 | Rank | Stemmer | Output policy | TP | FP | FN | TN | Over error / possible | Under error / possible |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ANY_CANDIDATE|142091|0|0|2831176784|0 / 2831176784|0 / 142091|
+|1|Radixor|PRIMARY_OUTPUT|134115|0|6691|2672431799|0 / 2672431799|6691 / 140806|
+|2|SNOWBALL NORWEGIAN BOKMAL DIRECT|PRIMARY_OUTPUT|105404|10337|35402|2672421462|10337 / 2672431799|35402 / 140806|
+|3|SNOWBALL NORWEGIAN BOKMAL LUCENE FILTER|PRIMARY_OUTPUT|105352|10350|35454|2672421449|10350 / 2672431799|35454 / 140806|
+|4|NORWEGIAN BOKMAL LUCENE NORWEGIAN LIGHT STEM FILTER|PRIMARY_OUTPUT|98376|11069|42430|2672420730|11069 / 2672431799|42430 / 140806|
+|5|NORWEGIAN BOKMAL LUCENE NORWEGIAN MINIMAL STEM FILTER|PRIMARY_OUTPUT|93273|2895|47533|2672428904|2895 / 2672431799|47533 / 140806|
+
+</details>
+
+#### `ANY_CANDIDATE` oracle bounds
+
+These results are measured, not missing. `ANY_CANDIDATE` answers two separate optimistic questions for each pair: a gold-related pair avoids under-stemming when the candidate sets intersect, while a gold-negative pair avoids over-stemming when some non-colliding candidate selection exists. The oracle may choose a different candidate for the same word in different pairs. Consequently, these decisions do not form one globally realizable predicted relation or one TP/FP/FN/TN confusion matrix. Balanced accuracy, F-scores, Jaccard, Fowlkes–Mallows, and MCC are therefore mathematically **not applicable**, rather than unknown.
+
+<div class="quality-summary quality-summary--oracle" markdown="1">
+
+| Stemmer | Optimistic over-stemming (OI) | Optimistic under-stemming (UI) |
+|---|---:|---:|
+|Radixor|0.000000%|0.000000%|
+
+</div>
+
+<details class="quality-details" markdown="1"><summary>Oracle-bound pair counts</summary>
+
+| Stemmer | Unavoidable over errors / gold-negative pairs | Unrepairable under errors / gold-related pairs |
+|---|---:|---:|
+|Radixor|0 / 2672431799|0 / 140806|
 
 </details>
 
 #### `ALL_CANDIDATES` ranking
 
-<div class="quality-table quality-table--compact" role="region" aria-label="Compact stemming-quality ranking; scroll horizontally for additional columns" tabindex="0" markdown="1">
+<div class="quality-summary" markdown="1">
 
-| Rank | Stemmer | Output policy | Balanced accuracy | Over-stemming | Under-stemming | F0.5 | F1 | MCC |
-|---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ALL_CANDIDATES|0.999996|20161 / 2831176784 (0.000712%)|0 / 142091 (0.000000%)|0.898061|0.933756|0.935808|
+| Rank | Stemmer | Balanced accuracy | Over-stemming (OI) | Under-stemming (UI) |
+|---:|---|---:|---:|---:|
+|1|Radixor|1.000000|0.000000%|0.000000%|
 
 </div>
 
@@ -350,7 +280,7 @@ This mode contains **7 result rows**, **5 evaluated stemmers**, and **3 output p
 
 | Rank | Stemmer | Output policy | Precision | Recall | Specificity | Balanced accuracy | Pairwise accuracy | Error rate |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ALL_CANDIDATES|0.875743|1.000000|0.999993|0.999996|0.999993|0.000007|
+|1|Radixor|ALL_CANDIDATES|1.000000|1.000000|1.000000|1.000000|1.000000|0.000000|
 
 </details>
 
@@ -358,15 +288,7 @@ This mode contains **7 result rows**, **5 evaluated stemmers**, and **3 output p
 
 | Rank | Stemmer | Output policy | F0.5 | F1 | F2 | Jaccard | Fowlkes–Mallows | MCC |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ALL_CANDIDATES|0.898061|0.933756|0.972405|0.875743|0.935811|0.935808|
-
-</details>
-
-<details class="quality-details" markdown="1"><summary>Partition metrics (PRIMARY_OUTPUT only)</summary>
-
-| Rank | Stemmer | Output policy | Adjusted Rand Index | Homogeneity | Completeness | V-measure | Normalized mutual information |
-|---:|---|---|---:|---:|---:|---:|---:|
-|1|Radixor|ALL_CANDIDATES|n/a|n/a|n/a|n/a|n/a|
+|1|Radixor|ALL_CANDIDATES|1.000000|1.000000|1.000000|1.000000|1.000000|1.000000|
 
 </details>
 
@@ -374,7 +296,7 @@ This mode contains **7 result rows**, **5 evaluated stemmers**, and **3 output p
 
 | Rank | Stemmer | Output policy | TP | FP | FN | TN | Over error / possible | Under error / possible |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ALL_CANDIDATES|142091|20161|0|2831156623|20161 / 2831176784|0 / 142091|
+|1|Radixor|ALL_CANDIDATES|140806|0|0|2672431799|0 / 2672431799|0 / 140806|
 
 </details>
 
@@ -384,19 +306,19 @@ Alternative candidates are capability analyses, not replacements for the determi
 
 | Stemmer | Under pairs repaired | Best-case over pairs avoided | All-candidate collisions added | Multi-candidate forms | Multi-candidate share | Maximum candidates | Total candidate assignments |
 |---|---:|---:|---:|---:|---:|---:|---:|
-|Radixor|7104|11482|8679|4204|5.586637%|9|79733|
+|Radixor|6691|0|0|2064|2.823105%|9|75251|
 
 ### Output Policies and Metric Definitions
 
-`PRIMARY_OUTPUT` uses one deterministic stem per form and therefore defines a strict partition. `ANY_CANDIDATE` is an optimistic oracle-assisted pairwise upper bound: a same-group pair succeeds when candidates intersect, while a different-group pair succeeds when a non-colliding selection exists. Candidate choices may differ between pairs, so this is not deterministic runtime behaviour and need not represent one globally consistent assignment. `ALL_CANDIDATES` activates every returned candidate; forms are related when candidate sets intersect. Alternatives can reduce under-stemming but can introduce cross-group collisions, and the resulting relation can overlap and need not be a partition.
+Each distinct surface form is one item and may belong to several gold groups. Two forms are gold-related when their membership sets intersect; a relation shared by several groups is counted once. `PRIMARY_OUTPUT` uses one deterministic stem per form. `ANY_CANDIDATE` is an optimistic oracle-assisted pairwise upper bound: a gold-related pair succeeds when candidates intersect, while a gold-negative pair succeeds when a non-colliding selection exists. Candidate choices may differ between pairs, so this is not deterministic runtime behaviour and does not define one confusion matrix. `ALL_CANDIDATES` activates every returned candidate; forms are related when candidate sets intersect.
 
-For each row, `TP = underPossiblePairs - underErrorPairs`, `FN = underErrorPairs`, `FP = overErrorPairs`, and `TN = overPossiblePairs - overErrorPairs`. TP and FN concern same-group pairs; FP and TN concern different-group pairs. Consequently, under-stemming and over-stemming use different denominators. Undefined values are rendered as `n/a`.
+For `PRIMARY_OUTPUT` and `ALL_CANDIDATES`, `TP = underPossiblePairs - underErrorPairs`, `FN = underErrorPairs`, `FP = overErrorPairs`, and `TN = overPossiblePairs - overErrorPairs`. `ANY_CANDIDATE` publishes only its separate oracle-assisted under/over bounds; confusion-derived metrics are mathematically inapplicable and are not presented in its language-page section. Their machine-readable CSV fields remain empty. Undefined metric denominators in otherwise applicable policies are rendered as `n/a`.
 
-- Under-stemming rate: `FN / (TP + FN)`, the false-negative rate over same-group pairs.
-- Over-stemming rate: `FP / (TN + FP)`, the false-positive rate over different-group pairs.
+- Under-stemming rate (Paice UI): `FN / (TP + FN)`, the false-negative rate over gold-related pairs.
+- Over-stemming rate (Paice OI): `FP / (TN + FP)`, the false-positive rate over gold-negative pairs.
 - Pairwise precision: `TP / (TP + FP)`, the fraction of predicted conflations that are gold-standard positive pairs.
 - Pairwise recall: `TP / (TP + FN)`, the fraction of gold-standard positive pairs successfully connected.
-- Pairwise specificity: `TN / (TN + FP)`, the fraction of different-group pairs correctly separated.
+- Pairwise specificity: `TN / (TN + FP)`, the fraction of gold-negative pairs correctly separated.
 - Balanced accuracy: `(recall + specificity) / 2`. It gives equal weight to positive and negative pair classes and is less dominated by the large true-negative class than ordinary accuracy. It does not replace the raw errors or other metrics.
 - Pairwise F-beta: `((1 + betaSquared) * TP) / (((1 + betaSquared) * TP) + (betaSquared * FN) + FP)`. F0.5 emphasizes precision and penalizes over-stemming more; F1 weights precision and recall equally; F2 emphasizes recall and penalizes under-stemming more.
 - MCC: `(TP * TN - FP * FN) / sqrt((TP + FP) * (TP + FN) * (TN + FP) * (TN + FN))`. It uses all confusion counts and remains useful under class imbalance, except when its denominator is degenerate.
@@ -405,16 +327,17 @@ For each row, `TP = underPossiblePairs - underErrorPairs`, `FN = underErrorPairs
 - Pairwise accuracy: `(TP + TN) / (TP + TN + FP + FN)`. It can be dominated by true-negative cross-group pairs.
 - Pairwise error rate: `(FP + FN) / (TP + TN + FP + FN)`.
 
-Adjusted Rand Index uses the gold/predicted contingency table and chance correction. Homogeneity is `1 - H(gold | predicted) / H(gold)`; completeness is `1 - H(predicted | gold) / H(predicted)`; V-measure is their harmonic mean; normalized mutual information uses the arithmetic-mean entropy normalization `MI / ((H(gold) + H(predicted)) / 2)`. These partition-only metrics apply to `PRIMARY_OUTPUT`; candidate-relation rows show `n/a`.
+Standard ARI, homogeneity, completeness, V-measure, and NMI are not calculated: their usual contingency-table definitions require an exclusive gold partition, while this gold standard is an overlapping cover.
 
 ### Provenance
 
 - Authoritative source: `docs/benchmarks/data/stemming-quality.csv`
-- Source SHA-256: `5a93a6ab60e46489737cd649eb1ac48182114b9038f7f20195ab9d1c1fc0dd28`
-- Evaluation command: `./gradlew stemmingQuality`
+- Source SHA-256: `edf16b07be8a535943ddf37caeb8807755c95e9e1fb13244145f28be74b491d8`
+- Evaluation command: `./gradlew stemmingQuality --no-daemon`
 - Dictionary language: `NB_NO`
 - Processing modes: `ALL_WORDS`, `LOWERCASE_GROUPS_ONLY`
 - Stemmer versions and transitive artifacts: resolved by the repository's JMH Gradle configuration and `gradle.lockfile`
-- Radixor version, Git revision, generation date, JDK version, operating system, and dictionary revision: not recorded in the authoritative CSV
+- Model ID, version, and SHA-256: recorded in every CSV row
+- Run date, core source state, JDK, operating system, and hardware: recorded on the [benchmark environment page](../reference/environment.md)
 
 <!-- STEMMING-QUALITY:END -->

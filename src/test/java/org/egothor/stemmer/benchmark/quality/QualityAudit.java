@@ -63,28 +63,30 @@ final class QualityAudit {
     static Scenario evaluate(final Candidate candidate, final ProcessingMode mode,
             final List<GoldStandardGroup> groups, final int limit) throws IOException {
         final List<GoldStandardGroup> includedGroups = groups.stream().filter(group -> mode.includes(group.forms())).toList();
-        final List<String> forms = new ArrayList<>();
-        for (GoldStandardGroup group : includedGroups) {
-            forms.addAll(group.forms());
-        }
+        final GoldStandardCover cover = GoldStandardCover.create(groups, mode);
+        final List<String> forms = cover.forms();
         final String[] outputs = candidate.createStemmer().stem(forms.toArray(String[]::new));
         if (outputs.length != forms.size()) {
             throw new IOException("Invalid audit output count for stemmer " + candidate.name() + ", language "
-                    + candidate.language() + ", and processing mode " + mode + ".");
+                    + candidate.resultLanguage() + ", and processing mode " + mode + ".");
         }
-        final int[] outputIndex = {0};
-        final QualityResult result = QualityEvaluator.evaluate(candidate.name(), candidate.language().name(), mode,
-                groups, word -> outputs[outputIndex[0]++]);
+        final Map<String, String> outputsByForm = new LinkedHashMap<>();
+        for (int index = 0; index < forms.size(); index++) {
+            outputsByForm.put(forms.get(index), outputs[index]);
+        }
+        final QualityResult result = QualityEvaluator.evaluate(candidate.name(), candidate.resultLanguage(), mode,
+                groups, outputsByForm::get);
         final List<Contributor> contributors = new ArrayList<>();
         long exactMatches = 0;
-        int offset = 0;
+        long exactDenominator = 0;
         final List<Integer> sizes = new ArrayList<>();
         for (GoldStandardGroup group : includedGroups) {
             final Map<String, List<String>> formsByStem = new LinkedHashMap<>();
             final String expected = group.forms().get(0);
             long mergedPairs = 0;
             for (String form : group.forms()) {
-                final String output = outputs[offset++];
+                exactDenominator++;
+                final String output = outputsByForm.get(form);
                 formsByStem.computeIfAbsent(output, ignored -> new ArrayList<>()).add(form);
                 if (expected.equals(output)) {
                     exactMatches++;
@@ -103,16 +105,12 @@ final class QualityAudit {
         contributors.sort(Comparator.comparingLong(Contributor::errorPairs).reversed()
                 .thenComparingInt(Contributor::rowNumber));
         final long contributionSum = contributors.stream().mapToLong(Contributor::errorPairs).reduce(0L, Math::addExact);
-        if (contributionSum != result.underErrorPairs()) {
-            throw new IOException("The summed group contributions do not equal the optimized under-stemming total for "
-                    + candidate.name() + ", " + candidate.language() + ", and " + mode + ".");
-        }
         sizes.sort(Integer::compareTo);
         final double mean = sizes.stream().mapToInt(Integer::intValue).average().orElse(0.0);
         final double median = median(sizes);
         final String resource = org.egothor.stemmer.StemmerModelRegistry.fromContextClassLoader()
-                .requireDefault(candidate.language()).resource();
-        return new Scenario(result, resource, exactMatches, forms.size(),
+                .require(candidate.dictionaryModelId()).resource();
+        return new Scenario(result, resource, exactMatches, exactDenominator,
                 sizes.isEmpty() ? 0 : sizes.get(0), sizes.isEmpty() ? 0 : sizes.get(sizes.size() - 1), mean, median,
                 List.copyOf(contributors.subList(0, Math.min(limit, contributors.size()))), contributionSum);
     }
@@ -136,7 +134,8 @@ final class QualityAudit {
                     .append("- Exact first-field matches: ").append(scenario.exactMatches()).append(" / ").append(scenario.exactDenominator()).append("\n")
                     .append("- Under-stemming pairs: ").append(result.underErrorPairs()).append(" / ").append(result.underPossiblePairs()).append("\n")
                     .append("- Over-stemming pairs: ").append(result.overErrorPairs()).append(" / ").append(result.overPossiblePairs()).append("\n")
-                    .append("- Independently summed under-stemming contributions: ").append(scenario.contributionSum()).append("\n\n")
+                    .append("- Sum of row-local under-stemming contributions: ").append(scenario.contributionSum())
+                    .append(" (shared gold pairs can occur in more than one row)\n\n")
                     .append("### Highest under-stemming contributors\n\n");
             for (Contributor contributor : scenario.contributors()) {
                 text.append("#### Dictionary row ").append(contributor.rowNumber()).append("\n\n")

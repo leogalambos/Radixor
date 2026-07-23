@@ -1,6 +1,6 @@
 # Language Benchmark Pages
 
-This section splits Radixor stemmer benchmark results by language. Each language page preserves the existing exact-root accuracy and runtime-performance results and adds pairwise stemming-quality tables for both dictionary-processing modes.
+This section splits Radixor stemmer benchmark results by language. Each of the 20 registered default models has one language page containing the refreshed corpus, patch-command distribution, exact-root accuracy, runtime performance, and pairwise stemming-quality tables for both dictionary-processing modes.
 
 ## Reference Pages
 
@@ -23,6 +23,7 @@ This section splits Radixor stemmer benchmark results by language. Each language
 | Finnish | `FI_FI` | [Finnish](finnish.md) |
 | French | `FR_FR` | [French](french.md) |
 | German | `DE_DE` | [German](german.md) |
+| Hebrew | `HE_IL` | [Hebrew](hebrew.md) |
 | Hungarian | `HU_HU` | [Hungarian](hungarian.md) |
 | Italian | `IT_IT` | [Italian](italian.md) |
 | Norwegian Bokmal | `NB_NO` | [Norwegian Bokmal](norwegian-bokmal.md) |

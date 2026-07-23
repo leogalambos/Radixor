@@ -2,7 +2,7 @@
 
 The stemmer comparison suite measures Radixor and Java stemmers on the same language and deterministic Radixor model dictionary-derived data. Published Radixor rows in this refresh use contracted compiled patch tries, where uniform preferred-command subtrees are collapsed into accepting leaves before the trie is frozen for lookup. For each language, the registered default model resource stores the expected root as the first tab-separated field on a line and its surface forms on the same line. Every single-token field on that line can therefore be paired with the same expected root.
 
-Published stemmer comparison results must come only from benchmark classes matching `.*StemmerComparisonBenchmark.*`. Internal `FrequencyTrie*` microbenchmarks are not part of those results.
+Published speed results come only from the exact method selection retained in `published-speed-benchmarks-2026-07-23.txt`. Internal `FrequencyTrie*` microbenchmarks, quality methods, the CISTEM gold-standard experiment, and the optional `PolishPolimorfStemmerComparisonBenchmark` are not part of those results.
 
 ## Benchmark Passes
 
@@ -12,6 +12,8 @@ There are two distinct benchmark passes:
 - Quality benchmarks process the complete dictionary for the language. They report exact agreement over all tokens, exact agreement over changed tokens only, and preservation of tokens that are already roots.
 
 Timing corpora are generated once per JMH JVM and kept in memory as shared `{token, expectedRoot}` arrays. Corpus construction, dictionary loading, trie loading, table loading, and analyzer construction are setup work and are not included in measured benchmark methods.
+
+The deterministic and timed workloads are executed separately. Corpus statistics, patch-command counts, exact-root counters, coverage accuracy, and pairwise quality do not use or interpret warmup or runtime scores. Published speed and coverage-speed methods use three independent forks, five one-second warmup iterations and ten one-second measurement iterations per fork, one benchmark thread, and a fixed 6 GiB heap.
 
 Performance is interpreted as average time per input token:
 
@@ -37,10 +39,10 @@ For right-to-left Radixor languages, patch application uses the traversal direct
 
 ## Quality Metric
 
-The quality pass reports exact-root agreement against the expected root from the Radixor dictionary line. It writes to the normal JMH report files:
+The quality pass reports exact-root agreement against the expected root from the default-model dictionary line. External-stemmer counters are written to:
 
-- `build/reports/jmh/jmh-results.csv`
-- `build/reports/jmh/jmh-results.txt`
+- `build/reports/jmh/stemmer-accuracy-2026-07-23.csv`
+- `build/reports/jmh/stemmer-accuracy-2026-07-23.txt`
 
 Accuracy is computed from standard JMH secondary rows:
 
@@ -54,7 +56,7 @@ rootPreservedPercent = rootPreservedMatches / rootEvaluatedTokens * 100
 
 Morfologik can emit multiple terms for one input token. The quality benchmark uses the first emitted term for exact-root accounting when no ranking weight is exposed. Throughput benchmarks for Morfologik TokenFilter paths consume all emitted terms.
 
-Quality reports use JMH auxiliary counter rows. Exact-root accounting is deterministic for a fixed corpus and stemmer, so repeated measurement samples duplicate the same counters; documentation uses the counter ratios and does not interpret quality benchmark timing scores.
+External-stemmer quality reports use JMH auxiliary counter rows from one deterministic evaluation. Radixor exact-root counts are computed directly while the default-model corpus and preferred patch commands are audited, so all 20 default models have the same coverage even where no older JMH quality adapter existed. Documentation uses counter ratios and does not interpret quality benchmark timing scores.
 
-Pairwise over-stemming, under-stemming, candidate-aware policies, balanced accuracy, and partition comparison are a separate analytical evaluation. See [Linguistic Quality Methodology](linguistic-quality.md); exact-root accuracy must not be interpreted as the complement of pairwise under-stemming.
+Pairwise over-stemming, under-stemming, candidate-aware policies, and relation metrics are a separate analytical evaluation. See [Linguistic Quality Methodology](linguistic-quality.md); exact-root accuracy must not be interpreted as the complement of pairwise under-stemming.
 Default rows use `Language.defaultModelId()`. Optional variants require a separate model field; `pl-pl-unimorph` and `pl-pl-polimorf` must never share an ambiguous Polish label. The benchmark runtime receives each resource exactly once from its individual model JAR through direct JMH runtime dependencies. See [Model Selection and Loading](../../model-selection-and-loading.md).

@@ -56,13 +56,18 @@ final class CandidateQualityAudit {
     static Scenario evaluate(final Candidate candidate, final ProcessingMode mode,
             final List<GoldStandardGroup> groups, final QualityResult primary, final QualityResult any,
             final int limit) throws IOException {
-        final List<String> forms = new ArrayList<>();
-        final List<Integer> groupIndexes = new ArrayList<>();
-        final List<Integer> rows = new ArrayList<>();
-        for (int group = 0; group < groups.size(); group++) {
-            final GoldStandardGroup item = groups.get(group);
-            if (!mode.includes(item.forms())) { continue; }
-            for (String form : item.forms()) { forms.add(form); groupIndexes.add(group); rows.add(item.rowNumber()); }
+        final GoldStandardCover cover = GoldStandardCover.create(groups, mode);
+        final List<String> forms = cover.forms();
+        final List<Integer> rows = new ArrayList<>(forms.size());
+        final List<Set<Integer>> memberships = new ArrayList<>(forms.size());
+        for (int index = 0; index < forms.size(); index++) {
+            rows.add(cover.representativeRow(index));
+            memberships.add(new HashSet<>());
+        }
+        for (int group = 0; group < cover.groups().size(); group++) {
+            for (String form : cover.groups().get(group).forms()) {
+                memberships.get(cover.indexOf(form)).add(group);
+            }
         }
         final BatchStemmer stemmer = candidate.createStemmer();
         final String[] primaryOutputs = stemmer.stem(forms.toArray(String[]::new));
@@ -78,7 +83,7 @@ final class CandidateQualityAudit {
             candidateCountDistribution.merge(set.size(), 1L, Math::addExact);
             for (String value : set) { inverted.computeIfAbsent(value, ignored -> new ArrayList<>()).add(index); }
         }
-        final QualityResult candidateResult = CandidateAwareEvaluator.evaluate(candidate.name(), candidate.language().name(),
+        final QualityResult candidateResult = CandidateAwareEvaluator.evaluate(candidate.name(), candidate.resultLanguage(),
                 mode, OutputPolicy.ALL_CANDIDATES, groups, candidate.createStemmer());
         final List<Integer> selected = new ArrayList<>();
         for (int index = 0; index < forms.size(); index++) { if (candidateSets.get(index).size() > 1) { selected.add(index); } }
@@ -92,8 +97,10 @@ final class CandidateQualityAudit {
             long repaired = 0; long introduced = 0;
             for (int partner : partners) {
                 final boolean primaryRelated = primaryOutputs[index].equals(primaryOutputs[partner]);
-                if (groupIndexes.get(index).equals(groupIndexes.get(partner)) && !primaryRelated) { repaired++; }
-                if (!groupIndexes.get(index).equals(groupIndexes.get(partner)) && !primaryRelated) { introduced++; }
+                final Set<Integer> sharedMemberships = new HashSet<>(memberships.get(index));
+                sharedMemberships.retainAll(memberships.get(partner));
+                if (!sharedMemberships.isEmpty() && !primaryRelated) { repaired++; }
+                if (sharedMemberships.isEmpty() && !primaryRelated) { introduced++; }
             }
             words.add(new Word(rows.get(index), forms.get(index), primaryOutputs[index], candidateSets.get(index),
                     repaired, introduced));
@@ -129,8 +136,8 @@ final class CandidateQualityAudit {
                 text.append("- Row ").append(word.row()).append(", form `").append(escape(word.form()))
                         .append("`, primary `").append(escape(word.primary())).append("`, candidates ")
                         .append(word.candidates().stream().map(value -> "`" + escape(value) + "`").toList())
-                        .append(", repaired same-group relations ").append(word.repairedUnderRelations())
-                        .append(", introduced cross-group relations ").append(word.introducedOverRelations()).append(".\n");
+                        .append(", repaired gold-positive relations ").append(word.repairedUnderRelations())
+                        .append(", introduced gold-negative relations ").append(word.introducedOverRelations()).append(".\n");
             }
             text.append('\n');
         }

@@ -87,16 +87,16 @@ Radixor performance is best read together with stemming quality. The English dic
 
 | Used rows | Actual row ratio | All exact | Changed exact | Root preserved | Speed ms/op | Error ms | ns/token |
 | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| 100% | 100.000% | 97.478% | 97.197% | 97.552% | 23.113 | 7.065 | 109.8 |
-| 90% | 90.000% | 97.047% | 94.913% | 97.613% | 21.270 | 9.914 | 101.0 |
-| 80% | 80.000% | 96.635% | 92.768% | 97.661% | 19.170 | 6.609 | 91.1 |
-| 70% | 70.000% | 96.209% | 90.565% | 97.705% | 20.857 | 6.734 | 99.1 |
-| 60% | 60.000% | 95.750% | 88.384% | 97.703% | 14.975 | 1.215 | 71.1 |
-| 50% | 50.000% | 95.262% | 86.107% | 97.690% | 15.249 | 1.078 | 72.4 |
-| 40% | 40.000% | 94.753% | 83.855% | 97.643% | 15.323 | 2.340 | 72.8 |
-| 30% | 30.000% | 94.208% | 81.651% | 97.537% | 16.778 | 2.643 | 79.7 |
-| 20% | 20.000% | 93.633% | 79.366% | 97.416% | 18.929 | 3.241 | 89.9 |
-| 10% | 10.000% | 92.868% | 76.516% | 97.204% | 19.124 | 1.883 | 90.9 |
+| 100% | 100.000% | 97.478% | 97.197% | 97.552% | 20.627 | 2.117 | 98.0 |
+| 90% | 90.000% | 97.047% | 94.913% | 97.613% | 21.713 | 2.104 | 103.2 |
+| 80% | 80.000% | 96.635% | 92.768% | 97.661% | 17.408 | 1.438 | 82.7 |
+| 70% | 70.000% | 96.209% | 90.565% | 97.705% | 16.946 | 1.531 | 80.5 |
+| 60% | 60.000% | 95.750% | 88.384% | 97.703% | 15.735 | 1.278 | 74.8 |
+| 50% | 50.000% | 95.262% | 86.107% | 97.690% | 14.714 | 1.089 | 69.9 |
+| 40% | 40.000% | 94.753% | 83.855% | 97.643% | 15.090 | 1.254 | 71.7 |
+| 30% | 30.000% | 94.208% | 81.651% | 97.537% | 13.773 | 1.071 | 65.4 |
+| 20% | 20.000% | 93.633% | 79.366% | 97.416% | 15.396 | 2.497 | 73.1 |
+| 10% | 10.000% | 92.868% | 76.516% | 97.204% | 16.970 | 2.847 | 80.6 |
 
 Column meanings:
 
@@ -109,7 +109,7 @@ Column meanings:
 - `Error ms` is the JMH score error converted to milliseconds.
 - `ns/token` is average nanoseconds per changed token in that operation.
 
-The contracted trie result is materially stronger than the older uncontracted profile: full English coverage reaches 97.478% all-token exactness and 97.197% changed-token exactness at 109.8 ns/token, while even a 10% deterministic dictionary slice remains at 92.868% all-token exactness and 76.516% changed-token exactness at 90.9 ns/token. This is why Radixor benchmark results are documented with both speed and quality instead of a single Porter speed badge.
+The contracted trie result is materially stronger than the older uncontracted profile: full English coverage reaches 97.478% all-token exactness and 97.197% changed-token exactness at 98.0 ns/token, while even a 10% deterministic dictionary slice remains at 92.868% all-token exactness and 76.516% changed-token exactness at 80.6 ns/token. This is why Radixor benchmark results are documented with both speed and quality instead of a single Porter speed badge.
 
 For benchmark scope, workload design, environment, commands, report locations, and interpretation guidance, see [Benchmarking](docs/benchmarking.md).
 

@@ -49,6 +49,8 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.egothor.stemmer.StemmerPatchTrieLoader.Language;
+
 /**
  * Publishes validated stemming-quality CSV results into marked sections of the
  * existing language benchmark pages. This test-source utility never modifies
@@ -182,7 +184,9 @@ public final class StemmingQualityDocumentationPublisher {
             throw new IllegalStateException("The stemming-quality CSV is empty.");
         }
         final List<String> header = parseCsv(lines.getFirst());
-        final List<String> required = List.of("Stemmer", "Language", "Dictionary mode", "Output policy", "Applied dictionary rows",
+        final List<String> required = List.of("Stemmer", "Language", "Dictionary model ID",
+                "Dictionary model version", "Dictionary model SHA-256",
+                "Dictionary mode", "Output policy", "Applied dictionary rows",
                 "Processed word forms", "Forms with multiple candidates", "Maximum candidates for one form", "Total candidate assignments",
                 "True-positive pairs", "False-positive pairs", "False-negative pairs", "True-negative pairs",
                 "Over-stemming error pairs", "Over-stemming possible pairs", "Over-stemming percentage", "Under-stemming error pairs",
@@ -244,6 +248,14 @@ public final class StemmingQualityDocumentationPublisher {
             if (!keys.add(row.key())) {
                 throw new IllegalStateException("Duplicate stemming-quality result key: " + row.key());
             }
+            final String expectedModelId = Language.valueOf(row.language()).defaultModelId();
+            if (!row.modelId().equals(expectedModelId)) {
+                throw new IllegalStateException("Stemming-quality row " + row.key()
+                        + " uses model " + row.modelId() + " instead of default model " + expectedModelId + ".");
+            }
+            if (row.modelVersion().isBlank() || !row.modelSha256().matches("[0-9a-f]{64}")) {
+                throw new IllegalStateException("Incomplete dictionary-model provenance for " + row.key() + ".");
+            }
             row.validate();
         }
         final Set<String> resultLanguages = new HashSet<>();
@@ -275,8 +287,9 @@ public final class StemmingQualityDocumentationPublisher {
             }
             validatePolicies(languageRows);
         }
-        if (!documentedLanguages.contains("DA_DK") || !documentedLanguages.contains("YI")) {
-            throw new IllegalStateException("The documentation mapping must contain DA_DK and YI.");
+        if (!documentedLanguages.contains("DA_DK") || !documentedLanguages.contains("HE_IL")
+                || !documentedLanguages.contains("YI")) {
+            throw new IllegalStateException("The documentation mapping must contain DA_DK, HE_IL, and YI.");
         }
     }
 
@@ -304,13 +317,15 @@ public final class StemmingQualityDocumentationPublisher {
 
     /** Renders one complete generated section for a language page. */
     private static String render(final Page page, final List<ResultRow> rows, final String checksum) {
+        final String modelId = Language.valueOf(page.language()).defaultModelId();
         final StringBuilder output = new StringBuilder(32768);
         output.append(START).append("\n\n## Stemming Quality\n\n")
                 .append("Runtime performance and linguistic grouping quality are independent dimensions. This section evaluates language `")
-                .append(page.language()).append("` using the complete validated stemming-quality result matrix. Every usable dictionary row is one gold-standard group of forms expected to share a morphological family or lemma. Exact equality with a predetermined lemma is not required. Same-row pairs are positive pairs; pairs from different rows are negative pairs.\n\n")
+                .append(page.language()).append("` using the complete validated stemming-quality result matrix. Every distinct surface form is one evaluated item and can belong to several dictionary groups. Two forms are a positive pair when their group-membership sets intersect and a negative pair when those sets are disjoint. A pair shared through several groups is counted once. Exact equality with a predetermined lemma is not required.\n\n")
                 .append("`ALL_WORDS` includes every valid group and its original forms. `LOWERCASE_GROUPS_ONLY` excludes an entire group when any Unicode code point is uppercase or titlecase; retained words are not lowercased or otherwise rewritten. This isolates case-handling effects without changing retained inputs. [Download the complete machine-readable result snapshot](../data/stemming-quality.csv).\n\n")
                 .append("### Evaluation Scope and Key Findings\n\n")
-                .append("The dictionary resource is `src/main/resources/").append(page.language().toLowerCase(Locale.ROOT)).append("/stemmer.gz`. The following findings compare only deterministic `PRIMARY_OUTPUT` rows over identical included groups; candidate policies are reported separately as capability analyses.\n\n");
+                .append("The default model is `").append(modelId).append("`, loaded from classpath resource `org/egothor/stemmer/models/")
+                .append(modelId).append("/stemmer.gz`. The following findings compare only deterministic `PRIMARY_OUTPUT` rows over identical included groups; candidate policies are reported separately as capability analyses.\n\n");
         for (String mode : MODES) {
             appendFinding(output, rows, mode);
         }
@@ -320,13 +335,17 @@ public final class StemmingQualityDocumentationPublisher {
             final long policies = selected.stream().map(ResultRow::policy).distinct().count();
             output.append("### `").append(mode).append("`\n\n")
                     .append("This mode contains **").append(selected.size()).append(" result rows**, **").append(stemmers)
-                    .append(" evaluated stemmers**, and **").append(policies).append(" output policies**. Applied-row and form counts are shown per row because adapters share the language corpus but policy rows remain independently auditable. Rankings are separated by output policy and ordered by unrounded balanced accuracy, followed by MCC, F1, over-stemming rate, over-stemming count, under-stemming rate, and stemmer. Balanced accuracy is a navigation metric, not a universally authoritative quality score.\n\n");
+                    .append(" evaluated stemmers**, and **").append(policies).append(" output policies**. Applied-row and form counts are shown per row because adapters share the language corpus but policy rows remain independently auditable. `PRIMARY_OUTPUT` and `ALL_CANDIDATES` rankings are ordered by unrounded balanced accuracy, followed by MCC, F1, over-stemming rate, over-stemming count, under-stemming rate, and stemmer. `ANY_CANDIDATE` has no single rank metric and is listed alphabetically. Balanced accuracy is a navigation metric, not a universally authoritative quality score.\n\n");
             for (String policy : List.of("PRIMARY_OUTPUT", "ANY_CANDIDATE", "ALL_CANDIDATES")) {
                 final List<ResultRow> policyRows = selected.stream().filter(row -> row.policy().equals(policy)).toList();
                 if (!policyRows.isEmpty()) {
-                    output.append("#### `").append(policy).append("` ranking\n\n");
-                    renderPrimaryTable(output, policyRows);
-                    renderDetailedTables(output, policyRows);
+                    if (policy.equals("ANY_CANDIDATE")) {
+                        renderAnyCandidatePolicy(output, policyRows);
+                    } else {
+                        output.append("#### `").append(policy).append("` ranking\n\n");
+                        renderPrimaryTable(output, policyRows);
+                        renderDetailedTables(output, policyRows);
+                    }
                 }
             }
             renderCandidateAnalysis(output, selected);
@@ -335,11 +354,12 @@ public final class StemmingQualityDocumentationPublisher {
         output.append("### Provenance\n\n")
                 .append("- Authoritative source: `docs/benchmarks/data/stemming-quality.csv`\n")
                 .append("- Source SHA-256: `").append(checksum).append("`\n")
-                .append("- Evaluation command: `./gradlew stemmingQuality`\n")
+                .append("- Evaluation command: `./gradlew stemmingQuality --no-daemon`\n")
                 .append("- Dictionary language: `").append(page.language()).append("`\n")
                 .append("- Processing modes: `ALL_WORDS`, `LOWERCASE_GROUPS_ONLY`\n")
                 .append("- Stemmer versions and transitive artifacts: resolved by the repository's JMH Gradle configuration and `gradle.lockfile`\n")
-                .append("- Radixor version, Git revision, generation date, JDK version, operating system, and dictionary revision: not recorded in the authoritative CSV\n\n")
+                .append("- Model ID, version, and SHA-256: recorded in every CSV row\n")
+                .append("- Run date, core source state, JDK, operating system, and hardware: recorded on the [benchmark environment page](../reference/environment.md)\n\n")
                 .append(END).append('\n');
         return output.toString();
     }
@@ -366,24 +386,22 @@ public final class StemmingQualityDocumentationPublisher {
         output.append(". This rank does not imply leadership in throughput or every secondary metric.\n");
     }
 
-    /** Renders the compact primary ranking table in an accessible scroll region. */
+    /** Renders the compact primary ranking without duplicating metrics available in the details. */
     private static void renderPrimaryTable(final StringBuilder output, final List<ResultRow> rows) {
-        output.append("<div class=\"quality-table quality-table--compact\" role=\"region\" aria-label=\"Compact stemming-quality ranking; scroll horizontally for additional columns\" tabindex=\"0\" markdown=\"1\">\n\n")
-                .append("| Rank | Stemmer | Output policy | Balanced accuracy | Over-stemming | Under-stemming | F0.5 | F1 | MCC |\n")
-                .append("|---:|---|---|---:|---:|---:|---:|---:|---:|\n");
+        output.append("<div class=\"quality-summary\" markdown=\"1\">\n\n")
+                .append("| Rank | Stemmer | Balanced accuracy | Over-stemming (OI) | Under-stemming (UI) |\n")
+                .append("|---:|---|---:|---:|---:|\n");
         for (int index = 0; index < rows.size(); index++) {
             final ResultRow row = rows.get(index);
-            output.append('|').append(index + 1).append('|').append(displayStemmer(row.stemmer())).append('|').append(row.policy()).append('|')
+            output.append('|').append(index + 1).append('|').append(displayStemmer(row.stemmer())).append('|')
                     .append(metric(row, "Balanced accuracy")).append('|')
-                    .append(pair(row, "Over-stemming error pairs", "Over-stemming possible pairs", "Over-stemming percentage")).append('|')
-                    .append(pair(row, "Under-stemming error pairs", "Under-stemming possible pairs", "Under-stemming percentage")).append('|')
-                    .append(metric(row, "Pairwise F0.5")).append('|').append(metric(row, "Pairwise F1")).append('|')
-                    .append(metric(row, "Matthews correlation coefficient")).append("|\n");
+                    .append(rate(row, "Over-stemming error pairs", "Over-stemming percentage")).append('|')
+                    .append(rate(row, "Under-stemming error pairs", "Under-stemming percentage")).append("|\n");
         }
         output.append("\n</div>\n\n");
     }
 
-    /** Renders classification, relation, partition, and raw-count tables with repeated identities. */
+    /** Renders classification, relation, and raw-count tables with repeated identities. */
     private static void renderDetailedTables(final StringBuilder output, final List<ResultRow> rows) {
         output.append("<details class=\"quality-details\" markdown=\"1\"><summary>Classification metrics</summary>\n\n")
                 .append("| Rank | Stemmer | Output policy | Precision | Recall | Specificity | Balanced accuracy | Pairwise accuracy | Error rate |\n")
@@ -403,22 +421,40 @@ public final class StemmingQualityDocumentationPublisher {
                     .append(metric(row, "Pairwise F2")).append('|').append(metric(row, "Jaccard index")).append('|')
                     .append(metric(row, "Fowlkes-Mallows index")).append('|').append(metric(row, "Matthews correlation coefficient")).append("|\n");
         }
-        output.append("\n</details>\n\n<details class=\"quality-details\" markdown=\"1\"><summary>Partition metrics (PRIMARY_OUTPUT only)</summary>\n\n")
-                .append("| Rank | Stemmer | Output policy | Adjusted Rand Index | Homogeneity | Completeness | V-measure | Normalized mutual information |\n")
-                .append("|---:|---|---|---:|---:|---:|---:|---:|\n");
-        for (int index = 0; index < rows.size(); index++) {
-            final ResultRow row = rows.get(index);
-            output.append(identity(index, row)).append(metric(row, "Adjusted Rand Index")).append('|').append(metric(row, "Homogeneity")).append('|')
-                    .append(metric(row, "Completeness")).append('|').append(metric(row, "V-measure")).append('|')
-                    .append(metric(row, "Normalized mutual information")).append("|\n");
-        }
         output.append("\n</details>\n\n<details class=\"quality-details\" markdown=\"1\"><summary>Raw pair counts</summary>\n\n")
                 .append("| Rank | Stemmer | Output policy | TP | FP | FN | TN | Over error / possible | Under error / possible |\n")
                 .append("|---:|---|---|---:|---:|---:|---:|---:|---:|\n");
         for (int index = 0; index < rows.size(); index++) {
             final ResultRow row = rows.get(index);
-            output.append(identity(index, row)).append(row.value("True-positive pairs")).append('|').append(row.value("False-positive pairs"))
-                    .append('|').append(row.value("False-negative pairs")).append('|').append(row.value("True-negative pairs")).append('|')
+            output.append(identity(index, row)).append(rawCount(row, "True-positive pairs")).append('|')
+                    .append(rawCount(row, "False-positive pairs")).append('|')
+                    .append(rawCount(row, "False-negative pairs")).append('|')
+                    .append(rawCount(row, "True-negative pairs")).append('|')
+                    .append(row.value("Over-stemming error pairs")).append(" / ").append(row.value("Over-stemming possible pairs")).append('|')
+                    .append(row.value("Under-stemming error pairs")).append(" / ").append(row.value("Under-stemming possible pairs")).append("|\n");
+        }
+        output.append("\n</details>\n\n");
+    }
+
+    /** Renders the two defined per-pair oracle bounds without implying one confusion matrix. */
+    private static void renderAnyCandidatePolicy(final StringBuilder output, final List<ResultRow> rows) {
+        final List<ResultRow> alphabetical = rows.stream().sorted(Comparator.comparing(ResultRow::stemmer)).toList();
+        output.append("#### `ANY_CANDIDATE` oracle bounds\n\n")
+                .append("These results are measured, not missing. `ANY_CANDIDATE` answers two separate optimistic questions for each pair: a gold-related pair avoids under-stemming when the candidate sets intersect, while a gold-negative pair avoids over-stemming when some non-colliding candidate selection exists. The oracle may choose a different candidate for the same word in different pairs. Consequently, these decisions do not form one globally realizable predicted relation or one TP/FP/FN/TN confusion matrix. Balanced accuracy, F-scores, Jaccard, Fowlkes–Mallows, and MCC are therefore mathematically **not applicable**, rather than unknown.\n\n")
+                .append("<div class=\"quality-summary quality-summary--oracle\" markdown=\"1\">\n\n")
+                .append("| Stemmer | Optimistic over-stemming (OI) | Optimistic under-stemming (UI) |\n")
+                .append("|---|---:|---:|\n");
+        for (ResultRow row : alphabetical) {
+            output.append('|').append(displayStemmer(row.stemmer())).append('|')
+                    .append(rate(row, "Over-stemming error pairs", "Over-stemming percentage")).append('|')
+                    .append(rate(row, "Under-stemming error pairs", "Under-stemming percentage")).append("|\n");
+        }
+        output.append("\n</div>\n\n")
+                .append("<details class=\"quality-details\" markdown=\"1\"><summary>Oracle-bound pair counts</summary>\n\n")
+                .append("| Stemmer | Unavoidable over errors / gold-negative pairs | Unrepairable under errors / gold-related pairs |\n")
+                .append("|---|---:|---:|\n");
+        for (ResultRow row : alphabetical) {
+            output.append('|').append(displayStemmer(row.stemmer())).append('|')
                     .append(row.value("Over-stemming error pairs")).append(" / ").append(row.value("Over-stemming possible pairs")).append('|')
                     .append(row.value("Under-stemming error pairs")).append(" / ").append(row.value("Under-stemming possible pairs")).append("|\n");
         }
@@ -464,13 +500,13 @@ public final class StemmingQualityDocumentationPublisher {
     /** Appends the self-contained policy, confusion-matrix, and metric definitions. */
     private static void appendMethodology(final StringBuilder output) {
         output.append("### Output Policies and Metric Definitions\n\n")
-                .append("`PRIMARY_OUTPUT` uses one deterministic stem per form and therefore defines a strict partition. `ANY_CANDIDATE` is an optimistic oracle-assisted pairwise upper bound: a same-group pair succeeds when candidates intersect, while a different-group pair succeeds when a non-colliding selection exists. Candidate choices may differ between pairs, so this is not deterministic runtime behaviour and need not represent one globally consistent assignment. `ALL_CANDIDATES` activates every returned candidate; forms are related when candidate sets intersect. Alternatives can reduce under-stemming but can introduce cross-group collisions, and the resulting relation can overlap and need not be a partition.\n\n")
-                .append("For each row, `TP = underPossiblePairs - underErrorPairs`, `FN = underErrorPairs`, `FP = overErrorPairs`, and `TN = overPossiblePairs - overErrorPairs`. TP and FN concern same-group pairs; FP and TN concern different-group pairs. Consequently, under-stemming and over-stemming use different denominators. Undefined values are rendered as `n/a`.\n\n")
-                .append("- Under-stemming rate: `FN / (TP + FN)`, the false-negative rate over same-group pairs.\n")
-                .append("- Over-stemming rate: `FP / (TN + FP)`, the false-positive rate over different-group pairs.\n")
+                .append("Each distinct surface form is one item and may belong to several gold groups. Two forms are gold-related when their membership sets intersect; a relation shared by several groups is counted once. `PRIMARY_OUTPUT` uses one deterministic stem per form. `ANY_CANDIDATE` is an optimistic oracle-assisted pairwise upper bound: a gold-related pair succeeds when candidates intersect, while a gold-negative pair succeeds when a non-colliding selection exists. Candidate choices may differ between pairs, so this is not deterministic runtime behaviour and does not define one confusion matrix. `ALL_CANDIDATES` activates every returned candidate; forms are related when candidate sets intersect.\n\n")
+                .append("For `PRIMARY_OUTPUT` and `ALL_CANDIDATES`, `TP = underPossiblePairs - underErrorPairs`, `FN = underErrorPairs`, `FP = overErrorPairs`, and `TN = overPossiblePairs - overErrorPairs`. `ANY_CANDIDATE` publishes only its separate oracle-assisted under/over bounds; confusion-derived metrics are mathematically inapplicable and are not presented in its language-page section. Their machine-readable CSV fields remain empty. Undefined metric denominators in otherwise applicable policies are rendered as `n/a`.\n\n")
+                .append("- Under-stemming rate (Paice UI): `FN / (TP + FN)`, the false-negative rate over gold-related pairs.\n")
+                .append("- Over-stemming rate (Paice OI): `FP / (TN + FP)`, the false-positive rate over gold-negative pairs.\n")
                 .append("- Pairwise precision: `TP / (TP + FP)`, the fraction of predicted conflations that are gold-standard positive pairs.\n")
                 .append("- Pairwise recall: `TP / (TP + FN)`, the fraction of gold-standard positive pairs successfully connected.\n")
-                .append("- Pairwise specificity: `TN / (TN + FP)`, the fraction of different-group pairs correctly separated.\n")
+                .append("- Pairwise specificity: `TN / (TN + FP)`, the fraction of gold-negative pairs correctly separated.\n")
                 .append("- Balanced accuracy: `(recall + specificity) / 2`. It gives equal weight to positive and negative pair classes and is less dominated by the large true-negative class than ordinary accuracy. It does not replace the raw errors or other metrics.\n")
                 .append("- Pairwise F-beta: `((1 + betaSquared) * TP) / (((1 + betaSquared) * TP) + (betaSquared * FN) + FP)`. F0.5 emphasizes precision and penalizes over-stemming more; F1 weights precision and recall equally; F2 emphasizes recall and penalizes under-stemming more.\n")
                 .append("- MCC: `(TP * TN - FP * FN) / sqrt((TP + FP) * (TP + FN) * (TN + FP) * (TN + FN))`. It uses all confusion counts and remains useful under class imbalance, except when its denominator is degenerate.\n")
@@ -478,14 +514,15 @@ public final class StemmingQualityDocumentationPublisher {
                 .append("- Fowlkes–Mallows index: `sqrt(precision * recall)`.\n")
                 .append("- Pairwise accuracy: `(TP + TN) / (TP + TN + FP + FN)`. It can be dominated by true-negative cross-group pairs.\n")
                 .append("- Pairwise error rate: `(FP + FN) / (TP + TN + FP + FN)`.\n\n")
-                .append("Adjusted Rand Index uses the gold/predicted contingency table and chance correction. Homogeneity is `1 - H(gold | predicted) / H(gold)`; completeness is `1 - H(predicted | gold) / H(predicted)`; V-measure is their harmonic mean; normalized mutual information uses the arithmetic-mean entropy normalization `MI / ((H(gold) + H(predicted)) / 2)`. These partition-only metrics apply to `PRIMARY_OUTPUT`; candidate-relation rows show `n/a`.\n\n");
+                .append("Standard ARI, homogeneity, completeness, V-measure, and NMI are not calculated: their usual contingency-table definitions require an exclusive gold partition, while this gold standard is an overlapping cover.\n\n");
     }
 
     /** Renders the generated executive findings, winner matrix, and Radixor aggregates. */
     private static String renderOverview(final Map<String, Page> pages, final List<ResultRow> rows, final String checksum) {
         final StringBuilder output = new StringBuilder(16384);
         output.append(OVERVIEW_START).append("\n\n## Pairwise Quality Findings\n\n")
-                .append("The validated snapshot is a broad multilingual comparison covering the complete 20-language Radixor dictionary universe; 19 languages have existing benchmark pages. The direct ranking below uses only deterministic `PRIMARY_OUTPUT` rows over identical per-language inputs. Candidate-aware rows are intentionally excluded from this claim.\n\n");
+                .append("The validated snapshot is a broad multilingual comparison covering the complete ")
+                .append(pages.size()).append("-language Radixor default-model universe, with one benchmark page per language. The direct ranking below uses only deterministic `PRIMARY_OUTPUT` rows over identical per-language inputs. Candidate-aware rows are intentionally excluded from this claim.\n\n");
         int radixorWins = 0;
         int comparisons = 0;
         for (String mode : MODES) {
@@ -524,7 +561,8 @@ public final class StemmingQualityDocumentationPublisher {
         for (String mode : MODES) {
             renderPlacementSummary(output, pages, rows, mode);
         }
-        output.append("\n### Radixor full-coverage aggregates\n\nThese aggregates cover all 19 documented languages. Macro balanced accuracy gives each language equal weight. Micro metrics first sum raw pair counts across languages. Unsupported third-party languages are never inserted as zero results, so this full-coverage table is not presented as a cross-stemmer common-language ranking.\n\n")
+        output.append("\n### Radixor full-coverage aggregates\n\nThese aggregates cover all ")
+                .append(pages.size()).append(" documented languages. Macro balanced accuracy gives each language equal weight. Micro metrics first sum raw pair counts across languages. Unsupported third-party languages are never inserted as zero results, so this full-coverage table is not presented as a cross-stemmer common-language ranking.\n\n")
                 .append("| Dictionary mode | Languages | Macro balanced accuracy | Micro balanced accuracy | Micro precision | Micro recall | Micro F1 |\n")
                 .append("|---|---:|---:|---:|---:|---:|---:|\n");
         for (String mode : MODES) {
@@ -669,10 +707,26 @@ public final class StemmingQualityDocumentationPublisher {
         return value.isEmpty() ? "n/a" : String.format(Locale.ROOT, "%.6f", Double.parseDouble(value));
     }
 
+    /** Formats an over- or under-stemming rate as a percentage. */
+    private static String rate(final ResultRow row, final String errorName, final String percentageName) {
+        final String value = row.value(percentageName);
+        if (value.isEmpty()) {
+            return "n/a";
+        }
+        final double rate = Double.parseDouble(value);
+        return rate < 0.000001 && row.longValue(errorName) > 0 ? "&lt;0.000001%" : String.format(Locale.ROOT, "%.6f%%", rate);
+    }
+
     /** Formats one raw error numerator, denominator, and percentage. */
     private static String pair(final ResultRow row, final String error, final String possible, final String percentage) {
         final String rate = row.value(percentage);
         return row.value(error) + " / " + row.value(possible) + " (" + (rate.isEmpty() ? "n/a" : String.format(Locale.ROOT, "%.6f%%", Double.parseDouble(rate))) + ")";
+    }
+
+    /** Formats an inapplicable confusion count explicitly. */
+    private static String rawCount(final ResultRow row, final String name) {
+        final String value = row.value(name);
+        return value.isEmpty() ? "n/a" : value;
     }
 
     /** Replaces an existing marked section or appends the first generated section. */
@@ -725,6 +779,12 @@ public final class StemmingQualityDocumentationPublisher {
         private String stemmer() { return value("Stemmer"); }
         /** Returns the language identifier. */
         private String language() { return value("Language"); }
+        /** Returns the dictionary model identifier. */
+        private String modelId() { return value("Dictionary model ID"); }
+        /** Returns the dictionary model version. */
+        private String modelVersion() { return value("Dictionary model version"); }
+        /** Returns the dictionary model SHA-256. */
+        private String modelSha256() { return value("Dictionary model SHA-256"); }
         /** Returns the dictionary-processing mode. */
         private String mode() { return value("Dictionary mode"); }
         /** Returns the output policy. */
@@ -736,20 +796,33 @@ public final class StemmingQualityDocumentationPublisher {
         /** Parses a numeric field, placing undefined values last during sorting. */
         private double number(final String name) { return value(name).isEmpty() ? Double.NEGATIVE_INFINITY : Double.parseDouble(value(name)); }
         /** Returns false-negative pairs. */
-        private long fn() { return longValue("False-negative pairs"); }
+        private long fn() { return longValue("Under-stemming error pairs"); }
         /** Returns false-positive pairs. */
-        private long fp() { return longValue("False-positive pairs"); }
+        private long fp() { return longValue("Over-stemming error pairs"); }
 
         /** Validates raw confusion counts and the published balanced accuracy. */
         private void validate() {
-            final long tp = longValue("True-positive pairs");
             final long fp = fp();
             final long fn = fn();
-            final long tn = longValue("True-negative pairs");
-            if (fn != longValue("Under-stemming error pairs") || fp != longValue("Over-stemming error pairs")
-                    || Math.addExact(tp, fn) != longValue("Under-stemming possible pairs")
-                    || Math.addExact(tn, fp) != longValue("Over-stemming possible pairs")) {
+            final long underPossible = longValue("Under-stemming possible pairs");
+            final long overPossible = longValue("Over-stemming possible pairs");
+            if (fn < 0 || fp < 0 || fn > underPossible || fp > overPossible) {
                 throw new IllegalStateException("Raw pair-count invariants fail for " + key());
+            }
+            if (policy().equals("ANY_CANDIDATE")) {
+                if (!value("True-positive pairs").isEmpty() || !value("False-positive pairs").isEmpty()
+                        || !value("False-negative pairs").isEmpty() || !value("True-negative pairs").isEmpty()
+                        || !value("Balanced accuracy").isEmpty() || !value("Pairwise F1").isEmpty()
+                        || !value("Matthews correlation coefficient").isEmpty()) {
+                    throw new IllegalStateException("Oracle-assisted ANY_CANDIDATE row contains incoherent classification metrics: "
+                            + key());
+                }
+                return;
+            }
+            final long tp = longValue("True-positive pairs");
+            final long tn = longValue("True-negative pairs");
+            if (Math.addExact(tp, fn) != underPossible || Math.addExact(tn, fp) != overPossible) {
+                throw new IllegalStateException("Raw confusion-count invariants fail for " + key());
             }
             final double recall = ratio(tp, Math.addExact(tp, fn));
             final double specificity = ratio(tn, Math.addExact(tn, fp));

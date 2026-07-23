@@ -70,4 +70,14 @@ final class PairwiseMetricsTest {
         assertTrue(metrics.precision().isEmpty()); assertTrue(metrics.recall().isEmpty());
         assertTrue(metrics.matthewsCorrelationCoefficient().isEmpty());
     }
+
+    /** Verifies oracle-assisted bounds are not misreported as one confusion matrix. */
+    @Test @DisplayName("Oracle-assisted ANY policy suppresses classification aggregates")
+    void oracleAssistedPolicy() {
+        final PairwiseMetrics metrics = new PairwiseMetrics(10, 2, 3, 20, false);
+        assertTrue(metrics.precision().isEmpty());
+        assertTrue(metrics.recall().isEmpty());
+        assertTrue(metrics.f1().isEmpty());
+        assertTrue(metrics.matthewsCorrelationCoefficient().isEmpty());
+    }
 }

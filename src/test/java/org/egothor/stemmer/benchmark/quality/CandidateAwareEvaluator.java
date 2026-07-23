@@ -57,20 +57,8 @@ final class CandidateAwareEvaluator {
         if (policy == OutputPolicy.PRIMARY_OUTPUT) {
             throw new IllegalArgumentException("Candidate-aware evaluation requires ANY_CANDIDATE or ALL_CANDIDATES.");
         }
-        final List<GoldStandardGroup> includedGroups = groups.stream().filter(group -> mode.includes(group.forms())).toList();
-        final List<String> forms = new ArrayList<>();
-        final List<Integer> groupIndexes = new ArrayList<>();
-        long singletonRows = 0;
-        long pairRows = 0;
-        long underPossible = 0;
-        for (int groupIndex = 0; groupIndex < includedGroups.size(); groupIndex++) {
-            final GoldStandardGroup group = includedGroups.get(groupIndex);
-            if (group.forms().size() == 1) { singletonRows = add(singletonRows, 1, "singleton rows"); }
-            else { pairRows = add(pairRows, 1, "rows contributing under-stemming pairs"); }
-            underPossible = add(underPossible, QualityEvaluator.chooseTwo(group.forms().size()), "under denominator");
-            for (String form : group.forms()) { forms.add(form); groupIndexes.add(groupIndex); }
-        }
-        final String[] input = forms.toArray(String[]::new);
+        final GoldStandardCover cover = GoldStandardCover.create(groups, mode);
+        final String[] input = cover.forms().toArray(String[]::new);
         final String[] primary = stemmer.stem(input);
         final List<List<String>> rawCandidates = stemmer.stemCandidates(input);
         if (primary == null || primary.length != input.length || rawCandidates == null || rawCandidates.size() != input.length) {
@@ -83,22 +71,31 @@ final class CandidateAwareEvaluator {
         long multipleCandidates = 0;
         long maximumCandidates = 0;
         long assignments = 0;
+        final Signature[] formSignatures = new Signature[input.length];
         for (int index = 0; index < input.length; index++) {
             final Signature signature = signature(rawCandidates.get(index), primary[index], stemmerName, language,
-                    mode, policy, includedGroups.get(groupIndexes.get(index)).rowNumber(), input[index]);
+                    mode, policy, cover.representativeRow(index), input[index]);
+            formSignatures[index] = signature;
             final int size = signature.candidates().size();
             if (size == 1) { oneCandidate = add(oneCandidate, 1, "single-candidate forms"); }
             else { multipleCandidates = add(multipleCandidates, 1, "multi-candidate forms"); }
             maximumCandidates = Math.max(maximumCandidates, size);
             assignments = add(assignments, size, "candidate assignments");
             distinctCandidates.addAll(signature.candidates());
-            counts.computeIfAbsent(signature, ignored -> new SignatureCount()).increment(groupIndexes.get(index));
+            counts.computeIfAbsent(signature, ignored -> new SignatureCount()).incrementTotal();
+        }
+        for (int groupIndex = 0; groupIndex < cover.groups().size(); groupIndex++) {
+            for (String form : cover.groups().get(groupIndex).forms()) {
+                counts.get(formSignatures[cover.indexOf(form)]).incrementGroup(groupIndex);
+            }
         }
 
         final List<Map.Entry<Signature, SignatureCount>> signatures = new ArrayList<>(counts.entrySet());
         signatures.sort(Map.Entry.comparingByKey());
         long sameGroupRelated = 0;
-        long crossGroupRelated = 0;
+        long globallyRelated = 0;
+        long forcedSameGroupRelated = 0;
+        long globallyForcedRelated = 0;
         final Map<String, List<Integer>> inverted = new HashMap<>();
         for (int index = 0; index < signatures.size(); index++) {
             final Map.Entry<Signature, SignatureCount> entry = signatures.get(index);
@@ -107,10 +104,13 @@ final class CandidateAwareEvaluator {
                 sameWithin = add(sameWithin, QualityEvaluator.chooseTwo(groupCount), "same-signature group pairs");
             }
             sameGroupRelated = add(sameGroupRelated, sameWithin, "same-group related pairs");
-            if (policy == OutputPolicy.ALL_CANDIDATES || entry.getKey().candidates().size() == 1) {
-                crossGroupRelated = add(crossGroupRelated,
-                        subtract(QualityEvaluator.chooseTwo(entry.getValue().total()), sameWithin, "same-signature cross pairs"),
-                        "cross-group related pairs");
+            globallyRelated = add(globallyRelated, QualityEvaluator.chooseTwo(entry.getValue().total()),
+                    "globally related pairs");
+            if (entry.getKey().candidates().size() == 1) {
+                forcedSameGroupRelated = add(forcedSameGroupRelated, sameWithin,
+                        "forced same-group related pairs");
+                globallyForcedRelated = add(globallyForcedRelated,
+                        QualityEvaluator.chooseTwo(entry.getValue().total()), "globally forced related pairs");
             }
             for (String candidate : entry.getKey().candidates()) {
                 inverted.computeIfAbsent(candidate, ignored -> new ArrayList<>()).add(index);
@@ -134,18 +134,56 @@ final class CandidateAwareEvaluator {
             }
             final long total = multiply(left.total(), right.total(), "different-signature pairs");
             sameGroupRelated = add(sameGroupRelated, same, "same-group related pairs");
-            if (policy == OutputPolicy.ALL_CANDIDATES) {
-                crossGroupRelated = add(crossGroupRelated, subtract(total, same, "different-signature cross pairs"),
-                        "cross-group related pairs");
+            globallyRelated = add(globallyRelated, total, "globally related pairs");
+        }
+        for (GoldStandardCover.DuplicateRelation duplicate : cover.duplicateRelations()) {
+            final Signature left = formSignatures[duplicate.leftFormIndex()];
+            final Signature right = formSignatures[duplicate.rightFormIndex()];
+            if (intersects(left, right)) {
+                sameGroupRelated = subtract(sameGroupRelated, duplicate.extraOccurrences(),
+                        "duplicate same-group candidate relations");
+            }
+            if (isForcedCollision(left, right)) {
+                forcedSameGroupRelated = subtract(forcedSameGroupRelated, duplicate.extraOccurrences(),
+                        "duplicate forced same-group candidate relations");
             }
         }
         final long wordCount = input.length;
+        final long underPossible = cover.relatedPairs();
         final long overPossible = subtract(QualityEvaluator.chooseTwo(wordCount), underPossible, "over denominator");
         final long underError = subtract(underPossible, sameGroupRelated, "candidate under errors");
+        final long overError = policy == OutputPolicy.ALL_CANDIDATES
+                ? subtract(globallyRelated, sameGroupRelated, "all-candidate over errors")
+                : subtract(globallyForcedRelated, forcedSameGroupRelated, "any-candidate over errors");
         return new QualityResult(stemmerName, language, mode, policy,
-                includedGroups.size(), wordCount, singletonRows, pairRows, oneCandidate, multipleCandidates,
-                maximumCandidates, assignments, distinctCandidates.size(), crossGroupRelated, overPossible,
+                cover.groups().size(), wordCount, cover.singletonRows(), cover.pairRows(),
+                oneCandidate, multipleCandidates, maximumCandidates, assignments,
+                distinctCandidates.size(), overError, overPossible,
                 underError, underPossible, null);
+    }
+
+    /** Returns whether two canonical candidate sets intersect. */
+    private static boolean intersects(final Signature left, final Signature right) {
+        int leftIndex = 0;
+        int rightIndex = 0;
+        while (leftIndex < left.candidates().size() && rightIndex < right.candidates().size()) {
+            final int comparison = left.candidates().get(leftIndex).compareTo(right.candidates().get(rightIndex));
+            if (comparison == 0) {
+                return true;
+            }
+            if (comparison < 0) {
+                leftIndex++;
+            } else {
+                rightIndex++;
+            }
+        }
+        return false;
+    }
+
+    /** Returns whether every independent selection forces the same output. */
+    private static boolean isForcedCollision(final Signature left, final Signature right) {
+        return left.candidates().size() == 1 && right.candidates().size() == 1
+                && left.candidates().getFirst().equals(right.candidates().getFirst());
     }
 
     /** Canonicalizes and validates one adapter candidate collection. */
@@ -182,11 +220,12 @@ final class CandidateAwareEvaluator {
             return Integer.compare(candidates.size(), other.candidates.size());
         }
     }
-    /** Aggregated global and per-group frequency of one signature. */
+    /** Aggregated unique-form and per-group membership frequency of one signature. */
     private static final class SignatureCount {
         private long total;
         private final Map<Integer, Long> byGroup = new HashMap<>();
-        /** Adds one word occurrence. */ private void increment(final int group) { total = add(total, 1, "signature frequency"); byGroup.merge(group, 1L, (left, right) -> add(left, right, "signature group frequency")); }
+        /** Adds one unique word form. */ private void incrementTotal() { total = add(total, 1, "signature frequency"); }
+        /** Adds membership in one gold group. */ private void incrementGroup(final int group) { byGroup.merge(group, 1L, (left, right) -> add(left, right, "signature group frequency")); }
         /** @return global signature frequency */ private long total() { return total; }
         /** @return mutable internally owned per-group frequencies */ private Map<Integer, Long> byGroup() { return byGroup; }
     }

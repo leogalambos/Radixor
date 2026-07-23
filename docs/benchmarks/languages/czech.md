@@ -8,21 +8,21 @@ Radixor must not be read as simply "slower" when a narrow competitor has a lower
 
 ## Dictionary Corpus
 
-| Resource | Dictionary rows | Complete quality tokens | Already-root tokens | Changed speed tokens |
-| --- | ---: | ---: | ---: | ---: |
-| `CS_CZ` | 5,113 | 56,612 | 10,049 | 46,563 |
+| Model ID | Model version | Language | Dictionary rows | Complete quality tokens | Already-root tokens | Changed speed tokens |
+| --- | --- | --- | ---: | ---: | ---: | ---: |
+| `cs-cz-default` | `1.0.0` | `CS_CZ` | 5,113 | 56,612 | 10,049 | 46,563 |
 
 ## Radixor Patch Command Distribution
 
-Radixor stores the preferred transformation for each normalized dictionary word form as a compiled patch command. This distribution shows which runtime command class is selected by the trained trie for the complete language dictionary. The total number of preferred patch commands analyzed for this language is **56,612**.
+Radixor stores the preferred transformation for each normalized dictionary word form as a compiled patch command. This distribution shows which runtime command class is selected by the trained trie for the complete default-model dictionary. The total number of preferred patch commands analyzed for this language is **56,612**.
 
 | Command class | Meaning | Word forms | Share |
 | --- | --- | ---: | ---: |
-| `AppendCharacterCommand` | Appends one character to the end of the word form. | 675 | 1.192% |
-| `BackwardCompoundCommand` | Applies a multi-step backward patch made from skip, delete, insert, and replace operations. | 22,681 | 40.064% |
-| `DeleteSuffixCommand` | Deletes one or more trailing characters from the word form. | 14,980 | 26.461% |
-| `PreserveCommand` | Returns the word form unchanged because it already matches the preferred root. | 10,109 | 17.857% |
-| `ReplaceLastCharacterCommand` | Replaces the final character of the word form. | 8,167 | 14.426% |
+| `AppendCharacterCommand` | Appends one character to the end of the word form. | 711 | 1.256% |
+| `BackwardCompoundCommand` | Applies a multi-step backward patch made from skip, delete, insert, and replace operations. | 22,643 | 39.997% |
+| `DeleteSuffixCommand` | Deletes one or more trailing characters from the word form. | 15,007 | 26.509% |
+| `PreserveCommand` | Returns the word form unchanged because it already matches the preferred root. | 10,046 | 17.745% |
+| `ReplaceLastCharacterCommand` | Replaces the final character of the word form. | 8,205 | 14.493% |
 
 ## Accuracy
 
@@ -34,15 +34,25 @@ Accuracy is computed from JMH auxiliary counters in the current report. The coun
 | Lucene HunspellStemFilter | 84.850% | 82.269% | 96.806% | Benchmark-only Czech Hunspell dictionary compared via Lucene HunspellStemFilter. |
 | Lucene CzechStemFilter | 16.784% | 15.538% | 22.559% | Lucene Czech suffix stemmer implemented as a TokenFilter. |
 
+
+
+
+
+
 ## Speed
 
-Speed uses JMH average time, 3 warmup iterations, 5 measurement iterations, 1 fork, and 1 thread. Relative factor is computed against the single Radixor row on this language page. Values below 1.000 are faster than that Radixor baseline; values above 1.000 are slower.
+Speed uses JMH average time, 5 warmup iterations, 10 measurement iterations, 3 independent forks, and 1 thread. Relative factor is computed against the single Radixor row on this language page. Values below 1.000 are faster than that Radixor baseline; values above 1.000 are slower.
 
 | Stemmer | Benchmark method | Score ms/op | Error ms | ns/token | Relative vs Radixor | Note |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
-| Radixor | `czechRadixor` | 3.332 | 0.240 | 71.6 | 1.000 | Full Radixor dictionary patch-command stemmer. |
-| Lucene HunspellStemFilter | `luceneHunspellStemFilter` | 346.819 | 3.622 | 7448.4 | 104.091 | Benchmark-only Czech Hunspell dictionary compared via Lucene HunspellStemFilter. |
-| Lucene CzechStemFilter | `czechLuceneCzechStemFilter` | 3.163 | 0.253 | 67.9 | 0.949 | Czech suffix stemmer implemented as a Lucene TokenFilter. |
+| Radixor | `czechRadixor` | 3.395 | 0.066 | 72.9 | 1.000 | Full Radixor dictionary patch-command stemmer. |
+| Lucene HunspellStemFilter | `luceneHunspellStemFilter` | 381.189 | 32.563 | 8186.5 | 112.265 | Benchmark-only Czech Hunspell dictionary compared via Lucene HunspellStemFilter. |
+| Lucene CzechStemFilter | `czechLuceneCzechStemFilter` | 3.125 | 0.042 | 67.1 | 0.920 | Czech suffix stemmer implemented as a Lucene TokenFilter. |
+
+
+
+
+
 
 ## Interpretation Notes
 
@@ -56,80 +66,29 @@ Speed uses JMH average time, 3 warmup iterations, 5 measurement iterations, 1 fo
 
 ## Stemming Quality
 
-Runtime performance and linguistic grouping quality are independent dimensions. This section evaluates language `CS_CZ` using the complete validated stemming-quality result matrix. Every usable dictionary row is one gold-standard group of forms expected to share a morphological family or lemma. Exact equality with a predetermined lemma is not required. Same-row pairs are positive pairs; pairs from different rows are negative pairs.
+Runtime performance and linguistic grouping quality are independent dimensions. This section evaluates language `CS_CZ` using the complete validated stemming-quality result matrix. Every distinct surface form is one evaluated item and can belong to several dictionary groups. Two forms are a positive pair when their group-membership sets intersect and a negative pair when those sets are disjoint. A pair shared through several groups is counted once. Exact equality with a predetermined lemma is not required.
 
 `ALL_WORDS` includes every valid group and its original forms. `LOWERCASE_GROUPS_ONLY` excludes an entire group when any Unicode code point is uppercase or titlecase; retained words are not lowercased or otherwise rewritten. This isolates case-handling effects without changing retained inputs. [Download the complete machine-readable result snapshot](../data/stemming-quality.csv).
 
 ### Evaluation Scope and Key Findings
 
-The dictionary resource is `src/main/resources/cs_cz/stemmer.gz`. The following findings compare only deterministic `PRIMARY_OUTPUT` rows over identical included groups; candidate policies are reported separately as capability analyses.
+The default model is `cs-cz-default`, loaded from classpath resource `org/egothor/stemmer/models/cs-cz-default/stemmer.gz`. The following findings compare only deterministic `PRIMARY_OUTPUT` rows over identical included groups; candidate policies are reported separately as capability analyses.
 
-- **ALL_WORDS:** `Radixor` ranks first by balanced accuracy at **0.996565** among 3 deterministic stemmers. The runner-up is `HUNSPELL CZECH LUCENE FILTER` at 0.853752, a difference of 0.142813. This rank does not imply leadership in throughput or every secondary metric.
-- **LOWERCASE_GROUPS_ONLY:** `Radixor` ranks first by balanced accuracy at **0.997139** among 3 deterministic stemmers. The runner-up is `HUNSPELL CZECH LUCENE FILTER` at 0.852770, a difference of 0.144369. This rank does not imply leadership in throughput or every secondary metric.
+- **ALL_WORDS:** `Radixor` ranks first by balanced accuracy at **0.996617** among 3 deterministic stemmers. The runner-up is `HUNSPELL CZECH LUCENE FILTER` at 0.854132, a difference of 0.142485. This rank does not imply leadership in throughput or every secondary metric.
+- **LOWERCASE_GROUPS_ONLY:** `Radixor` ranks first by balanced accuracy at **0.997195** among 3 deterministic stemmers. The runner-up is `HUNSPELL CZECH LUCENE FILTER` at 0.853150, a difference of 0.144045. This rank does not imply leadership in throughput or every secondary metric.
 ### `ALL_WORDS`
 
-This mode contains **7 result rows**, **3 evaluated stemmers**, and **3 output policies**. Applied-row and form counts are shown per row because adapters share the language corpus but policy rows remain independently auditable. Rankings are separated by output policy and ordered by unrounded balanced accuracy, followed by MCC, F1, over-stemming rate, over-stemming count, under-stemming rate, and stemmer. Balanced accuracy is a navigation metric, not a universally authoritative quality score.
+This mode contains **7 result rows**, **3 evaluated stemmers**, and **3 output policies**. Applied-row and form counts are shown per row because adapters share the language corpus but policy rows remain independently auditable. `PRIMARY_OUTPUT` and `ALL_CANDIDATES` rankings are ordered by unrounded balanced accuracy, followed by MCC, F1, over-stemming rate, over-stemming count, under-stemming rate, and stemmer. `ANY_CANDIDATE` has no single rank metric and is listed alphabetically. Balanced accuracy is a navigation metric, not a universally authoritative quality score.
 
 #### `PRIMARY_OUTPUT` ranking
 
-<div class="quality-table quality-table--compact" role="region" aria-label="Compact stemming-quality ranking; scroll horizontally for additional columns" tabindex="0" markdown="1">
+<div class="quality-summary" markdown="1">
 
-| Rank | Stemmer | Output policy | Balanced accuracy | Over-stemming | Under-stemming | F0.5 | F1 | MCC |
-|---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|PRIMARY_OUTPUT|0.996565|3867 / 1334876815 (0.000290%)|2073 / 301835 (0.686799%)|0.988432|0.990189|0.990191|
-|2|HUNSPELL CZECH LUCENE FILTER|PRIMARY_OUTPUT|0.853752|11408 / 1334876815 (0.000855%)|88283 / 301835 (29.248762%)|0.888560|0.810759|0.819499|
-|3|CZECH LUCENE CZECH STEM FILTER|PRIMARY_OUTPUT|0.793614|14480 / 1334876815 (0.001085%)|124586 / 301835 (41.276194%)|0.829234|0.718241|0.736765|
-
-</div>
-
-<details class="quality-details" markdown="1"><summary>Classification metrics</summary>
-
-| Rank | Stemmer | Output policy | Precision | Recall | Specificity | Balanced accuracy | Pairwise accuracy | Error rate |
-|---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|PRIMARY_OUTPUT|0.987264|0.993132|0.999997|0.996565|0.999996|0.000004|
-|2|HUNSPELL CZECH LUCENE FILTER|PRIMARY_OUTPUT|0.949289|0.707512|0.999991|0.853752|0.999925|0.000075|
-|3|CZECH LUCENE CZECH STEM FILTER|PRIMARY_OUTPUT|0.924477|0.587238|0.999989|0.793614|0.999896|0.000104|
-
-</details>
-
-<details class="quality-details" markdown="1"><summary>Pair-relation metrics</summary>
-
-| Rank | Stemmer | Output policy | F0.5 | F1 | F2 | Jaccard | Fowlkes–Mallows | MCC |
-|---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|PRIMARY_OUTPUT|0.988432|0.990189|0.991953|0.980569|0.990194|0.990191|
-|2|HUNSPELL CZECH LUCENE FILTER|PRIMARY_OUTPUT|0.888560|0.810759|0.745486|0.681745|0.819533|0.819499|
-|3|CZECH LUCENE CZECH STEM FILTER|PRIMARY_OUTPUT|0.829234|0.718241|0.633453|0.560356|0.736809|0.736765|
-
-</details>
-
-<details class="quality-details" markdown="1"><summary>Partition metrics (PRIMARY_OUTPUT only)</summary>
-
-| Rank | Stemmer | Output policy | Adjusted Rand Index | Homogeneity | Completeness | V-measure | Normalized mutual information |
-|---:|---|---|---:|---:|---:|---:|---:|
-|1|Radixor|PRIMARY_OUTPUT|0.990187|0.998733|0.998686|0.998709|0.998709|
-|2|HUNSPELL CZECH LUCENE FILTER|PRIMARY_OUTPUT|0.810723|0.995777|0.952852|0.973842|0.973842|
-|3|CZECH LUCENE CZECH STEM FILTER|PRIMARY_OUTPUT|0.718192|0.993801|0.944977|0.968774|0.968774|
-
-</details>
-
-<details class="quality-details" markdown="1"><summary>Raw pair counts</summary>
-
-| Rank | Stemmer | Output policy | TP | FP | FN | TN | Over error / possible | Under error / possible |
-|---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|PRIMARY_OUTPUT|299762|3867|2073|1334872948|3867 / 1334876815|2073 / 301835|
-|2|HUNSPELL CZECH LUCENE FILTER|PRIMARY_OUTPUT|213552|11408|88283|1334865407|11408 / 1334876815|88283 / 301835|
-|3|CZECH LUCENE CZECH STEM FILTER|PRIMARY_OUTPUT|177249|14480|124586|1334862335|14480 / 1334876815|124586 / 301835|
-
-</details>
-
-#### `ANY_CANDIDATE` ranking
-
-<div class="quality-table quality-table--compact" role="region" aria-label="Compact stemming-quality ranking; scroll horizontally for additional columns" tabindex="0" markdown="1">
-
-| Rank | Stemmer | Output policy | Balanced accuracy | Over-stemming | Under-stemming | F0.5 | F1 | MCC |
-|---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ANY_CANDIDATE|1.000000|0 / 1334876815 (0.000000%)|0 / 301835 (0.000000%)|1.000000|1.000000|1.000000|
-|2|HUNSPELL CZECH LUCENE FILTER|ANY_CANDIDATE|0.871577|10102 / 1334876815 (0.000757%)|77523 / 301835 (25.683900%)|0.904855|0.836596|0.843258|
+| Rank | Stemmer | Balanced accuracy | Over-stemming (OI) | Under-stemming (UI) |
+|---:|---|---:|---:|---:|
+|1|Radixor|0.996617|0.000000%|0.676519%|
+|2|HUNSPELL CZECH LUCENE FILTER|0.854132|0.000691%|29.172837%|
+|3|CZECH LUCENE CZECH STEM FILTER|0.794343|0.000928%|41.130549%|
 
 </div>
 
@@ -137,8 +96,9 @@ This mode contains **7 result rows**, **3 evaluated stemmers**, and **3 output p
 
 | Rank | Stemmer | Output policy | Precision | Recall | Specificity | Balanced accuracy | Pairwise accuracy | Error rate |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ANY_CANDIDATE|1.000000|1.000000|1.000000|1.000000|1.000000|0.000000|
-|2|HUNSPELL CZECH LUCENE FILTER|ANY_CANDIDATE|0.956905|0.743161|0.999992|0.871577|0.999934|0.000066|
+|1|Radixor|PRIMARY_OUTPUT|1.000000|0.993235|1.000000|0.996617|0.999998|0.000002|
+|2|HUNSPELL CZECH LUCENE FILTER|PRIMARY_OUTPUT|0.958877|0.708272|0.999993|0.854132|0.999927|0.000073|
+|3|CZECH LUCENE CZECH STEM FILTER|PRIMARY_OUTPUT|0.935210|0.588695|0.999991|0.794343|0.999897|0.000103|
 
 </details>
 
@@ -146,17 +106,9 @@ This mode contains **7 result rows**, **3 evaluated stemmers**, and **3 output p
 
 | Rank | Stemmer | Output policy | F0.5 | F1 | F2 | Jaccard | Fowlkes–Mallows | MCC |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ANY_CANDIDATE|1.000000|1.000000|1.000000|1.000000|1.000000|1.000000|
-|2|HUNSPELL CZECH LUCENE FILTER|ANY_CANDIDATE|0.904855|0.836596|0.777914|0.719094|0.843288|0.843258|
-
-</details>
-
-<details class="quality-details" markdown="1"><summary>Partition metrics (PRIMARY_OUTPUT only)</summary>
-
-| Rank | Stemmer | Output policy | Adjusted Rand Index | Homogeneity | Completeness | V-measure | Normalized mutual information |
-|---:|---|---|---:|---:|---:|---:|---:|
-|1|Radixor|ANY_CANDIDATE|n/a|n/a|n/a|n/a|n/a|
-|2|HUNSPELL CZECH LUCENE FILTER|ANY_CANDIDATE|n/a|n/a|n/a|n/a|n/a|
+|1|Radixor|PRIMARY_OUTPUT|0.998640|0.996606|0.994581|0.993235|0.996612|0.996611|
+|2|HUNSPELL CZECH LUCENE FILTER|PRIMARY_OUTPUT|0.895506|0.814739|0.747335|0.687392|0.824103|0.824070|
+|3|CZECH LUCENE CZECH STEM FILTER|PRIMARY_OUTPUT|0.836710|0.722556|0.635811|0.565626|0.741992|0.741949|
 
 </details>
 
@@ -164,19 +116,42 @@ This mode contains **7 result rows**, **3 evaluated stemmers**, and **3 output p
 
 | Rank | Stemmer | Output policy | TP | FP | FN | TN | Over error / possible | Under error / possible |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ANY_CANDIDATE|301835|0|0|1334876815|0 / 1334876815|0 / 301835|
-|2|HUNSPELL CZECH LUCENE FILTER|ANY_CANDIDATE|224312|10102|77523|1334866713|10102 / 1334876815|77523 / 301835|
+|1|Radixor|PRIMARY_OUTPUT|298476|0|2033|1320705191|0 / 1320705191|2033 / 300509|
+|2|HUNSPELL CZECH LUCENE FILTER|PRIMARY_OUTPUT|212842|9128|87667|1320696063|9128 / 1320705191|87667 / 300509|
+|3|CZECH LUCENE CZECH STEM FILTER|PRIMARY_OUTPUT|176908|12256|123601|1320692935|12256 / 1320705191|123601 / 300509|
+
+</details>
+
+#### `ANY_CANDIDATE` oracle bounds
+
+These results are measured, not missing. `ANY_CANDIDATE` answers two separate optimistic questions for each pair: a gold-related pair avoids under-stemming when the candidate sets intersect, while a gold-negative pair avoids over-stemming when some non-colliding candidate selection exists. The oracle may choose a different candidate for the same word in different pairs. Consequently, these decisions do not form one globally realizable predicted relation or one TP/FP/FN/TN confusion matrix. Balanced accuracy, F-scores, Jaccard, Fowlkes–Mallows, and MCC are therefore mathematically **not applicable**, rather than unknown.
+
+<div class="quality-summary quality-summary--oracle" markdown="1">
+
+| Stemmer | Optimistic over-stemming (OI) | Optimistic under-stemming (UI) |
+|---|---:|---:|
+|Radixor|0.000000%|0.000000%|
+|HUNSPELL CZECH LUCENE FILTER|0.000650%|25.611213%|
+
+</div>
+
+<details class="quality-details" markdown="1"><summary>Oracle-bound pair counts</summary>
+
+| Stemmer | Unavoidable over errors / gold-negative pairs | Unrepairable under errors / gold-related pairs |
+|---|---:|---:|
+|Radixor|0 / 1320705191|0 / 300509|
+|HUNSPELL CZECH LUCENE FILTER|8582 / 1320705191|76964 / 300509|
 
 </details>
 
 #### `ALL_CANDIDATES` ranking
 
-<div class="quality-table quality-table--compact" role="region" aria-label="Compact stemming-quality ranking; scroll horizontally for additional columns" tabindex="0" markdown="1">
+<div class="quality-summary" markdown="1">
 
-| Rank | Stemmer | Output policy | Balanced accuracy | Over-stemming | Under-stemming | F0.5 | F1 | MCC |
-|---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ALL_CANDIDATES|0.999998|5850 / 1334876815 (0.000438%)|0 / 301835 (0.000000%)|0.984732|0.990402|0.990446|
-|2|HUNSPELL CZECH LUCENE FILTER|ALL_CANDIDATES|0.871575|13917 / 1334876815 (0.001043%)|77523 / 301835 (25.683900%)|0.893851|0.830687|0.836477|
+| Rank | Stemmer | Balanced accuracy | Over-stemming (OI) | Under-stemming (UI) |
+|---:|---|---:|---:|---:|
+|1|Radixor|1.000000|0.000000%|0.000000%|
+|2|HUNSPELL CZECH LUCENE FILTER|0.871940|0.000816%|25.611213%|
 
 </div>
 
@@ -184,8 +159,8 @@ This mode contains **7 result rows**, **3 evaluated stemmers**, and **3 output p
 
 | Rank | Stemmer | Output policy | Precision | Recall | Specificity | Balanced accuracy | Pairwise accuracy | Error rate |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ALL_CANDIDATES|0.980987|1.000000|0.999996|0.999998|0.999996|0.000004|
-|2|HUNSPELL CZECH LUCENE FILTER|ALL_CANDIDATES|0.941581|0.743161|0.999990|0.871575|0.999932|0.000068|
+|1|Radixor|ALL_CANDIDATES|1.000000|1.000000|1.000000|1.000000|1.000000|0.000000|
+|2|HUNSPELL CZECH LUCENE FILTER|ALL_CANDIDATES|0.954016|0.743888|0.999992|0.871940|0.999934|0.000066|
 
 </details>
 
@@ -193,17 +168,8 @@ This mode contains **7 result rows**, **3 evaluated stemmers**, and **3 output p
 
 | Rank | Stemmer | Output policy | F0.5 | F1 | F2 | Jaccard | Fowlkes–Mallows | MCC |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ALL_CANDIDATES|0.984732|0.990402|0.996139|0.980987|0.990448|0.990446|
-|2|HUNSPELL CZECH LUCENE FILTER|ALL_CANDIDATES|0.893851|0.830687|0.775861|0.710406|0.836509|0.836477|
-
-</details>
-
-<details class="quality-details" markdown="1"><summary>Partition metrics (PRIMARY_OUTPUT only)</summary>
-
-| Rank | Stemmer | Output policy | Adjusted Rand Index | Homogeneity | Completeness | V-measure | Normalized mutual information |
-|---:|---|---|---:|---:|---:|---:|---:|
-|1|Radixor|ALL_CANDIDATES|n/a|n/a|n/a|n/a|n/a|
-|2|HUNSPELL CZECH LUCENE FILTER|ALL_CANDIDATES|n/a|n/a|n/a|n/a|n/a|
+|1|Radixor|ALL_CANDIDATES|1.000000|1.000000|1.000000|1.000000|1.000000|1.000000|
+|2|HUNSPELL CZECH LUCENE FILTER|ALL_CANDIDATES|0.903001|0.835949|0.778167|0.718138|0.842426|0.842395|
 
 </details>
 
@@ -211,8 +177,8 @@ This mode contains **7 result rows**, **3 evaluated stemmers**, and **3 output p
 
 | Rank | Stemmer | Output policy | TP | FP | FN | TN | Over error / possible | Under error / possible |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ALL_CANDIDATES|301835|5850|0|1334870965|5850 / 1334876815|0 / 301835|
-|2|HUNSPELL CZECH LUCENE FILTER|ALL_CANDIDATES|224312|13917|77523|1334862898|13917 / 1334876815|77523 / 301835|
+|1|Radixor|ALL_CANDIDATES|300509|0|0|1320705191|0 / 1320705191|0 / 300509|
+|2|HUNSPELL CZECH LUCENE FILTER|ALL_CANDIDATES|223545|10775|76964|1320694416|10775 / 1320705191|76964 / 300509|
 
 </details>
 
@@ -222,73 +188,22 @@ Alternative candidates are capability analyses, not replacements for the determi
 
 | Stemmer | Under pairs repaired | Best-case over pairs avoided | All-candidate collisions added | Multi-candidate forms | Multi-candidate share | Maximum candidates | Total candidate assignments |
 |---|---:|---:|---:|---:|---:|---:|---:|
-|Radixor|2073|3867|1983|596|1.153340%|4|52319|
-|HUNSPELL CZECH LUCENE FILTER|10760|1306|2509|3317|6.418840%|5|55596|
+|Radixor|2033|0|0|321|0.624501%|4|51739|
+|HUNSPELL CZECH LUCENE FILTER|10703|546|1647|3194|6.213887%|5|55179|
 
 ### `LOWERCASE_GROUPS_ONLY`
 
-This mode contains **7 result rows**, **3 evaluated stemmers**, and **3 output policies**. Applied-row and form counts are shown per row because adapters share the language corpus but policy rows remain independently auditable. Rankings are separated by output policy and ordered by unrounded balanced accuracy, followed by MCC, F1, over-stemming rate, over-stemming count, under-stemming rate, and stemmer. Balanced accuracy is a navigation metric, not a universally authoritative quality score.
+This mode contains **7 result rows**, **3 evaluated stemmers**, and **3 output policies**. Applied-row and form counts are shown per row because adapters share the language corpus but policy rows remain independently auditable. `PRIMARY_OUTPUT` and `ALL_CANDIDATES` rankings are ordered by unrounded balanced accuracy, followed by MCC, F1, over-stemming rate, over-stemming count, under-stemming rate, and stemmer. `ANY_CANDIDATE` has no single rank metric and is listed alphabetically. Balanced accuracy is a navigation metric, not a universally authoritative quality score.
 
 #### `PRIMARY_OUTPUT` ranking
 
-<div class="quality-table quality-table--compact" role="region" aria-label="Compact stemming-quality ranking; scroll horizontally for additional columns" tabindex="0" markdown="1">
+<div class="quality-summary" markdown="1">
 
-| Rank | Stemmer | Output policy | Balanced accuracy | Over-stemming | Under-stemming | F0.5 | F1 | MCC |
-|---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|PRIMARY_OUTPUT|0.997139|3863 / 1298544215 (0.000297%)|1709 / 298813 (0.571930%)|0.988580|0.990710|0.990714|
-|2|HUNSPELL CZECH LUCENE FILTER|PRIMARY_OUTPUT|0.852770|11239 / 1298544215 (0.000866%)|87986 / 298813 (29.445171%)|0.888009|0.809505|0.818403|
-|3|CZECH LUCENE CZECH STEM FILTER|PRIMARY_OUTPUT|0.791794|13950 / 1298544215 (0.001074%)|124426 / 298813 (41.640089%)|0.828709|0.715948|0.735055|
-
-</div>
-
-<details class="quality-details" markdown="1"><summary>Classification metrics</summary>
-
-| Rank | Stemmer | Output policy | Precision | Recall | Specificity | Balanced accuracy | Pairwise accuracy | Error rate |
-|---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|PRIMARY_OUTPUT|0.987165|0.994281|0.999997|0.997139|0.999996|0.000004|
-|2|HUNSPELL CZECH LUCENE FILTER|PRIMARY_OUTPUT|0.949389|0.705548|0.999991|0.852770|0.999924|0.000076|
-|3|CZECH LUCENE CZECH STEM FILTER|PRIMARY_OUTPUT|0.925931|0.583599|0.999989|0.791794|0.999893|0.000107|
-
-</details>
-
-<details class="quality-details" markdown="1"><summary>Pair-relation metrics</summary>
-
-| Rank | Stemmer | Output policy | F0.5 | F1 | F2 | Jaccard | Fowlkes–Mallows | MCC |
-|---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|PRIMARY_OUTPUT|0.988580|0.990710|0.992849|0.981591|0.990716|0.990714|
-|2|HUNSPELL CZECH LUCENE FILTER|PRIMARY_OUTPUT|0.888009|0.809505|0.743753|0.679973|0.818437|0.818403|
-|3|CZECH LUCENE CZECH STEM FILTER|PRIMARY_OUTPUT|0.828709|0.715948|0.630198|0.557569|0.735100|0.735055|
-
-</details>
-
-<details class="quality-details" markdown="1"><summary>Partition metrics (PRIMARY_OUTPUT only)</summary>
-
-| Rank | Stemmer | Output policy | Adjusted Rand Index | Homogeneity | Completeness | V-measure | Normalized mutual information |
-|---:|---|---|---:|---:|---:|---:|---:|
-|1|Radixor|PRIMARY_OUTPUT|0.990708|0.998726|0.999030|0.998878|0.998878|
-|2|HUNSPELL CZECH LUCENE FILTER|PRIMARY_OUTPUT|0.809467|0.995812|0.952394|0.973619|0.973619|
-|3|CZECH LUCENE CZECH STEM FILTER|PRIMARY_OUTPUT|0.715897|0.993897|0.944297|0.968463|0.968463|
-
-</details>
-
-<details class="quality-details" markdown="1"><summary>Raw pair counts</summary>
-
-| Rank | Stemmer | Output policy | TP | FP | FN | TN | Over error / possible | Under error / possible |
-|---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|PRIMARY_OUTPUT|297104|3863|1709|1298540352|3863 / 1298544215|1709 / 298813|
-|2|HUNSPELL CZECH LUCENE FILTER|PRIMARY_OUTPUT|210827|11239|87986|1298532976|11239 / 1298544215|87986 / 298813|
-|3|CZECH LUCENE CZECH STEM FILTER|PRIMARY_OUTPUT|174387|13950|124426|1298530265|13950 / 1298544215|124426 / 298813|
-
-</details>
-
-#### `ANY_CANDIDATE` ranking
-
-<div class="quality-table quality-table--compact" role="region" aria-label="Compact stemming-quality ranking; scroll horizontally for additional columns" tabindex="0" markdown="1">
-
-| Rank | Stemmer | Output policy | Balanced accuracy | Over-stemming | Under-stemming | F0.5 | F1 | MCC |
-|---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ANY_CANDIDATE|1.000000|0 / 1298544215 (0.000000%)|0 / 298813 (0.000000%)|1.000000|1.000000|1.000000|
-|2|HUNSPELL CZECH LUCENE FILTER|ANY_CANDIDATE|0.870432|10028 / 1298544215 (0.000772%)|77431 / 298813 (25.912862%)|0.904004|0.835052|0.841852|
+| Rank | Stemmer | Balanced accuracy | Over-stemming (OI) | Under-stemming (UI) |
+|---:|---|---:|---:|---:|
+|1|Radixor|0.997195|0.000000%|0.561033%|
+|2|HUNSPELL CZECH LUCENE FILTER|0.853150|0.000700%|29.369351%|
+|3|CZECH LUCENE CZECH STEM FILTER|0.792522|0.000918%|41.494586%|
 
 </div>
 
@@ -296,8 +211,9 @@ This mode contains **7 result rows**, **3 evaluated stemmers**, and **3 output p
 
 | Rank | Stemmer | Output policy | Precision | Recall | Specificity | Balanced accuracy | Pairwise accuracy | Error rate |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ANY_CANDIDATE|1.000000|1.000000|1.000000|1.000000|1.000000|0.000000|
-|2|HUNSPELL CZECH LUCENE FILTER|ANY_CANDIDATE|0.956666|0.740871|0.999992|0.870432|0.999933|0.000067|
+|1|Radixor|PRIMARY_OUTPUT|1.000000|0.994390|1.000000|0.997195|0.999999|0.000001|
+|2|HUNSPELL CZECH LUCENE FILTER|PRIMARY_OUTPUT|0.958957|0.706306|0.999993|0.853150|0.999925|0.000075|
+|3|CZECH LUCENE CZECH STEM FILTER|PRIMARY_OUTPUT|0.936557|0.585054|0.999991|0.792522|0.999895|0.000105|
 
 </details>
 
@@ -305,17 +221,9 @@ This mode contains **7 result rows**, **3 evaluated stemmers**, and **3 output p
 
 | Rank | Stemmer | Output policy | F0.5 | F1 | F2 | Jaccard | Fowlkes–Mallows | MCC |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ANY_CANDIDATE|1.000000|1.000000|1.000000|1.000000|1.000000|1.000000|
-|2|HUNSPELL CZECH LUCENE FILTER|ANY_CANDIDATE|0.904004|0.835052|0.775874|0.716815|0.841883|0.841852|
-
-</details>
-
-<details class="quality-details" markdown="1"><summary>Partition metrics (PRIMARY_OUTPUT only)</summary>
-
-| Rank | Stemmer | Output policy | Adjusted Rand Index | Homogeneity | Completeness | V-measure | Normalized mutual information |
-|---:|---|---|---:|---:|---:|---:|---:|
-|1|Radixor|ANY_CANDIDATE|n/a|n/a|n/a|n/a|n/a|
-|2|HUNSPELL CZECH LUCENE FILTER|ANY_CANDIDATE|n/a|n/a|n/a|n/a|n/a|
+|1|Radixor|PRIMARY_OUTPUT|0.998873|0.997187|0.995507|0.994390|0.997191|0.997190|
+|2|HUNSPELL CZECH LUCENE FILTER|PRIMARY_OUTPUT|0.894932|0.813466|0.745594|0.685581|0.822993|0.822960|
+|3|CZECH LUCENE CZECH STEM FILTER|PRIMARY_OUTPUT|0.836092|0.720206|0.632534|0.562751|0.740227|0.740184|
 
 </details>
 
@@ -323,19 +231,42 @@ This mode contains **7 result rows**, **3 evaluated stemmers**, and **3 output p
 
 | Rank | Stemmer | Output policy | TP | FP | FN | TN | Over error / possible | Under error / possible |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ANY_CANDIDATE|298813|0|0|1298544215|0 / 1298544215|0 / 298813|
-|2|HUNSPELL CZECH LUCENE FILTER|ANY_CANDIDATE|221382|10028|77431|1298534187|10028 / 1298544215|77431 / 298813|
+|1|Radixor|PRIMARY_OUTPUT|295818|0|1669|1284770069|0 / 1284770069|1669 / 297487|
+|2|HUNSPELL CZECH LUCENE FILTER|PRIMARY_OUTPUT|210117|8993|87370|1284761076|8993 / 1284770069|87370 / 297487|
+|3|CZECH LUCENE CZECH STEM FILTER|PRIMARY_OUTPUT|174046|11790|123441|1284758279|11790 / 1284770069|123441 / 297487|
+
+</details>
+
+#### `ANY_CANDIDATE` oracle bounds
+
+These results are measured, not missing. `ANY_CANDIDATE` answers two separate optimistic questions for each pair: a gold-related pair avoids under-stemming when the candidate sets intersect, while a gold-negative pair avoids over-stemming when some non-colliding candidate selection exists. The oracle may choose a different candidate for the same word in different pairs. Consequently, these decisions do not form one globally realizable predicted relation or one TP/FP/FN/TN confusion matrix. Balanced accuracy, F-scores, Jaccard, Fowlkes–Mallows, and MCC are therefore mathematically **not applicable**, rather than unknown.
+
+<div class="quality-summary quality-summary--oracle" markdown="1">
+
+| Stemmer | Optimistic over-stemming (OI) | Optimistic under-stemming (UI) |
+|---|---:|---:|
+|Radixor|0.000000%|0.000000%|
+|HUNSPELL CZECH LUCENE FILTER|0.000663%|25.840457%|
+
+</div>
+
+<details class="quality-details" markdown="1"><summary>Oracle-bound pair counts</summary>
+
+| Stemmer | Unavoidable over errors / gold-negative pairs | Unrepairable under errors / gold-related pairs |
+|---|---:|---:|
+|Radixor|0 / 1284770069|0 / 297487|
+|HUNSPELL CZECH LUCENE FILTER|8518 / 1284770069|76872 / 297487|
 
 </details>
 
 #### `ALL_CANDIDATES` ranking
 
-<div class="quality-table quality-table--compact" role="region" aria-label="Compact stemming-quality ranking; scroll horizontally for additional columns" tabindex="0" markdown="1">
+<div class="quality-summary" markdown="1">
 
-| Rank | Stemmer | Output policy | Balanced accuracy | Over-stemming | Under-stemming | F0.5 | F1 | MCC |
-|---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ALL_CANDIDATES|0.999998|5782 / 1298544215 (0.000445%)|0 / 298813 (0.000000%)|0.984756|0.990418|0.990461|
-|2|HUNSPELL CZECH LUCENE FILTER|ALL_CANDIDATES|0.870430|13601 / 1298544215 (0.001047%)|77431 / 298813 (25.912862%)|0.893574|0.829463|0.835425|
+| Rank | Stemmer | Balanced accuracy | Over-stemming (OI) | Under-stemming (UI) |
+|---:|---|---:|---:|---:|
+|1|Radixor|1.000000|0.000000%|0.000000%|
+|2|HUNSPELL CZECH LUCENE FILTER|0.870794|0.000819%|25.840457%|
 
 </div>
 
@@ -343,8 +274,8 @@ This mode contains **7 result rows**, **3 evaluated stemmers**, and **3 output p
 
 | Rank | Stemmer | Output policy | Precision | Recall | Specificity | Balanced accuracy | Pairwise accuracy | Error rate |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ALL_CANDIDATES|0.981017|1.000000|0.999996|0.999998|0.999996|0.000004|
-|2|HUNSPELL CZECH LUCENE FILTER|ALL_CANDIDATES|0.942119|0.740871|0.999990|0.870430|0.999930|0.000070|
+|1|Radixor|ALL_CANDIDATES|1.000000|1.000000|1.000000|1.000000|1.000000|0.000000|
+|2|HUNSPELL CZECH LUCENE FILTER|ALL_CANDIDATES|0.954473|0.741595|0.999992|0.870794|0.999932|0.000068|
 
 </details>
 
@@ -352,17 +283,8 @@ This mode contains **7 result rows**, **3 evaluated stemmers**, and **3 output p
 
 | Rank | Stemmer | Output policy | F0.5 | F1 | F2 | Jaccard | Fowlkes–Mallows | MCC |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ALL_CANDIDATES|0.984756|0.990418|0.996145|0.981017|0.990463|0.990461|
-|2|HUNSPELL CZECH LUCENE FILTER|ALL_CANDIDATES|0.893574|0.829463|0.773936|0.708617|0.835457|0.835425|
-
-</details>
-
-<details class="quality-details" markdown="1"><summary>Partition metrics (PRIMARY_OUTPUT only)</summary>
-
-| Rank | Stemmer | Output policy | Adjusted Rand Index | Homogeneity | Completeness | V-measure | Normalized mutual information |
-|---:|---|---|---:|---:|---:|---:|---:|
-|1|Radixor|ALL_CANDIDATES|n/a|n/a|n/a|n/a|n/a|
-|2|HUNSPELL CZECH LUCENE FILTER|ALL_CANDIDATES|n/a|n/a|n/a|n/a|n/a|
+|1|Radixor|ALL_CANDIDATES|1.000000|1.000000|1.000000|1.000000|1.000000|1.000000|
+|2|HUNSPELL CZECH LUCENE FILTER|ALL_CANDIDATES|0.902651|0.834675|0.776220|0.716259|0.841328|0.841297|
 
 </details>
 
@@ -370,8 +292,8 @@ This mode contains **7 result rows**, **3 evaluated stemmers**, and **3 output p
 
 | Rank | Stemmer | Output policy | TP | FP | FN | TN | Over error / possible | Under error / possible |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
-|1|Radixor|ALL_CANDIDATES|298813|5782|0|1298538433|5782 / 1298544215|0 / 298813|
-|2|HUNSPELL CZECH LUCENE FILTER|ALL_CANDIDATES|221382|13601|77431|1298530614|13601 / 1298544215|77431 / 298813|
+|1|Radixor|ALL_CANDIDATES|297487|0|0|1284770069|0 / 1284770069|0 / 297487|
+|2|HUNSPELL CZECH LUCENE FILTER|ALL_CANDIDATES|220615|10523|76872|1284759546|10523 / 1284770069|76872 / 297487|
 
 </details>
 
@@ -381,20 +303,20 @@ Alternative candidates are capability analyses, not replacements for the determi
 
 | Stemmer | Under pairs repaired | Best-case over pairs avoided | All-candidate collisions added | Multi-candidate forms | Multi-candidate share | Maximum candidates | Total candidate assignments |
 |---|---:|---:|---:|---:|---:|---:|---:|
-|Radixor|1709|3863|1919|540|1.059488%|4|51543|
-|HUNSPELL CZECH LUCENE FILTER|10555|1211|2362|3237|6.351044%|5|54804|
+|Radixor|1669|0|0|269|0.530603%|4|50975|
+|HUNSPELL CZECH LUCENE FILTER|10498|475|1530|3117|6.148293%|5|54394|
 
 ### Output Policies and Metric Definitions
 
-`PRIMARY_OUTPUT` uses one deterministic stem per form and therefore defines a strict partition. `ANY_CANDIDATE` is an optimistic oracle-assisted pairwise upper bound: a same-group pair succeeds when candidates intersect, while a different-group pair succeeds when a non-colliding selection exists. Candidate choices may differ between pairs, so this is not deterministic runtime behaviour and need not represent one globally consistent assignment. `ALL_CANDIDATES` activates every returned candidate; forms are related when candidate sets intersect. Alternatives can reduce under-stemming but can introduce cross-group collisions, and the resulting relation can overlap and need not be a partition.
+Each distinct surface form is one item and may belong to several gold groups. Two forms are gold-related when their membership sets intersect; a relation shared by several groups is counted once. `PRIMARY_OUTPUT` uses one deterministic stem per form. `ANY_CANDIDATE` is an optimistic oracle-assisted pairwise upper bound: a gold-related pair succeeds when candidates intersect, while a gold-negative pair succeeds when a non-colliding selection exists. Candidate choices may differ between pairs, so this is not deterministic runtime behaviour and does not define one confusion matrix. `ALL_CANDIDATES` activates every returned candidate; forms are related when candidate sets intersect.
 
-For each row, `TP = underPossiblePairs - underErrorPairs`, `FN = underErrorPairs`, `FP = overErrorPairs`, and `TN = overPossiblePairs - overErrorPairs`. TP and FN concern same-group pairs; FP and TN concern different-group pairs. Consequently, under-stemming and over-stemming use different denominators. Undefined values are rendered as `n/a`.
+For `PRIMARY_OUTPUT` and `ALL_CANDIDATES`, `TP = underPossiblePairs - underErrorPairs`, `FN = underErrorPairs`, `FP = overErrorPairs`, and `TN = overPossiblePairs - overErrorPairs`. `ANY_CANDIDATE` publishes only its separate oracle-assisted under/over bounds; confusion-derived metrics are mathematically inapplicable and are not presented in its language-page section. Their machine-readable CSV fields remain empty. Undefined metric denominators in otherwise applicable policies are rendered as `n/a`.
 
-- Under-stemming rate: `FN / (TP + FN)`, the false-negative rate over same-group pairs.
-- Over-stemming rate: `FP / (TN + FP)`, the false-positive rate over different-group pairs.
+- Under-stemming rate (Paice UI): `FN / (TP + FN)`, the false-negative rate over gold-related pairs.
+- Over-stemming rate (Paice OI): `FP / (TN + FP)`, the false-positive rate over gold-negative pairs.
 - Pairwise precision: `TP / (TP + FP)`, the fraction of predicted conflations that are gold-standard positive pairs.
 - Pairwise recall: `TP / (TP + FN)`, the fraction of gold-standard positive pairs successfully connected.
-- Pairwise specificity: `TN / (TN + FP)`, the fraction of different-group pairs correctly separated.
+- Pairwise specificity: `TN / (TN + FP)`, the fraction of gold-negative pairs correctly separated.
 - Balanced accuracy: `(recall + specificity) / 2`. It gives equal weight to positive and negative pair classes and is less dominated by the large true-negative class than ordinary accuracy. It does not replace the raw errors or other metrics.
 - Pairwise F-beta: `((1 + betaSquared) * TP) / (((1 + betaSquared) * TP) + (betaSquared * FN) + FP)`. F0.5 emphasizes precision and penalizes over-stemming more; F1 weights precision and recall equally; F2 emphasizes recall and penalizes under-stemming more.
 - MCC: `(TP * TN - FP * FN) / sqrt((TP + FP) * (TP + FN) * (TN + FP) * (TN + FN))`. It uses all confusion counts and remains useful under class imbalance, except when its denominator is degenerate.
@@ -403,16 +325,17 @@ For each row, `TP = underPossiblePairs - underErrorPairs`, `FN = underErrorPairs
 - Pairwise accuracy: `(TP + TN) / (TP + TN + FP + FN)`. It can be dominated by true-negative cross-group pairs.
 - Pairwise error rate: `(FP + FN) / (TP + TN + FP + FN)`.
 
-Adjusted Rand Index uses the gold/predicted contingency table and chance correction. Homogeneity is `1 - H(gold | predicted) / H(gold)`; completeness is `1 - H(predicted | gold) / H(predicted)`; V-measure is their harmonic mean; normalized mutual information uses the arithmetic-mean entropy normalization `MI / ((H(gold) + H(predicted)) / 2)`. These partition-only metrics apply to `PRIMARY_OUTPUT`; candidate-relation rows show `n/a`.
+Standard ARI, homogeneity, completeness, V-measure, and NMI are not calculated: their usual contingency-table definitions require an exclusive gold partition, while this gold standard is an overlapping cover.
 
 ### Provenance
 
 - Authoritative source: `docs/benchmarks/data/stemming-quality.csv`
-- Source SHA-256: `5a93a6ab60e46489737cd649eb1ac48182114b9038f7f20195ab9d1c1fc0dd28`
-- Evaluation command: `./gradlew stemmingQuality`
+- Source SHA-256: `edf16b07be8a535943ddf37caeb8807755c95e9e1fb13244145f28be74b491d8`
+- Evaluation command: `./gradlew stemmingQuality --no-daemon`
 - Dictionary language: `CS_CZ`
 - Processing modes: `ALL_WORDS`, `LOWERCASE_GROUPS_ONLY`
 - Stemmer versions and transitive artifacts: resolved by the repository's JMH Gradle configuration and `gradle.lockfile`
-- Radixor version, Git revision, generation date, JDK version, operating system, and dictionary revision: not recorded in the authoritative CSV
+- Model ID, version, and SHA-256: recorded in every CSV row
+- Run date, core source state, JDK, operating system, and hardware: recorded on the [benchmark environment page](../reference/environment.md)
 
 <!-- STEMMING-QUALITY:END -->

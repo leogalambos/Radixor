@@ -715,9 +715,18 @@ def modelCatalogText = providers.provider {
     return output.toString()
 }
 
+def modelCatalogDocumentationInputs = files(modelProjects().collectMany { Project modelProject ->
+    [
+            modelProject.file('build.gradle'),
+            modelProject.file('model-version.txt'),
+            modelProject.file('src/modelInput/stemmer.gz')
+    ]
+})
+
 tasks.register('generateModelCatalogDocumentation') {
     group = 'documentation'
     description = 'Generates the deterministic model catalog in the build documentation staging tree.'
+    inputs.files(modelCatalogDocumentationInputs)
     outputs.file(layout.buildDirectory.file('mkdocs-source/stemmer-model-catalog.md'))
     doLast {
         File catalog = layout.buildDirectory.file('mkdocs-source/stemmer-model-catalog.md').get().asFile
@@ -726,10 +735,24 @@ tasks.register('generateModelCatalogDocumentation') {
     }
 }
 
+tasks.register('publishModelCatalogDocumentation') {
+    group = 'documentation'
+    description = 'Updates the checked-in model catalog used by a direct local MkDocs invocation.'
+    dependsOn(tasks.named('generateModelCatalogDocumentation'))
+    inputs.file(layout.buildDirectory.file('mkdocs-source/stemmer-model-catalog.md'))
+    outputs.file(layout.projectDirectory.file('docs/stemmer-model-catalog.md'))
+    doLast {
+        File generated = layout.buildDirectory.file('mkdocs-source/stemmer-model-catalog.md').get().asFile
+        File published = layout.projectDirectory.file('docs/stemmer-model-catalog.md').asFile
+        published.setText(generated.getText('UTF-8'), 'UTF-8')
+    }
+}
+
 tasks.register('prepareMkDocsSource', Sync) {
     group = 'documentation'
     description = 'Stages maintained documentation, generated catalog, and MkDocs configuration under build/.'
     dependsOn(modelProjects().collect { Project modelProject -> modelProject.path + ':verifyModelDescriptor' })
+    inputs.files(modelCatalogDocumentationInputs)
     into(layout.buildDirectory.dir('mkdocs-source'))
     from(layout.projectDirectory.dir('docs'))
     doLast {
@@ -746,7 +769,7 @@ tasks.register('prepareMkDocsSource', Sync) {
 
 tasks.register('verifyModelCatalogDocumentation') {
     group = 'verification'
-    description = 'Validates model metadata and the generated build-directory MkDocs catalog.'
+    description = 'Validates model metadata and both the checked-in and staged MkDocs catalogs.'
     dependsOn(tasks.named('prepareMkDocsSource'))
     dependsOn(tasks.named('verifyAllDefaultModels'))
     doLast {
@@ -754,6 +777,11 @@ tasks.register('verifyModelCatalogDocumentation') {
         String expected = '# Published Stemmer Model Catalog\n\n' + modelCatalogText.get()
         if (!catalog.isFile() || catalog.getText('UTF-8') != expected) {
             throw new GradleException('The staged model catalog is missing or nondeterministic.')
+        }
+        File publishedCatalog = layout.projectDirectory.file('docs/stemmer-model-catalog.md').asFile
+        if (!publishedCatalog.isFile() || publishedCatalog.getText('UTF-8') != expected) {
+            throw new GradleException(
+                    'The checked-in model catalog is stale; run ./gradlew publishModelCatalogDocumentation.')
         }
         List<String> identifiers = modelProjects().collect { Project modelProject -> modelProject.name }
         if (identifiers != identifiers.sort()) {
@@ -952,6 +980,31 @@ tasks.register('stemmingQuality', JavaExec) {
             providers.gradleProperty('stemmingQualityAudit').getOrElse('false'),
             providers.gradleProperty('stemmingQualityAuditLimit').getOrElse('25')
     maxHeapSize = '6g'
+}
+
+tasks.register('benchmarkCorpusReport', JavaExec) {
+    group = 'verification'
+    description = 'Reports corpus and preferred patch-command counts for every default model.'
+    dependsOn(tasks.named('jmhClasses'))
+    classpath = files(sourceSets.jmh.runtimeClasspath, configurations.stemmingQualityJmhRuntime)
+    mainClass = 'org.egothor.stemmer.benchmark.BenchmarkCorpusReportApplication'
+    args layout.buildDirectory.file('reports/jmh/benchmark-corpora.csv').get().asFile.absolutePath
+    maxHeapSize = '6g'
+}
+
+tasks.register('writeJmhRuntimeClasspath') {
+    group = 'verification'
+    description = 'Writes the complete modular JMH runtime classpath for isolated direct JMH execution.'
+    dependsOn(tasks.named('jmhJar'))
+    dependsOn(modelProjects().collect { Project modelProject -> modelProject.tasks.named('jar') })
+    outputs.file(layout.buildDirectory.file('reports/jmh/jmh-runtime-classpath.txt'))
+    doLast {
+        File report = layout.buildDirectory.file('reports/jmh/jmh-runtime-classpath.txt').get().asFile
+        report.parentFile.mkdirs()
+        File executable = tasks.named('jmhJar', Jar).get().archiveFile.get().asFile
+        report.setText(executable.absolutePath + File.pathSeparator
+                + sourceSets.jmh.runtimeClasspath.asPath + System.lineSeparator(), 'UTF-8')
+    }
 }
 
 tasks.register('prepareBenchmarkModelInputs', Sync) {

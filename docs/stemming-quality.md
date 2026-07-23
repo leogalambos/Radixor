@@ -10,13 +10,13 @@ The authoritative Radixor universe is the validated one-to-one reconciliation of
 
 Default Polish evaluation is therefore `Radixor` with model `pl-pl-unimorph`. A future PoliMorf evaluation is a distinct `Radixor` / `pl-pl-polimorf` row. Evaluation classpaths receive individual models through direct non-production Gradle dependencies; ordinary applications inherit none of them from the core.
 
-Complete PoliMorf trie construction and deterministic stemming smoke fixtures are runtime-verified separately. That functional verification is not a linguistic-quality measurement and does not justify rewriting the historical quality snapshot.
+Complete PoliMorf trie construction and deterministic stemming smoke fixtures are runtime-verified separately. That functional verification is not a linguistic-quality measurement and does not enter the current default-model quality snapshot.
 
 The expected matrix is constructed before evaluation from stemmer, language, dictionary mode, and supported output policy. Generation fails on missing, duplicate, unexpected, or stale keys.
 
 ## Dictionary groups and modes
 
-Every usable parsed row is one gold-standard group. Exact duplicate strings are removed only within that row; identical forms in different rows remain distinct. `ALL_WORDS` preserves every valid form. `LOWERCASE_GROUPS_ONLY` excludes a complete group containing an uppercase or titlecase Unicode code point. Retained words are not lowercased or normalized by the evaluator.
+Every usable parsed row contributes one gold-standard group. A distinct surface form is one evaluated item and may belong to several groups. `ALL_WORDS` preserves every valid form. `LOWERCASE_GROUPS_ONLY` excludes a complete group containing an uppercase or titlecase Unicode code point. Retained words are not lowercased or normalized by the evaluator.
 
 ## Output policies
 
@@ -24,9 +24,9 @@ Every usable parsed row is one gold-standard group. Exact duplicate strings are 
 
 For multi-output adapters, `C(w)` is the immutable, sorted, exactly deduplicated candidate set. It is non-null, non-empty, contains no null, and contains the primary output. Radixor obtains alternatives through `getAll`. The repository's Morphologik lookups can return distinct lemma strings and are multi-output. Configured Hunspell filters can emit several stems at one token position. Other adapters emit only primary rows.
 
-`ANY_CANDIDATE` is an optimistic oracle-assisted pairwise upper bound. A same-group pair succeeds when its sets intersect. A cross-group pair is an error only when both sets are the same singleton; otherwise unequal candidates can be selected for that pair. Choices may vary between pairs and need not form one realizable global assignment.
+`ANY_CANDIDATE` is an optimistic oracle-assisted pairwise upper bound. A gold-related pair succeeds when its sets intersect. A gold-negative pair is an error only when both sets are the same singleton; otherwise unequal candidates can be selected for that pair. Choices may vary between pairs and need not form one realizable global assignment.
 
-`ALL_CANDIDATES` activates every candidate. Two forms are related when their sets intersect, for both same-group and cross-group pairs. This relation can overlap and need not be transitive. A pair sharing several candidates is counted once.
+`ALL_CANDIDATES` activates every candidate. Two forms are predicted as related when their sets intersect, for both gold-related and gold-negative pairs. This relation can overlap and need not be transitive. A pair sharing several candidates is counted once.
 
 The evaluator verifies:
 
@@ -40,14 +40,14 @@ ALL over >= PRIMARY over
 
 ## Pair definitions and efficient counting
 
-For `C2(n) = n(n-1)/2`:
+For the unique form population `W`:
 
 ```text
-underPossible = sum_g C2(n_g)
-overPossible = C2(N) - sum_g C2(n_g)
+underPossible = |{{u,v} subset W : G(u) intersection G(v) is not empty}|
+overPossible = C2(|W|) - underPossible
 ```
 
-Under-stemming counts unrelated same-group pairs. Over-stemming counts related cross-group pairs. Primary output uses global and per-group stem frequencies. Candidate sets are canonical signatures counted globally and per group. An inverted candidate-to-signature index discovers intersections, and signature pairs shared through several candidates are deduplicated. `ANY_CANDIDATE` over-stemming uses only equal singleton signatures. All pair arithmetic uses checked `long` operations; complete production word pairs are never enumerated.
+For each distinct form `w`, let `G(w)` be its set of included dictionary groups. Two forms are gold-related exactly when their membership sets intersect. Under-stemming counts gold-related pairs that the output relation separates. Over-stemming counts gold-negative pairs that the output relation conflates. A form is processed once, and a pair sharing several groups is counted once. Primary output uses global and per-group stem frequencies with explicit overlap corrections. Candidate sets are canonical signatures counted globally and per group. An inverted candidate-to-signature index discovers intersections, and signature pairs shared through several candidates are deduplicated. `ANY_CANDIDATE` over-stemming uses only equal singleton signatures. All pair arithmetic uses checked `long` operations; complete production word pairs are never enumerated.
 
 ## Confusion and aggregate metrics
 
@@ -58,9 +58,9 @@ FP = overError
 TN = overPossible - overError
 ```
 
-Under-stemming is `FN/(TP+FN)` and over-stemming is `FP/(TN+FP)`; their denominators differ. The CSV also publishes precision, recall, specificity, accuracy, balanced accuracy, F0.5, F1, F2, Jaccard, Fowlkes-Mallows, Matthews correlation coefficient, and pairwise error rate. F0.5 emphasizes precision and over-stemming, F1 balances precision and recall, and F2 emphasizes recall and under-stemming. Accuracy and error rate can be dominated by the large cross-group true-negative population. Metrics use raw counts, not rounded rates. Zero denominators produce `n/a` in Markdown and empty CSV fields.
+Under-stemming is Paice UI `FN/(TP+FN)` and over-stemming is Paice OI `FP/(TN+FP)`; their denominators differ. This is an explicit pairwise generalization of Paice's disjoint lemma groups to the overlapping gold relation above. For `PRIMARY_OUTPUT` and `ALL_CANDIDATES`, the CSV also publishes TP/FP/FN/TN, precision, recall, specificity, accuracy, balanced accuracy, F0.5, F1, F2, Jaccard, Fowlkes-Mallows, Matthews correlation coefficient, and pairwise error rate. `ANY_CANDIDATE` uses different optimistic oracle conditions for positive and negative pairs and therefore has no single confusion matrix; its TP/FP/FN/TN and aggregate classification fields are empty, while its explicit under/over numerators and denominators remain available. Metrics use raw counts, not rounded rates. Zero denominators produce `n/a` in Markdown and empty CSV fields.
 
-Only `PRIMARY_OUTPUT` receives partition metrics: Adjusted Rand Index, homogeneity, completeness, V-measure, and normalized mutual information with arithmetic-mean entropy normalization. Candidate policies remain inapplicable rather than being forced into artificial partitions.
+Standard Adjusted Rand Index, homogeneity, completeness, V-measure, and normalized mutual information are not calculated. Their ordinary contingency-table definitions require an exclusive gold partition, while these dictionary groups form an overlapping cover.
 
 Micro summaries sum confusion counts before calculation. Macro summaries average defined language values and retain coverage counts. Common-language comparisons use the exact language intersection and never score unsupported languages as zero. Rankings are separated by policy and metric; the default F0.5 choice is navigation, not a universal scientific preference.
 
@@ -79,9 +79,9 @@ Exact textual accuracy and pairwise grouping use different denominators. One err
 
 Optional properties are `stemmingQualityLanguage`, `stemmingQualityStemmer`, `stemmingQualityMode`, `stemmingQualityOutputPolicy`, `stemmingQualityRankMetric`, `stemmingQualityAudit`, and `stemmingQualityAuditLimit`. Policies are `PRIMARY_OUTPUT`, `ANY_CANDIDATE`, and `ALL_CANDIDATES`. Filtered reports carry `-filtered` and cannot overwrite complete output.
 
-Generated files under `build/reports/stemming-quality/` include `stemming-quality.md`, `stemming-quality.csv`, `metric-correlations-pearson.csv`, `metric-correlations-spearman.csv`, and optional audit Markdown.
+Generated files under `build/reports/stemming-quality/` include `stemming-quality.md`, `stemming-quality.csv`, `metric-correlations-pearson.csv`, `metric-correlations-spearman.csv`, and optional audit Markdown. Every CSV scenario records the exact dictionary model ID, independent model version, and descriptor SHA-256.
 
 ## Limitations
 
 These measurements evaluate agreement with the available dictionary grouping. They do not capture every semantic, morphological, downstream, or dataset-specific property. `ANY_CANDIDATE` is optimistic and may not be globally realizable. `ALL_CANDIDATES` measures an overlap graph rather than a partition. Language coverage must remain visible in cross-stemmer comparisons. No single published metric establishes universal superiority; multiple metrics and their correlations are provided for transparent scientific assessment.
-Historical checked-in quality results retain their original inputs and claims. The optional PoliMorf model is not attributed to snapshots that predate it. See [Model Selection and Loading](model-selection-and-loading.md) and the generated [model catalog](stemmer-model-catalog.md).
+The checked-in quality snapshot is regenerated from all 20 current default models. The optional PoliMorf model is not part of it and must not be attributed to the default Polish results. See [Model Selection and Loading](model-selection-and-loading.md) and the generated [model catalog](stemmer-model-catalog.md).

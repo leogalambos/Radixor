@@ -644,6 +644,19 @@ public class StemmerComparisonBenchmarkQuality {
     }
 
     /**
+     * Creates the authoritative multi-output Radixor adapter for an explicitly
+     * selected runtime model.
+     *
+     * @param modelId exact model identifier
+     * @return scenario-confined adapter using the JMH invocation path
+     * @throws IOException if the compiled dictionary cannot be loaded
+     */
+    static CandidateStemmer createRadixorQualityStemmer(final String modelId) throws IOException {
+        return radixor(new RadixorBenchmarkStemmer(StemmerPatchTrieLoader.loadCompiled(
+                modelId, true, ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS)));
+    }
+
+    /**
      * Exact-root agreement counters for one quality operation.
      *
      * @param correctMatches total exact-root matches

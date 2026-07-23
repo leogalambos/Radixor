@@ -33,7 +33,6 @@ package org.egothor.stemmer.benchmark.quality;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Locale;
@@ -44,6 +43,8 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.egothor.stemmer.StemmerModelDescriptor;
+import org.egothor.stemmer.StemmerModelRegistry;
 import org.egothor.stemmer.StemmerPatchTrieLoader.Language;
 import org.egothor.stemmer.benchmark.QualityStemmerMatrix;
 import org.egothor.stemmer.benchmark.QualityStemmerMatrix.Candidate;
@@ -96,7 +97,7 @@ public final class StemmingQualityApplication {
             for (ProcessingMode mode : modes) {
                 for (OutputPolicy policy : policies) {
                     if (policy == OutputPolicy.PRIMARY_OUTPUT || multiple) {
-                        expected.add(new ResultKey(candidate.name(), candidate.language().name(), mode, policy));
+                        expected.add(new ResultKey(candidate.name(), candidate.resultLanguage(), mode, policy));
                     }
                 }
             }
@@ -104,15 +105,17 @@ public final class StemmingQualityApplication {
 
         LOGGER.log(Level.INFO, filtered ? "Starting a filtered stemming-quality report."
                 : "Starting the complete stemming-quality report.");
-        final Map<Language, List<GoldStandardGroup>> dictionaries = new EnumMap<>(Language.class);
+        final Map<String, List<GoldStandardGroup>> dictionaries = new HashMap<>();
         final List<QualityResult> results = new ArrayList<>();
         final List<QualityAudit.Scenario> audits = new ArrayList<>();
         final List<CandidateQualityAudit.Scenario> candidateAudits = new ArrayList<>();
+        final StemmerModelRegistry modelRegistry = StemmerModelRegistry.fromContextClassLoader();
         for (Candidate candidate : candidates) {
-            List<GoldStandardGroup> groups = dictionaries.get(candidate.language());
+            final StemmerModelDescriptor model = modelRegistry.require(candidate.dictionaryModelId());
+            List<GoldStandardGroup> groups = dictionaries.get(candidate.dictionaryModelId());
             if (groups == null) {
-                groups = BundledGoldStandardLoader.load(candidate.language());
-                dictionaries.put(candidate.language(), groups);
+                groups = BundledGoldStandardLoader.loadModel(candidate.dictionaryModelId());
+                dictionaries.put(candidate.dictionaryModelId(), groups);
             }
             for (ProcessingMode mode : modes) {
                 final QualityStemmerMatrix.BatchStemmer primaryStemmer = candidate.createStemmer();
@@ -120,27 +123,34 @@ public final class StemmingQualityApplication {
                 if (audit && policies.contains(OutputPolicy.PRIMARY_OUTPUT)) {
                     final QualityAudit.Scenario scenario = QualityAudit.evaluate(candidate, mode, groups, auditLimit);
                     audits.add(scenario);
-                    primary = scenario.result();
+                    primary = withModelProvenance(scenario.result(), model);
                 } else {
-                    primary = QualityEvaluator.evaluateBatch(candidate.name(), candidate.language().name(),
-                            mode, groups, primaryStemmer);
+                    primary = withModelProvenance(
+                            QualityEvaluator.evaluateBatch(candidate.name(), candidate.resultLanguage(),
+                                    mode, groups, primaryStemmer),
+                            model);
                 }
                 if (policies.contains(OutputPolicy.PRIMARY_OUTPUT)) {
                     results.add(primary);
                     logScenario(candidate, mode, OutputPolicy.PRIMARY_OUTPUT);
                 }
                 if (multiOutput.get(candidate)) {
-                    final QualityResult anyCandidate = CandidateAwareEvaluator.evaluate(candidate.name(),
-                            candidate.language().name(), mode, OutputPolicy.ANY_CANDIDATE, groups, candidate.createStemmer());
+                    final QualityResult anyCandidate = withModelProvenance(
+                            CandidateAwareEvaluator.evaluate(candidate.name(),
+                                    candidate.resultLanguage(), mode, OutputPolicy.ANY_CANDIDATE, groups,
+                                    candidate.createStemmer()),
+                            model);
                     final QualityResult allCandidates;
                     if (audit) {
                         final CandidateQualityAudit.Scenario scenario = CandidateQualityAudit.evaluate(
                                 candidate, mode, groups, primary, anyCandidate, auditLimit);
                         candidateAudits.add(scenario);
-                        allCandidates = scenario.candidate();
+                        allCandidates = withModelProvenance(scenario.candidate(), model);
                     } else {
-                        allCandidates = CandidateAwareEvaluator.evaluate(candidate.name(), candidate.language().name(),
-                                mode, OutputPolicy.ALL_CANDIDATES, groups, candidate.createStemmer());
+                        allCandidates = withModelProvenance(
+                                CandidateAwareEvaluator.evaluate(candidate.name(), candidate.resultLanguage(),
+                                        mode, OutputPolicy.ALL_CANDIDATES, groups, candidate.createStemmer()),
+                                model);
                     }
                     verifyPolicyInvariants(primary, anyCandidate, allCandidates);
                     if (policies.contains(OutputPolicy.ANY_CANDIDATE)) {
@@ -175,13 +185,41 @@ public final class StemmingQualityApplication {
         LOGGER.log(Level.INFO, "Completed the stemming-quality report with {0} evaluated scenarios.", results.size());
     }
 
-    /** Selects candidates directly from the authoritative JMH matrix. */
-    private static List<Candidate> selectCandidates(final Set<Language> languages, final String filter) {
+    /** Attaches the exact independently versioned model used by one scenario. */
+    private static QualityResult withModelProvenance(final QualityResult result,
+            final StemmerModelDescriptor model) {
+        return result.withModelProvenance(model.id(), model.version(), model.sha256());
+    }
+
+    /**
+     * Selects candidates directly from the authoritative JMH matrix.
+     *
+     * <p>
+     * An unfiltered publication run evaluates only each language's registered
+     * default model. Optional model variants remain available only through an
+     * explicit stemmer or model-ID filter and therefore cannot enter the complete
+     * documentation snapshot accidentally.
+     * </p>
+     */
+    static List<Candidate> selectCandidates(final Set<Language> languages, final String filter) {
         return QualityStemmerMatrix.candidates().stream()
                 .filter(candidate -> languages.contains(candidate.language()))
-                .filter(candidate -> filter.isBlank() || candidate.name().equalsIgnoreCase(filter)
-                        || candidate.name().toUpperCase(Locale.ROOT).endsWith("_" + filter.toUpperCase(Locale.ROOT)))
+                .filter(candidate -> !filter.isBlank()
+                        || candidate.dictionaryModelId().equals(candidate.language().defaultModelId()))
+                .filter(candidate -> matchesFilter(candidate, filter))
                 .toList();
+    }
+
+    /** Tests one candidate against the exact, suffix, and model-ID filters. */
+    private static boolean matchesFilter(final Candidate candidate, final String filter) {
+        if (filter.isBlank()) {
+            return true;
+        }
+        final String normalizedFilter = filter.toUpperCase(Locale.ROOT);
+        final String name = candidate.name().toUpperCase(Locale.ROOT);
+        final String model = candidate.dictionaryModelId().toUpperCase(Locale.ROOT);
+        return name.equals(normalizedFilter) || name.endsWith("_" + normalizedFilter)
+                || model.equals(normalizedFilter) || model.endsWith("-" + normalizedFilter);
     }
 
     /** Parses a comma-separated language filter or selects every language. */
@@ -268,7 +306,7 @@ public final class StemmingQualityApplication {
     private static void logScenario(final Candidate candidate, final ProcessingMode mode, final OutputPolicy policy) {
         if (LOGGER.isLoggable(Level.INFO)) {
             LOGGER.log(Level.INFO, "Completed stemming-quality evaluation for stemmer {0}, language {1}, dictionary mode {2}, and output policy {3}.",
-                    new Object[] {candidate.name(), candidate.language(), mode, policy});
+                    new Object[] {candidate.name(), candidate.resultLanguage(), mode, policy});
         }
     }
 

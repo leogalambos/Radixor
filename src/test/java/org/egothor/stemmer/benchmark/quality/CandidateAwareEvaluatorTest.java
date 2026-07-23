@@ -109,6 +109,24 @@ final class CandidateAwareEvaluatorTest {
         assertEquals(2, any.underErrorPairs()); assertEquals(any.underErrorPairs(), all.underErrorPairs());
     }
 
+    /** Verifies candidate relations over a gold cover with shared forms. */
+    @Test @DisplayName("Candidate evaluation deduplicates forms and overlapping gold relations")
+    void overlappingGoldCover() throws IOException {
+        final List<GoldStandardGroup> groups = List.of(
+                new GoldStandardGroup(1, List.of("a", "b")),
+                new GoldStandardGroup(2, List.of("a", "b", "c")));
+        final Map<String, String> primary = Map.of("a", "x", "b", "y", "c", "z");
+        final Map<String, List<String>> candidates = Map.of(
+                "a", List.of("x", "shared"), "b", List.of("y", "shared"), "c", List.of("z"));
+        final QualityResult all = CandidateAwareEvaluator.evaluate("Synthetic", "MULTI",
+                ProcessingMode.ALL_WORDS, OutputPolicy.ALL_CANDIDATES, groups, adapter(primary, candidates));
+        assertEquals(3, all.processedWordForms());
+        assertEquals(3, all.underPossiblePairs());
+        assertEquals(2, all.underErrorPairs());
+        assertEquals(0, all.overPossiblePairs());
+        assertEquals(0, all.overErrorPairs());
+    }
+
     /** Compares the optimized signature algorithm with an independent fixed-seed oracle. */
     @Test @DisplayName("Optimized candidate metrics equal a deterministic randomized brute-force oracle")
     void randomizedOracleAgreement() throws IOException {
@@ -118,12 +136,21 @@ final class CandidateAwareEvaluatorTest {
             final List<GoldStandardGroup> groups = new ArrayList<>();
             final Map<String, String> primary = new HashMap<>();
             final Map<String, List<String>> candidates = new HashMap<>();
+            final List<String> existingForms = new ArrayList<>();
             int word = 0;
             for (int group = 0; group < groupCount; group++) {
                 final List<String> forms = new ArrayList<>();
                 for (int member = 0; member < 1 + random.nextInt(5); member++) {
-                    final String form = "w" + word++;
+                    final boolean reuse = !existingForms.isEmpty() && random.nextInt(5) == 0;
+                    final String form = reuse ? existingForms.get(random.nextInt(existingForms.size())) : "w" + word++;
+                    if (forms.contains(form)) {
+                        continue;
+                    }
                     forms.add(form);
+                    if (reuse) {
+                        continue;
+                    }
+                    existingForms.add(form);
                     final String primaryStem = "s" + random.nextInt(7);
                     primary.put(form, primaryStem);
                     final List<String> raw = new ArrayList<>();
@@ -204,17 +231,21 @@ final class CandidateAwareEvaluatorTest {
     /** Enumerates small word pairs independently and returns under error/possible and over error/possible counts. */
     private static long[] oracle(final List<GoldStandardGroup> groups,
             final Map<String, List<String>> candidates) {
-        final List<String> forms = new ArrayList<>();
-        final List<Integer> labels = new ArrayList<>();
+        final Map<String, Set<Integer>> memberships = new java.util.LinkedHashMap<>();
         for (int group = 0; group < groups.size(); group++) {
-            for (String form : groups.get(group).forms()) { forms.add(form); labels.add(group); }
+            for (String form : groups.get(group).forms()) {
+                memberships.computeIfAbsent(form, ignored -> new LinkedHashSet<>()).add(group);
+            }
         }
+        final List<String> forms = List.copyOf(memberships.keySet());
         long underError = 0; long underPossible = 0; long overError = 0; long overPossible = 0; long anyOverError = 0;
         for (int left = 0; left < forms.size(); left++) {
             for (int right = left + 1; right < forms.size(); right++) {
                 final Set<String> intersection = new LinkedHashSet<>(candidates.get(forms.get(left)));
                 intersection.retainAll(new LinkedHashSet<>(candidates.get(forms.get(right))));
-                if (labels.get(left).equals(labels.get(right))) {
+                final Set<Integer> sharedGroups = new LinkedHashSet<>(memberships.get(forms.get(left)));
+                sharedGroups.retainAll(memberships.get(forms.get(right)));
+                if (!sharedGroups.isEmpty()) {
                     underPossible++; if (intersection.isEmpty()) { underError++; }
                 } else {
                     overPossible++; if (!intersection.isEmpty()) { overError++; }

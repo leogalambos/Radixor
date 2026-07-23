@@ -4,53 +4,85 @@ The values below are environment-specific and must not be read as universal perf
 
 | Item | Value |
 | --- | --- |
-| Benchmark date | 2026-07-06 (Europe/Prague) |
-| Focused comparison command family | `./gradlew jmh -Pjmh.includes='.*StemmerComparisonBenchmark.*' --no-daemon` |
-| English coverage command | `./gradlew jmh -Pjmh.includes='.*EnglishRadixorDictionaryCoverageBenchmark.*' --no-daemon` |
-| Speed result reports | `build/reports/jmh/stemmer-comparison-2026-07-06.csv`, `build/reports/jmh/stemmer-comparison-2026-07-06.txt`, `build/reports/jmh/english-coverage-2026-07-06.csv`, and `build/reports/jmh/english-coverage-2026-07-06.txt` |
-| Accuracy result reports | `build/reports/jmh/stemmer-comparison-2026-07-06.csv`, `build/reports/jmh/english-coverage-2026-07-06.csv`, and deterministic Radixor exact-root accounting over the same bundled language corpora |
-| Final comparison JMH scope | Stemmer comparison benchmarks only; internal `FrequencyTrie*` microbenchmarks were not run |
-| Coverage JMH scope | English Radixor dictionary coverage benchmark only |
+| Benchmark date | 2026-07-23 (Europe/Prague) |
+| Corpus command | `./gradlew benchmarkCorpusReport --no-daemon` |
+| Exact-root accuracy command | Direct JMH execution of the four `*BenchmarkQuality` classes selected in `stemmer-accuracy-2026-07-23.txt`; timing scores are discarded |
+| Stemming-quality command | `./gradlew stemmingQuality --no-daemon` |
+| Published speed command | `tools/run-published-speed-benchmarks.sh 2026-07-23` |
+| Published speed run interval | 2026-07-23 12:58:50 to 15:15:43 Europe/Prague (2 h 16 min 53 s, including idle intervals and both JMH suites) |
+| Stabilization intervals | 120 s before the main speed matrix; 60 s between the main matrix and coverage-speed suite |
+| Corpus and command report | `build/reports/jmh/benchmark-corpora.csv` |
+| Exact-root reports | `build/reports/jmh/stemmer-accuracy-2026-07-23.csv` and `.txt` |
+| Speed reports | `build/reports/jmh/stemmer-speed-2026-07-23.csv` and `.txt` |
+| English coverage accuracy reports | `build/reports/jmh/english-coverage-accuracy-2026-07-23.csv` and `.txt` |
+| English coverage speed reports | `build/reports/jmh/english-coverage-speed-2026-07-23.csv` and `.txt` |
+| Stemming-quality reports | `build/reports/stemming-quality/stemming-quality.csv` and `.md` |
+| Environment report | `build/reports/jmh/performance-environment-2026-07-23.txt` |
+| Selected speed methods | `build/reports/jmh/published-speed-benchmarks-2026-07-23.txt` |
+| Comparison scope | Same-language methods used by the 20 language pages; `PolishPolimorfStemmerComparisonBenchmark`, all quality methods, the separate CISTEM gold-standard experiment, and internal trie microbenchmarks are excluded |
+| Model scope | Exactly the 20 IDs declared by `Language.defaultModelId()`; Polish uses `pl-pl-unimorph`, and `pl-pl-polimorf` is not measured |
+| Core base commit | `1f1b03c6a8d36a0918b92ebde698e5379a2a5946` |
+| Measured source state | `release@4.0.0-dirty`; exact tracked changes and untracked-source checksums are retained as `measured-source-2026-07-23.patch` and `measured-untracked-2026-07-23.sha256` |
 | JMH version | 1.37 |
 | Speed benchmark mode | Average time, `time/op` |
-| Score unit | `ns/op` |
-| Speed warmup | 3 iterations, 1 s each |
-| Speed measurement | 5 iterations, 1 s each |
-| Accuracy warmup | 3 JMH warmup iterations were applied by the Gradle invocation; timing scores from quality methods are not interpreted |
-| Accuracy measurement | 5 JMH measurement samples; documentation uses deterministic auxiliary counter ratios from the same report |
-| Fork count in generated report files | 1 |
-| Default fork policy for accuracy-only benchmark classes | `@Fork(0)` for future default runs because accuracy counters are deterministic and not interpreted as speed |
-| Thread count | 1 |
+| Score unit | `ns/op`; language pages additionally derive `ms/op` and `ns/token` |
+| Speed warmup | 5 iterations, 1 s each, independently in every fork |
+| Speed measurement | 10 iterations, 1 s each, independently in every fork |
+| Speed forks | 3 independent JVM forks |
+| Speed threads | 1 |
+| Speed fork heap | Fixed `-Xms6g -Xmx6g` |
+| Reported uncertainty | JMH `Score Error (99.9%)` over 30 measured samples |
+| Observed relative uncertainty | Main speed matrix: maximum 11.945%, with 6 of 102 rows above 10%; coverage-speed curve: maximum 16.775%, with 3 of 10 rows above 10%; no published row exceeded 20% |
+| Deterministic measurements | Corpus, patch-command distribution, exact-root counters, coverage accuracy, and pairwise stemming quality are evaluated without interpreting runtime scores; no warmup is required |
 | JVM reported by JMH | JDK 25.0.3, OpenJDK 64-Bit Server VM, 25.0.3+9 |
 | Java runtime | OpenJDK Runtime Environment, Red Hat build 25.0.3+9 |
 | JVM invoker | `/usr/lib/jvm/java-25-openjdk/bin/java` |
 | Operating system | Fedora Linux 44 (MATE-Compiz) |
-| Kernel | Linux 7.0.12-201.fc44.x86_64 |
+| Kernel | Linux 7.1.4-200.fc44.x86_64 |
 | Architecture | x86_64 |
 | CPU | AMD Ryzen 5 8600G w/ Radeon 760M Graphics |
-| Physical cores | 6 |
-| Logical CPUs | 12 |
+| Physical / logical CPUs | 6 / 12 |
+| CPU frequency policy | `amd-pstate-epp`; governor `performance` on every logical CPU; EPP `performance`; boost enabled |
+| CPU affinity | Scheduler default; no explicit pinning |
+| Installed memory | 60 GiB reported by the operating system |
+| Pre-run idle state | Load average 0.25 / 0.36 / 0.71 after the 120 s idle interval; CPU Tctl 40.2 degrees Celsius; swap unused |
+| End-of-run state | Load average 1.16 / 1.28 / 1.32; CPU Tctl 60.5 degrees Celsius |
+| Power and idle policy | Developer workstation on stable power; screensaver, suspend, and hibernation disabled |
+| Concurrent project work | None during the published speed and coverage-speed run |
+
+The workstation is not a hard real-time system. Normal kernel and desktop background activity was not removed, so the three independent forks and the published 99.9% error interval remain essential parts of result interpretation. Initial/final load and temperature sensor readings are stored in the environment report.
 
 ## Contracted Trie Baseline
 
-All Radixor rows in the refreshed benchmark tables use contracted compiled patch tries. During compilation, a subtree whose reachable entries all resolve to the same preferred patch command is represented as an accepting leaf. Runtime lookup can therefore stop as soon as that leaf is reached, which reduces depth in uniform regions while preserving the preferred result used by `get()`.
+All Radixor rows use contracted compiled patch tries. During compilation, a subtree whose reachable entries all resolve to the same preferred patch command is represented as an accepting leaf. Runtime lookup can therefore stop as soon as that leaf is reached while preserving the preferred result used by `get()`.
+
+## Model And Source Identity
+
+`benchmark-corpora.csv` records the model ID, independent artifact version, and descriptor SHA-256 for every language. Every stemming-quality CSV row repeats the same three fields. The performance environment report additionally records checksums of the executable JMH JAR, runtime classpath manifest, corpus report, quality report, measured source patch, and untracked-source manifest.
+
+The JMH runtime classpath contains the optional model artifact because it is a separately testable project dependency. It is not selected by any published benchmark. The selected-method manifest rejects `PolishPolimorf`, and the corpus/quality publication validators reject any non-default Polish model.
 
 ## Report Files
 
 Generated local report files for this benchmark update:
 
-- `build/reports/jmh/stemmer-comparison-2026-07-06.csv`
-- `build/reports/jmh/stemmer-comparison-2026-07-06.txt`
-- `build/reports/jmh/english-coverage-2026-07-06.csv`
-- `build/reports/jmh/english-coverage-2026-07-06.txt`
+- `build/reports/jmh/benchmark-corpora.csv`
+- `build/reports/jmh/stemmer-accuracy-2026-07-23.csv`
+- `build/reports/jmh/stemmer-accuracy-2026-07-23.txt`
+- `build/reports/jmh/stemmer-speed-2026-07-23.csv`
+- `build/reports/jmh/stemmer-speed-2026-07-23.txt`
+- `build/reports/jmh/english-coverage-accuracy-2026-07-23.csv`
+- `build/reports/jmh/english-coverage-accuracy-2026-07-23.txt`
+- `build/reports/jmh/english-coverage-speed-2026-07-23.csv`
+- `build/reports/jmh/english-coverage-speed-2026-07-23.txt`
+- `build/reports/jmh/performance-environment-2026-07-23.txt`
+- `build/reports/stemming-quality/stemming-quality.csv`
+- `build/reports/stemming-quality/stemming-quality.md`
+- `build/reports/stemming-quality/metric-correlations-pearson.csv`
+- `build/reports/stemming-quality/metric-correlations-spearman.csv`
 
-JMH TXT and CSV reports are still published as benchmark artifacts. They are not converted into a Porter speed badge.
+The versioned documentation snapshot under `docs/benchmarks/data/` preserves the complete stemming-quality matrix. Machine-specific JMH reports remain build artifacts.
 
 ## Published Metrics
 
-The historical English Radixor versus Porter performance badge is no longer generated. `tools/generate-pages-badges.py` now produces only coverage and mutation badge endpoint JSON files:
-
-- `coverage-badge.json`
-- `pitest-badge.json`
-
-The README therefore no longer presents a single Porter speed ratio. Benchmark interpretation now uses both speed and quality, because a narrow or aggressive stemmer can be fast while disagreeing with the dictionary root much more often than Radixor.
+The historical English Radixor versus Porter performance badge is retired. `tools/generate-pages-badges.py` produces only coverage and mutation badge endpoint JSON files. Benchmark interpretation uses both speed and quality because a narrow or aggressive stemmer can be fast while disagreeing with the dictionary root much more often than Radixor.

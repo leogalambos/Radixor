@@ -37,8 +37,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 
+import org.egothor.stemmer.StemmerPatchTrieLoader.Language;
 import org.egothor.stemmer.benchmark.QualityStemmerMatrix;
 import org.egothor.stemmer.benchmark.QualityStemmerMatrix.Candidate;
 import org.junit.jupiter.api.DisplayName;
@@ -57,10 +59,26 @@ final class QualityStemmerMatrixTest {
     @Test @DisplayName("Candidate discovery is derived from every JMH quality candidate")
     void discoversEveryCandidate() {
         final List<Candidate> candidates = QualityStemmerMatrix.candidates();
-        assertEquals(92, candidates.size(), "The current adapter-language matrix size changed; report coverage must be reviewed.");
+        assertEquals(98, candidates.size(), "The current adapter-language matrix size changed; report coverage must be reviewed.");
         assertTrue(candidates.stream().anyMatch(candidate -> !candidate.name().endsWith("_RADIXOR")));
         assertTrue(candidates.stream().anyMatch(candidate -> candidate.name().equals("DA_DK_RADIXOR")));
         assertTrue(candidates.stream().anyMatch(candidate -> candidate.name().equals("YI_RADIXOR")));
+        assertTrue(candidates.stream().anyMatch(candidate -> candidate.name().equals("POLISH_POLIMORF_RADIXOR")
+                && candidate.resultLanguage().equals("pl-pl-polimorf")));
+        assertTrue(candidates.stream().anyMatch(candidate -> candidate.name().equals("POLISH_LUCENE_STEMPEL_DIRECT")
+                && candidate.resultLanguage().equals("pl-pl-polimorf")));
+    }
+
+    /** Verifies the publishable complete matrix uses only registered defaults. */
+    @Test @DisplayName("Complete publication selection excludes optional models")
+    void completePublicationSelectionUsesOnlyDefaultModels() {
+        final List<Candidate> candidates = StemmingQualityApplication.selectCandidates(
+                EnumSet.allOf(Language.class), "");
+        assertEquals(92, candidates.size());
+        assertTrue(candidates.stream().allMatch(candidate ->
+                candidate.dictionaryModelId().equals(candidate.language().defaultModelId())));
+        assertTrue(candidates.stream().noneMatch(candidate ->
+                candidate.dictionaryModelId().equals("pl-pl-polimorf")));
     }
 
     /** Verifies a complete report row exists for both modes of every discovered candidate. */
@@ -69,7 +87,7 @@ final class QualityStemmerMatrixTest {
         final List<QualityResult> rows = new ArrayList<>();
         for (Candidate candidate : QualityStemmerMatrix.candidates()) {
             for (ProcessingMode mode : ProcessingMode.values()) {
-                rows.add(new QualityResult(candidate.name(), candidate.language().name(), mode,
+                rows.add(new QualityResult(candidate.name(), candidate.resultLanguage(), mode,
                         OutputPolicy.PRIMARY_OUTPUT, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0,
                         new PartitionMetrics(1.0, 1.0, 1.0, 1.0, 1.0)));
             }
@@ -77,10 +95,12 @@ final class QualityStemmerMatrixTest {
         final Path report = this.temporaryDirectory.resolve("matrix.csv");
         QualityReportWriter.writeCsv(report, rows);
         final String text = Files.readString(report, StandardCharsets.UTF_8);
-        assertEquals(185, text.lines().count());
+        assertEquals(197, text.lines().count());
         for (Candidate candidate : QualityStemmerMatrix.candidates()) {
-            assertTrue(text.contains("\"" + candidate.name() + "\",\"" + candidate.language() + "\",\"ALL_WORDS\""));
-            assertTrue(text.contains("\"" + candidate.name() + "\",\"" + candidate.language() + "\",\"LOWERCASE_GROUPS_ONLY\""));
+            final String prefix = "\"" + candidate.name() + "\",\"" + candidate.resultLanguage()
+                    + "\",\"\",\"\",\"\",";
+            assertTrue(text.contains(prefix + "\"ALL_WORDS\""));
+            assertTrue(text.contains(prefix + "\"LOWERCASE_GROUPS_ONLY\""));
         }
     }
 }

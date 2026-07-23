@@ -67,7 +67,7 @@ public final class QualityReportWriter {
         if (filtered) {
             text.append("> This is a filtered analytical report and is not the complete JMH candidate matrix.\n\n");
         }
-        text.append("## Methodology\n\nEach parsed multilingual dictionary row is a gold-standard equivalence class. Exact duplicates are removed only within that row. `PRIMARY_OUTPUT` is the deterministic JMH partition. `ANY_CANDIDATE` is an optimistic oracle-assisted pairwise upper bound: within-row sets must intersect, while a cross-row error occurs only for two equal singleton sets. `ALL_CANDIDATES` activates the complete overlap relation: within-row disjoint sets are false negatives and cross-row intersections are false positives. A shared pair is counted once. Candidate policies need not define partitions.\n\nTP is a related within-row pair, FN is an unrelated within-row pair, FP is a related cross-row pair, and TN is an unrelated cross-row pair. Under-stemming is FN/(TP+FN); over-stemming is FP/(TN+FP), so their denominators differ. F0.5 emphasizes precision, F1 balances precision and recall, and F2 emphasizes recall. Undefined values are `n/a`. Percentages and scores use `Locale.ROOT`.\n\n| Stemmer | Language | Dictionary mode | Output policy | Applied dictionary rows | Processed word forms | Distinct output stems | Over-stemming | Under-stemming | Pairwise F0.5 | Pairwise F1 | Pairwise F2 |\n|---|---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|\n");
+        text.append("## Methodology\n\nEach distinct surface form is one evaluated item and may belong to several parsed dictionary groups. Two forms are gold-related when their membership sets intersect; a pair sharing several groups is counted once. `PRIMARY_OUTPUT` uses equality of deterministic JMH outputs. `ANY_CANDIDATE` is an optimistic oracle-assisted bound: a gold-related pair succeeds when candidate sets intersect, while a gold-negative error is unavoidable only for two equal singleton sets. `ALL_CANDIDATES` activates the complete candidate-intersection relation.\n\nUnder-stemming is the Paice Understemming Index `FN/(TP+FN)` and over-stemming is the Paice Overstemming Index `FP/(TN+FP)`, generalized here from a disjoint lemma partition to the documented overlapping gold relation. F0.5, F1, MCC, and other classification metrics require one coherent predicted relation and are therefore `n/a` for `ANY_CANDIDATE`. Standard partition metrics are not calculated because the gold memberships overlap. Undefined values are `n/a`. Percentages and scores use `Locale.ROOT`.\n\n| Stemmer | Language | Dictionary mode | Output policy | Applied dictionary rows | Processed word forms | Distinct output stems | Over-stemming | Under-stemming | Pairwise F0.5 | Pairwise F1 | Pairwise F2 |\n|---|---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|\n");
         for (QualityResult row : rows) {
             text.append("| ").append(escapeMarkdown(row.stemmer())).append(TABLE_DELIMITER)
                     .append(escapeMarkdown(row.language())).append(TABLE_DELIMITER).append(row.processingMode()).append(TABLE_DELIMITER)
@@ -92,10 +92,12 @@ public final class QualityReportWriter {
     /** Writes machine-readable counts and separate percentage fields. */
     public static void writeCsv(final Path path, final Iterable<QualityResult> input) throws IOException {
         final StringBuilder text = new StringBuilder(4096);
-        text.append("Stemmer,Language,Dictionary mode,Output policy,Applied dictionary rows,Processed word forms,Singleton dictionary rows,Forms with one candidate,Forms with multiple candidates,Maximum candidates for one form,Total candidate assignments,Distinct output stems,True-positive pairs,False-positive pairs,False-negative pairs,True-negative pairs,Over-stemming error pairs,Over-stemming possible pairs,Over-stemming percentage,Under-stemming error pairs,Under-stemming possible pairs,Under-stemming percentage,Pairwise precision,Pairwise recall,Pairwise specificity,Pairwise accuracy,Balanced accuracy,Pairwise F0.5,Pairwise F1,Pairwise F2,Jaccard index,Fowlkes-Mallows index,Matthews correlation coefficient,Pairwise error rate,Adjusted Rand Index,Homogeneity,Completeness,V-measure,Normalized mutual information\n");
+        text.append("Stemmer,Language,Dictionary model ID,Dictionary model version,Dictionary model SHA-256,Dictionary mode,Output policy,Applied dictionary rows,Processed word forms,Singleton dictionary rows,Forms with one candidate,Forms with multiple candidates,Maximum candidates for one form,Total candidate assignments,Distinct output stems,True-positive pairs,False-positive pairs,False-negative pairs,True-negative pairs,Over-stemming error pairs,Over-stemming possible pairs,Over-stemming percentage,Under-stemming error pairs,Under-stemming possible pairs,Under-stemming percentage,Pairwise precision,Pairwise recall,Pairwise specificity,Pairwise accuracy,Balanced accuracy,Pairwise F0.5,Pairwise F1,Pairwise F2,Jaccard index,Fowlkes-Mallows index,Matthews correlation coefficient,Pairwise error rate,Adjusted Rand Index,Homogeneity,Completeness,V-measure,Normalized mutual information\n");
         for (QualityResult row : sorted(input)) {
             final PairwiseMetrics metrics = row.pairwiseMetrics();
-            appendCsv(text, row.stemmer()); appendCsv(text, row.language()); appendCsv(text, row.processingMode().name());
+            appendCsv(text, row.stemmer()); appendCsv(text, row.language());
+            appendCsv(text, row.dictionaryModelId()); appendCsv(text, row.dictionaryModelVersion());
+            appendCsv(text, row.dictionaryModelSha256()); appendCsv(text, row.processingMode().name());
             appendCsv(text, row.outputPolicy().name());
             appendCsv(text, Long.toString(row.appliedDictionaryRows())); appendCsv(text, Long.toString(row.processedWordForms()));
             appendCsv(text, Long.toString(row.singletonDictionaryRows()));
@@ -104,8 +106,11 @@ public final class QualityReportWriter {
             appendCsv(text, Long.toString(row.maximumCandidatesForOneWord()));
             appendCsv(text, Long.toString(row.totalCandidateAssignments()));
             appendCsv(text, Long.toString(row.distinctOutputStems()));
-            appendCsv(text, Long.toString(metrics.truePositivePairs())); appendCsv(text, Long.toString(metrics.falsePositivePairs()));
-            appendCsv(text, Long.toString(metrics.falseNegativePairs())); appendCsv(text, Long.toString(metrics.trueNegativePairs()));
+            final boolean confusionMatrix = row.outputPolicy() != OutputPolicy.ANY_CANDIDATE;
+            appendCsv(text, confusionMatrix ? Long.toString(metrics.truePositivePairs()) : "");
+            appendCsv(text, confusionMatrix ? Long.toString(metrics.falsePositivePairs()) : "");
+            appendCsv(text, confusionMatrix ? Long.toString(metrics.falseNegativePairs()) : "");
+            appendCsv(text, confusionMatrix ? Long.toString(metrics.trueNegativePairs()) : "");
             appendCsv(text, Long.toString(row.overErrorPairs()));
             appendCsv(text, Long.toString(row.overPossiblePairs())); appendCsv(text, machinePercent(row.overPercentage()));
             appendCsv(text, Long.toString(row.underErrorPairs())); appendCsv(text, Long.toString(row.underPossiblePairs()));
@@ -170,7 +175,7 @@ public final class QualityReportWriter {
                 .append("- Actual result rows: ").append(actualRows).append("\n\n")
                 .append("Unsupported third-party combinations are excluded because their authoritative JMH adapter metadata declares no mapping for that language. They are not emitted as zero-valued rows. Radixor is independently registered for every reconciled dictionary language.\n");
         final java.util.Map<String, Set<String>> support = new java.util.TreeMap<>();
-        for (Candidate candidate : candidates) { support.computeIfAbsent(candidate.name(), ignored -> new TreeSet<>()).add(candidate.language().name()); }
+        for (Candidate candidate : candidates) { support.computeIfAbsent(candidate.name(), ignored -> new TreeSet<>()).add(candidate.resultLanguage()); }
         text.append("\n| Adapter | Supported language count | Supported languages |\n|---|---:|---|\n");
         support.forEach((name, languages) -> text.append("| ").append(escapeMarkdown(name)).append(TABLE_DELIMITER)
                 .append(languages.size()).append(TABLE_DELIMITER).append(languages).append(" |\n"));
@@ -230,7 +235,8 @@ public final class QualityReportWriter {
                 if (metrics.f1().isPresent()) { macroF1 += metrics.f1().getAsDouble(); macroCount++; }
                 languages.add(row.language());
             }
-            final PairwiseMetrics micro = new PairwiseMetrics(tp, fp, fn, tn);
+            final PairwiseMetrics micro = new PairwiseMetrics(tp, fp, fn, tn,
+                    first.outputPolicy() != OutputPolicy.ANY_CANDIDATE);
             text.append("| ").append(escapeMarkdown(first.stemmer())).append(TABLE_DELIMITER).append(first.processingMode())
                     .append(TABLE_DELIMITER).append(first.outputPolicy()).append(TABLE_DELIMITER).append(languages.size())
                     .append(TABLE_DELIMITER).append(score(micro.f05())).append(TABLE_DELIMITER).append(score(micro.f1()))

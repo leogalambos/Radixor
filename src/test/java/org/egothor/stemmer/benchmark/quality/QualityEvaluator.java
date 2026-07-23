@@ -33,15 +33,14 @@ package org.egothor.stemmer.benchmark.quality;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.ArrayList;
+import java.util.List;
 
 import org.egothor.stemmer.benchmark.QualityStemmerMatrix.BatchStemmer;
 
-/** Evaluates pairwise partition agreement using aggregated frequencies, never explicit pairs. */
+/** Evaluates pairwise agreement with an overlapping gold-standard cover. */
 public final class QualityEvaluator {
     /** Utility class. */
     private QualityEvaluator() { throw new AssertionError("No instances."); }
@@ -61,53 +60,52 @@ public final class QualityEvaluator {
             final Iterable<GoldStandardGroup> groups, final StemmerFunction stemmer) {
         Objects.requireNonNull(groups, "groups");
         Objects.requireNonNull(stemmer, "stemmer");
+        return evaluate(stemmerName, language, mode, GoldStandardCover.create(groups, mode), stemmer);
+    }
+
+    /** Evaluates one scenario over a prebuilt overlapping gold-standard cover. */
+    private static QualityResult evaluate(final String stemmerName, final String language,
+            final ProcessingMode mode, final GoldStandardCover cover, final StemmerFunction stemmer) {
         final Map<String, Long> global = new HashMap<>();
-        long rows = 0;
-        long words = 0;
-        long singletonRows = 0;
-        long pairRows = 0;
-        long underPossible = 0;
         long withinSameStem = 0;
         final Set<String> stems = new HashSet<>();
         final Map<String, Long> local = new HashMap<>();
-        final List<Map<String, Long>> contingency = new ArrayList<>();
-        final List<Long> groupSizes = new ArrayList<>();
-        for (GoldStandardGroup group : groups) {
-            final List<String> forms = group.forms();
-            if (!mode.includes(forms)) {
-                continue;
+        final String[] outputs = new String[cover.forms().size()];
+        for (int index = 0; index < outputs.length; index++) {
+            final String form = cover.forms().get(index);
+            final String output;
+            try {
+                output = stemmer.stem(form);
+            } catch (IOException exception) {
+                throw failure(stemmerName, language, mode, cover.representativeRow(index), form,
+                        "the stemmer threw an exception", exception);
             }
-            rows = add(rows, 1, "applied dictionary rows");
-            words = add(words, forms.size(), "processed word forms");
-            if (forms.size() == 1) {
-                singletonRows = add(singletonRows, 1, "singleton dictionary rows");
-            } else {
-                pairRows = add(pairRows, 1, "dictionary rows contributing under-stemming pairs");
+            if (output == null) {
+                throw failure(stemmerName, language, mode, cover.representativeRow(index), form,
+                        "the stemmer returned null", null);
             }
-            underPossible = add(underPossible, chooseTwo(forms.size()), "under-stemming possible pairs");
+            outputs[index] = output;
+            global.merge(output, 1L, (left, right) -> add(left, right, "global stem frequency"));
+            stems.add(output);
+        }
+        for (GoldStandardGroup group : cover.groups()) {
             local.clear();
-            for (String form : forms) {
-                final String output;
-                try {
-                    output = stemmer.stem(form);
-                } catch (IOException exception) {
-                    throw failure(stemmerName, language, mode, group.rowNumber(), form,
-                            "the stemmer threw an exception", exception);
-                }
-                if (output == null) {
-                    throw failure(stemmerName, language, mode, group.rowNumber(), form,
-                            "the stemmer returned null", null);
-                }
+            for (String form : group.forms()) {
+                final String output = outputs[cover.indexOf(form)];
                 local.merge(output, 1L, (left, right) -> add(left, right, "group-to-stem frequency"));
-                global.merge(output, 1L, (left, right) -> add(left, right, "global stem frequency"));
-                stems.add(output);
             }
             for (long frequency : local.values()) {
                 withinSameStem = add(withinSameStem, chooseTwo(frequency), "within-group merged pairs");
             }
-            contingency.add(Map.copyOf(local));
-            groupSizes.add((long) forms.size());
         }
+        for (GoldStandardCover.DuplicateRelation duplicate : cover.duplicateRelations()) {
+            if (outputs[duplicate.leftFormIndex()].equals(outputs[duplicate.rightFormIndex()])) {
+                withinSameStem = subtract(withinSameStem, duplicate.extraOccurrences(),
+                        "duplicate within-group merged pairs");
+            }
+        }
+        final long words = cover.forms().size();
+        final long underPossible = cover.relatedPairs();
         long allPairs = chooseTwo(words);
         long overPossible = subtract(allPairs, underPossible, "over-stemming possible pairs");
         long allSameStem = 0;
@@ -116,47 +114,10 @@ public final class QualityEvaluator {
         }
         final long underError = subtract(underPossible, withinSameStem, "under-stemming error pairs");
         final long overError = subtract(allSameStem, withinSameStem, "over-stemming error pairs");
-        final PartitionMetrics partition = partitionMetrics(words, underPossible, allSameStem,
-                withinSameStem, groupSizes, global, contingency);
         return new QualityResult(stemmerName, language, mode, OutputPolicy.PRIMARY_OUTPUT,
-                rows, words, singletonRows, pairRows, words, 0, words == 0 ? 0 : 1, words, stems.size(), overError, overPossible,
-                underError, underPossible, partition);
-    }
-
-    /** Calculates strict-partition metrics from the exact contingency table. */
-    private static PartitionMetrics partitionMetrics(final long words, final long rowPairs, final long columnPairs,
-            final long indexPairs, final List<Long> groupSizes, final Map<String, Long> global,
-            final List<Map<String, Long>> contingency) {
-        if (words == 0) { return new PartitionMetrics(0.0, 0.0, 0.0, 0.0, 0.0); }
-        final double totalPairs = chooseTwo(words);
-        final double expected = totalPairs == 0.0 ? 0.0 : (double) rowPairs * columnPairs / totalPairs;
-        final double maximum = (rowPairs + (double) columnPairs) / 2.0;
-        final double adjustedRand = maximum == expected ? 1.0 : (indexPairs - expected) / (maximum - expected);
-        final double goldEntropy = entropy(words, groupSizes);
-        final double predictedEntropy = entropy(words, global.values());
-        double mutualInformation = 0.0;
-        for (int group = 0; group < contingency.size(); group++) {
-            final long groupSize = groupSizes.get(group);
-            for (Map.Entry<String, Long> cell : contingency.get(group).entrySet()) {
-                final double frequency = cell.getValue();
-                mutualInformation += frequency / words * Math.log(frequency * words
-                        / (groupSize * (double) global.get(cell.getKey())));
-            }
-        }
-        final double homogeneity = goldEntropy == 0.0 ? 1.0 : mutualInformation / goldEntropy;
-        final double completeness = predictedEntropy == 0.0 ? 1.0 : mutualInformation / predictedEntropy;
-        final double vMeasure = homogeneity + completeness == 0.0 ? 0.0
-                : 2.0 * homogeneity * completeness / (homogeneity + completeness);
-        final double nmiDenominator = (goldEntropy + predictedEntropy) / 2.0;
-        final double nmi = nmiDenominator == 0.0 ? 1.0 : mutualInformation / nmiDenominator;
-        return new PartitionMetrics(adjustedRand, homogeneity, completeness, vMeasure, nmi);
-    }
-
-    /** Calculates natural-log entropy from category frequencies. */
-    private static double entropy(final long total, final Iterable<Long> frequencies) {
-        double weightedLogs = 0.0;
-        for (long frequency : frequencies) { weightedLogs += frequency * Math.log(frequency); }
-        return Math.log(total) - weightedLogs / total;
+                cover.groups().size(), words, cover.singletonRows(), cover.pairRows(), words, 0,
+                words == 0 ? 0 : 1, words, stems.size(), overError, overPossible,
+                underError, underPossible, null);
     }
 
     /**
@@ -175,19 +136,14 @@ public final class QualityEvaluator {
     public static QualityResult evaluateBatch(final String stemmerName, final String language,
             final ProcessingMode mode, final List<GoldStandardGroup> groups, final BatchStemmer stemmer)
             throws IOException {
-        final List<String> included = new ArrayList<>();
-        for (GoldStandardGroup group : groups) {
-            if (mode.includes(group.forms())) {
-                included.addAll(group.forms());
-            }
-        }
-        final String[] outputs = stemmer.stem(included.toArray(String[]::new));
-        if (outputs == null || outputs.length != included.size()) {
+        final GoldStandardCover cover = GoldStandardCover.create(groups, mode);
+        final String[] outputs = stemmer.stem(cover.forms().toArray(String[]::new));
+        if (outputs == null || outputs.length != cover.forms().size()) {
             throw new IOException("JMH stemmer " + stemmerName + " returned an invalid output batch for language "
                     + language + " and processing mode " + mode + ".");
         }
         final int[] index = {0};
-        return evaluate(stemmerName, language, mode, groups, word -> {
+        return evaluate(stemmerName, language, mode, cover, word -> {
             final String output = outputs[index[0]++];
             if (output == null) {
                 throw new IOException("JMH stemmer " + stemmerName + " returned null for language " + language
