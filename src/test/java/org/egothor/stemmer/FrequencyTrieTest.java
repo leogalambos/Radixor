@@ -46,8 +46,18 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import org.egothor.stemmer.trie.CompiledNode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -972,6 +982,167 @@ class FrequencyTrieTest {
                 () -> assertFalse(fingerprintA.equals(differentMetadataFingerprint)));
     }
 
+    /**
+     * Verifies that trie construction does not calculate the canonical fingerprint.
+     */
+    @Test
+    @Tag("fingerprint")
+    @DisplayName("Construction does not calculate fingerprint")
+    void constructionDoesNotCalculateFingerprint() {
+        final AtomicInteger toStringCalls = new AtomicInteger();
+        final ObservableValue value = new ObservableValue("observed", toStringCalls);
+
+        directCompiledObservableTrie(value);
+
+        assertEquals(0, toStringCalls.get());
+    }
+
+    /**
+     * Verifies that ordinary read-only trie operations do not calculate the
+     * canonical fingerprint.
+     */
+    @Test
+    @Tag("fingerprint")
+    @DisplayName("Ordinary operations do not calculate fingerprint")
+    void ordinaryOperationsDoNotCalculateFingerprint() {
+        final AtomicInteger toStringCalls = new AtomicInteger();
+        final ObservableValue value = new ObservableValue("observed", toStringCalls);
+        final FrequencyTrie<ObservableValue> trie = observableTrie(value);
+        toStringCalls.set(0);
+
+        final ObservableValue preferred = trie.get("alpha");
+        final ObservableValue[] allValues = trie.getAll("alpha");
+        final List<ValueCount<ObservableValue>> entries = trie.getEntries("alpha");
+        final int trieSize = trie.size();
+        final TrieMetadata metadata = trie.metadata();
+        final WordTraversalDirection traversalDirection = trie.traversalDirection();
+
+        assertEquals(0, toStringCalls.get());
+        assertAll(() -> assertSame(value, preferred),
+                () -> assertEquals(1, allValues.length),
+                () -> assertSame(value, allValues[0]),
+                () -> assertEquals(1, entries.size()),
+                () -> assertSame(value, entries.get(0).value()),
+                () -> assertEquals(1, entries.get(0).count()),
+                () -> assertTrue(trieSize > 0),
+                () -> assertEquals(metadata.traversalDirection(), traversalDirection));
+    }
+
+    /**
+     * Verifies that the first string fingerprint request computes and caches the
+     * canonical digest.
+     */
+    @Test
+    @Tag("fingerprint")
+    @DisplayName("First getFingerprint calculates and caches fingerprint")
+    void firstGetFingerprintCalculatesAndCachesFingerprint() {
+        final AtomicInteger toStringCalls = new AtomicInteger();
+        final ObservableValue value = new ObservableValue("observed", toStringCalls);
+        final FrequencyTrie<ObservableValue> trie = observableTrie(value);
+        toStringCalls.set(0);
+
+        final String firstFingerprint = trie.getFingerprint();
+        final int callsAfterFirstFingerprint = toStringCalls.get();
+        final String secondFingerprint = trie.getFingerprint();
+        final byte[] fingerprintBytes = trie.copyFingerprintBytes();
+
+        assertAll(() -> assertTrue(callsAfterFirstFingerprint > 0),
+                () -> assertEquals(callsAfterFirstFingerprint, toStringCalls.get()),
+                () -> assertEquals(firstFingerprint, secondFingerprint),
+                () -> assertEquals(firstFingerprint, toLowerHex(fingerprintBytes)));
+    }
+
+    /**
+     * Verifies that the raw-byte accessor can initialize the canonical digest cache
+     * and still returns defensive copies.
+     */
+    @Test
+    @Tag("fingerprint")
+    @DisplayName("copyFingerprintBytes can initialize fingerprint cache")
+    void copyFingerprintBytesCanInitializeFingerprintCache() {
+        final AtomicInteger toStringCalls = new AtomicInteger();
+        final ObservableValue value = new ObservableValue("observed", toStringCalls);
+        final FrequencyTrie<ObservableValue> trie = observableTrie(value);
+        toStringCalls.set(0);
+
+        final byte[] firstFingerprintBytes = trie.copyFingerprintBytes();
+        final int callsAfterFirstCopy = toStringCalls.get();
+        final String expectedFingerprint = toLowerHex(firstFingerprintBytes);
+        firstFingerprintBytes[0] = (byte) (firstFingerprintBytes[0] ^ 0x7F);
+
+        final byte[] secondFingerprintBytes = trie.copyFingerprintBytes();
+        final String fingerprint = trie.getFingerprint();
+
+        assertAll(() -> assertTrue(callsAfterFirstCopy > 0),
+                () -> assertEquals(32, firstFingerprintBytes.length),
+                () -> assertEquals(callsAfterFirstCopy, toStringCalls.get()),
+                () -> assertEquals(expectedFingerprint, toLowerHex(secondFingerprintBytes)),
+                () -> assertEquals(expectedFingerprint, fingerprint),
+                () -> assertFalse(Arrays.equals(firstFingerprintBytes, secondFingerprintBytes)));
+    }
+
+    /**
+     * Verifies that concurrent first fingerprint access performs one digest
+     * calculation and publishes the same result to all readers.
+     *
+     * @throws Exception if the worker coordination fails unexpectedly
+     */
+    @Test
+    @Tag("fingerprint")
+    @DisplayName("Concurrent first access calculates fingerprint once")
+    void concurrentFirstAccessCalculatesFingerprintOnce() throws Exception {
+        final AtomicInteger toStringCalls = new AtomicInteger();
+        final ObservableValue value = new ObservableValue("observed", toStringCalls);
+        final FrequencyTrie<ObservableValue> trie = observableTrie(value);
+        final CountDownLatch startWorkers = new CountDownLatch(1);
+        final CountDownLatch firstToStringEntered = new CountDownLatch(1);
+        final CountDownLatch releaseFirstToString = new CountDownLatch(1);
+        final int workerCount = 8;
+        final ExecutorService executorService = Executors.newFixedThreadPool(workerCount);
+        final List<Future<String>> futures = new ArrayList<>(workerCount);
+        toStringCalls.set(0);
+        value.blockFirstToStringInvocation(firstToStringEntered, releaseFirstToString);
+
+        try {
+            for (int workerIndex = 0; workerIndex < workerCount; workerIndex++) {
+                final int fingerprintAccessIndex = workerIndex;
+                futures.add(executorService.submit(() -> {
+                    startWorkers.await();
+                    if (fingerprintAccessIndex % 2 == 0) {
+                        return trie.getFingerprint();
+                    }
+                    return toLowerHex(trie.copyFingerprintBytes());
+                }));
+            }
+
+            startWorkers.countDown();
+            assertTrue(firstToStringEntered.await(5, TimeUnit.SECONDS),
+                    "Timed out waiting for the first fingerprint calculation to start.");
+            releaseFirstToString.countDown();
+
+            final Set<String> observedFingerprints = new HashSet<>();
+            observedFingerprints.add(futures.get(0).get(5, TimeUnit.SECONDS));
+            final int callsAfterFirstCompletedAccess = toStringCalls.get();
+            for (int index = 1; index < futures.size(); index++) {
+                observedFingerprints.add(futures.get(index).get(5, TimeUnit.SECONDS));
+            }
+
+            final String fingerprint = trie.getFingerprint();
+            final byte[] fingerprintBytes = trie.copyFingerprintBytes();
+
+            assertAll(() -> assertEquals(1, observedFingerprints.size()),
+                    () -> assertTrue(callsAfterFirstCompletedAccess > 0),
+                    () -> assertEquals(callsAfterFirstCompletedAccess, toStringCalls.get()),
+                    () -> assertTrue(observedFingerprints.contains(fingerprint)),
+                    () -> assertEquals(fingerprint, toLowerHex(fingerprintBytes)));
+        } finally {
+            releaseFirstToString.countDown();
+            executorService.shutdownNow();
+            assertTrue(executorService.awaitTermination(5, TimeUnit.SECONDS),
+                    "Timed out waiting for fingerprint worker shutdown.");
+        }
+    }
+
     private static void assertLowercaseSha256Hex(final String fingerprint) {
         assertEquals(64, fingerprint.length());
         for (int index = 0; index < fingerprint.length(); index++) {
@@ -990,6 +1161,173 @@ class FrequencyTrieTest {
         }
         return builder.toString();
     }
+
+    /**
+     * Builds a small trie containing one observable value.
+     *
+     * @param value observable value to store
+     * @return compiled trie containing {@code value}
+     */
+    private static FrequencyTrie<ObservableValue> observableTrie(final ObservableValue value) {
+        final FrequencyTrie.Builder<ObservableValue> builder = new FrequencyTrie.Builder<>(ObservableValue[]::new,
+                ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS);
+        builder.put("alpha", value);
+        return builder.build();
+    }
+
+    /**
+     * Builds a one-node compiled trie directly so constructor-time fingerprinting is
+     * observable without build-time value ordering.
+     *
+     * @param value observable value to store at the root
+     * @return compiled trie containing {@code value}
+     */
+    @SuppressWarnings("unchecked")
+    private static FrequencyTrie<ObservableValue> directCompiledObservableTrie(final ObservableValue value) {
+        final CompiledNode<ObservableValue>[] children = new CompiledNode[0];
+        final CompiledNode<ObservableValue> root = new CompiledNode<>(new char[0], children,
+                new ObservableValue[] { value }, new int[] { 1 });
+        final TrieMetadata metadata = TrieMetadata.forCompilation(WordTraversalDirection.BACKWARD,
+                ReductionSettings.withDefaults(ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS),
+                DiacriticProcessingMode.AS_IS, CaseProcessingMode.LOWERCASE_WITH_LOCALE_ROOT);
+        return FrequencyTrie.fromCompiled(ObservableValue[]::new, root, metadata);
+    }
+
+    /**
+     * Test value whose textual representation records every invocation.
+     */
+    private static final class ObservableValue {
+
+        /**
+         * Deterministic text returned by {@link #toString()}.
+         */
+        private final String text;
+
+        /**
+         * Invocation counter owned by the current test.
+         */
+        private final AtomicInteger toStringCalls;
+
+        /**
+         * Optional first-invocation blocker used by the concurrency test.
+         */
+        private volatile FirstToStringBlocker firstToStringBlocker;
+
+        /**
+         * Creates an observable value.
+         *
+         * @param text          deterministic textual representation
+         * @param toStringCalls invocation counter
+         */
+        ObservableValue(final String text, final AtomicInteger toStringCalls) {
+            this.text = text;
+            this.toStringCalls = toStringCalls;
+        }
+
+        /**
+         * Blocks the next {@link #toString()} invocation until the supplied release
+         * latch opens.
+         *
+         * @param entered latch counted down when the invocation reaches the blocker
+         * @param release latch that releases the blocked invocation
+         */
+        void blockFirstToStringInvocation(final CountDownLatch entered, final CountDownLatch release) {
+            this.firstToStringBlocker = new FirstToStringBlocker(entered, release);
+        }
+
+        /**
+         * Returns the deterministic value text while recording the invocation.
+         *
+         * @return deterministic value text
+         */
+        @Override
+        public String toString() {
+            this.toStringCalls.incrementAndGet();
+            final FirstToStringBlocker blocker = this.firstToStringBlocker;
+            if (blocker != null) {
+                blocker.blockFirstInvocation();
+            }
+            return this.text;
+        }
+
+        /**
+         * Compares observable values by deterministic text only.
+         *
+         * @param other other object
+         * @return {@code true} when both values have the same deterministic text
+         */
+        @Override
+        public boolean equals(final Object other) {
+            if (this == other) {
+                return true;
+            }
+            if (!(other instanceof ObservableValue)) {
+                return false;
+            }
+            final ObservableValue that = (ObservableValue) other;
+            return this.text.equals(that.text);
+        }
+
+        /**
+         * Returns a stable hash code based on deterministic text.
+         *
+         * @return stable hash code
+         */
+        @Override
+        public int hashCode() {
+            return this.text.hashCode();
+        }
+    }
+
+    /**
+     * One-shot latch pair used to hold the first observable {@code toString()}
+     * invocation inside fingerprint calculation.
+     */
+    private static final class FirstToStringBlocker {
+
+        /**
+         * Latch signaled when the first invocation reaches the blocker.
+         */
+        private final CountDownLatch entered;
+
+        /**
+         * Latch that releases the blocked invocation.
+         */
+        private final CountDownLatch release;
+
+        /**
+         * Ensures only one invocation blocks.
+         */
+        private final AtomicInteger blockClaims = new AtomicInteger();
+
+        /**
+         * Creates a one-shot blocker.
+         *
+         * @param entered latch signaled when blocking starts
+         * @param release latch that releases the blocked invocation
+         */
+        FirstToStringBlocker(final CountDownLatch entered, final CountDownLatch release) {
+            this.entered = entered;
+            this.release = release;
+        }
+
+        /**
+         * Blocks only the first caller until the release latch opens.
+         */
+        void blockFirstInvocation() {
+            if (this.blockClaims.compareAndSet(0, 1)) {
+                this.entered.countDown();
+                try {
+                    this.release.await();
+                } catch (InterruptedException exception) {
+                    Thread.currentThread().interrupt();
+                    throw new IllegalStateException("Interrupted while coordinating observable toString().",
+                            exception);
+                }
+            }
+        }
+    }
+
     /**
      * Verifies that persistence methods reject {@code null} arguments.
      *

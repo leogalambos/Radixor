@@ -47,6 +47,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.IntFunction;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -118,10 +119,19 @@ public final class FrequencyTrie<V> {
     private final TrieMetadata metadata;
 
     /**
-     * Canonical SHA-256 fingerprint bytes. The internal array is never exposed
-     * directly to callers.
+     * Lazily initialized canonical SHA-256 fingerprint bytes. Every read and write
+     * is guarded by {@link #fingerprintLock}. The value is assigned only after
+     * calculation succeeds, so failed initialization leaves the cache empty. The
+     * internal array is never exposed directly to callers.
      */
-    private final byte[] fingerprintBytes;
+    private byte[] fingerprintBytes;
+
+    /**
+     * Guards all access to {@link #fingerprintBytes}. Holding this lock for every
+     * cache read and write safely publishes successful lazy initialization to
+     * subsequent callers.
+     */
+    private final ReentrantLock fingerprintLock = new ReentrantLock();
 
     /**
      * Cached traversal direction used for key lookup.
@@ -263,7 +273,6 @@ public final class FrequencyTrie<V> {
             final TrieMetadata metadata) {
         this.root = Objects.requireNonNull(root, "root");
         this.metadata = Objects.requireNonNull(metadata, "metadata");
-        this.fingerprintBytes = computeFingerprintBytes(root, metadata);
         this.lookupTraversalDirection = metadata.traversalDirection();
         this.lowercasesLookupKeys = metadata.caseProcessingMode() == CaseProcessingMode.LOWERCASE_WITH_LOCALE_ROOT;
         this.removeDiacritics = metadata.diacriticProcessingMode() == DiacriticProcessingMode.REMOVE;
@@ -623,10 +632,15 @@ public final class FrequencyTrie<V> {
      * state, absolute file paths, timestamps, or other process-local state.
      * </p>
      *
+     * <p>
+     * The fingerprint is calculated on first request and reused by later
+     * fingerprint accessors.
+     * </p>
+     *
      * @return 64-character lowercase hexadecimal SHA-256 fingerprint
      */
     public String getFingerprint() {
-        return toLowerHex(this.fingerprintBytes);
+        return toLowerHex(fingerprintBytes());
     }
 
     /**
@@ -637,10 +651,43 @@ public final class FrequencyTrie<V> {
      * trie.
      * </p>
      *
+     * <p>
+     * The fingerprint is calculated on first request and reused by later
+     * fingerprint accessors.
+     * </p>
+     *
      * @return defensive copy of the 32-byte SHA-256 fingerprint
      */
     public byte[] copyFingerprintBytes() {
-        return Arrays.copyOf(this.fingerprintBytes, this.fingerprintBytes.length);
+        final byte[] localFingerprintBytes = fingerprintBytes();
+        return Arrays.copyOf(localFingerprintBytes, localFingerprintBytes.length);
+    }
+
+    /**
+     * Returns the cached raw SHA-256 fingerprint bytes, computing them on the first
+     * request.
+     *
+     * <p>
+     * Access to the cache is guarded by {@link #fingerprintLock}. Because every read
+     * and write of the cache occurs while holding the same lock, successful
+     * initialization is safely published to all subsequent callers. If calculation
+     * fails, no value is cached and a later call may retry.
+     * </p>
+     *
+     * @return internal cached raw SHA-256 fingerprint bytes
+     */
+    private byte[] fingerprintBytes() {
+        this.fingerprintLock.lock();
+        try {
+            byte[] localFingerprintBytes = this.fingerprintBytes;
+            if (localFingerprintBytes == null) {
+                localFingerprintBytes = computeFingerprintBytes(this.root, this.metadata);
+                this.fingerprintBytes = localFingerprintBytes;
+            }
+            return localFingerprintBytes;
+        } finally {
+            this.fingerprintLock.unlock();
+        }
     }
 
     private static <V> byte[] computeFingerprintBytes(final CompiledNode<V> root, final TrieMetadata metadata) {
