@@ -179,7 +179,7 @@ public final class FrequencyTrie<V> {
     /**
      * Binary format version.
      */
-    private static final int STREAM_VERSION = 6;
+    private static final int STREAM_VERSION = 7;
 
     /**
      * Version where traversal-direction ordinal is persisted.
@@ -205,6 +205,11 @@ public final class FrequencyTrie<V> {
      * Version where contracted accepting nodes are persisted.
      */
     private static final int ACCEPTING_NODE_VERSION = 6;
+
+    /**
+     * Version where distinct values are persisted once in a stream-local table.
+     */
+    private static final int VALUE_TABLE_VERSION = 7;
 
     /**
      * Argument name for lookup keys.
@@ -748,6 +753,9 @@ public final class FrequencyTrie<V> {
         final Map<CompiledNode<V>, Integer> nodeIds = new IdentityHashMap<>();
         final List<CompiledNode<V>> orderedNodes = new ArrayList<>();
         assignNodeIds(this.root, nodeIds, orderedNodes);
+        final Map<V, Integer> valueIds = new LinkedHashMap<>();
+        final List<V> distinctValues = new ArrayList<>();
+        collectDistinctValues(orderedNodes, valueIds, distinctValues);
 
         if (LOGGER.isLoggable(Level.FINE)) {
             LOGGER.log(Level.FINE, "Writing compiled trie with {0} canonical nodes.", orderedNodes.size());
@@ -757,10 +765,11 @@ public final class FrequencyTrie<V> {
         dataOutput.writeInt(STREAM_VERSION);
         dataOutput.writeInt(orderedNodes.size());
         dataOutput.writeInt(nodeIds.get(this.root));
-        writeMetadata(dataOutput, this.metadata);
+        writeMetadata(dataOutput, metadataForCurrentStream(this.metadata));
+        writeValueTable(dataOutput, valueCodec, distinctValues);
 
-        for (CompiledNode<V> node : orderedNodes) {
-            writeNode(dataOutput, valueCodec, node, nodeIds);
+        for (int nodeId = 0; nodeId < orderedNodes.size(); nodeId++) {
+            writeNode(dataOutput, orderedNodes.get(nodeId), nodeId, nodeIds, valueIds);
         }
 
         dataOutput.flush();
@@ -824,6 +833,24 @@ public final class FrequencyTrie<V> {
     }
 
     /**
+     * Creates metadata aligned with the stream version emitted by the current
+     * writer.
+     *
+     * <p>
+     * The returned metadata preserves every semantic setting from the trie while
+     * reporting the current binary format version. The immutable metadata stored by
+     * the trie is not modified.
+     * </p>
+     *
+     * @param metadata source trie metadata
+     * @return metadata aligned with {@link #STREAM_VERSION}
+     */
+    private static TrieMetadata metadataForCurrentStream(final TrieMetadata metadata) {
+        return new TrieMetadata(STREAM_VERSION, metadata.traversalDirection(), metadata.reductionSettings(),
+                metadata.diacriticProcessingMode(), metadata.caseProcessingMode());
+    }
+
+    /**
      * Returns the number of canonical compiled nodes reachable from the root.
      *
      * <p>
@@ -864,16 +891,63 @@ public final class FrequencyTrie<V> {
     }
 
     /**
-     * Writes one compiled node.
+     * Collects the deterministic equality-based value table for serialization.
+     *
+     * <p>
+     * Nodes are visited in canonical node-identifier order and values are visited
+     * in their existing node-local order. The first occurrence according to
+     * {@link Object#equals(Object)} and {@link Object#hashCode()} assigns the table
+     * index.
+     * </p>
+     *
+     * @param orderedNodes   canonical nodes in identifier order
+     * @param valueIds       destination mapping from values to table indexes
+     * @param distinctValues destination values in table-index order
+     * @param <V>            value type
+     */
+    private static <V> void collectDistinctValues(final List<CompiledNode<V>> orderedNodes,
+            final Map<V, Integer> valueIds, final List<V> distinctValues) {
+        for (CompiledNode<V> node : orderedNodes) {
+            for (V value : node.orderedValues()) {
+                if (!valueIds.containsKey(value)) {
+                    final int valueId = distinctValues.size();
+                    valueIds.put(value, valueId);
+                    distinctValues.add(value);
+                }
+            }
+        }
+    }
+
+    /**
+     * Writes every distinct value exactly once in table-index order.
+     *
+     * @param dataOutput     output stream
+     * @param valueCodec     codec responsible for value encoding
+     * @param distinctValues distinct values in deterministic table order
+     * @param <V>            value type
+     * @throws IOException if writing the table fails
+     */
+    private static <V> void writeValueTable(final DataOutputStream dataOutput, final ValueStreamCodec<V> valueCodec,
+            final List<V> distinctValues) throws IOException {
+        dataOutput.writeInt(distinctValues.size());
+        for (V value : distinctValues) {
+            valueCodec.write(dataOutput, value);
+        }
+    }
+
+    /**
+     * Writes one compiled node using stream-local value-table indexes.
      *
      * @param dataOutput output
-     * @param valueCodec value codec
      * @param node       node to write
+     * @param nodeId     canonical identifier of {@code node}
      * @param nodeIds    node identifiers
+     * @param valueIds   value-table indexes
+     * @param <V>        value type
      * @throws IOException if writing fails
      */
-    private static <V> void writeNode(final DataOutputStream dataOutput, final ValueStreamCodec<V> valueCodec,
-            final CompiledNode<V> node, final Map<CompiledNode<V>, Integer> nodeIds) throws IOException {
+    private static <V> void writeNode(final DataOutputStream dataOutput, final CompiledNode<V> node, final int nodeId,
+            final Map<CompiledNode<V>, Integer> nodeIds, final Map<V, Integer> valueIds) throws IOException {
         dataOutput.writeBoolean(node.acceptsRemainingInput());
         dataOutput.writeInt(node.edgeLabels().length);
         for (int index = 0; index < node.edgeLabels().length; index++) {
@@ -887,7 +961,15 @@ public final class FrequencyTrie<V> {
 
         dataOutput.writeInt(node.orderedValues().length);
         for (int index = 0; index < node.orderedValues().length; index++) {
-            valueCodec.write(dataOutput, node.orderedValues()[index]);
+            final V value = node.orderedValues()[index];
+            final Integer valueId = valueIds.get(value);
+            if (valueId == null) {
+                final String valueContext = value == null ? "null"
+                        : value.getClass().getName() + '[' + value + ']';
+                throw new IOException("Missing value table index at canonical node " + nodeId + ", local value "
+                        + index + ": " + valueContext);
+            }
+            dataOutput.writeInt(valueId);
             dataOutput.writeInt(node.orderedCounts()[index]);
         }
     }
@@ -992,8 +1074,10 @@ public final class FrequencyTrie<V> {
             }
 
             final TrieMetadata sourceMetadata = readMetadata(dataInput, version);
+            final V[] valueTable = version >= VALUE_TABLE_VERSION ? readValueTable(dataInput, arrayFactory, valueCodec)
+                    : null;
             final int effectiveMaxExpandedIndex = maxExpandedIndex >= 0 ? maxExpandedIndex : DEFAULT_MAX_EXPANDED_INDEX;
-            final CompiledNode<V>[] nodes = readNodes(dataInput, arrayFactory, valueCodec, nodeCount,
+            final CompiledNode<V>[] nodes = readNodes(dataInput, arrayFactory, valueCodec, valueTable, nodeCount,
                     effectiveMaxExpandedIndex, version);
             final CompiledNode<V> rootNode = nodes[rootNodeId];
 
@@ -1002,6 +1086,36 @@ public final class FrequencyTrie<V> {
             }
 
             return new FrequencyTrie<>(arrayFactory, rootNode, sourceMetadata);
+        }
+
+        /**
+         * Reads the temporary stream-local value table.
+         *
+         * <p>
+         * Each serialized value is decoded exactly once. The returned array is used
+         * only while materializing node value arrays and is not retained by the
+         * resulting trie.
+         * </p>
+         *
+         * @param dataInput    input stream
+         * @param arrayFactory typed-array factory
+         * @param valueCodec   codec responsible for value decoding
+         * @param <V>          value type
+         * @return decoded values in table-index order
+         * @throws IOException if the count is negative or value decoding fails
+         */
+        private static <V> V[] readValueTable(final DataInputStream dataInput, final IntFunction<V[]> arrayFactory,
+                final ValueStreamCodec<V> valueCodec) throws IOException {
+            final int distinctValueCount = dataInput.readInt();
+            if (distinctValueCount < 0) {
+                throw new IOException("Negative distinct value count: " + distinctValueCount);
+            }
+
+            final V[] valueTable = arrayFactory.apply(distinctValueCount);
+            for (int valueIndex = 0; valueIndex < distinctValueCount; valueIndex++) {
+                valueTable[valueIndex] = valueCodec.read(dataInput);
+            }
+            return valueTable;
         }
 
         private static DataInputStream wrapInputStream(final InputStream inputStream) {
@@ -1067,8 +1181,8 @@ public final class FrequencyTrie<V> {
         }
 
         private static <V> CompiledNode<V>[] readNodes(final DataInputStream dataInput,
-                final IntFunction<V[]> arrayFactory, final ValueStreamCodec<V> valueCodec, final int nodeCount,
-                final int maxExpandedIndex, final int version) throws IOException {
+                final IntFunction<V[]> arrayFactory, final ValueStreamCodec<V> valueCodec, final V[] valueTable,
+                final int nodeCount, final int maxExpandedIndex, final int version) throws IOException {
             final char[][] edgeLabelsByNode = new char[nodeCount][];
             final int[][] childNodeIdsByNode = new int[nodeCount][];
             @SuppressWarnings("unchecked")
@@ -1111,7 +1225,17 @@ public final class FrequencyTrie<V> {
                 orderedCountsByNode[nodeIndex] = new int[valueCount];
 
                 for (int valueIndex = 0; valueIndex < valueCount; valueIndex++) {
-                    orderedValuesByNode[nodeIndex][valueIndex] = valueCodec.read(dataInput);
+                    if (version >= VALUE_TABLE_VERSION) {
+                        final int valueTableIndex = dataInput.readInt();
+                        if (valueTableIndex < 0 || valueTableIndex >= valueTable.length) {
+                            throw new IOException("Invalid value table index at node " + nodeIndex + ", local value "
+                                    + valueIndex + ": " + valueTableIndex + "; table size is " + valueTable.length
+                                    + '.');
+                        }
+                        orderedValuesByNode[nodeIndex][valueIndex] = valueTable[valueTableIndex];
+                    } else {
+                        orderedValuesByNode[nodeIndex][valueIndex] = valueCodec.read(dataInput);
+                    }
                     orderedCountsByNode[nodeIndex][valueIndex] = dataInput.readInt();
                     if (orderedCountsByNode[nodeIndex][valueIndex] <= 0) {
                         throw new IOException("Non-positive stored count at node " + nodeIndex + ", value index "

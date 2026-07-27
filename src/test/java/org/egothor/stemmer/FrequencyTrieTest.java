@@ -44,6 +44,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -95,6 +96,49 @@ class FrequencyTrieTest {
     };
 
     /**
+     * Codec that records the number of encoded and decoded string values.
+     */
+    private static final class CountingStringCodec implements FrequencyTrie.ValueStreamCodec<String> {
+
+        /**
+         * Number of completed write invocations.
+         */
+        private int writeCount;
+
+        /**
+         * Number of completed read invocations.
+         */
+        private int readCount;
+
+        /**
+         * Writes one string and records the invocation.
+         *
+         * @param dataOutput destination stream
+         * @param value      value to encode
+         * @throws IOException if writing fails
+         */
+        @Override
+        public void write(final DataOutputStream dataOutput, final String value) throws IOException {
+            dataOutput.writeUTF(value);
+            this.writeCount++;
+        }
+
+        /**
+         * Reads one string and records the invocation.
+         *
+         * @param dataInput source stream
+         * @return decoded string
+         * @throws IOException if reading fails
+         */
+        @Override
+        public String read(final DataInputStream dataInput) throws IOException {
+            final String value = dataInput.readUTF();
+            this.readCount++;
+            return value;
+        }
+    }
+
+    /**
      * Creates a builder using the ranked get-all reduction mode.
      *
      * @return new builder
@@ -102,6 +146,21 @@ class FrequencyTrieTest {
     private static FrequencyTrie.Builder<String> rankedBuilder() {
         return new FrequencyTrie.Builder<String>(String[]::new,
                 ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS);
+    }
+
+    /**
+     * Builds a backward trie whose repeated equal values remain on structurally
+     * distinct compiled nodes.
+     *
+     * @return trie containing two separate but equal shared-value inputs
+     */
+    private static FrequencyTrie<String> sharedValueTrie() {
+        final FrequencyTrie.Builder<String> builder = rankedBuilder();
+        builder.put("ab", new String("shared"));
+        builder.put("xab", "left");
+        builder.put("cb", new String("shared"));
+        builder.put("ycb", "right");
+        return builder.build();
     }
 
     /**
@@ -905,6 +964,7 @@ class FrequencyTrieTest {
 
         assertAll(() -> assertEquals(original.size(), restored.size()),
                 () -> assertEquals(original.getFingerprint(), restored.getFingerprint()),
+                () -> assertEquals(original.metadata(), restored.metadata()),
                 () -> assertEquals(original.get(""), restored.get("")),
                 () -> assertArrayEquals(original.getAll(""), restored.getAll("")),
                 () -> assertEquals(original.get("run"), restored.get("run")),
@@ -922,6 +982,134 @@ class FrequencyTrieTest {
                 () -> assertNull(restored.get("missing")),
                 () -> assertArrayEquals(new String[0], restored.getAll("missing")),
                 () -> assertEquals(List.of(), restored.getEntries("missing")));
+    }
+
+    /**
+     * Verifies that the public current-format query reports stream version 7.
+     */
+    @Test
+    @Tag("persistence")
+    @DisplayName("Current compiled trie format version is 7")
+    void currentCompiledTrieFormatVersionIsSeven() {
+        assertEquals(7, FrequencyTrie.currentFormatVersion());
+    }
+
+    /**
+     * Verifies the raw version 7 header, metadata, and deterministic value-table
+     * placement without relying on deserialization.
+     *
+     * @throws IOException if test I/O fails unexpectedly
+     */
+    @Test
+    @Tag("persistence")
+    @DisplayName("Version 7 stream writes header metadata and value table in order")
+    void versionSevenStreamWritesHeaderMetadataAndValueTableInOrder() throws IOException {
+        final FrequencyTrie<String> currentTrie = sharedValueTrie();
+        final TrieMetadata currentMetadata = currentTrie.metadata();
+        final TrieMetadata historicalMetadata = new TrieMetadata(6, currentMetadata.traversalDirection(),
+                currentMetadata.reductionSettings(), currentMetadata.diacriticProcessingMode(),
+                currentMetadata.caseProcessingMode());
+        final FrequencyTrie<String> trie = FrequencyTrie.fromCompiled(String[]::new, currentTrie.root(),
+                historicalMetadata);
+        final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        trie.writeTo(outputStream, STRING_CODEC);
+
+        final DataInputStream dataInput = new DataInputStream(new ByteArrayInputStream(outputStream.toByteArray()));
+        final int magic = dataInput.readInt();
+        final int version = dataInput.readInt();
+        final int nodeCount = dataInput.readInt();
+        final int rootNodeId = dataInput.readInt();
+        final String metadataText = dataInput.readUTF();
+        final int distinctValueCount = dataInput.readInt();
+        final String firstValue = dataInput.readUTF();
+        final String secondValue = dataInput.readUTF();
+        final String thirdValue = dataInput.readUTF();
+
+        assertAll(() -> assertEquals(0x45475452, magic),
+                () -> assertEquals(7, version),
+                () -> assertTrue(nodeCount > 0),
+                () -> assertTrue(rootNodeId >= 0 && rootNodeId < nodeCount),
+                () -> assertTrue(metadataText.contains("\nformatVersion=7\n")),
+                () -> assertEquals(6, trie.metadata().formatVersion()),
+                () -> assertEquals(3, distinctValueCount),
+                () -> assertArrayEquals(new String[] { "shared", "left", "right" },
+                        new String[] { firstValue, secondValue, thirdValue }));
+    }
+
+    /**
+     * Verifies that version 7 serialization deduplicates equal values represented
+     * by distinct Java objects.
+     *
+     * @throws IOException if test I/O fails unexpectedly
+     */
+    @Test
+    @Tag("persistence")
+    @DisplayName("Version 7 writer encodes each equality-distinct value once")
+    void versionSevenWriterEncodesEachEqualityDistinctValueOnce() throws IOException {
+        final FrequencyTrie<String> trie = sharedValueTrie();
+        final CountingStringCodec countingCodec = new CountingStringCodec();
+
+        trie.writeTo(new ByteArrayOutputStream(), countingCodec);
+
+        assertEquals(3, countingCodec.writeCount);
+    }
+
+    /**
+     * Verifies that version 7 deserialization invokes the value codec once per
+     * table entry rather than once per node-local slot.
+     *
+     * @throws IOException if test I/O fails unexpectedly
+     */
+    @Test
+    @Tag("persistence")
+    @DisplayName("Version 7 reader decodes each table value once")
+    void versionSevenReaderDecodesEachTableValueOnce() throws IOException {
+        final FrequencyTrie<String> original = sharedValueTrie();
+        final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        original.writeTo(outputStream, STRING_CODEC);
+        final CountingStringCodec countingCodec = new CountingStringCodec();
+
+        final FrequencyTrie<String> restored = FrequencyTrie.readFrom(
+                new ByteArrayInputStream(outputStream.toByteArray()), String[]::new, countingCodec);
+
+        assertAll(() -> assertEquals(3, countingCodec.readCount),
+                () -> assertEquals("shared", restored.get("ab")),
+                () -> assertEquals("shared", restored.get("cb")),
+                () -> assertEquals("left", restored.get("xab")),
+                () -> assertEquals("right", restored.get("ycb")),
+                () -> assertNull(restored.get("missing")));
+    }
+
+    /**
+     * Verifies that repeated version 7 table references become direct shared value
+     * references in the final compiled node arrays.
+     *
+     * @throws IOException if test I/O fails unexpectedly
+     */
+    @Test
+    @Tag("persistence")
+    @DisplayName("Version 7 materializes shared values directly in compiled nodes")
+    void versionSevenMaterializesSharedValuesDirectlyInCompiledNodes() throws IOException {
+        final FrequencyTrie<String> original = sharedValueTrie();
+        final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        original.writeTo(outputStream, STRING_CODEC);
+
+        final FrequencyTrie<String> restored = FrequencyTrie.readFrom(
+                new ByteArrayInputStream(outputStream.toByteArray()), String[]::new, STRING_CODEC);
+        final CompiledNode<String> suffixBNode = restored.root().findChild('b');
+        final CompiledNode<String> abNode = suffixBNode.findChild('a');
+        final CompiledNode<String> cbNode = suffixBNode.findChild('c');
+        final String abValue = abNode.orderedValues()[0];
+        final String cbValue = cbNode.orderedValues()[0];
+
+        assertAll(() -> assertSame(restored.get("ab"), restored.get("cb")),
+                () -> assertSame(abValue, cbValue),
+                () -> assertSame(restored.get("ab"), abValue),
+                () -> assertEquals(String[].class, abNode.orderedValues().getClass()),
+                () -> assertEquals(String[].class, cbNode.orderedValues().getClass()),
+                () -> assertEquals("left", restored.get("xab")),
+                () -> assertEquals("right", restored.get("ycb")),
+                () -> assertNull(restored.get("missing")));
     }
 
     /**
@@ -1690,6 +1878,156 @@ class FrequencyTrieTest {
     }
 
     /**
+     * Verifies that version 7 deserialization rejects a negative distinct-value
+     * count.
+     */
+    @Test
+    @Tag("persistence")
+    @DisplayName("Version 7 reader rejects negative value table size")
+    void versionSevenReaderRejectsNegativeValueTableSize() {
+        final byte[] bytes = createVersionSevenSerializedStream(dataOutput -> dataOutput.writeInt(-1),
+                dataOutput -> {
+                    // The invalid table size is rejected before node decoding.
+                });
+
+        final IOException exception = assertThrows(IOException.class,
+                () -> FrequencyTrie.readFrom(new ByteArrayInputStream(bytes), String[]::new, STRING_CODEC));
+
+        assertEquals("Negative distinct value count: -1", exception.getMessage());
+    }
+
+    /**
+     * Verifies that version 7 deserialization rejects a negative value-table index
+     * with complete node-local context.
+     */
+    @Test
+    @Tag("persistence")
+    @DisplayName("Version 7 reader rejects negative value table index")
+    void versionSevenReaderRejectsNegativeValueTableIndex() {
+        final byte[] bytes = createVersionSevenSerializedStream(FrequencyTrieTest::writeSingleValueTable,
+                dataOutput -> writeVersionSevenValueNode(dataOutput, -1, 1));
+
+        final IOException exception = assertThrows(IOException.class,
+                () -> FrequencyTrie.readFrom(new ByteArrayInputStream(bytes), String[]::new, STRING_CODEC));
+
+        assertEquals("Invalid value table index at node 0, local value 0: -1; table size is 1.",
+                exception.getMessage());
+    }
+
+    /**
+     * Verifies that version 7 deserialization rejects an index equal to the
+     * value-table size.
+     */
+    @Test
+    @Tag("persistence")
+    @DisplayName("Version 7 reader rejects value table index equal to size")
+    void versionSevenReaderRejectsValueTableIndexEqualToSize() {
+        final byte[] bytes = createVersionSevenSerializedStream(FrequencyTrieTest::writeSingleValueTable,
+                dataOutput -> writeVersionSevenValueNode(dataOutput, 1, 1));
+
+        final IOException exception = assertThrows(IOException.class,
+                () -> FrequencyTrie.readFrom(new ByteArrayInputStream(bytes), String[]::new, STRING_CODEC));
+
+        assertEquals("Invalid value table index at node 0, local value 0: 1; table size is 1.",
+                exception.getMessage());
+    }
+
+    /**
+     * Verifies that version 7 deserialization rejects an index greater than the
+     * value-table size.
+     */
+    @Test
+    @Tag("persistence")
+    @DisplayName("Version 7 reader rejects value table index greater than size")
+    void versionSevenReaderRejectsValueTableIndexGreaterThanSize() {
+        final byte[] bytes = createVersionSevenSerializedStream(FrequencyTrieTest::writeSingleValueTable,
+                dataOutput -> writeVersionSevenValueNode(dataOutput, 2, 1));
+
+        final IOException exception = assertThrows(IOException.class,
+                () -> FrequencyTrie.readFrom(new ByteArrayInputStream(bytes), String[]::new, STRING_CODEC));
+
+        assertEquals("Invalid value table index at node 0, local value 0: 2; table size is 1.",
+                exception.getMessage());
+    }
+
+    /**
+     * Verifies that version 7 deserialization retains positive-count validation
+     * after resolving a valid table reference.
+     */
+    @Test
+    @Tag("persistence")
+    @DisplayName("Version 7 reader rejects zero occurrence count")
+    void versionSevenReaderRejectsZeroOccurrenceCount() {
+        final byte[] bytes = createVersionSevenSerializedStream(FrequencyTrieTest::writeSingleValueTable,
+                dataOutput -> writeVersionSevenValueNode(dataOutput, 0, 0));
+
+        final IOException exception = assertThrows(IOException.class,
+                () -> FrequencyTrie.readFrom(new ByteArrayInputStream(bytes), String[]::new, STRING_CODEC));
+
+        assertEquals("Non-positive stored count at node 0, value index 0: 0", exception.getMessage());
+    }
+
+    /**
+     * Verifies that a truncated version 7 value-table payload remains an
+     * {@link EOFException}.
+     */
+    @Test
+    @Tag("persistence")
+    @DisplayName("Version 7 reader rejects truncated value table")
+    void versionSevenReaderRejectsTruncatedValueTable() {
+        final byte[] bytes = createVersionSevenSerializedStream(dataOutput -> {
+            dataOutput.writeInt(1);
+            dataOutput.writeByte(0);
+        }, dataOutput -> {
+            // Value decoding fails before node decoding.
+        });
+
+        assertThrows(EOFException.class,
+                () -> FrequencyTrie.readFrom(new ByteArrayInputStream(bytes), String[]::new, STRING_CODEC));
+    }
+
+    /**
+     * Verifies that a truncated version 7 node-local table index remains an
+     * {@link EOFException}.
+     */
+    @Test
+    @Tag("persistence")
+    @DisplayName("Version 7 reader rejects truncated node-local value index")
+    void versionSevenReaderRejectsTruncatedNodeLocalValueIndex() {
+        final byte[] bytes = createVersionSevenSerializedStream(FrequencyTrieTest::writeSingleValueTable,
+                dataOutput -> {
+                    dataOutput.writeBoolean(false);
+                    dataOutput.writeInt(0);
+                    dataOutput.writeInt(1);
+                    dataOutput.writeShort(0);
+                });
+
+        assertThrows(EOFException.class,
+                () -> FrequencyTrie.readFrom(new ByteArrayInputStream(bytes), String[]::new, STRING_CODEC));
+    }
+
+    /**
+     * Verifies that a truncated version 7 occurrence count remains an
+     * {@link EOFException}.
+     */
+    @Test
+    @Tag("persistence")
+    @DisplayName("Version 7 reader rejects truncated occurrence count")
+    void versionSevenReaderRejectsTruncatedOccurrenceCount() {
+        final byte[] bytes = createVersionSevenSerializedStream(FrequencyTrieTest::writeSingleValueTable,
+                dataOutput -> {
+                    dataOutput.writeBoolean(false);
+                    dataOutput.writeInt(0);
+                    dataOutput.writeInt(1);
+                    dataOutput.writeInt(0);
+                    dataOutput.writeShort(1);
+                });
+
+        assertThrows(EOFException.class,
+                () -> FrequencyTrie.readFrom(new ByteArrayInputStream(bytes), String[]::new, STRING_CODEC));
+    }
+
+    /**
      * Verifies that legacy version 1 metadata uses compatibility defaults.
      */
     @Test
@@ -1794,6 +2132,46 @@ class FrequencyTrieTest {
     }
 
     /**
+     * Verifies that historical text-metadata versions 5 and 6 retain inline value
+     * decoding without a value table.
+     *
+     * @throws IOException if test I/O fails unexpectedly
+     */
+    @Test
+    @Tag("persistence")
+    @DisplayName("readFrom supports inline values in stream versions 5 and 6")
+    void readFromSupportsInlineValuesInStreamVersionsFiveAndSix() throws IOException {
+        for (int version = 5; version <= 6; version++) {
+            final int historicalVersion = version;
+            final TrieMetadata historicalMetadata = new TrieMetadata(historicalVersion,
+                    WordTraversalDirection.BACKWARD,
+                    ReductionSettings.withDefaults(
+                            ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS),
+                    DiacriticProcessingMode.AS_IS, CaseProcessingMode.LOWERCASE_WITH_LOCALE_ROOT);
+            final byte[] bytes = createSerializedStream(0x45475452, historicalVersion, 1, 0,
+                    dataOutput -> dataOutput.writeUTF(historicalMetadata.toTextBlock()),
+                    new NodeWriter[] { dataOutput -> {
+                        if (historicalVersion >= 6) {
+                            dataOutput.writeBoolean(false);
+                        }
+                        dataOutput.writeInt(0);
+                        dataOutput.writeInt(1);
+                        dataOutput.writeUTF("inline");
+                        dataOutput.writeInt(2);
+                    } });
+
+            final CountingStringCodec countingCodec = new CountingStringCodec();
+            final FrequencyTrie<String> trie = FrequencyTrie.readFrom(new ByteArrayInputStream(bytes), String[]::new,
+                    countingCodec);
+
+            assertAll(() -> assertEquals(historicalVersion, trie.metadata().formatVersion()),
+                    () -> assertEquals("inline", trie.get("")),
+                    () -> assertEquals(List.of(new ValueCount<>("inline", 2)), trie.getEntries("")),
+                    () -> assertEquals(1, countingCodec.readCount));
+        }
+    }
+
+    /**
      * Verifies that invalid legacy metadata ordinals are rejected by validation.
      */
     @Test
@@ -1857,6 +2235,29 @@ class FrequencyTrieTest {
      */
     private static byte[] createSerializedStream(final int magic, final int version, final int nodeCount,
             final int rootNodeId, final MetadataWriter metadata, final NodeWriter[] nodes) {
+        return createSerializedStream(magic, version, nodeCount, rootNodeId, metadata, dataOutput -> {
+            if (version >= 7) {
+                dataOutput.writeInt(0);
+            }
+        }, nodes);
+    }
+
+    /**
+     * Creates a synthetic serialized trie stream with metadata and value-table
+     * writer hooks.
+     *
+     * @param magic      stream magic
+     * @param version    stream version
+     * @param nodeCount  declared node count
+     * @param rootNodeId declared root node identifier
+     * @param metadata   version-specific metadata writer
+     * @param valueTable version-specific value-table writer
+     * @param nodes      node body writers
+     * @return serialized bytes
+     */
+    private static byte[] createSerializedStream(final int magic, final int version, final int nodeCount,
+            final int rootNodeId, final MetadataWriter metadata, final ValueTableWriter valueTable,
+            final NodeWriter[] nodes) {
         try {
             final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             final DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
@@ -1866,6 +2267,7 @@ class FrequencyTrieTest {
             dataOutputStream.writeInt(nodeCount);
             dataOutputStream.writeInt(rootNodeId);
             metadata.write(dataOutputStream);
+            valueTable.write(dataOutputStream);
 
             for (NodeWriter node : nodes) {
                 node.write(dataOutputStream);
@@ -1879,6 +2281,51 @@ class FrequencyTrieTest {
     }
 
     /**
+     * Creates one synthetic version 7 stream containing a single declared node.
+     *
+     * @param valueTable value-table writer
+     * @param node       node-body writer
+     * @return serialized bytes
+     */
+    private static byte[] createVersionSevenSerializedStream(final ValueTableWriter valueTable,
+            final NodeWriter node) {
+        final TrieMetadata metadata = new TrieMetadata(7, WordTraversalDirection.BACKWARD,
+                ReductionSettings.withDefaults(
+                        ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS),
+                DiacriticProcessingMode.AS_IS, CaseProcessingMode.LOWERCASE_WITH_LOCALE_ROOT);
+        return createSerializedStream(0x45475452, 7, 1, 0,
+                dataOutput -> dataOutput.writeUTF(metadata.toTextBlock()), valueTable, new NodeWriter[] { node });
+    }
+
+    /**
+     * Writes one version 7 value table containing the string {@code value}.
+     *
+     * @param dataOutput output stream
+     * @throws IOException if writing fails
+     */
+    private static void writeSingleValueTable(final DataOutputStream dataOutput) throws IOException {
+        dataOutput.writeInt(1);
+        dataOutput.writeUTF("value");
+    }
+
+    /**
+     * Writes one leaf node with a single version 7 value-table reference.
+     *
+     * @param dataOutput     output stream
+     * @param valueTableIndex referenced table index
+     * @param occurrenceCount stored local occurrence count
+     * @throws IOException if writing fails
+     */
+    private static void writeVersionSevenValueNode(final DataOutputStream dataOutput, final int valueTableIndex,
+            final int occurrenceCount) throws IOException {
+        dataOutput.writeBoolean(false);
+        dataOutput.writeInt(0);
+        dataOutput.writeInt(1);
+        dataOutput.writeInt(valueTableIndex);
+        dataOutput.writeInt(occurrenceCount);
+    }
+
+    /**
      * Writes one synthetic metadata block.
      */
     @FunctionalInterface
@@ -1886,6 +2333,21 @@ class FrequencyTrieTest {
 
         /**
          * Writes metadata bytes for one stream version.
+         *
+         * @param dataOutput output stream
+         * @throws IOException if writing fails
+         */
+        void write(DataOutputStream dataOutput) throws IOException;
+    }
+
+    /**
+     * Writes the value-table section of a synthetic serialized trie stream.
+     */
+    @FunctionalInterface
+    private interface ValueTableWriter {
+
+        /**
+         * Writes one stream's version-specific value-table bytes.
          *
          * @param dataOutput output stream
          * @throws IOException if writing fails
