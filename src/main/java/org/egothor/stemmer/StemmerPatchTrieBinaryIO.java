@@ -39,7 +39,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.BiFunction;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
@@ -53,6 +56,8 @@ import java.util.zip.GZIPOutputStream;
  * patch commands represented as {@link String}. The serialized trie payload is
  * the native binary format of {@link FrequencyTrie}, wrapped in GZip
  * compression.
+ * Binary reads can either preserve those serialized strings or materialize
+ * {@link CompiledPatchCommand} values directly in the final trie nodes.
  *
  * <p>
  * The helper centralizes the codec and compression details so that higher-level
@@ -72,6 +77,21 @@ public final class StemmerPatchTrieBinaryIO {
     private static final FrequencyTrie.ValueStreamCodec<String> STRING_CODEC = new StringValueStreamCodec();
 
     /**
+     * Maximum serialized patch-command length included in validation diagnostics.
+     */
+    private static final int MAX_DIAGNOSTIC_PATCH_LENGTH = 128;
+
+    /**
+     * Null-check parameter name for filesystem paths.
+     */
+    private static final String PATH_PARAMETER = "path";
+
+    /**
+     * Null-check parameter name for filesystem path strings.
+     */
+    private static final String FILE_NAME_PARAMETER = "fileName";
+
+    /**
      * Utility class.
      */
     private StemmerPatchTrieBinaryIO() {
@@ -87,7 +107,7 @@ public final class StemmerPatchTrieBinaryIO {
      * @throws IOException          if reading or decompression fails
      */
     public static FrequencyTrie<String> read(final Path path) throws IOException {
-        Objects.requireNonNull(path, "path");
+        Objects.requireNonNull(path, PATH_PARAMETER);
 
         try (InputStream fileInputStream = Files.newInputStream(path)) {
             return read(fileInputStream);
@@ -110,7 +130,7 @@ public final class StemmerPatchTrieBinaryIO {
      * @throws IOException          if reading or decompression fails
      */
     public static FrequencyTrie<String> read(final Path path, final int maxExpandedIndex) throws IOException {
-        Objects.requireNonNull(path, "path");
+        Objects.requireNonNull(path, PATH_PARAMETER);
 
         try (InputStream fileInputStream = Files.newInputStream(path)) {
             return read(fileInputStream, maxExpandedIndex);
@@ -127,7 +147,7 @@ public final class StemmerPatchTrieBinaryIO {
      * @throws IOException          if reading or decompression fails
      */
     public static FrequencyTrie<String> read(final String fileName) throws IOException {
-        Objects.requireNonNull(fileName, "fileName");
+        Objects.requireNonNull(fileName, FILE_NAME_PARAMETER);
         return read(Path.of(fileName));
     }
 
@@ -147,7 +167,7 @@ public final class StemmerPatchTrieBinaryIO {
      * @throws IOException          if reading or decompression fails
      */
     public static FrequencyTrie<String> read(final String fileName, final int maxExpandedIndex) throws IOException {
-        Objects.requireNonNull(fileName, "fileName");
+        Objects.requireNonNull(fileName, FILE_NAME_PARAMETER);
         return read(Path.of(fileName), maxExpandedIndex);
     }
 
@@ -205,6 +225,149 @@ public final class StemmerPatchTrieBinaryIO {
     }
 
     /**
+     * Reads a compressed binary patch-command trie directly as compiled values from
+     * a filesystem path.
+     *
+     * @param path source file
+     * @return directly materialized compiled patch-command trie
+     * @throws NullPointerException if {@code path} is {@code null}
+     * @throws IOException          if reading, decompression, or command compilation
+     *                              fails
+     */
+    /* default */ static FrequencyTrie<CompiledPatchCommand> readCompiled(final Path path) throws IOException {
+        Objects.requireNonNull(path, PATH_PARAMETER);
+
+        try (InputStream fileInputStream = Files.newInputStream(path)) {
+            return readCompiled(fileInputStream);
+        }
+    }
+
+    /**
+     * Reads a compressed binary patch-command trie directly as compiled values from
+     * a filesystem path with a dense child lookup span override.
+     *
+     * @param path             source file
+     * @param maxExpandedIndex dense lookup span override; negative values use
+     *                         {@link FrequencyTrie#DEFAULT_MAX_EXPANDED_INDEX}
+     * @return directly materialized compiled patch-command trie
+     * @throws NullPointerException if {@code path} is {@code null}
+     * @throws IOException          if reading, decompression, or command compilation
+     *                              fails
+     */
+    /* default */ static FrequencyTrie<CompiledPatchCommand> readCompiled(final Path path,
+            final int maxExpandedIndex)
+            throws IOException {
+        Objects.requireNonNull(path, PATH_PARAMETER);
+
+        try (InputStream fileInputStream = Files.newInputStream(path)) {
+            return readCompiled(fileInputStream, maxExpandedIndex);
+        }
+    }
+
+    /**
+     * Reads a compressed binary patch-command trie directly as compiled values from
+     * a filesystem path string.
+     *
+     * @param fileName source file name or path string
+     * @return directly materialized compiled patch-command trie
+     * @throws NullPointerException if {@code fileName} is {@code null}
+     * @throws IOException          if reading, decompression, or command compilation
+     *                              fails
+     */
+    /* default */ static FrequencyTrie<CompiledPatchCommand> readCompiled(final String fileName) throws IOException {
+        Objects.requireNonNull(fileName, FILE_NAME_PARAMETER);
+        return readCompiled(Path.of(fileName));
+    }
+
+    /**
+     * Reads a compressed binary patch-command trie directly as compiled values from
+     * a filesystem path string with a dense child lookup span override.
+     *
+     * @param fileName         source file name or path string
+     * @param maxExpandedIndex dense lookup span override; negative values use
+     *                         {@link FrequencyTrie#DEFAULT_MAX_EXPANDED_INDEX}
+     * @return directly materialized compiled patch-command trie
+     * @throws NullPointerException if {@code fileName} is {@code null}
+     * @throws IOException          if reading, decompression, or command compilation
+     *                              fails
+     */
+    /* default */ static FrequencyTrie<CompiledPatchCommand> readCompiled(final String fileName,
+            final int maxExpandedIndex)
+            throws IOException {
+        Objects.requireNonNull(fileName, FILE_NAME_PARAMETER);
+        return readCompiled(Path.of(fileName), maxExpandedIndex);
+    }
+
+    /**
+     * Reads a compressed binary patch-command trie directly as compiled values from
+     * an input stream.
+     *
+     * @param inputStream source stream
+     * @return directly materialized compiled patch-command trie
+     * @throws NullPointerException if {@code inputStream} is {@code null}
+     * @throws IOException          if reading, decompression, or command compilation
+     *                              fails
+     */
+    /* default */ static FrequencyTrie<CompiledPatchCommand> readCompiled(final InputStream inputStream)
+            throws IOException {
+        return readCompiled(inputStream, -1);
+    }
+
+    /**
+     * Reads a compressed binary patch-command trie directly as compiled values from
+     * an input stream with a dense child lookup span override.
+     *
+     * @param inputStream      source stream
+     * @param maxExpandedIndex dense lookup span override; negative values use
+     *                         {@link FrequencyTrie#DEFAULT_MAX_EXPANDED_INDEX}
+     * @return directly materialized compiled patch-command trie
+     * @throws NullPointerException if {@code inputStream} is {@code null}
+     * @throws IOException          if reading, decompression, or command compilation
+     *                              fails
+     */
+    /* default */ static FrequencyTrie<CompiledPatchCommand> readCompiled(final InputStream inputStream,
+            final int maxExpandedIndex) throws IOException {
+        return readCompiled(inputStream, maxExpandedIndex, CompiledPatchCommand::compile);
+    }
+
+    /**
+     * Reads a compressed binary patch-command trie using a caller-supplied command
+     * compiler.
+     *
+     * <p>
+     * This package-private seam permits deterministic compilation-count testing
+     * without global counters. Production callers use
+     * {@link CompiledPatchCommand#compile(String, WordTraversalDirection)}.
+     * </p>
+     *
+     * @param inputStream      source stream
+     * @param maxExpandedIndex dense lookup span override
+     * @param commandCompiler  compiler for one serialized command and traversal
+     *                         direction
+     * @return directly materialized compiled patch-command trie
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IOException          if reading, decompression, or command compilation
+     *                              fails
+     */
+    /* default */ static FrequencyTrie<CompiledPatchCommand> readCompiled(final InputStream inputStream,
+            final int maxExpandedIndex,
+            final BiFunction<String, WordTraversalDirection, CompiledPatchCommand> commandCompiler)
+            throws IOException {
+        Objects.requireNonNull(inputStream, "inputStream");
+        Objects.requireNonNull(commandCompiler, "commandCompiler");
+        final CompiledPatchValueReader valueReader = new CompiledPatchValueReader(commandCompiler);
+
+        try (GZIPInputStream gzipInputStream = new GZIPInputStream(new BufferedInputStream(inputStream));
+                DataInputStream dataInputStream = new DataInputStream(gzipInputStream)) {
+            final FrequencyTrie<CompiledPatchCommand> trie = FrequencyTrie.readFromWithMetadata(dataInputStream,
+                    CompiledPatchCommand[]::new, valueReader, maxExpandedIndex);
+
+            LOGGER.log(Level.FINE, "Read compressed binary stemmer trie directly as compiled patch commands.");
+            return trie;
+        }
+    }
+
+    /**
      * Reads only metadata from a GZip-compressed binary patch-command trie stored
      * at a filesystem path.
      *
@@ -214,7 +377,7 @@ public final class StemmerPatchTrieBinaryIO {
      * @throws IOException          if reading or decompression fails
      */
     public static TrieMetadata readMetadata(final Path path) throws IOException {
-        Objects.requireNonNull(path, "path");
+        Objects.requireNonNull(path, PATH_PARAMETER);
         return read(path).metadata();
     }
 
@@ -228,7 +391,7 @@ public final class StemmerPatchTrieBinaryIO {
      * @throws IOException          if reading or decompression fails
      */
     public static TrieMetadata readMetadata(final String fileName) throws IOException {
-        Objects.requireNonNull(fileName, "fileName");
+        Objects.requireNonNull(fileName, FILE_NAME_PARAMETER);
         return readMetadata(Path.of(fileName));
     }
 
@@ -256,7 +419,7 @@ public final class StemmerPatchTrieBinaryIO {
      */
     public static void write(final FrequencyTrie<String> trie, final Path path) throws IOException {
         Objects.requireNonNull(trie, "trie");
-        Objects.requireNonNull(path, "path");
+        Objects.requireNonNull(path, PATH_PARAMETER);
 
         final Path parent = path.toAbsolutePath().getParent();
         if (parent != null) {
@@ -278,7 +441,7 @@ public final class StemmerPatchTrieBinaryIO {
      * @throws IOException          if writing fails
      */
     public static void write(final FrequencyTrie<String> trie, final String fileName) throws IOException {
-        Objects.requireNonNull(fileName, "fileName");
+        Objects.requireNonNull(fileName, FILE_NAME_PARAMETER);
         write(trie, Path.of(fileName));
     }
 
@@ -322,5 +485,98 @@ public final class StemmerPatchTrieBinaryIO {
         public String read(final DataInputStream dataInput) throws IOException {
             return dataInput.readUTF();
         }
+    }
+
+    /**
+     * Metadata-aware reader that compiles serialized patch commands into final trie
+     * values.
+     *
+     * <p>
+     * Version 7 value tables already contain distinct serialized values, so each
+     * entry is compiled directly. Historical inline formats use the reader-local
+     * equality cache to compile repeated serialized commands once. Neither the cache
+     * nor this reader is retained after trie loading.
+     * </p>
+     */
+    private static final class CompiledPatchValueReader
+            implements FrequencyTrie.MetadataValueStreamReader<CompiledPatchCommand> {
+
+        /**
+         * Compiler used to materialize one final command.
+         */
+        private final BiFunction<String, WordTraversalDirection, CompiledPatchCommand> commandCompiler;
+
+        /**
+         * Compatibility cache used only by historical inline-value streams.
+         */
+        private final Map<String, CompiledPatchCommand> legacyCompiledCommands = new HashMap<>();
+
+        /**
+         * Creates one reader with a caller-supplied compiler.
+         *
+         * @param commandCompiler compiler for serialized patch commands
+         */
+        private CompiledPatchValueReader(
+                final BiFunction<String, WordTraversalDirection, CompiledPatchCommand> commandCompiler) {
+            this.commandCompiler = commandCompiler;
+        }
+
+        /**
+         * Reads and compiles one serialized patch command.
+         *
+         * @param dataInput source data input
+         * @param metadata  parsed trie metadata
+         * @return final compiled patch command
+         * @throws IOException if reading or command compilation fails
+         */
+        @Override
+        public CompiledPatchCommand read(final DataInputStream dataInput, final TrieMetadata metadata)
+                throws IOException {
+            final String serializedPatch = dataInput.readUTF();
+            if (FrequencyTrie.usesValueTableFormat(metadata)) {
+                return compile(serializedPatch, metadata.traversalDirection());
+            }
+
+            final CompiledPatchCommand cachedCommand = this.legacyCompiledCommands.get(serializedPatch);
+            if (cachedCommand != null) {
+                return cachedCommand;
+            }
+            final CompiledPatchCommand compiledCommand = compile(serializedPatch, metadata.traversalDirection());
+            this.legacyCompiledCommands.put(serializedPatch, compiledCommand);
+            return compiledCommand;
+        }
+
+        /**
+         * Compiles one serialized command and converts validation failures to
+         * trust-boundary {@link IOException} instances.
+         *
+         * @param serializedPatch   serialized patch command
+         * @param traversalDirection traversal direction from persisted metadata
+         * @return compiled patch command
+         * @throws IOException if the serialized command is invalid
+         */
+        private CompiledPatchCommand compile(final String serializedPatch,
+                final WordTraversalDirection traversalDirection) throws IOException {
+            try {
+                return this.commandCompiler.apply(serializedPatch, traversalDirection);
+            } catch (IllegalArgumentException exception) {
+                throw new IOException("Invalid persisted patch command '" + boundedPatch(serializedPatch)
+                        + "' for traversal direction " + traversalDirection + '.', exception);
+            }
+        }
+    }
+
+    /**
+     * Returns a safely bounded patch-command representation for diagnostics.
+     *
+     * @param serializedPatch serialized patch command
+     * @return complete or length-bounded diagnostic representation
+     */
+    private static String boundedPatch(final String serializedPatch) {
+        if (serializedPatch.length() <= MAX_DIAGNOSTIC_PATCH_LENGTH) {
+            return serializedPatch;
+        }
+        return serializedPatch.substring(0, MAX_DIAGNOSTIC_PATCH_LENGTH) + "... (length "
+                + serializedPatch.length() + ')';
     }
 }

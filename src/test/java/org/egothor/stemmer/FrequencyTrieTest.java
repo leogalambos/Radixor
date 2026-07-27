@@ -1113,6 +1113,82 @@ class FrequencyTrieTest {
     }
 
     /**
+     * Verifies that metadata-aware version 7 reads receive parsed metadata before
+     * decoding and materialize shared final values directly in compiled nodes.
+     *
+     * @throws IOException if test I/O fails unexpectedly
+     */
+    @Test
+    @Tag("persistence")
+    @DisplayName("Metadata-aware version 7 reader materializes shared final values")
+    void metadataAwareVersionSevenReaderMaterializesSharedFinalValues() throws IOException {
+        final FrequencyTrie<String> original = sharedValueTrie();
+        final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        original.writeTo(outputStream, STRING_CODEC);
+        final AtomicInteger readCount = new AtomicInteger();
+        final AtomicInteger observedMetadataVersion = new AtomicInteger();
+
+        final FrequencyTrie<StringBuilder> restored = FrequencyTrie.readFromWithMetadata(
+                new ByteArrayInputStream(outputStream.toByteArray()), StringBuilder[]::new,
+                (dataInput, metadata) -> {
+                    observedMetadataVersion.set(metadata.formatVersion());
+                    readCount.incrementAndGet();
+                    return new StringBuilder(dataInput.readUTF());
+                }, -1);
+        final CompiledNode<StringBuilder> suffixBNode = restored.root().findChild('b');
+        final CompiledNode<StringBuilder> abNode = suffixBNode.findChild('a');
+        final CompiledNode<StringBuilder> cbNode = suffixBNode.findChild('c');
+
+        assertAll(() -> assertEquals(7, observedMetadataVersion.get()),
+                () -> assertEquals(3, readCount.get()),
+                () -> assertSame(restored.get("ab"), restored.get("cb")),
+                () -> assertSame(abNode.orderedValues()[0], cbNode.orderedValues()[0]),
+                () -> assertEquals(StringBuilder[].class, abNode.orderedValues().getClass()),
+                () -> assertEquals("left", restored.get("xab").toString()),
+                () -> assertEquals("right", restored.get("ycb").toString()));
+    }
+
+    /**
+     * Verifies that metadata-aware reading preserves the inline value layout used
+     * by every historical stream version from 1 through 6.
+     *
+     * @throws IOException if test I/O fails unexpectedly
+     */
+    @Test
+    @Tag("persistence")
+    @DisplayName("Metadata-aware reader supports inline values in versions 1 through 6")
+    void metadataAwareReaderSupportsInlineValuesInVersionsOneThroughSix() throws IOException {
+        for (int version = 1; version <= 6; version++) {
+            final int historicalVersion = version;
+            final byte[] bytes = createSerializedStream(0x45475452, historicalVersion, 1, 0,
+                    dataOutput -> writeMetadataForHistoricalVersion(dataOutput, historicalVersion),
+                    new NodeWriter[] { dataOutput -> {
+                        if (historicalVersion >= 6) {
+                            dataOutput.writeBoolean(false);
+                        }
+                        dataOutput.writeInt(0);
+                        dataOutput.writeInt(1);
+                        dataOutput.writeUTF("inline-" + historicalVersion);
+                        dataOutput.writeInt(1);
+                    } });
+            final AtomicInteger readCount = new AtomicInteger();
+            final AtomicInteger observedMetadataVersion = new AtomicInteger();
+
+            final FrequencyTrie<StringBuilder> trie = FrequencyTrie.readFromWithMetadata(
+                    new ByteArrayInputStream(bytes), StringBuilder[]::new,
+                    (dataInput, metadata) -> {
+                        observedMetadataVersion.set(metadata.formatVersion());
+                        readCount.incrementAndGet();
+                        return new StringBuilder(dataInput.readUTF());
+                    }, -1);
+
+            assertAll(() -> assertEquals(historicalVersion, observedMetadataVersion.get()),
+                    () -> assertEquals(1, readCount.get()),
+                    () -> assertEquals("inline-" + historicalVersion, trie.get("").toString()));
+        }
+    }
+
+    /**
      * Verifies fingerprint stability and sensitivity to metadata and trie content.
      */
     @Test
@@ -2323,6 +2399,42 @@ class FrequencyTrieTest {
         dataOutput.writeInt(1);
         dataOutput.writeInt(valueTableIndex);
         dataOutput.writeInt(occurrenceCount);
+    }
+
+    /**
+     * Writes the metadata layout used by one historical stream version.
+     *
+     * @param dataOutput output stream
+     * @param version    historical stream version from 1 through 6
+     * @throws IOException if writing fails
+     */
+    private static void writeMetadataForHistoricalVersion(final DataOutputStream dataOutput, final int version)
+            throws IOException {
+        if (version == 1) {
+            return;
+        }
+        if (version == 2) {
+            dataOutput.writeInt(WordTraversalDirection.BACKWARD.ordinal());
+            return;
+        }
+
+        final ReductionSettings reductionSettings = ReductionSettings
+                .withDefaults(ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS);
+        if (version <= 4) {
+            dataOutput.writeInt(WordTraversalDirection.BACKWARD.ordinal());
+            dataOutput.writeInt(reductionSettings.reductionMode().ordinal());
+            dataOutput.writeInt(reductionSettings.dominantWinnerMinPercent());
+            dataOutput.writeInt(reductionSettings.dominantWinnerOverSecondRatio());
+            dataOutput.writeInt(DiacriticProcessingMode.AS_IS.ordinal());
+            if (version == 4) {
+                dataOutput.writeInt(CaseProcessingMode.LOWERCASE_WITH_LOCALE_ROOT.ordinal());
+            }
+            return;
+        }
+
+        final TrieMetadata metadata = new TrieMetadata(version, WordTraversalDirection.BACKWARD, reductionSettings,
+                DiacriticProcessingMode.AS_IS, CaseProcessingMode.LOWERCASE_WITH_LOCALE_ROOT);
+        dataOutput.writeUTF(metadata.toTextBlock());
     }
 
     /**

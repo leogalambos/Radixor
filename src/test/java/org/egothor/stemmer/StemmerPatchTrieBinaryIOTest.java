@@ -32,6 +32,7 @@ package org.egothor.stemmer;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -50,14 +51,18 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
+import org.egothor.stemmer.trie.CompiledNode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
@@ -97,6 +102,17 @@ import org.mockito.MockedStatic;
 @Tag("trie")
 @DisplayName("StemmerPatchTrieBinaryIO")
 class StemmerPatchTrieBinaryIOTest {
+
+    /**
+     * Maximum invalid patch-command length retained verbatim in production
+     * diagnostics.
+     */
+    private static final int DIAGNOSTIC_PATCH_BOUNDARY = 128;
+
+    /**
+     * Marker that introduces the original length after diagnostic truncation.
+     */
+    private static final String DIAGNOSTIC_TRUNCATION_MARKER = "... (length ";
 
     /**
      * Temporary directory provided by JUnit.
@@ -323,7 +339,202 @@ class StemmerPatchTrieBinaryIOTest {
                             "read(InputStream) must reject null input stream."),
                     () -> assertThrows(NullPointerException.class,
                             () -> StemmerPatchTrieBinaryIO.read((ByteArrayInputStream) null, FrequencyTrie.DEFAULT_MAX_EXPANDED_INDEX),
-                            "read(InputStream, int) must reject null input stream."));
+                            "read(InputStream, int) must reject null input stream."),
+                    () -> assertThrows(NullPointerException.class,
+                            () -> StemmerPatchTrieBinaryIO.readCompiled((Path) null),
+                            "readCompiled(Path) must reject null path."),
+                    () -> assertThrows(NullPointerException.class,
+                            () -> StemmerPatchTrieBinaryIO.readCompiled((Path) null, 0),
+                            "readCompiled(Path, int) must reject null path."),
+                    () -> assertThrows(NullPointerException.class,
+                            () -> StemmerPatchTrieBinaryIO.readCompiled((String) null),
+                            "readCompiled(String) must reject null file name."),
+                    () -> assertThrows(NullPointerException.class,
+                            () -> StemmerPatchTrieBinaryIO.readCompiled((String) null, 0),
+                            "readCompiled(String, int) must reject null file name."),
+                    () -> assertThrows(NullPointerException.class,
+                            () -> StemmerPatchTrieBinaryIO.readCompiled((InputStream) null),
+                            "readCompiled(InputStream) must reject null input stream."),
+                    () -> assertThrows(NullPointerException.class,
+                            () -> StemmerPatchTrieBinaryIO.readCompiled((InputStream) null, 0),
+                            "readCompiled(InputStream, int) must reject null input stream."),
+                    () -> assertThrows(NullPointerException.class,
+                            () -> StemmerPatchTrieBinaryIO.readCompiled(new ByteArrayInputStream(new byte[0]), 0,
+                                    null),
+                            "Injected compiled read must reject a null command compiler."));
+        }
+
+        /**
+         * Verifies that direct compiled reading stores compiled commands in final
+         * nodes and shares one version 7 table object across repeated slots.
+         *
+         * @throws IOException if test I/O fails unexpectedly
+         */
+        @Test
+        @DisplayName("Should materialize version 7 directly as shared compiled commands")
+        void shouldMaterializeVersionSevenDirectlyAsSharedCompiledCommands() throws IOException {
+            final FrequencyTrie<String> sourceTrie = sharedPatchTrie();
+            final byte[] artifactBytes = writeCompressed(sourceTrie);
+
+            final FrequencyTrie<CompiledPatchCommand> compiledTrie = StemmerPatchTrieBinaryIO
+                    .readCompiled(new ByteArrayInputStream(artifactBytes));
+            final FrequencyTrie<String> stringTrie = StemmerPatchTrieBinaryIO
+                    .read(new ByteArrayInputStream(artifactBytes));
+            final CompiledNode<CompiledPatchCommand> suffixBNode = compiledTrie.root().findChild('b');
+            final CompiledNode<CompiledPatchCommand> abNode = suffixBNode.findChild('a');
+            final CompiledNode<CompiledPatchCommand> cbNode = suffixBNode.findChild('c');
+
+            assertAll(() -> assertEquals(sourceTrie.metadata(), compiledTrie.metadata()),
+                    () -> assertEquals(sourceTrie.size(), compiledTrie.size()),
+                    () -> assertEquals(CompiledPatchCommand[].class, abNode.orderedValues().getClass()),
+                    () -> assertSame(compiledTrie.get("ab"), compiledTrie.get("cb")),
+                    () -> assertSame(abNode.orderedValues()[0], cbNode.orderedValues()[0]),
+                    () -> assertEquals("a", compiledTrie.get("ab").apply("ab")),
+                    () -> assertEquals("c", compiledTrie.get("cb").apply("cb")),
+                    () -> assertEquals("x", compiledTrie.get("xab").apply("xab")),
+                    () -> assertEquals("y", compiledTrie.get("ycb").apply("ycb")),
+                    () -> assertInstanceOf(String.class, stringTrie.get("ab")),
+                    () -> assertInstanceOf(CompiledPatchCommand.class, compiledTrie.get("ab")));
+        }
+
+        /**
+         * Verifies that version 7 direct loading compiles once per distinct value
+         * table entry.
+         *
+         * @throws IOException if test I/O fails unexpectedly
+         */
+        @Test
+        @DisplayName("Should compile each version 7 table entry once")
+        void shouldCompileEachVersionSevenTableEntryOnce() throws IOException {
+            final FrequencyTrie<String> sourceTrie = sharedPatchTrie();
+            final byte[] artifactBytes = writeCompressed(sourceTrie);
+            final AtomicInteger compilationCount = new AtomicInteger();
+
+            final FrequencyTrie<CompiledPatchCommand> compiledTrie = StemmerPatchTrieBinaryIO.readCompiled(
+                    new ByteArrayInputStream(artifactBytes), -1, (serializedPatch, traversalDirection) -> {
+                        compilationCount.incrementAndGet();
+                        return CompiledPatchCommand.compile(serializedPatch, traversalDirection);
+                    });
+
+            assertAll(() -> assertEquals(2, compilationCount.get()),
+                    () -> assertSame(compiledTrie.get("ab"), compiledTrie.get("cb")),
+                    () -> assertEquals("x", compiledTrie.get("xab").apply("xab")));
+        }
+
+        /**
+         * Verifies that the direct historical reader compiles repeated inline
+         * commands once through its reader-local compatibility cache.
+         *
+         * @throws IOException if test I/O fails unexpectedly
+         */
+        @Test
+        @DisplayName("Should compile repeated version 6 inline commands once")
+        void shouldCompileRepeatedVersionSixInlineCommandsOnce() throws IOException {
+            final String serializedPatch = PatchCommandEncoder.builder().build().encode("ab", "a");
+            final byte[] artifactBytes = createVersionSixArtifactWithRepeatedPatch(serializedPatch);
+            final AtomicInteger compilationCount = new AtomicInteger();
+
+            final FrequencyTrie<CompiledPatchCommand> compiledTrie = StemmerPatchTrieBinaryIO.readCompiled(
+                    new ByteArrayInputStream(artifactBytes), -1, (patch, traversalDirection) -> {
+                        compilationCount.incrementAndGet();
+                        return CompiledPatchCommand.compile(patch, traversalDirection);
+                    });
+            final CompiledPatchCommand rootCommand = compiledTrie.root().orderedValues()[0];
+            final CompiledPatchCommand childCommand = compiledTrie.root().findChild('a').orderedValues()[0];
+
+            assertAll(() -> assertEquals(1, compilationCount.get()),
+                    () -> assertSame(rootCommand, childCommand),
+                    () -> assertEquals(6, compiledTrie.metadata().formatVersion()));
+        }
+
+        /**
+         * Verifies that invalid persisted patch commands are rejected only by the
+         * direct compiled path and retain their validation cause.
+         *
+         * @throws IOException if test setup I/O fails unexpectedly
+         */
+        @Test
+        @DisplayName("Should wrap invalid compiled patch commands as IOException")
+        void shouldWrapInvalidCompiledPatchCommandsAsIOException() throws IOException {
+            final FrequencyTrie.Builder<String> builder = new FrequencyTrie.Builder<String>(String[]::new,
+                    ReductionSettings
+                            .withDefaults(ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS));
+            builder.put("invalid", "Zz");
+            final byte[] artifactBytes = writeCompressed(builder.build());
+
+            final FrequencyTrie<String> stringTrie = StemmerPatchTrieBinaryIO
+                    .read(new ByteArrayInputStream(artifactBytes));
+            final IOException exception = assertThrows(IOException.class,
+                    () -> StemmerPatchTrieBinaryIO.readCompiled(new ByteArrayInputStream(artifactBytes)));
+
+            assertAll(() -> assertEquals("Zz", stringTrie.get("invalid")),
+                    () -> assertTrue(exception.getMessage().contains("Zz")),
+                    () -> assertTrue(exception.getMessage().contains("BACKWARD")),
+                    () -> assertInstanceOf(IllegalArgumentException.class, exception.getCause()));
+        }
+
+        /**
+         * Verifies that an invalid command exactly at the diagnostic boundary remains
+         * complete and does not receive a truncation marker.
+         *
+         * @throws IOException if test setup I/O fails unexpectedly
+         */
+        @Test
+        @DisplayName("Should retain an invalid command exactly at the diagnostic boundary")
+        void shouldRetainInvalidCommandAtDiagnosticBoundary() throws IOException {
+            final String invalidPatch = "Z".repeat(DIAGNOSTIC_PATCH_BOUNDARY);
+
+            final IOException exception = assertInvalidCompiledPatchDiagnostic(invalidPatch, invalidPatch);
+
+            assertAll(() -> assertTrue(exception.getMessage().contains(invalidPatch),
+                    "The exact-boundary command must remain complete."),
+                    () -> assertFalse(exception.getMessage().contains(DIAGNOSTIC_TRUNCATION_MARKER),
+                            "The exact-boundary command must not be marked as truncated."));
+        }
+
+        /**
+         * Verifies that an invalid command one character beyond the diagnostic
+         * boundary is truncated at the boundary and reports its original length.
+         *
+         * @throws IOException if test setup I/O fails unexpectedly
+         */
+        @Test
+        @DisplayName("Should truncate an invalid command immediately above the diagnostic boundary")
+        void shouldTruncateInvalidCommandAboveDiagnosticBoundary() throws IOException {
+            final String invalidPatch = "Z".repeat(DIAGNOSTIC_PATCH_BOUNDARY + 1);
+            final String expectedDiagnostic = invalidPatch.substring(0, DIAGNOSTIC_PATCH_BOUNDARY)
+                    + DIAGNOSTIC_TRUNCATION_MARKER + invalidPatch.length() + ')';
+
+            final IOException exception = assertInvalidCompiledPatchDiagnostic(invalidPatch, expectedDiagnostic);
+
+            assertAll(() -> assertTrue(exception.getMessage().contains(DIAGNOSTIC_TRUNCATION_MARKER),
+                    "The boundary-plus-one command must be marked as truncated."),
+                    () -> assertFalse(exception.getMessage().contains("'" + invalidPatch + "'"),
+                            "The complete boundary-plus-one command must not appear in the diagnostic."));
+        }
+
+        /**
+         * Verifies that substantially oversized invalid commands produce bounded
+         * diagnostics containing only the retained prefix, truncation marker, and
+         * original length.
+         *
+         * @throws IOException if test setup I/O fails unexpectedly
+         */
+        @Test
+        @DisplayName("Should bound diagnostics for substantially oversized invalid commands")
+        void shouldBoundDiagnosticForOversizedInvalidCommand() throws IOException {
+            final String invalidPatch = "Z".repeat(512);
+            final String expectedDiagnostic = invalidPatch.substring(0, DIAGNOSTIC_PATCH_BOUNDARY)
+                    + DIAGNOSTIC_TRUNCATION_MARKER + invalidPatch.length() + ')';
+
+            final IOException exception = assertInvalidCompiledPatchDiagnostic(invalidPatch, expectedDiagnostic);
+
+            assertAll(() -> assertTrue(exception.getMessage().contains(DIAGNOSTIC_TRUNCATION_MARKER),
+                    "The oversized command must be marked as truncated."),
+                    () -> assertFalse(exception.getMessage().contains("'" + invalidPatch + "'"),
+                            "The complete oversized command must not appear in the diagnostic."),
+                    () -> assertTrue(exception.getMessage().length() < invalidPatch.length(),
+                            "The diagnostic must remain shorter than the oversized persisted command."));
         }
 
         /**
@@ -612,6 +823,127 @@ class StemmerPatchTrieBinaryIOTest {
                         "The helper must propagate the original read exception instance.");
             }
         }
+    }
+
+    /**
+     * Builds a version 7 trie with equal patch strings on distinct nonmergeable
+     * nodes and one additional distinct patch.
+     *
+     * @return representative patch-command trie
+     */
+    private static FrequencyTrie<String> sharedPatchTrie() {
+        final PatchCommandEncoder encoder = PatchCommandEncoder.builder().build();
+        final String sharedPatch = encoder.encode("ab", "a");
+        final String longerDeletionPatch = encoder.encode("xab", "x");
+        final FrequencyTrie.Builder<String> builder = new FrequencyTrie.Builder<String>(String[]::new,
+                ReductionSettings.withDefaults(ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS));
+        builder.put("ab", new String(sharedPatch), 2);
+        builder.put("xab", longerDeletionPatch);
+        builder.put("cb", new String(sharedPatch), 3);
+        builder.put("ycb", new String(longerDeletionPatch));
+        return builder.build();
+    }
+
+    /**
+     * Serializes one String-valued trie through the production compressed writer.
+     *
+     * @param trie source trie
+     * @return compressed artifact bytes
+     * @throws IOException if writing fails
+     */
+    private static byte[] writeCompressed(final FrequencyTrie<String> trie) throws IOException {
+        final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        StemmerPatchTrieBinaryIO.write(trie, outputStream);
+        return outputStream.toByteArray();
+    }
+
+    /**
+     * Loads an artifact through an injected rejecting compiler and verifies the
+     * exact bounded trust-boundary diagnostic independently of patch-parser
+     * compatibility behavior for odd command lengths.
+     *
+     * @param invalidPatch       invalid serialized patch command
+     * @param expectedDiagnostic complete or bounded command representation expected
+     *                           inside the diagnostic
+     * @return thrown I/O exception for additional boundary-specific assertions
+     * @throws IOException if fixture serialization fails unexpectedly
+     */
+    private static IOException assertInvalidCompiledPatchDiagnostic(final String invalidPatch,
+            final String expectedDiagnostic) throws IOException {
+        final FrequencyTrie.Builder<String> builder = new FrequencyTrie.Builder<String>(String[]::new,
+                ReductionSettings.withDefaults(
+                        ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS));
+        builder.put("invalid", invalidPatch);
+        final byte[] artifactBytes = writeCompressed(builder.build());
+        final IOException exception = assertThrows(IOException.class,
+                () -> StemmerPatchTrieBinaryIO.readCompiled(new ByteArrayInputStream(artifactBytes), -1,
+                        (serializedPatch, traversalDirection) -> {
+                            throw new IllegalArgumentException("Injected invalid persisted command.");
+                        }),
+                "Direct compiled loading must translate an invalid persisted command to IOException.");
+        final String expectedMessage = "Invalid persisted patch command '" + expectedDiagnostic
+                + "' for traversal direction BACKWARD.";
+
+        assertAll(() -> assertEquals(IOException.class, exception.getClass(),
+                "IOException must be the exact externally visible exception type."),
+                () -> assertEquals(expectedMessage, exception.getMessage(),
+                        "The invalid-command diagnostic must match the bounded production contract."),
+                () -> assertNotNull(exception.getCause(), "The validation cause must be retained."),
+                () -> assertEquals(IllegalArgumentException.class, exception.getCause().getClass(),
+                        "The original patch-command validation failure must remain the cause."));
+        return exception;
+    }
+
+    /**
+     * Creates a valid version 6 artifact containing the same inline patch command
+     * in two distinct node slots.
+     *
+     * @param serializedPatch repeated serialized patch command
+     * @return compressed historical artifact bytes
+     * @throws IOException if fixture creation fails
+     */
+    private static byte[] createVersionSixArtifactWithRepeatedPatch(final String serializedPatch) throws IOException {
+        final TrieMetadata metadata = new TrieMetadata(6, WordTraversalDirection.BACKWARD,
+                ReductionSettings.withDefaults(ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS),
+                DiacriticProcessingMode.AS_IS, CaseProcessingMode.LOWERCASE_WITH_LOCALE_ROOT);
+        final ByteArrayOutputStream rawOutputStream = new ByteArrayOutputStream();
+        try (DataOutputStream dataOutput = new DataOutputStream(rawOutputStream)) {
+            dataOutput.writeInt(0x45475452);
+            dataOutput.writeInt(6);
+            dataOutput.writeInt(2);
+            dataOutput.writeInt(0);
+            dataOutput.writeUTF(metadata.toTextBlock());
+
+            dataOutput.writeBoolean(false);
+            dataOutput.writeInt(1);
+            dataOutput.writeChar('a');
+            dataOutput.writeInt(1);
+            dataOutput.writeInt(1);
+            dataOutput.writeUTF(serializedPatch);
+            dataOutput.writeInt(1);
+
+            dataOutput.writeBoolean(false);
+            dataOutput.writeInt(0);
+            dataOutput.writeInt(1);
+            dataOutput.writeUTF(serializedPatch);
+            dataOutput.writeInt(2);
+        }
+        return gzip(rawOutputStream.toByteArray());
+    }
+
+    /**
+     * Compresses a binary payload using GZip.
+     *
+     * @param payload uncompressed bytes
+     * @return compressed bytes
+     * @throws IOException if compression fails
+     */
+    private static byte[] gzip(final byte[] payload) throws IOException {
+        final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        try (GZIPOutputStream gzipOutputStream = new GZIPOutputStream(outputStream)) {
+            gzipOutputStream.write(payload);
+        }
+        return outputStream.toByteArray();
     }
 
     /**

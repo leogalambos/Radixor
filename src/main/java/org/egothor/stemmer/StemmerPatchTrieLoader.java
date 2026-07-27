@@ -1311,6 +1311,12 @@ public final class StemmerPatchTrieLoader {
      * Loads a GZip-compressed binary patch-command trie from a filesystem path and
      * returns runtime-specialized compiled patch values.
      *
+     * <p>
+     * Serialized patch commands are compiled while the binary graph is read, so the
+     * returned trie is materialized directly without an intermediate
+     * {@code FrequencyTrie<String>} or a second node graph.
+     * </p>
+     *
      * @param path path to the compressed binary trie file
      * @return compiled patch-command trie with runtime-specialized values
      * @throws NullPointerException if {@code path} is {@code null}
@@ -1318,7 +1324,8 @@ public final class StemmerPatchTrieLoader {
      *                              read
      */
     public static FrequencyTrie<CompiledPatchCommand> loadBinaryCompiled(final Path path) throws IOException {
-        return compilePatchTrie(loadBinary(path));
+        Objects.requireNonNull(path, PARAMETER_PATH);
+        return StemmerPatchTrieBinaryIO.readCompiled(path);
     }
 
     /**
@@ -1351,6 +1358,11 @@ public final class StemmerPatchTrieLoader {
      * a custom dense lookup span override and returns runtime-specialized compiled
      * patch values.
      *
+     * <p>
+     * Serialized patch commands are compiled directly into the final node graph.
+     * The dense lookup override is applied during that graph materialization.
+     * </p>
+     *
      * @param path             path to the compressed binary trie file
      * @param maxExpandedIndex dense lookup span override; negative values use
      *                         {@link FrequencyTrie#DEFAULT_MAX_EXPANDED_INDEX}
@@ -1361,7 +1373,8 @@ public final class StemmerPatchTrieLoader {
      */
     public static FrequencyTrie<CompiledPatchCommand> loadBinaryCompiled(final Path path,
             final int maxExpandedIndex) throws IOException {
-        return compilePatchTrie(loadBinary(path, maxExpandedIndex));
+        Objects.requireNonNull(path, PARAMETER_PATH);
+        return StemmerPatchTrieBinaryIO.readCompiled(path, maxExpandedIndex);
     }
 
     /**
@@ -1387,6 +1400,11 @@ public final class StemmerPatchTrieLoader {
      * Loads a GZip-compressed binary patch-command trie from a filesystem path
      * string and returns runtime-specialized compiled patch values.
      *
+     * <p>
+     * Serialized patch commands are compiled while the binary graph is read, so no
+     * intermediate String-valued trie is constructed.
+     * </p>
+     *
      * @param fileName file name or path string
      * @return compiled patch-command trie with runtime-specialized values
      * @throws NullPointerException if {@code fileName} is {@code null}
@@ -1394,7 +1412,8 @@ public final class StemmerPatchTrieLoader {
      *                              read
      */
     public static FrequencyTrie<CompiledPatchCommand> loadBinaryCompiled(final String fileName) throws IOException {
-        return compilePatchTrie(loadBinary(fileName));
+        Objects.requireNonNull(fileName, FILENAME_REQUIRED);
+        return StemmerPatchTrieBinaryIO.readCompiled(fileName);
     }
 
     /**
@@ -1428,6 +1447,11 @@ public final class StemmerPatchTrieLoader {
      * using a custom dense lookup span override and returns runtime-specialized
      * compiled patch values.
      *
+     * <p>
+     * Serialized patch commands are compiled directly into the final node graph.
+     * The dense lookup override is applied during that graph materialization.
+     * </p>
+     *
      * @param fileName         file name or path string
      * @param maxExpandedIndex dense lookup span override; negative values use
      *                         {@link FrequencyTrie#DEFAULT_MAX_EXPANDED_INDEX}
@@ -1438,7 +1462,8 @@ public final class StemmerPatchTrieLoader {
      */
     public static FrequencyTrie<CompiledPatchCommand> loadBinaryCompiled(final String fileName,
             final int maxExpandedIndex) throws IOException {
-        return compilePatchTrie(loadBinary(fileName, maxExpandedIndex));
+        Objects.requireNonNull(fileName, FILENAME_REQUIRED);
+        return StemmerPatchTrieBinaryIO.readCompiled(fileName, maxExpandedIndex);
     }
 
     /**
@@ -1462,6 +1487,12 @@ public final class StemmerPatchTrieLoader {
      * Loads a GZip-compressed binary patch-command trie from an input stream and
      * returns runtime-specialized compiled patch values.
      *
+     * <p>
+     * Serialized patch commands are compiled while the binary graph is read, so the
+     * returned trie is materialized directly without an intermediate
+     * {@code FrequencyTrie<String>} or graph-mapping pass.
+     * </p>
+     *
      * @param inputStream source input stream
      * @return compiled patch-command trie with runtime-specialized values
      * @throws NullPointerException if {@code inputStream} is {@code null}
@@ -1469,7 +1500,8 @@ public final class StemmerPatchTrieLoader {
      */
     public static FrequencyTrie<CompiledPatchCommand> loadBinaryCompiled(final InputStream inputStream)
             throws IOException {
-        return compilePatchTrie(loadBinary(inputStream));
+        Objects.requireNonNull(inputStream, "inputStream");
+        return StemmerPatchTrieBinaryIO.readCompiled(inputStream);
     }
 
     /**

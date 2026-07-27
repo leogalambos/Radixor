@@ -243,6 +243,18 @@ public final class FrequencyTrie<V> {
     }
 
     /**
+     * Returns whether the supplied metadata identifies a stream format with a
+     * serialized value table.
+     *
+     * @param metadata parsed trie metadata
+     * @return {@code true} when values are stored in a stream-local table
+     * @throws NullPointerException if {@code metadata} is {@code null}
+     */
+    /* default */ static boolean usesValueTableFormat(final TrieMetadata metadata) {
+        return Objects.requireNonNull(metadata, "metadata").formatVersion() >= VALUE_TABLE_VERSION;
+    }
+
+    /**
      * Receives trie values during visitor-style lookup.
      *
      * <p>
@@ -817,7 +829,37 @@ public final class FrequencyTrie<V> {
      */
     public static <V> FrequencyTrie<V> readFrom(final InputStream inputStream, final IntFunction<V[]> arrayFactory,
             final ValueStreamCodec<V> valueCodec, final int maxExpandedIndex) throws IOException {
-        return CompiledTrieReader.read(inputStream, arrayFactory, valueCodec, maxExpandedIndex);
+        Objects.requireNonNull(valueCodec, "valueCodec");
+        return readFromWithMetadata(inputStream, arrayFactory,
+                (dataInput, metadata) -> valueCodec.read(dataInput), maxExpandedIndex);
+    }
+
+    /**
+     * Reads a compiled trie while allowing value decoding to use already parsed
+     * trie metadata.
+     *
+     * <p>
+     * This package-private path materializes the requested final value type during
+     * the normal graph read. It does not expose reader state or construct an
+     * intermediate trie with a different value type.
+     * </p>
+     *
+     * @param inputStream      source input stream
+     * @param arrayFactory     factory used to create typed value arrays
+     * @param valueReader      metadata-aware value reader
+     * @param maxExpandedIndex dense lookup span override; zero disables dense
+     *                         lookup, negative values use
+     *                         {@link #DEFAULT_MAX_EXPANDED_INDEX}
+     * @param <V>              final value type
+     * @return deserialized compiled trie containing values returned by
+     *         {@code valueReader}
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IOException          if reading fails or the binary format is invalid
+     */
+    /* default */ static <V> FrequencyTrie<V> readFromWithMetadata(final InputStream inputStream,
+            final IntFunction<V[]> arrayFactory, final MetadataValueStreamReader<V> valueReader,
+            final int maxExpandedIndex) throws IOException {
+        return CompiledTrieReader.read(inputStream, arrayFactory, valueReader, maxExpandedIndex);
     }
 
     /**
@@ -1044,10 +1086,10 @@ public final class FrequencyTrie<V> {
     private static final class CompiledTrieReader {
 
         private static <V> FrequencyTrie<V> read(final InputStream inputStream, final IntFunction<V[]> arrayFactory,
-                final ValueStreamCodec<V> valueCodec, final int maxExpandedIndex) throws IOException {
+                final MetadataValueStreamReader<V> valueReader, final int maxExpandedIndex) throws IOException {
             Objects.requireNonNull(inputStream, "inputStream");
             Objects.requireNonNull(arrayFactory, "arrayFactory");
-            Objects.requireNonNull(valueCodec, "valueCodec");
+            Objects.requireNonNull(valueReader, "valueReader");
             if (maxExpandedIndex < -1) {
                 throw new IllegalArgumentException("maxExpandedIndex must be >= -1.");
             }
@@ -1074,11 +1116,12 @@ public final class FrequencyTrie<V> {
             }
 
             final TrieMetadata sourceMetadata = readMetadata(dataInput, version);
-            final V[] valueTable = version >= VALUE_TABLE_VERSION ? readValueTable(dataInput, arrayFactory, valueCodec)
+            final V[] valueTable = version >= VALUE_TABLE_VERSION
+                    ? readValueTable(dataInput, arrayFactory, valueReader, sourceMetadata)
                     : null;
             final int effectiveMaxExpandedIndex = maxExpandedIndex >= 0 ? maxExpandedIndex : DEFAULT_MAX_EXPANDED_INDEX;
-            final CompiledNode<V>[] nodes = readNodes(dataInput, arrayFactory, valueCodec, valueTable, nodeCount,
-                    effectiveMaxExpandedIndex, version);
+            final CompiledNode<V>[] nodes = readNodes(dataInput, arrayFactory, valueReader, sourceMetadata, valueTable,
+                    nodeCount, effectiveMaxExpandedIndex, version);
             final CompiledNode<V> rootNode = nodes[rootNodeId];
 
             if (LOGGER.isLoggable(Level.FINE)) {
@@ -1099,13 +1142,14 @@ public final class FrequencyTrie<V> {
          *
          * @param dataInput    input stream
          * @param arrayFactory typed-array factory
-         * @param valueCodec   codec responsible for value decoding
+         * @param valueReader  metadata-aware value reader
+         * @param metadata     parsed trie metadata
          * @param <V>          value type
          * @return decoded values in table-index order
          * @throws IOException if the count is negative or value decoding fails
          */
         private static <V> V[] readValueTable(final DataInputStream dataInput, final IntFunction<V[]> arrayFactory,
-                final ValueStreamCodec<V> valueCodec) throws IOException {
+                final MetadataValueStreamReader<V> valueReader, final TrieMetadata metadata) throws IOException {
             final int distinctValueCount = dataInput.readInt();
             if (distinctValueCount < 0) {
                 throw new IOException("Negative distinct value count: " + distinctValueCount);
@@ -1113,7 +1157,7 @@ public final class FrequencyTrie<V> {
 
             final V[] valueTable = arrayFactory.apply(distinctValueCount);
             for (int valueIndex = 0; valueIndex < distinctValueCount; valueIndex++) {
-                valueTable[valueIndex] = valueCodec.read(dataInput);
+                valueTable[valueIndex] = valueReader.read(dataInput, metadata);
             }
             return valueTable;
         }
@@ -1181,8 +1225,9 @@ public final class FrequencyTrie<V> {
         }
 
         private static <V> CompiledNode<V>[] readNodes(final DataInputStream dataInput,
-                final IntFunction<V[]> arrayFactory, final ValueStreamCodec<V> valueCodec, final V[] valueTable,
-                final int nodeCount, final int maxExpandedIndex, final int version) throws IOException {
+                final IntFunction<V[]> arrayFactory, final MetadataValueStreamReader<V> valueReader,
+                final TrieMetadata metadata, final V[] valueTable, final int nodeCount, final int maxExpandedIndex,
+                final int version) throws IOException {
             final char[][] edgeLabelsByNode = new char[nodeCount][];
             final int[][] childNodeIdsByNode = new int[nodeCount][];
             @SuppressWarnings("unchecked")
@@ -1234,7 +1279,7 @@ public final class FrequencyTrie<V> {
                         }
                         orderedValuesByNode[nodeIndex][valueIndex] = valueTable[valueTableIndex];
                     } else {
-                        orderedValuesByNode[nodeIndex][valueIndex] = valueCodec.read(dataInput);
+                        orderedValuesByNode[nodeIndex][valueIndex] = valueReader.read(dataInput, metadata);
                     }
                     orderedCountsByNode[nodeIndex][valueIndex] = dataInput.readInt();
                     if (orderedCountsByNode[nodeIndex][valueIndex] <= 0) {
@@ -1978,6 +2023,32 @@ public final class FrequencyTrie<V> {
         private Map<V, Integer> copyCounts(final Map<V, Integer> source) {
             return new LinkedHashMap<>(source);
         }
+    }
+
+    /**
+     * Reads one final trie value using metadata parsed from the same binary stream.
+     *
+     * <p>
+     * Implementations are invoked only during deserialization and are not retained
+     * by the resulting trie. Returned values are stored directly in final compiled
+     * node arrays.
+     * </p>
+     *
+     * @param <V> final value type
+     */
+    /* default */
+    @FunctionalInterface
+    interface MetadataValueStreamReader<V> {
+
+        /**
+         * Reads and materializes one final value.
+         *
+         * @param dataInput source data input
+         * @param metadata  already parsed trie metadata
+         * @return final value to store directly in compiled nodes
+         * @throws IOException if reading or materialization fails
+         */
+        V read(DataInputStream dataInput, TrieMetadata metadata) throws IOException;
     }
 
     /**

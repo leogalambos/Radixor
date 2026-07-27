@@ -151,6 +151,25 @@ final class CompiledTrieArtifactRegressionTest {
     }
 
     /**
+     * Verifies that every committed version 6 artifact can be materialized directly
+     * as compiled commands while preserving representative stemming behavior.
+     *
+     * @param artifactCase regression case
+     * @throws IOException if artifact loading fails
+     */
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("artifactCases")
+    @DisplayName("Committed golden artifacts must load directly as compiled commands")
+    void shouldLoadGoldenArtifactsDirectlyAsCompiledCommands(final ArtifactCase artifactCase) throws IOException {
+        final byte[] goldenArtifactBytes = RegressionArtifactSupport
+                .readResourceBytes(artifactCase.goldenArtifactResource());
+        final FrequencyTrie<CompiledPatchCommand> trie = StemmerPatchTrieLoader
+                .loadBinaryCompiled(new ByteArrayInputStream(goldenArtifactBytes));
+
+        assertGoldenCompiledArtifactSemanticProbes(trie, artifactCase);
+    }
+
+    /**
      * Verifies in-process determinism independently of the checked-in golden file
      * by compiling the same dictionary twice and requiring identical artifact
      * bytes.
@@ -252,6 +271,35 @@ final class CompiledTrieArtifactRegressionTest {
             final String preferredStem = preferredPatchCommand == null ? null
                     : PatchCommandEncoder.apply(probe.word(), preferredPatchCommand, trie.traversalDirection());
             final Set<String> allStems = reconstructStemCandidates(trie, probe.word(), allPatchCommands);
+
+            assertAll(
+                    () -> assertFalse(allPatchCommands.length == 0,
+                            "Representative probe must produce at least one result for word: " + probe.word()),
+                    () -> assertEquals(probe.preferredStem(), preferredStem,
+                            "Preferred stem mismatch for representative probe word: " + probe.word()),
+                    () -> assertTrue(allStems.containsAll(probe.acceptableStems()),
+                            "All acceptable stems must be present in getAll() for representative probe word: "
+                                    + probe.word()));
+        }
+    }
+
+    /**
+     * Verifies representative semantic probes against a directly materialized
+     * compiled-command trie.
+     *
+     * @param trie         compiled-command trie to inspect
+     * @param artifactCase regression case providing the expected probes
+     */
+    private static void assertGoldenCompiledArtifactSemanticProbes(
+            final FrequencyTrie<CompiledPatchCommand> trie, final ArtifactCase artifactCase) {
+        for (ProbeExpectation probe : artifactCase.probes()) {
+            final CompiledPatchCommand[] allPatchCommands = trie.getAll(probe.word());
+            final CompiledPatchCommand preferredPatchCommand = trie.get(probe.word());
+            final String preferredStem = preferredPatchCommand == null ? null : preferredPatchCommand.apply(probe.word());
+            final Set<String> allStems = new LinkedHashSet<String>();
+            for (CompiledPatchCommand patchCommand : allPatchCommands) {
+                allStems.add(patchCommand.apply(probe.word()));
+            }
 
             assertAll(
                     () -> assertFalse(allPatchCommands.length == 0,

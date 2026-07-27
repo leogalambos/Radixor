@@ -34,10 +34,15 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -58,6 +63,7 @@ import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
 
 import org.egothor.stemmer.StemmerPatchTrieLoader.Language;
+import org.egothor.stemmer.trie.CompiledNode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
@@ -67,6 +73,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.MockedStatic;
 
 /**
  * Professional test suite for {@link StemmerPatchTrieLoader}.
@@ -383,6 +390,161 @@ final class StemmerPatchTrieLoaderTest {
             final Path missingFile = tempDir.resolve("missing-trie.bin.gz");
 
             assertThrows(IOException.class, () -> StemmerPatchTrieLoader.loadBinary(missingFile));
+        }
+    }
+
+    /**
+     * Structural tests for direct compiled binary-loader delegation.
+     */
+    @Nested
+    @DisplayName("Compiled binary routing")
+    @Tag("unit")
+    @Tag("io")
+    @Tag("persistence")
+    final class CompiledBinaryRoutingTests {
+
+        /**
+         * Verifies that the path overload returns the direct compiled BinaryIO result
+         * without invoking deprecated String deserialization.
+         *
+         * @throws IOException if the loader unexpectedly reports an I/O failure
+         */
+        @Test
+        @DisplayName("Path compiled loading must use direct compiled BinaryIO")
+        void shouldRouteCompiledPathLoadingDirectly() throws IOException {
+            final Path path = tempDir.resolve("compiled-routing-path.bin.gz");
+            final FrequencyTrie<CompiledPatchCommand> compiledSentinel = compiledRoutingSentinel();
+            final FrequencyTrie<String> stringFallback = stringRoutingFallback();
+
+            try (MockedStatic<StemmerPatchTrieBinaryIO> binaryIo = mockStatic(StemmerPatchTrieBinaryIO.class)) {
+                binaryIo.when(() -> StemmerPatchTrieBinaryIO.readCompiled(path)).thenReturn(compiledSentinel);
+                binaryIo.when(() -> StemmerPatchTrieBinaryIO.read(path)).thenReturn(stringFallback);
+
+                final FrequencyTrie<CompiledPatchCommand> actual = StemmerPatchTrieLoader.loadBinaryCompiled(path);
+
+                assertSame(compiledSentinel, actual,
+                        "Path loading must return the trie materialized by the direct compiled reader.");
+                binaryIo.verify(() -> StemmerPatchTrieBinaryIO.readCompiled(path), times(1));
+                binaryIo.verify(() -> StemmerPatchTrieBinaryIO.read(path), never());
+                binaryIo.verifyNoMoreInteractions();
+            }
+        }
+
+        /**
+         * Verifies that the path-and-span overload preserves both arguments while
+         * delegating directly to compiled BinaryIO.
+         *
+         * @throws IOException if the loader unexpectedly reports an I/O failure
+         */
+        @Test
+        @DisplayName("Path and span compiled loading must use direct compiled BinaryIO")
+        void shouldRouteCompiledPathAndSpanLoadingDirectly() throws IOException {
+            final Path path = tempDir.resolve("compiled-routing-path-span.bin.gz");
+            final int maxExpandedIndex = 17;
+            final FrequencyTrie<CompiledPatchCommand> compiledSentinel = compiledRoutingSentinel();
+            final FrequencyTrie<String> stringFallback = stringRoutingFallback();
+
+            try (MockedStatic<StemmerPatchTrieBinaryIO> binaryIo = mockStatic(StemmerPatchTrieBinaryIO.class)) {
+                binaryIo.when(() -> StemmerPatchTrieBinaryIO.readCompiled(path, maxExpandedIndex))
+                        .thenReturn(compiledSentinel);
+                binaryIo.when(() -> StemmerPatchTrieBinaryIO.read(path, maxExpandedIndex)).thenReturn(stringFallback);
+
+                final FrequencyTrie<CompiledPatchCommand> actual = StemmerPatchTrieLoader.loadBinaryCompiled(path,
+                        maxExpandedIndex);
+
+                assertSame(compiledSentinel, actual,
+                        "Path-and-span loading must return the trie materialized by the direct compiled reader.");
+                binaryIo.verify(() -> StemmerPatchTrieBinaryIO.readCompiled(path, maxExpandedIndex), times(1));
+                binaryIo.verify(() -> StemmerPatchTrieBinaryIO.read(path, maxExpandedIndex), never());
+                binaryIo.verifyNoMoreInteractions();
+            }
+        }
+
+        /**
+         * Verifies that the file-name overload returns the direct compiled BinaryIO
+         * result without invoking deprecated String deserialization.
+         *
+         * @throws IOException if the loader unexpectedly reports an I/O failure
+         */
+        @Test
+        @DisplayName("String compiled loading must use direct compiled BinaryIO")
+        void shouldRouteCompiledStringLoadingDirectly() throws IOException {
+            final String fileName = tempDir.resolve("compiled-routing-string.bin.gz").toString();
+            final FrequencyTrie<CompiledPatchCommand> compiledSentinel = compiledRoutingSentinel();
+            final FrequencyTrie<String> stringFallback = stringRoutingFallback();
+
+            try (MockedStatic<StemmerPatchTrieBinaryIO> binaryIo = mockStatic(StemmerPatchTrieBinaryIO.class)) {
+                binaryIo.when(() -> StemmerPatchTrieBinaryIO.readCompiled(fileName)).thenReturn(compiledSentinel);
+                binaryIo.when(() -> StemmerPatchTrieBinaryIO.read(fileName)).thenReturn(stringFallback);
+
+                final FrequencyTrie<CompiledPatchCommand> actual = StemmerPatchTrieLoader
+                        .loadBinaryCompiled(fileName);
+
+                assertSame(compiledSentinel, actual,
+                        "String loading must return the trie materialized by the direct compiled reader.");
+                binaryIo.verify(() -> StemmerPatchTrieBinaryIO.readCompiled(fileName), times(1));
+                binaryIo.verify(() -> StemmerPatchTrieBinaryIO.read(fileName), never());
+                binaryIo.verifyNoMoreInteractions();
+            }
+        }
+
+        /**
+         * Verifies that the file-name-and-span overload preserves both arguments
+         * while delegating directly to compiled BinaryIO.
+         *
+         * @throws IOException if the loader unexpectedly reports an I/O failure
+         */
+        @Test
+        @DisplayName("String and span compiled loading must use direct compiled BinaryIO")
+        void shouldRouteCompiledStringAndSpanLoadingDirectly() throws IOException {
+            final String fileName = tempDir.resolve("compiled-routing-string-span.bin.gz").toString();
+            final int maxExpandedIndex = 17;
+            final FrequencyTrie<CompiledPatchCommand> compiledSentinel = compiledRoutingSentinel();
+            final FrequencyTrie<String> stringFallback = stringRoutingFallback();
+
+            try (MockedStatic<StemmerPatchTrieBinaryIO> binaryIo = mockStatic(StemmerPatchTrieBinaryIO.class)) {
+                binaryIo.when(() -> StemmerPatchTrieBinaryIO.readCompiled(fileName, maxExpandedIndex))
+                        .thenReturn(compiledSentinel);
+                binaryIo.when(() -> StemmerPatchTrieBinaryIO.read(fileName, maxExpandedIndex))
+                        .thenReturn(stringFallback);
+
+                final FrequencyTrie<CompiledPatchCommand> actual = StemmerPatchTrieLoader
+                        .loadBinaryCompiled(fileName, maxExpandedIndex);
+
+                assertSame(compiledSentinel, actual,
+                        "String-and-span loading must return the trie materialized by the direct compiled reader.");
+                binaryIo.verify(() -> StemmerPatchTrieBinaryIO.readCompiled(fileName, maxExpandedIndex), times(1));
+                binaryIo.verify(() -> StemmerPatchTrieBinaryIO.read(fileName, maxExpandedIndex), never());
+                binaryIo.verifyNoMoreInteractions();
+            }
+        }
+
+        /**
+         * Verifies that the stream overload preserves stream identity while
+         * delegating directly to compiled BinaryIO.
+         *
+         * @throws IOException if the loader unexpectedly reports an I/O failure
+         */
+        @Test
+        @DisplayName("InputStream compiled loading must use direct compiled BinaryIO")
+        void shouldRouteCompiledInputStreamLoadingDirectly() throws IOException {
+            final InputStream inputStream = new ByteArrayInputStream(new byte[] { 1, 2, 3 });
+            final FrequencyTrie<CompiledPatchCommand> compiledSentinel = compiledRoutingSentinel();
+            final FrequencyTrie<String> stringFallback = stringRoutingFallback();
+
+            try (MockedStatic<StemmerPatchTrieBinaryIO> binaryIo = mockStatic(StemmerPatchTrieBinaryIO.class)) {
+                binaryIo.when(() -> StemmerPatchTrieBinaryIO.readCompiled(inputStream)).thenReturn(compiledSentinel);
+                binaryIo.when(() -> StemmerPatchTrieBinaryIO.read(inputStream)).thenReturn(stringFallback);
+
+                final FrequencyTrie<CompiledPatchCommand> actual = StemmerPatchTrieLoader
+                        .loadBinaryCompiled(inputStream);
+
+                assertSame(compiledSentinel, actual,
+                        "Stream loading must return the trie materialized by the direct compiled reader.");
+                binaryIo.verify(() -> StemmerPatchTrieBinaryIO.readCompiled(inputStream), times(1));
+                binaryIo.verify(() -> StemmerPatchTrieBinaryIO.read(inputStream), never());
+                binaryIo.verifyNoMoreInteractions();
+            }
         }
     }
 
@@ -708,6 +870,54 @@ final class StemmerPatchTrieLoaderTest {
         }
 
         /**
+         * Verifies that public compiled binary loading materializes final command
+         * arrays directly and preserves shared table identity, counts, metadata, and
+         * canonical graph size.
+         *
+         * @throws IOException if writing or reading fails
+         */
+        @Test
+        @DisplayName("Compiled binary loading should materialize one final shared command graph")
+        void shouldMaterializeOneFinalSharedCommandGraphFromBinary() throws IOException {
+            final PatchCommandEncoder encoder = PatchCommandEncoder.builder().build();
+            final String sharedPatch = encoder.encode("ab", "a");
+            final String longerDeletionPatch = encoder.encode("xab", "x");
+            final FrequencyTrie.Builder<String> builder = new FrequencyTrie.Builder<String>(String[]::new,
+                    ReductionSettings
+                            .withDefaults(ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS));
+            builder.put("ab", new String(sharedPatch), 2);
+            builder.put("xab", longerDeletionPatch);
+            builder.put("cb", new String(sharedPatch), 3);
+            builder.put("ycb", new String(longerDeletionPatch));
+            final FrequencyTrie<String> sourceTrie = builder.build();
+            final Path binaryFile = tempDir.resolve("direct-compiled-trie.bin.gz");
+            StemmerPatchTrieLoader.saveBinary(sourceTrie, binaryFile);
+
+            final FrequencyTrie<CompiledPatchCommand> compiledTrie = StemmerPatchTrieLoader
+                    .loadBinaryCompiled(binaryFile);
+            final FrequencyTrie<String> stringTrie = StemmerPatchTrieLoader.loadBinary(binaryFile);
+            final CompiledNode<CompiledPatchCommand> suffixBNode = compiledTrie.root().findChild('b');
+            final CompiledNode<CompiledPatchCommand> abNode = suffixBNode.findChild('a');
+            final CompiledNode<CompiledPatchCommand> cbNode = suffixBNode.findChild('c');
+
+            assertAll(() -> assertEquals(sourceTrie.metadata(), compiledTrie.metadata()),
+                    () -> assertEquals(sourceTrie.size(), compiledTrie.size()),
+                    () -> assertEquals(sourceTrie.getEntries("ab").get(0).count(),
+                            compiledTrie.getEntries("ab").get(0).count()),
+                    () -> assertEquals(sourceTrie.getEntries("cb").get(0).count(),
+                            compiledTrie.getEntries("cb").get(0).count()),
+                    () -> assertEquals(CompiledPatchCommand[].class, abNode.orderedValues().getClass()),
+                    () -> assertSame(compiledTrie.get("ab"), compiledTrie.get("cb")),
+                    () -> assertSame(abNode.orderedValues()[0], cbNode.orderedValues()[0]),
+                    () -> assertEquals("a", compiledTrie.get("ab").apply("ab")),
+                    () -> assertEquals("c", compiledTrie.get("cb").apply("cb")),
+                    () -> assertEquals("x", compiledTrie.get("xab").apply("xab")),
+                    () -> assertEquals("y", compiledTrie.get("ycb").apply("ycb")),
+                    () -> assertInstanceOf(String.class, stringTrie.get("ab")),
+                    () -> assertInstanceOf(CompiledPatchCommand.class, compiledTrie.get("ab")));
+        }
+
+        /**
          * Verifies that binary load overloads with an explicit dense lookup span
          * preserve trie semantics while honoring the dense-layout override.
          */
@@ -728,9 +938,17 @@ final class StemmerPatchTrieLoaderTest {
 
             final FrequencyTrie<String> fromPathDefault = StemmerPatchTrieLoader.loadBinary(binaryFile);
             final FrequencyTrie<String> fromPathDefaultByNegative = StemmerPatchTrieLoader.loadBinary(binaryFile,
-                    FrequencyTrie.DEFAULT_MAX_EXPANDED_INDEX);
+                    -1);
             final FrequencyTrie<String> fromPathNoDense = StemmerPatchTrieLoader.loadBinary(binaryFile, 0);
             final FrequencyTrie<String> fromStringNoDense = StemmerPatchTrieLoader.loadBinary(binaryFile.toString(), 0);
+            final FrequencyTrie<CompiledPatchCommand> compiledDefault = StemmerPatchTrieLoader
+                    .loadBinaryCompiled(binaryFile);
+            final FrequencyTrie<CompiledPatchCommand> compiledDefaultByNegative = StemmerPatchTrieLoader
+                    .loadBinaryCompiled(binaryFile, -1);
+            final FrequencyTrie<CompiledPatchCommand> compiledNoDense = StemmerPatchTrieLoader
+                    .loadBinaryCompiled(binaryFile, 0);
+            final FrequencyTrie<CompiledPatchCommand> compiledStringNoDense = StemmerPatchTrieLoader
+                    .loadBinaryCompiled(binaryFile.toString(), 0);
 
             assertTriePatchSemanticsEqual(original, fromPathDefault, "run", "running", "runner", "cities", "studying");
             assertTriePatchSemanticsEqual(original, fromPathDefaultByNegative, "run", "running", "runner", "cities",
@@ -738,11 +956,27 @@ final class StemmerPatchTrieLoaderTest {
             assertTriePatchSemanticsEqual(original, fromPathNoDense, "run", "running", "runner", "cities", "studying");
             assertTriePatchSemanticsEqual(original, fromStringNoDense, "run", "running", "runner", "cities",
                     "studying");
+            assertCompiledTrieSemanticsEqual(original, compiledDefault, "run", "running", "runner", "cities",
+                    "studying");
+            assertCompiledTrieSemanticsEqual(original, compiledDefaultByNegative, "run", "running", "runner",
+                    "cities", "studying");
+            assertCompiledTrieSemanticsEqual(original, compiledNoDense, "run", "running", "runner", "cities",
+                    "studying");
+            assertCompiledTrieSemanticsEqual(original, compiledStringNoDense, "run", "running", "runner", "cities",
+                    "studying");
 
+            assertTrue(compiledDefault.root().hasDenseLookup(),
+                    "Default compiled loading should use the documented dense lookup span.");
+            assertTrue(compiledDefaultByNegative.root().hasDenseLookup(),
+                    "Negative compiled override should use the documented default dense lookup span.");
             assertFalse(fromPathNoDense.root().hasDenseLookup(),
                     "Zero span should disable dense lookup on the loaded root.");
             assertFalse(fromStringNoDense.root().hasDenseLookup(),
                     "Zero span should disable dense lookup on the loaded root.");
+            assertFalse(compiledNoDense.root().hasDenseLookup(),
+                    "Zero span should disable dense lookup on the directly compiled root.");
+            assertFalse(compiledStringNoDense.root().hasDenseLookup(),
+                    "String-path zero span should disable dense lookup on the directly compiled root.");
         }
 
         /**
@@ -988,6 +1222,36 @@ final class StemmerPatchTrieLoaderTest {
         }
 
         return stems;
+    }
+
+    /**
+     * Creates a compiled trie whose identity distinguishes the direct BinaryIO
+     * result from any graph produced through deprecated String loading.
+     *
+     * @return compiled trie sentinel
+     */
+    private static FrequencyTrie<CompiledPatchCommand> compiledRoutingSentinel() {
+        final String serializedPatch = PatchCommandEncoder.builder().build().encode("running", "run");
+        final CompiledPatchCommand compiledPatch = CompiledPatchCommand.compile(serializedPatch,
+                WordTraversalDirection.BACKWARD);
+        return new FrequencyTrie.Builder<CompiledPatchCommand>(CompiledPatchCommand[]::new,
+                ReductionSettings.withDefaults(DEFAULT_REDUCTION_MODE))
+                        .put("running", compiledPatch)
+                        .build();
+    }
+
+    /**
+     * Creates a valid String-valued trie that allows the deprecated two-stage route
+     * to execute rather than failing because of incomplete mock setup.
+     *
+     * @return valid String-valued fallback trie
+     */
+    private static FrequencyTrie<String> stringRoutingFallback() {
+        final String serializedPatch = PatchCommandEncoder.builder().build().encode("running", "run");
+        return new FrequencyTrie.Builder<String>(String[]::new,
+                ReductionSettings.withDefaults(DEFAULT_REDUCTION_MODE))
+                        .put("running", serializedPatch)
+                        .build();
     }
 
     /**
