@@ -1,0 +1,50 @@
+{
+  "source": "Python all-language batch benchmark, 2026-08-08",
+  "environment": {
+    "processor": "AMD Ryzen 5 5625U with Radeon Graphics",
+    "platform": "Linux-7.1.6-201.fc44.x86_64-x86_64-with-glibc2.43",
+    "python": "CPython 3.14.6",
+    "cpu_governor": "schedutil"
+  },
+  "batch_size": 100,
+  "direct_pystemmer_comparisons": 18,
+  "direct_pystemmer_wins": 18,
+  "geometric_mean_speedup_vs_pystemmer": 1.665046904842523,
+  "maximum_speedup_vs_pystemmer": {
+    "language": "it",
+    "speedup": 3.027396185495421
+  },
+  "radixor_throughput_mwords_per_second": {
+    "minimum": {
+      "language": "ru",
+      "value": 3.6574304356731138
+    },
+    "maximum": {
+      "language": "pt",
+      "value": 5.99085795076713
+    }
+  },
+  "languages": {
+    "cs": {"radixor_ns_per_word": 224.3, "radixor_mwords_per_second": 4.46, "pystemmer_ns_per_word": 236.6, "speedup_vs_pystemmer": 1.05},
+    "da": {"radixor_ns_per_word": 178.3, "radixor_mwords_per_second": 5.61, "pystemmer_ns_per_word": 267.6, "speedup_vs_pystemmer": 1.50},
+    "de": {"radixor_ns_per_word": 230.9, "radixor_mwords_per_second": 4.33, "pystemmer_ns_per_word": 635.5, "speedup_vs_pystemmer": 2.75},
+    "en": {"radixor_ns_per_word": 180.5, "radixor_mwords_per_second": 5.54, "pystemmer_ns_per_word": 331.9, "speedup_vs_pystemmer": 1.84},
+    "es": {"radixor_ns_per_word": 184.2, "radixor_mwords_per_second": 5.43, "pystemmer_ns_per_word": 316.6, "speedup_vs_pystemmer": 1.72},
+    "fa": {"radixor_ns_per_word": 210.1, "radixor_mwords_per_second": 4.76, "pystemmer_ns_per_word": 497.1, "speedup_vs_pystemmer": 2.37},
+    "fi": {"radixor_ns_per_word": 227.8, "radixor_mwords_per_second": 4.39, "pystemmer_ns_per_word": 258.8, "speedup_vs_pystemmer": 1.14},
+    "fr": {"radixor_ns_per_word": 234.2, "radixor_mwords_per_second": 4.27, "pystemmer_ns_per_word": 503.7, "speedup_vs_pystemmer": 2.15},
+    "he": {"radixor_ns_per_word": 228.6, "radixor_mwords_per_second": 4.37, "pystemmer_ns_per_word": null, "speedup_vs_pystemmer": null},
+    "hu": {"radixor_ns_per_word": 198.2, "radixor_mwords_per_second": 5.04, "pystemmer_ns_per_word": 264.7, "speedup_vs_pystemmer": 1.34},
+    "it": {"radixor_ns_per_word": 170.8, "radixor_mwords_per_second": 5.86, "pystemmer_ns_per_word": 517.0, "speedup_vs_pystemmer": 3.03},
+    "nb": {"radixor_ns_per_word": 187.1, "radixor_mwords_per_second": 5.34, "pystemmer_ns_per_word": 239.7, "speedup_vs_pystemmer": 1.28},
+    "nl": {"radixor_ns_per_word": 187.1, "radixor_mwords_per_second": 5.35, "pystemmer_ns_per_word": 354.8, "speedup_vs_pystemmer": 1.90},
+    "nn": {"radixor_ns_per_word": 168.7, "radixor_mwords_per_second": 5.93, "pystemmer_ns_per_word": 231.2, "speedup_vs_pystemmer": 1.37},
+    "pl": {"radixor_ns_per_word": 194.6, "radixor_mwords_per_second": 5.14, "pystemmer_ns_per_word": 214.5, "speedup_vs_pystemmer": 1.10},
+    "pt": {"radixor_ns_per_word": 166.9, "radixor_mwords_per_second": 5.99, "pystemmer_ns_per_word": 293.2, "speedup_vs_pystemmer": 1.76},
+    "ru": {"radixor_ns_per_word": 273.4, "radixor_mwords_per_second": 3.66, "pystemmer_ns_per_word": 414.4, "speedup_vs_pystemmer": 1.52},
+    "sv": {"radixor_ns_per_word": 189.3, "radixor_mwords_per_second": 5.28, "pystemmer_ns_per_word": 212.5, "speedup_vs_pystemmer": 1.12},
+    "uk": {"radixor_ns_per_word": 221.5, "radixor_mwords_per_second": 4.51, "pystemmer_ns_per_word": null, "speedup_vs_pystemmer": null},
+    "yi": {"radixor_ns_per_word": 227.5, "radixor_mwords_per_second": 4.39, "pystemmer_ns_per_word": 624.2, "speedup_vs_pystemmer": 2.74}
+  },
+  "pystemmer_missing_for_radixor_languages": ["he", "uk"]
+}

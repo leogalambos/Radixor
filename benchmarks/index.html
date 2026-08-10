@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="High-performance multi-language stemming toolkit for Java">
+        <meta name="description" content="Learned transformation stemming with compiled patch-command tries for Java and Python">
       
       
       
@@ -22,8 +22,8 @@
         
       
       
-      <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <link rel="icon" href="../assets/images/radixor-logo.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
@@ -31,7 +31,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
       
         
         <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -55,6 +55,10 @@
     
       <link rel="stylesheet" href="../assets/stylesheets/extra.css">
     
+      <link rel="stylesheet" href="../assets/stylesheets/landing-v2.css">
+    
+      <link rel="stylesheet" href="../assets/stylesheets/radixor-docs-safety.css">
+    
     <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -71,7 +75,7 @@
     
     
     
-    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="white" data-md-color-accent="blue">
   
     
     <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
@@ -98,8 +102,7 @@
   <nav class="md-header__inner md-grid" aria-label="Header">
     <a href=".." title="Radixor" class="md-header__button md-logo" aria-label="Radixor" data-md-component="logo">
       
-  
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+  <img src="../assets/images/radixor-logo.png" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -129,7 +132,7 @@
     
     
     
-    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="white" data-md-color-accent="blue"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
     
   
 </form>
@@ -222,8 +225,7 @@
   <label class="md-nav__title" for="__drawer">
     <a href=".." title="Radixor" class="md-nav__button md-logo" aria-label="Radixor" data-md-component="logo">
       
-  
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+  <img src="../assets/images/radixor-logo.png" alt="logo">
 
     </a>
     Radixor
@@ -329,6 +331,90 @@
   
   
     <li class="md-nav__item">
+      <a href="../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Choose a Runtime
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../why-radixor-is-different/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Why Radixor Is Different
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../python/fast-track/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python Fast Track
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../fast-track/" class="md-nav__link">
         
   
@@ -336,7 +422,35 @@
   <span class="md-ellipsis">
     
   
-    Fast Track
+    Java Fast Track
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../python/quick-start/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python Quick Start
   
 
     
@@ -364,35 +478,7 @@
   <span class="md-ellipsis">
     
   
-    Quick Start
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../integration-deep-dive/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Integration Deep Dive
+    Java Quick Start
   
 
     
@@ -443,7 +529,7 @@
   <span class="md-ellipsis">
     
   
-    Integration
+    Java
   
 
     
@@ -459,11 +545,39 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Integration
+    Java
   
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../integration-deep-dive/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Integration Deep Dive
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -698,7 +812,7 @@
   <span class="md-ellipsis">
     
   
-    Dictionaries and Languages
+    Python
   
 
     
@@ -711,6 +825,261 @@
         
         <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Python
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../python/fast-track/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python Fast Track
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../python/quick-start/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../python/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../python/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation and Builds
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../python/usage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Usage and API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../python/model-compilation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dictionary Compilation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../python/performance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Benchmarks
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dictionaries and Languages
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -887,10 +1256,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
         
           
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
             
   
   
@@ -908,8 +1277,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -918,6 +1287,34 @@
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../technology-lineage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Technology and Lineage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -1088,10 +1485,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" checked>
         
           
-          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
             
   
   
@@ -1109,8 +1506,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_6">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_7">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1267,6 +1664,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Quality versus performance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#new-snowball-310-rows" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        New Snowball 3.1.0 rows
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1367,10 +1781,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_3" >
         
           
-          <label class="md-nav__link" for="__nav_6_3" id="__nav_6_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_7_3" id="__nav_7_3_label" tabindex="0">
             
   
   
@@ -1388,8 +1802,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_6_3">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_3">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1648,10 +2062,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_4" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_4" >
         
           
-          <label class="md-nav__link" for="__nav_6_4" id="__nav_6_4_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_7_4" id="__nav_7_4_label" tabindex="0">
             
   
   
@@ -1669,8 +2083,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_6_4">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -2303,10 +2717,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
         
           
-          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
             
   
   
@@ -2324,8 +2738,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_7">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -2561,6 +2975,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Quality versus performance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#new-snowball-310-rows" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        New Snowball 3.1.0 rows
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -2731,13 +3162,53 @@ the preferred result measured by the accuracy pass.</p>
 <h2 id="key-published-result">Key Published Result</h2>
 <p>The English dictionary coverage benchmark shows the current contracted-trie operating curve. With
 the full English dictionary, Radixor reaches <code>97.478%</code> all-token exactness and <code>97.197%</code>
-changed-token exactness at <code>98.0 ns/token</code>. Even with a deterministic 10% dictionary slice, it
-keeps <code>92.868%</code> all-token exactness and <code>76.516%</code> changed-token exactness at <code>80.6 ns/token</code>.</p>
+changed-token exactness at <code>71.6 ns/token</code>. Even with a deterministic 10% dictionary slice, it
+keeps <code>92.868%</code> all-token exactness and <code>76.516%</code> changed-token exactness at <code>47.0 ns/token</code>.</p>
 <p>Those figures should not be reduced to a single speed badge. The professional interpretation is a
 quality/speed envelope: the amount and quality of dictionary knowledge affect stemming precision,
 while contracted tries reduce lookup cost in uniform regions of the compiled graph.</p>
 <h2 id="quality-versus-performance">Quality versus performance</h2>
-<p>Each language page keeps exact-root accuracy, JMH latency, and pairwise linguistic-quality results in separate tables. No undocumented scalar combines them. The 2026-07-23 language tables are generated from the unrounded JMH comparison report produced on the environment documented for this refresh. Readers should inspect the quality and speed dimensions side by side; no cross-language Pareto ranking is inferred from workloads with different dictionaries and token counts.</p>
+<p>Each language page keeps exact-root accuracy, JMH latency, and pairwise linguistic-quality results in separate tables. No undocumented scalar combines them. The 2026-08-10 language tables are generated exclusively from the current unrounded JMH comparison report produced on the environment documented for this refresh. The Snowball 3.1.0 matrix adds direct Czech, Persian, and Polish stemmers; all previously published Java stemmers were measured again in the same run. Readers should inspect the quality and speed dimensions side by side; no cross-language Pareto ranking is inferred from workloads with different dictionaries and token counts.</p>
+<h3 id="new-snowball-310-rows">New Snowball 3.1.0 rows</h3>
+<table>
+<thead>
+<tr>
+<th>New direct stemmer</th>
+<th style="text-align: right;">All exact</th>
+<th style="text-align: right;">Changed exact</th>
+<th style="text-align: right;">Root preserved</th>
+<th style="text-align: right;">Speed</th>
+<th style="text-align: right;">Relative to same-language Radixor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Czech</td>
+<td style="text-align: right;">19.865%</td>
+<td style="text-align: right;">18.186%</td>
+<td style="text-align: right;">27.645%</td>
+<td style="text-align: right;">82.4 ns/token</td>
+<td style="text-align: right;">1.187×</td>
+</tr>
+<tr>
+<td>Persian</td>
+<td style="text-align: right;">3.660%</td>
+<td style="text-align: right;">0.000%</td>
+<td style="text-align: right;">100.000%</td>
+<td style="text-align: right;">298.1 ns/token</td>
+<td style="text-align: right;">6.486×</td>
+</tr>
+<tr>
+<td>Polish</td>
+<td style="text-align: right;">22.315%</td>
+<td style="text-align: right;">20.225%</td>
+<td style="text-align: right;">34.078%</td>
+<td style="text-align: right;">86.5 ns/token</td>
+<td style="text-align: right;">1.196×</td>
+</tr>
+</tbody>
+</table>
+<p>These rows describe exact agreement with each Radixor model dictionary and the measured direct API workload; they are not a universal linguistic ranking. In this dataset the three new Snowball stemmers are both less exact and slower than their same-language Radixor baseline. Lucene 10.5.0 does not expose the three new algorithms through <code>SnowballFilter</code>, so no synthetic Lucene wrapper rows were added.</p>
 <!-- STEMMING-QUALITY-OVERVIEW:START -->
 
 <h2 id="pairwise-quality-findings">Pairwise Quality Findings</h2>
@@ -2769,7 +3240,7 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 <td>HUNSPELL CZECH LUCENE FILTER</td>
 <td style="text-align: right;">0.142485045</td>
 <td>no</td>
-<td style="text-align: right;">3</td>
+<td style="text-align: right;">4</td>
 </tr>
 <tr>
 <td>Czech (<code>CS_CZ</code>)</td>
@@ -2779,15 +3250,15 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 <td>HUNSPELL CZECH LUCENE FILTER</td>
 <td style="text-align: right;">0.144045088</td>
 <td>no</td>
-<td style="text-align: right;">3</td>
+<td style="text-align: right;">4</td>
 </tr>
 <tr>
 <td>Danish (<code>DA_DK</code>)</td>
 <td>ALL_WORDS</td>
 <td>Radixor</td>
 <td style="text-align: right;">0.996243</td>
-<td>SNOWBALL DANISH LUCENE FILTER</td>
-<td style="text-align: right;">0.058337376</td>
+<td>SNOWBALL DANISH DIRECT</td>
+<td style="text-align: right;">0.053760569</td>
 <td>no</td>
 <td style="text-align: right;">3</td>
 </tr>
@@ -2797,7 +3268,7 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 <td>Radixor</td>
 <td style="text-align: right;">0.996482</td>
 <td>SNOWBALL DANISH DIRECT</td>
-<td style="text-align: right;">0.058471663</td>
+<td style="text-align: right;">0.054099342</td>
 <td>no</td>
 <td style="text-align: right;">3</td>
 </tr>
@@ -2857,7 +3328,7 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 <td>Radixor</td>
 <td style="text-align: right;">0.988242</td>
 <td>SNOWBALL FINNISH DIRECT</td>
-<td style="text-align: right;">0.249897933</td>
+<td style="text-align: right;">0.249699076</td>
 <td>no</td>
 <td style="text-align: right;">4</td>
 </tr>
@@ -3006,20 +3477,20 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 <td>ALL_WORDS</td>
 <td>Radixor</td>
 <td style="text-align: right;">0.976360</td>
-<td>PERSIAN LUCENE PERSIAN STEM FILTER</td>
-<td style="text-align: right;">0.474147508</td>
+<td>SNOWBALL PERSIAN DIRECT</td>
+<td style="text-align: right;">0.441236451</td>
 <td>no</td>
-<td style="text-align: right;">2</td>
+<td style="text-align: right;">3</td>
 </tr>
 <tr>
 <td>Persian (<code>FA_IR</code>)</td>
 <td>LOWERCASE_GROUPS_ONLY</td>
 <td>Radixor</td>
 <td style="text-align: right;">0.976360</td>
-<td>PERSIAN LUCENE PERSIAN STEM FILTER</td>
-<td style="text-align: right;">0.474147508</td>
+<td>SNOWBALL PERSIAN DIRECT</td>
+<td style="text-align: right;">0.441236451</td>
 <td>no</td>
-<td style="text-align: right;">2</td>
+<td style="text-align: right;">3</td>
 </tr>
 <tr>
 <td>Polish (<code>PL_PL</code>)</td>
@@ -3029,7 +3500,7 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 <td>POLISH LUCENE MORFOLOGIK FILTER</td>
 <td style="text-align: right;">0.042712804</td>
 <td>no</td>
-<td style="text-align: right;">5</td>
+<td style="text-align: right;">6</td>
 </tr>
 <tr>
 <td>Polish (<code>PL_PL</code>)</td>
@@ -3039,7 +3510,7 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 <td>POLISH LUCENE MORFOLOGIK FILTER</td>
 <td style="text-align: right;">0.042883749</td>
 <td>no</td>
-<td style="text-align: right;">5</td>
+<td style="text-align: right;">6</td>
 </tr>
 <tr>
 <td>Portuguese (<code>PT_PT</code>)</td>
@@ -3481,8 +3952,8 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">1</td>
-<td style="text-align: right;">2.000</td>
-<td style="text-align: right;">2.000</td>
+<td style="text-align: right;">3.000</td>
+<td style="text-align: right;">3.000</td>
 </tr>
 <tr>
 <td>POLISH LUCENE MORFOLOGIK FILTER</td>
@@ -3548,13 +4019,22 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 <td style="text-align: right;">4.000</td>
 </tr>
 <tr>
+<td>SNOWBALL CZECH DIRECT</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">4.000</td>
+<td style="text-align: right;">4.000</td>
+</tr>
+<tr>
 <td>SNOWBALL DANISH DIRECT</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">1</td>
-<td style="text-align: right;">3.000</td>
-<td style="text-align: right;">3.000</td>
+<td style="text-align: right;">2.000</td>
+<td style="text-align: right;">2.000</td>
 </tr>
 <tr>
 <td>SNOWBALL DANISH LUCENE FILTER</td>
@@ -3562,8 +4042,8 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">1</td>
-<td style="text-align: right;">2.000</td>
-<td style="text-align: right;">2.000</td>
+<td style="text-align: right;">3.000</td>
+<td style="text-align: right;">3.000</td>
 </tr>
 <tr>
 <td>SNOWBALL DUTCH DIRECT</td>
@@ -3708,6 +4188,24 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 <td style="text-align: right;">1</td>
 <td style="text-align: right;">3.000</td>
 <td style="text-align: right;">3.000</td>
+</tr>
+<tr>
+<td>SNOWBALL PERSIAN DIRECT</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">2.000</td>
+<td style="text-align: right;">2.000</td>
+</tr>
+<tr>
+<td>SNOWBALL POLISH DIRECT</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">6.000</td>
+<td style="text-align: right;">6.000</td>
 </tr>
 <tr>
 <td>SNOWBALL PORTUGUESE DIRECT</td>
@@ -4156,8 +4654,8 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">1</td>
-<td style="text-align: right;">2.000</td>
-<td style="text-align: right;">2.000</td>
+<td style="text-align: right;">3.000</td>
+<td style="text-align: right;">3.000</td>
 </tr>
 <tr>
 <td>POLISH LUCENE MORFOLOGIK FILTER</td>
@@ -4215,6 +4713,15 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 </tr>
 <tr>
 <td>RUSSIAN LUCENE RUSSIAN LIGHT STEM FILTER</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">4.000</td>
+<td style="text-align: right;">4.000</td>
+</tr>
+<tr>
+<td>SNOWBALL CZECH DIRECT</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">0</td>
@@ -4383,6 +4890,24 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 <td style="text-align: right;">1</td>
 <td style="text-align: right;">3.000</td>
 <td style="text-align: right;">3.000</td>
+</tr>
+<tr>
+<td>SNOWBALL PERSIAN DIRECT</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">2.000</td>
+<td style="text-align: right;">2.000</td>
+</tr>
+<tr>
+<td>SNOWBALL POLISH DIRECT</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">6.000</td>
+<td style="text-align: right;">6.000</td>
 </tr>
 <tr>
 <td>SNOWBALL PORTUGUESE DIRECT</td>
@@ -4578,7 +5103,7 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 <h3 id="reproducible-data">Reproducible data</h3>
 <ul>
 <li><a href="data/stemming-quality.csv">Machine-readable quality snapshot</a></li>
-<li>SHA-256: <code>edf16b07be8a535943ddf37caeb8807755c95e9e1fb13244145f28be74b491d8</code></li>
+<li>SHA-256: <code>d34f325da320a2e040b54d8d8b5c216d70448f08cfb8659a423e99882aa1afb5</code></li>
 <li><a href="reference/linguistic-quality/">Linguistic quality methodology</a></li>
 <li><a href="reference/tested-stemmers/">Tested stemmer inventory</a></li>
 <li><a href="reference/reproducibility/">Reproducibility and raw data</a></li>
@@ -4620,7 +5145,7 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
       <div class="md-copyright">
   
     <div class="md-copyright__highlight">
-      &copy; 2026 Egothor. Licensed under <a href='https://github.com/leogalambos/Radixor/blob/main/LICENSE'>BSD-3-Clause</a>.
+      © 2026 Egothor · Radixor software is BSD-3-Clause licensed.
     </div>
   
   
@@ -4639,10 +5164,14 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.instant", "navigation.sections", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.sections", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="https://unpkg.com/mermaid@11/dist/mermaid.min.js"></script>
+      
+        <script src="../assets/javascripts/mermaid.js"></script>
       
     
   </body>

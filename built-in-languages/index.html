@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="High-performance multi-language stemming toolkit for Java">
+        <meta name="description" content="Learned transformation stemming with compiled patch-command tries for Java and Python">
       
       
       
@@ -22,8 +22,8 @@
         
       
       
-      <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <link rel="icon" href="../assets/images/radixor-logo.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
@@ -31,7 +31,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
       
         
         <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -55,6 +55,10 @@
     
       <link rel="stylesheet" href="../assets/stylesheets/extra.css">
     
+      <link rel="stylesheet" href="../assets/stylesheets/landing-v2.css">
+    
+      <link rel="stylesheet" href="../assets/stylesheets/radixor-docs-safety.css">
+    
     <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -71,7 +75,7 @@
     
     
     
-    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="white" data-md-color-accent="blue">
   
     
     <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
@@ -98,8 +102,7 @@
   <nav class="md-header__inner md-grid" aria-label="Header">
     <a href=".." title="Radixor" class="md-header__button md-logo" aria-label="Radixor" data-md-component="logo">
       
-  
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+  <img src="../assets/images/radixor-logo.png" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -129,7 +132,7 @@
     
     
     
-    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="white" data-md-color-accent="blue"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
     
   
 </form>
@@ -222,8 +225,7 @@
   <label class="md-nav__title" for="__drawer">
     <a href=".." title="Radixor" class="md-nav__button md-logo" aria-label="Radixor" data-md-component="logo">
       
-  
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+  <img src="../assets/images/radixor-logo.png" alt="logo">
 
     </a>
     Radixor
@@ -329,6 +331,90 @@
   
   
     <li class="md-nav__item">
+      <a href="../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Choose a Runtime
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../why-radixor-is-different/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Why Radixor Is Different
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../python/fast-track/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python Fast Track
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../fast-track/" class="md-nav__link">
         
   
@@ -336,7 +422,35 @@
   <span class="md-ellipsis">
     
   
-    Fast Track
+    Java Fast Track
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../python/quick-start/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python Quick Start
   
 
     
@@ -364,35 +478,7 @@
   <span class="md-ellipsis">
     
   
-    Quick Start
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../integration-deep-dive/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Integration Deep Dive
+    Java Quick Start
   
 
     
@@ -443,7 +529,7 @@
   <span class="md-ellipsis">
     
   
-    Integration
+    Java
   
 
     
@@ -459,11 +545,39 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Integration
+    Java
   
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../integration-deep-dive/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Integration Deep Dive
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -672,6 +786,261 @@
       
   
   
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Python
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../python/fast-track/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python Fast Track
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../python/quick-start/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../python/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../python/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation and Builds
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../python/usage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Usage and API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../python/model-compilation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dictionary Compilation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../python/performance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Benchmarks
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
     
   
   
@@ -690,10 +1059,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
         
           
-          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
             
   
   
@@ -711,8 +1080,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_4">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1013,10 +1382,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
         
           
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
             
   
   
@@ -1034,8 +1403,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1044,6 +1413,34 @@
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../technology-lineage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Technology and Lineage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -1212,10 +1609,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
         
           
-          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
             
   
   
@@ -1233,8 +1630,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_6">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1317,10 +1714,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_3" >
         
           
-          <label class="md-nav__link" for="__nav_6_3" id="__nav_6_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_7_3" id="__nav_7_3_label" tabindex="0">
             
   
   
@@ -1338,8 +1735,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_6_3">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_3">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1598,10 +1995,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_4" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_4" >
         
           
-          <label class="md-nav__link" for="__nav_6_4" id="__nav_6_4_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_7_4" id="__nav_7_4_label" tabindex="0">
             
   
   
@@ -1619,8 +2016,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_6_4">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -2253,10 +2650,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
         
           
-          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
             
   
   
@@ -2274,8 +2671,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_7">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -2556,16 +2953,26 @@
 
 
 <h1 id="built-in-languages-and-default-models">Built-in Languages and Default Models</h1>
-<p>“Supported language” means that Radixor defines a language enum value and publishes a corresponding default model artifact. It does not mean that a dictionary is embedded in the core JAR. Applications add model artifacts explicitly or use the optional standard pack.</p>
-<p>The language enum carries language identity, writing direction, a legacy resource-directory name, and the stable default model ID. A model descriptor carries the independently versioned model identity and resource. See <a href="../model-selection-and-loading/">Model Selection and Loading</a> for the API and the generated <a href="../stemmer-model-catalog/">model catalog</a> for versions, provenance, checksums, and sizes.</p>
+<p>“Supported language” means that the repository maintains a default dictionary
+and runtime mapping for that language. Packaging differs by runtime: Java keeps
+the core dictionary-free and resolves external model artifacts, while the
+Python installs a separate <code>radixor-models-standard</code> data package containing
+the 20 default dictionaries in precompiled version 7 form.</p>
+<p>The Java language enum carries language identity, writing direction, a legacy
+resource-directory name, and the stable default model ID. A Java model
+descriptor carries the independently versioned model identity and resource.
+Python accepts the short alias or the same full model ID. See
+<a href="../model-selection-and-loading/">Model Selection and Loading</a> for Java and
+<a href="../python/usage/">Python Usage and API</a> for Python.</p>
 <h2 id="defaults-and-variants">Defaults and variants</h2>
 <table>
 <thead>
 <tr>
 <th>Language</th>
-<th>Enum</th>
+<th>Java enum</th>
+<th>Python alias</th>
 <th>Default model ID</th>
-<th>Default artifact</th>
+<th>Java default artifact</th>
 <th>Optional variants</th>
 </tr>
 </thead>
@@ -2573,6 +2980,7 @@
 <tr>
 <td>Czech</td>
 <td><code>CS_CZ</code></td>
+<td><code>cs</code></td>
 <td><code>cs-cz-default</code></td>
 <td><code>org.egothor:radixor-model-cs-cz-default</code></td>
 <td>—</td>
@@ -2580,6 +2988,7 @@
 <tr>
 <td>Danish</td>
 <td><code>DA_DK</code></td>
+<td><code>da</code></td>
 <td><code>da-dk-default</code></td>
 <td><code>org.egothor:radixor-model-da-dk-default</code></td>
 <td>—</td>
@@ -2587,6 +2996,7 @@
 <tr>
 <td>German</td>
 <td><code>DE_DE</code></td>
+<td><code>de</code></td>
 <td><code>de-de-default</code></td>
 <td><code>org.egothor:radixor-model-de-de-default</code></td>
 <td>—</td>
@@ -2594,6 +3004,7 @@
 <tr>
 <td>Spanish</td>
 <td><code>ES_ES</code></td>
+<td><code>es</code></td>
 <td><code>es-es-default</code></td>
 <td><code>org.egothor:radixor-model-es-es-default</code></td>
 <td>—</td>
@@ -2601,6 +3012,7 @@
 <tr>
 <td>Persian</td>
 <td><code>FA_IR</code></td>
+<td><code>fa</code></td>
 <td><code>fa-ir-default</code></td>
 <td><code>org.egothor:radixor-model-fa-ir-default</code></td>
 <td>—</td>
@@ -2608,6 +3020,7 @@
 <tr>
 <td>Finnish</td>
 <td><code>FI_FI</code></td>
+<td><code>fi</code></td>
 <td><code>fi-fi-default</code></td>
 <td><code>org.egothor:radixor-model-fi-fi-default</code></td>
 <td>—</td>
@@ -2615,6 +3028,7 @@
 <tr>
 <td>French</td>
 <td><code>FR_FR</code></td>
+<td><code>fr</code></td>
 <td><code>fr-fr-default</code></td>
 <td><code>org.egothor:radixor-model-fr-fr-default</code></td>
 <td>—</td>
@@ -2622,6 +3036,7 @@
 <tr>
 <td>Hebrew</td>
 <td><code>HE_IL</code></td>
+<td><code>he</code></td>
 <td><code>he-il-default</code></td>
 <td><code>org.egothor:radixor-model-he-il-default</code></td>
 <td>—</td>
@@ -2629,6 +3044,7 @@
 <tr>
 <td>Hungarian</td>
 <td><code>HU_HU</code></td>
+<td><code>hu</code></td>
 <td><code>hu-hu-default</code></td>
 <td><code>org.egothor:radixor-model-hu-hu-default</code></td>
 <td>—</td>
@@ -2636,6 +3052,7 @@
 <tr>
 <td>Italian</td>
 <td><code>IT_IT</code></td>
+<td><code>it</code></td>
 <td><code>it-it-default</code></td>
 <td><code>org.egothor:radixor-model-it-it-default</code></td>
 <td>—</td>
@@ -2643,6 +3060,7 @@
 <tr>
 <td>Norwegian Bokmål</td>
 <td><code>NB_NO</code></td>
+<td><code>nb</code></td>
 <td><code>nb-no-default</code></td>
 <td><code>org.egothor:radixor-model-nb-no-default</code></td>
 <td>—</td>
@@ -2650,6 +3068,7 @@
 <tr>
 <td>Dutch</td>
 <td><code>NL_NL</code></td>
+<td><code>nl</code></td>
 <td><code>nl-nl-default</code></td>
 <td><code>org.egothor:radixor-model-nl-nl-default</code></td>
 <td>—</td>
@@ -2657,6 +3076,7 @@
 <tr>
 <td>Norwegian Nynorsk</td>
 <td><code>NN_NO</code></td>
+<td><code>nn</code></td>
 <td><code>nn-no-default</code></td>
 <td><code>org.egothor:radixor-model-nn-no-default</code></td>
 <td>—</td>
@@ -2664,6 +3084,7 @@
 <tr>
 <td>Polish</td>
 <td><code>PL_PL</code></td>
+<td><code>pl</code></td>
 <td><code>pl-pl-unimorph</code></td>
 <td><code>org.egothor:radixor-model-pl-pl-unimorph</code></td>
 <td><code>pl-pl-polimorf</code> / <code>org.egothor:radixor-model-pl-pl-polimorf</code></td>
@@ -2671,6 +3092,7 @@
 <tr>
 <td>Portuguese</td>
 <td><code>PT_PT</code></td>
+<td><code>pt</code></td>
 <td><code>pt-pt-default</code></td>
 <td><code>org.egothor:radixor-model-pt-pt-default</code></td>
 <td>—</td>
@@ -2678,6 +3100,7 @@
 <tr>
 <td>Russian</td>
 <td><code>RU_RU</code></td>
+<td><code>ru</code></td>
 <td><code>ru-ru-default</code></td>
 <td><code>org.egothor:radixor-model-ru-ru-default</code></td>
 <td>—</td>
@@ -2685,6 +3108,7 @@
 <tr>
 <td>Swedish</td>
 <td><code>SV_SE</code></td>
+<td><code>sv</code></td>
 <td><code>sv-se-default</code></td>
 <td><code>org.egothor:radixor-model-sv-se-default</code></td>
 <td>—</td>
@@ -2692,6 +3116,7 @@
 <tr>
 <td>Ukrainian</td>
 <td><code>UK_UA</code></td>
+<td><code>uk</code></td>
 <td><code>uk-ua-default</code></td>
 <td><code>org.egothor:radixor-model-uk-ua-default</code></td>
 <td>—</td>
@@ -2699,6 +3124,7 @@
 <tr>
 <td>English</td>
 <td><code>US_UK</code></td>
+<td><code>en</code></td>
 <td><code>us-uk-default</code></td>
 <td><code>org.egothor:radixor-model-us-uk-default</code></td>
 <td>—</td>
@@ -2706,6 +3132,7 @@
 <tr>
 <td>Yiddish</td>
 <td><code>YI</code></td>
+<td><code>yi</code></td>
 <td><code>yi-default</code></td>
 <td><code>org.egothor:radixor-model-yi-default</code></td>
 <td>—</td>
@@ -2724,6 +3151,10 @@
 <li>Radixor does not merge their dictionaries or outputs automatically.</li>
 </ul>
 <p>UniMorph and PoliMorf have different lexical sources and provenance. Applications should compare outputs with application-specific regression tests before changing an explicit model choice.</p>
+<p>In Python, <code>Stemmer("pl")</code> selects <code>pl-pl-unimorph</code>. The standard Python data
+package does not include PoliMorf; applications that need it must compile and
+load it explicitly as a trusted custom model. As in Java, it never changes the
+Polish default implicitly.</p>
 <h2 id="dependency-patterns">Dependency patterns</h2>
 <p>Minimal English:</p>
 <div class="highlight"><pre><span></span><code><span class="n">dependencies</span><span class="w"> </span><span class="o">{</span>
@@ -2799,7 +3230,7 @@ reproducibility limitation, not a claim that the source or license is unknown.</
       <div class="md-copyright">
   
     <div class="md-copyright__highlight">
-      &copy; 2026 Egothor. Licensed under <a href='https://github.com/leogalambos/Radixor/blob/main/LICENSE'>BSD-3-Clause</a>.
+      © 2026 Egothor · Radixor software is BSD-3-Clause licensed.
     </div>
   
   
@@ -2818,10 +3249,14 @@ reproducibility limitation, not a claim that the source or license is unknown.</
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.instant", "navigation.sections", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.sections", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="https://unpkg.com/mermaid@11/dist/mermaid.min.js"></script>
+      
+        <script src="../assets/javascripts/mermaid.js"></script>
       
     
   </body>

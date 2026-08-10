@@ -1,0 +1,146 @@
+/*
+ * Radixor documentation safety constraints.
+ *
+ * The landing page uses custom page chrome while standard documentation pages
+ * use Material for MkDocs. These size constraints ensure that a documentation
+ * logo can never inherit unconstrained intrinsic dimensions. The remaining
+ * rules carry the landing page's light blue/teal visual language into the
+ * standard Material documentation shell.
+ */
+:root,
+[data-md-color-scheme="default"] {
+  --md-primary-fg-color: #ffffff;
+  --md-primary-fg-color--light: #ffffff;
+  --md-primary-fg-color--dark: #f7faff;
+  --md-primary-bg-color: #11182e;
+  --md-primary-bg-color--light: #4b5b74;
+  --md-accent-fg-color: #1769ef;
+  --md-accent-fg-color--transparent: rgba(23, 105, 239, 0.1);
+  --md-typeset-a-color: #0e62df;
+  --rx-doc-line: #dce6f2;
+  --rx-doc-soft: #f7faff;
+  --rx-doc-text: #172554;
+  --rx-doc-muted: #53627b;
+  --rx-doc-teal: #078d7a;
+  --rx-doc-purple: #6544ef;
+}
+
+.md-header {
+  color: var(--rx-doc-text);
+  background: rgba(255, 255, 255, 0.97);
+  border-bottom: 1px solid var(--rx-doc-line);
+  box-shadow: 0 5px 18px rgba(33, 64, 112, 0.06);
+  backdrop-filter: blur(8px);
+}
+
+.md-header__title,
+.md-header__button,
+.md-header__topic,
+.md-source {
+  color: var(--rx-doc-text);
+}
+
+.md-search__form {
+  background: #f3f7fc;
+  border: 1px solid #d8e4f0;
+}
+
+.md-search__input,
+.md-search__icon {
+  color: var(--rx-doc-text);
+}
+
+.md-search__input::placeholder {
+  color: #69778d;
+}
+
+.md-tabs {
+  color: var(--rx-doc-text);
+  background: #fbfdff;
+  border-bottom: 1px solid var(--rx-doc-line);
+}
+
+.md-nav__link--active,
+.md-nav__link:focus,
+.md-nav__link:hover {
+  color: #145ff5;
+}
+
+.md-nav__item--section > .md-nav__link {
+  color: #263653;
+}
+
+.md-typeset h1,
+.md-typeset h2,
+.md-typeset h3 {
+  color: #0b1537;
+}
+
+.md-typeset a:hover {
+  color: var(--rx-doc-purple);
+}
+
+.md-typeset code {
+  border-radius: 0.22rem;
+  background: #f3f7fc;
+}
+
+.md-typeset .admonition,
+.md-typeset details {
+  border-color: #8bb6f2;
+  box-shadow: 0 3px 12px rgba(33, 64, 112, 0.06);
+}
+
+.md-typeset table:not([class]) {
+  border-color: var(--rx-doc-line);
+  box-shadow: 0 2px 10px rgba(33, 64, 112, 0.04);
+}
+
+.md-footer {
+  --md-footer-fg-color: var(--rx-doc-text);
+  --md-footer-fg-color--light: #31516f;
+  --md-footer-fg-color--lighter: var(--rx-doc-muted);
+  --md-footer-bg-color: #fbfdff;
+  --md-footer-bg-color--dark: #f5f9fe;
+  color: var(--rx-doc-muted);
+  background: #fbfdff;
+  border-top: 1px solid var(--rx-doc-line);
+}
+
+.md-footer-meta {
+  color: var(--rx-doc-muted);
+  background: #f5f9fe;
+}
+
+.md-footer a,
+.md-footer-meta a {
+  color: #31516f;
+}
+
+.md-header__button.md-logo img,
+.md-header__button.md-logo svg,
+.md-nav__button.md-logo img,
+.md-nav__button.md-logo svg {
+  width: 1.6rem;
+  height: 1.6rem;
+  max-width: 1.6rem;
+  max-height: 1.6rem;
+  object-fit: cover;
+  border-radius: 0.38rem;
+  box-shadow: 0 2px 8px rgba(24, 82, 176, 0.18);
+}
+
+.md-typeset .mermaid {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  text-align: center;
+}
+
+.md-typeset .mermaid svg {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  margin-inline: auto;
+}

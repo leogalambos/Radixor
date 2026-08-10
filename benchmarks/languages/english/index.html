@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="High-performance multi-language stemming toolkit for Java">
+        <meta name="description" content="Learned transformation stemming with compiled patch-command tries for Java and Python">
       
       
       
@@ -22,8 +22,8 @@
         
       
       
-      <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <link rel="icon" href="../../../assets/images/radixor-logo.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
@@ -31,7 +31,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -55,6 +55,10 @@
     
       <link rel="stylesheet" href="../../../assets/stylesheets/extra.css">
     
+      <link rel="stylesheet" href="../../../assets/stylesheets/landing-v2.css">
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/radixor-docs-safety.css">
+    
     <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -71,7 +75,7 @@
     
     
     
-    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="white" data-md-color-accent="blue">
   
     
     <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
@@ -98,8 +102,7 @@
   <nav class="md-header__inner md-grid" aria-label="Header">
     <a href="../../.." title="Radixor" class="md-header__button md-logo" aria-label="Radixor" data-md-component="logo">
       
-  
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+  <img src="../../../assets/images/radixor-logo.png" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -129,7 +132,7 @@
     
     
     
-    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="white" data-md-color-accent="blue"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
     
   
 </form>
@@ -222,8 +225,7 @@
   <label class="md-nav__title" for="__drawer">
     <a href="../../.." title="Radixor" class="md-nav__button md-logo" aria-label="Radixor" data-md-component="logo">
       
-  
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+  <img src="../../../assets/images/radixor-logo.png" alt="logo">
 
     </a>
     Radixor
@@ -329,6 +331,90 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Choose a Runtime
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../why-radixor-is-different/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Why Radixor Is Different
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../python/fast-track/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python Fast Track
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../fast-track/" class="md-nav__link">
         
   
@@ -336,7 +422,35 @@
   <span class="md-ellipsis">
     
   
-    Fast Track
+    Java Fast Track
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../python/quick-start/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python Quick Start
   
 
     
@@ -364,35 +478,7 @@
   <span class="md-ellipsis">
     
   
-    Quick Start
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../integration-deep-dive/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Integration Deep Dive
+    Java Quick Start
   
 
     
@@ -443,7 +529,7 @@
   <span class="md-ellipsis">
     
   
-    Integration
+    Java
   
 
     
@@ -459,11 +545,39 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Integration
+    Java
   
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../integration-deep-dive/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Integration Deep Dive
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -698,7 +812,7 @@
   <span class="md-ellipsis">
     
   
-    Dictionaries and Languages
+    Python
   
 
     
@@ -711,6 +825,261 @@
         
         <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Python
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../python/fast-track/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python Fast Track
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../python/quick-start/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../python/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../python/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation and Builds
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../python/usage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Usage and API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../python/model-compilation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dictionary Compilation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../python/performance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Benchmarks
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dictionaries and Languages
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -887,10 +1256,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
         
           
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
             
   
   
@@ -908,8 +1277,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -918,6 +1287,34 @@
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../technology-lineage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Technology and Lineage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -1088,10 +1485,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" checked>
         
           
-          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
             
   
   
@@ -1109,8 +1506,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_6">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_7">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1193,10 +1590,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_3" >
         
           
-          <label class="md-nav__link" for="__nav_6_3" id="__nav_6_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_7_3" id="__nav_7_3_label" tabindex="0">
             
   
   
@@ -1214,8 +1611,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_6_3">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_3">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1476,10 +1873,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_4" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_4" checked>
         
           
-          <label class="md-nav__link" for="__nav_6_4" id="__nav_6_4_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_7_4" id="__nav_7_4_label" tabindex="0">
             
   
   
@@ -1497,8 +1894,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_4_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_6_4">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_7_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -2405,10 +2802,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
         
           
-          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
             
   
   
@@ -2426,8 +2823,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_7">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -2871,7 +3268,8 @@
 <th style="text-align: right;">Dictionary rows</th>
 <th style="text-align: right;">Complete quality tokens</th>
 <th style="text-align: right;">Already-root tokens</th>
-<th style="text-align: right;">Changed speed tokens</th>
+<th style="text-align: right;">Changed tokens</th>
+<th style="text-align: right;">JMH timing tokens</th>
 </tr>
 </thead>
 <tbody>
@@ -2882,6 +3280,7 @@
 <td style="text-align: right;">396,939</td>
 <td style="text-align: right;">1,004,374</td>
 <td style="text-align: right;">793,874</td>
+<td style="text-align: right;">210,500</td>
 <td style="text-align: right;">210,500</td>
 </tr>
 </tbody>
@@ -2948,7 +3347,7 @@
 <td style="text-align: right;">97.478%</td>
 <td style="text-align: right;">97.197%</td>
 <td style="text-align: right;">97.552%</td>
-<td>Full Radixor dictionary patch-command stemmer.</td>
+<td>Radixor dictionary-trained patch-command stemmer.</td>
 </tr>
 <tr>
 <td>Lucene EnglishMinimalStemFilter</td>
@@ -2980,9 +3379,9 @@
 </tr>
 <tr>
 <td>Snowball English / Porter2</td>
-<td style="text-align: right;">40.342%</td>
-<td style="text-align: right;">46.296%</td>
-<td style="text-align: right;">38.763%</td>
+<td style="text-align: right;">40.346%</td>
+<td style="text-align: right;">46.302%</td>
+<td style="text-align: right;">38.767%</td>
 <td>Porter2 rule-based suffix stemmer, distinct from original Porter.</td>
 </tr>
 <tr>
@@ -3040,107 +3439,107 @@
 <tr>
 <td>Radixor</td>
 <td><code>radixorUsUkProfiPreferredStem</code></td>
-<td style="text-align: right;">17.489</td>
-<td style="text-align: right;">1.380</td>
-<td style="text-align: right;">83.1</td>
+<td style="text-align: right;">14.397</td>
+<td style="text-align: right;">0.915</td>
+<td style="text-align: right;">68.4</td>
 <td style="text-align: right;">1.000</td>
 <td>Full dictionary patch-command stemmer using compiled patch commands.</td>
 </tr>
 <tr>
 <td>Lucene EnglishPossessiveFilter</td>
 <td><code>luceneEnglishPossessiveFilter</code></td>
-<td style="text-align: right;">17.151</td>
-<td style="text-align: right;">0.215</td>
-<td style="text-align: right;">81.5</td>
-<td style="text-align: right;">0.981</td>
+<td style="text-align: right;">15.034</td>
+<td style="text-align: right;">0.322</td>
+<td style="text-align: right;">71.4</td>
+<td style="text-align: right;">1.044</td>
 <td>Possessive-ending remover only; not a full stemmer.</td>
 </tr>
 <tr>
 <td>Lucene EnglishMinimalStemFilter</td>
 <td><code>luceneEnglishMinimalStemFilter</code></td>
-<td style="text-align: right;">18.522</td>
-<td style="text-align: right;">0.152</td>
-<td style="text-align: right;">88.0</td>
-<td style="text-align: right;">1.059</td>
+<td style="text-align: right;">16.352</td>
+<td style="text-align: right;">0.244</td>
+<td style="text-align: right;">77.7</td>
+<td style="text-align: right;">1.136</td>
 <td>Narrow plural reduction filter; not a full stemmer.</td>
 </tr>
 <tr>
 <td>Lucene PorterStemmer direct copy</td>
 <td><code>lucenePorterStemmerCopied</code></td>
-<td style="text-align: right;">17.651</td>
-<td style="text-align: right;">0.129</td>
-<td style="text-align: right;">83.9</td>
-<td style="text-align: right;">1.009</td>
+<td style="text-align: right;">16.491</td>
+<td style="text-align: right;">0.149</td>
+<td style="text-align: right;">78.3</td>
+<td style="text-align: right;">1.145</td>
 <td>Benchmark-only generated copy of Lucene package-private Porter implementation.</td>
 </tr>
 <tr>
 <td>OpenNLP PorterStemmer</td>
 <td><code>opennlpPorterStemmer</code></td>
-<td style="text-align: right;">17.681</td>
-<td style="text-align: right;">0.139</td>
-<td style="text-align: right;">84.0</td>
-<td style="text-align: right;">1.011</td>
+<td style="text-align: right;">16.481</td>
+<td style="text-align: right;">0.175</td>
+<td style="text-align: right;">78.3</td>
+<td style="text-align: right;">1.145</td>
 <td>Apache OpenNLP Porter implementation.</td>
 </tr>
 <tr>
 <td>Snowball original Porter</td>
 <td><code>snowballOriginalPorter</code></td>
-<td style="text-align: right;">33.290</td>
-<td style="text-align: right;">1.916</td>
-<td style="text-align: right;">158.1</td>
-<td style="text-align: right;">1.904</td>
+<td style="text-align: right;">30.634</td>
+<td style="text-align: right;">1.620</td>
+<td style="text-align: right;">145.5</td>
+<td style="text-align: right;">2.128</td>
 <td>Classic Porter suffix-rule stemmer; historical English baseline, not a dictionary-equivalent stemmer.</td>
 </tr>
 <tr>
 <td>Lucene PorterStemFilter</td>
 <td><code>lucenePorterStemFilter</code></td>
-<td style="text-align: right;">32.408</td>
-<td style="text-align: right;">0.412</td>
-<td style="text-align: right;">154.0</td>
-<td style="text-align: right;">1.853</td>
+<td style="text-align: right;">29.666</td>
+<td style="text-align: right;">0.536</td>
+<td style="text-align: right;">140.9</td>
+<td style="text-align: right;">2.061</td>
 <td>Lucene TokenFilter integration path for Porter; includes TokenStream overhead.</td>
 </tr>
 <tr>
 <td>Lucene KStemFilter</td>
 <td><code>luceneKStemFilter</code></td>
-<td style="text-align: right;">45.877</td>
-<td style="text-align: right;">0.425</td>
-<td style="text-align: right;">217.9</td>
-<td style="text-align: right;">2.623</td>
+<td style="text-align: right;">41.485</td>
+<td style="text-align: right;">0.509</td>
+<td style="text-align: right;">197.1</td>
+<td style="text-align: right;">2.882</td>
 <td>Krovetz-style English TokenFilter; broader than minimal suffix filters.</td>
 </tr>
 <tr>
 <td>Lucene HunspellStemFilter</td>
 <td><code>luceneHunspellStemFilter</code></td>
-<td style="text-align: right;">76.852</td>
-<td style="text-align: right;">1.028</td>
-<td style="text-align: right;">365.1</td>
-<td style="text-align: right;">4.394</td>
+<td style="text-align: right;">74.399</td>
+<td style="text-align: right;">1.223</td>
+<td style="text-align: right;">353.4</td>
+<td style="text-align: right;">5.168</td>
 <td>Benchmark-only English Hunspell comparison using the benchmark Hunspell corpus.</td>
 </tr>
 <tr>
 <td>Snowball English / Porter2</td>
 <td><code>snowballEnglishPorter2</code></td>
-<td style="text-align: right;">46.568</td>
-<td style="text-align: right;">2.414</td>
-<td style="text-align: right;">221.2</td>
-<td style="text-align: right;">2.663</td>
+<td style="text-align: right;">43.117</td>
+<td style="text-align: right;">1.983</td>
+<td style="text-align: right;">204.8</td>
+<td style="text-align: right;">2.995</td>
 <td>Porter2 suffix-rule stemmer, distinct from original Porter.</td>
 </tr>
 <tr>
 <td>Paice/Husk Lancaster</td>
 <td><code>paiceHuskLancaster</code></td>
-<td style="text-align: right;">144.951</td>
-<td style="text-align: right;">2.710</td>
-<td style="text-align: right;">688.6</td>
-<td style="text-align: right;">8.288</td>
+<td style="text-align: right;">137.952</td>
+<td style="text-align: right;">2.443</td>
+<td style="text-align: right;">655.4</td>
+<td style="text-align: right;">9.582</td>
 <td>Aggressive rule-based English stemmer.</td>
 </tr>
 </tbody>
 </table>
 <h2 id="interpretation-notes">Interpretation Notes</h2>
 <ul>
-<li>Radixor is a dictionary-derived patch-command stemmer. Its quality depends on the language resource used to train the compiled trie.</li>
+<li>Radixor is a dictionary-trained patch-command stemmer. Its learned transformations can generalize beyond the word forms listed in the training resource.</li>
 <li>Light, minimal, plural, and possessive filters are narrow baselines. They can be fast because they intentionally perform less linguistic work.</li>
 <li>Lucene TokenFilter rows include TokenStream, attribute, and required normalization overhead. Direct rows measure exposed direct APIs.</li>
 <li>Morfologik rows are dictionary-based and can emit multiple terms for one input token. Quality rows use the first returned term when no ranking weight is available.</li>
@@ -3203,9 +3602,9 @@
 <tr>
 <td style="text-align: right;">5</td>
 <td>ENGLISH SNOWBALL PORTER2</td>
-<td style="text-align: right;">0.954708</td>
+<td style="text-align: right;">0.954732</td>
 <td style="text-align: right;">0.000212%</td>
-<td style="text-align: right;">9.058097%</td>
+<td style="text-align: right;">9.053310%</td>
 </tr>
 <tr>
 <td style="text-align: right;">6</td>
@@ -3317,10 +3716,10 @@
 <td style="text-align: right;">5</td>
 <td>ENGLISH SNOWBALL PORTER2</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.434174</td>
-<td style="text-align: right;">0.909419</td>
+<td style="text-align: right;">0.434309</td>
+<td style="text-align: right;">0.909467</td>
 <td style="text-align: right;">0.999998</td>
-<td style="text-align: right;">0.954708</td>
+<td style="text-align: right;">0.954732</td>
 <td style="text-align: right;">0.999998</td>
 <td style="text-align: right;">0.000002</td>
 </tr>
@@ -3458,12 +3857,12 @@
 <td style="text-align: right;">5</td>
 <td>ENGLISH SNOWBALL PORTER2</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.484849</td>
-<td style="text-align: right;">0.587747</td>
-<td style="text-align: right;">0.746086</td>
-<td style="text-align: right;">0.416176</td>
-<td style="text-align: right;">0.628368</td>
-<td style="text-align: right;">0.628367</td>
+<td style="text-align: right;">0.484986</td>
+<td style="text-align: right;">0.587880</td>
+<td style="text-align: right;">0.746192</td>
+<td style="text-align: right;">0.416310</td>
+<td style="text-align: right;">0.628482</td>
+<td style="text-align: right;">0.628481</td>
 </tr>
 <tr>
 <td style="text-align: right;">6</td>
@@ -3599,12 +3998,12 @@
 <td style="text-align: right;">5</td>
 <td>ENGLISH SNOWBALL PORTER2</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">284971</td>
-<td style="text-align: right;">371381</td>
-<td style="text-align: right;">28384</td>
-<td style="text-align: right;">175199052749</td>
-<td style="text-align: right;">371381 / 175199424130</td>
-<td style="text-align: right;">28384 / 313355</td>
+<td style="text-align: right;">284986</td>
+<td style="text-align: right;">371197</td>
+<td style="text-align: right;">28369</td>
+<td style="text-align: right;">175199052933</td>
+<td style="text-align: right;">371197 / 175199424130</td>
+<td style="text-align: right;">28369 / 313355</td>
 </tr>
 <tr>
 <td style="text-align: right;">6</td>
@@ -3964,9 +4363,9 @@
 <tr>
 <td style="text-align: right;">5</td>
 <td>ENGLISH SNOWBALL PORTER2</td>
-<td style="text-align: right;">0.955016</td>
+<td style="text-align: right;">0.955040</td>
 <td style="text-align: right;">0.000228%</td>
-<td style="text-align: right;">8.996666%</td>
+<td style="text-align: right;">8.991849%</td>
 </tr>
 <tr>
 <td style="text-align: right;">6</td>
@@ -4078,10 +4477,10 @@
 <td style="text-align: right;">5</td>
 <td>ENGLISH SNOWBALL PORTER2</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.435017</td>
-<td style="text-align: right;">0.910033</td>
+<td style="text-align: right;">0.435153</td>
+<td style="text-align: right;">0.910082</td>
 <td style="text-align: right;">0.999998</td>
-<td style="text-align: right;">0.955016</td>
+<td style="text-align: right;">0.955040</td>
 <td style="text-align: right;">0.999998</td>
 <td style="text-align: right;">0.000002</td>
 </tr>
@@ -4219,12 +4618,12 @@
 <td style="text-align: right;">5</td>
 <td>ENGLISH SNOWBALL PORTER2</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">0.485725</td>
-<td style="text-align: right;">0.588647</td>
-<td style="text-align: right;">0.746915</td>
-<td style="text-align: right;">0.417080</td>
-<td style="text-align: right;">0.629190</td>
-<td style="text-align: right;">0.629189</td>
+<td style="text-align: right;">0.485863</td>
+<td style="text-align: right;">0.588782</td>
+<td style="text-align: right;">0.747021</td>
+<td style="text-align: right;">0.417215</td>
+<td style="text-align: right;">0.629305</td>
+<td style="text-align: right;">0.629304</td>
 </tr>
 <tr>
 <td style="text-align: right;">6</td>
@@ -4360,12 +4759,12 @@
 <td style="text-align: right;">5</td>
 <td>ENGLISH SNOWBALL PORTER2</td>
 <td>PRIMARY_OUTPUT</td>
-<td style="text-align: right;">283368</td>
-<td style="text-align: right;">368027</td>
-<td style="text-align: right;">28014</td>
-<td style="text-align: right;">161561621611</td>
-<td style="text-align: right;">368027 / 161561989638</td>
-<td style="text-align: right;">28014 / 311382</td>
+<td style="text-align: right;">283383</td>
+<td style="text-align: right;">367843</td>
+<td style="text-align: right;">27999</td>
+<td style="text-align: right;">161561621795</td>
+<td style="text-align: right;">367843 / 161561989638</td>
+<td style="text-align: right;">27999 / 311382</td>
 </tr>
 <tr>
 <td style="text-align: right;">6</td>
@@ -4700,7 +5099,7 @@
 <h3 id="provenance">Provenance</h3>
 <ul>
 <li>Authoritative source: <code>docs/benchmarks/data/stemming-quality.csv</code></li>
-<li>Source SHA-256: <code>edf16b07be8a535943ddf37caeb8807755c95e9e1fb13244145f28be74b491d8</code></li>
+<li>Source SHA-256: <code>d34f325da320a2e040b54d8d8b5c216d70448f08cfb8659a423e99882aa1afb5</code></li>
 <li>Evaluation command: <code>./gradlew stemmingQuality --no-daemon</code></li>
 <li>Dictionary language: <code>US_UK</code></li>
 <li>Processing modes: <code>ALL_WORDS</code>, <code>LOWERCASE_GROUPS_ONLY</code></li>
@@ -4744,7 +5143,7 @@
       <div class="md-copyright">
   
     <div class="md-copyright__highlight">
-      &copy; 2026 Egothor. Licensed under <a href='https://github.com/leogalambos/Radixor/blob/main/LICENSE'>BSD-3-Clause</a>.
+      © 2026 Egothor · Radixor software is BSD-3-Clause licensed.
     </div>
   
   
@@ -4763,10 +5162,14 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.instant", "navigation.sections", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.sections", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="https://unpkg.com/mermaid@11/dist/mermaid.min.js"></script>
+      
+        <script src="../../../assets/javascripts/mermaid.js"></script>
       
     
   </body>
