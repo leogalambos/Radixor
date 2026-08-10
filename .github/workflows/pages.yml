@@ -327,7 +327,10 @@ jobs:
         run: |
           set -euo pipefail
           mkdocs build --strict --config-file build/mkdocs/mkdocs.yml
-          rsync -a --delete --exclude '.git' --exclude '.git/' --exclude 'builds/' --exclude 'python/' build/mkdocs-site/ .gh-pages/
+          rsync -a --delete \
+            --exclude '.git' --exclude '.git/' \
+            --exclude 'builds/' --exclude 'python/simple/' \
+            build/mkdocs-site/ .gh-pages/
           mkdir -p .gh-pages/builds
           cp build/mkdocs-site/builds/index.html .gh-pages/builds/index.html
           cat > .gh-pages/.nojekyll <<EOF
@@ -337,7 +340,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          rm -rf .gh-pages/python
+          rm -rf .gh-pages/python/simple
           rm -f .gh-pages/.git
           if find .gh-pages -type l -print -quit | grep -q .; then
             echo 'Publication candidate contains a symbolic link.' >&2
@@ -391,7 +394,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test ! -e candidate/python
+          test ! -e candidate/python/simple
           test ! -e candidate/.git
           if find candidate -type l -print -quit | grep -q .; then
             echo 'Publication candidate contains a symbolic link.' >&2
@@ -399,7 +402,8 @@ jobs:
           fi
           rsync -a --delete \
             --exclude '.git' --exclude '.git/' \
-            --exclude 'python' --exclude 'python/' candidate/ pages/
+            --exclude 'python/simple' --exclude 'python/simple/' \
+            candidate/ pages/
           cd pages
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
