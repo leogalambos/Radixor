@@ -1,33 +1,42 @@
 # Built-in Languages and Default Models
 
-“Supported language” means that Radixor defines a language enum value and publishes a corresponding default model artifact. It does not mean that a dictionary is embedded in the core JAR. Applications add model artifacts explicitly or use the optional standard pack.
+“Supported language” means that the repository maintains a default dictionary
+and runtime mapping for that language. Packaging differs by runtime: Java keeps
+the core dictionary-free and resolves external model artifacts, while the
+Python installs a separate `radixor-models-standard` data package containing
+the 20 default dictionaries in precompiled version 7 form.
 
-The language enum carries language identity, writing direction, a legacy resource-directory name, and the stable default model ID. A model descriptor carries the independently versioned model identity and resource. See [Model Selection and Loading](model-selection-and-loading.md) for the API and the generated [model catalog](stemmer-model-catalog.md) for versions, provenance, checksums, and sizes.
+The Java language enum carries language identity, writing direction, a legacy
+resource-directory name, and the stable default model ID. A Java model
+descriptor carries the independently versioned model identity and resource.
+Python accepts the short alias or the same full model ID. See
+[Model Selection and Loading](model-selection-and-loading.md) for Java and
+[Python Usage and API](python/usage.md) for Python.
 
 ## Defaults and variants
 
-| Language | Enum | Default model ID | Default artifact | Optional variants |
-|---|---|---|---|---|
-| Czech | `CS_CZ` | `cs-cz-default` | `org.egothor:radixor-model-cs-cz-default` | — |
-| Danish | `DA_DK` | `da-dk-default` | `org.egothor:radixor-model-da-dk-default` | — |
-| German | `DE_DE` | `de-de-default` | `org.egothor:radixor-model-de-de-default` | — |
-| Spanish | `ES_ES` | `es-es-default` | `org.egothor:radixor-model-es-es-default` | — |
-| Persian | `FA_IR` | `fa-ir-default` | `org.egothor:radixor-model-fa-ir-default` | — |
-| Finnish | `FI_FI` | `fi-fi-default` | `org.egothor:radixor-model-fi-fi-default` | — |
-| French | `FR_FR` | `fr-fr-default` | `org.egothor:radixor-model-fr-fr-default` | — |
-| Hebrew | `HE_IL` | `he-il-default` | `org.egothor:radixor-model-he-il-default` | — |
-| Hungarian | `HU_HU` | `hu-hu-default` | `org.egothor:radixor-model-hu-hu-default` | — |
-| Italian | `IT_IT` | `it-it-default` | `org.egothor:radixor-model-it-it-default` | — |
-| Norwegian Bokmål | `NB_NO` | `nb-no-default` | `org.egothor:radixor-model-nb-no-default` | — |
-| Dutch | `NL_NL` | `nl-nl-default` | `org.egothor:radixor-model-nl-nl-default` | — |
-| Norwegian Nynorsk | `NN_NO` | `nn-no-default` | `org.egothor:radixor-model-nn-no-default` | — |
-| Polish | `PL_PL` | `pl-pl-unimorph` | `org.egothor:radixor-model-pl-pl-unimorph` | `pl-pl-polimorf` / `org.egothor:radixor-model-pl-pl-polimorf` |
-| Portuguese | `PT_PT` | `pt-pt-default` | `org.egothor:radixor-model-pt-pt-default` | — |
-| Russian | `RU_RU` | `ru-ru-default` | `org.egothor:radixor-model-ru-ru-default` | — |
-| Swedish | `SV_SE` | `sv-se-default` | `org.egothor:radixor-model-sv-se-default` | — |
-| Ukrainian | `UK_UA` | `uk-ua-default` | `org.egothor:radixor-model-uk-ua-default` | — |
-| English | `US_UK` | `us-uk-default` | `org.egothor:radixor-model-us-uk-default` | — |
-| Yiddish | `YI` | `yi-default` | `org.egothor:radixor-model-yi-default` | — |
+| Language | Java enum | Python alias | Default model ID | Java default artifact | Optional variants |
+|---|---|---|---|---|---|
+| Czech | `CS_CZ` | `cs` | `cs-cz-default` | `org.egothor:radixor-model-cs-cz-default` | — |
+| Danish | `DA_DK` | `da` | `da-dk-default` | `org.egothor:radixor-model-da-dk-default` | — |
+| German | `DE_DE` | `de` | `de-de-default` | `org.egothor:radixor-model-de-de-default` | — |
+| Spanish | `ES_ES` | `es` | `es-es-default` | `org.egothor:radixor-model-es-es-default` | — |
+| Persian | `FA_IR` | `fa` | `fa-ir-default` | `org.egothor:radixor-model-fa-ir-default` | — |
+| Finnish | `FI_FI` | `fi` | `fi-fi-default` | `org.egothor:radixor-model-fi-fi-default` | — |
+| French | `FR_FR` | `fr` | `fr-fr-default` | `org.egothor:radixor-model-fr-fr-default` | — |
+| Hebrew | `HE_IL` | `he` | `he-il-default` | `org.egothor:radixor-model-he-il-default` | — |
+| Hungarian | `HU_HU` | `hu` | `hu-hu-default` | `org.egothor:radixor-model-hu-hu-default` | — |
+| Italian | `IT_IT` | `it` | `it-it-default` | `org.egothor:radixor-model-it-it-default` | — |
+| Norwegian Bokmål | `NB_NO` | `nb` | `nb-no-default` | `org.egothor:radixor-model-nb-no-default` | — |
+| Dutch | `NL_NL` | `nl` | `nl-nl-default` | `org.egothor:radixor-model-nl-nl-default` | — |
+| Norwegian Nynorsk | `NN_NO` | `nn` | `nn-no-default` | `org.egothor:radixor-model-nn-no-default` | — |
+| Polish | `PL_PL` | `pl` | `pl-pl-unimorph` | `org.egothor:radixor-model-pl-pl-unimorph` | `pl-pl-polimorf` / `org.egothor:radixor-model-pl-pl-polimorf` |
+| Portuguese | `PT_PT` | `pt` | `pt-pt-default` | `org.egothor:radixor-model-pt-pt-default` | — |
+| Russian | `RU_RU` | `ru` | `ru-ru-default` | `org.egothor:radixor-model-ru-ru-default` | — |
+| Swedish | `SV_SE` | `sv` | `sv-se-default` | `org.egothor:radixor-model-sv-se-default` | — |
+| Ukrainian | `UK_UA` | `uk` | `uk-ua-default` | `org.egothor:radixor-model-uk-ua-default` | — |
+| English | `US_UK` | `en` | `us-uk-default` | `org.egothor:radixor-model-us-uk-default` | — |
+| Yiddish | `YI` | `yi` | `yi-default` | `org.egothor:radixor-model-yi-default` | — |
 
 The maintained table deliberately avoids duplicating mutable provenance and checksum fields. Those values come from module metadata and are generated into the model catalog.
 
@@ -43,6 +52,11 @@ The maintained table deliberately avoids duplicating mutable provenance and chec
 - Radixor does not merge their dictionaries or outputs automatically.
 
 UniMorph and PoliMorf have different lexical sources and provenance. Applications should compare outputs with application-specific regression tests before changing an explicit model choice.
+
+In Python, `Stemmer("pl")` selects `pl-pl-unimorph`. The standard Python data
+package does not include PoliMorf; applications that need it must compile and
+load it explicitly as a trusted custom model. As in Java, it never changes the
+Polish default implicitly.
 
 ## Dependency patterns
 

@@ -1,6 +1,10 @@
-# CLI Compilation
+# Java CLI Compilation
 
 Radixor provides a command-line compiler for turning line-oriented dictionary files into compact binary stemmer artifacts.
+
+This page documents the Java CLI and its selectable reduction and normalization
+controls. Python exposes its production compilation profile through
+`radixor.compile(...)`; see [Compiling Dictionaries in Python](python/model-compilation.md).
 
 The CLI output is not a model JAR. A model artifact contains a compressed textual dictionary, descriptor, index, checksum, and license so the runtime registry can discover and compile it. The CLI instead emits an already compiled binary trie for direct `loadBinaryCompiled(...)` use. Choose the model-module workflow when independently published classpath discovery is required; choose the CLI when the application owns a compiled binary asset.
 

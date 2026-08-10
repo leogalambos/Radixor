@@ -1,0 +1,6 @@
+# Optional comparison engines for the runtime stemming benchmark.
+# radixor itself must already be built (maturin develop) in the same env.
+# Any subset may be installed; the harness auto-detects what is present.
+PyStemmer          # Snowball as a C extension (libstemmer); real batch API
+snowballstemmer    # Official pure-Python Snowball (used via its pure backend)
+nltk               # Porter (English) pure-Python reference baseline

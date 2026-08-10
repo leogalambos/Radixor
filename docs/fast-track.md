@@ -1,9 +1,12 @@
-# Fast Track
+# Java Fast Track
 
 This page is the shortest path from an empty Java project to a working Radixor stemmer.
 It deliberately uses an external model artifact and the preferred compiled-command runtime API, so the
 first result does not require writing a dictionary, running the CLI compiler, or understanding
 reduction internals.
+
+For the native Python package, start with the [Python Fast Track](python/fast-track.md)
+instead; Python does not use Maven model artifacts or the Java loader API.
 
 Use this page when the goal is:
 

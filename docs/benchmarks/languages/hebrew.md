@@ -8,9 +8,9 @@ The default Hebrew model currently has no same-language third-party adapter in t
 
 ## Dictionary Corpus
 
-| Model ID | Model version | Language | Dictionary rows | Complete quality tokens | Already-root tokens | Changed speed tokens |
-| --- | --- | --- | ---: | ---: | ---: | ---: |
-| `he-il-default` | `1.0.0` | `HE_IL` | 2,358 | 61,071 | 4,715 | 56,356 |
+| Model ID | Model version | Language | Dictionary rows | Complete quality tokens | Already-root tokens | Changed tokens | JMH timing tokens |
+| --- | --- | --- | ---: | ---: | ---: | ---: | ---: |
+| `he-il-default` | `1.0.0` | `HE_IL` | 2,358 | 61,071 | 4,715 | 56,356 | 56,356 |
 
 ## Radixor Patch Command Distribution
 
@@ -32,23 +32,17 @@ Accuracy is computed from JMH auxiliary counters in the current report. The coun
 | --- | ---: | ---: | ---: | --- |
 | Radixor | 98.228% | 98.172% | 98.897% | Full default-model Radixor dictionary patch-command stemmer. |
 
-
-
-
 ## Speed
 
 Speed uses JMH average time, 5 warmup iterations, 10 measurement iterations, 3 independent forks, and 1 thread.
 
 | Stemmer | Benchmark method | Score ms/op | Error ms | ns/token | Relative vs Radixor | Note |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
-| Radixor | `hebrewRadixor` | 3.921 | 0.140 | 69.6 | 1.000 | Full default-model Radixor dictionary patch-command stemmer. |
-
-
-
+| Radixor | `hebrewRadixor` | 3.570 | 0.074 | 63.3 | 1.000 | Full default-model Radixor dictionary patch-command stemmer. |
 
 ## Interpretation Notes
 
-- Radixor is a dictionary-derived patch-command stemmer. Its quality depends on the default language model used to train the compiled trie.
+- Radixor is a dictionary-trained patch-command stemmer. Its learned transformations can generalize beyond the word forms listed in the training resource.
 - Hebrew patch commands use forward traversal as declared by the model metadata.
 - Results are environment-specific and should be compared only with rows from the same benchmark run.
 
@@ -290,7 +284,7 @@ Standard ARI, homogeneity, completeness, V-measure, and NMI are not calculated: 
 ### Provenance
 
 - Authoritative source: `docs/benchmarks/data/stemming-quality.csv`
-- Source SHA-256: `edf16b07be8a535943ddf37caeb8807755c95e9e1fb13244145f28be74b491d8`
+- Source SHA-256: `d34f325da320a2e040b54d8d8b5c216d70448f08cfb8659a423e99882aa1afb5`
 - Evaluation command: `./gradlew stemmingQuality --no-daemon`
 - Dictionary language: `HE_IL`
 - Processing modes: `ALL_WORDS`, `LOWERCASE_GROUPS_ONLY`

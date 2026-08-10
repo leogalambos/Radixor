@@ -1,0 +1,303 @@
+def pythonProjectDirectory = layout.projectDirectory.dir('python')
+def pythonHostDistributionDirectory = layout.buildDirectory.dir('python/dist/host')
+def pythonSdistDistributionDirectory = layout.buildDirectory.dir('python/dist/sdist')
+def pythonStandardDistributionDirectory = layout.buildDirectory.dir('python/dist/standard')
+def pythonGeneratedStandardProjectDirectory = layout.buildDirectory.dir('python/generated/models-standard')
+def pythonBenchmarkRuntimeDirectory = layout.buildDirectory.dir('python/runtime/benchmark')
+def pythonModelCompilerRuntimeDirectory = layout.buildDirectory.dir('python/runtime/model-compiler')
+def pythonBenchmarkReportDirectory = layout.buildDirectory.dir('reports/python-benchmarks')
+def pythonTemporaryDirectory = layout.buildDirectory.dir('python/tmp')
+
+def hostOsName = System.getProperty('os.name', '').toLowerCase(Locale.ROOT)
+def hostPlatform = hostOsName.contains('win') ? 'windows'
+        : hostOsName.contains('mac') || hostOsName.contains('darwin') ? 'macos'
+        : 'linux'
+def hostArchitectureName = System.getProperty('os.arch', '').toLowerCase(Locale.ROOT)
+def hostArchitecture = hostArchitectureName in ['aarch64', 'arm64'] ? 'aarch64' : 'x86_64'
+
+def pythonExecutable = providers.gradleProperty('pythonExecutable')
+        .orElse(hostPlatform == 'windows' ? 'python' : 'python3')
+def maturinExecutable = providers.gradleProperty('maturinExecutable').orElse('maturin')
+def pythonToolIdentity = providers.exec {
+    commandLine(pythonExecutable.get(), '--version')
+}.standardOutput.asText.map { String value -> value.strip() }
+def maturinToolIdentity = providers.exec {
+    commandLine(maturinExecutable.get(), '--version')
+}.standardOutput.asText.map { String value -> value.strip() }
+def rustToolIdentity = providers.exec {
+    commandLine('rustc', '--version')
+}.standardOutput.asText.map { String value -> value.strip() }
+def pythonBenchmarkWords = providers.gradleProperty('pythonBenchmarkWords').orElse('5000')
+def pythonBenchmarkRepeats = providers.gradleProperty('pythonBenchmarkRepeats').orElse('15')
+def pythonBenchmarkWarmup = providers.gradleProperty('pythonBenchmarkWarmup').orElse('3')
+
+def rustTargets = [
+        linux  : [x86_64: 'x86_64-unknown-linux-gnu', aarch64: 'aarch64-unknown-linux-gnu'],
+        windows: [x86_64: 'x86_64-pc-windows-msvc', aarch64: 'aarch64-pc-windows-msvc'],
+        macos  : [x86_64: 'x86_64-apple-darwin', aarch64: 'aarch64-apple-darwin']
+]
+
+def pythonBuildStandardModels = tasks.register('pythonBuildStandardModels', Exec) {
+    group = 'python'
+    description = 'Builds the pure py3-none-any standard-model wheel and offline-ready sdist.'
+
+    dependsOn('regeneratePythonStandardModels')
+    inputs.dir(pythonGeneratedStandardProjectDirectory)
+    inputs.file(pythonProjectDirectory.file('scripts/build_standard_distribution.py'))
+    inputs.property('pythonExecutable', pythonExecutable)
+    inputs.property('pythonToolIdentity', pythonToolIdentity)
+    outputs.dir(pythonStandardDistributionDirectory)
+
+    workingDir(layout.projectDirectory)
+    doFirst {
+        final File output = pythonStandardDistributionDirectory.get().asFile
+        if (output.exists() && !output.deleteDir()) {
+            throw new GradleException("Cannot clean standard-model distribution directory: ${output}")
+        }
+        output.mkdirs()
+        commandLine(pythonExecutable.get(), 'python/scripts/build_standard_distribution.py',
+                '--project', pythonGeneratedStandardProjectDirectory.get().asFile.absolutePath,
+                '--outdir', output.absolutePath)
+    }
+}
+
+def pythonBuildSdist = tasks.register('pythonBuildSdist', Exec) {
+    group = 'python'
+    description = 'Builds the Radixor native source distribution without runtime model data.'
+
+    inputs.files(pythonProjectDirectory.file('Cargo.toml'), pythonProjectDirectory.file('Cargo.lock'),
+            pythonProjectDirectory.file('pyproject.toml'), layout.projectDirectory.file('gradle/python.gradle'))
+    inputs.dir(pythonProjectDirectory.dir('src'))
+    inputs.files(fileTree(pythonProjectDirectory.dir('radixor')) {
+        exclude 'models/**'
+    })
+    inputs.property('maturinExecutable', maturinExecutable)
+    inputs.property('maturinToolIdentity', maturinToolIdentity)
+    outputs.dir(pythonSdistDistributionDirectory)
+
+    workingDir(pythonProjectDirectory)
+    doFirst {
+        final File output = pythonSdistDistributionDirectory.get().asFile
+        if (output.exists() && !output.deleteDir()) {
+            throw new GradleException("Cannot clean Python sdist output directory: ${output}")
+        }
+        output.mkdirs()
+        commandLine(maturinExecutable.get(), 'sdist', '--out', output.absolutePath)
+    }
+}
+
+def registerPythonWheelBuild = { String taskName, String taskDescription, Provider<Directory> outputDirectory,
+        String target ->
+    tasks.register(taskName, Exec) {
+        group = 'python'
+        description = taskDescription
+
+        inputs.files(pythonProjectDirectory.file('Cargo.toml'), pythonProjectDirectory.file('Cargo.lock'),
+                pythonProjectDirectory.file('pyproject.toml'), layout.projectDirectory.file('gradle/python.gradle'))
+        inputs.dir(pythonProjectDirectory.dir('src'))
+        inputs.dir(pythonProjectDirectory.dir('radixor'))
+        inputs.property('maturinExecutable', maturinExecutable)
+        inputs.property('maturinToolIdentity', maturinToolIdentity)
+        inputs.property('rustToolIdentity', rustToolIdentity)
+        inputs.property('pythonBuildTarget', target == null ? 'host' : target)
+        if (target == null) {
+            inputs.property('pythonExecutable', pythonExecutable)
+            inputs.property('pythonToolIdentity', pythonToolIdentity)
+        }
+        outputs.dir(outputDirectory)
+
+        workingDir(pythonProjectDirectory)
+        doFirst {
+            final File output = outputDirectory.get().asFile
+            if (output.exists() && !output.deleteDir()) {
+                throw new GradleException("Cannot clean Python wheel output directory: ${output}")
+            }
+            output.mkdirs()
+            final List<String> arguments = [
+                    'build', '--release', '--locked', '--out', output.absolutePath
+            ]
+            if (target != null) {
+                arguments.addAll(['--target', target])
+            } else {
+                arguments.addAll(['--interpreter', pythonExecutable.get()])
+            }
+            commandLine([maturinExecutable.get()] + arguments)
+        }
+    }
+}
+
+def pythonBuildNativeWheel = registerPythonWheelBuild(
+        'pythonBuildNativeWheel',
+        'Builds the Radixor native Python wheel for the current host platform.',
+        pythonHostDistributionDirectory,
+        null
+)
+def pythonBuild = tasks.register('pythonBuild') {
+    group = 'python'
+    description = 'Builds the host native wheel/sdist and generated standard-model wheel/sdist.'
+    dependsOn(pythonBuildNativeWheel, pythonBuildStandardModels, pythonBuildSdist)
+}
+
+rustTargets.each { String platform, Map<String, String> architectureTargets ->
+    final String taskName = 'pythonBuild' + platform.capitalize()
+    if (platform == hostPlatform) {
+        tasks.register(taskName) {
+            group = 'python'
+            description = "Builds the Radixor Python release wheel for ${platform} on the current host."
+            dependsOn(pythonBuild)
+        }
+    } else {
+        final String propertyName = 'python' + platform.capitalize() + 'Target'
+        final String target = providers.gradleProperty(propertyName)
+                .getOrElse(architectureTargets[hostArchitecture])
+        registerPythonWheelBuild(
+                taskName,
+                "Cross-builds the Radixor Python release wheel for ${platform}; requires the target toolchain.",
+                layout.buildDirectory.dir("python/dist/${platform}"),
+                target
+        )
+    }
+}
+
+tasks.register('preparePythonBenchmarkRuntime', Sync) {
+    group = 'python'
+    description = 'Extracts the host Python wheel into an isolated benchmark runtime.'
+
+    dependsOn(pythonBuild)
+
+    from {
+        final Set<File> wheels = fileTree(pythonHostDistributionDirectory).matching {
+            include '*.whl'
+        }.files
+        if (wheels.size() != 1) {
+            throw new GradleException("Expected exactly one host Python wheel, found ${wheels.size()} in "
+                    + pythonHostDistributionDirectory.get().asFile)
+        }
+        zipTree(wheels.first())
+    }
+    from {
+        final Set<File> wheels = fileTree(pythonStandardDistributionDirectory).matching {
+            include '*.whl'
+        }.files
+        if (wheels.size() != 1) {
+            throw new GradleException("Expected exactly one standard-model Python wheel, found ${wheels.size()} in "
+                    + pythonStandardDistributionDirectory.get().asFile)
+        }
+        zipTree(wheels.first())
+    }
+    into(pythonBenchmarkRuntimeDirectory)
+}
+
+tasks.register('preparePythonModelCompilerRuntime', Sync) {
+    group = 'python'
+    description = 'Extracts the host native wheel for deterministic standard-model regeneration.'
+    dependsOn(pythonBuildNativeWheel)
+    from {
+        final Set<File> wheels = fileTree(pythonHostDistributionDirectory).matching {
+            include '*.whl'
+        }.files
+        if (wheels.size() != 1) {
+            throw new GradleException("Expected exactly one host Python wheel, found ${wheels.size()} in "
+                    + pythonHostDistributionDirectory.get().asFile)
+        }
+        zipTree(wheels.first())
+    }
+    into(pythonModelCompilerRuntimeDirectory)
+}
+
+tasks.register('regeneratePythonStandardModels', Exec) {
+    group = 'python'
+    description = 'Generates standard .rxc artifacts and metadata below build/ from canonical model sources.'
+    dependsOn(tasks.named('preparePythonModelCompilerRuntime'))
+    inputs.file(layout.projectDirectory.file('models/model-projects.properties'))
+    inputs.file(layout.projectDirectory.file('models/catalog-version.txt'))
+    inputs.files(fileTree(layout.projectDirectory.dir('models')) {
+        include '*/build.gradle', '*/model-version.txt', '*/src/modelInput/stemmer.gz',
+                '*/src/modelInput/NOTICE-model-data.txt'
+    })
+    inputs.files(fileTree(pythonProjectDirectory.dir('models-standard')) {
+        exclude 'build/**', 'dist/**', '*.egg-info/**', '**/__pycache__/**',
+                'radixor_models_standard/manifest.json', 'radixor_models_standard/models/*.rxc',
+                'radixor_models_standard/notices/*/NOTICE-model-data.txt'
+    })
+    inputs.file(pythonProjectDirectory.file('scripts/build_standard_models.py'))
+    outputs.dir(pythonGeneratedStandardProjectDirectory)
+    workingDir(layout.projectDirectory)
+    doFirst {
+        environment('PYTHONPATH', pythonModelCompilerRuntimeDirectory.get().asFile.absolutePath)
+        commandLine(
+                pythonExecutable.get(), 'python/scripts/build_standard_models.py',
+                '--project', pythonGeneratedStandardProjectDirectory.get().asFile.absolutePath,
+                '--distribution-version', '0.0.0'
+        )
+    }
+}
+
+tasks.register('pythonVerifyDistributions', Exec) {
+    group = 'verification'
+    description = 'Verifies both Python archives and a fresh offline wheel-only installation.'
+    dependsOn(pythonBuild)
+    inputs.dir(pythonHostDistributionDirectory)
+    inputs.dir(pythonSdistDistributionDirectory)
+    inputs.dir(pythonStandardDistributionDirectory)
+    inputs.file(pythonProjectDirectory.file('scripts/verify_distributions.py'))
+    outputs.upToDateWhen { false }
+    workingDir(layout.projectDirectory)
+    commandLine(
+            pythonExecutable.get(), 'python/scripts/verify_distributions.py',
+            '--main-wheel-dir', pythonHostDistributionDirectory.get().asFile.absolutePath,
+            '--main-sdist-dir', pythonSdistDistributionDirectory.get().asFile.absolutePath,
+            '--standard-dir', pythonStandardDistributionDirectory.get().asFile.absolutePath
+    )
+}
+
+tasks.register('pythonBenchmarkAllLanguagesBatch', Exec) {
+    group = 'verification'
+    description = 'Benchmarks the host Python wheel and available competitors for every supported language.'
+
+    dependsOn(tasks.named('preparePythonBenchmarkRuntime'))
+
+    inputs.files(pythonProjectDirectory.file('benchmarks/run_benchmark.py'),
+            pythonProjectDirectory.file('benchmarks/corpus.py'),
+            pythonProjectDirectory.file('benchmarks/engines.py'),
+            layout.projectDirectory.file('gradle/python.gradle'))
+    inputs.dir(pythonBenchmarkRuntimeDirectory)
+    inputs.property('pythonExecutable', pythonExecutable)
+    inputs.property('pythonToolIdentity', pythonToolIdentity)
+    inputs.property('pythonBenchmarkWords', pythonBenchmarkWords)
+    inputs.property('pythonBenchmarkRepeats', pythonBenchmarkRepeats)
+    inputs.property('pythonBenchmarkWarmup', pythonBenchmarkWarmup)
+    outputs.file(pythonBenchmarkReportDirectory.map { it.file('all-languages-batch.csv') })
+    outputs.file(pythonBenchmarkReportDirectory.map { it.file('all-languages-batch.json') })
+    outputs.upToDateWhen { false }
+
+    workingDir(pythonProjectDirectory)
+    doFirst {
+        final File reportDirectory = pythonBenchmarkReportDirectory.get().asFile
+        reportDirectory.mkdirs()
+        environment('PYTHONPATH', pythonBenchmarkRuntimeDirectory.get().asFile.absolutePath)
+        commandLine(
+                pythonExecutable.get(),
+                'benchmarks/run_benchmark.py',
+                '--all-languages',
+                '--sizes', '10', '20', '50', '100',
+                '--words', pythonBenchmarkWords.get(),
+                '--repeats', pythonBenchmarkRepeats.get(),
+                '--warmup', pythonBenchmarkWarmup.get(),
+                '--csv', new File(reportDirectory, 'all-languages-batch.csv').absolutePath,
+                '--json', new File(reportDirectory, 'all-languages-batch.json').absolutePath
+        )
+    }
+}
+
+tasks.withType(Exec).configureEach { Exec task ->
+    if (task.name.startsWith('python') || task.name == 'regeneratePythonStandardModels') {
+        task.doFirst {
+            final File temporaryDirectory = pythonTemporaryDirectory.get().asFile
+            temporaryDirectory.mkdirs()
+            environment('TMPDIR', temporaryDirectory.absolutePath)
+            environment('TEMP', temporaryDirectory.absolutePath)
+            environment('TMP', temporaryDirectory.absolutePath)
+        }
+    }
+}

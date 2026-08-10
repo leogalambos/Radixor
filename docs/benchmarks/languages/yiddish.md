@@ -8,9 +8,9 @@ Radixor must not be read as simply "slower" when a narrow competitor has a lower
 
 ## Dictionary Corpus
 
-| Model ID | Model version | Language | Dictionary rows | Complete quality tokens | Already-root tokens | Changed speed tokens |
-| --- | --- | --- | ---: | ---: | ---: | ---: |
-| `yi-default` | `1.0.0` | `YI` | 802 | 4,300 | 1,524 | 2,776 |
+| Model ID | Model version | Language | Dictionary rows | Complete quality tokens | Already-root tokens | Changed tokens | JMH timing tokens |
+| --- | --- | --- | ---: | ---: | ---: | ---: | ---: |
+| `yi-default` | `1.0.0` | `YI` | 802 | 4,300 | 1,524 | 2,776 | 5,000 |
 
 ## Radixor Patch Command Distribution
 
@@ -29,12 +29,9 @@ Accuracy is computed from JMH auxiliary counters in the current report. The coun
 
 | Stemmer | All exact | Changed exact | Root preserved | Note |
 | --- | ---: | ---: | ---: | --- |
-| Radixor | 98.930% | 98.343% | 100.000% | Full Radixor dictionary patch-command stemmer. |
+| Radixor | 98.930% | 98.343% | 100.000% | Radixor dictionary-trained patch-command stemmer. |
 | Lucene SnowballFilter | 2.837% | 2.558% | 3.346% | Lucene TokenFilter integration path around the Snowball algorithm. |
 | Official Snowball direct | 2.837% | 2.558% | 3.346% | Official Snowball generated Java stemmer; rule-based suffix algorithm. |
-
-
-
 
 ## Speed
 
@@ -42,16 +39,13 @@ Speed uses JMH average time, 5 warmup iterations, 10 measurement iterations, 3 i
 
 | Stemmer | Benchmark method | Score ms/op | Error ms | ns/token | Relative vs Radixor | Note |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
-| Radixor | `radixor[YIDDISH]` | 0.249 | 0.001 | 89.6 | 1.000 | Full Radixor dictionary patch-command stemmer. |
-| Official Snowball direct | `snowballDirect[YIDDISH]` | 1.574 | 0.066 | 567.1 | 6.330 | Official Snowball generated Java stemmer; direct API. |
-| Lucene SnowballFilter | `luceneSnowballFilter[YIDDISH]` | 1.849 | 0.079 | 665.9 | 7.434 | Lucene TokenFilter path around Snowball; includes TokenStream overhead. |
-
-
-
+| Radixor | `radixor[YIDDISH]` | 0.234 | 0.001 | 46.8 | 1.000 | Radixor dictionary-trained patch-command stemmer. |
+| Official Snowball direct | `snowballDirect[YIDDISH]` | 1.487 | 0.062 | 297.5 | 6.354 | Official Snowball generated Java stemmer; direct API. |
+| Lucene SnowballFilter | `luceneSnowballFilter[YIDDISH]` | 1.754 | 0.070 | 350.8 | 7.492 | Lucene TokenFilter path around Snowball; includes TokenStream overhead. |
 
 ## Interpretation Notes
 
-- Radixor is a dictionary-derived patch-command stemmer. Its quality depends on the language resource used to train the compiled trie.
+- Radixor is a dictionary-trained patch-command stemmer. Its learned transformations can generalize beyond the word forms listed in the training resource.
 - Light, minimal, plural, and possessive filters are narrow baselines. They can be fast because they intentionally perform less linguistic work.
 - Lucene TokenFilter rows include TokenStream, attribute, and required normalization overhead. Direct rows measure exposed direct APIs.
 - Morfologik rows are dictionary-based and can emit multiple terms for one input token. Quality rows use the first returned term when no ranking weight is available.
@@ -311,7 +305,7 @@ Standard ARI, homogeneity, completeness, V-measure, and NMI are not calculated: 
 ### Provenance
 
 - Authoritative source: `docs/benchmarks/data/stemming-quality.csv`
-- Source SHA-256: `edf16b07be8a535943ddf37caeb8807755c95e9e1fb13244145f28be74b491d8`
+- Source SHA-256: `d34f325da320a2e040b54d8d8b5c216d70448f08cfb8659a423e99882aa1afb5`
 - Evaluation command: `./gradlew stemmingQuality --no-daemon`
 - Dictionary language: `YI`
 - Processing modes: `ALL_WORDS`, `LOWERCASE_GROUPS_ONLY`

@@ -8,9 +8,9 @@ Radixor must not be read as simply "slower" when a narrow competitor has a lower
 
 ## Dictionary Corpus
 
-| Model ID | Model version | Language | Dictionary rows | Complete quality tokens | Already-root tokens | Changed speed tokens |
-| --- | --- | --- | ---: | ---: | ---: | ---: |
-| `pl-pl-unimorph` | `1.0.0` | `PL_PL` | 9,990 | 132,308 | 19,957 | 112,351 |
+| Model ID | Model version | Language | Dictionary rows | Complete quality tokens | Already-root tokens | Changed tokens | JMH timing tokens |
+| --- | --- | --- | ---: | ---: | ---: | ---: | ---: |
+| `pl-pl-unimorph` | `1.0.0` | `PL_PL` | 9,990 | 132,308 | 19,957 | 112,351 | 112,351 |
 
 ## Radixor Patch Command Distribution
 
@@ -30,14 +30,12 @@ Accuracy is computed from JMH auxiliary counters in the current report. The coun
 
 | Stemmer | All exact | Changed exact | Root preserved | Note |
 | --- | ---: | ---: | ---: | --- |
-| Radixor | 98.837% | 98.744% | 99.359% | Full Radixor dictionary patch-command stemmer. |
+| Radixor | 98.837% | 98.744% | 99.359% | Radixor dictionary-trained patch-command stemmer. |
 | Lucene HunspellStemFilter | 89.545% | 88.272% | 96.713% | Benchmark-only Polish Hunspell dictionary compared via Lucene HunspellStemFilter. |
 | Lucene MorfologikFilter | 87.729% | 86.606% | 94.047% | Dictionary-based path; Morfologik can emit multiple terms. |
 | Lucene StempelFilter | 70.009% | 69.262% | 74.220% | Lucene TokenFilter integration path for table-driven Polish Stempel. |
 | Lucene StempelStemmer direct | 70.009% | 69.262% | 74.220% | Direct table-driven Polish Stempel stemmer API. |
-
-
-
+| Official Snowball direct | 22.315% | 20.225% | 34.078% | Official Snowball 3.1.0 generated Java stemmer; rule-based suffix algorithm. |
 
 ## Speed
 
@@ -45,18 +43,16 @@ Speed uses JMH average time, 5 warmup iterations, 10 measurement iterations, 3 i
 
 | Stemmer | Benchmark method | Score ms/op | Error ms | ns/token | Relative vs Radixor | Note |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
-| Radixor | `polishRadixor` | 8.972 | 0.203 | 79.9 | 1.000 | Full Radixor dictionary patch-command stemmer. |
-| Lucene HunspellStemFilter | `luceneHunspellStemFilter` | 524.081 | 35.121 | 4664.7 | 58.412 | Benchmark-only Polish Hunspell dictionary compared via Lucene HunspellStemFilter. |
-| Lucene StempelStemmer direct | `polishLuceneStempelStemmerDirect` | 37.947 | 0.335 | 337.8 | 4.229 | Direct table-driven Polish Stempel stemmer API. |
-| Lucene StempelFilter | `polishLuceneStempelFilter` | 43.090 | 0.411 | 383.5 | 4.803 | Lucene TokenFilter integration path for table-driven Polish Stempel. |
-| Lucene MorfologikFilter | `polishLuceneMorfologikFilter` | 143.527 | 1.176 | 1277.5 | 15.997 | Dictionary-based Morfologik TokenFilter; may emit multiple terms. |
-
-
-
+| Radixor | `polishRadixor` | 8.122 | 0.146 | 72.3 | 1.000 | Radixor dictionary-trained patch-command stemmer. |
+| Lucene HunspellStemFilter | `luceneHunspellStemFilter` | 471.669 | 26.993 | 4198.2 | 58.070 | Benchmark-only Polish Hunspell dictionary compared via Lucene HunspellStemFilter. |
+| Lucene StempelStemmer direct | `polishLuceneStempelStemmerDirect` | 31.524 | 0.189 | 280.6 | 3.881 | Direct table-driven Polish Stempel stemmer API. |
+| Lucene StempelFilter | `polishLuceneStempelFilter` | 39.180 | 0.362 | 348.7 | 4.824 | Lucene TokenFilter integration path for table-driven Polish Stempel. |
+| Lucene MorfologikFilter | `polishLuceneMorfologikFilter` | 138.971 | 1.429 | 1236.9 | 17.110 | Dictionary-based Morfologik TokenFilter; may emit multiple terms. |
+| Official Snowball direct | `snowballDirect[POLISH]` | 9.715 | 0.858 | 86.5 | 1.196 | Official Snowball 3.1.0 generated Java stemmer; direct API. |
 
 ## Interpretation Notes
 
-- Radixor is a dictionary-derived patch-command stemmer. Its quality depends on the language resource used to train the compiled trie.
+- Radixor is a dictionary-trained patch-command stemmer. Its learned transformations can generalize beyond the word forms listed in the training resource.
 - Light, minimal, plural, and possessive filters are narrow baselines. They can be fast because they intentionally perform less linguistic work.
 - Lucene TokenFilter rows include TokenStream, attribute, and required normalization overhead. Direct rows measure exposed direct APIs.
 - Morfologik rows are dictionary-based and can emit multiple terms for one input token. Quality rows use the first returned term when no ranking weight is available.
@@ -74,11 +70,11 @@ Runtime performance and linguistic grouping quality are independent dimensions. 
 
 The default model is `pl-pl-unimorph`, loaded from classpath resource `org/egothor/stemmer/models/pl-pl-unimorph/stemmer.gz`. The following findings compare only deterministic `PRIMARY_OUTPUT` rows over identical included groups; candidate policies are reported separately as capability analyses.
 
-- **ALL_WORDS:** `Radixor` ranks first by balanced accuracy at **0.991105** among 5 deterministic stemmers. The runner-up is `POLISH LUCENE MORFOLOGIK FILTER` at 0.948392, a difference of 0.042713. This rank does not imply leadership in throughput or every secondary metric.
-- **LOWERCASE_GROUPS_ONLY:** `Radixor` ranks first by balanced accuracy at **0.991301** among 5 deterministic stemmers. The runner-up is `POLISH LUCENE MORFOLOGIK FILTER` at 0.948417, a difference of 0.042884. This rank does not imply leadership in throughput or every secondary metric.
+- **ALL_WORDS:** `Radixor` ranks first by balanced accuracy at **0.991105** among 6 deterministic stemmers. The runner-up is `POLISH LUCENE MORFOLOGIK FILTER` at 0.948392, a difference of 0.042713. This rank does not imply leadership in throughput or every secondary metric.
+- **LOWERCASE_GROUPS_ONLY:** `Radixor` ranks first by balanced accuracy at **0.991301** among 6 deterministic stemmers. The runner-up is `POLISH LUCENE MORFOLOGIK FILTER` at 0.948417, a difference of 0.042884. This rank does not imply leadership in throughput or every secondary metric.
 ### `ALL_WORDS`
 
-This mode contains **11 result rows**, **5 evaluated stemmers**, and **3 output policies**. Applied-row and form counts are shown per row because adapters share the language corpus but policy rows remain independently auditable. `PRIMARY_OUTPUT` and `ALL_CANDIDATES` rankings are ordered by unrounded balanced accuracy, followed by MCC, F1, over-stemming rate, over-stemming count, under-stemming rate, and stemmer. `ANY_CANDIDATE` has no single rank metric and is listed alphabetically. Balanced accuracy is a navigation metric, not a universally authoritative quality score.
+This mode contains **12 result rows**, **6 evaluated stemmers**, and **3 output policies**. Applied-row and form counts are shown per row because adapters share the language corpus but policy rows remain independently auditable. `PRIMARY_OUTPUT` and `ALL_CANDIDATES` rankings are ordered by unrounded balanced accuracy, followed by MCC, F1, over-stemming rate, over-stemming count, under-stemming rate, and stemmer. `ANY_CANDIDATE` has no single rank metric and is listed alphabetically. Balanced accuracy is a navigation metric, not a universally authoritative quality score.
 
 #### `PRIMARY_OUTPUT` ranking
 
@@ -91,6 +87,7 @@ This mode contains **11 result rows**, **5 evaluated stemmers**, and **3 output 
 |3|HUNSPELL POLISH LUCENE FILTER|0.933457|0.000383%|13.308172%|
 |4|POLISH LUCENE STEMPEL DIRECT|0.855699|0.000602%|28.859618%|
 |5|POLISH LUCENE STEMPEL FILTER|0.855699|0.000602%|28.859618%|
+|6|SNOWBALL POLISH DIRECT|0.823625|0.000967%|35.273970%|
 
 </div>
 
@@ -103,6 +100,7 @@ This mode contains **11 result rows**, **5 evaluated stemmers**, and **3 output 
 |3|HUNSPELL POLISH LUCENE FILTER|PRIMARY_OUTPUT|0.971931|0.866918|0.999996|0.933457|0.999976|0.000024|
 |4|POLISH LUCENE STEMPEL DIRECT|PRIMARY_OUTPUT|0.947549|0.711404|0.999994|0.855699|0.999950|0.000050|
 |5|POLISH LUCENE STEMPEL FILTER|PRIMARY_OUTPUT|0.947549|0.711404|0.999994|0.855699|0.999950|0.000050|
+|6|SNOWBALL POLISH DIRECT|PRIMARY_OUTPUT|0.910978|0.647260|0.999990|0.823625|0.999936|0.000064|
 
 </details>
 
@@ -115,6 +113,7 @@ This mode contains **11 result rows**, **5 evaluated stemmers**, and **3 output 
 |3|HUNSPELL POLISH LUCENE FILTER|PRIMARY_OUTPUT|0.948942|0.916426|0.886065|0.845744|0.917924|0.917913|
 |4|POLISH LUCENE STEMPEL DIRECT|PRIMARY_OUTPUT|0.888559|0.812669|0.748723|0.684450|0.821030|0.821007|
 |5|POLISH LUCENE STEMPEL FILTER|PRIMARY_OUTPUT|0.888559|0.812669|0.748723|0.684450|0.821030|0.821007|
+|6|SNOWBALL POLISH DIRECT|PRIMARY_OUTPUT|0.842338|0.756803|0.687038|0.608756|0.767880|0.767852|
 
 </details>
 
@@ -127,6 +126,7 @@ This mode contains **11 result rows**, **5 evaluated stemmers**, and **3 output 
 |3|HUNSPELL POLISH LUCENE FILTER|PRIMARY_OUTPUT|968411|27967|148662|7303210371|27967 / 7303238338|148662 / 1117073|
 |4|POLISH LUCENE STEMPEL DIRECT|PRIMARY_OUTPUT|794690|43990|322383|7303194348|43990 / 7303238338|322383 / 1117073|
 |5|POLISH LUCENE STEMPEL FILTER|PRIMARY_OUTPUT|794690|43990|322383|7303194348|43990 / 7303238338|322383 / 1117073|
+|6|SNOWBALL POLISH DIRECT|PRIMARY_OUTPUT|723037|70656|394036|7303167682|70656 / 7303238338|394036 / 1117073|
 
 </details>
 
@@ -208,7 +208,7 @@ Alternative candidates are capability analyses, not replacements for the determi
 
 ### `LOWERCASE_GROUPS_ONLY`
 
-This mode contains **11 result rows**, **5 evaluated stemmers**, and **3 output policies**. Applied-row and form counts are shown per row because adapters share the language corpus but policy rows remain independently auditable. `PRIMARY_OUTPUT` and `ALL_CANDIDATES` rankings are ordered by unrounded balanced accuracy, followed by MCC, F1, over-stemming rate, over-stemming count, under-stemming rate, and stemmer. `ANY_CANDIDATE` has no single rank metric and is listed alphabetically. Balanced accuracy is a navigation metric, not a universally authoritative quality score.
+This mode contains **12 result rows**, **6 evaluated stemmers**, and **3 output policies**. Applied-row and form counts are shown per row because adapters share the language corpus but policy rows remain independently auditable. `PRIMARY_OUTPUT` and `ALL_CANDIDATES` rankings are ordered by unrounded balanced accuracy, followed by MCC, F1, over-stemming rate, over-stemming count, under-stemming rate, and stemmer. `ANY_CANDIDATE` has no single rank metric and is listed alphabetically. Balanced accuracy is a navigation metric, not a universally authoritative quality score.
 
 #### `PRIMARY_OUTPUT` ranking
 
@@ -221,6 +221,7 @@ This mode contains **11 result rows**, **5 evaluated stemmers**, and **3 output 
 |3|HUNSPELL POLISH LUCENE FILTER|0.933546|0.000382%|13.290396%|
 |4|POLISH LUCENE STEMPEL DIRECT|0.856335|0.000611%|28.732387%|
 |5|POLISH LUCENE STEMPEL FILTER|0.856335|0.000611%|28.732387%|
+|6|SNOWBALL POLISH DIRECT|0.823465|0.000990%|35.306102%|
 
 </div>
 
@@ -233,6 +234,7 @@ This mode contains **11 result rows**, **5 evaluated stemmers**, and **3 output 
 |3|HUNSPELL POLISH LUCENE FILTER|PRIMARY_OUTPUT|0.972469|0.867096|0.999996|0.933546|0.999975|0.000025|
 |4|POLISH LUCENE STEMPEL DIRECT|PRIMARY_OUTPUT|0.947796|0.712676|0.999994|0.856335|0.999949|0.000051|
 |5|POLISH LUCENE STEMPEL FILTER|PRIMARY_OUTPUT|0.947796|0.712676|0.999994|0.856335|0.999949|0.000051|
+|6|SNOWBALL POLISH DIRECT|PRIMARY_OUTPUT|0.910487|0.646939|0.999990|0.823465|0.999935|0.000065|
 
 </details>
 
@@ -245,6 +247,7 @@ This mode contains **11 result rows**, **5 evaluated stemmers**, and **3 output 
 |3|HUNSPELL POLISH LUCENE FILTER|PRIMARY_OUTPUT|0.949394|0.916764|0.886303|0.846320|0.918272|0.918260|
 |4|POLISH LUCENE STEMPEL DIRECT|PRIMARY_OUTPUT|0.889130|0.813590|0.749881|0.685758|0.821871|0.821848|
 |5|POLISH LUCENE STEMPEL FILTER|PRIMARY_OUTPUT|0.889130|0.813590|0.749881|0.685758|0.821871|0.821848|
+|6|SNOWBALL POLISH DIRECT|PRIMARY_OUTPUT|0.841894|0.756414|0.686693|0.608253|0.767483|0.767454|
 
 </details>
 
@@ -257,6 +260,7 @@ This mode contains **11 result rows**, **5 evaluated stemmers**, and **3 output 
 |3|HUNSPELL POLISH LUCENE FILTER|PRIMARY_OUTPUT|963133|27267|147624|7133072951|27267 / 7133100218|147624 / 1110757|
 |4|POLISH LUCENE STEMPEL DIRECT|PRIMARY_OUTPUT|791610|43601|319147|7133056617|43601 / 7133100218|319147 / 1110757|
 |5|POLISH LUCENE STEMPEL FILTER|PRIMARY_OUTPUT|791610|43601|319147|7133056617|43601 / 7133100218|319147 / 1110757|
+|6|SNOWBALL POLISH DIRECT|PRIMARY_OUTPUT|718592|70647|392165|7133029571|70647 / 7133100218|392165 / 1110757|
 
 </details>
 
@@ -360,7 +364,7 @@ Standard ARI, homogeneity, completeness, V-measure, and NMI are not calculated: 
 ### Provenance
 
 - Authoritative source: `docs/benchmarks/data/stemming-quality.csv`
-- Source SHA-256: `edf16b07be8a535943ddf37caeb8807755c95e9e1fb13244145f28be74b491d8`
+- Source SHA-256: `d34f325da320a2e040b54d8d8b5c216d70448f08cfb8659a423e99882aa1afb5`
 - Evaluation command: `./gradlew stemmingQuality --no-daemon`
 - Dictionary language: `PL_PL`
 - Processing modes: `ALL_WORDS`, `LOWERCASE_GROUPS_ONLY`

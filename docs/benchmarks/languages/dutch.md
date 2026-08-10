@@ -8,9 +8,9 @@ Radixor must not be read as simply "slower" when a narrow competitor has a lower
 
 ## Dictionary Corpus
 
-| Model ID | Model version | Language | Dictionary rows | Complete quality tokens | Already-root tokens | Changed speed tokens |
-| --- | --- | --- | ---: | ---: | ---: | ---: |
-| `nl-nl-default` | `1.0.0` | `NL_NL` | 4,992 | 31,466 | 9,981 | 21,485 |
+| Model ID | Model version | Language | Dictionary rows | Complete quality tokens | Already-root tokens | Changed tokens | JMH timing tokens |
+| --- | --- | --- | ---: | ---: | ---: | ---: | ---: |
+| `nl-nl-default` | `1.0.0` | `NL_NL` | 4,992 | 31,466 | 9,981 | 21,485 | 21,485 |
 
 ## Radixor Patch Command Distribution
 
@@ -30,15 +30,10 @@ Accuracy is computed from JMH auxiliary counters in the current report. The coun
 
 | Stemmer | All exact | Changed exact | Root preserved | Note |
 | --- | ---: | ---: | ---: | --- |
-| Radixor | 99.120% | 98.711% | 100.000% | Full Radixor dictionary patch-command stemmer. |
+| Radixor | 99.120% | 98.711% | 100.000% | Radixor dictionary-trained patch-command stemmer. |
 | Lucene HunspellStemFilter | 46.590% | 22.718% | 97.976% | Benchmark-only Dutch Hunspell dictionary compared via Lucene HunspellStemFilter. |
 | Official Snowball direct | 15.954% | 8.992% | 30.939% | Official Snowball generated Java stemmer; rule-based suffix algorithm. |
 | Lucene SnowballFilter | 12.620% | 5.441% | 28.073% | Lucene TokenFilter integration path around the Snowball algorithm. |
-
-
-
-
-
 
 ## Speed
 
@@ -46,19 +41,14 @@ Speed uses JMH average time, 5 warmup iterations, 10 measurement iterations, 3 i
 
 | Stemmer | Benchmark method | Score ms/op | Error ms | ns/token | Relative vs Radixor | Note |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
-| Radixor | `radixor[DUTCH]` | 1.410 | 0.139 | 65.6 | 1.000 | Full Radixor dictionary patch-command stemmer. |
-| Lucene HunspellStemFilter | `luceneHunspellStemFilter` | 24.183 | 2.889 | 1125.6 | 17.156 | Benchmark-only Dutch Hunspell dictionary compared via Lucene HunspellStemFilter. |
-| Official Snowball direct | `snowballDirect[DUTCH]` | 4.560 | 0.205 | 212.2 | 3.235 | Official Snowball generated Java stemmer; direct API. |
-| Lucene SnowballFilter | `luceneSnowballFilter[DUTCH]` | 7.762 | 0.262 | 361.3 | 5.506 | Lucene TokenFilter path around Snowball; includes TokenStream overhead. |
-
-
-
-
-
+| Radixor | `radixor[DUTCH]` | 1.340 | 0.127 | 62.4 | 1.000 | Radixor dictionary-trained patch-command stemmer. |
+| Lucene HunspellStemFilter | `luceneHunspellStemFilter` | 22.275 | 2.325 | 1036.8 | 16.621 | Benchmark-only Dutch Hunspell dictionary compared via Lucene HunspellStemFilter. |
+| Official Snowball direct | `snowballDirect[DUTCH]` | 4.298 | 0.185 | 200.0 | 3.207 | Official Snowball generated Java stemmer; direct API. |
+| Lucene SnowballFilter | `luceneSnowballFilter[DUTCH]` | 7.317 | 0.255 | 340.6 | 5.460 | Lucene TokenFilter path around Snowball; includes TokenStream overhead. |
 
 ## Interpretation Notes
 
-- Radixor is a dictionary-derived patch-command stemmer. Its quality depends on the language resource used to train the compiled trie.
+- Radixor is a dictionary-trained patch-command stemmer. Its learned transformations can generalize beyond the word forms listed in the training resource.
 - Light, minimal, plural, and possessive filters are narrow baselines. They can be fast because they intentionally perform less linguistic work.
 - Lucene TokenFilter rows include TokenStream, attribute, and required normalization overhead. Direct rows measure exposed direct APIs.
 - Morfologik rows are dictionary-based and can emit multiple terms for one input token. Quality rows use the first returned term when no ranking weight is available.
@@ -340,7 +330,7 @@ Standard ARI, homogeneity, completeness, V-measure, and NMI are not calculated: 
 ### Provenance
 
 - Authoritative source: `docs/benchmarks/data/stemming-quality.csv`
-- Source SHA-256: `edf16b07be8a535943ddf37caeb8807755c95e9e1fb13244145f28be74b491d8`
+- Source SHA-256: `d34f325da320a2e040b54d8d8b5c216d70448f08cfb8659a423e99882aa1afb5`
 - Evaluation command: `./gradlew stemmingQuality --no-daemon`
 - Dictionary language: `NL_NL`
 - Processing modes: `ALL_WORDS`, `LOWERCASE_GROUPS_ONLY`

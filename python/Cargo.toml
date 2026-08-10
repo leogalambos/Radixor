@@ -1,0 +1,20 @@
+[package]
+name = "radixor"
+version = "0.0.0"
+edition = "2021"
+
+[lib]
+name = "_radixor"
+crate-type = ["cdylib"]
+
+[dependencies]
+pyo3 = { version = "0.22", features = ["extension-module", "abi3-py39"] }
+flate2 = "1.0"
+unicode-normalization = "0.1"
+unicode-general-category = "0.6"
+
+[profile.release]
+lto = true
+codegen-units = 1
+opt-level = 3
+strip = true

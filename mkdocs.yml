@@ -1,15 +1,17 @@
 site_name: Radixor
-site_description: High-performance multi-language stemming toolkit for Java
+site_description: Learned transformation stemming with compiled patch-command tries for Java and Python
 site_url: https://leogalambos.github.io/Radixor/
 repo_url: https://github.com/leogalambos/Radixor
 repo_name: leogalambos/Radixor
-copyright: "&copy; 2026 Egothor. Licensed under <a href='https://github.com/leogalambos/Radixor/blob/main/LICENSE'>BSD-3-Clause</a>."
+copyright: "© 2026 Egothor · Radixor software is BSD-3-Clause licensed."
 
 theme:
   name: material
   language: en
+  custom_dir: docs/overrides
+  logo: assets/images/radixor-logo.png
+  favicon: assets/images/radixor-logo.png
   features:
-    - navigation.instant
     - navigation.sections
     - navigation.top
     - search.suggest
@@ -17,14 +19,20 @@ theme:
     - content.code.copy
   palette:
     - scheme: default
-      primary: indigo
-      accent: indigo
+      primary: white
+      accent: blue
 
-extra: 
+extra:
   generator: false
 
 extra_css:
   - assets/stylesheets/extra.css
+  - assets/stylesheets/landing-v2.css
+  - assets/stylesheets/radixor-docs-safety.css
+
+extra_javascript:
+  - https://unpkg.com/mermaid@11/dist/mermaid.min.js
+  - assets/javascripts/mermaid.js
 
 markdown_extensions:
   - admonition
@@ -32,18 +40,28 @@ markdown_extensions:
   - md_in_html
   - pymdownx.details
   - pymdownx.highlight
-  - pymdownx.superfences
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
   - tables
 
 nav:
   - Home: index.md
 
   - Start:
-     - Fast Track: fast-track.md
-     - Quick Start: quick-start.md
-     - Integration Deep Dive: integration-deep-dive.md
+     - Choose a Runtime: getting-started.md
+     - Why Radixor Is Different: why-radixor-is-different.md
+     - Python Fast Track: python/fast-track.md
+     - Java Fast Track: fast-track.md
+     - Python Quick Start: python/quick-start.md
+     - Java Quick Start: quick-start.md
 
-  - Integration:
+  - Java:
+     - Integration Deep Dive: integration-deep-dive.md
      - Overview: programmatic-usage.md
      - Model Selection and Loading: model-selection-and-loading.md
      - Loading and Building Stemmers: programmatic-loading-and-building.md
@@ -51,6 +69,15 @@ nav:
      - Extending and Persisting Compiled Tries: programmatic-extending-and-persistence.md
      - Migration and Backward Compatibility: migration-and-backward-compatibility.md
      - CLI Compilation: cli-compilation.md
+
+  - Python:
+     - Fast Track: python/fast-track.md
+     - Quick Start: python/quick-start.md
+     - Overview: python/index.md
+     - Installation and Builds: python/installation.md
+     - Usage and API: python/usage.md
+     - Dictionary Compilation: python/model-compilation.md
+     - Benchmarks: python/performance.md
 
   - Dictionaries and Languages:
      - Stemmer Models: stemmer-models.md
@@ -60,6 +87,7 @@ nav:
      - Contributing Dictionaries: contributing-dictionaries.md
 
   - Architecture and Semantics:
+     - Technology and Lineage: technology-lineage.md
      - Overview: architecture-and-reduction.md
      - Architecture: architecture.md
      - Reduction Semantics: reduction-semantics.md

@@ -8,9 +8,9 @@ Radixor must not be read as simply "slower" when a narrow competitor has a lower
 
 ## Dictionary Corpus
 
-| Model ID | Model version | Language | Dictionary rows | Complete quality tokens | Already-root tokens | Changed speed tokens |
-| --- | --- | --- | ---: | ---: | ---: | ---: |
-| `da-dk-default` | `1.0.0` | `DA_DK` | 4,179 | 32,256 | 8,356 | 23,900 |
+| Model ID | Model version | Language | Dictionary rows | Complete quality tokens | Already-root tokens | Changed tokens | JMH timing tokens |
+| --- | --- | --- | ---: | ---: | ---: | ---: | ---: |
+| `da-dk-default` | `1.0.0` | `DA_DK` | 4,179 | 32,256 | 8,356 | 23,900 | 23,900 |
 
 ## Radixor Patch Command Distribution
 
@@ -30,14 +30,9 @@ Accuracy is computed from JMH auxiliary counters in the current report. The coun
 
 | Stemmer | All exact | Changed exact | Root preserved | Note |
 | --- | ---: | ---: | ---: | --- |
-| Radixor | 99.371% | 99.527% | 98.923% | Full Radixor dictionary patch-command stemmer. |
+| Radixor | 99.371% | 99.527% | 98.923% | Radixor dictionary-trained patch-command stemmer. |
 | Lucene SnowballFilter | 55.509% | 54.159% | 59.371% | Lucene TokenFilter integration path around the Snowball algorithm. |
-| Official Snowball direct | 55.509% | 54.159% | 59.371% | Official Snowball generated Java stemmer; rule-based suffix algorithm. |
-
-
-
-
-
+| Official Snowball direct | 55.971% | 54.791% | 59.347% | Official Snowball generated Java stemmer; rule-based suffix algorithm. |
 
 ## Speed
 
@@ -45,18 +40,13 @@ Speed uses JMH average time, 5 warmup iterations, 10 measurement iterations, 3 i
 
 | Stemmer | Benchmark method | Score ms/op | Error ms | ns/token | Relative vs Radixor | Note |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
-| Radixor | `radixor[DANISH]` | 1.206 | 0.134 | 50.5 | 1.000 | Full Radixor dictionary patch-command stemmer. |
-| Official Snowball direct | `snowballDirect[DANISH]` | 2.326 | 0.205 | 97.3 | 1.928 | Official Snowball generated Java stemmer; direct API. |
-| Lucene SnowballFilter | `luceneSnowballFilter[DANISH]` | 3.275 | 0.335 | 137.0 | 2.716 | Lucene TokenFilter path around Snowball; includes TokenStream overhead. |
-
-
-
-
-
+| Radixor | `radixor[DANISH]` | 1.146 | 0.122 | 47.9 | 1.000 | Radixor dictionary-trained patch-command stemmer. |
+| Official Snowball direct | `snowballDirect[DANISH]` | 2.542 | 0.179 | 106.4 | 2.219 | Official Snowball generated Java stemmer; direct API. |
+| Lucene SnowballFilter | `luceneSnowballFilter[DANISH]` | 2.879 | 0.239 | 120.4 | 2.512 | Lucene TokenFilter path around Snowball; includes TokenStream overhead. |
 
 ## Interpretation Notes
 
-- Radixor is a dictionary-derived patch-command stemmer. Its quality depends on the language resource used to train the compiled trie.
+- Radixor is a dictionary-trained patch-command stemmer. Its learned transformations can generalize beyond the word forms listed in the training resource.
 - Light, minimal, plural, and possessive filters are narrow baselines. They can be fast because they intentionally perform less linguistic work.
 - Lucene TokenFilter rows include TokenStream, attribute, and required normalization overhead. Direct rows measure exposed direct APIs.
 - Morfologik rows are dictionary-based and can emit multiple terms for one input token. Quality rows use the first returned term when no ranking weight is available.
@@ -74,8 +64,8 @@ Runtime performance and linguistic grouping quality are independent dimensions. 
 
 The default model is `da-dk-default`, loaded from classpath resource `org/egothor/stemmer/models/da-dk-default/stemmer.gz`. The following findings compare only deterministic `PRIMARY_OUTPUT` rows over identical included groups; candidate policies are reported separately as capability analyses.
 
-- **ALL_WORDS:** `Radixor` ranks first by balanced accuracy at **0.996243** among 3 deterministic stemmers. The runner-up is `SNOWBALL DANISH LUCENE FILTER` at 0.937905, a difference of 0.058337. This rank does not imply leadership in throughput or every secondary metric.
-- **LOWERCASE_GROUPS_ONLY:** `Radixor` ranks first by balanced accuracy at **0.996482** among 3 deterministic stemmers. The runner-up is `SNOWBALL DANISH DIRECT` at 0.938010, a difference of 0.058472. This rank does not imply leadership in throughput or every secondary metric.
+- **ALL_WORDS:** `Radixor` ranks first by balanced accuracy at **0.996243** among 3 deterministic stemmers. The runner-up is `SNOWBALL DANISH DIRECT` at 0.942482, a difference of 0.053761. This rank does not imply leadership in throughput or every secondary metric.
+- **LOWERCASE_GROUPS_ONLY:** `Radixor` ranks first by balanced accuracy at **0.996482** among 3 deterministic stemmers. The runner-up is `SNOWBALL DANISH DIRECT` at 0.942383, a difference of 0.054099. This rank does not imply leadership in throughput or every secondary metric.
 ### `ALL_WORDS`
 
 This mode contains **5 result rows**, **3 evaluated stemmers**, and **3 output policies**. Applied-row and form counts are shown per row because adapters share the language corpus but policy rows remain independently auditable. `PRIMARY_OUTPUT` and `ALL_CANDIDATES` rankings are ordered by unrounded balanced accuracy, followed by MCC, F1, over-stemming rate, over-stemming count, under-stemming rate, and stemmer. `ANY_CANDIDATE` has no single rank metric and is listed alphabetically. Balanced accuracy is a navigation metric, not a universally authoritative quality score.
@@ -87,8 +77,8 @@ This mode contains **5 result rows**, **3 evaluated stemmers**, and **3 output p
 | Rank | Stemmer | Balanced accuracy | Over-stemming (OI) | Under-stemming (UI) |
 |---:|---|---:|---:|---:|
 |1|Radixor|0.996243|0.000000%|0.751435%|
-|2|SNOWBALL DANISH LUCENE FILTER|0.937905|0.001273%|12.417638%|
-|3|SNOWBALL DANISH DIRECT|0.937839|0.001230%|12.431016%|
+|2|SNOWBALL DANISH DIRECT|0.942482|0.001236%|11.502313%|
+|3|SNOWBALL DANISH LUCENE FILTER|0.937905|0.001273%|12.417638%|
 
 </div>
 
@@ -97,8 +87,8 @@ This mode contains **5 result rows**, **3 evaluated stemmers**, and **3 output p
 | Rank | Stemmer | Output policy | Precision | Recall | Specificity | Balanced accuracy | Pairwise accuracy | Error rate |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
 |1|Radixor|PRIMARY_OUTPUT|1.000000|0.992486|1.000000|0.996243|0.999998|0.000002|
-|2|SNOWBALL DANISH LUCENE FILTER|PRIMARY_OUTPUT|0.940600|0.875824|0.999987|0.937905|0.999959|0.000041|
-|3|SNOWBALL DANISH DIRECT|PRIMARY_OUTPUT|0.942465|0.875690|0.999988|0.937839|0.999959|0.000041|
+|2|SNOWBALL DANISH DIRECT|PRIMARY_OUTPUT|0.942799|0.884977|0.999988|0.942482|0.999961|0.000039|
+|3|SNOWBALL DANISH LUCENE FILTER|PRIMARY_OUTPUT|0.940600|0.875824|0.999987|0.937905|0.999959|0.000041|
 
 </details>
 
@@ -107,8 +97,8 @@ This mode contains **5 result rows**, **3 evaluated stemmers**, and **3 output p
 | Rank | Stemmer | Output policy | F0.5 | F1 | F2 | Jaccard | Fowlkes–Mallows | MCC |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
 |1|Radixor|PRIMARY_OUTPUT|0.998488|0.996229|0.993979|0.992486|0.996236|0.996235|
-|2|SNOWBALL DANISH LUCENE FILTER|PRIMARY_OUTPUT|0.926889|0.907057|0.888055|0.829921|0.907634|0.907614|
-|3|SNOWBALL DANISH DIRECT|PRIMARY_OUTPUT|0.928307|0.907851|0.888277|0.831252|0.908464|0.908444|
+|2|SNOWBALL DANISH DIRECT|PRIMARY_OUTPUT|0.930638|0.912973|0.895967|0.839881|0.913430|0.913411|
+|3|SNOWBALL DANISH LUCENE FILTER|PRIMARY_OUTPUT|0.926889|0.907057|0.888055|0.829921|0.907634|0.907614|
 
 </details>
 
@@ -117,8 +107,8 @@ This mode contains **5 result rows**, **3 evaluated stemmers**, and **3 output p
 | Rank | Stemmer | Output policy | TP | FP | FN | TN | Over error / possible | Under error / possible |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
 |1|Radixor|PRIMARY_OUTPUT|89021|0|674|389687465|0 / 389687465|674 / 89695|
-|2|SNOWBALL DANISH LUCENE FILTER|PRIMARY_OUTPUT|78557|4961|11138|389682504|4961 / 389687465|11138 / 89695|
-|3|SNOWBALL DANISH DIRECT|PRIMARY_OUTPUT|78545|4795|11150|389682670|4795 / 389687465|11150 / 89695|
+|2|SNOWBALL DANISH DIRECT|PRIMARY_OUTPUT|79378|4816|10317|389682649|4816 / 389687465|10317 / 89695|
+|3|SNOWBALL DANISH LUCENE FILTER|PRIMARY_OUTPUT|78557|4961|11138|389682504|4961 / 389687465|11138 / 89695|
 
 </details>
 
@@ -195,7 +185,7 @@ This mode contains **5 result rows**, **3 evaluated stemmers**, and **3 output p
 | Rank | Stemmer | Balanced accuracy | Over-stemming (OI) | Under-stemming (UI) |
 |---:|---|---:|---:|---:|
 |1|Radixor|0.996482|0.000000%|0.703596%|
-|2|SNOWBALL DANISH DIRECT|0.938010|0.001235%|12.396694%|
+|2|SNOWBALL DANISH DIRECT|0.942383|0.001240%|11.522225%|
 |3|SNOWBALL DANISH LUCENE FILTER|0.938010|0.001235%|12.396694%|
 
 </div>
@@ -205,7 +195,7 @@ This mode contains **5 result rows**, **3 evaluated stemmers**, and **3 output p
 | Rank | Stemmer | Output policy | Precision | Recall | Specificity | Balanced accuracy | Pairwise accuracy | Error rate |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
 |1|Radixor|PRIMARY_OUTPUT|1.000000|0.992964|1.000000|0.996482|0.999998|0.000002|
-|2|SNOWBALL DANISH DIRECT|PRIMARY_OUTPUT|0.942392|0.876033|0.999988|0.938010|0.999959|0.000041|
+|2|SNOWBALL DANISH DIRECT|PRIMARY_OUTPUT|0.942693|0.884778|0.999988|0.942383|0.999961|0.000039|
 |3|SNOWBALL DANISH LUCENE FILTER|PRIMARY_OUTPUT|0.942392|0.876033|0.999988|0.938010|0.999959|0.000041|
 
 </details>
@@ -215,7 +205,7 @@ This mode contains **5 result rows**, **3 evaluated stemmers**, and **3 output p
 | Rank | Stemmer | Output policy | F0.5 | F1 | F2 | Jaccard | Fowlkes–Mallows | MCC |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
 |1|Radixor|PRIMARY_OUTPUT|0.998585|0.996470|0.994363|0.992964|0.996476|0.996475|
-|2|SNOWBALL DANISH DIRECT|PRIMARY_OUTPUT|0.928328|0.908002|0.888547|0.831505|0.908607|0.908587|
+|2|SNOWBALL DANISH DIRECT|PRIMARY_OUTPUT|0.930511|0.912818|0.895784|0.839618|0.913277|0.913257|
 |3|SNOWBALL DANISH LUCENE FILTER|PRIMARY_OUTPUT|0.928328|0.908002|0.888547|0.831505|0.908607|0.908587|
 
 </details>
@@ -225,7 +215,7 @@ This mode contains **5 result rows**, **3 evaluated stemmers**, and **3 output p
 | Rank | Stemmer | Output policy | TP | FP | FN | TN | Over error / possible | Under error / possible |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
 |1|Radixor|PRIMARY_OUTPUT|88910|0|630|388404335|0 / 388404335|630 / 89540|
-|2|SNOWBALL DANISH DIRECT|PRIMARY_OUTPUT|78440|4795|11100|388399540|4795 / 388404335|11100 / 89540|
+|2|SNOWBALL DANISH DIRECT|PRIMARY_OUTPUT|79223|4816|10317|388399519|4816 / 388404335|10317 / 89540|
 |3|SNOWBALL DANISH LUCENE FILTER|PRIMARY_OUTPUT|78440|4795|11100|388399540|4795 / 388404335|11100 / 89540|
 
 </details>
@@ -316,7 +306,7 @@ Standard ARI, homogeneity, completeness, V-measure, and NMI are not calculated: 
 ### Provenance
 
 - Authoritative source: `docs/benchmarks/data/stemming-quality.csv`
-- Source SHA-256: `edf16b07be8a535943ddf37caeb8807755c95e9e1fb13244145f28be74b491d8`
+- Source SHA-256: `d34f325da320a2e040b54d8d8b5c216d70448f08cfb8659a423e99882aa1afb5`
 - Evaluation command: `./gradlew stemmingQuality --no-daemon`
 - Dictionary language: `DA_DK`
 - Processing modes: `ALL_WORDS`, `LOWERCASE_GROUPS_ONLY`

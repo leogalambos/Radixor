@@ -117,6 +117,49 @@ public class SnowballLanguageStemmerComparisonBenchmark {
     }
 
     /**
+     * Shared corpus state for every official direct Snowball implementation.
+     *
+     * <p>
+     * Czech, Persian, and Polish are available in the official Snowball 3.1.0
+     * distribution but not through the Lucene SnowballFilter version used by
+     * this project. Keeping the direct parameter domain separate prevents JMH
+     * from constructing unsupported Lucene workloads.
+     * </p>
+     */
+    @State(Scope.Benchmark)
+    public static class DirectSharedState {
+
+        /**
+         * Language/algorithm case under comparison.
+         */
+        @Param({ "CZECH", "DANISH", "DUTCH", "FINNISH", "FRENCH", "GERMAN", "HUNGARIAN", "ITALIAN",
+                "NORWEGIAN_BOKMAL", "NORWEGIAN_NYNORSK", "PERSIAN", "POLISH", "PORTUGUESE", "RUSSIAN",
+                "SPANISH", "SWEDISH", "YIDDISH" })
+        public String languageCaseName;
+
+        /**
+         * Resolved language/algorithm case.
+         */
+        private SnowballLanguageCase languageCase;
+
+        /**
+         * Shared deterministic changed-token dictionary corpus.
+         */
+        private String[] tokens;
+
+        /**
+         * Initializes the selected direct Snowball corpus before measurement.
+         *
+         * @throws IOException if the corpus cannot be loaded
+         */
+        @Setup(Level.Trial)
+        public void setUp() throws IOException {
+            this.languageCase = SnowballLanguageCase.valueOf(this.languageCaseName);
+            this.tokens = LanguageBenchmarkCorpus.createTokens(this.languageCase.radixorLanguage());
+        }
+    }
+
+    /**
      * Per-thread direct Snowball state.
      */
     @State(Scope.Thread)
@@ -130,10 +173,10 @@ public class SnowballLanguageStemmerComparisonBenchmark {
         /**
          * Initializes direct Snowball state for the selected language.
          *
-         * @param sharedState selected language state
+         * @param sharedState selected direct Snowball language state
          */
         @Setup(Level.Trial)
-        public void setUp(final SharedState sharedState) {
+        public void setUp(final DirectSharedState sharedState) {
             this.snowballStemmer = sharedState.languageCase.createDirectStemmer();
         }
     }
@@ -198,7 +241,7 @@ public class SnowballLanguageStemmerComparisonBenchmark {
     /**
      * Runs Radixor over the selected Snowball-language corpus.
      *
-     * @param sharedState shared benchmark state
+     * @param sharedState shared direct Snowball benchmark state
      * @param blackhole   result sink
      */
     @Benchmark
@@ -220,7 +263,7 @@ public class SnowballLanguageStemmerComparisonBenchmark {
      * @param blackhole   result sink
      */
     @Benchmark
-    public void snowballDirect(final SharedState sharedState, final DirectState directState,
+    public void snowballDirect(final DirectSharedState sharedState, final DirectState directState,
             final Blackhole blackhole) {
         final String[] tokens = sharedState.tokens;
         final SnowballStemmerAdapter stemmer = directState.snowballStemmer;

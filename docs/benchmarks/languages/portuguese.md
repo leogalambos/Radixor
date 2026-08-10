@@ -8,9 +8,9 @@ Radixor must not be read as simply "slower" when a narrow competitor has a lower
 
 ## Dictionary Corpus
 
-| Model ID | Model version | Language | Dictionary rows | Complete quality tokens | Already-root tokens | Changed speed tokens |
-| --- | --- | --- | ---: | ---: | ---: | ---: |
-| `pt-pt-default` | `1.0.0` | `PT_PT` | 4,001 | 215,490 | 8,002 | 207,488 |
+| Model ID | Model version | Language | Dictionary rows | Complete quality tokens | Already-root tokens | Changed tokens | JMH timing tokens |
+| --- | --- | --- | ---: | ---: | ---: | ---: | ---: |
+| `pt-pt-default` | `1.0.0` | `PT_PT` | 4,001 | 215,490 | 8,002 | 207,488 | 207,488 |
 
 ## Radixor Patch Command Distribution
 
@@ -30,15 +30,12 @@ Accuracy is computed from JMH auxiliary counters in the current report. The coun
 
 | Stemmer | All exact | Changed exact | Root preserved | Note |
 | --- | ---: | ---: | ---: | --- |
-| Radixor | 99.815% | 99.808% | 100.000% | Full Radixor dictionary patch-command stemmer. |
-| Lucene PortugueseLightStemFilter | 8.966% | 5.558% | 97.326% | Light suffix stemmer; intentionally narrower than a dictionary-derived stemmer. |
+| Radixor | 99.815% | 99.808% | 100.000% | Radixor dictionary-trained patch-command stemmer. |
+| Lucene PortugueseLightStemFilter | 8.966% | 5.558% | 97.326% | Light suffix stemmer; intentionally narrower than Radixor's dictionary-trained transformation model. |
 | Lucene PortugueseMinimalStemFilter | 5.539% | 1.896% | 100.000% | Minimal suffix reducer; narrow baseline, not a full stemmer. |
 | Lucene SnowballFilter | 0.625% | 0.558% | 2.374% | Lucene TokenFilter integration path around the Snowball algorithm. |
 | Official Snowball direct | 0.625% | 0.558% | 2.374% | Official Snowball generated Java stemmer; rule-based suffix algorithm. |
 | Lucene PortugueseStemFilter | 0.312% | 0.308% | 0.425% | Portuguese RSLP-style Lucene TokenFilter stemmer. |
-
-
-
 
 ## Speed
 
@@ -46,19 +43,16 @@ Speed uses JMH average time, 5 warmup iterations, 10 measurement iterations, 3 i
 
 | Stemmer | Benchmark method | Score ms/op | Error ms | ns/token | Relative vs Radixor | Note |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
-| Radixor | `portugueseRadixor` | 12.301 | 0.252 | 59.3 | 1.000 | Full Radixor dictionary patch-command stemmer. |
-| Lucene PortugueseLightStemFilter | `portugueseLucenePortugueseLightStemFilter` | 11.409 | 0.151 | 55.0 | 0.927 | Light Portuguese suffix stemmer. |
-| Lucene PortugueseMinimalStemFilter | `portugueseLucenePortugueseMinimalStemFilter` | 15.619 | 0.084 | 75.3 | 1.270 | Minimal Portuguese suffix reducer. |
-| Official Snowball direct | `snowballDirect[PORTUGUESE]` | 57.577 | 1.591 | 277.5 | 4.681 | Official Snowball generated Java stemmer; direct API. |
-| Lucene SnowballFilter | `luceneSnowballFilter[PORTUGUESE]` | 63.403 | 2.720 | 305.6 | 5.154 | Lucene TokenFilter path around Snowball; includes TokenStream overhead. |
-| Lucene PortugueseStemFilter | `portugueseLucenePortugueseStemFilter` | 158.014 | 5.150 | 761.6 | 12.845 | Portuguese RSLP-style Lucene TokenFilter. |
-
-
-
+| Radixor | `portugueseRadixor` | 10.902 | 0.166 | 52.5 | 1.000 | Radixor dictionary-trained patch-command stemmer. |
+| Lucene PortugueseLightStemFilter | `portugueseLucenePortugueseLightStemFilter` | 10.125 | 0.161 | 48.8 | 0.929 | Light Portuguese suffix stemmer. |
+| Lucene PortugueseMinimalStemFilter | `portugueseLucenePortugueseMinimalStemFilter` | 14.338 | 0.156 | 69.1 | 1.315 | Minimal Portuguese suffix reducer. |
+| Official Snowball direct | `snowballDirect[PORTUGUESE]` | 52.193 | 1.905 | 251.5 | 4.788 | Official Snowball generated Java stemmer; direct API. |
+| Lucene SnowballFilter | `luceneSnowballFilter[PORTUGUESE]` | 58.991 | 2.457 | 284.3 | 5.411 | Lucene TokenFilter path around Snowball; includes TokenStream overhead. |
+| Lucene PortugueseStemFilter | `portugueseLucenePortugueseStemFilter` | 164.457 | 8.688 | 792.6 | 15.085 | Portuguese RSLP-style Lucene TokenFilter. |
 
 ## Interpretation Notes
 
-- Radixor is a dictionary-derived patch-command stemmer. Its quality depends on the language resource used to train the compiled trie.
+- Radixor is a dictionary-trained patch-command stemmer. Its learned transformations can generalize beyond the word forms listed in the training resource.
 - Light, minimal, plural, and possessive filters are narrow baselines. They can be fast because they intentionally perform less linguistic work.
 - Lucene TokenFilter rows include TokenStream, attribute, and required normalization overhead. Direct rows measure exposed direct APIs.
 - Morfologik rows are dictionary-based and can emit multiple terms for one input token. Quality rows use the first returned term when no ranking weight is available.
@@ -342,7 +336,7 @@ Standard ARI, homogeneity, completeness, V-measure, and NMI are not calculated: 
 ### Provenance
 
 - Authoritative source: `docs/benchmarks/data/stemming-quality.csv`
-- Source SHA-256: `edf16b07be8a535943ddf37caeb8807755c95e9e1fb13244145f28be74b491d8`
+- Source SHA-256: `d34f325da320a2e040b54d8d8b5c216d70448f08cfb8659a423e99882aa1afb5`
 - Evaluation command: `./gradlew stemmingQuality --no-daemon`
 - Dictionary language: `PT_PT`
 - Processing modes: `ALL_WORDS`, `LOWERCASE_GROUPS_ONLY`

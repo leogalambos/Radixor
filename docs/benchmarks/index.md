@@ -52,8 +52,8 @@ Open [Language Benchmark Pages](languages/index.md) for the complete language li
 
 The English dictionary coverage benchmark shows the current contracted-trie operating curve. With
 the full English dictionary, Radixor reaches `97.478%` all-token exactness and `97.197%`
-changed-token exactness at `98.0 ns/token`. Even with a deterministic 10% dictionary slice, it
-keeps `92.868%` all-token exactness and `76.516%` changed-token exactness at `80.6 ns/token`.
+changed-token exactness at `71.6 ns/token`. Even with a deterministic 10% dictionary slice, it
+keeps `92.868%` all-token exactness and `76.516%` changed-token exactness at `47.0 ns/token`.
 
 Those figures should not be reduced to a single speed badge. The professional interpretation is a
 quality/speed envelope: the amount and quality of dictionary knowledge affect stemming precision,
@@ -61,7 +61,17 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 
 ## Quality versus performance
 
-Each language page keeps exact-root accuracy, JMH latency, and pairwise linguistic-quality results in separate tables. No undocumented scalar combines them. The 2026-07-23 language tables are generated from the unrounded JMH comparison report produced on the environment documented for this refresh. Readers should inspect the quality and speed dimensions side by side; no cross-language Pareto ranking is inferred from workloads with different dictionaries and token counts.
+Each language page keeps exact-root accuracy, JMH latency, and pairwise linguistic-quality results in separate tables. No undocumented scalar combines them. The 2026-08-10 language tables are generated exclusively from the current unrounded JMH comparison report produced on the environment documented for this refresh. The Snowball 3.1.0 matrix adds direct Czech, Persian, and Polish stemmers; all previously published Java stemmers were measured again in the same run. Readers should inspect the quality and speed dimensions side by side; no cross-language Pareto ranking is inferred from workloads with different dictionaries and token counts.
+
+### New Snowball 3.1.0 rows
+
+| New direct stemmer | All exact | Changed exact | Root preserved | Speed | Relative to same-language Radixor |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Czech | 19.865% | 18.186% | 27.645% | 82.4 ns/token | 1.187× |
+| Persian | 3.660% | 0.000% | 100.000% | 298.1 ns/token | 6.486× |
+| Polish | 22.315% | 20.225% | 34.078% | 86.5 ns/token | 1.196× |
+
+These rows describe exact agreement with each Radixor model dictionary and the measured direct API workload; they are not a universal linguistic ranking. In this dataset the three new Snowball stemmers are both less exact and slower than their same-language Radixor baseline. Lucene 10.5.0 does not expose the three new algorithms through `SnowballFilter`, so no synthetic Lucene wrapper rows were added.
 
 <!-- STEMMING-QUALITY-OVERVIEW:START -->
 
@@ -76,16 +86,16 @@ The validated snapshot is a broad multilingual comparison covering the complete 
 
 | Language | Dictionary mode | Winner | Balanced accuracy | Runner-up | Difference | Exact tie | Deterministic stemmers |
 |---|---|---|---:|---|---:|---|---:|
-|Czech (`CS_CZ`)|ALL_WORDS|Radixor|0.996617|HUNSPELL CZECH LUCENE FILTER|0.142485045|no|3|
-|Czech (`CS_CZ`)|LOWERCASE_GROUPS_ONLY|Radixor|0.997195|HUNSPELL CZECH LUCENE FILTER|0.144045088|no|3|
-|Danish (`DA_DK`)|ALL_WORDS|Radixor|0.996243|SNOWBALL DANISH LUCENE FILTER|0.058337376|no|3|
-|Danish (`DA_DK`)|LOWERCASE_GROUPS_ONLY|Radixor|0.996482|SNOWBALL DANISH DIRECT|0.058471663|no|3|
+|Czech (`CS_CZ`)|ALL_WORDS|Radixor|0.996617|HUNSPELL CZECH LUCENE FILTER|0.142485045|no|4|
+|Czech (`CS_CZ`)|LOWERCASE_GROUPS_ONLY|Radixor|0.997195|HUNSPELL CZECH LUCENE FILTER|0.144045088|no|4|
+|Danish (`DA_DK`)|ALL_WORDS|Radixor|0.996243|SNOWBALL DANISH DIRECT|0.053760569|no|3|
+|Danish (`DA_DK`)|LOWERCASE_GROUPS_ONLY|Radixor|0.996482|SNOWBALL DANISH DIRECT|0.054099342|no|3|
 |Dutch (`NL_NL`)|ALL_WORDS|Radixor|0.988733|SNOWBALL DUTCH DIRECT|0.261639748|no|4|
 |Dutch (`NL_NL`)|LOWERCASE_GROUPS_ONLY|Radixor|0.989114|SNOWBALL DUTCH DIRECT|0.258605347|no|4|
 |English (`US_UK`)|ALL_WORDS|Radixor|0.965537|ENGLISH LUCENE PORTER COPIED|0.010741250|no|11|
 |English (`US_UK`)|LOWERCASE_GROUPS_ONLY|Radixor|0.966202|ENGLISH LUCENE PORTER COPIED|0.011138557|no|11|
 |Finnish (`FI_FI`)|ALL_WORDS|Radixor|0.984838|SNOWBALL FINNISH LUCENE FILTER|0.244558928|no|4|
-|Finnish (`FI_FI`)|LOWERCASE_GROUPS_ONLY|Radixor|0.988242|SNOWBALL FINNISH DIRECT|0.249897933|no|4|
+|Finnish (`FI_FI`)|LOWERCASE_GROUPS_ONLY|Radixor|0.988242|SNOWBALL FINNISH DIRECT|0.249699076|no|4|
 |French (`FR_FR`)|ALL_WORDS|Radixor|0.958627|SNOWBALL FRENCH DIRECT|0.109964908|no|6|
 |French (`FR_FR`)|LOWERCASE_GROUPS_ONLY|Radixor|0.958856|SNOWBALL FRENCH DIRECT|0.110030565|no|6|
 |German (`DE_DE`)|ALL_WORDS|Radixor|0.910445|GERMAN CISTEM|0.031918024|no|8|
@@ -100,10 +110,10 @@ The validated snapshot is a broad multilingual comparison covering the complete 
 |Norwegian Bokmal (`NB_NO`)|LOWERCASE_GROUPS_ONLY|Radixor|0.976240|SNOWBALL NORWEGIAN BOKMAL DIRECT|0.101954266|no|5|
 |Norwegian Nynorsk (`NN_NO`)|ALL_WORDS|Radixor|0.950991|SNOWBALL NORWEGIAN NYNORSK DIRECT|0.082896791|no|3|
 |Norwegian Nynorsk (`NN_NO`)|LOWERCASE_GROUPS_ONLY|Radixor|0.951104|SNOWBALL NORWEGIAN NYNORSK DIRECT|0.082851757|no|3|
-|Persian (`FA_IR`)|ALL_WORDS|Radixor|0.976360|PERSIAN LUCENE PERSIAN STEM FILTER|0.474147508|no|2|
-|Persian (`FA_IR`)|LOWERCASE_GROUPS_ONLY|Radixor|0.976360|PERSIAN LUCENE PERSIAN STEM FILTER|0.474147508|no|2|
-|Polish (`PL_PL`)|ALL_WORDS|Radixor|0.991105|POLISH LUCENE MORFOLOGIK FILTER|0.042712804|no|5|
-|Polish (`PL_PL`)|LOWERCASE_GROUPS_ONLY|Radixor|0.991301|POLISH LUCENE MORFOLOGIK FILTER|0.042883749|no|5|
+|Persian (`FA_IR`)|ALL_WORDS|Radixor|0.976360|SNOWBALL PERSIAN DIRECT|0.441236451|no|3|
+|Persian (`FA_IR`)|LOWERCASE_GROUPS_ONLY|Radixor|0.976360|SNOWBALL PERSIAN DIRECT|0.441236451|no|3|
+|Polish (`PL_PL`)|ALL_WORDS|Radixor|0.991105|POLISH LUCENE MORFOLOGIK FILTER|0.042712804|no|6|
+|Polish (`PL_PL`)|LOWERCASE_GROUPS_ONLY|Radixor|0.991301|POLISH LUCENE MORFOLOGIK FILTER|0.042883749|no|6|
 |Portuguese (`PT_PT`)|ALL_WORDS|Radixor|0.998542|SNOWBALL PORTUGUESE DIRECT|0.059619854|no|6|
 |Portuguese (`PT_PT`)|LOWERCASE_GROUPS_ONLY|Radixor|0.998542|SNOWBALL PORTUGUESE DIRECT|0.059619854|no|6|
 |Russian (`RU_RU`)|ALL_WORDS|Radixor|0.990188|SNOWBALL RUSSIAN LUCENE FILTER|0.155623602|no|4|
@@ -166,7 +176,7 @@ Counts use `PRIMARY_OUTPUT` only and retain each adapter configuration as a sepa
 |ITALIAN LUCENE ITALIAN LIGHT STEM FILTER|1|0|0|0|4.000|4.000|
 |NORWEGIAN BOKMAL LUCENE NORWEGIAN LIGHT STEM FILTER|1|0|0|0|4.000|4.000|
 |NORWEGIAN BOKMAL LUCENE NORWEGIAN MINIMAL STEM FILTER|1|0|0|0|5.000|5.000|
-|PERSIAN LUCENE PERSIAN STEM FILTER|1|0|0|1|2.000|2.000|
+|PERSIAN LUCENE PERSIAN STEM FILTER|1|0|0|1|3.000|3.000|
 |POLISH LUCENE MORFOLOGIK FILTER|1|0|0|1|2.000|2.000|
 |POLISH LUCENE STEMPEL DIRECT|1|0|0|0|4.000|4.000|
 |POLISH LUCENE STEMPEL FILTER|1|0|0|0|5.000|5.000|
@@ -174,8 +184,9 @@ Counts use `PRIMARY_OUTPUT` only and retain each adapter configuration as a sepa
 |PORTUGUESE LUCENE PORTUGUESE MINIMAL STEM FILTER|1|0|0|0|6.000|6.000|
 |PORTUGUESE LUCENE PORTUGUESE STEM FILTER|1|0|0|0|4.000|4.000|
 |RUSSIAN LUCENE RUSSIAN LIGHT STEM FILTER|1|0|0|0|4.000|4.000|
-|SNOWBALL DANISH DIRECT|1|0|0|1|3.000|3.000|
-|SNOWBALL DANISH LUCENE FILTER|1|0|0|1|2.000|2.000|
+|SNOWBALL CZECH DIRECT|1|0|0|0|4.000|4.000|
+|SNOWBALL DANISH DIRECT|1|0|0|1|2.000|2.000|
+|SNOWBALL DANISH LUCENE FILTER|1|0|0|1|3.000|3.000|
 |SNOWBALL DUTCH DIRECT|1|0|0|1|2.000|2.000|
 |SNOWBALL DUTCH LUCENE FILTER|1|0|0|0|4.000|4.000|
 |SNOWBALL FINNISH DIRECT|1|0|0|1|3.000|3.000|
@@ -192,6 +203,8 @@ Counts use `PRIMARY_OUTPUT` only and retain each adapter configuration as a sepa
 |SNOWBALL NORWEGIAN BOKMAL LUCENE FILTER|1|0|0|1|3.000|3.000|
 |SNOWBALL NORWEGIAN NYNORSK DIRECT|1|0|0|1|2.000|2.000|
 |SNOWBALL NORWEGIAN NYNORSK LUCENE FILTER|1|0|0|1|3.000|3.000|
+|SNOWBALL PERSIAN DIRECT|1|0|0|1|2.000|2.000|
+|SNOWBALL POLISH DIRECT|1|0|0|0|6.000|6.000|
 |SNOWBALL PORTUGUESE DIRECT|1|0|0|1|2.000|2.000|
 |SNOWBALL PORTUGUESE LUCENE FILTER|1|0|0|1|3.000|3.000|
 |SNOWBALL RUSSIAN DIRECT|1|0|0|1|3.000|3.000|
@@ -246,7 +259,7 @@ Counts use `PRIMARY_OUTPUT` only and retain each adapter configuration as a sepa
 |ITALIAN LUCENE ITALIAN LIGHT STEM FILTER|1|0|0|0|4.000|4.000|
 |NORWEGIAN BOKMAL LUCENE NORWEGIAN LIGHT STEM FILTER|1|0|0|0|4.000|4.000|
 |NORWEGIAN BOKMAL LUCENE NORWEGIAN MINIMAL STEM FILTER|1|0|0|0|5.000|5.000|
-|PERSIAN LUCENE PERSIAN STEM FILTER|1|0|0|1|2.000|2.000|
+|PERSIAN LUCENE PERSIAN STEM FILTER|1|0|0|1|3.000|3.000|
 |POLISH LUCENE MORFOLOGIK FILTER|1|0|0|1|2.000|2.000|
 |POLISH LUCENE STEMPEL DIRECT|1|0|0|0|4.000|4.000|
 |POLISH LUCENE STEMPEL FILTER|1|0|0|0|5.000|5.000|
@@ -254,6 +267,7 @@ Counts use `PRIMARY_OUTPUT` only and retain each adapter configuration as a sepa
 |PORTUGUESE LUCENE PORTUGUESE MINIMAL STEM FILTER|1|0|0|0|6.000|6.000|
 |PORTUGUESE LUCENE PORTUGUESE STEM FILTER|1|0|0|0|4.000|4.000|
 |RUSSIAN LUCENE RUSSIAN LIGHT STEM FILTER|1|0|0|0|4.000|4.000|
+|SNOWBALL CZECH DIRECT|1|0|0|0|4.000|4.000|
 |SNOWBALL DANISH DIRECT|1|0|0|1|2.000|2.000|
 |SNOWBALL DANISH LUCENE FILTER|1|0|0|1|3.000|3.000|
 |SNOWBALL DUTCH DIRECT|1|0|0|1|2.000|2.000|
@@ -272,6 +286,8 @@ Counts use `PRIMARY_OUTPUT` only and retain each adapter configuration as a sepa
 |SNOWBALL NORWEGIAN BOKMAL LUCENE FILTER|1|0|0|1|3.000|3.000|
 |SNOWBALL NORWEGIAN NYNORSK DIRECT|1|0|0|1|2.000|2.000|
 |SNOWBALL NORWEGIAN NYNORSK LUCENE FILTER|1|0|0|1|3.000|3.000|
+|SNOWBALL PERSIAN DIRECT|1|0|0|1|2.000|2.000|
+|SNOWBALL POLISH DIRECT|1|0|0|0|6.000|6.000|
 |SNOWBALL PORTUGUESE DIRECT|1|0|0|1|2.000|2.000|
 |SNOWBALL PORTUGUESE LUCENE FILTER|1|0|0|1|3.000|3.000|
 |SNOWBALL RUSSIAN DIRECT|1|0|0|1|2.000|2.000|
@@ -305,7 +321,7 @@ These aggregates cover all 20 documented languages. Macro balanced accuracy give
 ### Reproducible data
 
 - [Machine-readable quality snapshot](data/stemming-quality.csv)
-- SHA-256: `edf16b07be8a535943ddf37caeb8807755c95e9e1fb13244145f28be74b491d8`
+- SHA-256: `d34f325da320a2e040b54d8d8b5c216d70448f08cfb8659a423e99882aa1afb5`
 - [Linguistic quality methodology](reference/linguistic-quality.md)
 - [Tested stemmer inventory](reference/tested-stemmers.md)
 - [Reproducibility and raw data](reference/reproducibility.md)

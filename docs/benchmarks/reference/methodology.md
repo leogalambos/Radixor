@@ -2,7 +2,7 @@
 
 The stemmer comparison suite measures Radixor and Java stemmers on the same language and deterministic Radixor model dictionary-derived data. Published Radixor rows in this refresh use contracted compiled patch tries, where uniform preferred-command subtrees are collapsed into accepting leaves before the trie is frozen for lookup. For each language, the registered default model resource stores the expected root as the first tab-separated field on a line and its surface forms on the same line. Every single-token field on that line can therefore be paired with the same expected root.
 
-Published speed results come only from the exact method selection retained in `published-speed-benchmarks-2026-07-23.txt`. Internal `FrequencyTrie*` microbenchmarks, quality methods, the CISTEM gold-standard experiment, and the optional `PolishPolimorfStemmerComparisonBenchmark` are not part of those results.
+Published speed results come only from the exact method selection retained in `published-speed-benchmarks-2026-08-10.txt`. Internal `FrequencyTrie*` microbenchmarks, quality methods, the CISTEM gold-standard experiment, and the optional `PolishPolimorfStemmerComparisonBenchmark` are not part of those results. The Snowball 3.1.0 refresh adds direct Czech, Persian, and Polish workloads; the existing Radixor and Lucene workload domains are unchanged.
 
 ## Benchmark Passes
 
@@ -41,8 +41,8 @@ For right-to-left Radixor languages, patch application uses the traversal direct
 
 The quality pass reports exact-root agreement against the expected root from the default-model dictionary line. External-stemmer counters are written to:
 
-- `build/reports/jmh/stemmer-accuracy-2026-07-23.csv`
-- `build/reports/jmh/stemmer-accuracy-2026-07-23.txt`
+- `build/reports/jmh/stemmer-accuracy-2026-08-10.csv`
+- `build/reports/jmh/stemmer-accuracy-2026-08-10.txt`
 
 Accuracy is computed from standard JMH secondary rows:
 

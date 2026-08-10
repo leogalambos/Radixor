@@ -8,9 +8,9 @@ Radixor must not be read as simply "slower" when a narrow competitor has a lower
 
 ## Dictionary Corpus
 
-| Model ID | Model version | Language | Dictionary rows | Complete quality tokens | Already-root tokens | Changed speed tokens |
-| --- | --- | --- | ---: | ---: | ---: | ---: |
-| `fr-fr-default` | `1.0.0` | `FR_FR` | 59,240 | 474,110 | 108,141 | 365,969 |
+| Model ID | Model version | Language | Dictionary rows | Complete quality tokens | Already-root tokens | Changed tokens | JMH timing tokens |
+| --- | --- | --- | ---: | ---: | ---: | ---: | ---: |
+| `fr-fr-default` | `1.0.0` | `FR_FR` | 59,240 | 474,110 | 108,141 | 365,969 | 365,969 |
 
 ## Radixor Patch Command Distribution
 
@@ -30,16 +30,12 @@ Accuracy is computed from JMH auxiliary counters in the current report. The coun
 
 | Stemmer | All exact | Changed exact | Root preserved | Note |
 | --- | ---: | ---: | ---: | --- |
-| Radixor | 94.831% | 94.859% | 94.734% | Full Radixor dictionary patch-command stemmer. |
+| Radixor | 94.831% | 94.859% | 94.734% | Radixor dictionary-trained patch-command stemmer. |
 | Lucene HunspellStemFilter | 68.923% | 63.617% | 86.876% | Benchmark-only French Hunspell dictionary compared via Lucene HunspellStemFilter. |
 | Lucene FrenchMinimalStemFilter | 11.472% | 6.236% | 29.192% | Minimal suffix reducer; narrow baseline, not a full stemmer. |
 | Lucene SnowballFilter | 8.551% | 5.183% | 19.952% | Lucene TokenFilter integration path around the Snowball algorithm. |
 | Official Snowball direct | 8.462% | 5.067% | 19.952% | Official Snowball generated Java stemmer; rule-based suffix algorithm. |
-| Lucene FrenchLightStemFilter | 6.377% | 3.965% | 14.540% | Light suffix stemmer; intentionally narrower than a dictionary-derived stemmer. |
-
-
-
-
+| Lucene FrenchLightStemFilter | 6.377% | 3.965% | 14.540% | Light suffix stemmer; intentionally narrower than Radixor's dictionary-trained transformation model. |
 
 ## Speed
 
@@ -47,20 +43,16 @@ Speed uses JMH average time, 5 warmup iterations, 10 measurement iterations, 3 i
 
 | Stemmer | Benchmark method | Score ms/op | Error ms | ns/token | Relative vs Radixor | Note |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
-| Radixor | `frenchRadixor` | 49.340 | 0.986 | 134.8 | 1.000 | Full Radixor dictionary patch-command stemmer. |
-| Lucene HunspellStemFilter | `luceneHunspellStemFilter` | 1781.070 | 43.544 | 4866.7 | 36.098 | Benchmark-only French Hunspell dictionary compared via Lucene HunspellStemFilter. |
-| Lucene FrenchMinimalStemFilter | `frenchLuceneFrenchMinimalStemFilter` | 19.093 | 0.681 | 52.2 | 0.387 | Minimal French suffix reducer; narrow baseline. |
-| Lucene FrenchLightStemFilter | `frenchLuceneFrenchLightStemFilter` | 29.553 | 0.465 | 80.8 | 0.599 | Light French suffix stemmer. |
-| Official Snowball direct | `snowballDirect[FRENCH]` | 121.376 | 0.865 | 331.7 | 2.460 | Official Snowball generated Java stemmer; direct API. |
-| Lucene SnowballFilter | `luceneSnowballFilter[FRENCH]` | 126.574 | 4.671 | 345.9 | 2.565 | Lucene TokenFilter path around Snowball; includes TokenStream overhead. |
-
-
-
-
+| Radixor | `frenchRadixor` | 37.443 | 0.520 | 102.3 | 1.000 | Radixor dictionary-trained patch-command stemmer. |
+| Lucene HunspellStemFilter | `luceneHunspellStemFilter` | 1673.192 | 57.385 | 4572.0 | 44.686 | Benchmark-only French Hunspell dictionary compared via Lucene HunspellStemFilter. |
+| Lucene FrenchMinimalStemFilter | `frenchLuceneFrenchMinimalStemFilter` | 18.034 | 0.181 | 49.3 | 0.482 | Minimal French suffix reducer; narrow baseline. |
+| Lucene FrenchLightStemFilter | `frenchLuceneFrenchLightStemFilter` | 27.961 | 0.493 | 76.4 | 0.747 | Light French suffix stemmer. |
+| Official Snowball direct | `snowballDirect[FRENCH]` | 112.255 | 4.045 | 306.7 | 2.998 | Official Snowball generated Java stemmer; direct API. |
+| Lucene SnowballFilter | `luceneSnowballFilter[FRENCH]` | 119.555 | 4.560 | 326.7 | 3.193 | Lucene TokenFilter path around Snowball; includes TokenStream overhead. |
 
 ## Interpretation Notes
 
-- Radixor is a dictionary-derived patch-command stemmer. Its quality depends on the language resource used to train the compiled trie.
+- Radixor is a dictionary-trained patch-command stemmer. Its learned transformations can generalize beyond the word forms listed in the training resource.
 - Light, minimal, plural, and possessive filters are narrow baselines. They can be fast because they intentionally perform less linguistic work.
 - Lucene TokenFilter rows include TokenStream, attribute, and required normalization overhead. Direct rows measure exposed direct APIs.
 - Morfologik rows are dictionary-based and can emit multiple terms for one input token. Quality rows use the first returned term when no ranking weight is available.
@@ -358,7 +350,7 @@ Standard ARI, homogeneity, completeness, V-measure, and NMI are not calculated: 
 ### Provenance
 
 - Authoritative source: `docs/benchmarks/data/stemming-quality.csv`
-- Source SHA-256: `edf16b07be8a535943ddf37caeb8807755c95e9e1fb13244145f28be74b491d8`
+- Source SHA-256: `d34f325da320a2e040b54d8d8b5c216d70448f08cfb8659a423e99882aa1afb5`
 - Evaluation command: `./gradlew stemmingQuality --no-daemon`
 - Dictionary language: `FR_FR`
 - Processing modes: `ALL_WORDS`, `LOWERCASE_GROUPS_ONLY`

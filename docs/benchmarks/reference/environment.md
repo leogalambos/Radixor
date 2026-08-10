@@ -4,25 +4,25 @@ The values below are environment-specific and must not be read as universal perf
 
 | Item | Value |
 | --- | --- |
-| Benchmark date | 2026-07-23 (Europe/Prague) |
+| Benchmark date | 2026-08-10 (Europe/Prague) |
 | Corpus command | `./gradlew benchmarkCorpusReport --no-daemon` |
-| Exact-root accuracy command | Direct JMH execution of the four `*BenchmarkQuality` classes selected in `stemmer-accuracy-2026-07-23.txt`; timing scores are discarded |
+| Exact-root accuracy command | `tools/run-published-accuracy-benchmarks.sh 2026-08-10`; all four `*BenchmarkQuality` classes are selected and timing scores are discarded |
 | Stemming-quality command | `./gradlew stemmingQuality --no-daemon` |
-| Published speed command | `tools/run-published-speed-benchmarks.sh 2026-07-23` |
-| Published speed run interval | 2026-07-23 12:58:50 to 15:15:43 Europe/Prague (2 h 16 min 53 s, including idle intervals and both JMH suites) |
+| Published speed command | `tools/run-published-speed-benchmarks.sh 2026-08-10` |
+| Published speed run interval | 2026-08-10 16:22:33 to 18:36:41 Europe/Prague (2 h 14 min 8 s, including idle intervals and both JMH suites) |
 | Stabilization intervals | 120 s before the main speed matrix; 60 s between the main matrix and coverage-speed suite |
 | Corpus and command report | `build/reports/jmh/benchmark-corpora.csv` |
-| Exact-root reports | `build/reports/jmh/stemmer-accuracy-2026-07-23.csv` and `.txt` |
-| Speed reports | `build/reports/jmh/stemmer-speed-2026-07-23.csv` and `.txt` |
-| English coverage accuracy reports | `build/reports/jmh/english-coverage-accuracy-2026-07-23.csv` and `.txt` |
-| English coverage speed reports | `build/reports/jmh/english-coverage-speed-2026-07-23.csv` and `.txt` |
+| Exact-root reports | `build/reports/jmh/stemmer-accuracy-2026-08-10.csv` and `.txt` |
+| Speed reports | `build/reports/jmh/stemmer-speed-2026-08-10.csv` and `.txt` |
+| English coverage accuracy reports | `build/reports/jmh/english-coverage-accuracy-2026-08-10.csv` and `.txt` |
+| English coverage speed reports | `build/reports/jmh/english-coverage-speed-2026-08-10.csv` and `.txt` |
 | Stemming-quality reports | `build/reports/stemming-quality/stemming-quality.csv` and `.md` |
-| Environment report | `build/reports/jmh/performance-environment-2026-07-23.txt` |
-| Selected speed methods | `build/reports/jmh/published-speed-benchmarks-2026-07-23.txt` |
+| Environment report | `build/reports/jmh/performance-environment-2026-08-10.txt` |
+| Selected speed methods | `build/reports/jmh/published-speed-benchmarks-2026-08-10.txt` |
 | Comparison scope | Same-language methods used by the 20 language pages; `PolishPolimorfStemmerComparisonBenchmark`, all quality methods, the separate CISTEM gold-standard experiment, and internal trie microbenchmarks are excluded |
 | Model scope | Exactly the 20 IDs declared by `Language.defaultModelId()`; Polish uses `pl-pl-unimorph`, and `pl-pl-polimorf` is not measured |
-| Core base commit | `1f1b03c6a8d36a0918b92ebde698e5379a2a5946` |
-| Measured source state | `release@4.0.0-dirty`; exact tracked changes and untracked-source checksums are retained as `measured-source-2026-07-23.patch` and `measured-untracked-2026-07-23.sha256` |
+| Core base commit | `b45e143c8484c2ae1d6e31069a2e67232c4f7f29` |
+| Measured source state | `release@4.1.0-dirty`; exact tracked changes and untracked-source checksums are retained as `measured-source-2026-08-10.patch` and `measured-untracked-2026-08-10.sha256` |
 | JMH version | 1.37 |
 | Speed benchmark mode | Average time, `time/op` |
 | Score unit | `ns/op`; language pages additionally derive `ms/op` and `ns/token` |
@@ -32,21 +32,21 @@ The values below are environment-specific and must not be read as universal perf
 | Speed threads | 1 |
 | Speed fork heap | Fixed `-Xms6g -Xmx6g` |
 | Reported uncertainty | JMH `Score Error (99.9%)` over 30 measured samples |
-| Observed relative uncertainty | Main speed matrix: maximum 11.945%, with 6 of 102 rows above 10%; coverage-speed curve: maximum 16.775%, with 3 of 10 rows above 10%; no published row exceeded 20% |
+| Observed relative uncertainty | Main speed matrix: maximum 10.607%, with 2 of 105 rows above 10%; coverage-speed curve: maximum 12.142%, with 2 of 10 rows above 10%; no published row exceeded 20% |
 | Deterministic measurements | Corpus, patch-command distribution, exact-root counters, coverage accuracy, and pairwise stemming quality are evaluated without interpreting runtime scores; no warmup is required |
-| JVM reported by JMH | JDK 25.0.3, OpenJDK 64-Bit Server VM, 25.0.3+9 |
-| Java runtime | OpenJDK Runtime Environment, Red Hat build 25.0.3+9 |
+| JVM reported by JMH | JDK 25.0.4, OpenJDK 64-Bit Server VM, 25.0.4+7 |
+| Java runtime | OpenJDK Runtime Environment, Red Hat build 25.0.4+7 |
 | JVM invoker | `/usr/lib/jvm/java-25-openjdk/bin/java` |
 | Operating system | Fedora Linux 44 (MATE-Compiz) |
-| Kernel | Linux 7.1.4-200.fc44.x86_64 |
+| Kernel | Linux 7.1.7-200.fc44.x86_64 |
 | Architecture | x86_64 |
-| CPU | AMD Ryzen 5 8600G w/ Radeon 760M Graphics |
+| CPU | AMD Ryzen 5 7600 6-Core Processor |
 | Physical / logical CPUs | 6 / 12 |
 | CPU frequency policy | `amd-pstate-epp`; governor `performance` on every logical CPU; EPP `performance`; boost enabled |
 | CPU affinity | Scheduler default; no explicit pinning |
-| Installed memory | 60 GiB reported by the operating system |
-| Pre-run idle state | Load average 0.25 / 0.36 / 0.71 after the 120 s idle interval; CPU Tctl 40.2 degrees Celsius; swap unused |
-| End-of-run state | Load average 1.16 / 1.28 / 1.32; CPU Tctl 60.5 degrees Celsius |
+| Installed memory | 61 GiB reported by the operating system |
+| Pre-run idle state | Load average 0.16 / 0.42 / 0.88 after the 120 s idle interval; CPU Tctl 57.4 degrees Celsius; swap unused |
+| End-of-run state | Load average 1.59 / 1.49 / 1.36; CPU Tctl 78.1 degrees Celsius |
 | Power and idle policy | Developer workstation on stable power; screensaver, suspend, and hibernation disabled |
 | Concurrent project work | None during the published speed and coverage-speed run |
 
@@ -67,15 +67,15 @@ The JMH runtime classpath contains the optional model artifact because it is a s
 Generated local report files for this benchmark update:
 
 - `build/reports/jmh/benchmark-corpora.csv`
-- `build/reports/jmh/stemmer-accuracy-2026-07-23.csv`
-- `build/reports/jmh/stemmer-accuracy-2026-07-23.txt`
-- `build/reports/jmh/stemmer-speed-2026-07-23.csv`
-- `build/reports/jmh/stemmer-speed-2026-07-23.txt`
-- `build/reports/jmh/english-coverage-accuracy-2026-07-23.csv`
-- `build/reports/jmh/english-coverage-accuracy-2026-07-23.txt`
-- `build/reports/jmh/english-coverage-speed-2026-07-23.csv`
-- `build/reports/jmh/english-coverage-speed-2026-07-23.txt`
-- `build/reports/jmh/performance-environment-2026-07-23.txt`
+- `build/reports/jmh/stemmer-accuracy-2026-08-10.csv`
+- `build/reports/jmh/stemmer-accuracy-2026-08-10.txt`
+- `build/reports/jmh/stemmer-speed-2026-08-10.csv`
+- `build/reports/jmh/stemmer-speed-2026-08-10.txt`
+- `build/reports/jmh/english-coverage-accuracy-2026-08-10.csv`
+- `build/reports/jmh/english-coverage-accuracy-2026-08-10.txt`
+- `build/reports/jmh/english-coverage-speed-2026-08-10.csv`
+- `build/reports/jmh/english-coverage-speed-2026-08-10.txt`
+- `build/reports/jmh/performance-environment-2026-08-10.txt`
 - `build/reports/stemming-quality/stemming-quality.csv`
 - `build/reports/stemming-quality/stemming-quality.md`
 - `build/reports/stemming-quality/metric-correlations-pearson.csv`

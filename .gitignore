@@ -88,6 +88,9 @@ local.properties
 # Typically, this file would be tracked if it contains build/dependency configurations:
 #.project
 
+# Eclipse and Buildship create project descriptors during import.
+**/.project
+
 # PMD plugin conf
 .pmd
 
@@ -109,3 +112,21 @@ gradle-app.setting
 
 # Gradle task-name cache
 .gradletasknamecache
+
+##---------------------------------------------------------------------------------------- Python tooling
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Workspace-local Rust/Python build and test scratch directories.
+/.cargo-target/
+/pytest-of-*/
+
+# tempfile.NamedTemporaryFile-style dictionary scratch files must not survive
+# as repository candidates when a process is interrupted.
+/tmp*.gz

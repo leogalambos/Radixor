@@ -8,9 +8,9 @@ Radixor must not be read as simply "slower" when a narrow competitor has a lower
 
 ## Dictionary Corpus
 
-| Model ID | Model version | Language | Dictionary rows | Complete quality tokens | Already-root tokens | Changed speed tokens |
-| --- | --- | --- | ---: | ---: | ---: | ---: |
-| `de-de-default` | `1.0.0` | `DE_DE` | 54,092 | 333,036 | 90,535 | 242,501 |
+| Model ID | Model version | Language | Dictionary rows | Complete quality tokens | Already-root tokens | Changed tokens | JMH timing tokens |
+| --- | --- | --- | ---: | ---: | ---: | ---: | ---: |
+| `de-de-default` | `1.0.0` | `DE_DE` | 54,092 | 333,036 | 90,535 | 242,501 | 242,501 |
 
 ## Radixor Patch Command Distribution
 
@@ -30,18 +30,14 @@ Accuracy is computed from JMH auxiliary counters in the current report. The coun
 
 | Stemmer | All exact | Changed exact | Root preserved | Note |
 | --- | ---: | ---: | ---: | --- |
-| Radixor | 92.725% | 92.847% | 92.396% | Full Radixor dictionary patch-command stemmer. |
+| Radixor | 92.725% | 92.847% | 92.396% | Radixor dictionary-trained patch-command stemmer. |
 | Lucene HunspellStemFilter | 47.064% | 29.661% | 93.678% | Benchmark-only German Hunspell dictionary compared via Lucene HunspellStemFilter. |
 | CISTEM (German) | 24.675% | 23.724% | 27.222% | Benchmark-only CISTEM implementation. |
-| Lucene GermanLightStemFilter | 37.434% | 35.465% | 42.707% | Light suffix stemmer; intentionally narrower than a dictionary-derived stemmer. |
+| Lucene GermanLightStemFilter | 37.434% | 35.465% | 42.707% | Light suffix stemmer; intentionally narrower than Radixor's lexicon-trained transformation model. |
 | Lucene GermanMinimalStemFilter | 27.640% | 24.951% | 34.844% | Minimal suffix reducer; narrow baseline, not a full stemmer. |
 | Lucene SnowballFilter | 30.956% | 28.853% | 36.589% | Lucene TokenFilter integration path around the Snowball algorithm. |
-| Official Snowball direct | 30.481% | 29.027% | 34.376% | Official Snowball generated Java stemmer; rule-based suffix algorithm. |
+| Official Snowball direct | 30.483% | 29.030% | 34.376% | Official Snowball generated Java stemmer; rule-based suffix algorithm. |
 | Lucene GermanStemFilter | 21.559% | 19.312% | 27.576% | German Lucene stemming TokenFilter; broader than minimal/light variants. |
-
-
-
-
 
 ## Speed
 
@@ -49,22 +45,18 @@ Speed uses JMH average time, 5 warmup iterations, 10 measurement iterations, 3 i
 
 | Stemmer | Benchmark method | Score ms/op | Error ms | ns/token | Relative vs Radixor | Note |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
-| Radixor | `germanRadixor` | 40.571 | 1.647 | 167.3 | 1.000 | Full Radixor dictionary patch-command stemmer. |
-| CISTEM | `germanCistem` | 305.166 | 4.590 | 1258.4 | 7.522 | Benchmark-only CISTEM implementation. |
-| Lucene HunspellStemFilter | `luceneHunspellStemFilter` | 291.791 | 21.769 | 1203.3 | 7.192 | Benchmark-only German Hunspell dictionary compared via Lucene HunspellStemFilter. |
-| Lucene GermanMinimalStemFilter | `germanLuceneGermanMinimalStemFilter` | 23.903 | 0.208 | 98.6 | 0.589 | Minimal German suffix reduction; narrow baseline. |
-| Lucene GermanLightStemFilter | `germanLuceneGermanLightStemFilter` | 24.695 | 0.322 | 101.8 | 0.609 | Light German suffix stemmer; narrower than a dictionary stemmer. |
-| Lucene GermanStemFilter | `germanLuceneGermanStemFilter` | 72.140 | 1.544 | 297.5 | 1.778 | Older German stemming TokenFilter with normalization requirements. |
-| Lucene SnowballFilter | `luceneSnowballFilter[GERMAN]` | 110.086 | 2.315 | 454.0 | 2.713 | Lucene TokenFilter path around Snowball; includes TokenStream overhead. |
-| Official Snowball direct | `snowballDirect[GERMAN]` | 100.122 | 2.623 | 412.9 | 2.468 | Official Snowball generated Java stemmer; direct API. |
-
-
-
-
+| Radixor | `germanRadixor` | 27.697 | 0.583 | 114.2 | 1.000 | Radixor dictionary-trained patch-command stemmer. |
+| CISTEM | `germanCistem` | 289.568 | 8.761 | 1194.1 | 10.455 | Benchmark-only CISTEM implementation. |
+| Lucene HunspellStemFilter | `luceneHunspellStemFilter` | 265.653 | 10.779 | 1095.5 | 9.591 | Benchmark-only German Hunspell dictionary compared via Lucene HunspellStemFilter. |
+| Lucene GermanMinimalStemFilter | `germanLuceneGermanMinimalStemFilter` | 22.385 | 0.217 | 92.3 | 0.808 | Minimal German suffix reduction; narrow baseline. |
+| Lucene GermanLightStemFilter | `germanLuceneGermanLightStemFilter` | 23.170 | 0.383 | 95.5 | 0.837 | Light German suffix stemmer; narrower than Radixor's lexicon-trained transformation model. |
+| Lucene GermanStemFilter | `germanLuceneGermanStemFilter` | 67.453 | 0.967 | 278.2 | 2.435 | Older German stemming TokenFilter with normalization requirements. |
+| Lucene SnowballFilter | `luceneSnowballFilter[GERMAN]` | 105.203 | 2.035 | 433.8 | 3.798 | Lucene TokenFilter path around Snowball; includes TokenStream overhead. |
+| Official Snowball direct | `snowballDirect[GERMAN]` | 91.847 | 2.301 | 378.7 | 3.316 | Official Snowball generated Java stemmer; direct API. |
 
 ## Interpretation Notes
 
-- Radixor is a dictionary-derived patch-command stemmer. Its quality depends on the language resource used to train the compiled trie.
+- Radixor is a dictionary-trained patch-command stemmer. Its learned transformations can generalize beyond the word forms listed in the training resource.
 - Light, minimal, plural, and possessive filters are narrow baselines. They can be fast because they intentionally perform less linguistic work.
 - Lucene TokenFilter rows include TokenStream, attribute, and required normalization overhead. Direct rows measure exposed direct APIs.
 - Morfologik rows are dictionary-based and can emit multiple terms for one input token. Quality rows use the first returned term when no ranking weight is available.
@@ -96,7 +88,7 @@ This mode contains **12 result rows**, **8 evaluated stemmers**, and **3 output 
 |---:|---|---:|---:|---:|
 |1|Radixor|0.910445|0.000002%|17.910967%|
 |2|GERMAN CISTEM|0.878527|0.000674%|24.293900%|
-|3|SNOWBALL GERMAN DIRECT|0.776006|0.000171%|44.798684%|
+|3|SNOWBALL GERMAN DIRECT|0.776012|0.000171%|44.797420%|
 |4|SNOWBALL GERMAN LUCENE FILTER|0.769071|0.000371%|46.185528%|
 |5|GERMAN LUCENE GERMAN LIGHT STEM FILTER|0.753833|0.000191%|49.233299%|
 |6|GERMAN LUCENE GERMAN STEM FILTER|0.720992|0.000443%|55.801084%|
@@ -111,7 +103,7 @@ This mode contains **12 result rows**, **8 evaluated stemmers**, and **3 output 
 |---:|---|---|---:|---:|---:|---:|---:|---:|
 |1|Radixor|PRIMARY_OUTPUT|0.999400|0.820890|1.000000|0.910445|0.999994|0.000006|
 |2|GERMAN CISTEM|PRIMARY_OUTPUT|0.797231|0.757061|0.999993|0.878527|0.999985|0.000015|
-|3|SNOWBALL GERMAN DIRECT|PRIMARY_OUTPUT|0.918570|0.552013|0.999998|0.776006|0.999983|0.000017|
+|3|SNOWBALL GERMAN DIRECT|PRIMARY_OUTPUT|0.918571|0.552026|0.999998|0.776012|0.999983|0.000017|
 |4|SNOWBALL GERMAN LUCENE FILTER|PRIMARY_OUTPUT|0.835220|0.538145|0.999996|0.769071|0.999980|0.000020|
 |5|GERMAN LUCENE GERMAN LIGHT STEM FILTER|PRIMARY_OUTPUT|0.902792|0.507667|0.999998|0.753833|0.999981|0.000019|
 |6|GERMAN LUCENE GERMAN STEM FILTER|PRIMARY_OUTPUT|0.777304|0.441989|0.999996|0.720992|0.999976|0.000024|
@@ -126,7 +118,7 @@ This mode contains **12 result rows**, **8 evaluated stemmers**, and **3 output 
 |---:|---|---|---:|---:|---:|---:|---:|---:|
 |1|Radixor|PRIMARY_OUTPUT|0.957746|0.901392|0.851302|0.820486|0.905758|0.905755|
 |2|GERMAN CISTEM|PRIMARY_OUTPUT|0.788860|0.776627|0.764768|0.634824|0.776886|0.776879|
-|3|SNOWBALL GERMAN DIRECT|PRIMARY_OUTPUT|0.810879|0.689608|0.599891|0.526260|0.712083|0.712076|
+|3|SNOWBALL GERMAN DIRECT|PRIMARY_OUTPUT|0.810886|0.689618|0.599903|0.526272|0.712092|0.712085|
 |4|SNOWBALL GERMAN LUCENE FILTER|PRIMARY_OUTPUT|0.752175|0.654552|0.579359|0.486494|0.670425|0.670416|
 |5|GERMAN LUCENE GERMAN LIGHT STEM FILTER|PRIMARY_OUTPUT|0.781189|0.649884|0.556368|0.481355|0.676991|0.676984|
 |6|GERMAN LUCENE GERMAN STEM FILTER|PRIMARY_OUTPUT|0.674901|0.563540|0.483723|0.392311|0.586140|0.586130|
@@ -141,7 +133,7 @@ This mode contains **12 result rows**, **8 evaluated stemmers**, and **3 output 
 |---:|---|---|---:|---:|---:|---:|---:|---:|
 |1|Radixor|PRIMARY_OUTPUT|1103976|663|240876|38436733230|663 / 38436733893|240876 / 1344852|
 |2|GERMAN CISTEM|PRIMARY_OUTPUT|1018135|258954|326717|38436474939|258954 / 38436733893|326717 / 1344852|
-|3|SNOWBALL GERMAN DIRECT|PRIMARY_OUTPUT|742376|65811|602476|38436668082|65811 / 38436733893|602476 / 1344852|
+|3|SNOWBALL GERMAN DIRECT|PRIMARY_OUTPUT|742393|65811|602459|38436668082|65811 / 38436733893|602459 / 1344852|
 |4|SNOWBALL GERMAN LUCENE FILTER|PRIMARY_OUTPUT|723725|142783|621127|38436591110|142783 / 38436733893|621127 / 1344852|
 |5|GERMAN LUCENE GERMAN LIGHT STEM FILTER|PRIMARY_OUTPUT|682737|73514|662115|38436660379|73514 / 38436733893|662115 / 1344852|
 |6|GERMAN LUCENE GERMAN STEM FILTER|PRIMARY_OUTPUT|594410|170297|750442|38436563596|170297 / 38436733893|750442 / 1344852|
@@ -231,7 +223,7 @@ This mode contains **12 result rows**, **8 evaluated stemmers**, and **3 output 
 |---:|---|---:|---:|---:|
 |1|Radixor|0.966959|0.000001%|6.608210%|
 |2|GERMAN CISTEM|0.914727|0.000812%|17.053716%|
-|3|SNOWBALL GERMAN DIRECT|0.794994|0.000391%|41.000819%|
+|3|SNOWBALL GERMAN DIRECT|0.794997|0.000391%|41.000236%|
 |4|SNOWBALL GERMAN LUCENE FILTER|0.774716|0.000325%|45.056540%|
 |5|GERMAN LUCENE GERMAN LIGHT STEM FILTER|0.768968|0.000130%|46.206331%|
 |6|GERMAN LUCENE GERMAN STEM FILTER|0.716147|0.000358%|56.770194%|
@@ -246,7 +238,7 @@ This mode contains **12 result rows**, **8 evaluated stemmers**, and **3 output 
 |---:|---|---|---:|---:|---:|---:|---:|---:|
 |1|Radixor|PRIMARY_OUTPUT|0.999900|0.933918|1.000000|0.966959|0.999995|0.000005|
 |2|GERMAN CISTEM|PRIMARY_OUTPUT|0.892172|0.829463|0.999992|0.914727|0.999978|0.000022|
-|3|SNOWBALL GERMAN DIRECT|PRIMARY_OUTPUT|0.924303|0.589992|0.999996|0.794994|0.999963|0.000037|
+|3|SNOWBALL GERMAN DIRECT|PRIMARY_OUTPUT|0.924304|0.589998|0.999996|0.794997|0.999963|0.000037|
 |4|SNOWBALL GERMAN LUCENE FILTER|PRIMARY_OUTPUT|0.931871|0.549435|0.999997|0.774716|0.999960|0.000040|
 |5|GERMAN LUCENE GERMAN LIGHT STEM FILTER|PRIMARY_OUTPUT|0.971001|0.537937|0.999999|0.768968|0.999961|0.000039|
 |6|GERMAN LUCENE GERMAN STEM FILTER|PRIMARY_OUTPUT|0.907196|0.432298|0.999996|0.716147|0.999950|0.000050|
@@ -261,7 +253,7 @@ This mode contains **12 result rows**, **8 evaluated stemmers**, and **3 output 
 |---:|---|---|---:|---:|---:|---:|---:|---:|
 |1|Radixor|PRIMARY_OUTPUT|0.985968|0.965783|0.946408|0.933831|0.966346|0.966343|
 |2|GERMAN CISTEM|PRIMARY_OUTPUT|0.878883|0.859676|0.841289|0.753887|0.860246|0.860236|
-|3|SNOWBALL GERMAN DIRECT|PRIMARY_OUTPUT|0.830217|0.720244|0.635999|0.562799|0.738466|0.738450|
+|3|SNOWBALL GERMAN DIRECT|PRIMARY_OUTPUT|0.830220|0.720249|0.636004|0.562804|0.738469|0.738454|
 |4|SNOWBALL GERMAN LUCENE FILTER|PRIMARY_OUTPUT|0.817997|0.691285|0.598564|0.528217|0.715543|0.715527|
 |5|GERMAN LUCENE GERMAN LIGHT STEM FILTER|PRIMARY_OUTPUT|0.836342|0.692324|0.590620|0.529431|0.722729|0.722714|
 |6|GERMAN LUCENE GERMAN STEM FILTER|PRIMARY_OUTPUT|0.743781|0.585563|0.482850|0.413990|0.626242|0.626223|
@@ -276,7 +268,7 @@ This mode contains **12 result rows**, **8 evaluated stemmers**, and **3 output 
 |---:|---|---|---:|---:|---:|---:|---:|---:|
 |1|Radixor|PRIMARY_OUTPUT|801691|80|56726|10594963454|80 / 10594963534|56726 / 858417|
 |2|GERMAN CISTEM|PRIMARY_OUTPUT|712025|86055|146392|10594877479|86055 / 10594963534|146392 / 858417|
-|3|SNOWBALL GERMAN DIRECT|PRIMARY_OUTPUT|506459|41477|351958|10594922057|41477 / 10594963534|351958 / 858417|
+|3|SNOWBALL GERMAN DIRECT|PRIMARY_OUTPUT|506464|41477|351953|10594922057|41477 / 10594963534|351953 / 858417|
 |4|SNOWBALL GERMAN LUCENE FILTER|PRIMARY_OUTPUT|471644|34482|386773|10594929052|34482 / 10594963534|386773 / 858417|
 |5|GERMAN LUCENE GERMAN LIGHT STEM FILTER|PRIMARY_OUTPUT|461774|13791|396643|10594949743|13791 / 10594963534|396643 / 858417|
 |6|GERMAN LUCENE GERMAN STEM FILTER|PRIMARY_OUTPUT|371092|37962|487325|10594925572|37962 / 10594963534|487325 / 858417|
@@ -378,7 +370,7 @@ Standard ARI, homogeneity, completeness, V-measure, and NMI are not calculated: 
 ### Provenance
 
 - Authoritative source: `docs/benchmarks/data/stemming-quality.csv`
-- Source SHA-256: `edf16b07be8a535943ddf37caeb8807755c95e9e1fb13244145f28be74b491d8`
+- Source SHA-256: `d34f325da320a2e040b54d8d8b5c216d70448f08cfb8659a423e99882aa1afb5`
 - Evaluation command: `./gradlew stemmingQuality --no-daemon`
 - Dictionary language: `DE_DE`
 - Processing modes: `ALL_WORDS`, `LOWERCASE_GROUPS_ONLY`

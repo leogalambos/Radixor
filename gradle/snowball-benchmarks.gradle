@@ -1,7 +1,10 @@
 import org.gradle.plugins.ide.eclipse.model.SourceFolder
 
+import java.security.MessageDigest
 
-def snowballVersion = '3.0.1'
+
+def snowballVersion = '3.1.0'
+def snowballArchiveSha256 = '5dab34d491f55f47b6e971569ffe6aadf5991512c648ddfe5d331b494cf6d655'
 def snowballArchiveName = "libstemmer_java-${snowballVersion}.tar.gz"
 def snowballDistributionDirectoryName = "libstemmer_java-${snowballVersion}"
 def snowballRootRelativePath = 'third-party/snowball'
@@ -73,11 +76,32 @@ tasks.register('downloadSnowballJava') {
     }
 }
 
+tasks.register('verifySnowballJava') {
+    group = 'verification'
+    description = 'Verifies the official Snowball Java source distribution checksum.'
+
+    dependsOn(tasks.named('downloadSnowballJava'))
+    inputs.file(snowballDownloadFile)
+    inputs.property('expectedSha256', snowballArchiveSha256)
+
+    doLast {
+        final File archive = snowballDownloadFile.get().asFile
+        final String actualSha256 = MessageDigest.getInstance('SHA-256')
+                .digest(archive.bytes)
+                .encodeHex()
+                .toString()
+        if (actualSha256 != snowballArchiveSha256) {
+            throw new GradleException("Snowball ${snowballVersion} archive SHA-256 mismatch: "
+                    + "expected ${snowballArchiveSha256}, found ${actualSha256}.")
+        }
+    }
+}
+
 tasks.register('extractSnowballJava', Copy) {
     group = 'build setup'
     description = 'Extracts the official Snowball Java source distribution.'
 
-    dependsOn(tasks.named('downloadSnowballJava'))
+    dependsOn(tasks.named('verifySnowballJava'))
 
     from(tarTree(resources.gzip(snowballDownloadFile)))
     into(snowballExtractDirectory)

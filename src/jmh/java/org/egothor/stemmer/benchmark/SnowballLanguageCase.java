@@ -31,6 +31,7 @@
 package org.egothor.stemmer.benchmark;
 
 import org.egothor.stemmer.StemmerPatchTrieLoader;
+import org.egothor.stemmer.benchmark.snowball.ext.czechStemmer;
 import org.egothor.stemmer.benchmark.snowball.ext.danishStemmer;
 import org.egothor.stemmer.benchmark.snowball.ext.dutchStemmer;
 import org.egothor.stemmer.benchmark.snowball.ext.finnishStemmer;
@@ -39,6 +40,8 @@ import org.egothor.stemmer.benchmark.snowball.ext.germanStemmer;
 import org.egothor.stemmer.benchmark.snowball.ext.hungarianStemmer;
 import org.egothor.stemmer.benchmark.snowball.ext.italianStemmer;
 import org.egothor.stemmer.benchmark.snowball.ext.norwegianStemmer;
+import org.egothor.stemmer.benchmark.snowball.ext.persianStemmer;
+import org.egothor.stemmer.benchmark.snowball.ext.polishStemmer;
 import org.egothor.stemmer.benchmark.snowball.ext.portugueseStemmer;
 import org.egothor.stemmer.benchmark.snowball.ext.russianStemmer;
 import org.egothor.stemmer.benchmark.snowball.ext.spanishStemmer;
@@ -49,6 +52,11 @@ import org.egothor.stemmer.benchmark.snowball.ext.yiddishStemmer;
  * Maps Radixor dictionary languages to matching official Snowball algorithms.
  */
 enum SnowballLanguageCase {
+
+    /**
+     * Czech Snowball stemming over the Radixor Czech dictionary.
+     */
+    CZECH("Czech", StemmerPatchTrieLoader.Language.CS_CZ, czechStemmer::new),
 
     /**
      * Danish Snowball stemming over the Radixor Danish dictionary.
@@ -98,6 +106,16 @@ enum SnowballLanguageCase {
             "Norwegian"),
 
     /**
+     * Persian Snowball stemming over the Radixor Persian dictionary.
+     */
+    PERSIAN("Persian", StemmerPatchTrieLoader.Language.FA_IR, persianStemmer::new),
+
+    /**
+     * Polish Snowball stemming over the Radixor Polish dictionary.
+     */
+    POLISH("Polish", StemmerPatchTrieLoader.Language.PL_PL, polishStemmer::new),
+
+    /**
      * Portuguese Snowball stemming over the Radixor Portuguese dictionary.
      */
     PORTUGUESE("Portuguese", StemmerPatchTrieLoader.Language.PT_PT, portugueseStemmer::new, "Portuguese"),
@@ -141,6 +159,19 @@ enum SnowballLanguageCase {
      * Lucene SnowballFilter algorithm name.
      */
     private final String luceneSnowballName;
+
+    /**
+     * Creates a direct-only language case not provided by the current Lucene
+     * Snowball implementation.
+     *
+     * @param displayLanguage human-readable language name
+     * @param radixorLanguage matching Radixor language resource
+     * @param directFactory   direct Snowball stemmer factory
+     */
+    SnowballLanguageCase(final String displayLanguage, final StemmerPatchTrieLoader.Language radixorLanguage,
+            final SnowballStemmerAdapter.Factory directFactory) {
+        this(displayLanguage, radixorLanguage, directFactory, null);
+    }
 
     /**
      * Creates a language case.
@@ -191,6 +222,9 @@ enum SnowballLanguageCase {
      * @return Lucene SnowballFilter algorithm name
      */
     String luceneSnowballName() {
+        if (this.luceneSnowballName == null) {
+            throw new IllegalStateException("Lucene Snowball does not provide " + this.displayLanguage);
+        }
         return this.luceneSnowballName;
     }
 }

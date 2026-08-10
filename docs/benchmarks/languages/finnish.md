@@ -8,9 +8,9 @@ Radixor must not be read as simply "slower" when a narrow competitor has a lower
 
 ## Dictionary Corpus
 
-| Model ID | Model version | Language | Dictionary rows | Complete quality tokens | Already-root tokens | Changed speed tokens |
-| --- | --- | --- | ---: | ---: | ---: | ---: |
-| `fi-fi-default` | `1.0.0` | `FI_FI` | 57,027 | 1,865,215 | 110,525 | 1,754,690 |
+| Model ID | Model version | Language | Dictionary rows | Complete quality tokens | Already-root tokens | Changed tokens | JMH timing tokens |
+| --- | --- | --- | ---: | ---: | ---: | ---: | ---: |
+| `fi-fi-default` | `1.0.0` | `FI_FI` | 57,027 | 1,865,215 | 110,525 | 1,754,690 | 1,754,690 |
 
 ## Radixor Patch Command Distribution
 
@@ -30,14 +30,10 @@ Accuracy is computed from JMH auxiliary counters in the current report. The coun
 
 | Stemmer | All exact | Changed exact | Root preserved | Note |
 | --- | ---: | ---: | ---: | --- |
-| Radixor | 98.661% | 98.803% | 96.408% | Full Radixor dictionary patch-command stemmer. |
+| Radixor | 98.661% | 98.803% | 96.408% | Radixor dictionary-trained patch-command stemmer. |
 | Lucene SnowballFilter | 10.991% | 10.268% | 22.471% | Lucene TokenFilter integration path around the Snowball algorithm. |
-| Official Snowball direct | 10.991% | 10.268% | 22.471% | Official Snowball generated Java stemmer; rule-based suffix algorithm. |
-| Lucene FinnishLightStemFilter | 4.351% | 4.294% | 5.264% | Light suffix stemmer; intentionally narrower than a dictionary-derived stemmer. |
-
-
-
-
+| Official Snowball direct | 10.995% | 10.272% | 22.462% | Official Snowball generated Java stemmer; rule-based suffix algorithm. |
+| Lucene FinnishLightStemFilter | 4.351% | 4.294% | 5.264% | Light suffix stemmer; intentionally narrower than Radixor's dictionary-trained transformation model. |
 
 ## Speed
 
@@ -45,18 +41,14 @@ Speed uses JMH average time, 5 warmup iterations, 10 measurement iterations, 3 i
 
 | Stemmer | Benchmark method | Score ms/op | Error ms | ns/token | Relative vs Radixor | Note |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
-| Radixor | `finnishRadixor` | 289.539 | 4.136 | 165.0 | 1.000 | Full Radixor dictionary patch-command stemmer. |
-| Lucene FinnishLightStemFilter | `finnishLuceneFinnishLightStemFilter` | 175.789 | 4.827 | 100.2 | 0.607 | Light Finnish suffix stemmer. |
-| Official Snowball direct | `snowballDirect[FINNISH]` | 259.889 | 8.924 | 148.1 | 0.898 | Official Snowball generated Java stemmer; direct API. |
-| Lucene SnowballFilter | `luceneSnowballFilter[FINNISH]` | 332.524 | 9.490 | 189.5 | 1.148 | Lucene TokenFilter path around Snowball; includes TokenStream overhead. |
-
-
-
-
+| Radixor | `finnishRadixor` | 225.954 | 2.940 | 128.8 | 1.000 | Radixor dictionary-trained patch-command stemmer. |
+| Lucene FinnishLightStemFilter | `finnishLuceneFinnishLightStemFilter` | 168.756 | 6.027 | 96.2 | 0.747 | Light Finnish suffix stemmer. |
+| Official Snowball direct | `snowballDirect[FINNISH]` | 247.984 | 16.083 | 141.3 | 1.097 | Official Snowball generated Java stemmer; direct API. |
+| Lucene SnowballFilter | `luceneSnowballFilter[FINNISH]` | 321.331 | 9.790 | 183.1 | 1.422 | Lucene TokenFilter path around Snowball; includes TokenStream overhead. |
 
 ## Interpretation Notes
 
-- Radixor is a dictionary-derived patch-command stemmer. Its quality depends on the language resource used to train the compiled trie.
+- Radixor is a dictionary-trained patch-command stemmer. Its learned transformations can generalize beyond the word forms listed in the training resource.
 - Light, minimal, plural, and possessive filters are narrow baselines. They can be fast because they intentionally perform less linguistic work.
 - Lucene TokenFilter rows include TokenStream, attribute, and required normalization overhead. Direct rows measure exposed direct APIs.
 - Morfologik rows are dictionary-based and can emit multiple terms for one input token. Quality rows use the first returned term when no ranking weight is available.
@@ -75,7 +67,7 @@ Runtime performance and linguistic grouping quality are independent dimensions. 
 The default model is `fi-fi-default`, loaded from classpath resource `org/egothor/stemmer/models/fi-fi-default/stemmer.gz`. The following findings compare only deterministic `PRIMARY_OUTPUT` rows over identical included groups; candidate policies are reported separately as capability analyses.
 
 - **ALL_WORDS:** `Radixor` ranks first by balanced accuracy at **0.984838** among 4 deterministic stemmers. The runner-up is `SNOWBALL FINNISH LUCENE FILTER` at 0.740279, a difference of 0.244559. This rank does not imply leadership in throughput or every secondary metric.
-- **LOWERCASE_GROUPS_ONLY:** `Radixor` ranks first by balanced accuracy at **0.988242** among 4 deterministic stemmers. The runner-up is `SNOWBALL FINNISH DIRECT` at 0.738344, a difference of 0.249898. This rank does not imply leadership in throughput or every secondary metric.
+- **LOWERCASE_GROUPS_ONLY:** `Radixor` ranks first by balanced accuracy at **0.988242** among 4 deterministic stemmers. The runner-up is `SNOWBALL FINNISH DIRECT` at 0.738543, a difference of 0.249699. This rank does not imply leadership in throughput or every secondary metric.
 ### `ALL_WORDS`
 
 This mode contains **6 result rows**, **4 evaluated stemmers**, and **3 output policies**. Applied-row and form counts are shown per row because adapters share the language corpus but policy rows remain independently auditable. `PRIMARY_OUTPUT` and `ALL_CANDIDATES` rankings are ordered by unrounded balanced accuracy, followed by MCC, F1, over-stemming rate, over-stemming count, under-stemming rate, and stemmer. `ANY_CANDIDATE` has no single rank metric and is listed alphabetically. Balanced accuracy is a navigation metric, not a universally authoritative quality score.
@@ -88,7 +80,7 @@ This mode contains **6 result rows**, **4 evaluated stemmers**, and **3 output p
 |---:|---|---:|---:|---:|
 |1|Radixor|0.984838|&lt;0.000001%|3.032474%|
 |2|SNOWBALL FINNISH LUCENE FILTER|0.740279|0.000081%|51.944179%|
-|3|SNOWBALL FINNISH DIRECT|0.739671|0.000060%|52.065724%|
+|3|SNOWBALL FINNISH DIRECT|0.739870|0.000060%|52.025976%|
 |4|FINNISH LUCENE FINNISH LIGHT STEM FILTER|0.695725|0.000094%|60.854936%|
 
 </div>
@@ -99,7 +91,7 @@ This mode contains **6 result rows**, **4 evaluated stemmers**, and **3 output p
 |---:|---|---|---:|---:|---:|---:|---:|---:|
 |1|Radixor|PRIMARY_OUTPUT|0.999974|0.969675|1.000000|0.984838|0.999999|0.000001|
 |2|SNOWBALL FINNISH LUCENE FILTER|PRIMARY_OUTPUT|0.921471|0.480558|0.999999|0.740279|0.999989|0.000011|
-|3|SNOWBALL FINNISH DIRECT|PRIMARY_OUTPUT|0.940611|0.479343|0.999999|0.739671|0.999989|0.000011|
+|3|SNOWBALL FINNISH DIRECT|PRIMARY_OUTPUT|0.940647|0.479740|0.999999|0.739870|0.999989|0.000011|
 |4|FINNISH LUCENE FINNISH LIGHT STEM FILTER|PRIMARY_OUTPUT|0.890914|0.391451|0.999999|0.695725|0.999987|0.000013|
 
 </details>
@@ -110,7 +102,7 @@ This mode contains **6 result rows**, **4 evaluated stemmers**, and **3 output p
 |---:|---|---|---:|---:|---:|---:|---:|---:|
 |1|Radixor|PRIMARY_OUTPUT|0.993763|0.984591|0.975587|0.969650|0.984708|0.984708|
 |2|SNOWBALL FINNISH LUCENE FILTER|PRIMARY_OUTPUT|0.778598|0.631685|0.531413|0.461652|0.665448|0.665443|
-|3|SNOWBALL FINNISH DIRECT|PRIMARY_OUTPUT|0.788800|0.635056|0.531468|0.465262|0.671472|0.671468|
+|3|SNOWBALL FINNISH DIRECT|PRIMARY_OUTPUT|0.789035|0.635413|0.531862|0.465645|0.671764|0.671760|
 |4|FINNISH LUCENE FINNISH LIGHT STEM FILTER|PRIMARY_OUTPUT|0.709787|0.543915|0.440884|0.373546|0.590550|0.590545|
 
 </details>
@@ -121,7 +113,7 @@ This mode contains **6 result rows**, **4 evaluated stemmers**, and **3 output p
 |---:|---|---|---:|---:|---:|---:|---:|---:|
 |1|Radixor|PRIMARY_OUTPUT|30511413|804|954186|1599841738533|804 / 1599841739337|954186 / 31465599|
 |2|SNOWBALL FINNISH LUCENE FILTER|PRIMARY_OUTPUT|15121052|1288634|16344547|1599840450703|1288634 / 1599841739337|16344547 / 31465599|
-|3|SNOWBALL FINNISH DIRECT|PRIMARY_OUTPUT|15082807|952306|16382792|1599840787031|952306 / 1599841739337|16382792 / 31465599|
+|3|SNOWBALL FINNISH DIRECT|PRIMARY_OUTPUT|15095314|952479|16370285|1599840786858|952479 / 1599841739337|16370285 / 31465599|
 |4|FINNISH LUCENE FINNISH LIGHT STEM FILTER|PRIMARY_OUTPUT|12317229|1508153|19148370|1599840231184|1508153 / 1599841739337|19148370 / 31465599|
 
 </details>
@@ -199,7 +191,7 @@ This mode contains **6 result rows**, **4 evaluated stemmers**, and **3 output p
 | Rank | Stemmer | Balanced accuracy | Over-stemming (OI) | Under-stemming (UI) |
 |---:|---|---:|---:|---:|
 |1|Radixor|0.988242|&lt;0.000001%|2.351587%|
-|2|SNOWBALL FINNISH DIRECT|0.738344|0.000062%|52.331112%|
+|2|SNOWBALL FINNISH DIRECT|0.738543|0.000062%|52.291340%|
 |3|SNOWBALL FINNISH LUCENE FILTER|0.738344|0.000062%|52.331112%|
 |4|FINNISH LUCENE FINNISH LIGHT STEM FILTER|0.694308|0.000077%|61.138333%|
 
@@ -210,7 +202,7 @@ This mode contains **6 result rows**, **4 evaluated stemmers**, and **3 output p
 | Rank | Stemmer | Output policy | Precision | Recall | Specificity | Balanced accuracy | Pairwise accuracy | Error rate |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
 |1|Radixor|PRIMARY_OUTPUT|0.999973|0.976484|1.000000|0.988242|1.000000|0.000000|
-|2|SNOWBALL FINNISH DIRECT|PRIMARY_OUTPUT|0.939951|0.476689|0.999999|0.738344|0.999989|0.000011|
+|2|SNOWBALL FINNISH DIRECT|PRIMARY_OUTPUT|0.939988|0.477087|0.999999|0.738543|0.999989|0.000011|
 |3|SNOWBALL FINNISH LUCENE FILTER|PRIMARY_OUTPUT|0.939951|0.476689|0.999999|0.738344|0.999989|0.000011|
 |4|FINNISH LUCENE FINNISH LIGHT STEM FILTER|PRIMARY_OUTPUT|0.911893|0.388617|0.999999|0.694308|0.999987|0.000013|
 
@@ -221,7 +213,7 @@ This mode contains **6 result rows**, **4 evaluated stemmers**, and **3 output p
 | Rank | Stemmer | Output policy | F0.5 | F1 | F2 | Jaccard | Fowlkes–Mallows | MCC |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
 |1|Radixor|PRIMARY_OUTPUT|0.995185|0.988089|0.981093|0.976459|0.988159|0.988159|
-|2|SNOWBALL FINNISH DIRECT|PRIMARY_OUTPUT|0.786987|0.632573|0.528815|0.462601|0.669376|0.669372|
+|2|SNOWBALL FINNISH DIRECT|PRIMARY_OUTPUT|0.787224|0.632932|0.529209|0.462985|0.669668|0.669664|
 |3|SNOWBALL FINNISH LUCENE FILTER|PRIMARY_OUTPUT|0.786987|0.632573|0.528815|0.462601|0.669376|0.669372|
 |4|FINNISH LUCENE FINNISH LIGHT STEM FILTER|PRIMARY_OUTPUT|0.718421|0.544981|0.438999|0.374553|0.595296|0.595291|
 
@@ -232,7 +224,7 @@ This mode contains **6 result rows**, **4 evaluated stemmers**, and **3 output p
 | Rank | Stemmer | Output policy | TP | FP | FN | TN | Over error / possible | Under error / possible |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
 |1|Radixor|PRIMARY_OUTPUT|30037514|804|723369|1504706134249|804 / 1504706135053|723369 / 30760883|
-|2|SNOWBALL FINNISH DIRECT|PRIMARY_OUTPUT|14663371|936765|16097512|1504705198288|936765 / 1504706135053|16097512 / 30760883|
+|2|SNOWBALL FINNISH DIRECT|PRIMARY_OUTPUT|14675605|936938|16085278|1504705198115|936938 / 1504706135053|16085278 / 30760883|
 |3|SNOWBALL FINNISH LUCENE FILTER|PRIMARY_OUTPUT|14663371|936765|16097512|1504705198288|936765 / 1504706135053|16097512 / 30760883|
 |4|FINNISH LUCENE FINNISH LIGHT STEM FILTER|PRIMARY_OUTPUT|11954192|1155011|18806691|1504704980042|1155011 / 1504706135053|18806691 / 30760883|
 
@@ -324,7 +316,7 @@ Standard ARI, homogeneity, completeness, V-measure, and NMI are not calculated: 
 ### Provenance
 
 - Authoritative source: `docs/benchmarks/data/stemming-quality.csv`
-- Source SHA-256: `edf16b07be8a535943ddf37caeb8807755c95e9e1fb13244145f28be74b491d8`
+- Source SHA-256: `d34f325da320a2e040b54d8d8b5c216d70448f08cfb8659a423e99882aa1afb5`
 - Evaluation command: `./gradlew stemmingQuality --no-daemon`
 - Dictionary language: `FI_FI`
 - Processing modes: `ALL_WORDS`, `LOWERCASE_GROUPS_ONLY`

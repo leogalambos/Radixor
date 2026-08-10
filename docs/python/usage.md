@@ -1,0 +1,173 @@
+# Usage and examples
+
+## Creating a stemmer
+
+```python
+from radixor import Stemmer
+
+s = Stemmer("en")                      # by language code (bundled model)
+s = Stemmer("us-uk-default")           # by full model ID
+s = Stemmer(path="my_dictionary.gz")   # a custom gzipped TSV source dictionary
+s = Stemmer(compiled="en.rxc")         # a pre-compiled binary (instant load)
+```
+
+The traversal direction is derived from the language (right-to-left `fa`/`he`/`yi`
+use FORWARD, all others BACKWARD); override with `backward=True|False` for a
+custom `path=`.
+
+## Stemming a single word
+
+```python
+s.stem("running")     # 'run'
+s.stem("cats")        # 'cat'
+s.stem("zzzzz")       # None  -> not reducible / unknown
+```
+
+`stem()` returns the single **dominant** stem, or `None`.
+
+!!! info "Why a known word may return itself"
+    A surface form that is *also* a canonical headword (e.g. an English word
+    that is both its own lemma and an inflection of another lemma) returns
+    itself, because the dominant sense is “this word is its own stem”. The
+    inflectional reading is still available via `stem_all()`.
+
+## Batch stemming — the fast path
+
+For anything beyond a handful of words, use the batch API. It crosses the
+Python↔native boundary **once** for the whole list, which is the dominant cost
+when stemming from Python.
+
+```python
+words = ["running", "cats", "stemming", "quickly"]
+s.stem_batch(words)          # ['run', 'cat', 'stem', 'quick'] (None for unknowns)
+```
+
+```python
+# Multiple candidate stems per word (ambiguity preserved):
+s.stem_all("running")               # e.g. ['run', 'runn']
+s.stem_all_batch(["running", "cats"])
+```
+
+## PyStemmer-compatible methods
+
+Radixor also exposes PyStemmer's scalar and batch method names. They differ
+from the native Radixor methods only when the trie cannot find a patch command:
+
+| Method | Recognized word | Word without a patch command | Return type |
+| --- | --- | --- | --- |
+| `stem(word)` | dominant stem | `None` | `str | None` |
+| `stem_batch(words)` | dominant stem at the same position | `None` at the same position | `list[str | None]` |
+| `stemWord(word)` | dominant stem | original input word | `str` |
+| `stemWords(words)` | dominant stem at the same position | original input word at the same position | `list[str]` |
+
+Use `stemWord()` and `stemWords()` when migrating code that expects
+PyStemmer's no-`None` contract:
+
+```python
+import radixor as Stemmer
+
+# The rest of this common PyStemmer call pattern remains unchanged.
+s = Stemmer.Stemmer("english")
+
+s.stemWord("running")                  # 'run'
+s.stemWord("unknown_word")             # 'unknown_word'
+s.stemWords(["running", "unknown_word"])
+# ['run', 'unknown_word']
+```
+
+`stemWords()` retains input order and makes one Python-to-Rust call for the
+whole list. PyStemmer's full language names, such as `"english"` and
+`"czech"`, are accepted for bundled Radixor languages alongside two-letter
+codes and full model IDs.
+
+The compatibility contract covers these method names, full language aliases,
+and unmatched-word fallback behavior. Radixor configuration keywords remain
+Radixor-specific: use `cache_size`, not PyStemmer's `maxCacheSize`. Both
+libraries default to a cache capacity of 10,000 entries.
+
+## Bounded result cache
+
+Real text repeats tokens. The default bounded cache returns the already-built
+result object on a recognized-word hit (a reference-count bump — no
+re-stemming, no new result string). Unknown words are cached as misses, so
+`stemWord()` and `stemWords()` still create their required original-word
+result. Its default capacity is **10,000 entries**, matching PyStemmer:
+
+```python
+s = Stemmer("en")                       # cache up to 10,000 distinct input words
+s = Stemmer("en", cache_size=50_000)    # choose a custom capacity
+s = Stemmer("en", cache_size=0)         # explicitly disable caching
+```
+
+One cache is shared by `stem()`, `stemWord()`, `stem_batch()`, and
+`stemWords()`. The `stem_all()` and `stem_all_batch()` methods are not cached.
+Caching never changes results; it only avoids recomputation. Entries are
+inserted until the configured capacity is reached; there is no eviction. For a
+high-cardinality stream without useful token repetition, use `cache_size=0`.
+
+## Skipping lowercasing for pre-normalized input
+
+By default lookups lowercase the input (`LOWERCASE_WITH_LOCALE_ROOT`). If your
+pipeline already lowercases tokens, skip the redundant work:
+
+```python
+s = Stemmer("en", lowercase=False)     # assume already-lowercased input
+s.stem("running")                      # 'run'
+s.stem("Running")                      # None  -> not lowercased, so no match
+```
+
+The model's keys are always lowercase; `lowercase=False` only turns off
+per-lookup normalization. On already-lowercased input the results are identical.
+
+## Compile once, load instantly
+
+Compiling a trie from text costs a few seconds for large languages. Compile it
+once to Radixor's binary format and load it directly afterwards:
+
+```python
+import radixor
+
+radixor.compile("stemmer.gz", "en.rxc", language="en")
+s = radixor.Stemmer(compiled="en.rxc")
+```
+
+See [Compiling Dictionaries in Python](model-compilation.md) for the source
+format, traversal and normalization options, deployment guidance, Java
+interoperability, and the controls that remain Java-only.
+
+## Using a custom dictionary
+
+A source dictionary is a gzipped (or plain) TSV file, one entry per line, the
+first column the canonical stem and the rest its variants; `#` and `//` start
+line remarks:
+
+```
+run	running	runs	ran
+cat	cats
+```
+
+```python
+s = Stemmer(path="custom.gz", backward=True, store_original=True)
+```
+
+`store_original=True` (default) maps each stem to itself (a no-op patch) so the
+stem is recognised. See [Dictionary Format](../dictionary-format.md) for the
+authoritative specification shared with the Java project.
+
+## Thread-safety
+
+A `Stemmer` is safe to share across threads. The bounded cache is guarded
+internally; the compiled trie is immutable after construction.
+
+## API summary
+
+| Call | Returns | Notes |
+|---|---|---|
+| `Stemmer(lang \| path= \| compiled=, *, backward, store_original, lowercase, cache_size=10_000)` | stemmer | auto-detects compiled vs textual for `path=`; `cache_size=0` disables caching |
+| `stem(word)` | `str \| None` | dominant stem |
+| `stem_batch(words)` | `list[str \| None]` | **preferred** for many words |
+| `stemWord(word)` | `str` | PyStemmer-compatible; returns an unmatched word unchanged |
+| `stemWords(words)` | `list[str]` | PyStemmer-compatible batch call; preserves unmatched words and input order |
+| `stem_all(word)` | `list[str]` | all candidate stems, best first |
+| `stem_all_batch(words)` | `list[list[str]]` | |
+| `radixor.compile(source, out, *, language, backward, store_original, lowercase)` | `None` | writes a v7 binary |

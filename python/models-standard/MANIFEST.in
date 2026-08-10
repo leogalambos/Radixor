@@ -1,0 +1,4 @@
+include LICENSE-MODEL-DATA.txt
+include README.md
+recursive-include radixor_models_standard *.json *.rxc *.txt
+global-exclude stemmer.gz *.gz __pycache__ *.py[cod]

@@ -1,0 +1,452 @@
+name: Python Native Release
+
+on:
+  push:
+    tags:
+      - 'python@*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Stable distribution version to validate without publishing
+        required: true
+        default: '4.1.0'
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: github-python-pages
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    name: Prepare versioned sources and sdist
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.release.outputs.version }}
+      tag: ${{ steps.release.outputs.tag }}
+
+    steps:
+      - name: Check out repository
+        if: ${{ env.ACT != 'true' }}
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.12.13'
+
+      - name: Install pinned Rust toolchain
+        uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c
+        with:
+          toolchain: 1.88.0
+
+      - name: Select and validate release
+        id: release
+        shell: bash
+        env:
+          REQUESTED_VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          if [[ "${GITHUB_EVENT_NAME}" == 'push' ]]; then
+            tag="${GITHUB_REF_NAME}"
+          else
+            tag="python@${REQUESTED_VERSION}"
+          fi
+          eval "$(./tools/parse-python-release-tag.sh "${tag}")"
+          [[ "${PYTHON_DISTRIBUTION}" == 'radixor' ]]
+          if [[ "${GITHUB_EVENT_NAME}" == 'push' ]]; then
+            [[ "$(git rev-parse "${tag}^{commit}")" == "${GITHUB_SHA}" ]]
+            git merge-base --is-ancestor "${GITHUB_SHA}" origin/main
+          fi
+          printf 'version=%s\ntag=%s\n' "${PYTHON_VERSION}" "${tag}" >> "${GITHUB_OUTPUT}"
+
+      - name: Install pinned source-build tools
+        run: >-
+          python -m pip install --disable-pip-version-check
+          maturin==1.14.1 setuptools==80.9.0 wheel==0.45.1
+
+      - name: Materialize versioned native source
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf build/python-release
+          python python/scripts/prepare_release_tree.py \
+            native '${{ steps.release.outputs.version }}' \
+            build/python-release/native-source
+
+      - name: Build and verify source distributions
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build/python-release/compiler-wheel build/python-release/compiler-runtime \
+            build/python-release/native-sdist build/python-release/models
+          maturin build --release --locked \
+            --manifest-path build/python-release/native-source/Cargo.toml \
+            --out build/python-release/compiler-wheel
+          python -c "from pathlib import Path; import zipfile; wheels=list(Path('build/python-release/compiler-wheel').glob('*.whl')); assert len(wheels) == 1; zipfile.ZipFile(wheels[0]).extractall('build/python-release/compiler-runtime')"
+          PYTHONPATH=build/python-release/compiler-runtime \
+            python python/scripts/build_standard_models.py \
+              --project build/python-release/models-source \
+              --distribution-version 1.0.0
+          maturin sdist --manifest-path build/python-release/native-source/Cargo.toml \
+            --out build/python-release/native-sdist
+          python python/scripts/build_standard_distribution.py \
+            --project build/python-release/models-source \
+            --outdir build/python-release/models
+          python python/scripts/verify_distributions.py \
+            --standard-dir build/python-release/models \
+            --standard-version 1.0.0
+          PYTHONPATH=python/scripts python -c \
+            "from pathlib import Path; from verify_distributions import _verify_main_sdist; _verify_main_sdist(next(Path('build/python-release/native-sdist').glob('*.tar.gz')), '${{ steps.release.outputs.version }}')"
+
+      - name: Upload versioned native source
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: native-source-${{ steps.release.outputs.version }}
+          path: |
+            build/python-release/native-source
+            !build/python-release/native-source/target/**
+          if-no-files-found: error
+          retention-days: 1
+
+      - name: Upload native sdist
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: native-sdist-${{ steps.release.outputs.version }}
+          path: build/python-release/native-sdist/*.tar.gz
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload verified model fixture
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: native-model-fixture-${{ steps.release.outputs.version }}
+          path: build/python-release/models/*
+          if-no-files-found: error
+          retention-days: 1
+
+  build-linux-x86-64:
+    name: Build Linux x86-64 wheel
+    needs: prepare
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.12.13'
+
+      - name: Install pinned Rust toolchain
+        uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c
+        with:
+          toolchain: 1.88.0
+
+      - name: Download versioned native source
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: native-source-${{ needs.prepare.outputs.version }}
+          path: build/python-release/native-source
+
+      - name: Download model fixture
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: native-model-fixture-${{ needs.prepare.outputs.version }}
+          path: build/python-release/models
+
+      - name: Select Linux build isolation
+        id: linux-isolation
+        shell: bash
+        run: |
+          if [[ "${ACT:-}" == 'true' ]]; then
+            echo 'manylinux=off' >> "${GITHUB_OUTPUT}"
+            echo 'container=' >> "${GITHUB_OUTPUT}"
+          else
+            echo 'manylinux=auto' >> "${GITHUB_OUTPUT}"
+            echo 'container=quay.io/pypa/manylinux2014_x86_64@sha256:0a42cb7e5f4ba6bbfb8d0a86d1aab0c8876ba9c3be16bd99360ae42bf010ec77' >> "${GITHUB_OUTPUT}"
+          fi
+
+      - name: Build manylinux wheel
+        uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1
+        with:
+          command: build
+          target: x86_64
+          manylinux: ${{ steps.linux-isolation.outputs.manylinux }}
+          container: ${{ steps.linux-isolation.outputs.container }}
+          maturin-version: v1.14.1
+          rust-toolchain: 1.88.0
+          working-directory: build/python-release/native-source
+          args: --release --locked --out ../wheel
+
+      - name: Smoke-test wheel with standard models
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --no-index \
+            --find-links build/python-release/wheel \
+            --find-links build/python-release/models radixor
+          python -c "from radixor import Stemmer; assert Stemmer('en').stem('running') == 'run'"
+
+      - name: Upload Linux x86-64 wheel
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: native-wheel-linux-x86-64-${{ needs.prepare.outputs.version }}
+          path: build/python-release/wheel/*.whl
+          if-no-files-found: error
+          retention-days: 14
+
+  build-platform-wheels:
+    name: Build ${{ matrix.name }} wheel
+    needs: prepare
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Linux aarch64
+            os: ubuntu-24.04-arm
+            target: aarch64
+            manylinux: auto
+            container: quay.io/pypa/manylinux2014_aarch64@sha256:63bfa74be47f0277e998cb7c1b571b27664ac848bb356b0f4588438f930285dd
+            artifact: linux-aarch64
+          - name: macOS universal2
+            os: macos-14
+            target: universal2-apple-darwin
+            manylinux: 'off'
+            container: ''
+            artifact: macos-universal2
+          - name: Windows x86-64
+            os: windows-2022
+            target: x86_64-pc-windows-msvc
+            manylinux: 'off'
+            container: ''
+            artifact: windows-x86-64
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.12.13'
+
+      - name: Install pinned Rust toolchain
+        uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c
+        with:
+          toolchain: 1.88.0
+
+      - name: Download versioned native source
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: native-source-${{ needs.prepare.outputs.version }}
+          path: build/python-release/native-source
+
+      - name: Download model fixture
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: native-model-fixture-${{ needs.prepare.outputs.version }}
+          path: build/python-release/models
+
+      - name: Build platform wheel
+        uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1
+        with:
+          command: build
+          target: ${{ matrix.target }}
+          manylinux: ${{ matrix.manylinux }}
+          container: ${{ matrix.container }}
+          maturin-version: v1.14.1
+          rust-toolchain: 1.88.0
+          working-directory: build/python-release/native-source
+          args: --release --locked --out ../wheel
+
+      - name: Smoke-test wheel with standard models
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --no-index \
+            --find-links build/python-release/wheel \
+            --find-links build/python-release/models radixor
+          python -c "from radixor import Stemmer; assert Stemmer('en').stem('running') == 'run'"
+
+      - name: Upload platform wheel
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: native-wheel-${{ matrix.artifact }}-${{ needs.prepare.outputs.version }}
+          path: build/python-release/wheel/*.whl
+          if-no-files-found: error
+          retention-days: 14
+
+  assemble:
+    name: Assemble verified release
+    needs: [prepare, build-linux-x86-64, build-platform-wheels]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        if: ${{ env.ACT != 'true' }}
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.12.13'
+
+      - name: Download native artifacts only
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          pattern: native-wheel-*
+          path: build/python-release/artifacts
+          merge-multiple: true
+
+      - name: Download native sdist
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: native-sdist-${{ needs.prepare.outputs.version }}
+          path: build/python-release/artifacts
+
+      - name: Enforce release allowlist and checksums
+        run: >-
+          python python/scripts/assemble_release.py native
+          '${{ needs.prepare.outputs.version }}'
+          build/python-release/artifacts build/python-release/release
+
+      - name: Prepare complete PEP 503 index candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          index_root='build/python-release/index/python/simple'
+          if git ls-remote --exit-code --heads origin gh-pages >/dev/null 2>&1; then
+            git fetch origin gh-pages:refs/remotes/origin/gh-pages
+            git worktree add --detach build/python-release/pages origin/gh-pages
+            mkdir -p "$(dirname "${index_root}")"
+            if [[ -d build/python-release/pages/python/simple ]]; then
+              cp -R build/python-release/pages/python/simple "${index_root}"
+            fi
+          fi
+          python python/scripts/update_simple_index.py \
+            --root "${index_root}" \
+            --repository "${GITHUB_REPOSITORY}" \
+            --package radixor \
+            --version '${{ needs.prepare.outputs.version }}' \
+            --tag '${{ needs.prepare.outputs.tag }}' \
+            --artifacts build/python-release/release
+
+      - name: Upload verified release candidate
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: python-native-release-${{ needs.prepare.outputs.version }}
+          path: build/python-release/release/*
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload package-index candidate
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: python-native-index-${{ needs.prepare.outputs.version }}
+          path: build/python-release/index/python/simple
+          if-no-files-found: error
+          retention-days: 14
+
+  publish:
+    name: Publish immutable GitHub Release
+    if: github.event_name == 'push'
+    needs: [prepare, assemble]
+    runs-on: ubuntu-latest
+    environment: python-github-release
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+
+    steps:
+      - name: Download verified release candidate
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: python-native-release-${{ needs.prepare.outputs.version }}
+          path: release
+
+      - name: Verify release inventory
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd release
+          sha256sum --check SHA256SUMS
+          awk '{print $2}' SHA256SUMS | LC_ALL=C sort > expected-files
+          find . -maxdepth 1 -type f \( -name '*.whl' -o -name '*.tar.gz' \) \
+            -printf '%f\n' | LC_ALL=C sort > actual-files
+          diff -u expected-files actual-files
+          rm expected-files actual-files
+
+      - name: Require published standard models
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          [[ "$(gh release view 'python-models-standard@1.0.0' --json isDraft --jq '.isDraft')" == 'false' ]]
+
+      - name: Attest package artifacts
+        uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2
+        with:
+          subject-path: |
+            release/*.whl
+            release/*.tar.gz
+
+      - name: Create and publish draft release exactly once
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ needs.prepare.outputs.tag }}
+          RELEASE_VERSION: ${{ needs.prepare.outputs.version }}
+        run: |
+          set -euo pipefail
+          if gh release view "${RELEASE_TAG}" >/dev/null 2>&1; then
+            echo "Release already exists; refusing to replace its assets: ${RELEASE_TAG}" >&2
+            exit 1
+          fi
+          gh release create "${RELEASE_TAG}" \
+            release/*.whl release/*.tar.gz release/SHA256SUMS \
+            --verify-tag --draft --title "radixor ${RELEASE_VERSION}" \
+            --notes "Native Rust/Python Radixor distribution ${RELEASE_VERSION}."
+          gh release edit "${RELEASE_TAG}" --draft=false
+
+  publish-index:
+    name: Publish Python package index
+    if: github.event_name == 'push'
+    needs: [prepare, assemble, publish]
+    runs-on: ubuntu-latest
+    environment: python-github-pages
+    permissions:
+      contents: write
+
+    steps:
+      - name: Check out gh-pages only
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: gh-pages
+          path: pages
+
+      - name: Download validated index candidate
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: python-native-index-${{ needs.prepare.outputs.version }}
+          path: candidate
+
+      - name: Commit package index
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p pages/python/simple
+          rsync -a --delete candidate/ pages/python/simple/
+          cd pages
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add python/simple
+          git diff --cached --quiet && exit 0
+          git commit -m 'Index radixor ${{ needs.prepare.outputs.version }}'
+          git push origin HEAD:gh-pages

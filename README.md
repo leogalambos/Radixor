@@ -1,16 +1,19 @@
-<img src="docs/assets/images/banner.jpg" width="100%" alt="Radixor banner" />
+<p align="center">
+  <img src="docs/assets/images/radixor-logo.png" width="160" alt="Radixor logo" />
+</p>
 
 [![License](https://img.shields.io/github/license/leogalambos/Radixor)](LICENSE)
 [![Java](https://img.shields.io/badge/Java-21%2B-brightgreen)](#)
+[![Python](https://img.shields.io/badge/Python-3.9%2B-1769ef)](docs/python/fast-track.md)
 [![Maven Central](https://img.shields.io/maven-central/v/org.egothor/radixor)](https://central.sonatype.com/artifact/org.egothor/radixor)
 [![Published reports](https://img.shields.io/badge/reports-GitHub%20Pages-blue)](https://leogalambos.github.io/Radixor/builds/latest/)
 [![Quality gates](https://github.com/leogalambos/Radixor/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/leogalambos/Radixor/actions/workflows/build.yml)
 [![Coverage](https://img.shields.io/endpoint?url=https://leogalambos.github.io/Radixor/builds/latest/metrics/coverage-badge.json)](https://leogalambos.github.io/Radixor/builds/latest/coverage/)
 [![Mutation score](https://img.shields.io/endpoint?url=https://leogalambos.github.io/Radixor/builds/latest/metrics/pitest-badge.json)](https://leogalambos.github.io/Radixor/builds/latest/pitest/)
 
-*Deterministic, multi-language stemming for Java, built around compact dictionary-derived patch-command tries with an explicit quality/speed trade-off.*
+*Deterministic, multi-language stemming for Java and Python, built around compact dictionary-trained patch-command tries with an explicit quality/speed trade-off.*
 
-**Radixor** is a modern multi-language stemming toolkit for Java in the tradition of the original **Egothor** approach. It learns compact word-to-stem transformations from dictionary data, stores them in compiled patch-command tries, and exposes a runtime model designed for speed, determinism, and operational simplicity. Unlike a closed-form dictionary lookup stemmer, Radixor can also generalize beyond explicitly listed word forms.
+**Radixor** is a modern multi-language stemming toolkit for Java and Python in the tradition of the original **Egothor** approach. It learns compact word-to-stem transformations from dictionary data, stores them in compiled patch-command tries, and exposes native runtime implementations designed for speed, determinism, and operational simplicity. Unlike a closed-form dictionary lookup stemmer, Radixor can also generalize beyond explicitly listed word forms.
 
 It is particularly well suited to systems that need stemming which is:
 
@@ -22,7 +25,35 @@ It is particularly well suited to systems that need stemming which is:
 
 It also retains the operational advantages of a compiled artifact model: predictable runtime behavior, direct binary loading, and clear separation between preparation-time compilation and live request processing.
 
-## Add Radixor and a model
+## Choose a runtime
+
+For Python, one installation provides the native runtime and the separate
+standard package of 20 precompiled models:
+
+From PyPI, once publication is enabled:
+
+```bash
+python -m pip install --only-binary=:all: radixor
+```
+
+Or from the GitHub Releases-backed index:
+
+```bash
+python -m pip install --only-binary=:all: \
+  --index-url https://leogalambos.github.io/Radixor/python/simple/ radixor
+```
+
+```python
+from radixor import Stemmer
+
+english = Stemmer("en")
+print(english.stemWord("running"))  # run
+```
+
+Continue with the [Python Fast Track](docs/python/fast-track.md) or
+[Python Quick Start](docs/python/quick-start.md).
+
+### Java dependencies
 
 The core artifact contains the algorithm and registry, but no language dictionary. Add either one minimal model or the optional standard default pack:
 
@@ -87,16 +118,16 @@ Radixor performance is best read together with stemming quality. The English dic
 
 | Used rows | Actual row ratio | All exact | Changed exact | Root preserved | Speed ms/op | Error ms | ns/token |
 | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| 100% | 100.000% | 97.478% | 97.197% | 97.552% | 20.627 | 2.117 | 98.0 |
-| 90% | 90.000% | 97.047% | 94.913% | 97.613% | 21.713 | 2.104 | 103.2 |
-| 80% | 80.000% | 96.635% | 92.768% | 97.661% | 17.408 | 1.438 | 82.7 |
-| 70% | 70.000% | 96.209% | 90.565% | 97.705% | 16.946 | 1.531 | 80.5 |
-| 60% | 60.000% | 95.750% | 88.384% | 97.703% | 15.735 | 1.278 | 74.8 |
-| 50% | 50.000% | 95.262% | 86.107% | 97.690% | 14.714 | 1.089 | 69.9 |
-| 40% | 40.000% | 94.753% | 83.855% | 97.643% | 15.090 | 1.254 | 71.7 |
-| 30% | 30.000% | 94.208% | 81.651% | 97.537% | 13.773 | 1.071 | 65.4 |
-| 20% | 20.000% | 93.633% | 79.366% | 97.416% | 15.396 | 2.497 | 73.1 |
-| 10% | 10.000% | 92.868% | 76.516% | 97.204% | 16.970 | 2.847 | 80.6 |
+| 100% | 100.000% | 97.478% | 97.197% | 97.552% | 15.064 | 0.658 | 71.6 |
+| 90% | 90.000% | 97.047% | 94.913% | 97.613% | 17.798 | 2.161 | 84.6 |
+| 80% | 80.000% | 96.635% | 92.768% | 97.661% | 13.900 | 0.941 | 66.0 |
+| 70% | 70.000% | 96.209% | 90.565% | 97.705% | 14.809 | 1.376 | 70.3 |
+| 60% | 60.000% | 95.750% | 88.384% | 97.703% | 13.186 | 0.930 | 62.6 |
+| 50% | 50.000% | 95.262% | 86.107% | 97.690% | 12.852 | 0.943 | 61.1 |
+| 40% | 40.000% | 94.753% | 83.855% | 97.643% | 12.358 | 0.831 | 58.7 |
+| 30% | 30.000% | 94.208% | 81.651% | 97.537% | 11.657 | 0.921 | 55.4 |
+| 20% | 20.000% | 93.633% | 79.366% | 97.416% | 11.494 | 1.256 | 54.6 |
+| 10% | 10.000% | 92.868% | 76.516% | 97.204% | 9.895 | 0.925 | 47.0 |
 
 Column meanings:
 
@@ -109,7 +140,7 @@ Column meanings:
 - `Error ms` is the JMH score error converted to milliseconds.
 - `ns/token` is average nanoseconds per changed token in that operation.
 
-The contracted trie result is materially stronger than the older uncontracted profile: full English coverage reaches 97.478% all-token exactness and 97.197% changed-token exactness at 98.0 ns/token, while even a 10% deterministic dictionary slice remains at 92.868% all-token exactness and 76.516% changed-token exactness at 80.6 ns/token. This is why Radixor benchmark results are documented with both speed and quality instead of a single Porter speed badge.
+The contracted trie result is materially stronger than the older uncontracted profile: full English coverage reaches 97.478% all-token exactness and 97.197% changed-token exactness at 71.6 ns/token, while even a 10% deterministic dictionary slice remains at 92.868% all-token exactness and 76.516% changed-token exactness at 47.0 ns/token. This is why Radixor benchmark results are documented with both speed and quality instead of a single Porter speed badge.
 
 For benchmark scope, workload design, environment, commands, report locations, and interpretation guidance, see [Benchmarking](docs/benchmarking.md).
 
@@ -182,13 +213,22 @@ The repository keeps the front page concise and places detailed documentation un
 
 ### Getting Started
 
-- [Fast Track](docs/fast-track.md)  
-  The shortest path from adding core plus a model artifact to getting a first stem.
+- [Python Fast Track](docs/python/fast-track.md)
+  The shortest path from `pip install` to the first native Python stem.
 
-- [Quick Start](docs/quick-start.md)  
-  A broader developer walkthrough covering loading options, querying, extension, persistence, and metadata.
+- [Java Fast Track](docs/fast-track.md)
+  The shortest Java path from adding core plus a model artifact to getting a first stem.
 
-- [Integration Deep Dive](docs/integration-deep-dive.md)  
+- [Python Quick Start](docs/python/quick-start.md)
+  Installation, standard models, batch use, PyStemmer migration, and deployment guidance.
+
+- [Java Quick Start](docs/quick-start.md)
+  A broader Java walkthrough covering loading options, querying, extension, persistence, and metadata.
+
+- [Python Overview](docs/python/index.md)
+  Runtime architecture, model packaging, API capabilities, and Java interoperability.
+
+- [Java Integration Deep Dive](docs/integration-deep-dive.md)
   Dependency setup, model selection, production lifecycle, search-pipeline guidance, and operational checklist.
 
 - [Built-in Languages](docs/built-in-languages.md)  
@@ -197,10 +237,29 @@ The repository keeps the front page concise and places detailed documentation un
 - [Dictionary Format](docs/dictionary-format.md)  
   How to write and normalize stemming dictionaries.
 
-- [Compilation (CLI tool)](docs/cli-compilation.md)  
-  How to compile dictionaries into deployable binary artifacts.
+- [Java CLI Compilation](docs/cli-compilation.md)
+  How to compile dictionaries into deployable binary artifacts from Java.
 
-### Programmatic Usage
+### Python
+
+The Python installation installs the native package together with the pure
+`radixor-models-standard` 1.x distribution of the 2026.1 catalog: 20 precompiled v7 models, excluding
+the optional PoliMorf model. Python runtime distributions contain no textual
+dictionaries.
+
+- [Installation and Builds](docs/python/installation.md)
+  Wheels, source builds, Gradle tasks, host builds, and cross-compilation requirements.
+
+- [Usage and API](docs/python/usage.md)
+  Single and batch stemming, caching, custom dictionaries, and compiled models.
+
+- [Dictionary Compilation](docs/python/model-compilation.md)
+  Compile a textual dictionary once, load it directly, or share its version 7 binary with Java.
+
+- [Python Benchmarks](docs/python/performance.md)
+  Batch methodology and comparisons with available Python stemmers.
+
+### Java Programmatic Usage
 
 - [Programmatic Usage Overview](docs/programmatic-usage.md)  
   Entry point to the Java API and the overall usage model.

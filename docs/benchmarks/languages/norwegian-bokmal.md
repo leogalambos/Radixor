@@ -8,9 +8,9 @@ Radixor must not be read as simply "slower" when a narrow competitor has a lower
 
 ## Dictionary Corpus
 
-| Model ID | Model version | Language | Dictionary rows | Complete quality tokens | Already-root tokens | Changed speed tokens |
-| --- | --- | --- | ---: | ---: | ---: | ---: |
-| `nb-no-default` | `1.0.0` | `NB_NO` | 17,929 | 90,757 | 33,376 | 57,381 |
+| Model ID | Model version | Language | Dictionary rows | Complete quality tokens | Already-root tokens | Changed tokens | JMH timing tokens |
+| --- | --- | --- | ---: | ---: | ---: | ---: | ---: |
+| `nb-no-default` | `1.0.0` | `NB_NO` | 17,929 | 90,757 | 33,376 | 57,381 | 57,381 |
 
 ## Radixor Patch Command Distribution
 
@@ -30,14 +30,11 @@ Accuracy is computed from JMH auxiliary counters in the current report. The coun
 
 | Stemmer | All exact | Changed exact | Root preserved | Note |
 | --- | ---: | ---: | ---: | --- |
-| Radixor | 96.852% | 97.637% | 95.503% | Full Radixor dictionary patch-command stemmer. |
+| Radixor | 96.852% | 97.637% | 95.503% | Radixor dictionary-trained patch-command stemmer. |
 | Lucene NorwegianMinimalStemFilter | 57.107% | 53.913% | 62.599% | Minimal suffix reducer; narrow baseline, not a full stemmer. |
 | Official Snowball direct | 54.824% | 51.791% | 60.040% | Official Snowball generated Java stemmer; rule-based suffix algorithm. |
 | Lucene SnowballFilter | 54.803% | 51.780% | 60.001% | Lucene TokenFilter integration path around the Snowball algorithm. |
-| Lucene NorwegianLightStemFilter | 52.136% | 50.616% | 54.749% | Light suffix stemmer; intentionally narrower than a dictionary-derived stemmer. |
-
-
-
+| Lucene NorwegianLightStemFilter | 52.136% | 50.616% | 54.749% | Light suffix stemmer; intentionally narrower than Radixor's dictionary-trained transformation model. |
 
 ## Speed
 
@@ -45,18 +42,15 @@ Speed uses JMH average time, 5 warmup iterations, 10 measurement iterations, 3 i
 
 | Stemmer | Benchmark method | Score ms/op | Error ms | ns/token | Relative vs Radixor | Note |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
-| Radixor | `norwegianBokmalRadixor` | 3.401 | 0.055 | 59.3 | 1.000 | Full Radixor dictionary patch-command stemmer. |
-| Lucene NorwegianMinimalStemFilter | `norwegianBokmalLuceneNorwegianMinimalStemFilter` | 2.943 | 0.023 | 51.3 | 0.865 | Minimal Norwegian suffix reducer. |
-| Lucene NorwegianLightStemFilter | `norwegianBokmalLuceneNorwegianLightStemFilter` | 3.358 | 0.036 | 58.5 | 0.987 | Light Norwegian suffix stemmer. |
-| Official Snowball direct | `snowballDirect[NORWEGIAN_BOKMAL]` | 4.378 | 0.295 | 76.3 | 1.287 | Official Snowball generated Java stemmer; direct API. |
-| Lucene SnowballFilter | `luceneSnowballFilter[NORWEGIAN_BOKMAL]` | 6.114 | 0.436 | 106.5 | 1.797 | Lucene TokenFilter path around Snowball; includes TokenStream overhead. |
-
-
-
+| Radixor | `norwegianBokmalRadixor` | 3.240 | 0.087 | 56.5 | 1.000 | Radixor dictionary-trained patch-command stemmer. |
+| Lucene NorwegianMinimalStemFilter | `norwegianBokmalLuceneNorwegianMinimalStemFilter` | 2.726 | 0.022 | 47.5 | 0.841 | Minimal Norwegian suffix reducer. |
+| Lucene NorwegianLightStemFilter | `norwegianBokmalLuceneNorwegianLightStemFilter` | 3.136 | 0.028 | 54.6 | 0.968 | Light Norwegian suffix stemmer. |
+| Official Snowball direct | `snowballDirect[NORWEGIAN_BOKMAL]` | 4.711 | 0.410 | 82.1 | 1.454 | Official Snowball generated Java stemmer; direct API. |
+| Lucene SnowballFilter | `luceneSnowballFilter[NORWEGIAN_BOKMAL]` | 5.681 | 0.206 | 99.0 | 1.753 | Lucene TokenFilter path around Snowball; includes TokenStream overhead. |
 
 ## Interpretation Notes
 
-- Radixor is a dictionary-derived patch-command stemmer. Its quality depends on the language resource used to train the compiled trie.
+- Radixor is a dictionary-trained patch-command stemmer. Its learned transformations can generalize beyond the word forms listed in the training resource.
 - Light, minimal, plural, and possessive filters are narrow baselines. They can be fast because they intentionally perform less linguistic work.
 - Lucene TokenFilter rows include TokenStream, attribute, and required normalization overhead. Direct rows measure exposed direct APIs.
 - Morfologik rows are dictionary-based and can emit multiple terms for one input token. Quality rows use the first returned term when no ranking weight is available.
@@ -332,7 +326,7 @@ Standard ARI, homogeneity, completeness, V-measure, and NMI are not calculated: 
 ### Provenance
 
 - Authoritative source: `docs/benchmarks/data/stemming-quality.csv`
-- Source SHA-256: `edf16b07be8a535943ddf37caeb8807755c95e9e1fb13244145f28be74b491d8`
+- Source SHA-256: `d34f325da320a2e040b54d8d8b5c216d70448f08cfb8659a423e99882aa1afb5`
 - Evaluation command: `./gradlew stemmingQuality --no-daemon`
 - Dictionary language: `NB_NO`
 - Processing modes: `ALL_WORDS`, `LOWERCASE_GROUPS_ONLY`

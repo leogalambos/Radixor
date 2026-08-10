@@ -8,11 +8,16 @@ Three artifacts must not be confused:
 
 | Artifact | Representation | Consumer |
 |---|---|---|
-| Source textual dictionary | Plain UTF-8 tab-separated rows | Authors, parser, CLI, or model preparation |
-| Registered model resource | The same Radixor dictionary bytes under GZip, accompanied by index, descriptor, checksum, and license | `StemmerModelRegistry` and `StemmerPatchTrieLoader` |
-| Persisted compiled trie | GZip-compressed Radixor binary format, commonly `.radixor.gz` | `loadBinaryCompiled(...)` |
+| Source textual dictionary | Plain UTF-8 tab-separated rows, optionally GZip-compressed | Java and Python loaders or compilation tools |
+| Registered Java model resource | The same dictionary bytes under GZip, accompanied by index, descriptor, checksum, and license | Java `StemmerModelRegistry` and `StemmerPatchTrieLoader` |
+| Standard Python model resource | A precompiled version 7 `.rxc` artifact in the required `radixor-models-standard` data package | Python `Stemmer("<alias>")` |
+| Persisted compiled trie | GZip-compressed Radixor version 7 binary, commonly `.radixor.gz` in Java or `.rxc` in Python | Java `loadBinaryCompiled(...)` and Python `Stemmer(compiled=...)` |
 
-The model file named `stemmer.gz` is not Java serialization and is not a pre-instantiated or persisted trie. It is compressed textual dictionary input parsed when the model is loaded.
+The Java model file named `stemmer.gz` is not Java serialization and is not a
+pre-instantiated or persisted trie. It is compressed textual dictionary input
+parsed when a Java model is loaded. Python's standard data distribution instead
+contains generated, precompiled version 7 tries; neither Python distribution
+ships the textual source dictionaries.
 
 Consequently, compressed size is not a construction-memory estimate. The PoliMorf resource is 12,624,997 bytes compressed and 68,093,680 bytes decompressed, while full parsing, trie construction, reduction, and patch compilation require a dedicated verification JVM with a 6 GiB maximum heap.
 
@@ -24,6 +29,22 @@ notice does not claim ownership over the underlying data. GZip packaging and des
 generation are disclosed transformations; the in-memory trie is a Radixor runtime structure.
 
 Each logical line describes one canonical stem and zero or more known word variants that should reduce to that stem. The format is intentionally lightweight, easy to maintain in source control, and directly consumable both by the programmatic loader and by the CLI compiler.
+
+## Use the format from either runtime
+
+The dictionary semantics are shared; the integration entry points are not:
+
+| Task | Java | Python |
+|---|---|---|
+| Load and compile text now | `StemmerPatchTrieLoader.loadCompiled(...)` | `Stemmer(path=...)` |
+| Compile a reusable binary | `org.egothor.stemmer.Compile` | `radixor.compile(...)` |
+| Load a compiled binary | `StemmerPatchTrieLoader.loadBinaryCompiled(...)` | `Stemmer(compiled=...)` |
+| Registered/standard language | External model JAR selected through the registry | Compiled model in `radixor-models-standard`, selected by alias or model ID |
+
+Python compilation writes the shared version 7 stream using its fixed
+production reduction profile. Java exposes additional reduction and
+normalization controls. See [Java CLI Compilation](cli-compilation.md) and
+[Compiling Dictionaries in Python](python/model-compilation.md).
 
 ## Core structure
 

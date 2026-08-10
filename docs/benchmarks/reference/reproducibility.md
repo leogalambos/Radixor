@@ -4,19 +4,28 @@
 
 - Machine-readable CSV: [stemming-quality.csv](../data/stemming-quality.csv)
 - SHA-256 record: [stemming-quality.sha256](../data/stemming-quality.sha256)
-- SHA-256: `edf16b07be8a535943ddf37caeb8807755c95e9e1fb13244145f28be74b491d8`
-- Complete scenarios: 308
+- SHA-256: `d34f325da320a2e040b54d8d8b5c216d70448f08cfb8659a423e99882aa1afb5`
+- Complete scenarios: 314
 - Authoritative language universe: 20 languages
-- Language-page scenarios: 308 across 20 benchmark pages
+- Language-page scenarios: 314 across 20 benchmark pages
 
 The CSV contains the model ID, independent model version, descriptor SHA-256, raw pair counts, raw over/under numerators and denominators, candidate statistics, and relation metrics. Reserved partition-metric columns remain empty because the gold standard is an overlapping cover. Documentation is regenerated from this file rather than manually transcribed. Publication fails when any row uses a model other than the language's registered default.
 
 ## Commands
 
 ```bash
-./gradlew stemmingQuality
-./gradlew publishStemmingQualityDocumentation
-./gradlew verifyStemmingQualityDocumentation
+./gradlew --no-daemon stemmingQuality \
+    publishStemmingQualityDocumentation \
+    verifyStemmingQualityDocumentation
+./gradlew --no-daemon benchmarkCorpusReport writeJmhRuntimeClasspath
+tools/run-published-accuracy-benchmarks.sh 2026-08-10
+tools/run-published-speed-benchmarks.sh 2026-08-10
+python3 tools/update-benchmark-documentation.py \
+    --corpus build/reports/jmh/benchmark-corpora.csv \
+    --accuracy build/reports/jmh/stemmer-accuracy-2026-08-10.csv \
+    --speed build/reports/jmh/stemmer-speed-2026-08-10.csv \
+    --coverage-accuracy build/reports/jmh/english-coverage-accuracy-2026-08-10.csv \
+    --coverage-speed build/reports/jmh/english-coverage-speed-2026-08-10.csv
 ./gradlew test
 ./gradlew prepareMkDocsSource
 mkdocs build --strict --config-file build/mkdocs/mkdocs.yml
@@ -59,18 +68,19 @@ The Pages workflow publishes that staged documentation together with Javadoc, JU
 
 ## Performance benchmark reproduction
 
-The current speed and coverage-speed command is:
+The current accuracy, speed, and coverage commands are:
 
 ```bash
-./gradlew writeJmhRuntimeClasspath --no-daemon
-tools/run-published-speed-benchmarks.sh 2026-07-23
+./gradlew --no-daemon benchmarkCorpusReport writeJmhRuntimeClasspath
+tools/run-published-accuracy-benchmarks.sh 2026-08-10
+tools/run-published-speed-benchmarks.sh 2026-08-10
 ```
 
-The runner refuses to start unless every CPU uses the `performance` governor, materializes the exact selected benchmark list, rejects quality/Polimorf/gold-standard methods, and requires the Hebrew speed path. It records hardware, JVM, source-state, JAR, classpath, corpus, quality, load, temperature, and governor provenance before running. The exact JMH configuration is listed in [Environment and reports](environment.md). Quality and performance reports are separate datasets and are not combined into an undocumented scalar.
+The speed runner refuses to start unless every CPU uses the `performance` governor, materializes the exact selected benchmark list, rejects quality/Polimorf/gold-standard methods, and requires the Hebrew speed path. It records hardware, JVM, source-state, JAR, classpath, corpus, quality, load, temperature, and governor provenance before running. The accuracy runner evaluates all four exact-root benchmark classes and verifies that every new Snowball 3.1.0 candidate exposes all six accuracy counters. The exact JMH configuration is listed in [Environment and reports](environment.md). Quality and performance reports are separate datasets and are not combined into an undocumented scalar.
 
 ## Recorded and unavailable provenance
 
-The performance documentation records its 2026-07-23 environment, JDK 25.0.3, operating system, hardware, base revision, exact dirty patch, untracked-source checksums, executable JMH JAR checksum, and model descriptor checksums. The quality CSV embeds model identity and checksum in every row; run date, core source state, JVM, OS, and hardware are shared provenance on the environment page.
+The performance documentation records its 2026-08-10 environment, JDK, operating system, hardware, base revision, exact dirty patch, untracked-source checksums, executable JMH JAR checksum, and model descriptor checksums. The quality CSV embeds model identity and checksum in every row; run date, core source state, JVM, OS, and hardware are shared provenance on the environment page.
 
 Exact immutable upstream revisions were not recorded for every legacy UniMorph import. That limitation remains explicit in model descriptors and cannot be repaired from filesystem timestamps. Dependency versions reproducible from repository configuration include Apache Lucene 10.5.0, Morfologik 2.1.9, the Ukrainian dictionary artifact 4.9.1, and JMH 1.37.
 

@@ -1,6 +1,9 @@
-# Loading and Building Stemmers
+# Loading and Building Stemmers in Java
 
 This document explains how to acquire a compiled Radixor stemmer in Java.
+
+For Python construction and binary preparation, use [Python Usage and API](python/usage.md)
+and [Compiling Dictionaries in Python](python/model-compilation.md).
 
 ## Load a registered default model
 

@@ -26,42 +26,43 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
-  group: pages-${{ github.ref }}
-  cancel-in-progress: true
+  group: github-python-pages
+  cancel-in-progress: false
 
 jobs:
-  publish-pages:
-    name: Publish static reports
+  build-pages:
+    name: Build static reports
     runs-on: ubuntu-latest
 
     steps:
       - name: Check out source repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Validate Gradle wrapper
-        uses: gradle/actions/wrapper-validation@v4
+        uses: gradle/actions/wrapper-validation@0b6dd653ba04f4f93bf581ec31e66cbd7dcb644d # v4
 
       - name: Set up Temurin JDK 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4
         with:
           distribution: temurin
           java-version: '21'
 
       - name: Set up Gradle caching and instrumentation
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@0b6dd653ba04f4f93bf581ec31e66cbd7dcb644d # v4
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
-          python-version: '3.x'
+          python-version: '3.14.6'
 
       - name: Install MkDocs Material
-        run: python -m pip install --upgrade pip mkdocs-material
+        run: python -m pip install --disable-pip-version-check mkdocs-material==9.7.6
 
       - name: Verify reproducibility inputs
         shell: bash
@@ -326,18 +327,80 @@ jobs:
         run: |
           set -euo pipefail
           mkdocs build --strict --config-file build/mkdocs/mkdocs.yml
-          rsync -a --delete --exclude '.git' --exclude '.git/' --exclude 'builds/' build/mkdocs-site/ .gh-pages/
+          rsync -a --delete --exclude '.git' --exclude '.git/' --exclude 'builds/' --exclude 'python/' build/mkdocs-site/ .gh-pages/
           mkdir -p .gh-pages/builds
           cp build/mkdocs-site/builds/index.html .gh-pages/builds/index.html
           cat > .gh-pages/.nojekyll <<EOF
           EOF
 
-      - name: Commit and push gh-pages
+      - name: Prepare read-only publication candidate
         shell: bash
         run: |
           set -euo pipefail
-          cd .gh-pages
+          rm -rf .gh-pages/python
+          rm -f .gh-pages/.git
+          if find .gh-pages -type l -print -quit | grep -q .; then
+            echo 'Publication candidate contains a symbolic link.' >&2
+            exit 1
+          fi
 
+      - name: Upload static-site candidate
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: pages-site-${{ github.run_id }}
+          path: .gh-pages
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 1
+
+  publish-pages:
+    name: Publish static reports
+    needs: build-pages
+    runs-on: ubuntu-latest
+    environment: python-github-pages
+    permissions:
+      contents: write
+
+    steps:
+      - name: Check out repository for publication
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+          path: pages
+
+      - name: Select or initialize gh-pages
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd pages
+          if git ls-remote --exit-code --heads origin gh-pages >/dev/null 2>&1; then
+            git fetch origin gh-pages:refs/remotes/origin/gh-pages
+            git checkout -B gh-pages origin/gh-pages
+          else
+            git checkout --orphan gh-pages
+            git rm -rf .
+          fi
+
+      - name: Download static-site candidate
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: pages-site-${{ github.run_id }}
+          path: candidate
+
+      - name: Validate and publish static site
+        shell: bash
+        run: |
+          set -euo pipefail
+          test ! -e candidate/python
+          test ! -e candidate/.git
+          if find candidate -type l -print -quit | grep -q .; then
+            echo 'Publication candidate contains a symbolic link.' >&2
+            exit 1
+          fi
+          rsync -a --delete \
+            --exclude '.git' --exclude '.git/' \
+            --exclude 'python' --exclude 'python/' candidate/ pages/
+          cd pages
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
@@ -348,4 +411,4 @@ jobs:
           fi
 
           git commit -m "Publish reports for run ${GITHUB_RUN_NUMBER}"
-          git push origin gh-pages
+          git push origin HEAD:gh-pages

@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "radixor-models-standard"
+version = "0.0.0"
+requires-python = ">=3.9"
+description = "Precompiled standard language models for Radixor"
+readme = "README.md"
+license = "CC-BY-SA-3.0"
+license-files = ["LICENSE-MODEL-DATA.txt"]
+keywords = ["stemming", "nlp", "linguistics", "model-data"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Topic :: Text Processing :: Linguistic",
+]
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["radixor_models_standard*"]
+
+[tool.setuptools.package-data]
+radixor_models_standard = ["manifest.json"]
+"radixor_models_standard.models" = ["*.rxc"]
+"radixor_models_standard.notices" = ["*/*.txt"]

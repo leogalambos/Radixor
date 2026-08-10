@@ -762,7 +762,9 @@ tasks.register('prepareMkDocsSource', Sync) {
         buildsPage.setText('# Historical Builds\n\nThe Pages publication workflow replaces this staging placeholder with the retained build index.\n', 'UTF-8')
         File configuration = layout.buildDirectory.file('mkdocs/mkdocs.yml').get().asFile
         configuration.parentFile.mkdirs()
-        configuration.setText(layout.projectDirectory.file('mkdocs.yml').asFile.getText('UTF-8')
+        String configurationText = layout.projectDirectory.file('mkdocs.yml').asFile.getText('UTF-8')
+                .replace('custom_dir: docs/overrides', 'custom_dir: ../mkdocs-source/overrides')
+        configuration.setText(configurationText
                 + '\ndocs_dir: ../mkdocs-source\nsite_dir: ../mkdocs-site\n', 'UTF-8')
     }
 }
@@ -1133,6 +1135,7 @@ apply from: 'gradle/paicehusk-benchmarks.gradle'
 apply from: 'gradle/opennlp-benchmarks.gradle'
 apply from: 'gradle/hunspell-benchmarks.gradle'
 apply from: 'gradle/cistem-benchmarks.gradle'
+apply from: 'gradle/python.gradle'
 
 gradle.taskGraph.whenReady { taskGraph ->
     def banner = """

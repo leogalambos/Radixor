@@ -1,0 +1,23 @@
+# Rust and maturin build products
+/target/
+**/dist/
+/models-standard/build/
+/radixor/models/
+*.so
+*.egg-info/
+
+# Standard-model payload is generated deterministically below the repository
+# build directory and belongs only in the published wheel/sdist.
+/models-standard/radixor_models_standard/manifest.json
+/models-standard/radixor_models_standard/models/*.rxc
+/models-standard/radixor_models_standard/notices/*/NOTICE-model-data.txt
+
+# Local Python environments and caches
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Reports produced by direct benchmark-script runs
+/benchmarks/results*.csv
+/benchmarks/results*.json

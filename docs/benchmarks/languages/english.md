@@ -8,9 +8,9 @@ Radixor must not be read as simply "slower" when a narrow competitor has a lower
 
 ## Dictionary Corpus
 
-| Model ID | Model version | Language | Dictionary rows | Complete quality tokens | Already-root tokens | Changed speed tokens |
-| --- | --- | --- | ---: | ---: | ---: | ---: |
-| `us-uk-default` | `1.0.0` | `US_UK` | 396,939 | 1,004,374 | 793,874 | 210,500 |
+| Model ID | Model version | Language | Dictionary rows | Complete quality tokens | Already-root tokens | Changed tokens | JMH timing tokens |
+| --- | --- | --- | ---: | ---: | ---: | ---: | ---: |
+| `us-uk-default` | `1.0.0` | `US_UK` | 396,939 | 1,004,374 | 793,874 | 210,500 | 210,500 |
 
 ## Radixor Patch Command Distribution
 
@@ -30,21 +30,17 @@ Accuracy is computed from JMH auxiliary counters in the current report. The coun
 
 | Stemmer | All exact | Changed exact | Root preserved | Note |
 | --- | ---: | ---: | ---: | --- |
-| Radixor | 97.478% | 97.197% | 97.552% | Full Radixor dictionary patch-command stemmer. |
+| Radixor | 97.478% | 97.197% | 97.552% | Radixor dictionary-trained patch-command stemmer. |
 | Lucene EnglishMinimalStemFilter | 90.981% | 65.189% | 97.820% | Minimal English plural reduction, not a full stemmer. |
 | Lucene KStemFilter | 80.076% | 76.608% | 80.996% | Krovetz-style English stemming TokenFilter; broader than minimal suffix reducers. |
 | Lucene HunspellStemFilter | 80.243% | 12.750% | 98.139% | Benchmark-only English Hunspell dictionary compared via Lucene HunspellStemFilter. |
 | Lucene EnglishPossessiveFilter | 79.032% | 0.003% | 99.987% | Possessive-ending remover only, not a full stemmer. |
-| Snowball English / Porter2 | 40.342% | 46.296% | 38.763% | Porter2 rule-based suffix stemmer, distinct from original Porter. |
+| Snowball English / Porter2 | 40.346% | 46.302% | 38.767% | Porter2 rule-based suffix stemmer, distinct from original Porter. |
 | Lucene PorterStemFilter | 39.538% | 46.201% | 37.772% | Lucene TokenFilter path for Porter suffix rules; not dictionary-root equivalent. |
 | Lucene PorterStemmer direct copy | 39.538% | 46.201% | 37.772% | Direct Porter suffix-rule implementation generated under build for benchmark-only use. |
 | OpenNLP PorterStemmer | 39.538% | 46.201% | 37.772% | Apache OpenNLP Porter suffix-rule implementation. |
 | Snowball original Porter | 39.529% | 46.179% | 37.766% | Classic Porter rule-based suffix stemmer. |
 | Paice/Husk Lancaster | 28.055% | 37.039% | 25.673% | Aggressive Paice/Husk rule stemmer that often produces shorter stems. |
-
-
-
-
 
 ## Speed
 
@@ -52,25 +48,21 @@ Speed uses JMH average time, 5 warmup iterations, 10 measurement iterations, 3 i
 
 | Stemmer | Benchmark method | Score ms/op | Error ms | ns/token | Relative vs Radixor | Note |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
-| Radixor | `radixorUsUkProfiPreferredStem` | 17.489 | 1.380 | 83.1 | 1.000 | Full dictionary patch-command stemmer using compiled patch commands. |
-| Lucene EnglishPossessiveFilter | `luceneEnglishPossessiveFilter` | 17.151 | 0.215 | 81.5 | 0.981 | Possessive-ending remover only; not a full stemmer. |
-| Lucene EnglishMinimalStemFilter | `luceneEnglishMinimalStemFilter` | 18.522 | 0.152 | 88.0 | 1.059 | Narrow plural reduction filter; not a full stemmer. |
-| Lucene PorterStemmer direct copy | `lucenePorterStemmerCopied` | 17.651 | 0.129 | 83.9 | 1.009 | Benchmark-only generated copy of Lucene package-private Porter implementation. |
-| OpenNLP PorterStemmer | `opennlpPorterStemmer` | 17.681 | 0.139 | 84.0 | 1.011 | Apache OpenNLP Porter implementation. |
-| Snowball original Porter | `snowballOriginalPorter` | 33.290 | 1.916 | 158.1 | 1.904 | Classic Porter suffix-rule stemmer; historical English baseline, not a dictionary-equivalent stemmer. |
-| Lucene PorterStemFilter | `lucenePorterStemFilter` | 32.408 | 0.412 | 154.0 | 1.853 | Lucene TokenFilter integration path for Porter; includes TokenStream overhead. |
-| Lucene KStemFilter | `luceneKStemFilter` | 45.877 | 0.425 | 217.9 | 2.623 | Krovetz-style English TokenFilter; broader than minimal suffix filters. |
-| Lucene HunspellStemFilter | `luceneHunspellStemFilter` | 76.852 | 1.028 | 365.1 | 4.394 | Benchmark-only English Hunspell comparison using the benchmark Hunspell corpus. |
-| Snowball English / Porter2 | `snowballEnglishPorter2` | 46.568 | 2.414 | 221.2 | 2.663 | Porter2 suffix-rule stemmer, distinct from original Porter. |
-| Paice/Husk Lancaster | `paiceHuskLancaster` | 144.951 | 2.710 | 688.6 | 8.288 | Aggressive rule-based English stemmer. |
-
-
-
-
+| Radixor | `radixorUsUkProfiPreferredStem` | 14.397 | 0.915 | 68.4 | 1.000 | Full dictionary patch-command stemmer using compiled patch commands. |
+| Lucene EnglishPossessiveFilter | `luceneEnglishPossessiveFilter` | 15.034 | 0.322 | 71.4 | 1.044 | Possessive-ending remover only; not a full stemmer. |
+| Lucene EnglishMinimalStemFilter | `luceneEnglishMinimalStemFilter` | 16.352 | 0.244 | 77.7 | 1.136 | Narrow plural reduction filter; not a full stemmer. |
+| Lucene PorterStemmer direct copy | `lucenePorterStemmerCopied` | 16.491 | 0.149 | 78.3 | 1.145 | Benchmark-only generated copy of Lucene package-private Porter implementation. |
+| OpenNLP PorterStemmer | `opennlpPorterStemmer` | 16.481 | 0.175 | 78.3 | 1.145 | Apache OpenNLP Porter implementation. |
+| Snowball original Porter | `snowballOriginalPorter` | 30.634 | 1.620 | 145.5 | 2.128 | Classic Porter suffix-rule stemmer; historical English baseline, not a dictionary-equivalent stemmer. |
+| Lucene PorterStemFilter | `lucenePorterStemFilter` | 29.666 | 0.536 | 140.9 | 2.061 | Lucene TokenFilter integration path for Porter; includes TokenStream overhead. |
+| Lucene KStemFilter | `luceneKStemFilter` | 41.485 | 0.509 | 197.1 | 2.882 | Krovetz-style English TokenFilter; broader than minimal suffix filters. |
+| Lucene HunspellStemFilter | `luceneHunspellStemFilter` | 74.399 | 1.223 | 353.4 | 5.168 | Benchmark-only English Hunspell comparison using the benchmark Hunspell corpus. |
+| Snowball English / Porter2 | `snowballEnglishPorter2` | 43.117 | 1.983 | 204.8 | 2.995 | Porter2 suffix-rule stemmer, distinct from original Porter. |
+| Paice/Husk Lancaster | `paiceHuskLancaster` | 137.952 | 2.443 | 655.4 | 9.582 | Aggressive rule-based English stemmer. |
 
 ## Interpretation Notes
 
-- Radixor is a dictionary-derived patch-command stemmer. Its quality depends on the language resource used to train the compiled trie.
+- Radixor is a dictionary-trained patch-command stemmer. Its learned transformations can generalize beyond the word forms listed in the training resource.
 - Light, minimal, plural, and possessive filters are narrow baselines. They can be fast because they intentionally perform less linguistic work.
 - Lucene TokenFilter rows include TokenStream, attribute, and required normalization overhead. Direct rows measure exposed direct APIs.
 - Morfologik rows are dictionary-based and can emit multiple terms for one input token. Quality rows use the first returned term when no ranking weight is available.
@@ -104,7 +96,7 @@ This mode contains **15 result rows**, **11 evaluated stemmers**, and **3 output
 |2|ENGLISH LUCENE PORTER COPIED|0.954796|0.000207%|9.040545%|
 |3|ENGLISH LUCENE PORTER FILTER|0.954796|0.000207%|9.040545%|
 |4|ENGLISH OPENNLP PORTER|0.954796|0.000207%|9.040545%|
-|5|ENGLISH SNOWBALL PORTER2|0.954708|0.000212%|9.058097%|
+|5|ENGLISH SNOWBALL PORTER2|0.954732|0.000212%|9.053310%|
 |6|ENGLISH SNOWBALL ORIGINAL PORTER|0.954659|0.000206%|9.067990%|
 |7|ENGLISH PAICE HUSK LANCASTER|0.952535|0.000960%|9.492110%|
 |8|ENGLISH LUCENE KSTEM FILTER|0.878645|0.000110%|24.270875%|
@@ -122,7 +114,7 @@ This mode contains **15 result rows**, **11 evaluated stemmers**, and **3 output
 |2|ENGLISH LUCENE PORTER COPIED|PRIMARY_OUTPUT|0.440121|0.909595|0.999998|0.954796|0.999998|0.000002|
 |3|ENGLISH LUCENE PORTER FILTER|PRIMARY_OUTPUT|0.440121|0.909595|0.999998|0.954796|0.999998|0.000002|
 |4|ENGLISH OPENNLP PORTER|PRIMARY_OUTPUT|0.440121|0.909595|0.999998|0.954796|0.999998|0.000002|
-|5|ENGLISH SNOWBALL PORTER2|PRIMARY_OUTPUT|0.434174|0.909419|0.999998|0.954708|0.999998|0.000002|
+|5|ENGLISH SNOWBALL PORTER2|PRIMARY_OUTPUT|0.434309|0.909467|0.999998|0.954732|0.999998|0.000002|
 |6|ENGLISH SNOWBALL ORIGINAL PORTER|PRIMARY_OUTPUT|0.441440|0.909320|0.999998|0.954659|0.999998|0.000002|
 |7|ENGLISH PAICE HUSK LANCASTER|PRIMARY_OUTPUT|0.144284|0.905079|0.999990|0.952535|0.999990|0.000010|
 |8|ENGLISH LUCENE KSTEM FILTER|PRIMARY_OUTPUT|0.551014|0.757291|0.999999|0.878645|0.999998|0.000002|
@@ -140,7 +132,7 @@ This mode contains **15 result rows**, **11 evaluated stemmers**, and **3 output
 |2|ENGLISH LUCENE PORTER COPIED|PRIMARY_OUTPUT|0.490783|0.593208|0.749662|0.421675|0.632717|0.632716|
 |3|ENGLISH LUCENE PORTER FILTER|PRIMARY_OUTPUT|0.490783|0.593208|0.749662|0.421675|0.632717|0.632716|
 |4|ENGLISH OPENNLP PORTER|PRIMARY_OUTPUT|0.490783|0.593208|0.749662|0.421675|0.632717|0.632716|
-|5|ENGLISH SNOWBALL PORTER2|PRIMARY_OUTPUT|0.484849|0.587747|0.746086|0.416176|0.628368|0.628367|
+|5|ENGLISH SNOWBALL PORTER2|PRIMARY_OUTPUT|0.484986|0.587880|0.746192|0.416310|0.628482|0.628481|
 |6|ENGLISH SNOWBALL ORIGINAL PORTER|PRIMARY_OUTPUT|0.492079|0.594348|0.750277|0.422827|0.633570|0.633569|
 |7|ENGLISH PAICE HUSK LANCASTER|PRIMARY_OUTPUT|0.173443|0.248891|0.440518|0.142133|0.361370|0.361368|
 |8|ENGLISH LUCENE KSTEM FILTER|PRIMARY_OUTPUT|0.582762|0.637891|0.704541|0.468312|0.645971|0.645970|
@@ -158,7 +150,7 @@ This mode contains **15 result rows**, **11 evaluated stemmers**, and **3 output
 |2|ENGLISH LUCENE PORTER COPIED|PRIMARY_OUTPUT|285026|362583|28329|175199061547|362583 / 175199424130|28329 / 313355|
 |3|ENGLISH LUCENE PORTER FILTER|PRIMARY_OUTPUT|285026|362583|28329|175199061547|362583 / 175199424130|28329 / 313355|
 |4|ENGLISH OPENNLP PORTER|PRIMARY_OUTPUT|285026|362583|28329|175199061547|362583 / 175199424130|28329 / 313355|
-|5|ENGLISH SNOWBALL PORTER2|PRIMARY_OUTPUT|284971|371381|28384|175199052749|371381 / 175199424130|28384 / 313355|
+|5|ENGLISH SNOWBALL PORTER2|PRIMARY_OUTPUT|284986|371197|28369|175199052933|371197 / 175199424130|28369 / 313355|
 |6|ENGLISH SNOWBALL ORIGINAL PORTER|PRIMARY_OUTPUT|284940|360538|28415|175199063592|360538 / 175199424130|28415 / 313355|
 |7|ENGLISH PAICE HUSK LANCASTER|PRIMARY_OUTPUT|283611|1682034|29744|175197742096|1682034 / 175199424130|29744 / 313355|
 |8|ENGLISH LUCENE KSTEM FILTER|PRIMARY_OUTPUT|237301|193361|76054|175199230769|193361 / 175199424130|76054 / 313355|
@@ -251,7 +243,7 @@ This mode contains **15 result rows**, **11 evaluated stemmers**, and **3 output
 |2|ENGLISH LUCENE PORTER COPIED|0.955064|0.000222%|8.987032%|
 |3|ENGLISH LUCENE PORTER FILTER|0.955064|0.000222%|8.987032%|
 |4|ENGLISH OPENNLP PORTER|0.955064|0.000222%|8.987032%|
-|5|ENGLISH SNOWBALL PORTER2|0.955016|0.000228%|8.996666%|
+|5|ENGLISH SNOWBALL PORTER2|0.955040|0.000228%|8.991849%|
 |6|ENGLISH SNOWBALL ORIGINAL PORTER|0.954926|0.000221%|9.014651%|
 |7|ENGLISH PAICE HUSK LANCASTER|0.952850|0.001032%|9.428933%|
 |8|ENGLISH LUCENE KSTEM FILTER|0.881028|0.000120%|23.794246%|
@@ -269,7 +261,7 @@ This mode contains **15 result rows**, **11 evaluated stemmers**, and **3 output
 |2|ENGLISH LUCENE PORTER COPIED|PRIMARY_OUTPUT|0.440920|0.910130|0.999998|0.955064|0.999998|0.000002|
 |3|ENGLISH LUCENE PORTER FILTER|PRIMARY_OUTPUT|0.440920|0.910130|0.999998|0.955064|0.999998|0.000002|
 |4|ENGLISH OPENNLP PORTER|PRIMARY_OUTPUT|0.440920|0.910130|0.999998|0.955064|0.999998|0.000002|
-|5|ENGLISH SNOWBALL PORTER2|PRIMARY_OUTPUT|0.435017|0.910033|0.999998|0.955016|0.999998|0.000002|
+|5|ENGLISH SNOWBALL PORTER2|PRIMARY_OUTPUT|0.435153|0.910082|0.999998|0.955040|0.999998|0.000002|
 |6|ENGLISH SNOWBALL ORIGINAL PORTER|PRIMARY_OUTPUT|0.442235|0.909853|0.999998|0.954926|0.999998|0.000002|
 |7|ENGLISH PAICE HUSK LANCASTER|PRIMARY_OUTPUT|0.144700|0.905711|0.999990|0.952850|0.999990|0.000010|
 |8|ENGLISH LUCENE KSTEM FILTER|PRIMARY_OUTPUT|0.551013|0.762058|0.999999|0.881028|0.999998|0.000002|
@@ -287,7 +279,7 @@ This mode contains **15 result rows**, **11 evaluated stemmers**, and **3 output
 |2|ENGLISH LUCENE PORTER COPIED|PRIMARY_OUTPUT|0.491609|0.594049|0.750417|0.422524|0.633478|0.633477|
 |3|ENGLISH LUCENE PORTER FILTER|PRIMARY_OUTPUT|0.491609|0.594049|0.750417|0.422524|0.633478|0.633477|
 |4|ENGLISH OPENNLP PORTER|PRIMARY_OUTPUT|0.491609|0.594049|0.750417|0.422524|0.633478|0.633477|
-|5|ENGLISH SNOWBALL PORTER2|PRIMARY_OUTPUT|0.485725|0.588647|0.746915|0.417080|0.629190|0.629189|
+|5|ENGLISH SNOWBALL PORTER2|PRIMARY_OUTPUT|0.485863|0.588782|0.747021|0.417215|0.629305|0.629304|
 |6|ENGLISH SNOWBALL ORIGINAL PORTER|PRIMARY_OUTPUT|0.492900|0.595181|0.751027|0.423671|0.634326|0.634325|
 |7|ENGLISH PAICE HUSK LANCASTER|PRIMARY_OUTPUT|0.173928|0.249533|0.441413|0.142553|0.362017|0.362015|
 |8|ENGLISH LUCENE KSTEM FILTER|PRIMARY_OUTPUT|0.583322|0.639575|0.707836|0.470129|0.648000|0.647999|
@@ -305,7 +297,7 @@ This mode contains **15 result rows**, **11 evaluated stemmers**, and **3 output
 |2|ENGLISH LUCENE PORTER COPIED|PRIMARY_OUTPUT|283398|359344|27984|161561630294|359344 / 161561989638|27984 / 311382|
 |3|ENGLISH LUCENE PORTER FILTER|PRIMARY_OUTPUT|283398|359344|27984|161561630294|359344 / 161561989638|27984 / 311382|
 |4|ENGLISH OPENNLP PORTER|PRIMARY_OUTPUT|283398|359344|27984|161561630294|359344 / 161561989638|27984 / 311382|
-|5|ENGLISH SNOWBALL PORTER2|PRIMARY_OUTPUT|283368|368027|28014|161561621611|368027 / 161561989638|28014 / 311382|
+|5|ENGLISH SNOWBALL PORTER2|PRIMARY_OUTPUT|283383|367843|27999|161561621795|367843 / 161561989638|27999 / 311382|
 |6|ENGLISH SNOWBALL ORIGINAL PORTER|PRIMARY_OUTPUT|283312|357325|28070|161561632313|357325 / 161561989638|28070 / 311382|
 |7|ENGLISH PAICE HUSK LANCASTER|PRIMARY_OUTPUT|282022|1666990|29360|161560322648|1666990 / 161561989638|29360 / 311382|
 |8|ENGLISH LUCENE KSTEM FILTER|PRIMARY_OUTPUT|237291|193354|74091|161561796284|193354 / 161561989638|74091 / 311382|
@@ -408,7 +400,7 @@ Standard ARI, homogeneity, completeness, V-measure, and NMI are not calculated: 
 ### Provenance
 
 - Authoritative source: `docs/benchmarks/data/stemming-quality.csv`
-- Source SHA-256: `edf16b07be8a535943ddf37caeb8807755c95e9e1fb13244145f28be74b491d8`
+- Source SHA-256: `d34f325da320a2e040b54d8d8b5c216d70448f08cfb8659a423e99882aa1afb5`
 - Evaluation command: `./gradlew stemmingQuality --no-daemon`
 - Dictionary language: `US_UK`
 - Processing modes: `ALL_WORDS`, `LOWERCASE_GROUPS_ONLY`

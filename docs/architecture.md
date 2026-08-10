@@ -2,7 +2,7 @@
 
 This document explains the structural architecture of **Radixor**: what data is stored, how it flows through the build pipeline, and how runtime lookup works once a compiled trie has been produced.
 
-## Component boundaries
+## Java component boundaries
 
 | Component | Responsibility |
 |---|---|
@@ -18,6 +18,23 @@ This document explains the structural architecture of **Radixor**: what data is 
 | Release workflows | Independent core, one-model, and catalog publication boundaries |
 
 Read [Model Selection and Loading](model-selection-and-loading.md) for executable application examples and [Stemmer Models](stemmer-models.md) for artifact maintenance.
+
+## Python component boundaries
+
+The Python distribution is a separate native implementation rather than a JVM
+wrapper. The `radixor` wheel contains the Rust/PyO3 runtime but no language
+data. Its mandatory `radixor-models-standard` dependency supplies 20 validated,
+precompiled, GZip-compressed version 7 `.rxc` tries. It does not use Java model
+JARs, `ServiceLoader`, descriptors, or the Java registry.
+
+`Stemmer("<alias>")` resolves and synchronously loads a compiled standard model;
+it does not parse a textual dictionary at application startup.
+`radixor.compile(...)` remains available for application-owned textual
+dictionaries, and `Stemmer(compiled=...)` loads the resulting version 7
+artifact. The Java and Python in-memory layouts are intentionally different;
+the shared dictionary syntax and version 7 binary stream are their
+interoperability boundaries. See [Radixor for Python](python/index.md) and
+[Compiling Dictionaries in Python](python/model-compilation.md).
 
 ## Runtime model discovery and loading
 
@@ -100,8 +117,14 @@ That matters because many words share similar transformation patterns. Once thos
 
 The full build-time flow is:
 
-```text
-Dictionary -> Mutable trie -> Reduced trie -> Compiled trie
+```mermaid
+flowchart TD
+    dictionary[Training dictionary]
+    mutable[Mutable trie]
+    reduced[Reduced trie]
+    compiled[Compiled trie]
+
+    dictionary --> mutable --> reduced --> compiled
 ```
 
 Each stage has a different purpose.

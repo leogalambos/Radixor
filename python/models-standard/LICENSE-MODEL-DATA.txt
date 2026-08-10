@@ -1,0 +1,12 @@
+Radixor Standard Model Data License
+
+The model data in this distribution, including Radixor's protectable
+selection, transformation, metadata, and packaging contributions, is licensed
+under Creative Commons Attribution-ShareAlike 3.0 Unported (CC BY-SA 3.0):
+
+https://creativecommons.org/licenses/by-sa/3.0/
+
+Each model's attribution, upstream provenance, and license details are recorded
+in radixor_models_standard/notices/<model-id>/NOTICE-model-data.txt. Those
+notices form part of this distribution and must be retained with redistributed
+model data.

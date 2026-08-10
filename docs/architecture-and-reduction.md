@@ -13,11 +13,29 @@ Radixor does not keep a large flat table of final stems. Instead, it converts di
 
 The build-time flow is:
 
-```text
-Dictionary -> Mutable trie -> Reduced trie -> Compiled trie
+```mermaid
+flowchart TD
+    dictionary[Training dictionary]
+    mutable[Mutable trie]
+    reduced[Reduced trie]
+    compiled[Compiled trie]
+
+    dictionary --> mutable --> reduced --> compiled
 ```
 
-For registered models, the dictionary is an independently versioned GZip resource discovered through a descriptor and verified before this flow begins. The model resource is input to trie construction, not a precompiled trie. See [Model Selection and Loading](model-selection-and-loading.md) for discovery and [Architecture](architecture.md) for component and release boundaries.
+Both implementations follow this conceptual flow. Java materializes its
+object-based compiled trie and exposes multiple reduction modes; the Python
+extension implements the production dominant-result profile in Rust and stores
+the runtime trie in flat arrays. Their persisted interoperability boundary is
+the version 7 binary stream, not their in-memory representation.
+
+For registered Java models, the dictionary is an independently versioned GZip
+resource discovered through a descriptor and verified before this flow begins.
+For Python's standard models, this flow runs during package preparation and the
+installed `radixor-models-standard` distribution already contains validated
+compiled version 7 tries. See [Model Selection and Loading](model-selection-and-loading.md)
+for Java discovery and [Architecture](architecture.md) for component and release
+boundaries.
 
 Explicit descriptors and stable model IDs now use the same compiled-value path as language defaults. `loadCompiled(descriptor, ...)` and `loadCompiled(modelId, ...)` first build with serialized patch commands and then map those values to `CompiledPatchCommand` while preserving metadata, reduction semantics, and ranked `getAll` order. Very large inputs can have a high temporary construction peak; PoliMorf is verified in an isolated 6 GiB JVM rather than increasing ordinary test or Gradle daemon heaps.
 

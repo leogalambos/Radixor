@@ -59,10 +59,13 @@ final class QualityStemmerMatrixTest {
     @Test @DisplayName("Candidate discovery is derived from every JMH quality candidate")
     void discoversEveryCandidate() {
         final List<Candidate> candidates = QualityStemmerMatrix.candidates();
-        assertEquals(98, candidates.size(), "The current adapter-language matrix size changed; report coverage must be reviewed.");
+        assertEquals(102, candidates.size(), "The current adapter-language matrix size changed; report coverage must be reviewed.");
         assertTrue(candidates.stream().anyMatch(candidate -> !candidate.name().endsWith("_RADIXOR")));
         assertTrue(candidates.stream().anyMatch(candidate -> candidate.name().equals("DA_DK_RADIXOR")));
         assertTrue(candidates.stream().anyMatch(candidate -> candidate.name().equals("YI_RADIXOR")));
+        assertTrue(candidates.stream().anyMatch(candidate -> candidate.name().equals("SNOWBALL_CZECH_DIRECT")));
+        assertTrue(candidates.stream().anyMatch(candidate -> candidate.name().equals("SNOWBALL_PERSIAN_DIRECT")));
+        assertTrue(candidates.stream().anyMatch(candidate -> candidate.name().equals("SNOWBALL_POLISH_DIRECT")));
         assertTrue(candidates.stream().anyMatch(candidate -> candidate.name().equals("POLISH_POLIMORF_RADIXOR")
                 && candidate.resultLanguage().equals("pl-pl-polimorf")));
         assertTrue(candidates.stream().anyMatch(candidate -> candidate.name().equals("POLISH_LUCENE_STEMPEL_DIRECT")
@@ -74,7 +77,7 @@ final class QualityStemmerMatrixTest {
     void completePublicationSelectionUsesOnlyDefaultModels() {
         final List<Candidate> candidates = StemmingQualityApplication.selectCandidates(
                 EnumSet.allOf(Language.class), "");
-        assertEquals(92, candidates.size());
+        assertEquals(95, candidates.size());
         assertTrue(candidates.stream().allMatch(candidate ->
                 candidate.dictionaryModelId().equals(candidate.language().defaultModelId())));
         assertTrue(candidates.stream().noneMatch(candidate ->
@@ -95,7 +98,7 @@ final class QualityStemmerMatrixTest {
         final Path report = this.temporaryDirectory.resolve("matrix.csv");
         QualityReportWriter.writeCsv(report, rows);
         final String text = Files.readString(report, StandardCharsets.UTF_8);
-        assertEquals(197, text.lines().count());
+        assertEquals(205, text.lines().count());
         for (Candidate candidate : QualityStemmerMatrix.candidates()) {
             final String prefix = "\"" + candidate.name() + "\",\"" + candidate.resultLanguage()
                     + "\",\"\",\"\",\"\",";

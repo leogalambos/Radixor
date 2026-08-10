@@ -104,7 +104,6 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument("--docs-root", type=Path, default=Path("docs"))
     parser.add_argument("--readme", type=Path, default=Path("README.md"))
     parser.add_argument("--corpus", type=Path, required=True)
-    parser.add_argument("--old-comparison", type=Path, required=True)
     parser.add_argument("--accuracy", type=Path, required=True)
     parser.add_argument("--speed", type=Path, required=True)
     parser.add_argument("--coverage-accuracy", type=Path, required=True)
@@ -165,9 +164,13 @@ def read_corpora(path: Path) -> dict[str, dict[str, object]]:
             )
             entry["commands"].append((row["Command class"], int(row["Command count"])))
     if set(corpora) != set(LANGUAGES.values()):
-        raise ValueError(f"Corpus report languages differ from documentation languages: {sorted(corpora)}")
+        raise ValueError(
+            f"Corpus report languages differ from documentation languages: {sorted(corpora)}"
+        )
     if any(entry["model"] == "pl-pl-polimorf" for entry in corpora.values()):
-        raise ValueError("The default-model corpus report must not contain pl-pl-polimorf.")
+        raise ValueError(
+            "The default-model corpus report must not contain pl-pl-polimorf."
+        )
     return corpora
 
 
@@ -180,11 +183,11 @@ def render_corpus_sections(language: str, entry: dict[str, object]) -> str:
     lines = [
         "## Dictionary Corpus",
         "",
-        "| Model ID | Model version | Language | Dictionary rows | Complete quality tokens | Already-root tokens | Changed speed tokens |",
-        "| --- | --- | --- | ---: | ---: | ---: | ---: |",
+        "| Model ID | Model version | Language | Dictionary rows | Complete quality tokens | Already-root tokens | Changed tokens | JMH timing tokens |",
+        "| --- | --- | --- | ---: | ---: | ---: | ---: | ---: |",
         f"| `{entry['model']}` | `{entry['version']}` | `{language}` | {format_integer(int(entry['rows']))} | "
         f"{format_integer(total)} | {format_integer(int(entry['roots']))} | "
-        f"{format_integer(int(entry['changed']))} |",
+        f"{format_integer(int(entry['changed']))} | {format_integer(int(entry['timing']))} |",
         "",
         "## Radixor Patch Command Distribution",
         "",
@@ -205,7 +208,9 @@ def render_corpus_sections(language: str, entry: dict[str, object]) -> str:
             f"{100.0 * count / total:.3f}% |"
         )
     if command_total != total:
-        raise ValueError(f"Patch command count {command_total} differs from corpus total {total} for {language}.")
+        raise ValueError(
+            f"Patch command count {command_total} differs from corpus total {total} for {language}."
+        )
     return "\n".join(lines) + "\n\n"
 
 
@@ -252,17 +257,27 @@ def select_accuracy_key(
         for key, counters in data.auxiliary.items()
         if AUXILIARY_NAMES.issubset(counters)
         and language_words.issubset(
-            words(key.benchmark + " " + " ".join(f"{name} {value}" for name, value in key.parameters))
+            words(
+                key.benchmark
+                + " "
+                + " ".join(f"{name} {value}" for name, value in key.parameters)
+            )
         )
     ]
     if not matches:
-        raise ValueError(f"No current JMH accuracy row matches language {language} and label {label}.")
+        raise ValueError(
+            f"No current JMH accuracy row matches language {language} and label {label}."
+        )
 
     label_words = words(label) - language_words
 
     def score(key: Key) -> tuple[int, int, int, int, int]:
         identity_words = (
-            words(key.benchmark + " " + " ".join(f"{name} {value}" for name, value in key.parameters))
+            words(
+                key.benchmark
+                + " "
+                + " ".join(f"{name} {value}" for name, value in key.parameters)
+            )
             - language_words
         )
         return (
@@ -273,9 +288,13 @@ def select_accuracy_key(
             int(language_words.issubset(words(key.benchmark))),
         )
 
-    ranked = sorted(((score(key), key) for key in matches), reverse=True, key=lambda item: item[0])
+    ranked = sorted(
+        ((score(key), key) for key in matches), reverse=True, key=lambda item: item[0]
+    )
     if ranked[0][0][0] == 0:
-        raise ValueError(f"No implementation identity words match accuracy label {label} for {language}.")
+        raise ValueError(
+            f"No implementation identity words match accuracy label {label} for {language}."
+        )
     if len(ranked) > 1 and ranked[0][0] == ranked[1][0]:
         raise ValueError(
             f"Ambiguous current JMH accuracy identity for {label} in {language}: "
@@ -300,11 +319,31 @@ def update_accuracy_table(
 ) -> str:
     start = text.index("## Accuracy")
     end = text.index("## Speed", start)
-    section = text[start:end]
+    section = text[start:end].rstrip()
     output: list[str] = []
     for line in section.splitlines():
         cells = [cell.strip() for cell in line.split("|")[1:-1]]
-        if len(cells) == 5 and all(re.fullmatch(r"\d+\.\d{3}%", cell) for cell in cells[1:4]):
+        measured = len(cells) == 5 and all(
+            re.fullmatch(r"\d+\.\d{3}%", cell) for cell in cells[1:4]
+        )
+        pending = len(cells) == 5 and all(cell == "pending" for cell in cells[1:4])
+        partial_pending = (
+            len(cells) == 5
+            and any(cell == "pending" for cell in cells[1:4])
+            and not pending
+        )
+        if partial_pending:
+            raise ValueError(
+                f"Partially pending accuracy row for {cells[0]} in {language}."
+            )
+        if (
+            len(cells) == 5
+            and cells[0] not in {"Stemmer", "---"}
+            and not measured
+            and not pending
+        ):
+            raise ValueError(f"Malformed accuracy row for {cells[0]} in {language}.")
+        if measured or pending:
             if cells[0] == "Radixor":
                 values = rounded_accuracy(corpus_accuracy(corpus))
             else:
@@ -312,12 +351,8 @@ def update_accuracy_table(
                 values = rounded_accuracy(accuracy(new_data, key))
             cells[1:4] = [f"{value}%" for value in values]
             line = "| " + " | ".join(cells) + " |"
-        elif language == "HE_IL" and len(cells) == 5 and cells[0] == "Radixor" and cells[1] == "pending":
-            values = rounded_accuracy(corpus_accuracy(corpus))
-            cells[1:4] = [f"{value}%" for value in values]
-            line = "| " + " | ".join(cells) + " |"
         output.append(line)
-    replacement = "\n".join(output) + "\n\n"
+    replacement = "\n".join(output).rstrip() + "\n\n"
     return text[:start] + replacement + text[end:]
 
 
@@ -328,9 +363,9 @@ def method_and_parameter(display: str) -> tuple[str, str]:
     return match.group(1), match.group(2) or ""
 
 
-def speed_matches(display: str, data: JmhData) -> list[Key]:
+def speed_matches(display: str, data: JmhData, language: str) -> list[Key]:
     method, language_case = method_and_parameter(display)
-    return [
+    matches = [
         key
         for key, row in data.primary.items()
         if key.method == method
@@ -338,57 +373,54 @@ def speed_matches(display: str, data: JmhData) -> list[Key]:
         and key not in data.auxiliary
         and row["Unit"] == "ns/op"
     ]
+    if language_case or len(matches) <= 1:
+        return matches
+    language_words = LANGUAGE_IDENTITY_WORDS[language]
+    return [
+        key
+        for key in matches
+        if language_words.issubset(
+            words(" ".join(value for _, value in key.parameters))
+        )
+    ]
 
 
-def closest_speed_key(display: str, score_ms: float, data: JmhData) -> tuple[Key, float]:
-    matches = speed_matches(display, data)
-    if not matches:
-        raise ValueError(f"No JMH speed row matches {display}")
-    selected = min(matches, key=lambda key: abs(float(data.primary[key]["Score"]) / 1_000_000.0 - score_ms))
-    difference = abs(float(data.primary[selected]["Score"]) / 1_000_000.0 - score_ms)
-    return selected, difference
-
-
-def select_speed_key(display: str, published_score_ms: float, old_data: JmhData, new_data: JmhData) -> Key:
-    current, current_difference = closest_speed_key(display, published_score_ms, new_data)
-    if current_difference < 0.001:
-        return current
-    selected, difference = closest_speed_key(display, published_score_ms, old_data)
-    if difference >= 0.001:
-        raise ValueError(f"Old speed row for {display} differs by {difference:.6f} ms from documentation.")
-    return selected
+def select_speed_key(display: str, data: JmhData, language: str) -> Key:
+    matches = speed_matches(display, data, language)
+    if len(matches) != 1:
+        raise ValueError(
+            f"Expected one current JMH speed row for {display} in {language}, found {len(matches)}."
+        )
+    return matches[0]
 
 
 def update_speed_table(
     text: str,
-    old_data: JmhData,
     new_data: JmhData,
-    changed_tokens: int,
+    timing_tokens: int,
     language: str,
 ) -> str:
     start = text.index("## Speed")
     end = text.index("## Interpretation Notes", start)
-    section = text[start:end]
+    section = text[start:end].rstrip()
     parsed: list[tuple[str, list[str] | None, Key | None]] = []
     radixor_score = math.nan
     for line in section.splitlines():
         cells = [cell.strip() for cell in line.split("|")[1:-1]]
         if len(cells) == 7 and cells[1].startswith("`") and cells[1].endswith("`"):
             display = cells[1].strip("`")
-            if cells[2] == "pending" and language == "HE_IL":
-                matches = [
-                    key
-                    for key, row in new_data.primary.items()
-                    if key.method == "hebrewRadixor" and key not in new_data.auxiliary and row["Unit"] == "ns/op"
-                ]
-                if len(matches) != 1:
-                    raise ValueError(f"Expected one Hebrew speed row, found {len(matches)}")
-                key = matches[0]
-            elif re.fullmatch(r"\d+\.\d{3}", cells[2]):
-                key = select_speed_key(display, float(cells[2]), old_data, new_data)
-            else:
-                parsed.append((line, None, None))
-                continue
+            pending = all(cell == "pending" for cell in cells[2:6])
+            measured = all(re.fullmatch(r"\d+\.\d+", cell) for cell in cells[2:6])
+            partial_pending = (
+                any(cell == "pending" for cell in cells[2:6]) and not pending
+            )
+            if partial_pending:
+                raise ValueError(
+                    f"Partially pending speed row for {cells[0]} in {language}."
+                )
+            if not pending and not measured:
+                raise ValueError(f"Malformed speed row for {cells[0]} in {language}.")
+            key = select_speed_key(display, new_data, language)
             if key not in new_data.primary:
                 raise ValueError(f"New JMH report omits speed key {key}")
             score = float(new_data.primary[key]["Score"])
@@ -408,18 +440,17 @@ def update_speed_table(
             error = float(row["Score Error (99.9%)"])
             cells[2] = f"{score / 1_000_000.0:.3f}"
             cells[3] = f"{error / 1_000_000.0:.3f}"
-            cells[4] = f"{score / changed_tokens:.1f}"
+            cells[4] = f"{score / timing_tokens:.1f}"
             cells[5] = f"{score / radixor_score:.3f}"
             line = "| " + " | ".join(cells) + " |"
         output.append(line)
-    replacement = "\n".join(output) + "\n\n"
+    replacement = "\n".join(output).rstrip() + "\n\n"
     return text[:start] + replacement + text[end:]
 
 
 def update_language_pages(
     docs_root: Path,
     corpora: dict[str, dict[str, object]],
-    old_data: JmhData,
     accuracy_data: JmhData,
     speed_data: JmhData,
 ) -> None:
@@ -429,7 +460,11 @@ def update_language_pages(
         text = path.read_text(encoding="utf-8")
         corpus_start = text.index("## Dictionary Corpus")
         accuracy_start = text.index("## Accuracy", corpus_start)
-        text = text[:corpus_start] + render_corpus_sections(language, corpora[language]) + text[accuracy_start:]
+        text = (
+            text[:corpus_start]
+            + render_corpus_sections(language, corpora[language])
+            + text[accuracy_start:]
+        )
         text = re.sub(
             r"Speed uses JMH average time, \d+ warmup iterations, \d+ measurement iterations, "
             r"\d+ forks?, and 1 thread\.",
@@ -439,11 +474,15 @@ def update_language_pages(
             count=1,
         )
         text = update_accuracy_table(text, accuracy_data, language, corpora[language])
-        text = update_speed_table(text, old_data, speed_data, int(corpora[language]["changed"]), language)
+        text = update_speed_table(
+            text, speed_data, int(corpora[language]["timing"]), language
+        )
         path.write_text(text, encoding="utf-8")
 
 
-def update_corpora_reference(docs_root: Path, corpora: dict[str, dict[str, object]]) -> None:
+def update_corpora_reference(
+    docs_root: Path, corpora: dict[str, dict[str, object]]
+) -> None:
     path = docs_root / "benchmarks" / "reference" / "corpora.md"
     text = path.read_text(encoding="utf-8")
     original_header = "| Language resource |"
@@ -453,7 +492,9 @@ def update_corpora_reference(docs_root: Path, corpora: dict[str, dict[str, objec
     elif current_header in text:
         table_start = text.index(current_header)
     else:
-        raise ValueError("The corpora reference contains no recognized corpus-table header.")
+        raise ValueError(
+            "The corpora reference contains no recognized corpus-table header."
+        )
     table_end = text.index("\n\n", table_start)
     lines = [
         "| Default model ID | Version | SHA-256 | Language | Dictionary rows | Total tokens | Already-root tokens | Changed tokens | Speed timing tokens |",
@@ -468,7 +509,9 @@ def update_corpora_reference(docs_root: Path, corpora: dict[str, dict[str, objec
             f"{format_integer(int(entry['changed']))} | {format_integer(int(entry['timing']))} |"
         )
     replacement = "\n".join(lines)
-    path.write_text(text[:table_start] + replacement + text[table_end:], encoding="utf-8")
+    path.write_text(
+        text[:table_start] + replacement + text[table_end:], encoding="utf-8"
+    )
 
 
 def coverage_rows(accuracy_data: JmhData, speed_data: JmhData) -> list[str]:
@@ -558,23 +601,31 @@ def update_coverage(
         "quality/speed envelope: the amount and quality of dictionary knowledge affect stemming precision,\n"
         "while contracted tries reduce lookup cost in uniform regions of the compiled graph.\n\n"
     )
-    index.write_text(index_text[:key_start] + key_section + index_text[key_end:], encoding="utf-8")
+    index.write_text(
+        index_text[:key_start] + key_section + index_text[key_end:], encoding="utf-8"
+    )
 
 
 def main() -> None:
     arguments = parse_arguments()
     corpora = read_corpora(arguments.corpus)
-    old_data = read_jmh(arguments.old_comparison)
     accuracy_data = read_jmh(arguments.accuracy)
     speed_data = read_jmh(arguments.speed)
     coverage_accuracy_data = read_jmh(arguments.coverage_accuracy)
     coverage_speed_data = read_jmh(arguments.coverage_speed)
     measured_keys = set(accuracy_data.primary) | set(speed_data.primary)
     if any("PolishPolimorf" in key.benchmark for key in measured_keys):
-        raise ValueError("A published report contains the excluded PolishPolimorf benchmark.")
-    update_language_pages(arguments.docs_root, corpora, old_data, accuracy_data, speed_data)
+        raise ValueError(
+            "A published report contains the excluded PolishPolimorf benchmark."
+        )
+    update_language_pages(arguments.docs_root, corpora, accuracy_data, speed_data)
     update_corpora_reference(arguments.docs_root, corpora)
-    update_coverage(arguments.docs_root, arguments.readme, coverage_accuracy_data, coverage_speed_data)
+    update_coverage(
+        arguments.docs_root,
+        arguments.readme,
+        coverage_accuracy_data,
+        coverage_speed_data,
+    )
 
 
 if __name__ == "__main__":

@@ -1,6 +1,11 @@
-# Programmatic Usage
+# Java Programmatic Usage
 
 Radixor code and model data are separate runtime components. Every example on this page requires `org.egothor:radixor:<radixor-version>` as an `implementation` dependency and at least one model JAR as a runtime dependency. The core JAR contains no `stemmer.gz`.
+
+The Python implementation has its own native API. `pip install radixor` also
+installs the separate standard data package containing 20 precompiled models.
+See the [Python Quick Start](python/quick-start.md) and
+[Python Usage and API](python/usage.md).
 
 For complete dependency patterns, lifecycle guidance, and troubleshooting, use [Model Selection and Loading](model-selection-and-loading.md). The generated [model catalog](stemmer-model-catalog.md) records the current artifacts, versions, checksums, and provenance.
 

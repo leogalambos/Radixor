@@ -1,4 +1,4 @@
-# Integration Deep Dive
+# Java Integration Deep Dive
 
 This page explains how to integrate Radixor into a real Java application after the first
 fast-track experiment works. It covers dependencies, external model artifacts, runtime lifecycle,

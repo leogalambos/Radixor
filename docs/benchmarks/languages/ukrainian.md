@@ -8,9 +8,9 @@ Radixor must not be read as simply "slower" when a narrow competitor has a lower
 
 ## Dictionary Corpus
 
-| Model ID | Model version | Language | Dictionary rows | Complete quality tokens | Already-root tokens | Changed speed tokens |
-| --- | --- | --- | ---: | ---: | ---: | ---: |
-| `uk-ua-default` | `1.0.0` | `UK_UA` | 1,493 | 15,737 | 2,985 | 12,752 |
+| Model ID | Model version | Language | Dictionary rows | Complete quality tokens | Already-root tokens | Changed tokens | JMH timing tokens |
+| --- | --- | --- | ---: | ---: | ---: | ---: | ---: |
+| `uk-ua-default` | `1.0.0` | `UK_UA` | 1,493 | 15,737 | 2,985 | 12,752 | 12,752 |
 
 ## Radixor Patch Command Distribution
 
@@ -30,13 +30,10 @@ Accuracy is computed from JMH auxiliary counters in the current report. The coun
 
 | Stemmer | All exact | Changed exact | Root preserved | Note |
 | --- | ---: | ---: | ---: | --- |
-| Radixor | 99.307% | 99.365% | 99.062% | Full Radixor dictionary patch-command stemmer. |
+| Radixor | 99.307% | 99.365% | 99.062% | Radixor dictionary-trained patch-command stemmer. |
 | Lucene HunspellStemFilter | 86.815% | 83.759% | 99.866% | Benchmark-only Ukrainian Hunspell dictionary compared via Lucene HunspellStemFilter. |
 | Lucene MorfologikFilter | 92.362% | 90.637% | 99.732% | Dictionary-based path; Morfologik can emit multiple terms. |
 | Morfologik direct | 92.362% | 90.637% | 99.732% | Direct dictionary lookup; first returned stem is used for quality when no ranking weight is exposed. |
-
-
-
 
 ## Speed
 
@@ -44,17 +41,14 @@ Speed uses JMH average time, 5 warmup iterations, 10 measurement iterations, 3 i
 
 | Stemmer | Benchmark method | Score ms/op | Error ms | ns/token | Relative vs Radixor | Note |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
-| Radixor | `ukrainianRadixor` | 0.639 | 0.009 | 50.1 | 1.000 | Full Radixor dictionary patch-command stemmer. |
-| Lucene HunspellStemFilter | `luceneHunspellStemFilter` | 47.919 | 5.308 | 3757.8 | 74.957 | Benchmark-only Ukrainian Hunspell dictionary compared via Lucene HunspellStemFilter. |
-| Morfologik direct | `ukrainianMorfologikDirect` | 8.662 | 0.105 | 679.3 | 13.550 | Direct Morfologik dictionary lookup; first returned stem is used for quality. |
-| Lucene MorfologikFilter | `ukrainianLuceneMorfologikFilter` | 15.367 | 0.219 | 1205.1 | 24.038 | Dictionary-based Morfologik TokenFilter; may emit multiple terms. |
-
-
-
+| Radixor | `ukrainianRadixor` | 0.594 | 0.010 | 46.6 | 1.000 | Radixor dictionary-trained patch-command stemmer. |
+| Lucene HunspellStemFilter | `luceneHunspellStemFilter` | 39.820 | 3.772 | 3122.6 | 67.067 | Benchmark-only Ukrainian Hunspell dictionary compared via Lucene HunspellStemFilter. |
+| Morfologik direct | `ukrainianMorfologikDirect` | 8.231 | 0.121 | 645.5 | 13.863 | Direct Morfologik dictionary lookup; first returned stem is used for quality. |
+| Lucene MorfologikFilter | `ukrainianLuceneMorfologikFilter` | 14.700 | 0.176 | 1152.8 | 24.758 | Dictionary-based Morfologik TokenFilter; may emit multiple terms. |
 
 ## Interpretation Notes
 
-- Radixor is a dictionary-derived patch-command stemmer. Its quality depends on the language resource used to train the compiled trie.
+- Radixor is a dictionary-trained patch-command stemmer. Its learned transformations can generalize beyond the word forms listed in the training resource.
 - Light, minimal, plural, and possessive filters are narrow baselines. They can be fast because they intentionally perform less linguistic work.
 - Lucene TokenFilter rows include TokenStream, attribute, and required normalization overhead. Direct rows measure exposed direct APIs.
 - Morfologik rows are dictionary-based and can emit multiple terms for one input token. Quality rows use the first returned term when no ranking weight is available.
@@ -364,7 +358,7 @@ Standard ARI, homogeneity, completeness, V-measure, and NMI are not calculated: 
 ### Provenance
 
 - Authoritative source: `docs/benchmarks/data/stemming-quality.csv`
-- Source SHA-256: `edf16b07be8a535943ddf37caeb8807755c95e9e1fb13244145f28be74b491d8`
+- Source SHA-256: `d34f325da320a2e040b54d8d8b5c216d70448f08cfb8659a423e99882aa1afb5`
 - Evaluation command: `./gradlew stemmingQuality --no-daemon`
 - Dictionary language: `UK_UA`
 - Processing modes: `ALL_WORDS`, `LOWERCASE_GROUPS_ONLY`

@@ -1,6 +1,9 @@
-# Quick Start
+# Java Quick Start
 
-This guide introduces the fastest practical path to using **Radixor**.
+This guide introduces the fastest practical path to using **Radixor in Java**.
+Python users have an equivalent application-oriented path in the
+[Python Quick Start](python/quick-start.md), followed by the
+[Python Usage and API guide](python/usage.md).
 
 If you are new to Radixor and want the shortest possible path to a first working stem, start with
 [Fast Track](fast-track.md). This Quick Start is a broader developer walkthrough: it introduces the

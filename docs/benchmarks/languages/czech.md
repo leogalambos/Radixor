@@ -8,9 +8,9 @@ Radixor must not be read as simply "slower" when a narrow competitor has a lower
 
 ## Dictionary Corpus
 
-| Model ID | Model version | Language | Dictionary rows | Complete quality tokens | Already-root tokens | Changed speed tokens |
-| --- | --- | --- | ---: | ---: | ---: | ---: |
-| `cs-cz-default` | `1.0.0` | `CS_CZ` | 5,113 | 56,612 | 10,049 | 46,563 |
+| Model ID | Model version | Language | Dictionary rows | Complete quality tokens | Already-root tokens | Changed tokens | JMH timing tokens |
+| --- | --- | --- | ---: | ---: | ---: | ---: | ---: |
+| `cs-cz-default` | `1.0.0` | `CS_CZ` | 5,113 | 56,612 | 10,049 | 46,563 | 46,563 |
 
 ## Radixor Patch Command Distribution
 
@@ -30,14 +30,10 @@ Accuracy is computed from JMH auxiliary counters in the current report. The coun
 
 | Stemmer | All exact | Changed exact | Root preserved | Note |
 | --- | ---: | ---: | ---: | --- |
-| Radixor | 99.465% | 99.439% | 99.582% | Full Radixor dictionary patch-command stemmer. |
+| Radixor | 99.465% | 99.439% | 99.582% | Radixor dictionary-trained patch-command stemmer. |
 | Lucene HunspellStemFilter | 84.850% | 82.269% | 96.806% | Benchmark-only Czech Hunspell dictionary compared via Lucene HunspellStemFilter. |
 | Lucene CzechStemFilter | 16.784% | 15.538% | 22.559% | Lucene Czech suffix stemmer implemented as a TokenFilter. |
-
-
-
-
-
+| Official Snowball direct | 19.865% | 18.186% | 27.645% | Official Snowball 3.1.0 generated Java stemmer; rule-based suffix algorithm. |
 
 ## Speed
 
@@ -45,18 +41,14 @@ Speed uses JMH average time, 5 warmup iterations, 10 measurement iterations, 3 i
 
 | Stemmer | Benchmark method | Score ms/op | Error ms | ns/token | Relative vs Radixor | Note |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
-| Radixor | `czechRadixor` | 3.395 | 0.066 | 72.9 | 1.000 | Full Radixor dictionary patch-command stemmer. |
-| Lucene HunspellStemFilter | `luceneHunspellStemFilter` | 381.189 | 32.563 | 8186.5 | 112.265 | Benchmark-only Czech Hunspell dictionary compared via Lucene HunspellStemFilter. |
-| Lucene CzechStemFilter | `czechLuceneCzechStemFilter` | 3.125 | 0.042 | 67.1 | 0.920 | Czech suffix stemmer implemented as a Lucene TokenFilter. |
-
-
-
-
-
+| Radixor | `czechRadixor` | 3.230 | 0.050 | 69.4 | 1.000 | Radixor dictionary-trained patch-command stemmer. |
+| Lucene HunspellStemFilter | `luceneHunspellStemFilter` | 349.111 | 24.459 | 7497.6 | 108.091 | Benchmark-only Czech Hunspell dictionary compared via Lucene HunspellStemFilter. |
+| Lucene CzechStemFilter | `czechLuceneCzechStemFilter` | 2.927 | 0.032 | 62.9 | 0.906 | Czech suffix stemmer implemented as a Lucene TokenFilter. |
+| Official Snowball direct | `snowballDirect[CZECH]` | 3.835 | 0.320 | 82.4 | 1.187 | Official Snowball 3.1.0 generated Java stemmer; direct API. |
 
 ## Interpretation Notes
 
-- Radixor is a dictionary-derived patch-command stemmer. Its quality depends on the language resource used to train the compiled trie.
+- Radixor is a dictionary-trained patch-command stemmer. Its learned transformations can generalize beyond the word forms listed in the training resource.
 - Light, minimal, plural, and possessive filters are narrow baselines. They can be fast because they intentionally perform less linguistic work.
 - Lucene TokenFilter rows include TokenStream, attribute, and required normalization overhead. Direct rows measure exposed direct APIs.
 - Morfologik rows are dictionary-based and can emit multiple terms for one input token. Quality rows use the first returned term when no ranking weight is available.
@@ -74,11 +66,11 @@ Runtime performance and linguistic grouping quality are independent dimensions. 
 
 The default model is `cs-cz-default`, loaded from classpath resource `org/egothor/stemmer/models/cs-cz-default/stemmer.gz`. The following findings compare only deterministic `PRIMARY_OUTPUT` rows over identical included groups; candidate policies are reported separately as capability analyses.
 
-- **ALL_WORDS:** `Radixor` ranks first by balanced accuracy at **0.996617** among 3 deterministic stemmers. The runner-up is `HUNSPELL CZECH LUCENE FILTER` at 0.854132, a difference of 0.142485. This rank does not imply leadership in throughput or every secondary metric.
-- **LOWERCASE_GROUPS_ONLY:** `Radixor` ranks first by balanced accuracy at **0.997195** among 3 deterministic stemmers. The runner-up is `HUNSPELL CZECH LUCENE FILTER` at 0.853150, a difference of 0.144045. This rank does not imply leadership in throughput or every secondary metric.
+- **ALL_WORDS:** `Radixor` ranks first by balanced accuracy at **0.996617** among 4 deterministic stemmers. The runner-up is `HUNSPELL CZECH LUCENE FILTER` at 0.854132, a difference of 0.142485. This rank does not imply leadership in throughput or every secondary metric.
+- **LOWERCASE_GROUPS_ONLY:** `Radixor` ranks first by balanced accuracy at **0.997195** among 4 deterministic stemmers. The runner-up is `HUNSPELL CZECH LUCENE FILTER` at 0.853150, a difference of 0.144045. This rank does not imply leadership in throughput or every secondary metric.
 ### `ALL_WORDS`
 
-This mode contains **7 result rows**, **3 evaluated stemmers**, and **3 output policies**. Applied-row and form counts are shown per row because adapters share the language corpus but policy rows remain independently auditable. `PRIMARY_OUTPUT` and `ALL_CANDIDATES` rankings are ordered by unrounded balanced accuracy, followed by MCC, F1, over-stemming rate, over-stemming count, under-stemming rate, and stemmer. `ANY_CANDIDATE` has no single rank metric and is listed alphabetically. Balanced accuracy is a navigation metric, not a universally authoritative quality score.
+This mode contains **8 result rows**, **4 evaluated stemmers**, and **3 output policies**. Applied-row and form counts are shown per row because adapters share the language corpus but policy rows remain independently auditable. `PRIMARY_OUTPUT` and `ALL_CANDIDATES` rankings are ordered by unrounded balanced accuracy, followed by MCC, F1, over-stemming rate, over-stemming count, under-stemming rate, and stemmer. `ANY_CANDIDATE` has no single rank metric and is listed alphabetically. Balanced accuracy is a navigation metric, not a universally authoritative quality score.
 
 #### `PRIMARY_OUTPUT` ranking
 
@@ -89,6 +81,7 @@ This mode contains **7 result rows**, **3 evaluated stemmers**, and **3 output p
 |1|Radixor|0.996617|0.000000%|0.676519%|
 |2|HUNSPELL CZECH LUCENE FILTER|0.854132|0.000691%|29.172837%|
 |3|CZECH LUCENE CZECH STEM FILTER|0.794343|0.000928%|41.130549%|
+|4|SNOWBALL CZECH DIRECT|0.786366|0.000904%|42.725842%|
 
 </div>
 
@@ -99,6 +92,7 @@ This mode contains **7 result rows**, **3 evaluated stemmers**, and **3 output p
 |1|Radixor|PRIMARY_OUTPUT|1.000000|0.993235|1.000000|0.996617|0.999998|0.000002|
 |2|HUNSPELL CZECH LUCENE FILTER|PRIMARY_OUTPUT|0.958877|0.708272|0.999993|0.854132|0.999927|0.000073|
 |3|CZECH LUCENE CZECH STEM FILTER|PRIMARY_OUTPUT|0.935210|0.588695|0.999991|0.794343|0.999897|0.000103|
+|4|SNOWBALL CZECH DIRECT|PRIMARY_OUTPUT|0.935153|0.572742|0.999991|0.786366|0.999894|0.000106|
 
 </details>
 
@@ -109,6 +103,7 @@ This mode contains **7 result rows**, **3 evaluated stemmers**, and **3 output p
 |1|Radixor|PRIMARY_OUTPUT|0.998640|0.996606|0.994581|0.993235|0.996612|0.996611|
 |2|HUNSPELL CZECH LUCENE FILTER|PRIMARY_OUTPUT|0.895506|0.814739|0.747335|0.687392|0.824103|0.824070|
 |3|CZECH LUCENE CZECH STEM FILTER|PRIMARY_OUTPUT|0.836710|0.722556|0.635811|0.565626|0.741992|0.741949|
+|4|SNOWBALL CZECH DIRECT|PRIMARY_OUTPUT|0.830101|0.710396|0.620864|0.550864|0.731848|0.731804|
 
 </details>
 
@@ -119,6 +114,7 @@ This mode contains **7 result rows**, **3 evaluated stemmers**, and **3 output p
 |1|Radixor|PRIMARY_OUTPUT|298476|0|2033|1320705191|0 / 1320705191|2033 / 300509|
 |2|HUNSPELL CZECH LUCENE FILTER|PRIMARY_OUTPUT|212842|9128|87667|1320696063|9128 / 1320705191|87667 / 300509|
 |3|CZECH LUCENE CZECH STEM FILTER|PRIMARY_OUTPUT|176908|12256|123601|1320692935|12256 / 1320705191|123601 / 300509|
+|4|SNOWBALL CZECH DIRECT|PRIMARY_OUTPUT|172114|11935|128395|1320693256|11935 / 1320705191|128395 / 300509|
 
 </details>
 
@@ -193,7 +189,7 @@ Alternative candidates are capability analyses, not replacements for the determi
 
 ### `LOWERCASE_GROUPS_ONLY`
 
-This mode contains **7 result rows**, **3 evaluated stemmers**, and **3 output policies**. Applied-row and form counts are shown per row because adapters share the language corpus but policy rows remain independently auditable. `PRIMARY_OUTPUT` and `ALL_CANDIDATES` rankings are ordered by unrounded balanced accuracy, followed by MCC, F1, over-stemming rate, over-stemming count, under-stemming rate, and stemmer. `ANY_CANDIDATE` has no single rank metric and is listed alphabetically. Balanced accuracy is a navigation metric, not a universally authoritative quality score.
+This mode contains **8 result rows**, **4 evaluated stemmers**, and **3 output policies**. Applied-row and form counts are shown per row because adapters share the language corpus but policy rows remain independently auditable. `PRIMARY_OUTPUT` and `ALL_CANDIDATES` rankings are ordered by unrounded balanced accuracy, followed by MCC, F1, over-stemming rate, over-stemming count, under-stemming rate, and stemmer. `ANY_CANDIDATE` has no single rank metric and is listed alphabetically. Balanced accuracy is a navigation metric, not a universally authoritative quality score.
 
 #### `PRIMARY_OUTPUT` ranking
 
@@ -204,6 +200,7 @@ This mode contains **7 result rows**, **3 evaluated stemmers**, and **3 output p
 |1|Radixor|0.997195|0.000000%|0.561033%|
 |2|HUNSPELL CZECH LUCENE FILTER|0.853150|0.000700%|29.369351%|
 |3|CZECH LUCENE CZECH STEM FILTER|0.792522|0.000918%|41.494586%|
+|4|SNOWBALL CZECH DIRECT|0.784821|0.000923%|43.034822%|
 
 </div>
 
@@ -214,6 +211,7 @@ This mode contains **7 result rows**, **3 evaluated stemmers**, and **3 output p
 |1|Radixor|PRIMARY_OUTPUT|1.000000|0.994390|1.000000|0.997195|0.999999|0.000001|
 |2|HUNSPELL CZECH LUCENE FILTER|PRIMARY_OUTPUT|0.958957|0.706306|0.999993|0.853150|0.999925|0.000075|
 |3|CZECH LUCENE CZECH STEM FILTER|PRIMARY_OUTPUT|0.936557|0.585054|0.999991|0.792522|0.999895|0.000105|
+|4|SNOWBALL CZECH DIRECT|PRIMARY_OUTPUT|0.934577|0.569652|0.999991|0.784821|0.999891|0.000109|
 
 </details>
 
@@ -224,6 +222,7 @@ This mode contains **7 result rows**, **3 evaluated stemmers**, and **3 output p
 |1|Radixor|PRIMARY_OUTPUT|0.998873|0.997187|0.995507|0.994390|0.997191|0.997190|
 |2|HUNSPELL CZECH LUCENE FILTER|PRIMARY_OUTPUT|0.894932|0.813466|0.745594|0.685581|0.822993|0.822960|
 |3|CZECH LUCENE CZECH STEM FILTER|PRIMARY_OUTPUT|0.836092|0.720206|0.632534|0.562751|0.740227|0.740184|
+|4|SNOWBALL CZECH DIRECT|PRIMARY_OUTPUT|0.828436|0.707849|0.617907|0.547807|0.729646|0.729601|
 
 </details>
 
@@ -234,6 +233,7 @@ This mode contains **7 result rows**, **3 evaluated stemmers**, and **3 output p
 |1|Radixor|PRIMARY_OUTPUT|295818|0|1669|1284770069|0 / 1284770069|1669 / 297487|
 |2|HUNSPELL CZECH LUCENE FILTER|PRIMARY_OUTPUT|210117|8993|87370|1284761076|8993 / 1284770069|87370 / 297487|
 |3|CZECH LUCENE CZECH STEM FILTER|PRIMARY_OUTPUT|174046|11790|123441|1284758279|11790 / 1284770069|123441 / 297487|
+|4|SNOWBALL CZECH DIRECT|PRIMARY_OUTPUT|169464|11863|128023|1284758206|11863 / 1284770069|128023 / 297487|
 
 </details>
 
@@ -330,7 +330,7 @@ Standard ARI, homogeneity, completeness, V-measure, and NMI are not calculated: 
 ### Provenance
 
 - Authoritative source: `docs/benchmarks/data/stemming-quality.csv`
-- Source SHA-256: `edf16b07be8a535943ddf37caeb8807755c95e9e1fb13244145f28be74b491d8`
+- Source SHA-256: `d34f325da320a2e040b54d8d8b5c216d70448f08cfb8659a423e99882aa1afb5`
 - Evaluation command: `./gradlew stemmingQuality --no-daemon`
 - Dictionary language: `CS_CZ`
 - Processing modes: `ALL_WORDS`, `LOWERCASE_GROUPS_ONLY`

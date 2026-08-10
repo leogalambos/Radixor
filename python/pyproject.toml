@@ -1,0 +1,82 @@
+[build-system]
+requires = ["maturin>=1.7,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "radixor"
+version = "0.0.0"
+requires-python = ">=3.9"
+description = "Radixor stemmer – fastest stemming for Python, backed by Rust"
+readme = "README.md"
+license = "BSD-3-Clause"
+license-files = ["LICENSE"]
+dependencies = ["radixor-models-standard>=1.0,<2.0"]
+keywords = [
+    "python",
+    "information retrieval",
+    "language processing",
+    "morphology",
+    "stemming algorithms",
+    "stemmers",
+    "nlp",
+    "rust",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Natural Language :: Czech",
+    "Natural Language :: Danish",
+    "Natural Language :: Dutch",
+    "Natural Language :: English",
+    "Natural Language :: Finnish",
+    "Natural Language :: French",
+    "Natural Language :: German",
+    "Natural Language :: Hebrew",
+    "Natural Language :: Hungarian",
+    "Natural Language :: Italian",
+    "Natural Language :: Norwegian",
+    "Natural Language :: Persian",
+    "Natural Language :: Polish",
+    "Natural Language :: Portuguese",
+    "Natural Language :: Russian",
+    "Natural Language :: Spanish",
+    "Natural Language :: Swedish",
+    "Natural Language :: Ukrainian",
+    "Natural Language :: Yiddish",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Rust",
+    "Topic :: Internet :: WWW/HTTP :: Indexing/Search",
+    "Topic :: Text Processing :: Indexing",
+    "Topic :: Text Processing :: Linguistic",
+]
+
+[tool.maturin]
+python-source = "."
+module-name = "radixor._radixor"
+features = ["pyo3/extension-module"]
+exclude = [
+    "radixor/models/**",
+    "models-standard/**",
+    "dist/**",
+    "benchmarks/results*.csv",
+    "benchmarks/results*.json",
+    "**/__pycache__/**",
+    "**/*.pyc",
+    "**/*.pyo",
+    "**/*.pyd",
+]
+
+[tool.ruff]
+extend-exclude = ["models-standard/build", "target"]
+line-length = 88
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]

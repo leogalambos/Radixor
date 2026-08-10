@@ -8,9 +8,9 @@ Radixor must not be read as simply "slower" when a narrow competitor has a lower
 
 ## Dictionary Corpus
 
-| Model ID | Model version | Language | Dictionary rows | Complete quality tokens | Already-root tokens | Changed speed tokens |
-| --- | --- | --- | ---: | ---: | ---: | ---: |
-| `fa-ir-default` | `1.0.0` | `FA_IR` | 69 | 3,770 | 138 | 3,632 |
+| Model ID | Model version | Language | Dictionary rows | Complete quality tokens | Already-root tokens | Changed tokens | JMH timing tokens |
+| --- | --- | --- | ---: | ---: | ---: | ---: | ---: |
+| `fa-ir-default` | `1.0.0` | `FA_IR` | 69 | 3,770 | 138 | 3,632 | 5,000 |
 
 ## Radixor Patch Command Distribution
 
@@ -28,11 +28,9 @@ Accuracy is computed from JMH auxiliary counters in the current report. The coun
 
 | Stemmer | All exact | Changed exact | Root preserved | Note |
 | --- | ---: | ---: | ---: | --- |
-| Radixor | 95.836% | 95.677% | 100.000% | Full Radixor dictionary patch-command stemmer. |
+| Radixor | 95.836% | 95.677% | 100.000% | Radixor dictionary-trained patch-command stemmer. |
 | Lucene PersianStemFilter | 1.485% | 0.000% | 40.580% | Lucene Persian suffix stemmer with required normalization in the measured path. |
-
-
-
+| Official Snowball direct | 3.660% | 0.000% | 100.000% | Official Snowball 3.1.0 generated Java stemmer; rule-based suffix algorithm. |
 
 ## Speed
 
@@ -40,15 +38,13 @@ Speed uses JMH average time, 5 warmup iterations, 10 measurement iterations, 3 i
 
 | Stemmer | Benchmark method | Score ms/op | Error ms | ns/token | Relative vs Radixor | Note |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
-| Radixor | `persianRadixor` | 0.243 | 0.004 | 66.9 | 1.000 | Full Radixor dictionary patch-command stemmer. |
-| Lucene PersianStemFilter | `persianLucenePersianStemFilter` | 0.469 | 0.007 | 129.1 | 1.930 | Persian suffix stemmer with Lucene normalization in the measured path. |
-
-
-
+| Radixor | `persianRadixor` | 0.230 | 0.003 | 46.0 | 1.000 | Radixor dictionary-trained patch-command stemmer. |
+| Lucene PersianStemFilter | `persianLucenePersianStemFilter` | 0.448 | 0.009 | 89.5 | 1.948 | Persian suffix stemmer with Lucene normalization in the measured path. |
+| Official Snowball direct | `snowballDirect[PERSIAN]` | 1.490 | 0.055 | 298.1 | 6.486 | Official Snowball 3.1.0 generated Java stemmer; direct API. |
 
 ## Interpretation Notes
 
-- Radixor is a dictionary-derived patch-command stemmer. Its quality depends on the language resource used to train the compiled trie.
+- Radixor is a dictionary-trained patch-command stemmer. Its learned transformations can generalize beyond the word forms listed in the training resource.
 - Light, minimal, plural, and possessive filters are narrow baselines. They can be fast because they intentionally perform less linguistic work.
 - Lucene TokenFilter rows include TokenStream, attribute, and required normalization overhead. Direct rows measure exposed direct APIs.
 - Morfologik rows are dictionary-based and can emit multiple terms for one input token. Quality rows use the first returned term when no ranking weight is available.
@@ -66,11 +62,11 @@ Runtime performance and linguistic grouping quality are independent dimensions. 
 
 The default model is `fa-ir-default`, loaded from classpath resource `org/egothor/stemmer/models/fa-ir-default/stemmer.gz`. The following findings compare only deterministic `PRIMARY_OUTPUT` rows over identical included groups; candidate policies are reported separately as capability analyses.
 
-- **ALL_WORDS:** `Radixor` ranks first by balanced accuracy at **0.976360** among 2 deterministic stemmers. The runner-up is `PERSIAN LUCENE PERSIAN STEM FILTER` at 0.502212, a difference of 0.474148. This rank does not imply leadership in throughput or every secondary metric.
-- **LOWERCASE_GROUPS_ONLY:** `Radixor` ranks first by balanced accuracy at **0.976360** among 2 deterministic stemmers. The runner-up is `PERSIAN LUCENE PERSIAN STEM FILTER` at 0.502212, a difference of 0.474148. This rank does not imply leadership in throughput or every secondary metric.
+- **ALL_WORDS:** `Radixor` ranks first by balanced accuracy at **0.976360** among 3 deterministic stemmers. The runner-up is `SNOWBALL PERSIAN DIRECT` at 0.535123, a difference of 0.441236. This rank does not imply leadership in throughput or every secondary metric.
+- **LOWERCASE_GROUPS_ONLY:** `Radixor` ranks first by balanced accuracy at **0.976360** among 3 deterministic stemmers. The runner-up is `SNOWBALL PERSIAN DIRECT` at 0.535123, a difference of 0.441236. This rank does not imply leadership in throughput or every secondary metric.
 ### `ALL_WORDS`
 
-This mode contains **4 result rows**, **2 evaluated stemmers**, and **3 output policies**. Applied-row and form counts are shown per row because adapters share the language corpus but policy rows remain independently auditable. `PRIMARY_OUTPUT` and `ALL_CANDIDATES` rankings are ordered by unrounded balanced accuracy, followed by MCC, F1, over-stemming rate, over-stemming count, under-stemming rate, and stemmer. `ANY_CANDIDATE` has no single rank metric and is listed alphabetically. Balanced accuracy is a navigation metric, not a universally authoritative quality score.
+This mode contains **5 result rows**, **3 evaluated stemmers**, and **3 output policies**. Applied-row and form counts are shown per row because adapters share the language corpus but policy rows remain independently auditable. `PRIMARY_OUTPUT` and `ALL_CANDIDATES` rankings are ordered by unrounded balanced accuracy, followed by MCC, F1, over-stemming rate, over-stemming count, under-stemming rate, and stemmer. `ANY_CANDIDATE` has no single rank metric and is listed alphabetically. Balanced accuracy is a navigation metric, not a universally authoritative quality score.
 
 #### `PRIMARY_OUTPUT` ranking
 
@@ -79,7 +75,8 @@ This mode contains **4 result rows**, **2 evaluated stemmers**, and **3 output p
 | Rank | Stemmer | Balanced accuracy | Over-stemming (OI) | Under-stemming (UI) |
 |---:|---|---:|---:|---:|
 |1|Radixor|0.976360|0.000000%|4.728041%|
-|2|PERSIAN LUCENE PERSIAN STEM FILTER|0.502212|0.000049%|99.557494%|
+|2|SNOWBALL PERSIAN DIRECT|0.535123|0.001278%|92.974054%|
+|3|PERSIAN LUCENE PERSIAN STEM FILTER|0.502212|0.000049%|99.557494%|
 
 </div>
 
@@ -88,7 +85,8 @@ This mode contains **4 result rows**, **2 evaluated stemmers**, and **3 output p
 | Rank | Stemmer | Output policy | Precision | Recall | Specificity | Balanced accuracy | Pairwise accuracy | Error rate |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
 |1|Radixor|PRIMARY_OUTPUT|1.000000|0.952720|1.000000|0.976360|0.999277|0.000723|
-|2|PERSIAN LUCENE PERSIAN STEM FILTER|PRIMARY_OUTPUT|0.992991|0.004425|1.000000|0.502212|0.984769|0.015231|
+|2|SNOWBALL PERSIAN DIRECT|PRIMARY_OUTPUT|0.988428|0.070259|0.999987|0.535123|0.985764|0.014236|
+|3|PERSIAN LUCENE PERSIAN STEM FILTER|PRIMARY_OUTPUT|0.992991|0.004425|1.000000|0.502212|0.984769|0.015231|
 
 </details>
 
@@ -97,7 +95,8 @@ This mode contains **4 result rows**, **2 evaluated stemmers**, and **3 output p
 | Rank | Stemmer | Output policy | F0.5 | F1 | F2 | Jaccard | Fowlkes–Mallows | MCC |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
 |1|Radixor|PRIMARY_OUTPUT|0.990172|0.975787|0.961815|0.952720|0.976074|0.975715|
-|2|PERSIAN LUCENE PERSIAN STEM FILTER|PRIMARY_OUTPUT|0.021738|0.008811|0.005525|0.004425|0.066288|0.065774|
+|2|SNOWBALL PERSIAN DIRECT|PRIMARY_OUTPUT|0.273526|0.131193|0.086291|0.070202|0.263527|0.261598|
+|3|PERSIAN LUCENE PERSIAN STEM FILTER|PRIMARY_OUTPUT|0.021738|0.008811|0.005525|0.004425|0.066288|0.065774|
 
 </details>
 
@@ -106,7 +105,8 @@ This mode contains **4 result rows**, **2 evaluated stemmers**, and **3 output p
 | Rank | Stemmer | Output policy | TP | FP | FN | TN | Over error / possible | Under error / possible |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
 |1|Radixor|PRIMARY_OUTPUT|91503|0|4541|6182152|0 / 6182152|4541 / 96044|
-|2|PERSIAN LUCENE PERSIAN STEM FILTER|PRIMARY_OUTPUT|425|3|95619|6182149|3 / 6182152|95619 / 96044|
+|2|SNOWBALL PERSIAN DIRECT|PRIMARY_OUTPUT|6748|79|89296|6182073|79 / 6182152|89296 / 96044|
+|3|PERSIAN LUCENE PERSIAN STEM FILTER|PRIMARY_OUTPUT|425|3|95619|6182149|3 / 6182152|95619 / 96044|
 
 </details>
 
@@ -174,7 +174,7 @@ Alternative candidates are capability analyses, not replacements for the determi
 
 ### `LOWERCASE_GROUPS_ONLY`
 
-This mode contains **4 result rows**, **2 evaluated stemmers**, and **3 output policies**. Applied-row and form counts are shown per row because adapters share the language corpus but policy rows remain independently auditable. `PRIMARY_OUTPUT` and `ALL_CANDIDATES` rankings are ordered by unrounded balanced accuracy, followed by MCC, F1, over-stemming rate, over-stemming count, under-stemming rate, and stemmer. `ANY_CANDIDATE` has no single rank metric and is listed alphabetically. Balanced accuracy is a navigation metric, not a universally authoritative quality score.
+This mode contains **5 result rows**, **3 evaluated stemmers**, and **3 output policies**. Applied-row and form counts are shown per row because adapters share the language corpus but policy rows remain independently auditable. `PRIMARY_OUTPUT` and `ALL_CANDIDATES` rankings are ordered by unrounded balanced accuracy, followed by MCC, F1, over-stemming rate, over-stemming count, under-stemming rate, and stemmer. `ANY_CANDIDATE` has no single rank metric and is listed alphabetically. Balanced accuracy is a navigation metric, not a universally authoritative quality score.
 
 #### `PRIMARY_OUTPUT` ranking
 
@@ -183,7 +183,8 @@ This mode contains **4 result rows**, **2 evaluated stemmers**, and **3 output p
 | Rank | Stemmer | Balanced accuracy | Over-stemming (OI) | Under-stemming (UI) |
 |---:|---|---:|---:|---:|
 |1|Radixor|0.976360|0.000000%|4.728041%|
-|2|PERSIAN LUCENE PERSIAN STEM FILTER|0.502212|0.000049%|99.557494%|
+|2|SNOWBALL PERSIAN DIRECT|0.535123|0.001278%|92.974054%|
+|3|PERSIAN LUCENE PERSIAN STEM FILTER|0.502212|0.000049%|99.557494%|
 
 </div>
 
@@ -192,7 +193,8 @@ This mode contains **4 result rows**, **2 evaluated stemmers**, and **3 output p
 | Rank | Stemmer | Output policy | Precision | Recall | Specificity | Balanced accuracy | Pairwise accuracy | Error rate |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
 |1|Radixor|PRIMARY_OUTPUT|1.000000|0.952720|1.000000|0.976360|0.999277|0.000723|
-|2|PERSIAN LUCENE PERSIAN STEM FILTER|PRIMARY_OUTPUT|0.992991|0.004425|1.000000|0.502212|0.984769|0.015231|
+|2|SNOWBALL PERSIAN DIRECT|PRIMARY_OUTPUT|0.988428|0.070259|0.999987|0.535123|0.985764|0.014236|
+|3|PERSIAN LUCENE PERSIAN STEM FILTER|PRIMARY_OUTPUT|0.992991|0.004425|1.000000|0.502212|0.984769|0.015231|
 
 </details>
 
@@ -201,7 +203,8 @@ This mode contains **4 result rows**, **2 evaluated stemmers**, and **3 output p
 | Rank | Stemmer | Output policy | F0.5 | F1 | F2 | Jaccard | Fowlkes–Mallows | MCC |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
 |1|Radixor|PRIMARY_OUTPUT|0.990172|0.975787|0.961815|0.952720|0.976074|0.975715|
-|2|PERSIAN LUCENE PERSIAN STEM FILTER|PRIMARY_OUTPUT|0.021738|0.008811|0.005525|0.004425|0.066288|0.065774|
+|2|SNOWBALL PERSIAN DIRECT|PRIMARY_OUTPUT|0.273526|0.131193|0.086291|0.070202|0.263527|0.261598|
+|3|PERSIAN LUCENE PERSIAN STEM FILTER|PRIMARY_OUTPUT|0.021738|0.008811|0.005525|0.004425|0.066288|0.065774|
 
 </details>
 
@@ -210,7 +213,8 @@ This mode contains **4 result rows**, **2 evaluated stemmers**, and **3 output p
 | Rank | Stemmer | Output policy | TP | FP | FN | TN | Over error / possible | Under error / possible |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
 |1|Radixor|PRIMARY_OUTPUT|91503|0|4541|6182152|0 / 6182152|4541 / 96044|
-|2|PERSIAN LUCENE PERSIAN STEM FILTER|PRIMARY_OUTPUT|425|3|95619|6182149|3 / 6182152|95619 / 96044|
+|2|SNOWBALL PERSIAN DIRECT|PRIMARY_OUTPUT|6748|79|89296|6182073|79 / 6182152|89296 / 96044|
+|3|PERSIAN LUCENE PERSIAN STEM FILTER|PRIMARY_OUTPUT|425|3|95619|6182149|3 / 6182152|95619 / 96044|
 
 </details>
 
@@ -300,7 +304,7 @@ Standard ARI, homogeneity, completeness, V-measure, and NMI are not calculated: 
 ### Provenance
 
 - Authoritative source: `docs/benchmarks/data/stemming-quality.csv`
-- Source SHA-256: `edf16b07be8a535943ddf37caeb8807755c95e9e1fb13244145f28be74b491d8`
+- Source SHA-256: `d34f325da320a2e040b54d8d8b5c216d70448f08cfb8659a423e99882aa1afb5`
 - Evaluation command: `./gradlew stemmingQuality --no-daemon`
 - Dictionary language: `FA_IR`
 - Processing modes: `ALL_WORDS`, `LOWERCASE_GROUPS_ONLY`
