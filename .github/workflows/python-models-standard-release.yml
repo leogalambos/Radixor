@@ -188,15 +188,18 @@ jobs:
           RELEASE_VERSION: ${{ needs.build.outputs.version }}
         run: |
           set -euo pipefail
-          if gh release view "${RELEASE_TAG}" >/dev/null 2>&1; then
+          if gh release view "${RELEASE_TAG}" \
+            --repo "${GITHUB_REPOSITORY}" >/dev/null 2>&1; then
             echo "Release already exists; refusing to replace its assets: ${RELEASE_TAG}" >&2
             exit 1
           fi
           gh release create "${RELEASE_TAG}" \
             release/*.whl release/*.tar.gz release/SHA256SUMS \
+            --repo "${GITHUB_REPOSITORY}" \
             --verify-tag --draft --title "radixor-models-standard ${RELEASE_VERSION}" \
             --notes "Precompiled standard Radixor model distribution ${RELEASE_VERSION}."
-          gh release edit "${RELEASE_TAG}" --draft=false
+          gh release edit "${RELEASE_TAG}" \
+            --repo "${GITHUB_REPOSITORY}" --draft=false
 
   publish-index:
     name: Publish Python package index

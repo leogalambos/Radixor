@@ -388,7 +388,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          [[ "$(gh release view 'python-models-standard@1.0.0' --json isDraft --jq '.isDraft')" == 'false' ]]
+          [[ "$(gh release view 'python-models-standard@1.0.0' \
+            --repo "${GITHUB_REPOSITORY}" --json isDraft --jq '.isDraft')" == 'false' ]]
 
       - name: Attest package artifacts
         uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2
@@ -405,15 +406,18 @@ jobs:
           RELEASE_VERSION: ${{ needs.prepare.outputs.version }}
         run: |
           set -euo pipefail
-          if gh release view "${RELEASE_TAG}" >/dev/null 2>&1; then
+          if gh release view "${RELEASE_TAG}" \
+            --repo "${GITHUB_REPOSITORY}" >/dev/null 2>&1; then
             echo "Release already exists; refusing to replace its assets: ${RELEASE_TAG}" >&2
             exit 1
           fi
           gh release create "${RELEASE_TAG}" \
             release/*.whl release/*.tar.gz release/SHA256SUMS \
+            --repo "${GITHUB_REPOSITORY}" \
             --verify-tag --draft --title "radixor ${RELEASE_VERSION}" \
             --notes "Native Rust/Python Radixor distribution ${RELEASE_VERSION}."
-          gh release edit "${RELEASE_TAG}" --draft=false
+          gh release edit "${RELEASE_TAG}" \
+            --repo "${GITHUB_REPOSITORY}" --draft=false
 
   publish-index:
     name: Publish Python package index
