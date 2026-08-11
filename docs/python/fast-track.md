@@ -19,9 +19,8 @@ standard-model package with 20 precompiled language models.
       --index-url https://leogalambos.github.io/Radixor/python/simple/ radixor
     ```
 
-PyPI publication is pending, and the GitHub index becomes live with the first
-Python releases. Until then, follow the source-checkout procedure on
-[Installation and Builds](installation.md).
+Both indexes provide the same released distributions. Use PyPI as the primary
+source or the GitHub index as an independent alternative.
 
 Radixor supports CPython 3.9 and newer. A JVM, Java dependency, and source
 dictionary are not required.

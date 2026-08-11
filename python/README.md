@@ -22,7 +22,7 @@ fairness notes are in [`benchmarks/`](benchmarks/README.md).
 
 ## Installation
 
-From PyPI, once publication is enabled:
+From PyPI:
 
 ```bash
 python -m pip install --only-binary=:all: radixor
@@ -35,9 +35,9 @@ python -m pip install --only-binary=:all: \
   --index-url https://leogalambos.github.io/Radixor/python/simple/ radixor
 ```
 
-The GitHub command becomes usable after the first model and native releases
-populate that index. See the [installation guide](../docs/python/installation.md)
-for current availability and source-checkout builds.
+The GitHub index points to the same immutable model and native release assets.
+See the [installation guide](../docs/python/installation.md) for provenance and
+source-checkout builds.
 
 Wheels are provided for Linux, macOS, and Windows (Python 3.9+). The install
 also resolves the mandatory pure `radixor-models-standard` dependency

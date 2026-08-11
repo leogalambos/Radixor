@@ -30,7 +30,7 @@ It also retains the operational advantages of a compiled artifact model: predict
 For Python, one installation provides the native runtime and the separate
 standard package of 20 precompiled models:
 
-From PyPI, once publication is enabled:
+From PyPI:
 
 ```bash
 python -m pip install --only-binary=:all: radixor

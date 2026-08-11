@@ -26,9 +26,8 @@ source .venv/bin/activate       # Windows: .venv\Scripts\activate
       --index-url https://leogalambos.github.io/Radixor/python/simple/ radixor
     ```
 
-PyPI publication is pending. The GitHub option becomes live when the first
-Python GitHub Releases populate the Pages-backed package index. See
-[Installation and Builds](installation.md) for availability and source builds.
+Both indexes provide the same released distributions. See
+[Installation and Builds](installation.md) for provenance and source builds.
 
 The `radixor` wheel contains code. Its required
 `radixor-models-standard` dependency contains 20 precompiled models. The

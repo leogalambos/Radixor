@@ -7,16 +7,11 @@ development or unsupported platforms.
 
 ## Install from PyPI
 
-PyPI is the intended primary index once the Radixor projects are approved and
-published there:
+PyPI is the primary package index:
 
 ```bash
 python -m pip install --only-binary=:all: radixor
 ```
-
-PyPI publication is not live yet. Until the `radixor` and
-`radixor-models-standard` project pages exist, this command cannot install the
-project.
 
 ## Install compiled packages from GitHub
 
@@ -29,10 +24,7 @@ python -m pip install --only-binary=:all: \
 ```
 
 The index links directly to checksummed wheel assets in GitHub Releases; Pages
-does not duplicate the package files. It is not live until the first Python
-model and native releases have been published. This was verified before the
-initial release: the URL returned HTTP 404 and the repository contained no
-Python Release assets.
+does not duplicate the package files.
 
 Do not configure the GitHub index as an `--extra-index-url`: `pip` does not
 prioritize one index over another. Use it as the sole `--index-url`, as shown
@@ -93,10 +85,8 @@ gh attestation verify radixor-<version>-<wheel-tags>.whl \
 
 Python packages do **not** reuse the OpenPGP key configured for Java/Maven
 Central publications. Java's `SIGNING_KEY` and `SIGNING_PASSWORD` produce Maven
-signatures; Python currently uses release checksums plus GitHub's
-identity-bound build-provenance attestation. A future PyPI publication should
-use PyPI Trusted Publishing and its supported attestations rather than copying
-the Java signing mechanism.
+signatures; Python uses release checksums, GitHub identity-bound build
+provenance, and PyPI Trusted Publishing with supported digital attestations.
 
 ## Build through Gradle
 

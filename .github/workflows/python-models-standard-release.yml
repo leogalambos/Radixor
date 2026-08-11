@@ -11,6 +11,11 @@ on:
         required: true
         default: '1.0.0'
         type: string
+      publish_existing_to_pypi:
+        description: Publish the existing GitHub Release to PyPI
+        required: true
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -22,6 +27,7 @@ concurrency:
 jobs:
   build:
     name: Build and verify standard models
+    if: github.event_name == 'push' || inputs.publish_existing_to_pypi != true
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.release.outputs.version }}
@@ -200,6 +206,99 @@ jobs:
             --notes "Precompiled standard Radixor model distribution ${RELEASE_VERSION}."
           gh release edit "${RELEASE_TAG}" \
             --repo "${GITHUB_REPOSITORY}" --draft=false
+
+  publish-pypi:
+    name: Publish standard models to PyPI
+    if: >-
+      always() &&
+      ((github.event_name == 'push' && needs.publish.result == 'success') ||
+       (github.event_name == 'workflow_dispatch' && inputs.publish_existing_to_pypi))
+    needs: [build, publish]
+    runs-on: ubuntu-latest
+    environment: python-pypi
+    permissions:
+      attestations: read
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Select PyPI release source
+        id: release
+        shell: bash
+        env:
+          BUILT_VERSION: ${{ needs.build.outputs.version }}
+          BUILT_TAG: ${{ needs.build.outputs.tag }}
+          REQUESTED_VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          if [[ "${GITHUB_EVENT_NAME}" == 'push' ]]; then
+            version="${BUILT_VERSION}"
+            tag="${BUILT_TAG}"
+          else
+            version="${REQUESTED_VERSION}"
+            tag="python-models-standard@${version}"
+          fi
+          [[ "${version}" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]
+          printf 'version=%s\ntag=%s\n' "${version}" "${tag}" >> "${GITHUB_OUTPUT}"
+
+      - name: Download current-run release candidate
+        if: github.event_name == 'push'
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: python-models-standard-release-${{ steps.release.outputs.version }}
+          path: release
+
+      - name: Download existing GitHub Release
+        if: github.event_name == 'workflow_dispatch'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.release.outputs.tag }}
+        run: |
+          set -euo pipefail
+          mkdir release
+          gh release download "${RELEASE_TAG}" \
+            --repo "${GITHUB_REPOSITORY}" --dir release \
+            --pattern '*.whl' --pattern '*.tar.gz' --pattern SHA256SUMS
+
+      - name: Verify and stage PyPI distributions
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd release
+          sha256sum --check SHA256SUMS
+          awk '{print $2}' SHA256SUMS | LC_ALL=C sort > expected-files
+          [[ "$(wc -l < expected-files)" -eq 2 ]]
+          if grep -Ev '^[A-Za-z0-9_.+-]+(\.whl|\.tar\.gz)$' expected-files; then
+            echo 'SHA256SUMS contains an invalid distribution filename.' >&2
+            exit 1
+          fi
+          find . -maxdepth 1 -type f \( -name '*.whl' -o -name '*.tar.gz' \) \
+            -printf '%f\n' | LC_ALL=C sort > actual-files
+          diff -u expected-files actual-files
+          mkdir ../pypi
+          while IFS= read -r artifact; do
+            cp -- "${artifact}" ../pypi/
+          done < expected-files
+
+      - name: Verify GitHub build provenance
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.release.outputs.tag }}
+        run: |
+          set -euo pipefail
+          for artifact in pypi/*; do
+            gh attestation verify "${artifact}" \
+              --repo "${GITHUB_REPOSITORY}" \
+              --signer-workflow "${GITHUB_REPOSITORY}/.github/workflows/python-models-standard-release.yml" \
+              --source-ref "refs/tags/${RELEASE_TAG}"
+          done
+
+      - name: Publish distributions with PyPI Trusted Publishing
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: pypi/
 
   publish-index:
     name: Publish Python package index

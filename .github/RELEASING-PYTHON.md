@@ -12,8 +12,8 @@ non-deterministic output; generated payload must never be added to Git.
 ## Validate without publishing
 
 Run **Python Standard Models Release** manually with version `1.0.0`, then run
-**Python Native Release** with version `4.1.0`. `workflow_dispatch` validates
-artifacts but cannot publish. The native run must pass Linux x86-64, Linux
+**Python Native Release** with version `4.1.0`. The default manual mode validates
+artifacts without publishing. The native run must pass Linux x86-64, Linux
 ARM64, macOS universal2, and Windows x86-64.
 
 For the Linux paths, maintainers can use `act` with rootless Podman and the
