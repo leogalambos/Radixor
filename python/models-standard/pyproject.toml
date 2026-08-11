@@ -16,6 +16,12 @@ classifiers = [
     "Topic :: Text Processing :: Linguistic",
 ]
 
+[project.urls]
+Homepage = "https://github.com/leogalambos/Radixor"
+Documentation = "https://leogalambos.github.io/Radixor/python/"
+Repository = "https://github.com/leogalambos/Radixor"
+Issues = "https://github.com/leogalambos/Radixor/issues"
+
 [tool.setuptools]
 include-package-data = true
 

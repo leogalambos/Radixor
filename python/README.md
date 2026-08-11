@@ -249,5 +249,6 @@ individual model versions recorded in the manifest.
 
 ## License
 
-The native/API package is BSD-3-Clause — see [LICENSE](LICENSE). Model data
-is separately licensed under CC BY-SA 3.0 in its packaged notices.
+The native/API package is BSD-3-Clause — see the
+[license text](https://github.com/leogalambos/Radixor/blob/main/python/LICENSE).
+Model data is separately licensed under CC BY-SA 3.0 in its packaged notices.

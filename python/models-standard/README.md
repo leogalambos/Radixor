@@ -17,8 +17,9 @@ tag version, and deterministically compiles all model resources there.
 Only gzip-compressed Radixor v7 (`.rxc`) tries are shipped. They are release
 artifacts, not checked-in repository files. Canonical textual dictionaries
 remain in the Radixor source repository and are not included in this wheel or
-source distribution. Model data is licensed under CC BY-SA 3.0; see
-`LICENSE-MODEL-DATA.txt` and the generated per-model notices.
+source distribution. Model data is licensed under CC BY-SA 3.0; see the
+[model-data license](https://github.com/leogalambos/Radixor/blob/main/python/models-standard/LICENSE-MODEL-DATA.txt)
+and the generated per-model notices.
 
 The checked-out directory is intentionally only a packaging skeleton and is
 not directly buildable as the complete data distribution. From the repository
