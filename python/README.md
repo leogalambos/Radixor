@@ -17,8 +17,9 @@ same-input methodology, radixor won all **18 / 18** direct comparisons with
 PyStemmer 3.1.0 (Snowball's C `libstemmer`) in the published 2026-08-08 run.
 At batch size 100, the geometric-mean speedup was **1.67×**. The complete
 machine metadata and current results are in the [Python performance
-documentation](../docs/python/performance.md); benchmark implementation and
-fairness notes are in [`benchmarks/`](benchmarks/README.md).
+documentation](https://leogalambos.github.io/Radixor/python/performance/);
+benchmark implementation and fairness notes are in the
+[`benchmarks/` source directory](https://github.com/leogalambos/Radixor/blob/main/python/benchmarks/README.md).
 
 ## Installation
 
@@ -36,8 +37,8 @@ python -m pip install --only-binary=:all: \
 ```
 
 The GitHub index points to the same immutable model and native release assets.
-See the [installation guide](../docs/python/installation.md) for provenance and
-source-checkout builds.
+See the [installation guide](https://leogalambos.github.io/Radixor/python/installation/)
+for provenance and source-checkout builds.
 
 Wheels are provided for Linux, macOS, and Windows (Python 3.9+). The install
 also resolves the mandatory pure `radixor-models-standard` dependency
