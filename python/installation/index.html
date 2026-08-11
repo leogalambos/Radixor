@@ -3014,13 +3014,9 @@ OS/architecture that works on CPython ≥ 3.9 (including 3.14) through the stabl
 ABI. Most users just <code>pip install</code>; building from source is only needed for
 development or unsupported platforms.</p>
 <h2 id="install-from-pypi">Install from PyPI</h2>
-<p>PyPI is the intended primary index once the Radixor projects are approved and
-published there:</p>
+<p>PyPI is the primary package index:</p>
 <div class="highlight"><pre><span></span><code>python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>--only-binary<span class="o">=</span>:all:<span class="w"> </span>radixor
 </code></pre></div>
-<p>PyPI publication is not live yet. Until the <code>radixor</code> and
-<code>radixor-models-standard</code> project pages exist, this command cannot install the
-project.</p>
 <h2 id="install-compiled-packages-from-github">Install compiled packages from GitHub</h2>
 <p>Python releases are published as immutable GitHub Release assets. A small
 PEP 503 index on GitHub Pages exposes both packages to <code>pip</code>:</p>
@@ -3028,10 +3024,7 @@ PEP 503 index on GitHub Pages exposes both packages to <code>pip</code>:</p>
 <span class="w">  </span>--index-url<span class="w"> </span>https://leogalambos.github.io/Radixor/python/simple/<span class="w"> </span>radixor
 </code></pre></div>
 <p>The index links directly to checksummed wheel assets in GitHub Releases; Pages
-does not duplicate the package files. It is not live until the first Python
-model and native releases have been published. This was verified before the
-initial release: the URL returned HTTP 404 and the repository contained no
-Python Release assets.</p>
+does not duplicate the package files.</p>
 <p>Do not configure the GitHub index as an <code>--extra-index-url</code>: <code>pip</code> does not
 prioritize one index over another. Use it as the sole <code>--index-url</code>, as shown
 above. The binary-only constraint also prevents an accidental source build
@@ -3078,10 +3071,8 @@ gh<span class="w"> </span>attestation<span class="w"> </span>verify<span class="
 </code></pre></div>
 <p>Python packages do <strong>not</strong> reuse the OpenPGP key configured for Java/Maven
 Central publications. Java's <code>SIGNING_KEY</code> and <code>SIGNING_PASSWORD</code> produce Maven
-signatures; Python currently uses release checksums plus GitHub's
-identity-bound build-provenance attestation. A future PyPI publication should
-use PyPI Trusted Publishing and its supported attestations rather than copying
-the Java signing mechanism.</p>
+signatures; Python uses release checksums, GitHub identity-bound build
+provenance, and PyPI Trusted Publishing with supported digital attestations.</p>
 <h2 id="build-through-gradle">Build through Gradle</h2>
 <p>From the repository root, the supported build entry point creates the native
 wheel/sdist and pure standard-model wheel/sdist:</p>
