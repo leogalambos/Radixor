@@ -3018,10 +3018,10 @@ strategies:</p>
 <code>linear scan</code> is therefore used when there are only a few edges even if those edges are
 spread across very distant code points.</p>
 <h3 id="example-few-edges-wide-unicode-span">Example: few edges, wide Unicode span</h3>
-<div class="highlight"><pre><span></span><code>edges = [&#39;a&#39;, &#39;中&#39;, &#39;你&#39;]
+<div class="highlight"><pre><span></span><code>edges = ['a', '中', '你']
 edge count = 3
-minEdge = &#39;a&#39; (U+0061)
-maxEdge = &#39;你&#39; (U+4F60)
+minEdge = 'a' (U+0061)
+maxEdge = '你' (U+4F60)
 span = 20319
 </code></pre></div>
 <ul>
@@ -3104,13 +3104,13 @@ The builder threshold is applied while freezing reduced nodes into the immutable
 <span class="kn">import</span><span class="w"> </span><span class="nn">org.egothor.stemmer.StemmerPatchTrieLoader</span><span class="p">;</span>
 
 <span class="kd">final</span><span class="w"> </span><span class="n">FrequencyTrie</span><span class="o">&lt;</span><span class="n">CompiledPatchCommand</span><span class="o">&gt;</span><span class="w"> </span><span class="n">defaultLookup</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">StemmerPatchTrieLoader</span><span class="p">.</span><span class="na">loadBinaryCompiled</span><span class="p">(</span>
-<span class="w">        </span><span class="n">Path</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="s">&quot;stemmers&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;english.radixor.gz&quot;</span><span class="p">));</span>
+<span class="w">        </span><span class="n">Path</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="s">"stemmers"</span><span class="p">,</span><span class="w"> </span><span class="s">"english.radixor.gz"</span><span class="p">));</span>
 
 <span class="kd">final</span><span class="w"> </span><span class="n">FrequencyTrie</span><span class="o">&lt;</span><span class="n">CompiledPatchCommand</span><span class="o">&gt;</span><span class="w"> </span><span class="n">fastLookup</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">StemmerPatchTrieLoader</span><span class="p">.</span><span class="na">loadBinaryCompiled</span><span class="p">(</span>
-<span class="w">        </span><span class="n">Path</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="s">&quot;stemmers&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;english.radixor.gz&quot;</span><span class="p">),</span><span class="w"> </span><span class="mi">1024</span><span class="p">);</span>
+<span class="w">        </span><span class="n">Path</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="s">"stemmers"</span><span class="p">,</span><span class="w"> </span><span class="s">"english.radixor.gz"</span><span class="p">),</span><span class="w"> </span><span class="mi">1024</span><span class="p">);</span>
 
 <span class="kd">final</span><span class="w"> </span><span class="n">FrequencyTrie</span><span class="o">&lt;</span><span class="n">CompiledPatchCommand</span><span class="o">&gt;</span><span class="w"> </span><span class="n">compactLookup</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">StemmerPatchTrieLoader</span><span class="p">.</span><span class="na">loadBinaryCompiled</span><span class="p">(</span>
-<span class="w">        </span><span class="n">Path</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="s">&quot;stemmers&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;english.radixor.gz&quot;</span><span class="p">),</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="w">        </span><span class="n">Path</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="s">"stemmers"</span><span class="p">,</span><span class="w"> </span><span class="s">"english.radixor.gz"</span><span class="p">),</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
 </code></pre></div>
 <p>You can also set the threshold directly with <code>FrequencyTrie.readFrom(...)</code> when reading streams:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">java.io.DataInputStream</span><span class="p">;</span>
@@ -3125,11 +3125,11 @@ The builder threshold is applied while freezing reduced nodes into the immutable
 <span class="kd">public</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kd">class</span> <span class="nc">StreamLoadExample</span><span class="w"> </span><span class="p">{</span>
 
 <span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="nf">StreamLoadExample</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">throw</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">AssertionError</span><span class="p">(</span><span class="s">&quot;No instances.&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="k">throw</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">AssertionError</span><span class="p">(</span><span class="s">"No instances."</span><span class="p">);</span>
 <span class="w">    </span><span class="p">}</span>
 
 <span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kd">final</span><span class="w"> </span><span class="n">String</span><span class="o">[]</span><span class="w"> </span><span class="n">arguments</span><span class="p">)</span><span class="w"> </span><span class="kd">throws</span><span class="w"> </span><span class="n">IOException</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">try</span><span class="w"> </span><span class="p">(</span><span class="n">InputStream</span><span class="w"> </span><span class="n">fileInput</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Files</span><span class="p">.</span><span class="na">newInputStream</span><span class="p">(</span><span class="n">Path</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="s">&quot;stemmers&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;english.radixor.gz&quot;</span><span class="p">));</span>
+<span class="w">        </span><span class="k">try</span><span class="w"> </span><span class="p">(</span><span class="n">InputStream</span><span class="w"> </span><span class="n">fileInput</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Files</span><span class="p">.</span><span class="na">newInputStream</span><span class="p">(</span><span class="n">Path</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="s">"stemmers"</span><span class="p">,</span><span class="w"> </span><span class="s">"english.radixor.gz"</span><span class="p">));</span>
 <span class="w">                </span><span class="n">GZIPInputStream</span><span class="w"> </span><span class="n">gzip</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">GZIPInputStream</span><span class="p">(</span><span class="n">fileInput</span><span class="p">);</span>
 <span class="w">                </span><span class="n">DataInputStream</span><span class="w"> </span><span class="n">dataInput</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">DataInputStream</span><span class="p">(</span><span class="n">gzip</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
 <span class="w">            </span><span class="kd">final</span><span class="w"> </span><span class="n">FrequencyTrie</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">compactOnLoad</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FrequencyTrie</span><span class="p">.</span><span class="na">readFrom</span><span class="p">(</span>

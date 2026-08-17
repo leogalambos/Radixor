@@ -3056,8 +3056,8 @@ applications should use normal safe-publication practices when sharing a loaded 
 </code></pre></div>
 <p>Gradle:</p>
 <div class="highlight"><pre><span></span><code><span class="n">dependencies</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">implementation</span><span class="p">(</span><span class="s">&quot;org.egothor:radixor:&lt;radixor-version&gt;&quot;</span><span class="p">)</span>
-<span class="w">    </span><span class="n">runtimeOnly</span><span class="p">(</span><span class="s">&quot;org.egothor:radixor-models-standard:&lt;catalog-version&gt;&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="n">implementation</span><span class="p">(</span><span class="s">"org.egothor:radixor:&lt;radixor-version&gt;"</span><span class="p">)</span>
+<span class="w">    </span><span class="n">runtimeOnly</span><span class="p">(</span><span class="s">"org.egothor:radixor-models-standard:&lt;catalog-version&gt;"</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>Maven:</p>
@@ -3103,13 +3103,13 @@ applications should use normal safe-publication practices when sharing a loaded 
 
 <span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="nf">RadixorStemmerService</span><span class="p">(</span><span class="kd">final</span><span class="w"> </span><span class="n">StemmerPatchTrieLoader</span><span class="p">.</span><span class="na">Language</span><span class="w"> </span><span class="n">language</span><span class="p">)</span><span class="w"> </span><span class="kd">throws</span><span class="w"> </span><span class="n">IOException</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">trie</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">StemmerPatchTrieLoader</span><span class="p">.</span><span class="na">loadCompiled</span><span class="p">(</span>
-<span class="w">                </span><span class="n">Objects</span><span class="p">.</span><span class="na">requireNonNull</span><span class="p">(</span><span class="n">language</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;language&quot;</span><span class="p">),</span>
+<span class="w">                </span><span class="n">Objects</span><span class="p">.</span><span class="na">requireNonNull</span><span class="p">(</span><span class="n">language</span><span class="p">,</span><span class="w"> </span><span class="s">"language"</span><span class="p">),</span>
 <span class="w">                </span><span class="kc">true</span><span class="p">,</span>
 <span class="w">                </span><span class="n">ReductionMode</span><span class="p">.</span><span class="na">MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS</span><span class="p">);</span>
 <span class="w">    </span><span class="p">}</span>
 
 <span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="nf">stem</span><span class="p">(</span><span class="kd">final</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">token</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="kd">final</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">checkedToken</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Objects</span><span class="p">.</span><span class="na">requireNonNull</span><span class="p">(</span><span class="n">token</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;token&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="kd">final</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">checkedToken</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Objects</span><span class="p">.</span><span class="na">requireNonNull</span><span class="p">(</span><span class="n">token</span><span class="p">,</span><span class="w"> </span><span class="s">"token"</span><span class="p">);</span>
 <span class="w">        </span><span class="kd">final</span><span class="w"> </span><span class="n">CompiledPatchCommand</span><span class="w"> </span><span class="n">command</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">trie</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">checkedToken</span><span class="p">);</span>
 <span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">command</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">checkedToken</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">command</span><span class="p">.</span><span class="na">apply</span><span class="p">(</span><span class="n">checkedToken</span><span class="p">);</span>
 <span class="w">    </span><span class="p">}</span>
@@ -3139,11 +3139,11 @@ searchable.</p>
 <span class="kd">public</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kd">class</span> <span class="nc">BinaryStemmerLoader</span><span class="w"> </span><span class="p">{</span>
 
 <span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="nf">BinaryStemmerLoader</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">throw</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">AssertionError</span><span class="p">(</span><span class="s">&quot;No instances.&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="k">throw</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">AssertionError</span><span class="p">(</span><span class="s">"No instances."</span><span class="p">);</span>
 <span class="w">    </span><span class="p">}</span>
 
 <span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="n">FrequencyTrie</span><span class="o">&lt;</span><span class="n">CompiledPatchCommand</span><span class="o">&gt;</span><span class="w"> </span><span class="nf">loadEnglish</span><span class="p">()</span><span class="w"> </span><span class="kd">throws</span><span class="w"> </span><span class="n">IOException</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">StemmerPatchTrieLoader</span><span class="p">.</span><span class="na">loadBinaryCompiled</span><span class="p">(</span><span class="n">Path</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="s">&quot;stemmers&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;english.radixor.gz&quot;</span><span class="p">));</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">StemmerPatchTrieLoader</span><span class="p">.</span><span class="na">loadBinaryCompiled</span><span class="p">(</span><span class="n">Path</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="s">"stemmers"</span><span class="p">,</span><span class="w"> </span><span class="s">"english.radixor.gz"</span><span class="p">));</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>

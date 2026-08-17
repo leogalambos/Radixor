@@ -3022,18 +3022,18 @@
 <h2 id="creating-a-stemmer">Creating a stemmer</h2>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">radixor</span><span class="w"> </span><span class="kn">import</span> <span class="n">Stemmer</span>
 
-<span class="n">s</span> <span class="o">=</span> <span class="n">Stemmer</span><span class="p">(</span><span class="s2">&quot;en&quot;</span><span class="p">)</span>                      <span class="c1"># by language code (bundled model)</span>
-<span class="n">s</span> <span class="o">=</span> <span class="n">Stemmer</span><span class="p">(</span><span class="s2">&quot;us-uk-default&quot;</span><span class="p">)</span>           <span class="c1"># by full model ID</span>
-<span class="n">s</span> <span class="o">=</span> <span class="n">Stemmer</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s2">&quot;my_dictionary.gz&quot;</span><span class="p">)</span>   <span class="c1"># a custom gzipped TSV source dictionary</span>
-<span class="n">s</span> <span class="o">=</span> <span class="n">Stemmer</span><span class="p">(</span><span class="n">compiled</span><span class="o">=</span><span class="s2">&quot;en.rxc&quot;</span><span class="p">)</span>         <span class="c1"># a pre-compiled binary (instant load)</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">Stemmer</span><span class="p">(</span><span class="s2">"en"</span><span class="p">)</span>                      <span class="c1"># by language code (bundled model)</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">Stemmer</span><span class="p">(</span><span class="s2">"us-uk-default"</span><span class="p">)</span>           <span class="c1"># by full model ID</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">Stemmer</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s2">"my_dictionary.gz"</span><span class="p">)</span>   <span class="c1"># a custom gzipped TSV source dictionary</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">Stemmer</span><span class="p">(</span><span class="n">compiled</span><span class="o">=</span><span class="s2">"en.rxc"</span><span class="p">)</span>         <span class="c1"># a pre-compiled binary (instant load)</span>
 </code></pre></div>
 <p>The traversal direction is derived from the language (right-to-left <code>fa</code>/<code>he</code>/<code>yi</code>
 use FORWARD, all others BACKWARD); override with <code>backward=True|False</code> for a
 custom <code>path=</code>.</p>
 <h2 id="stemming-a-single-word">Stemming a single word</h2>
-<div class="highlight"><pre><span></span><code><span class="n">s</span><span class="o">.</span><span class="n">stem</span><span class="p">(</span><span class="s2">&quot;running&quot;</span><span class="p">)</span>     <span class="c1"># &#39;run&#39;</span>
-<span class="n">s</span><span class="o">.</span><span class="n">stem</span><span class="p">(</span><span class="s2">&quot;cats&quot;</span><span class="p">)</span>        <span class="c1"># &#39;cat&#39;</span>
-<span class="n">s</span><span class="o">.</span><span class="n">stem</span><span class="p">(</span><span class="s2">&quot;zzzzz&quot;</span><span class="p">)</span>       <span class="c1"># None  -&gt; not reducible / unknown</span>
+<div class="highlight"><pre><span></span><code><span class="n">s</span><span class="o">.</span><span class="n">stem</span><span class="p">(</span><span class="s2">"running"</span><span class="p">)</span>     <span class="c1"># 'run'</span>
+<span class="n">s</span><span class="o">.</span><span class="n">stem</span><span class="p">(</span><span class="s2">"cats"</span><span class="p">)</span>        <span class="c1"># 'cat'</span>
+<span class="n">s</span><span class="o">.</span><span class="n">stem</span><span class="p">(</span><span class="s2">"zzzzz"</span><span class="p">)</span>       <span class="c1"># None  -&gt; not reducible / unknown</span>
 </code></pre></div>
 <p><code>stem()</code> returns the single <strong>dominant</strong> stem, or <code>None</code>.</p>
 <div class="admonition info">
@@ -3047,16 +3047,17 @@ inflectional reading is still available via <code>stem_all()</code>.</p>
 <p>For anything beyond a handful of words, use the batch API. It crosses the
 Python↔native boundary <strong>once</strong> for the whole list, which is the dominant cost
 when stemming from Python.</p>
-<div class="highlight"><pre><span></span><code><span class="n">words</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;running&quot;</span><span class="p">,</span> <span class="s2">&quot;cats&quot;</span><span class="p">,</span> <span class="s2">&quot;stemming&quot;</span><span class="p">,</span> <span class="s2">&quot;quickly&quot;</span><span class="p">]</span>
-<span class="n">s</span><span class="o">.</span><span class="n">stem_batch</span><span class="p">(</span><span class="n">words</span><span class="p">)</span>          <span class="c1"># [&#39;run&#39;, &#39;cat&#39;, &#39;stem&#39;, &#39;quick&#39;] (None for unknowns)</span>
+<div class="highlight"><pre><span></span><code><span class="n">words</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"running"</span><span class="p">,</span> <span class="s2">"cats"</span><span class="p">,</span> <span class="s2">"stemming"</span><span class="p">,</span> <span class="s2">"quickly"</span><span class="p">]</span>
+<span class="n">s</span><span class="o">.</span><span class="n">stem_batch</span><span class="p">(</span><span class="n">words</span><span class="p">)</span>          <span class="c1"># ['run', 'cat', 'stem', 'quick'] (None for unknowns)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><span class="c1"># Multiple candidate stems per word (ambiguity preserved):</span>
-<span class="n">s</span><span class="o">.</span><span class="n">stem_all</span><span class="p">(</span><span class="s2">&quot;running&quot;</span><span class="p">)</span>               <span class="c1"># e.g. [&#39;run&#39;, &#39;runn&#39;]</span>
-<span class="n">s</span><span class="o">.</span><span class="n">stem_all_batch</span><span class="p">([</span><span class="s2">&quot;running&quot;</span><span class="p">,</span> <span class="s2">&quot;cats&quot;</span><span class="p">])</span>
+<span class="n">s</span><span class="o">.</span><span class="n">stem_all</span><span class="p">(</span><span class="s2">"running"</span><span class="p">)</span>               <span class="c1"># e.g. ['run', 'runn']</span>
+<span class="n">s</span><span class="o">.</span><span class="n">stem_all_batch</span><span class="p">([</span><span class="s2">"running"</span><span class="p">,</span> <span class="s2">"cats"</span><span class="p">])</span>
 </code></pre></div>
 <h2 id="pystemmer-compatible-methods">PyStemmer-compatible methods</h2>
-<p>Radixor also exposes PyStemmer's scalar and batch method names. They differ
-from the native Radixor methods only when the trie cannot find a patch command:</p>
+<p>Radixor also exposes PyStemmer's scalar and batch method names. It preserves
+PyStemmer method compatibility while keeping Radixor's own stemmer internals.
+The compatibility surface covers supported PyStemmer-native algorithms only.</p>
 <table>
 <thead>
 <tr>
@@ -3083,13 +3084,13 @@ from the native Radixor methods only when the trie cannot find a patch command:<
 <td><code>stemWord(word)</code></td>
 <td>dominant stem</td>
 <td>original input word</td>
-<td><code>str</code></td>
+<td><code>str \| bytes</code></td>
 </tr>
 <tr>
 <td><code>stemWords(words)</code></td>
 <td>dominant stem at the same position</td>
 <td>original input word at the same position</td>
-<td><code>list[str]</code></td>
+<td><code>list[str \| bytes]</code></td>
 </tr>
 </tbody>
 </table>
@@ -3098,31 +3099,55 @@ PyStemmer's no-<code>None</code> contract:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">radixor</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">Stemmer</span>
 
 <span class="c1"># The rest of this common PyStemmer call pattern remains unchanged.</span>
-<span class="n">s</span> <span class="o">=</span> <span class="n">Stemmer</span><span class="o">.</span><span class="n">Stemmer</span><span class="p">(</span><span class="s2">&quot;english&quot;</span><span class="p">)</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">Stemmer</span><span class="o">.</span><span class="n">Stemmer</span><span class="p">(</span><span class="s2">"english"</span><span class="p">)</span>
 
-<span class="n">s</span><span class="o">.</span><span class="n">stemWord</span><span class="p">(</span><span class="s2">&quot;running&quot;</span><span class="p">)</span>                  <span class="c1"># &#39;run&#39;</span>
-<span class="n">s</span><span class="o">.</span><span class="n">stemWord</span><span class="p">(</span><span class="s2">&quot;unknown_word&quot;</span><span class="p">)</span>             <span class="c1"># &#39;unknown_word&#39;</span>
-<span class="n">s</span><span class="o">.</span><span class="n">stemWords</span><span class="p">([</span><span class="s2">&quot;running&quot;</span><span class="p">,</span> <span class="s2">&quot;unknown_word&quot;</span><span class="p">])</span>
-<span class="c1"># [&#39;run&#39;, &#39;unknown_word&#39;]</span>
+<span class="n">s</span><span class="o">.</span><span class="n">stemWord</span><span class="p">(</span><span class="s2">"running"</span><span class="p">)</span>                  <span class="c1"># 'run'</span>
+<span class="n">s</span><span class="o">.</span><span class="n">stemWord</span><span class="p">(</span><span class="s2">"unknown_word"</span><span class="p">)</span>             <span class="c1"># 'unknown_word'</span>
+<span class="n">s</span><span class="o">.</span><span class="n">stemWords</span><span class="p">([</span><span class="s2">"running"</span><span class="p">,</span> <span class="s2">"unknown_word"</span><span class="p">])</span>
+<span class="c1"># ['run', 'unknown_word']</span>
+
+<span class="n">s</span><span class="o">.</span><span class="n">stemWord</span><span class="p">(</span><span class="sa">b</span><span class="s2">"running"</span><span class="p">)</span>                 <span class="c1"># b'run'</span>
+<span class="n">s</span><span class="o">.</span><span class="n">stemWords</span><span class="p">([</span><span class="sa">b</span><span class="s2">"running"</span><span class="p">,</span> <span class="s2">"unknown"</span><span class="p">,</span> <span class="sa">b</span><span class="s2">"cars"</span><span class="p">])</span>
+<span class="c1"># [b'run', 'unknown', b'car']</span>
 </code></pre></div>
-<p><code>stemWords()</code> retains input order and makes one Python-to-Rust call for the
-whole list. PyStemmer's full language names, such as <code>"english"</code> and
-<code>"czech"</code>, are accepted for bundled Radixor languages alongside two-letter
-codes and full model IDs.</p>
+<p><code>stemWords()</code> accepts any iterable:</p>
+<div class="highlight"><pre><span></span><code><span class="n">s</span><span class="o">.</span><span class="n">stemWords</span><span class="p">((</span><span class="s2">"running"</span><span class="p">,</span> <span class="sa">b</span><span class="s2">"running"</span><span class="p">))</span>               <span class="c1"># tuple input</span>
+<span class="n">s</span><span class="o">.</span><span class="n">stemWords</span><span class="p">(</span><span class="n">word</span> <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"running"</span><span class="p">,</span> <span class="sa">b</span><span class="s2">"running"</span><span class="p">])</span>  <span class="c1"># generator input</span>
+</code></pre></div>
+<p>It preserves input order and length, and returns typed output (<code>str</code> for
+<code>str</code> inputs, <code>bytes</code> for <code>bytes</code> inputs).</p>
+<div class="highlight"><pre><span></span><code><span class="n">radixor</span><span class="o">.</span><span class="n">algorithms</span><span class="p">()</span>        <span class="c1"># canonical compatibility names only</span>
+<span class="n">radixor</span><span class="o">.</span><span class="n">algorithms</span><span class="p">(</span><span class="n">aliases</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">==</span> <span class="n">radixor</span><span class="o">.</span><span class="n">algorithms</span><span class="p">()</span>
+<span class="n">radixor</span><span class="o">.</span><span class="n">algorithms</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>    <span class="c1"># include aliases</span>
+<span class="n">radixor</span><span class="o">.</span><span class="n">version</span><span class="p">()</span>           <span class="c1"># installed package version string</span>
+</code></pre></div>
+<p><code>algorithms(True)</code> includes only supported aliases and does not add unsupported
+Snowball identities (<code>porter</code>, <code>dutch_porter</code>, etc.).
+<code>algorithms(False)</code> omits aliases and is deterministic.</p>
+<p>PyStemmer's full language names, such as <code>"english"</code> and <code>"czech"</code>, are
+accepted for bundled Radixor languages and supported aliases.</p>
 <p>The compatibility contract covers these method names, full language aliases,
-and unmatched-word fallback behavior. Radixor configuration keywords remain
-Radixor-specific: use <code>cache_size</code>, not PyStemmer's <code>maxCacheSize</code>. Both
-libraries default to a cache capacity of 10,000 entries.</p>
+and unmatched-word fallback behavior. Radixor also accepts PyStemmer's cache
+knob name as an alias: <code>maxCacheSize</code> is supported as an alias of
+<code>cache_size</code>. Both libraries default to a cache capacity of 10,000 entries.</p>
+<p>Use <code>from radixor import Stemmer</code> (or <code>import radixor as Stemmer</code>) for the primary import.
+<code>import Stemmer</code> is optional and only valid for zero-source-change migration when Radixor is the only top-level <code>Stemmer</code> provider.</p>
 <h2 id="bounded-result-cache">Bounded result cache</h2>
 <p>Real text repeats tokens. The default bounded cache returns the already-built
 result object on a recognized-word hit (a reference-count bump — no
 re-stemming, no new result string). Unknown words are cached as misses, so
 <code>stemWord()</code> and <code>stemWords()</code> still create their required original-word
 result. Its default capacity is <strong>10,000 entries</strong>, matching PyStemmer:</p>
-<div class="highlight"><pre><span></span><code><span class="n">s</span> <span class="o">=</span> <span class="n">Stemmer</span><span class="p">(</span><span class="s2">&quot;en&quot;</span><span class="p">)</span>                       <span class="c1"># cache up to 10,000 distinct input words</span>
-<span class="n">s</span> <span class="o">=</span> <span class="n">Stemmer</span><span class="p">(</span><span class="s2">&quot;en&quot;</span><span class="p">,</span> <span class="n">cache_size</span><span class="o">=</span><span class="mi">50_000</span><span class="p">)</span>    <span class="c1"># choose a custom capacity</span>
-<span class="n">s</span> <span class="o">=</span> <span class="n">Stemmer</span><span class="p">(</span><span class="s2">&quot;en&quot;</span><span class="p">,</span> <span class="n">cache_size</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>         <span class="c1"># explicitly disable caching</span>
+<div class="highlight"><pre><span></span><code><span class="n">s</span> <span class="o">=</span> <span class="n">Stemmer</span><span class="p">(</span><span class="s2">"en"</span><span class="p">)</span>                       <span class="c1"># cache up to 10,000 distinct input words</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">Stemmer</span><span class="p">(</span><span class="s2">"en"</span><span class="p">,</span> <span class="n">cache_size</span><span class="o">=</span><span class="mi">50_000</span><span class="p">)</span>    <span class="c1"># choose a custom capacity</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">Stemmer</span><span class="p">(</span><span class="s2">"en"</span><span class="p">,</span> <span class="n">cache_size</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>         <span class="c1"># explicitly disable caching</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">Stemmer</span><span class="p">(</span><span class="s2">"english"</span><span class="p">,</span> <span class="mi">50_000</span><span class="p">)</span>          <span class="c1"># drop-in PyStemmer style positional cache size</span>
+
+<span class="c1"># Equivalent PyStemmer-style cache control:</span>
+<span class="n">s</span><span class="o">.</span><span class="n">maxCacheSize</span> <span class="o">=</span> <span class="mi">25_000</span>
 </code></pre></div>
+<p><code>maxCacheSize</code> matches PyStemmer's behavior: assigning a non-<code>int</code> raises
+<code>TypeError</code>, and assigning a negative value raises <code>ValueError</code>.</p>
 <p>One cache is shared by <code>stem()</code>, <code>stemWord()</code>, <code>stem_batch()</code>, and
 <code>stemWords()</code>. The <code>stem_all()</code> and <code>stem_all_batch()</code> methods are not cached.
 Caching never changes results; it only avoids recomputation. Entries are
@@ -3131,9 +3156,9 @@ high-cardinality stream without useful token repetition, use <code>cache_size=0<
 <h2 id="skipping-lowercasing-for-pre-normalized-input">Skipping lowercasing for pre-normalized input</h2>
 <p>By default lookups lowercase the input (<code>LOWERCASE_WITH_LOCALE_ROOT</code>). If your
 pipeline already lowercases tokens, skip the redundant work:</p>
-<div class="highlight"><pre><span></span><code><span class="n">s</span> <span class="o">=</span> <span class="n">Stemmer</span><span class="p">(</span><span class="s2">&quot;en&quot;</span><span class="p">,</span> <span class="n">lowercase</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>     <span class="c1"># assume already-lowercased input</span>
-<span class="n">s</span><span class="o">.</span><span class="n">stem</span><span class="p">(</span><span class="s2">&quot;running&quot;</span><span class="p">)</span>                      <span class="c1"># &#39;run&#39;</span>
-<span class="n">s</span><span class="o">.</span><span class="n">stem</span><span class="p">(</span><span class="s2">&quot;Running&quot;</span><span class="p">)</span>                      <span class="c1"># None  -&gt; not lowercased, so no match</span>
+<div class="highlight"><pre><span></span><code><span class="n">s</span> <span class="o">=</span> <span class="n">Stemmer</span><span class="p">(</span><span class="s2">"en"</span><span class="p">,</span> <span class="n">lowercase</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>     <span class="c1"># assume already-lowercased input</span>
+<span class="n">s</span><span class="o">.</span><span class="n">stem</span><span class="p">(</span><span class="s2">"running"</span><span class="p">)</span>                      <span class="c1"># 'run'</span>
+<span class="n">s</span><span class="o">.</span><span class="n">stem</span><span class="p">(</span><span class="s2">"Running"</span><span class="p">)</span>                      <span class="c1"># None  -&gt; not lowercased, so no match</span>
 </code></pre></div>
 <p>The model's keys are always lowercase; <code>lowercase=False</code> only turns off
 per-lookup normalization. On already-lowercased input the results are identical.</p>
@@ -3142,8 +3167,8 @@ per-lookup normalization. On already-lowercased input the results are identical.
 once to Radixor's binary format and load it directly afterwards:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">radixor</span>
 
-<span class="n">radixor</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s2">&quot;stemmer.gz&quot;</span><span class="p">,</span> <span class="s2">&quot;en.rxc&quot;</span><span class="p">,</span> <span class="n">language</span><span class="o">=</span><span class="s2">&quot;en&quot;</span><span class="p">)</span>
-<span class="n">s</span> <span class="o">=</span> <span class="n">radixor</span><span class="o">.</span><span class="n">Stemmer</span><span class="p">(</span><span class="n">compiled</span><span class="o">=</span><span class="s2">&quot;en.rxc&quot;</span><span class="p">)</span>
+<span class="n">radixor</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s2">"stemmer.gz"</span><span class="p">,</span> <span class="s2">"en.rxc"</span><span class="p">,</span> <span class="n">language</span><span class="o">=</span><span class="s2">"en"</span><span class="p">)</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">radixor</span><span class="o">.</span><span class="n">Stemmer</span><span class="p">(</span><span class="n">compiled</span><span class="o">=</span><span class="s2">"en.rxc"</span><span class="p">)</span>
 </code></pre></div>
 <p>See <a href="../model-compilation/">Compiling Dictionaries in Python</a> for the source
 format, traversal and normalization options, deployment guidance, Java
@@ -3155,7 +3180,7 @@ line remarks:</p>
 <div class="highlight"><pre><span></span><code>run running runs    ran
 cat cats
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><span class="n">s</span> <span class="o">=</span> <span class="n">Stemmer</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s2">&quot;custom.gz&quot;</span><span class="p">,</span> <span class="n">backward</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">store_original</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">s</span> <span class="o">=</span> <span class="n">Stemmer</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s2">"custom.gz"</span><span class="p">,</span> <span class="n">backward</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">store_original</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </code></pre></div>
 <p><code>store_original=True</code> (default) maps each stem to itself (a no-op patch) so the
 stem is recognised. See <a href="../../dictionary-format/">Dictionary Format</a> for the
@@ -3174,9 +3199,9 @@ internally; the compiled trie is immutable after construction.</p>
 </thead>
 <tbody>
 <tr>
-<td><code>Stemmer(lang \| path= \| compiled=, *, backward, store_original, lowercase, cache_size=10_000)</code></td>
+<td><code>Stemmer(language=None, maxCacheSize: int | None = None, *, path=..., compiled=..., backward, store_original, lowercase, cache_size=10_000)</code></td>
 <td>stemmer</td>
-<td>auto-detects compiled vs textual for <code>path=</code>; <code>cache_size=0</code> disables caching</td>
+<td>PyStemmer-compatible positional cache argument via <code>maxCacheSize</code>; if set, <code>cache_size</code> is ignored; <code>cache_size=0</code> disables caching (<code>maxCacheSize</code> remains supported as alias)</td>
 </tr>
 <tr>
 <td><code>stem(word)</code></td>
@@ -3190,13 +3215,23 @@ internally; the compiled trie is immutable after construction.</p>
 </tr>
 <tr>
 <td><code>stemWord(word)</code></td>
-<td><code>str</code></td>
+<td><code>str \| bytes</code></td>
 <td>PyStemmer-compatible; returns an unmatched word unchanged</td>
 </tr>
 <tr>
 <td><code>stemWords(words)</code></td>
+<td><code>list[str \| bytes]</code></td>
+<td>PyStemmer-compatible batch call; accepts any iterable and preserves unmatched words and input order</td>
+</tr>
+<tr>
+<td><code>algorithms(aliases: bool = False)</code></td>
 <td><code>list[str]</code></td>
-<td>PyStemmer-compatible batch call; preserves unmatched words and input order</td>
+<td>Supported PyStemmer algorithm names</td>
+</tr>
+<tr>
+<td><code>version()</code></td>
+<td><code>str</code></td>
+<td>Installed <code>radixor</code> version</td>
 </tr>
 <tr>
 <td><code>stem_all(word)</code></td>

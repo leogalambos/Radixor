@@ -3075,11 +3075,11 @@ data, which keeps startup on the direct compiled-model path.</p>
 <p>Construct a stemmer once and retain it for the lifetime of the application:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">radixor</span><span class="w"> </span><span class="kn">import</span> <span class="n">Stemmer</span>
 
-<span class="n">english</span> <span class="o">=</span> <span class="n">Stemmer</span><span class="p">(</span><span class="s2">&quot;en&quot;</span><span class="p">)</span>
-<span class="n">polish</span> <span class="o">=</span> <span class="n">Stemmer</span><span class="p">(</span><span class="s2">&quot;pl&quot;</span><span class="p">)</span>
+<span class="n">english</span> <span class="o">=</span> <span class="n">Stemmer</span><span class="p">(</span><span class="s2">"en"</span><span class="p">)</span>
+<span class="n">polish</span> <span class="o">=</span> <span class="n">Stemmer</span><span class="p">(</span><span class="s2">"pl"</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="n">english</span><span class="o">.</span><span class="n">stem</span><span class="p">(</span><span class="s2">&quot;running&quot;</span><span class="p">))</span>  <span class="c1"># &#39;run&#39;</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">polish</span><span class="o">.</span><span class="n">stem</span><span class="p">(</span><span class="s2">&quot;koty&quot;</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">english</span><span class="o">.</span><span class="n">stem</span><span class="p">(</span><span class="s2">"running"</span><span class="p">))</span>  <span class="c1"># 'run'</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">polish</span><span class="o">.</span><span class="n">stem</span><span class="p">(</span><span class="s2">"koty"</span><span class="p">))</span>
 </code></pre></div>
 <p>Short aliases such as <code>en</code>, <code>de</code>, and <code>pl</code> resolve to the documented default
 model IDs. A full ID such as <code>us-uk-default</code> selects the same model explicitly.
@@ -3087,7 +3087,7 @@ The complete mapping is listed under <a href="../../built-in-languages/">Built-i
 <h2 id="3-prefer-batch-calls-for-collections">3. Prefer batch calls for collections</h2>
 <p>Crossing the Python/native boundary once per collection is substantially more
 efficient than a Python loop of scalar calls:</p>
-<div class="highlight"><pre><span></span><code><span class="n">words</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;running&quot;</span><span class="p">,</span> <span class="s2">&quot;studies&quot;</span><span class="p">,</span> <span class="s2">&quot;better&quot;</span><span class="p">,</span> <span class="s2">&quot;cars&quot;</span><span class="p">]</span>
+<div class="highlight"><pre><span></span><code><span class="n">words</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"running"</span><span class="p">,</span> <span class="s2">"studies"</span><span class="p">,</span> <span class="s2">"better"</span><span class="p">,</span> <span class="s2">"cars"</span><span class="p">]</span>
 <span class="n">stems</span> <span class="o">=</span> <span class="n">english</span><span class="o">.</span><span class="n">stem_batch</span><span class="p">(</span><span class="n">words</span><span class="p">)</span>
 </code></pre></div>
 <p><code>stem_batch()</code> preserves input order and returns one item per word. Entries can
@@ -3095,31 +3095,39 @@ be <code>None</code> when the trie has no applicable patch command.</p>
 <p>Repeated natural-language tokens use a bounded result cache shared by the
 scalar and batch APIs. Its default capacity is 10,000 entries, matching
 PyStemmer; choose another bound or pass <code>0</code> to disable it:</p>
-<div class="highlight"><pre><span></span><code><span class="n">english</span> <span class="o">=</span> <span class="n">Stemmer</span><span class="p">(</span><span class="s2">&quot;en&quot;</span><span class="p">,</span> <span class="n">cache_size</span><span class="o">=</span><span class="mi">10_000</span><span class="p">)</span>
-<span class="n">uncached</span> <span class="o">=</span> <span class="n">Stemmer</span><span class="p">(</span><span class="s2">&quot;en&quot;</span><span class="p">,</span> <span class="n">cache_size</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">english</span> <span class="o">=</span> <span class="n">Stemmer</span><span class="p">(</span><span class="s2">"en"</span><span class="p">,</span> <span class="mi">10_000</span><span class="p">)</span>  <span class="c1"># positional second argument like PyStemmer</span>
+<span class="n">english</span> <span class="o">=</span> <span class="n">Stemmer</span><span class="p">(</span><span class="s2">"en"</span><span class="p">,</span> <span class="n">cache_size</span><span class="o">=</span><span class="mi">10_000</span><span class="p">)</span>
+<span class="n">uncached</span> <span class="o">=</span> <span class="n">Stemmer</span><span class="p">(</span><span class="s2">"en"</span><span class="p">,</span> <span class="n">cache_size</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="c1"># PyStemmer-compatible cache alias:</span>
+<span class="n">english</span><span class="o">.</span><span class="n">maxCacheSize</span> <span class="o">=</span> <span class="mi">25_000</span>
 </code></pre></div>
 <p>The cache covers <code>stem()</code>, <code>stemWord()</code>, <code>stem_batch()</code>, and <code>stemWords()</code>;
 the <code>stem_all*()</code> methods are not cached.</p>
 <h2 id="4-migrate-from-pystemmer">4. Migrate from PyStemmer</h2>
 <p>Radixor exposes PyStemmer's familiar scalar and batch method names:</p>
-<div class="highlight"><pre><span></span><code><span class="n">stemmer</span> <span class="o">=</span> <span class="n">Stemmer</span><span class="p">(</span><span class="s2">&quot;en&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">stemmer</span> <span class="o">=</span> <span class="n">Stemmer</span><span class="p">(</span><span class="s2">"en"</span><span class="p">)</span>
 
-<span class="n">stemmer</span><span class="o">.</span><span class="n">stemWord</span><span class="p">(</span><span class="s2">&quot;running&quot;</span><span class="p">)</span>
-<span class="n">stemmer</span><span class="o">.</span><span class="n">stemWords</span><span class="p">([</span><span class="s2">&quot;running&quot;</span><span class="p">,</span> <span class="s2">&quot;unknown_word&quot;</span><span class="p">])</span>
+<span class="n">stemmer</span><span class="o">.</span><span class="n">stemWord</span><span class="p">(</span><span class="s2">"running"</span><span class="p">)</span>
+<span class="n">stemmer</span><span class="o">.</span><span class="n">stemWords</span><span class="p">([</span><span class="s2">"running"</span><span class="p">,</span> <span class="s2">"unknown_word"</span><span class="p">])</span>
+<span class="n">stemmer</span><span class="o">.</span><span class="n">stemWords</span><span class="p">((</span><span class="sa">b</span><span class="s2">"running"</span><span class="p">,</span> <span class="s2">"cars"</span><span class="p">))</span>
+<span class="n">stemmer</span><span class="o">.</span><span class="n">stemWords</span><span class="p">(</span><span class="n">b_word</span> <span class="k">for</span> <span class="n">b_word</span> <span class="ow">in</span> <span class="p">[</span><span class="sa">b</span><span class="s2">"running"</span><span class="p">,</span> <span class="sa">b</span><span class="s2">"cars"</span><span class="p">])</span>
 </code></pre></div>
 <p><code>stemWord()</code> and <code>stemWords()</code> return unmatched input unchanged. This removes
 the <code>None</code> fallback checks required by Radixor's original <code>stem()</code> and
 <code>stem_batch()</code> methods, so most migration work is limited to the package import
 and dependency change.</p>
+<p>Use <code>from radixor import Stemmer</code> (or <code>import radixor as Stemmer</code>) in migration code.
+<code>import Stemmer</code> is optional and only for environments without PyStemmer (zero-source-change migration).</p>
 <h2 id="5-load-a-custom-compiled-model">5. Load a custom compiled model</h2>
 <p>The standard installation covers the maintained default catalog. A custom
 version 7 model can be loaded directly:</p>
-<div class="highlight"><pre><span></span><code><span class="n">custom</span> <span class="o">=</span> <span class="n">Stemmer</span><span class="p">(</span><span class="n">compiled</span><span class="o">=</span><span class="s2">&quot;models/domain-english.rxc&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">custom</span> <span class="o">=</span> <span class="n">Stemmer</span><span class="p">(</span><span class="n">compiled</span><span class="o">=</span><span class="s2">"models/domain-english.rxc"</span><span class="p">)</span>
 </code></pre></div>
 <p>To compile a maintained textual dictionary during a preparation step:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">radixor</span><span class="w"> </span><span class="kn">import</span> <span class="nb">compile</span>
 
-<span class="nb">compile</span><span class="p">(</span><span class="s2">&quot;dictionaries/domain.tsv.gz&quot;</span><span class="p">,</span> <span class="s2">&quot;models/domain-english.rxc&quot;</span><span class="p">,</span> <span class="n">language</span><span class="o">=</span><span class="s2">&quot;en&quot;</span><span class="p">)</span>
+<span class="nb">compile</span><span class="p">(</span><span class="s2">"dictionaries/domain.tsv.gz"</span><span class="p">,</span> <span class="s2">"models/domain-english.rxc"</span><span class="p">,</span> <span class="n">language</span><span class="o">=</span><span class="s2">"en"</span><span class="p">)</span>
 </code></pre></div>
 <p>Deploy the resulting <code>.rxc</code> file and load it at application startup. See
 <a href="../model-compilation/">Dictionary Compilation</a> for format interoperability and

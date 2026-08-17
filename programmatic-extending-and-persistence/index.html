@@ -2925,12 +2925,12 @@
 <span class="kd">public</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kd">class</span> <span class="nc">ExtendCompiledStemmerExample</span><span class="w"> </span><span class="p">{</span>
 
 <span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="nf">ExtendCompiledStemmerExample</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">throw</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">AssertionError</span><span class="p">(</span><span class="s">&quot;No instances.&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="k">throw</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">AssertionError</span><span class="p">(</span><span class="s">"No instances."</span><span class="p">);</span>
 <span class="w">    </span><span class="p">}</span>
 
 <span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kd">final</span><span class="w"> </span><span class="n">String</span><span class="o">[]</span><span class="w"> </span><span class="n">arguments</span><span class="p">)</span><span class="w"> </span><span class="kd">throws</span><span class="w"> </span><span class="n">IOException</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="kd">final</span><span class="w"> </span><span class="n">FrequencyTrie</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">compiledTrie</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">StemmerPatchTrieBinaryIO</span><span class="p">.</span><span class="na">read</span><span class="p">(</span>
-<span class="w">                </span><span class="n">Path</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="s">&quot;stemmers&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;english.radixor.gz&quot;</span><span class="p">));</span>
+<span class="w">                </span><span class="n">Path</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="s">"stemmers"</span><span class="p">,</span><span class="w"> </span><span class="s">"english.radixor.gz"</span><span class="p">));</span>
 
 <span class="w">        </span><span class="kd">final</span><span class="w"> </span><span class="n">ReductionSettings</span><span class="w"> </span><span class="n">settings</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ReductionSettings</span><span class="p">.</span><span class="na">withDefaults</span><span class="p">(</span>
 <span class="w">                </span><span class="n">ReductionMode</span><span class="p">.</span><span class="na">MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS</span><span class="p">);</span>
@@ -2940,13 +2940,13 @@
 <span class="w">                </span><span class="n">String</span><span class="o">[]</span><span class="p">::</span><span class="k">new</span><span class="p">,</span>
 <span class="w">                </span><span class="n">settings</span><span class="p">);</span>
 
-<span class="w">        </span><span class="n">builder</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">&quot;microservices&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Na&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="n">builder</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">"microservices"</span><span class="p">,</span><span class="w"> </span><span class="s">"Na"</span><span class="p">);</span>
 
 <span class="w">        </span><span class="kd">final</span><span class="w"> </span><span class="n">FrequencyTrie</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">updatedTrie</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">builder</span><span class="p">.</span><span class="na">build</span><span class="p">();</span>
 
 <span class="w">        </span><span class="n">StemmerPatchTrieBinaryIO</span><span class="p">.</span><span class="na">write</span><span class="p">(</span>
 <span class="w">                </span><span class="n">updatedTrie</span><span class="p">,</span>
-<span class="w">                </span><span class="n">Path</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="s">&quot;stemmers&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;english-custom.radixor.gz&quot;</span><span class="p">));</span>
+<span class="w">                </span><span class="n">Path</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="s">"stemmers"</span><span class="p">,</span><span class="w"> </span><span class="s">"english-custom.radixor.gz"</span><span class="p">));</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -2964,7 +2964,7 @@
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">org.egothor.stemmer.StemmerPatchTrieBinaryIO</span><span class="p">;</span>
 
-<span class="n">StemmerPatchTrieBinaryIO</span><span class="p">.</span><span class="na">write</span><span class="p">(</span><span class="n">trie</span><span class="p">,</span><span class="w"> </span><span class="n">Path</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="s">&quot;stemmers&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;english.radixor.gz&quot;</span><span class="p">));</span>
+<span class="n">StemmerPatchTrieBinaryIO</span><span class="p">.</span><span class="na">write</span><span class="p">(</span><span class="n">trie</span><span class="p">,</span><span class="w"> </span><span class="n">Path</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="s">"stemmers"</span><span class="p">,</span><span class="w"> </span><span class="s">"english.radixor.gz"</span><span class="p">));</span>
 </code></pre></div>
 <p>In deployment terms, the cleanest model is usually:</p>
 <ul>
@@ -2989,7 +2989,7 @@
 <h2 id="inspecting-persisted-metadata">Inspecting persisted metadata</h2>
 <p>After loading a compiled artifact, applications can inspect the persisted build descriptor directly:</p>
 <div class="highlight"><pre><span></span><code><span class="kd">final</span><span class="w"> </span><span class="n">FrequencyTrie</span><span class="o">&lt;</span><span class="n">CompiledPatchCommand</span><span class="o">&gt;</span><span class="w"> </span><span class="n">trie</span><span class="w"> </span><span class="o">=</span>
-<span class="w">        </span><span class="n">StemmerPatchTrieLoader</span><span class="p">.</span><span class="na">loadBinaryCompiled</span><span class="p">(</span><span class="s">&quot;build/stemmers/cs_cz.dat.gz&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="n">StemmerPatchTrieLoader</span><span class="p">.</span><span class="na">loadBinaryCompiled</span><span class="p">(</span><span class="s">"build/stemmers/cs_cz.dat.gz"</span><span class="p">);</span>
 <span class="kd">final</span><span class="w"> </span><span class="n">TrieMetadata</span><span class="w"> </span><span class="n">metadata</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">trie</span><span class="p">.</span><span class="na">metadata</span><span class="p">();</span>
 
 <span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="n">metadata</span><span class="p">.</span><span class="na">formatVersion</span><span class="p">());</span>

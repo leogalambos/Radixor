@@ -2971,10 +2971,11 @@ is made fair. The scripts are in the repository (<code>python/benchmarks/</code>
 can reproduce the numbers.</p>
 <div class="admonition info">
 <p class="admonition-title">Published single-machine measurement</p>
-<p>These results were regenerated on 2026-08-08 on the current benchmark
-workstation: Fedora Linux 44 (<code>7.1.6-201.fc44.x86_64</code>), AMD Ryzen 5 5625U
-(6 cores / 12 threads), CPython 3.14.6, Rust 1.97.1, and a release wheel.
-All logical CPUs used the <code>schedutil</code> governor. Absolute timings remain
+<p>These results were regenerated on 2026-08-18 on the current benchmark
+workstation: AMD Ryzen 5 8600G with Radeon 760M Graphics (6 cores / 12
+threads), Linux-7.1.8-200.fc44.x86_64-x86_64-with-glibc2.43,
+CPython 3.14.6, Rust 1.97.1, and a release wheel.
+All logical CPUs used the <code>performance</code> governor. Absolute timings remain
 machine-specific; compare ratios only within this run.</p>
 </div>
 <h2 id="what-is-measured">What is measured</h2>
@@ -2986,10 +2987,9 @@ machine-specific; compare ratios only within this run.</p>
   with its line's root, normalized <code>trim().lower()</code>, keeping only tokens that
   differ from their root (the forms a stemmer must actually rewrite), padded to
   ≥ 5 000 tokens. This is identical to the Java <code>LanguageBenchmarkCorpus</code>.</li>
-<li><strong>Batch sizes 10/20/50/100</strong> are swept and a line is fit to <code>per_call(N) =
-  intercept + N · slope</code> as a descriptive scaling summary. This is an
-  unconstrained OLS fit, so noise may produce a negative intercept; it is not a
-  physical decomposition of runtime. The <em>best</em> of many repeats is reported.</li>
+<li>The benchmark is now run at a single fixed batch size <strong>N = 100</strong>.
+  This avoids fitting a scaling model and reports the measured batch performance
+  directly.</li>
 </ul>
 <h2 id="fairness-making-the-comparison-apples-to-apples">Fairness: making the comparison apples-to-apples</h2>
 <p>Three asymmetries silently distort stemmer comparisons. Each is neutralized, and
@@ -3028,7 +3028,7 @@ where it <strong>cannot</strong> be neutralized the effect is described.</p>
 <tbody>
 <tr>
 <td>CPU</td>
-<td>AMD Ryzen 5 5625U with Radeon Graphics</td>
+<td>AMD Ryzen 5 8600G with Radeon 760M Graphics</td>
 </tr>
 <tr>
 <td>CPU topology</td>
@@ -3036,11 +3036,11 @@ where it <strong>cannot</strong> be neutralized the effect is described.</p>
 </tr>
 <tr>
 <td>OS</td>
-<td>Fedora Linux 44, kernel <code>7.1.6-201.fc44.x86_64</code></td>
+<td>Linux-7.1.8-200.fc44.x86_64-x86_64-with-glibc2.43</td>
 </tr>
 <tr>
 <td>CPU governor</td>
-<td><code>schedutil</code> on all 12 logical CPUs; boost enabled</td>
+<td><code>performance</code> on all 12 logical CPUs; boost enabled</td>
 </tr>
 <tr>
 <td>Python</td>
@@ -3048,7 +3048,7 @@ where it <strong>cannot</strong> be neutralized the effect is described.</p>
 </tr>
 <tr>
 <td>Radixor</td>
-<td>4.1.0, release-mode ABI3 wheel, cache disabled</td>
+<td>4.1.2, release-mode ABI3 wheel, cache disabled</td>
 </tr>
 <tr>
 <td>PyStemmer</td>
@@ -3060,7 +3060,7 @@ where it <strong>cannot</strong> be neutralized the effect is described.</p>
 </tr>
 <tr>
 <td>NLTK</td>
-<td>3.10.2</td>
+<td>3.10.3</td>
 </tr>
 <tr>
 <td>Workload</td>
@@ -3068,18 +3068,23 @@ where it <strong>cannot</strong> be neutralized the effect is described.</p>
 </tr>
 <tr>
 <td>Batch sizes</td>
-<td>10, 20, 50, 100</td>
+<td>100</td>
 </tr>
 <tr>
 <td>Timing</td>
-<td>best of 15 measured passes after 3 warm-up passes</td>
+<td>median of 3 measured passes after 3 warm-up passes</td>
 </tr>
 </tbody>
 </table>
 <p>The authoritative command was:</p>
-<div class="highlight"><pre><span></span><code>./gradlew<span class="w"> </span>pythonBenchmarkAllLanguagesBatch<span class="w"> </span>--rerun-tasks
+<div class="highlight"><pre><span></span><code>./gradlew<span class="w"> </span>pythonBenchmarkAllLanguagesBatch<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-PpythonBenchmarkEngines<span class="o">=</span>radixor,PyStemmer,snowballstemmer-pure,cistem,nltk-porter<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-PpythonBenchmarkWords<span class="o">=</span><span class="m">5000</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-PpythonBenchmarkRepeats<span class="o">=</span><span class="m">3</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-PpythonBenchmarkWarmup<span class="o">=</span><span class="m">3</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--rerun-tasks
 </code></pre></div>
-<p>It completed successfully in 3 minutes 33 seconds and emitted
+<p>The run completed successfully and emitted
 the full per-size CSV and JSON reports under
 <code>build/reports/python-benchmarks/</code>.</p>
 <h2 id="results-batch-size-100-cache-disabled">Results — batch size 100, cache disabled</h2>
@@ -3101,71 +3106,71 @@ partitioning.</p>
 <tbody>
 <tr>
 <td>Czech (<code>cs</code>)</td>
-<td style="text-align: right;"><strong>224.3</strong></td>
-<td style="text-align: right;">236.6</td>
+<td style="text-align: right;"><strong>151.6</strong></td>
+<td style="text-align: right;">158.7</td>
 <td style="text-align: right;">—</td>
-<td style="text-align: right;">4,835.2</td>
+<td style="text-align: right;">3194.4</td>
 <td style="text-align: right;">—</td>
 </tr>
 <tr>
 <td>Danish (<code>da</code>)</td>
-<td style="text-align: right;"><strong>178.3</strong></td>
-<td style="text-align: right;">267.6</td>
+<td style="text-align: right;"><strong>115.8</strong></td>
+<td style="text-align: right;">181.9</td>
 <td style="text-align: right;">—</td>
-<td style="text-align: right;">8,568.9</td>
+<td style="text-align: right;">5643.1</td>
 <td style="text-align: right;">—</td>
 </tr>
 <tr>
 <td>German (<code>de</code>)</td>
-<td style="text-align: right;"><strong>230.9</strong></td>
-<td style="text-align: right;">635.5</td>
-<td style="text-align: right;">3,341.9</td>
-<td style="text-align: right;">33,654.1</td>
+<td style="text-align: right;"><strong>156.1</strong></td>
+<td style="text-align: right;">453.3</td>
+<td style="text-align: right;">2306.4</td>
+<td style="text-align: right;">22351.7</td>
 <td style="text-align: right;">—</td>
 </tr>
 <tr>
 <td>English (<code>en</code>)</td>
-<td style="text-align: right;"><strong>180.5</strong></td>
-<td style="text-align: right;">331.9</td>
+<td style="text-align: right;"><strong>127.4</strong></td>
+<td style="text-align: right;">251.2</td>
 <td style="text-align: right;">—</td>
-<td style="text-align: right;">20,195.0</td>
-<td style="text-align: right;">7,740.3</td>
+<td style="text-align: right;">12806.1</td>
+<td style="text-align: right;">5335.1</td>
 </tr>
 <tr>
 <td>Spanish (<code>es</code>)</td>
-<td style="text-align: right;"><strong>184.2</strong></td>
-<td style="text-align: right;">316.6</td>
+<td style="text-align: right;"><strong>134.3</strong></td>
+<td style="text-align: right;">209.9</td>
 <td style="text-align: right;">—</td>
-<td style="text-align: right;">19,640.1</td>
+<td style="text-align: right;">13053.4</td>
 <td style="text-align: right;">—</td>
 </tr>
 <tr>
 <td>Persian (<code>fa</code>)</td>
-<td style="text-align: right;"><strong>210.1</strong></td>
-<td style="text-align: right;">497.1</td>
+<td style="text-align: right;"><strong>147.4</strong></td>
+<td style="text-align: right;">324.2</td>
 <td style="text-align: right;">—</td>
-<td style="text-align: right;">32,732.3</td>
+<td style="text-align: right;">20816.9</td>
 <td style="text-align: right;">—</td>
 </tr>
 <tr>
 <td>Finnish (<code>fi</code>)</td>
-<td style="text-align: right;"><strong>227.8</strong></td>
-<td style="text-align: right;">258.8</td>
+<td style="text-align: right;"><strong>171.7</strong></td>
+<td style="text-align: right;">188.3</td>
 <td style="text-align: right;">—</td>
-<td style="text-align: right;">12,339.5</td>
+<td style="text-align: right;">7790.9</td>
 <td style="text-align: right;">—</td>
 </tr>
 <tr>
 <td>French (<code>fr</code>)</td>
-<td style="text-align: right;"><strong>234.2</strong></td>
-<td style="text-align: right;">503.7</td>
+<td style="text-align: right;"><strong>167.4</strong></td>
+<td style="text-align: right;">349.8</td>
 <td style="text-align: right;">—</td>
-<td style="text-align: right;">36,161.9</td>
+<td style="text-align: right;">22760.1</td>
 <td style="text-align: right;">—</td>
 </tr>
 <tr>
 <td>Hebrew (<code>he</code>)</td>
-<td style="text-align: right;"><strong>228.6</strong></td>
+<td style="text-align: right;"><strong>161.6</strong></td>
 <td style="text-align: right;">—</td>
 <td style="text-align: right;">—</td>
 <td style="text-align: right;">—</td>
@@ -3173,79 +3178,79 @@ partitioning.</p>
 </tr>
 <tr>
 <td>Hungarian (<code>hu</code>)</td>
-<td style="text-align: right;"><strong>198.2</strong></td>
-<td style="text-align: right;">264.7</td>
+<td style="text-align: right;"><strong>133.2</strong></td>
+<td style="text-align: right;">190.7</td>
 <td style="text-align: right;">—</td>
-<td style="text-align: right;">13,694.3</td>
+<td style="text-align: right;">9040.2</td>
 <td style="text-align: right;">—</td>
 </tr>
 <tr>
 <td>Italian (<code>it</code>)</td>
-<td style="text-align: right;"><strong>170.8</strong></td>
-<td style="text-align: right;">517.0</td>
+<td style="text-align: right;"><strong>137.6</strong></td>
+<td style="text-align: right;">363.8</td>
 <td style="text-align: right;">—</td>
-<td style="text-align: right;">34,504.6</td>
+<td style="text-align: right;">22083.6</td>
 <td style="text-align: right;">—</td>
 </tr>
 <tr>
 <td>Norwegian Bokmål (<code>nb</code>)</td>
-<td style="text-align: right;"><strong>187.1</strong></td>
-<td style="text-align: right;">239.7</td>
+<td style="text-align: right;"><strong>115.1</strong></td>
+<td style="text-align: right;">166.4</td>
 <td style="text-align: right;">—</td>
-<td style="text-align: right;">7,457.6</td>
+<td style="text-align: right;">4926.5</td>
 <td style="text-align: right;">—</td>
 </tr>
 <tr>
 <td>Dutch (<code>nl</code>)</td>
-<td style="text-align: right;"><strong>187.1</strong></td>
-<td style="text-align: right;">354.8</td>
+<td style="text-align: right;"><strong>120.4</strong></td>
+<td style="text-align: right;">246.3</td>
 <td style="text-align: right;">—</td>
-<td style="text-align: right;">18,148.2</td>
+<td style="text-align: right;">11720.3</td>
 <td style="text-align: right;">—</td>
 </tr>
 <tr>
 <td>Norwegian Nynorsk (<code>nn</code>)</td>
-<td style="text-align: right;"><strong>168.7</strong></td>
-<td style="text-align: right;">231.2</td>
+<td style="text-align: right;"><strong>106.5</strong></td>
+<td style="text-align: right;">164.3</td>
 <td style="text-align: right;">—</td>
-<td style="text-align: right;">7,489.4</td>
+<td style="text-align: right;">4828.7</td>
 <td style="text-align: right;">—</td>
 </tr>
 <tr>
 <td>Polish (<code>pl</code>)</td>
-<td style="text-align: right;"><strong>194.6</strong></td>
-<td style="text-align: right;">214.5</td>
+<td style="text-align: right;"><strong>125.6</strong></td>
+<td style="text-align: right;">137.2</td>
 <td style="text-align: right;">—</td>
-<td style="text-align: right;">5,282.9</td>
+<td style="text-align: right;">3489.3</td>
 <td style="text-align: right;">—</td>
 </tr>
 <tr>
 <td>Portuguese (<code>pt</code>)</td>
-<td style="text-align: right;"><strong>166.9</strong></td>
-<td style="text-align: right;">293.2</td>
+<td style="text-align: right;"><strong>114.5</strong></td>
+<td style="text-align: right;">198.7</td>
 <td style="text-align: right;">—</td>
-<td style="text-align: right;">21,157.2</td>
+<td style="text-align: right;">14330.2</td>
 <td style="text-align: right;">—</td>
 </tr>
 <tr>
 <td>Russian (<code>ru</code>)</td>
-<td style="text-align: right;"><strong>273.4</strong></td>
-<td style="text-align: right;">414.4</td>
+<td style="text-align: right;"><strong>192.3</strong></td>
+<td style="text-align: right;">278.5</td>
 <td style="text-align: right;">—</td>
-<td style="text-align: right;">15,703.8</td>
+<td style="text-align: right;">10333.2</td>
 <td style="text-align: right;">—</td>
 </tr>
 <tr>
 <td>Swedish (<code>sv</code>)</td>
-<td style="text-align: right;"><strong>189.3</strong></td>
-<td style="text-align: right;">212.5</td>
+<td style="text-align: right;"><strong>122.6</strong></td>
+<td style="text-align: right;">138.0</td>
 <td style="text-align: right;">—</td>
-<td style="text-align: right;">5,351.4</td>
+<td style="text-align: right;">3576.5</td>
 <td style="text-align: right;">—</td>
 </tr>
 <tr>
 <td>Ukrainian (<code>uk</code>)</td>
-<td style="text-align: right;"><strong>221.5</strong></td>
+<td style="text-align: right;"><strong>149.6</strong></td>
 <td style="text-align: right;">—</td>
 <td style="text-align: right;">—</td>
 <td style="text-align: right;">—</td>
@@ -3253,18 +3258,18 @@ partitioning.</p>
 </tr>
 <tr>
 <td>Yiddish (<code>yi</code>)</td>
-<td style="text-align: right;"><strong>227.5</strong></td>
-<td style="text-align: right;">624.2</td>
+<td style="text-align: right;"><strong>159.5</strong></td>
+<td style="text-align: right;">434.1</td>
 <td style="text-align: right;">—</td>
-<td style="text-align: right;">33,251.6</td>
+<td style="text-align: right;">20835.4</td>
 <td style="text-align: right;">—</td>
 </tr>
 </tbody>
 </table>
-<p>Radixor won all <strong>18 / 18</strong> direct PyStemmer comparisons. At <code>N=100</code>, its
-geometric-mean speedup was <strong>1.67×</strong>; the largest direct advantage was <strong>3.03×</strong>
-for Italian. Across all 20 Radixor languages, throughput ranged from <strong>3.66 to
-5.99 million words/s</strong>.</p>
+<p>Radixor won <strong>18 / 18</strong> direct PyStemmer comparisons. At <code>N=100</code>, its
+geometric-mean speedup was <strong>1.68×</strong>; the largest direct advantage was <strong>2.90×</strong>
+for German. Across all 20 Radixor languages, throughput ranged from <strong>5.20 to
+9.39 million words/s</strong>.</p>
 <h3 id="cistem-comparison-for-german">CISTEM comparison for German</h3>
 <p>The German row also provides a direct comparison with CISTEM:</p>
 <table>
@@ -3280,20 +3285,20 @@ for Italian. Across all 20 Radixor languages, throughput ranged from <strong>3.6
 <tr>
 <td><strong>radixor</strong></td>
 <td>Rust trie</td>
-<td><strong>230.9 ns/word</strong></td>
+<td><strong>156.1 ns/word</strong></td>
 <td>—</td>
 </tr>
 <tr>
 <td>PyStemmer (de)</td>
 <td>Snowball C</td>
-<td>635.5 ns/word</td>
-<td>2.75× slower</td>
+<td>453.3 ns/word</td>
+<td>2.90× slower</td>
 </tr>
 <tr>
 <td><strong>CISTEM</strong></td>
 <td>pure Python (<code>nltk</code>)</td>
-<td><strong>3,341.9 ns/word</strong></td>
-<td><strong>14.47× slower</strong></td>
+<td><strong>2,306.4 ns/word</strong></td>
+<td><strong>14.79× slower</strong></td>
 </tr>
 </tbody>
 </table>
@@ -3301,7 +3306,7 @@ for Italian. Across all 20 Radixor languages, throughput ranged from <strong>3.6
 cost is flat across batch sizes and batching cannot amortize it. It is a compact
 ~40-rule German heuristic with no dictionary — a different design point that
 trades coverage for simplicity. Because CISTEM's unavoidable normalization work
-modestly biases the measurement in radixor's favour (point 2 above), the 14.47×
+modestly biases the measurement in radixor's favour (point 2 above), the 14.82×
 result is not a perfectly normalization-matched ratio.</p>
 <p>The all-language Gradle task does not measure stage-level profiling or cached
 lookup performance. This page therefore does not mix such figures from an older
@@ -3317,7 +3322,12 @@ methodology</a> for how stemming
 quality is assessed separately from throughput.</p>
 <h2 id="reproduce">Reproduce</h2>
 <div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>python/benchmarks/requirements-bench.txt
-./gradlew<span class="w"> </span>pythonBenchmarkAllLanguagesBatch<span class="w"> </span>--rerun-tasks
+./gradlew<span class="w"> </span>pythonBenchmarkAllLanguagesBatch<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-PpythonBenchmarkEngines<span class="o">=</span>radixor,PyStemmer,snowballstemmer-pure,cistem,nltk-porter<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-PpythonBenchmarkWords<span class="o">=</span><span class="m">5000</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-PpythonBenchmarkRepeats<span class="o">=</span><span class="m">3</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-PpythonBenchmarkWarmup<span class="o">=</span><span class="m">3</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--rerun-tasks
 </code></pre></div>
 <p>The run prints the machine/Python/engine versions and each engine's backing
 module (provenance), and writes per-point rows (CSV) plus the full report

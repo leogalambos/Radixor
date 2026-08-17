@@ -2906,15 +2906,16 @@ compiled extension (Rust, via <a href="https://pyo3.rs/">PyO3</a> and
 derived from the same canonical UniMorph data as the Java models.</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">radixor</span><span class="w"> </span><span class="kn">import</span> <span class="n">Stemmer</span>
 
-<span class="n">s</span> <span class="o">=</span> <span class="n">Stemmer</span><span class="p">(</span><span class="s2">&quot;en&quot;</span><span class="p">)</span>
-<span class="n">s</span><span class="o">.</span><span class="n">stem</span><span class="p">(</span><span class="s2">&quot;running&quot;</span><span class="p">)</span>               <span class="c1"># &#39;run&#39;</span>
-<span class="n">s</span><span class="o">.</span><span class="n">stem_batch</span><span class="p">([</span><span class="s2">&quot;cats&quot;</span><span class="p">,</span> <span class="s2">&quot;ran&quot;</span><span class="p">])</span>   <span class="c1"># [&#39;cat&#39;, &#39;run&#39;]</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">Stemmer</span><span class="p">(</span><span class="s2">"en"</span><span class="p">)</span>
+<span class="n">s</span><span class="o">.</span><span class="n">stem</span><span class="p">(</span><span class="s2">"running"</span><span class="p">)</span>               <span class="c1"># 'run'</span>
+<span class="n">s</span><span class="o">.</span><span class="n">stem_batch</span><span class="p">([</span><span class="s2">"cats"</span><span class="p">,</span> <span class="s2">"ran"</span><span class="p">])</span>   <span class="c1"># ['cat', 'run']</span>
 </code></pre></div>
 <ul>
 <li><a href="fast-track/">Fast Track</a> — install and produce the first stem.</li>
 <li><a href="quick-start/">Quick Start</a> — the complete application-oriented learning path.</li>
 <li><a href="installation/">Installation and building</a> — Linux, Windows, macOS.</li>
 <li><a href="usage/">Usage and examples</a> — batch API, caching, and custom models.</li>
+<li><a href="usage/">Migration methods</a> — <code>Stemmer</code>, <code>stemWord</code>, <code>stemWords</code>, <code>algorithms</code>, and <code>version</code>; optional compatibility <code>import Stemmer</code> when legacy import migration is used.</li>
 <li><a href="model-compilation/">Dictionary compilation</a> — prepare a version 7 binary
   once and share it with Python or Java.</li>
 <li><a href="performance/">Performance</a> — fair, reproducible comparisons vs PyStemmer,
@@ -2966,7 +2967,7 @@ stated explicitly. <strong>Neither is “better”</strong> — they target diff
 <tr>
 <td>Result cache</td>
 <td><strong>None</strong> — <code>get()</code> is stateless and re-stems every call</td>
-<td><strong>Bounded</strong>, 10,000 entries by default (matching PyStemmer); <code>Stemmer(cache_size=0)</code> disables it</td>
+<td><strong>Bounded</strong>, 10,000 entries by default (matching PyStemmer); <code>Stemmer(cache_size=0)</code> disables it (<code>maxCacheSize</code> is a supported alias)</td>
 </tr>
 <tr>
 <td>Batch API</td>
@@ -3021,10 +3022,10 @@ stated explicitly. <strong>Neither is “better”</strong> — they target diff
 <ul>
 <li>A <strong>batch API</strong> (<code>stem_batch</code>) that amortizes the Python↔native boundary — the
   single most important call for throughput from Python.</li>
-<li>A <strong>bounded result cache</strong> (<code>cache_size=10_000</code> by default) for workloads with
-  repeated tokens. It is shared by <code>stem()</code>, <code>stemWord()</code>, <code>stem_batch()</code>, and
-  <code>stemWords()</code>; pass <code>cache_size=0</code> to disable it. The <code>stem_all*()</code> methods are
-  not cached.</li>
+<li>A <strong>bounded result cache</strong> (<code>cache_size=10_000</code> by default; <code>maxCacheSize</code> is
+  a supported alias) for workloads with repeated tokens. It is shared by
+  <code>stem()</code>, <code>stemWord()</code>, <code>stem_batch()</code>, and <code>stemWords()</code>; pass
+  <code>cache_size=0</code> to disable it. The <code>stem_all*()</code> methods are not cached.</li>
 <li>A <code>lowercase=False</code> mode to skip per-lookup lowercasing when the caller
   guarantees already-lowercased input.</li>
 </ul>

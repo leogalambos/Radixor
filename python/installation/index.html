@@ -3078,6 +3078,20 @@ provenance, and PyPI Trusted Publishing with supported digital attestations.</p>
 wheel/sdist and pure standard-model wheel/sdist:</p>
 <div class="highlight"><pre><span></span><code>./gradlew<span class="w"> </span>pythonBuild
 </code></pre></div>
+<p><code>pythonBuild</code> is the supported one-shot entry point for the full distribution build.
+It already runs <code>pythonBuildNativeWheel</code> internally first, so running
+<code>./gradlew pythonBuildNativeWheel</code> manually is only needed for isolated
+troubleshooting of the native-wheel task, not for the normal build path.</p>
+<p>If you ever hit an intermittent error like this after a clean checkout:</p>
+<div class="highlight"><pre><span></span><code>Expected exactly one host Python wheel, found 0 in .../build/python/dist/host
+</code></pre></div>
+<p>run the native wheel task explicitly once and then retry:</p>
+<div class="highlight"><pre><span></span><code>./gradlew<span class="w"> </span>clean<span class="w"> </span>pythonBuildNativeWheel<span class="w"> </span>--no-build-cache
+./gradlew<span class="w"> </span>pythonBuild<span class="w"> </span>--no-build-cache
+</code></pre></div>
+<p>This workaround is now handled automatically by <code>pythonBuild</code> when the host wheel is
+missing from the expected location, but this sequence remains useful for local
+diagnostics when investigating unusual workspace state.</p>
 <p>Artifacts are written below <code>build/python/dist/</code>; they are not installed into
 the invoking interpreter. <code>./gradlew pythonVerifyDistributions</code> also validates
 archive contents, dependency metadata, checksums, v7 headers, and a fresh
@@ -3102,7 +3116,7 @@ remain useful while developing inside <code>python/</code>.</p>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p><div class="highlight"><pre><span></span><code><span class="c1"># Rust (rustup); most distros already ship Python 3.9+</span>
-curl<span class="w"> </span>--proto<span class="w"> </span><span class="s1">&#39;=https&#39;</span><span class="w"> </span>--tlsv1.2<span class="w"> </span>-sSf<span class="w"> </span>https://sh.rustup.rs<span class="w"> </span><span class="p">|</span><span class="w"> </span>sh
+curl<span class="w"> </span>--proto<span class="w"> </span><span class="s1">'=https'</span><span class="w"> </span>--tlsv1.2<span class="w"> </span>-sSf<span class="w"> </span>https://sh.rustup.rs<span class="w"> </span><span class="p">|</span><span class="w"> </span>sh
 python3<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>.venv<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>.venv/bin/activate
 pip<span class="w"> </span>install<span class="w"> </span>maturin<span class="w"> </span>pytest
 </code></pre></div>
@@ -3146,14 +3160,14 @@ maturin<span class="w"> </span>develop<span class="w"> </span>--release
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="nv">$env:PYO3_USE_ABI3_FORWARD_COMPATIBILITY</span> <span class="p">=</span> <span class="s2">&quot;1&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="nv">$env:PYO3_USE_ABI3_FORWARD_COMPATIBILITY</span> <span class="p">=</span> <span class="s2">"1"</span>
 <span class="n">maturin</span> <span class="n">develop</span> <span class="p">-</span><span class="n">-release</span>
 </code></pre></div>
 </div>
 </div>
 </div>
 <h2 id="verifying-the-build">Verifying the build</h2>
-<div class="highlight"><pre><span></span><code>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;from radixor import Stemmer; print(Stemmer(&#39;en&#39;).stem(&#39;running&#39;))&quot;</span><span class="w">   </span><span class="c1"># -&gt; run</span>
+<div class="highlight"><pre><span></span><code>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">"from radixor import Stemmer; print(Stemmer('en').stem('running'))"</span><span class="w">   </span><span class="c1"># -&gt; run</span>
 pytest<span class="w"> </span>-q
 </code></pre></div>
 <h2 id="notes-and-caveats">Notes and caveats</h2>

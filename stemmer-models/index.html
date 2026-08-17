@@ -3245,7 +3245,7 @@ its BSD-2-Clause data license.</p>
   -&gt; copy identical bytes into build/generated/modelResources
   -&gt; generate descriptor, index, and packaged license
   -&gt; package radixor-model-&lt;id&gt;-&lt;version&gt;.jar
-  -&gt; discover from the application&#39;s runtime classpath
+  -&gt; discover from the application's runtime classpath
   -&gt; verify checksum, parse dictionary, and build a trie
 </code></pre></div>
 <p>Application runtime never reads <code>src/modelInput</code> from a source checkout.</p>
@@ -3327,7 +3327,7 @@ its BSD-2-Clause data license.</p>
 </tbody>
 </table>
 <p>Local validation for PoliMorf 1.0.0 is:</p>
-<div class="highlight"><pre><span></span><code>./tools/parse-model-release-tag.sh<span class="w"> </span><span class="s2">&quot;model/pl-pl-polimorf@1.0.0&quot;</span><span class="w"> </span>.
+<div class="highlight"><pre><span></span><code>./tools/parse-model-release-tag.sh<span class="w"> </span><span class="s2">"model/pl-pl-polimorf@1.0.0"</span><span class="w"> </span>.
 ./gradlew<span class="w"> </span>--no-daemon<span class="w"> </span>:models:pl-pl-polimorf:check
 ./gradlew<span class="w"> </span>--no-daemon<span class="w"> </span>runtimeModelIntegrationTest<span class="w"> </span>-PmodelId<span class="o">=</span>pl-pl-polimorf
 ./gradlew<span class="w"> </span>--no-daemon<span class="w"> </span>:models:pl-pl-polimorf:validateModelRelease<span class="w"> </span><span class="se">\</span>

@@ -3002,10 +3002,10 @@ dictionary are not required.</p>
 <h2 id="2-stem-words">2. Stem words</h2>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">radixor</span><span class="w"> </span><span class="kn">import</span> <span class="n">Stemmer</span>
 
-<span class="n">stemmer</span> <span class="o">=</span> <span class="n">Stemmer</span><span class="p">(</span><span class="s2">&quot;en&quot;</span><span class="p">)</span>
+<span class="n">stemmer</span> <span class="o">=</span> <span class="n">Stemmer</span><span class="p">(</span><span class="s2">"en"</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="n">stemmer</span><span class="o">.</span><span class="n">stem</span><span class="p">(</span><span class="s2">&quot;running&quot;</span><span class="p">))</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">stemmer</span><span class="o">.</span><span class="n">stem_batch</span><span class="p">([</span><span class="s2">&quot;running&quot;</span><span class="p">,</span> <span class="s2">&quot;studies&quot;</span><span class="p">,</span> <span class="s2">&quot;cars&quot;</span><span class="p">]))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">stemmer</span><span class="o">.</span><span class="n">stem</span><span class="p">(</span><span class="s2">"running"</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">stemmer</span><span class="o">.</span><span class="n">stem_batch</span><span class="p">([</span><span class="s2">"running"</span><span class="p">,</span> <span class="s2">"studies"</span><span class="p">,</span> <span class="s2">"cars"</span><span class="p">]))</span>
 </code></pre></div>
 <p>Expected first output:</p>
 <div class="highlight"><pre><span></span><code>run
@@ -3014,11 +3014,13 @@ dictionary are not required.</p>
 the trie finds no patch command produces <code>None</code>.</p>
 <h2 id="3-use-pystemmer-compatible-fallback-semantics">3. Use PyStemmer-compatible fallback semantics</h2>
 <p>For a low-friction migration from PyStemmer, use the compatible method names:</p>
-<div class="highlight"><pre><span></span><code><span class="n">stemmer</span><span class="o">.</span><span class="n">stemWord</span><span class="p">(</span><span class="s2">&quot;running&quot;</span><span class="p">)</span>
-<span class="n">stemmer</span><span class="o">.</span><span class="n">stemWords</span><span class="p">([</span><span class="s2">&quot;running&quot;</span><span class="p">,</span> <span class="s2">&quot;unknown_word&quot;</span><span class="p">])</span>
+<div class="highlight"><pre><span></span><code><span class="n">stemmer</span><span class="o">.</span><span class="n">stemWord</span><span class="p">(</span><span class="s2">"running"</span><span class="p">)</span>
+<span class="n">stemmer</span><span class="o">.</span><span class="n">stemWords</span><span class="p">([</span><span class="s2">"running"</span><span class="p">,</span> <span class="s2">"unknown_word"</span><span class="p">])</span>
 </code></pre></div>
 <p>These methods return the original input whenever no patch command is found, so
 their results are always strings rather than <code>None</code>.</p>
+<p><code>import Stemmer</code> is optional and only for zero-source-change migration when
+PyStemmer is absent; otherwise use <code>from radixor import Stemmer</code>.</p>
 <h2 id="next">Next</h2>
 <ul>
 <li>Continue with the <a href="../quick-start/">Python Quick Start</a> for model selection,

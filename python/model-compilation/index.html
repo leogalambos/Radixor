@@ -2931,9 +2931,9 @@ page.</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">radixor</span>
 
 <span class="n">radixor</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
-    <span class="s2">&quot;stemmer.tsv.gz&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;english.rxc&quot;</span><span class="p">,</span>
-    <span class="n">language</span><span class="o">=</span><span class="s2">&quot;en&quot;</span><span class="p">,</span>
+    <span class="s2">"stemmer.tsv.gz"</span><span class="p">,</span>
+    <span class="s2">"english.rxc"</span><span class="p">,</span>
+    <span class="n">language</span><span class="o">=</span><span class="s2">"en"</span><span class="p">,</span>
 <span class="p">)</span>
 </code></pre></div>
 <p><code>language</code> is used to choose traversal direction when <code>backward</code> is omitted.
@@ -2941,8 +2941,8 @@ Persian (<code>fa</code>), Hebrew (<code>he</code>), and Yiddish (<code>yi</code
 other bundled languages use backward traversal. For a custom language, select
 the direction explicitly:</p>
 <div class="highlight"><pre><span></span><code><span class="n">radixor</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
-    <span class="s2">&quot;custom.tsv&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;custom.rxc&quot;</span><span class="p">,</span>
+    <span class="s2">"custom.tsv"</span><span class="p">,</span>
+    <span class="s2">"custom.rxc"</span><span class="p">,</span>
     <span class="n">backward</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="n">store_original</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="n">lowercase</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -2989,8 +2989,8 @@ location and for replacing an existing file only when that is intended.</p>
 <h2 id="load-the-compiled-model">Load the compiled model</h2>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">radixor</span><span class="w"> </span><span class="kn">import</span> <span class="n">Stemmer</span>
 
-<span class="n">stemmer</span> <span class="o">=</span> <span class="n">Stemmer</span><span class="p">(</span><span class="n">compiled</span><span class="o">=</span><span class="s2">&quot;english.rxc&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">stemmer</span><span class="o">.</span><span class="n">stem</span><span class="p">(</span><span class="s2">&quot;running&quot;</span><span class="p">))</span>
+<span class="n">stemmer</span> <span class="o">=</span> <span class="n">Stemmer</span><span class="p">(</span><span class="n">compiled</span><span class="o">=</span><span class="s2">"english.rxc"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">stemmer</span><span class="o">.</span><span class="n">stem</span><span class="p">(</span><span class="s2">"running"</span><span class="p">))</span>
 </code></pre></div>
 <p><code>Stemmer(path=...)</code> also auto-detects textual dictionaries and compiled version
 7 streams, but <code>compiled=</code> communicates the deployment intent more clearly.
