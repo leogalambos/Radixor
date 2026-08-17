@@ -50,15 +50,16 @@ s.stem_all_batch(["running", "cats"])
 
 ## PyStemmer-compatible methods
 
-Radixor also exposes PyStemmer's scalar and batch method names. They differ
-from the native Radixor methods only when the trie cannot find a patch command:
+Radixor also exposes PyStemmer's scalar and batch method names. It preserves
+PyStemmer method compatibility while keeping Radixor's own stemmer internals.
+The compatibility surface covers supported PyStemmer-native algorithms only.
 
 | Method | Recognized word | Word without a patch command | Return type |
 | --- | --- | --- | --- |
 | `stem(word)` | dominant stem | `None` | `str | None` |
 | `stem_batch(words)` | dominant stem at the same position | `None` at the same position | `list[str | None]` |
-| `stemWord(word)` | dominant stem | original input word | `str` |
-| `stemWords(words)` | dominant stem at the same position | original input word at the same position | `list[str]` |
+| `stemWord(word)` | dominant stem | original input word | `str \| bytes` |
+| `stemWords(words)` | dominant stem at the same position | original input word at the same position | `list[str \| bytes]` |
 
 Use `stemWord()` and `stemWords()` when migrating code that expects
 PyStemmer's no-`None` contract:
@@ -73,17 +74,43 @@ s.stemWord("running")                  # 'run'
 s.stemWord("unknown_word")             # 'unknown_word'
 s.stemWords(["running", "unknown_word"])
 # ['run', 'unknown_word']
+
+s.stemWord(b"running")                 # b'run'
+s.stemWords([b"running", "unknown", b"cars"])
+# [b'run', 'unknown', b'car']
 ```
 
-`stemWords()` retains input order and makes one Python-to-Rust call for the
-whole list. PyStemmer's full language names, such as `"english"` and
-`"czech"`, are accepted for bundled Radixor languages alongside two-letter
-codes and full model IDs.
+`stemWords()` accepts any iterable:
+
+```python
+s.stemWords(("running", b"running"))               # tuple input
+s.stemWords(word for word in ["running", b"running"])  # generator input
+```
+
+It preserves input order and length, and returns typed output (`str` for
+`str` inputs, `bytes` for `bytes` inputs).
+
+```python
+radixor.algorithms()        # canonical compatibility names only
+radixor.algorithms(aliases=False) == radixor.algorithms()
+radixor.algorithms(True)    # include aliases
+radixor.version()           # installed package version string
+```
+
+`algorithms(True)` includes only supported aliases and does not add unsupported
+Snowball identities (`porter`, `dutch_porter`, etc.).
+`algorithms(False)` omits aliases and is deterministic.
+
+PyStemmer's full language names, such as `"english"` and `"czech"`, are
+accepted for bundled Radixor languages and supported aliases.
 
 The compatibility contract covers these method names, full language aliases,
-and unmatched-word fallback behavior. Radixor configuration keywords remain
-Radixor-specific: use `cache_size`, not PyStemmer's `maxCacheSize`. Both
-libraries default to a cache capacity of 10,000 entries.
+and unmatched-word fallback behavior. Radixor also accepts PyStemmer's cache
+knob name as an alias: `maxCacheSize` is supported as an alias of
+`cache_size`. Both libraries default to a cache capacity of 10,000 entries.
+
+Use `from radixor import Stemmer` (or `import radixor as Stemmer`) for the primary import.
+`import Stemmer` is optional and only valid for zero-source-change migration when Radixor is the only top-level `Stemmer` provider.
 
 ## Bounded result cache
 
@@ -97,7 +124,14 @@ result. Its default capacity is **10,000 entries**, matching PyStemmer:
 s = Stemmer("en")                       # cache up to 10,000 distinct input words
 s = Stemmer("en", cache_size=50_000)    # choose a custom capacity
 s = Stemmer("en", cache_size=0)         # explicitly disable caching
+s = Stemmer("english", 50_000)          # drop-in PyStemmer style positional cache size
+
+# Equivalent PyStemmer-style cache control:
+s.maxCacheSize = 25_000
 ```
+
+`maxCacheSize` matches PyStemmer's behavior: assigning a non-`int` raises
+`TypeError`, and assigning a negative value raises `ValueError`.
 
 One cache is shared by `stem()`, `stemWord()`, `stem_batch()`, and
 `stemWords()`. The `stem_all()` and `stem_all_batch()` methods are not cached.
@@ -163,11 +197,13 @@ internally; the compiled trie is immutable after construction.
 
 | Call | Returns | Notes |
 |---|---|---|
-| `Stemmer(lang \| path= \| compiled=, *, backward, store_original, lowercase, cache_size=10_000)` | stemmer | auto-detects compiled vs textual for `path=`; `cache_size=0` disables caching |
+| `Stemmer(language=None, maxCacheSize: int | None = None, *, path=..., compiled=..., backward, store_original, lowercase, cache_size=10_000)` | stemmer | PyStemmer-compatible positional cache argument via `maxCacheSize`; if set, `cache_size` is ignored; `cache_size=0` disables caching (`maxCacheSize` remains supported as alias) |
 | `stem(word)` | `str \| None` | dominant stem |
 | `stem_batch(words)` | `list[str \| None]` | **preferred** for many words |
-| `stemWord(word)` | `str` | PyStemmer-compatible; returns an unmatched word unchanged |
-| `stemWords(words)` | `list[str]` | PyStemmer-compatible batch call; preserves unmatched words and input order |
+| `stemWord(word)` | `str \| bytes` | PyStemmer-compatible; returns an unmatched word unchanged |
+| `stemWords(words)` | `list[str \| bytes]` | PyStemmer-compatible batch call; accepts any iterable and preserves unmatched words and input order |
+| `algorithms(aliases: bool = False)` | `list[str]` | Supported PyStemmer algorithm names |
+| `version()` | `str` | Installed `radixor` version |
 | `stem_all(word)` | `list[str]` | all candidate stems, best first |
 | `stem_all_batch(words)` | `list[list[str]]` | |
 | `radixor.compile(source, out, *, language, backward, store_original, lowercase)` | `None` | writes a v7 binary |

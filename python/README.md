@@ -75,14 +75,16 @@ compatibility methods also follow PyStemmer's fallback behavior: when the trie
 has no patch command, they return the original word instead of `None`.
 
 ```python
-# PyStemmer: import Stemmer
-import radixor as Stemmer
+from radixor import Stemmer
 
-stemmer = Stemmer.Stemmer("english")
+stemmer = Stemmer("english")
 stemmer.stemWord("running")                 # → "run"
 stemmer.stemWord("unknown_word")            # → "unknown_word"
-stemmer.stemWords(["running", "unknown"])  # → ["run", "unknown"]
+stemmer.stemWords(["running", "unknown"])   # → ["run", "unknown"]
 ```
+
+Prefer `from radixor import Stemmer` (or `import radixor as Stemmer`).
+`import Stemmer` is only for zero-source-change migration when Radixor is the only provider of that top-level module name.
 
 The original Radixor methods remain unchanged: `stem` and `stem_batch` return
 `None` for words without a matching patch command. Radixor accepts PyStemmer's
@@ -137,6 +139,7 @@ lowercasing for already-normalized input, and `cache_size` enables the bounded
 result cache. The default holds up to 10,000 entries, matching PyStemmer;
 `cache_size=0` disables it. One cache is shared by `stem()`, `stemWord()`,
 `stem_batch()`, and `stemWords()`; the `stem_all*()` methods are not cached.
+`maxCacheSize` is also available as a PyStemmer-compatible cache-size alias.
 
 ### `stem(word: str) → str | None`
 
@@ -147,14 +150,27 @@ command. This does not mean that lookup is restricted to exact training words.
 
 Stem an entire list. Preferred for large inputs.
 
-### `stemWord(word: str) → str`
+### `stemWord(word: str | bytes) → str | bytes`
 
 PyStemmer-compatible scalar method. Return the original word if it cannot be
 stemmed.
 
-### `stemWords(words: list[str]) → list[str]`
+### `stemWords(words) → list[str | bytes]`
 
-PyStemmer-compatible batch method. Return each unrecognized word unchanged.
+PyStemmer-compatible batch method. Accepts arbitrary iterables of `str` and
+`bytes`, returns list output with per-element type preservation, and returns
+each unrecognized word unchanged.
+
+### `algorithms(aliases: bool = False) → list[str]`
+
+Return supported PyStemmer-compatible algorithms.
+
+`algorithms(True)` includes aliases from supported PyStemmer algorithms; unsupported
+algorithm names are intentionally not surfaced.
+
+### `version() → str`
+
+Return the installed `radixor` package version.
 
 ### `stem_all(word: str) → list[str]`
 

@@ -47,6 +47,7 @@ from __future__ import annotations
 import gzip
 import inspect
 from pathlib import Path
+import pytest
 
 from radixor import Stemmer
 
@@ -135,6 +136,42 @@ def test_pystemmer_batch_cache_does_not_change_original_api(tmp_path: Path):
 
     assert s.stemWords(["Unknown", "cats", "Unknown"]) == ["Unknown", "cat", "Unknown"]
     assert s.stem_batch(["Unknown", "cats", "Unknown"]) == [None, "cat", None]
+
+
+def test_pystemmer_compatible_positional_max_cache_size(tmp_path: Path):
+    path = _write_gz_dict(["cat\tcats"], tmp_path)
+    s = Stemmer("english", 7, path=path)
+    assert s.maxCacheSize == 7
+
+    s = Stemmer("english", 8, path=path, cache_size=4)
+    assert s.maxCacheSize == 8
+
+    with pytest.raises(TypeError):
+        Stemmer("english", "7", path=path)
+
+    with pytest.raises(ValueError):
+        Stemmer("english", -1, path=path)
+
+
+def test_max_cache_size_property_is_compatible_with_pystemmer(tmp_path: Path):
+    path = _write_gz_dict(["cat\tcats"], tmp_path)
+    s = Stemmer(path=path, backward=True, cache_size=10)
+    assert s.maxCacheSize == 10
+
+    s.maxCacheSize = 0
+    assert s.maxCacheSize == 0
+
+    s.maxCacheSize = 7
+    assert s.maxCacheSize == 7
+
+    with pytest.raises(TypeError):
+        s.maxCacheSize = "0"
+
+    with pytest.raises(TypeError):
+        s.maxCacheSize = 1.0
+
+    with pytest.raises(ValueError):
+        s.maxCacheSize = -1
 
 
 def test_wrapper_forwards_default_cache_size_and_zero_opt_out(monkeypatch):

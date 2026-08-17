@@ -97,6 +97,28 @@ wheel/sdist and pure standard-model wheel/sdist:
 ./gradlew pythonBuild
 ```
 
+`pythonBuild` is the supported one-shot entry point for the full distribution build.
+It already runs `pythonBuildNativeWheel` internally first, so running
+`./gradlew pythonBuildNativeWheel` manually is only needed for isolated
+troubleshooting of the native-wheel task, not for the normal build path.
+
+If you ever hit an intermittent error like this after a clean checkout:
+
+```text
+Expected exactly one host Python wheel, found 0 in .../build/python/dist/host
+```
+
+run the native wheel task explicitly once and then retry:
+
+```bash
+./gradlew clean pythonBuildNativeWheel --no-build-cache
+./gradlew pythonBuild --no-build-cache
+```
+
+This workaround is now handled automatically by `pythonBuild` when the host wheel is
+missing from the expected location, but this sequence remains useful for local
+diagnostics when investigating unusual workspace state.
+
 Artifacts are written below `build/python/dist/`; they are not installed into
 the invoking interpreter. `./gradlew pythonVerifyDistributions` also validates
 archive contents, dependency metadata, checksums, v7 headers, and a fresh

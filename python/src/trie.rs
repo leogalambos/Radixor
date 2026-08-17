@@ -29,7 +29,6 @@
 
 use crate::patch::PatchCommand;
 use std::borrow::Cow;
-use std::sync::Arc;
 use unicode_general_category::{get_general_category, GeneralCategory};
 use unicode_normalization::UnicodeNormalization;
 
@@ -68,7 +67,9 @@ pub struct TrieMetadata {
 ///   for node `i` (labels sorted ascending, so child lookup is a binary search
 ///   over a contiguous, cache-hot slice — no pointer chasing, no atomics),
 /// * `accepts[i]` marks a contracted accepting leaf,
-/// * `value_start[i] .. value_start[i+1]` slices `values` (best value first).
+/// * `value_start[i] .. value_start[i+1]` slices `value_ids` (best value first),
+/// * `preferred_patch_ids[i]` points directly at the hot-path patch for node `i`,
+/// * `patches` stores each compiled patch exactly once in contiguous memory.
 ///
 /// Node 0 is the root. Shared (deduplicated) subtrees simply reference the same
 /// node id, so structural sharing from reduction is preserved without `Arc`.
@@ -78,7 +79,9 @@ pub struct FrequencyTrie {
     edge_targets: Vec<u32>,
     accepts: Vec<bool>,
     value_start: Vec<u32>,
-    values: Vec<Arc<PatchCommand>>,
+    value_ids: Vec<u32>,
+    preferred_patch_ids: Vec<u32>,
+    patches: Vec<PatchCommand>,
     // Adaptive child lookup (mirrors the Java CompiledNode fanout strategy):
     // high-fanout nodes whose child labels span a small contiguous range get a
     // dense direct-index table (O(1) child access); sparse nodes fall back to
@@ -99,23 +102,68 @@ impl FrequencyTrie {
         edge_targets: Vec<u32>,
         accepts: Vec<bool>,
         value_start: Vec<u32>,
-        values: Vec<Arc<PatchCommand>>,
+        value_ids: Vec<u32>,
+        patches: Vec<PatchCommand>,
         dense_start: Vec<u32>,
         dense_base: Vec<u16>,
         dense_targets: Vec<u32>,
         metadata: TrieMetadata,
     ) -> Self {
+        let node_count = edge_start.len().saturating_sub(1);
+        let mut preferred_patch_ids: Vec<u32> = Vec::with_capacity(node_count);
+        for node in 0..node_count {
+            let start = value_start[node] as usize;
+            let end = value_start[node + 1] as usize;
+            preferred_patch_ids.push(if start < end {
+                value_ids[start]
+            } else {
+                u32::MAX
+            });
+        }
+
         FrequencyTrie {
             edge_start,
             edge_labels,
             edge_targets,
             accepts,
             value_start,
-            values,
+            value_ids,
+            preferred_patch_ids,
+            patches,
             dense_start,
             dense_base,
             dense_targets,
             metadata,
+        }
+    }
+
+    /// Override runtime case processing without modifying the persisted trie.
+    ///
+    /// Compiled standard models store their default case mode in v7 metadata,
+    /// while the Python runtime exposes `lowercase` as a lookup-time option.
+    /// Applying the option here keeps compiled and textual model construction
+    /// consistent without changing the serialized representation.
+    pub fn set_lowercase(&mut self, lowercase: bool) {
+        self.metadata.case_mode = if lowercase {
+            CaseMode::LowercaseWithLocaleRoot
+        } else {
+            CaseMode::AsIs
+        };
+    }
+
+    /// Whether patch results may safely borrow contiguous slices of the
+    /// original UTF-8 input without reproducing normalization.
+    #[inline]
+    pub fn source_slice_fast_path_enabled(&self) -> bool {
+        matches!(self.metadata.case_mode, CaseMode::AsIs)
+            && matches!(self.metadata.diacritic_mode, DiacriticMode::AsIs)
+    }
+
+    /// Human-readable runtime case-processing mode for diagnostics.
+    pub fn case_mode_name(&self) -> &'static str {
+        match self.metadata.case_mode {
+            CaseMode::LowercaseWithLocaleRoot => "LOWERCASE_WITH_LOCALE_ROOT",
+            CaseMode::AsIs => "AS_IS",
         }
     }
 
@@ -230,15 +278,33 @@ impl FrequencyTrie {
         Some(node)
     }
 
+    /// Return the dominant patch for `node` through the precomputed compact
+    /// patch identifier used by the normal stemming hot path.
     #[inline]
-    fn preferred_value(&self, node: usize) -> Option<&Arc<PatchCommand>> {
-        let start = self.value_start[node] as usize;
-        let end = self.value_start[node + 1] as usize;
-        if start == end {
+    fn preferred_value(&self, node: usize) -> Option<&PatchCommand> {
+        // SAFETY: `preferred_patch_ids` has one entry per trie node.
+        let patch_id = unsafe { *self.preferred_patch_ids.get_unchecked(node) };
+        if patch_id == u32::MAX {
             None
         } else {
-            Some(&self.values[start])
+            // SAFETY: patch identifiers are validated/constructed against the
+            // contiguous `patches` table when the runtime trie is built.
+            Some(unsafe { self.patches.get_unchecked(patch_id as usize) })
         }
+    }
+
+    /// Encode `word`, locate its accepting trie node, and return the preferred
+    /// patch command. The encoded key remains in `key_buf` for immediate patch
+    /// application by the caller.
+    #[inline]
+    pub fn lookup_preferred_patch<'a>(
+        &'a self,
+        word: &str,
+        key_buf: &mut Vec<u16>,
+    ) -> Option<&'a PatchCommand> {
+        self.encode_key(word, key_buf);
+        let node = self.find_node(key_buf)?;
+        self.preferred_value(node)
     }
 
     /// Stem into caller-owned scratch buffers and return the produced length
@@ -250,9 +316,7 @@ impl FrequencyTrie {
         key_buf: &mut Vec<u16>,
         out_buf: &mut Vec<u16>,
     ) -> Option<usize> {
-        self.encode_key(word, key_buf);
-        let node = self.find_node(key_buf)?;
-        let patch = self.preferred_value(node)?;
+        let patch = self.lookup_preferred_patch(word, key_buf)?;
         patch.apply_into(key_buf, out_buf);
         Some(out_buf.len())
     }
@@ -269,6 +333,26 @@ impl FrequencyTrie {
         self.find_node(key_buf).is_some()
     }
 
+    /// Diagnostic: normalize, walk the trie, and resolve the preferred patch.
+    ///
+    /// This isolates preferred-patch access from the actual patch application.
+    pub fn bench_find_patch(&self, word: &str, key_buf: &mut Vec<u16>) -> bool {
+        self.encode_key(word, key_buf);
+        match self.find_node(key_buf) {
+            Some(node) => self.preferred_value(node).is_some(),
+            None => false,
+        }
+    }
+
+    /// Return compact runtime value-layout counters for diagnostics.
+    pub fn value_layout_stats(&self) -> (usize, usize, usize) {
+        (
+            self.preferred_patch_ids.len(),
+            self.value_ids.len(),
+            self.patches.len(),
+        )
+    }
+
     /// Return all stems in frequency order.
     pub fn stem_all(&self, word: &str) -> Vec<String> {
         let mut key_u16: Vec<u16> = Vec::new();
@@ -278,9 +362,12 @@ impl FrequencyTrie {
             Some(node) => {
                 let start = self.value_start[node] as usize;
                 let end = self.value_start[node + 1] as usize;
-                self.values[start..end]
+                self.value_ids[start..end]
                     .iter()
-                    .map(|p| String::from_utf16_lossy(&p.apply(&key_u16)))
+                    .map(|&patch_id| {
+                        let patch = &self.patches[patch_id as usize];
+                        String::from_utf16_lossy(&patch.apply(&key_u16))
+                    })
                     .collect()
             }
         }

@@ -45,57 +45,57 @@ from __future__ import annotations
 import gzip
 import hashlib
 import importlib.resources
+import importlib.metadata as metadata
 import json
 import re
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, Iterator, Optional
+from typing import Any, Iterable, Iterator, Optional, overload
 
 from radixor._radixor import StemmerCore
 from radixor._radixor import compile as _compile
 
-_LANGUAGE_ALIASES: dict[str, str] = {
-    # Friendly aliases -> model ID
-    "cs": "cs-cz-default",
-    "czech": "cs-cz-default",
-    "da": "da-dk-default",
-    "danish": "da-dk-default",
-    "de": "de-de-default",
-    "german": "de-de-default",
-    "en": "us-uk-default",
-    "english": "us-uk-default",
-    "es": "es-es-default",
-    "spanish": "es-es-default",
-    "fa": "fa-ir-default",
-    "persian": "fa-ir-default",
-    "fi": "fi-fi-default",
-    "finnish": "fi-fi-default",
-    "fr": "fr-fr-default",
-    "french": "fr-fr-default",
-    "he": "he-il-default",
-    "hebrew": "he-il-default",
-    "hu": "hu-hu-default",
-    "hungarian": "hu-hu-default",
-    "it": "it-it-default",
-    "italian": "it-it-default",
-    "nb": "nb-no-default",
-    "norwegian": "nb-no-default",
-    "nl": "nl-nl-default",
-    "dutch": "nl-nl-default",
-    "nn": "nn-no-default",
-    "pl": "pl-pl-unimorph",
-    "polish": "pl-pl-unimorph",
-    "pt": "pt-pt-default",
-    "portuguese": "pt-pt-default",
-    "ru": "ru-ru-default",
-    "russian": "ru-ru-default",
-    "sv": "sv-se-default",
-    "swedish": "sv-se-default",
-    "uk": "uk-ua-default",
-    "ukrainian": "uk-ua-default",
-    "yi": "yi-default",
-    "yiddish": "yi-default",
-}
+_PYSTEMMER_MODEL_MAP: tuple[tuple[str, bool, tuple[str, ...], tuple[str, ...]], ...] = (
+    # (model ID, PyStemmer-compatible model, pystemmer aliases, native-only aliases)
+    ("cs-cz-default", True, ("czech", "cs", "ces", "cze"), ()),
+    ("da-dk-default", True, ("danish", "da", "dan"), ()),
+    ("nl-nl-default", True, ("dutch", "nl", "dut", "nld", "kraaij_pohlmann"), ("dutch",)),
+    ("us-uk-default", True, ("english", "en", "eng"), ()),
+    ("fi-fi-default", True, ("finnish", "fi", "fin"), ()),
+    ("fr-fr-default", True, ("french", "fr", "fre", "fra"), ()),
+    ("de-de-default", True, ("german", "de", "ger", "deu"), ()),
+    ("hu-hu-default", True, ("hungarian", "hu", "hun"), ()),
+    ("it-it-default", True, ("italian", "it", "ita"), ()),
+    ("nb-no-default", True, ("norwegian", "no", "nor"), ("nb",)),
+    ("nn-no-default", False, tuple(), ("nn",)),
+    ("fa-ir-default", True, ("persian", "fa", "fas", "pers"), ()),
+    ("pl-pl-unimorph", True, ("polish", "pl", "pol"), ()),
+    ("pt-pt-default", True, ("portuguese", "pt", "por"), ()),
+    ("ru-ru-default", True, ("russian", "ru", "rus"), ()),
+    ("es-es-default", True, ("spanish", "es", "esl", "spa"), ()),
+    ("sv-se-default", True, ("swedish", "sv", "swe"), ()),
+    ("yi-default", True, ("yiddish", "yi", "yid"), ()),
+    ("he-il-default", False, tuple(), ("he", "hebrew")),
+    ("uk-ua-default", False, tuple(), ("uk", "ukrainian")),
+)
+
+_LANGUAGE_ALIASES: dict[str, str] = {model_id: model_id for model_id, *_ in _PYSTEMMER_MODEL_MAP}
+_SUPPORTED_PYSTEMMER_ALGORITHMS: list[str] = []
+_SUPPORTED_PYSTEMMER_ALIASES: list[str] = []
+for model_id, is_pystemmer_supported, aliases, native_aliases in _PYSTEMMER_MODEL_MAP:
+    for alias in aliases:
+        _LANGUAGE_ALIASES[alias] = model_id
+    for alias in native_aliases:
+        _LANGUAGE_ALIASES[alias] = model_id
+    if is_pystemmer_supported:
+        _SUPPORTED_PYSTEMMER_ALGORITHMS.append(aliases[0])
+        _SUPPORTED_PYSTEMMER_ALIASES.extend(aliases)
+
+_SUPPORTED_PYSTEMMER_ALIASES = list(dict.fromkeys(_SUPPORTED_PYSTEMMER_ALIASES))
+_SUPPORTED_PYSTEMMER_ALGORITHM_SET = frozenset(_SUPPORTED_PYSTEMMER_ALGORITHMS)
+_SUPPORTED_PYSTEMMER_MODEL_IDS = frozenset(
+    model_id for model_id, _supported, *_ in _PYSTEMMER_MODEL_MAP
+)
 
 # Right-to-left languages use FORWARD traversal; everything else BACKWARD.
 # Keyed by model ID prefix (language part).
@@ -112,6 +112,28 @@ _MODEL_ID = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*\Z")
 _SHA256 = re.compile(r"[0-9a-f]{64}\Z")
 _V7_MAGIC = b"EGTR"
 _V7_VERSION = 7
+
+
+def algorithms(aliases: bool = False) -> list[str]:
+    """Return the algorithm names compatible with PyStemmer.
+
+    Parameters
+    ----------
+    aliases:
+        Include PyStemmer aliases when ``True``. ``False`` returns canonical
+        names only.
+    """
+    if aliases:
+        return list(_SUPPORTED_PYSTEMMER_ALIASES)
+    return list(_SUPPORTED_PYSTEMMER_ALGORITHMS)
+
+
+def version() -> str:
+    """Return the installed `radixor` distribution version."""
+    try:
+        return metadata.version("radixor")
+    except metadata.PackageNotFoundError:
+        return "0.0.0"
 
 
 def _load_standard_manifest() -> dict[str, Any]:
@@ -284,11 +306,14 @@ class Stemmer:
         matching PyStemmer). Set to ``0`` to disable caching. Cached results are
         shared by :meth:`stem`, :meth:`stemWord`, :meth:`stem_batch`, and
         :meth:`stemWords`; ``stem_all`` methods are not cached.
+    maxCacheSize:
+        PyStemmer-compatible alias for :meth:`cache_size`.
     """
 
     def __init__(
         self,
         language: Optional[str] = None,
+        maxCacheSize: Optional[int] = None,
         *,
         path: Optional[str] = None,
         compiled: Optional[str] = None,
@@ -298,22 +323,76 @@ class Stemmer:
         cache_size: int = 10_000,
     ) -> None:
         source = path if path is not None else compiled
+        if maxCacheSize is not None:
+            if not isinstance(maxCacheSize, int):
+                raise TypeError("maxCacheSize must be an int")
+            if maxCacheSize < 0:
+                raise ValueError("maxCacheSize must be non-negative")
+            cache_size = maxCacheSize
+        elif cache_size < 0:
+            raise ValueError("cache_size must be non-negative")
         if source is not None:
             model_path = source
             is_backward = True if backward is None else backward
         elif language is not None:
-            model_id = _LANGUAGE_ALIASES.get(language, language)
-            is_backward = _is_backward(model_id) if backward is None else backward
-            with _standard_model_path(model_id) as model_path:
-                self._core = StemmerCore(
-                    str(model_path), is_backward, store_original, lowercase, cache_size
+            if language in _LANGUAGE_ALIASES:
+                model_id = _LANGUAGE_ALIASES[language]
+            elif language in _SUPPORTED_PYSTEMMER_MODEL_IDS:
+                model_id = language
+            elif "-" in language and _MODEL_ID.fullmatch(language) is not None:
+                model_id = language
+            elif ".." in language or "/" in language or "\\" in language:
+                raise ValueError(
+                    f"Invalid Radixor model ID {language!r}; expected lowercase letters, "
+                    "digits, and hyphens."
                 )
-            return
+            else:
+                raise KeyError(language)
+            is_backward = _is_backward(model_id) if backward is None else backward
+            model_path = None
         else:
             raise ValueError("Provide 'language', 'path', or 'compiled'.")
-        self._core = StemmerCore(
-            model_path, is_backward, store_original, lowercase, cache_size
-        )
+
+        self._backward = is_backward
+        self._store_original = store_original
+        self._lowercase = lowercase
+        self._cache_size = cache_size
+        self._source_path = model_path
+        self._model_id = None if source is not None else model_id
+        self._core = self._create_core(cache_size)
+
+    def _create_core(self, cache_size: int) -> StemmerCore:
+        if self._source_path is not None:
+            return StemmerCore(
+                self._source_path, self._backward, self._store_original,
+                self._lowercase, cache_size
+            )
+        with _standard_model_path(self._model_id or "") as model_path:
+            return StemmerCore(
+                str(model_path), self._backward, self._store_original,
+                self._lowercase, cache_size
+            )
+
+    @staticmethod
+    def version() -> str:
+        """Return the installed `radixor` package version."""
+        return version()
+
+    @property
+    def maxCacheSize(self) -> int:
+        """PyStemmer-compatible cache size alias."""
+        return self._cache_size
+
+    @maxCacheSize.setter
+    def maxCacheSize(self, size: int) -> None:
+        if not isinstance(size, int):
+            raise TypeError("maxCacheSize must be an int")
+        if size < 0:
+            raise ValueError("maxCacheSize must be non-negative")
+        if size == self._cache_size:
+            return
+        self._cache_size = size
+        self._core = self._create_core(size)
 
     def stem(self, word: str) -> Optional[str]:
         """Return a stem, or ``None`` when no patch command applies."""
@@ -331,7 +410,13 @@ class Stemmer:
         """
         return self._core.stem_batch(words)
 
-    def stemWord(self, word: str) -> str:
+    @overload
+    def stemWord(self, word: str) -> str: ...
+
+    @overload
+    def stemWord(self, word: bytes) -> bytes: ...
+
+    def stemWord(self, word: str | bytes) -> str | bytes:
         """Return a stem using PyStemmer-compatible fallback semantics.
 
         If no patch command can be found, return *word* unchanged. Use
@@ -340,7 +425,7 @@ class Stemmer:
         """
         return self._core.stemWord(word)
 
-    def stemWords(self, words: list[str]) -> list[str]:
+    def stemWords(self, words: Iterable[str | bytes]) -> list[str | bytes]:
         """Stem words using PyStemmer-compatible fallback semantics.
 
         The returned list has the same length and order as *words*; each word
@@ -395,4 +480,4 @@ def compile(
     _compile(source, out_path, backward, store_original, lowercase)
 
 
-__all__ = ["Stemmer", "compile"]
+__all__ = ["Stemmer", "algorithms", "compile", "version"]

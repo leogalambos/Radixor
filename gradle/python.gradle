@@ -37,6 +37,48 @@ def rustTargets = [
         macos  : [x86_64: 'x86_64-apple-darwin', aarch64: 'aarch64-apple-darwin']
 ]
 
+def locateSingleWheel = { Provider<Directory> distributionDirectory ->
+    final Set<File> wheels = fileTree(distributionDirectory.get()).matching {
+        include '*.whl'
+    }.files
+    if (wheels.size() != 1) {
+        throw new GradleException("Expected exactly one wheel, found ${wheels.size()} in ${distributionDirectory.get().asFile}")
+    }
+    wheels.first()
+}
+
+def rebuildHostNativeWheel = {
+    final File output = pythonHostDistributionDirectory.get().asFile
+    if (output.exists() && !output.deleteDir()) {
+        throw new GradleException("Cannot clean Python native wheel output directory: ${output}")
+    }
+    output.mkdirs()
+    final List<String> arguments = [
+            'build', '--release', '--locked', '--out', output.absolutePath, '--interpreter', pythonExecutable.get()
+    ]
+    project.exec {
+        workingDir(pythonProjectDirectory)
+        commandLine(maturinExecutable.get(), *arguments)
+    }
+}
+
+def ensureHostPythonWheel = {
+    final File hostWheelDirectory = pythonHostDistributionDirectory.get().asFile
+    final Set<File> wheelsBefore = fileTree(hostWheelDirectory).matching { include '*.whl' }.files
+    if (wheelsBefore.size() != 1) {
+        if (wheelsBefore.isEmpty()) {
+            logger.lifecycle('No host native wheel in {}. Rebuilding now.', hostWheelDirectory.absolutePath)
+        } else {
+            logger.lifecycle(
+                    'Expected exactly one host native wheel in {} but found {}. Rebuilding now.',
+                    hostWheelDirectory.absolutePath,
+                    wheelsBefore.size()
+            )
+        }
+        rebuildHostNativeWheel()
+    }
+}
+
 def pythonBuildStandardModels = tasks.register('pythonBuildStandardModels', Exec) {
     group = 'python'
     description = 'Builds the pure py3-none-any standard-model wheel and offline-ready sdist.'
@@ -159,50 +201,50 @@ rustTargets.each { String platform, Map<String, String> architectureTargets ->
     }
 }
 
-tasks.register('preparePythonBenchmarkRuntime', Sync) {
+tasks.register('preparePythonBenchmarkRuntime') {
     group = 'python'
     description = 'Extracts the host Python wheel into an isolated benchmark runtime.'
 
     dependsOn(pythonBuild)
+    inputs.dir(pythonHostDistributionDirectory)
+    inputs.dir(pythonStandardDistributionDirectory)
+    outputs.dir(pythonBenchmarkRuntimeDirectory)
 
-    from {
-        final Set<File> wheels = fileTree(pythonHostDistributionDirectory).matching {
-            include '*.whl'
-        }.files
-        if (wheels.size() != 1) {
-            throw new GradleException("Expected exactly one host Python wheel, found ${wheels.size()} in "
-                    + pythonHostDistributionDirectory.get().asFile)
+    doFirst {
+        ensureHostPythonWheel()
+        final File output = pythonBenchmarkRuntimeDirectory.get().asFile
+        if (output.exists() && !output.deleteDir()) {
+            throw new GradleException("Cannot clean benchmark runtime directory: ${output}")
         }
-        zipTree(wheels.first())
-    }
-    from {
-        final Set<File> wheels = fileTree(pythonStandardDistributionDirectory).matching {
-            include '*.whl'
-        }.files
-        if (wheels.size() != 1) {
-            throw new GradleException("Expected exactly one standard-model Python wheel, found ${wheels.size()} in "
-                    + pythonStandardDistributionDirectory.get().asFile)
+        output.mkdirs()
+        copy {
+            from zipTree(locateSingleWheel(pythonHostDistributionDirectory))
+            from zipTree(locateSingleWheel(pythonStandardDistributionDirectory))
+            into output
         }
-        zipTree(wheels.first())
     }
-    into(pythonBenchmarkRuntimeDirectory)
 }
 
-tasks.register('preparePythonModelCompilerRuntime', Sync) {
+tasks.register('preparePythonModelCompilerRuntime') {
     group = 'python'
     description = 'Extracts the host native wheel for deterministic standard-model regeneration.'
     dependsOn(pythonBuildNativeWheel)
-    from {
-        final Set<File> wheels = fileTree(pythonHostDistributionDirectory).matching {
-            include '*.whl'
-        }.files
-        if (wheels.size() != 1) {
-            throw new GradleException("Expected exactly one host Python wheel, found ${wheels.size()} in "
-                    + pythonHostDistributionDirectory.get().asFile)
+
+    inputs.dir(pythonHostDistributionDirectory)
+    outputs.dir(pythonModelCompilerRuntimeDirectory)
+
+    doFirst {
+        ensureHostPythonWheel()
+        final File output = pythonModelCompilerRuntimeDirectory.get().asFile
+        if (output.exists() && !output.deleteDir()) {
+            throw new GradleException("Cannot clean model-compiler runtime directory: ${output}")
         }
-        zipTree(wheels.first())
+        output.mkdirs()
+        copy {
+            from zipTree(locateSingleWheel(pythonHostDistributionDirectory))
+            into output
+        }
     }
-    into(pythonModelCompilerRuntimeDirectory)
 }
 
 tasks.register('regeneratePythonStandardModels', Exec) {

@@ -70,8 +70,12 @@ scalar and batch APIs. Its default capacity is 10,000 entries, matching
 PyStemmer; choose another bound or pass `0` to disable it:
 
 ```python
+english = Stemmer("en", 10_000)  # positional second argument like PyStemmer
 english = Stemmer("en", cache_size=10_000)
 uncached = Stemmer("en", cache_size=0)
+
+# PyStemmer-compatible cache alias:
+english.maxCacheSize = 25_000
 ```
 
 The cache covers `stem()`, `stemWord()`, `stem_batch()`, and `stemWords()`;
@@ -86,12 +90,18 @@ stemmer = Stemmer("en")
 
 stemmer.stemWord("running")
 stemmer.stemWords(["running", "unknown_word"])
+stemmer.stemWords((b"running", "cars"))
+stemmer.stemWords(b_word for b_word in [b"running", b"cars"])
 ```
 
 `stemWord()` and `stemWords()` return unmatched input unchanged. This removes
 the `None` fallback checks required by Radixor's original `stem()` and
 `stem_batch()` methods, so most migration work is limited to the package import
 and dependency change.
+
+Use `from radixor import Stemmer` (or `import radixor as Stemmer`) in migration code.
+`import Stemmer` is optional and only for environments without PyStemmer (zero-source-change migration).
+
 
 ## 5. Load a custom compiled model
 

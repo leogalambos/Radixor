@@ -50,7 +50,6 @@ Examples
     python run_benchmark.py --language en de ru --repeats 15 --csv results.csv
     python run_benchmark.py --language en --sizes 10 20 50 100 200 --json out.json
 """
-
 from __future__ import annotations
 
 import argparse
@@ -70,6 +69,97 @@ sys.path.insert(0, str(HERE))  # allow running as a plain script
 import corpus as corpus_mod  # noqa: E402
 import engines as engines_mod  # noqa: E402
 
+_FALLBACK_LANGUAGE_MODEL_IDS: tuple[str, ...] = (
+    "cs-cz-default",
+    "da-dk-default",
+    "de-de-default",
+    "us-uk-default",
+    "es-es-default",
+    "fa-ir-default",
+    "fi-fi-default",
+    "fr-fr-default",
+    "hu-hu-default",
+    "it-it-default",
+    "nb-no-default",
+    "nl-nl-default",
+    "pl-pl-unimorph",
+    "pt-pt-default",
+    "ru-ru-default",
+    "sv-se-default",
+    "yi-default",
+)
+
+_FALLBACK_LANGUAGE_ALIASES: dict[str, str] = {
+    **{model_id: model_id for model_id in _FALLBACK_LANGUAGE_MODEL_IDS},
+    "cs": "cs-cz-default",
+    "dan": "da-dk-default",
+    "da": "da-dk-default",
+    "dutch": "nl-nl-default",
+    "nl": "nl-nl-default",
+    "nld": "nl-nl-default",
+    "eng": "us-uk-default",
+    "en": "us-uk-default",
+    "english": "us-uk-default",
+    "fi": "fi-fi-default",
+    "finnish": "fi-fi-default",
+    "fr": "fr-fr-default",
+    "french": "fr-fr-default",
+    "de": "de-de-default",
+    "german": "de-de-default",
+    "hu": "hu-hu-default",
+    "hungarian": "hu-hu-default",
+    "it": "it-it-default",
+    "italian": "it-it-default",
+    "nb": "nb-no-default",
+    "nor": "nb-no-default",
+    "no": "nb-no-default",
+    "norwegian": "nb-no-default",
+    "fa": "fa-ir-default",
+    "persian": "fa-ir-default",
+    "pl": "pl-pl-unimorph",
+    "polish": "pl-pl-unimorph",
+    "pt": "pt-pt-default",
+    "portuguese": "pt-pt-default",
+    "ru": "ru-ru-default",
+    "russian": "ru-ru-default",
+    "es": "es-es-default",
+    "spanish": "es-es-default",
+    "sv": "sv-se-default",
+    "swedish": "sv-se-default",
+    "yi": "yi-default",
+    "yiddish": "yi-default",
+    "ces": "cs-cz-default",
+    "cze": "cs-cz-default",
+    "fra": "fr-fr-default",
+    "fre": "fr-fr-default",
+    "ger": "de-de-default",
+    "deu": "de-de-default",
+    "hun": "hu-hu-default",
+    "ita": "it-it-default",
+    "fin": "fi-fi-default",
+    "swe": "sv-se-default",
+    "pol": "pl-pl-unimorph",
+    "por": "pt-pt-default",
+    "rus": "ru-ru-default",
+    "spa": "es-es-default",
+    "esl": "es-es-default",
+    "yid": "yi-default",
+}
+
+
+def _load_language_aliases() -> dict[str, str]:
+    """Return language aliases to model IDs with optional Radixor fallback.
+
+    PyStemmer-only environments cannot import ``radixor`` yet still need stable
+    language-to-model mapping for benchmark corpus selection. The fallback table
+    stays focused on languages supported by the benchmark-compatible engines.
+    """
+    try:
+        from radixor import _LANGUAGE_ALIASES
+
+        return dict(_LANGUAGE_ALIASES)
+    except Exception:
+        return _FALLBACK_LANGUAGE_ALIASES.copy()
 
 def _chunks(seq: list[str], n: int) -> list[list[str]]:
     return [seq[i : i + n] for i in range(0, len(seq), n)]
@@ -134,8 +224,6 @@ def _processor_name() -> str:
 
 
 def run(args) -> dict:
-    from radixor import _LANGUAGE_ALIASES
-
     engine_filter = set(args.engines) if args.engines else None
     engines = engines_mod.available_engines(engine_filter)
     if not engines:
@@ -154,8 +242,10 @@ def run(args) -> dict:
     for missing_engine in sorted(strict_engine_names - available_engine_names):
         failures.append(f"engine unavailable: {missing_engine}")
 
+    language_aliases = _load_language_aliases()
+
     for code in args.language:
-        model_id = _LANGUAGE_ALIASES.get(code, code)
+        model_id = language_aliases.get(code, code)
         if args.model_path:
             dict_path = Path(args.model_path)
         else:
@@ -403,9 +493,7 @@ def main() -> None:
     args = p.parse_args()
 
     if args.all_languages:
-        from radixor import _LANGUAGE_ALIASES
-
-        args.language = sorted(_LANGUAGE_ALIASES)
+        args.language = sorted(_load_language_aliases())
     elif args.language is None:
         args.language = ["en"]
 

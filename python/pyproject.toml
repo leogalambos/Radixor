@@ -67,6 +67,7 @@ Issues = "https://github.com/leogalambos/Radixor/issues"
 python-source = "."
 module-name = "radixor._radixor"
 features = ["pyo3/extension-module"]
+include = ["Stemmer.py"]
 exclude = [
     "radixor/models/**",
     "models-standard/**",

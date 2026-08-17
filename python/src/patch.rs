@@ -151,6 +151,69 @@ fn forward_min_len(opcodes: &[u8], operands: &[u32]) -> usize {
     min_len
 }
 
+/// Locate the UTF-8 byte boundary left after deleting `utf16_units` from
+/// the end of `source`. Returns `None` if the requested boundary would split
+/// a Unicode scalar value.
+#[inline]
+fn utf8_suffix_boundary(source: &str, utf16_units: usize) -> Option<usize> {
+    if source.is_ascii() {
+        return source.len().checked_sub(utf16_units);
+    }
+
+    let mut remaining = utf16_units;
+    for (index, ch) in source.char_indices().rev() {
+        let width = ch.len_utf16();
+        if width > remaining {
+            return None;
+        }
+        remaining -= width;
+        if remaining == 0 {
+            return Some(index);
+        }
+    }
+    None
+}
+
+/// Locate the UTF-8 byte boundary right after deleting `utf16_units` from
+/// the beginning of `source`. Returns `None` if the requested boundary would
+/// split a Unicode scalar value.
+#[inline]
+fn utf8_prefix_boundary(source: &str, utf16_units: usize) -> Option<usize> {
+    if source.is_ascii() {
+        return (utf16_units <= source.len()).then_some(utf16_units);
+    }
+
+    let mut remaining = utf16_units;
+    for (index, ch) in source.char_indices() {
+        let width = ch.len_utf16();
+        if width > remaining {
+            return None;
+        }
+        remaining -= width;
+        if remaining == 0 {
+            return Some(index + ch.len_utf8());
+        }
+    }
+    None
+}
+
+/// Append one UTF-16 code unit using the same lossy decoding semantics as the
+/// generic UTF-16 output path.
+#[inline]
+fn push_utf16_unit_lossy(out: &mut String, unit: u16) {
+    let decoded = char::decode_utf16(std::iter::once(unit))
+        .next()
+        .expect("single UTF-16 unit iterator must yield one result")
+        .unwrap_or('\u{FFFD}');
+    out.push(decoded);
+}
+
+/// Return whether `unit` is a UTF-16 surrogate code unit.
+#[inline]
+fn is_utf16_surrogate(unit: u16) -> bool {
+    (0xD800..=0xDFFF).contains(&unit)
+}
+
 impl PatchCommand {
     pub fn parse(patch: &str, backward: bool) -> Self {
         let chars: Vec<u16> = patch.encode_utf16().collect();
@@ -259,6 +322,147 @@ impl PatchCommand {
         } else {
             applied as usize
         }
+    }
+
+    /// Return a borrowed UTF-8 source slice when this command can be applied
+    /// without constructing an intermediate UTF-16 output buffer.
+    ///
+    /// The caller must guarantee that the encoded trie key represents the
+    /// original source text without case or diacritic normalization. The
+    /// supplied `src_utf16_len` is the UTF-16 code-unit length of that key.
+    /// Commands whose result is not a contiguous source slice return `None`.
+    /// A deletion that would be rejected by the normal patch length rules
+    /// returns the complete source, exactly matching [`Self::apply_into`].
+    #[inline]
+    pub fn source_slice_utf8<'a>(
+        &self,
+        source: &'a str,
+        src_utf16_len: usize,
+    ) -> Option<&'a str> {
+        match self {
+            PatchCommand::Preserve => Some(source),
+            PatchCommand::DeleteSuffix(count) => {
+                let out_len = self.computed_length(src_utf16_len);
+                if out_len >= src_utf16_len {
+                    return Some(source);
+                }
+                utf8_suffix_boundary(source, *count).map(|end| &source[..end])
+            }
+            PatchCommand::DeletePrefix(count) => {
+                let out_len = self.computed_length(src_utf16_len);
+                if out_len >= src_utf16_len {
+                    return Some(source);
+                }
+                utf8_prefix_boundary(source, *count).map(|start| &source[start..])
+            }
+            _ => None,
+        }
+    }
+
+    /// Apply a simple non-slice patch directly to UTF-8 output.
+    ///
+    /// The caller must guarantee that the trie key represents the original
+    /// source text without case or diacritic normalization. This method mirrors
+    /// the UTF-16 patch semantics while avoiding construction and decoding of a
+    /// second UTF-16 buffer. It returns `false` when exact UTF-16 replacement
+    /// semantics would require manipulating half of a supplementary scalar; the
+    /// caller must then use the generic UTF-16 implementation.
+    #[inline]
+    pub fn apply_simple_utf8_into(
+        &self,
+        source: &str,
+        src_utf16_len: usize,
+        out: &mut String,
+    ) -> bool {
+        match self {
+            PatchCommand::AppendChar(unit) => {
+                out.clear();
+                out.reserve(source.len().saturating_add(3));
+                out.push_str(source);
+                push_utf16_unit_lossy(out, *unit);
+                true
+            }
+            PatchCommand::PrependChar(unit) => {
+                out.clear();
+                out.reserve(source.len().saturating_add(3));
+                push_utf16_unit_lossy(out, *unit);
+                out.push_str(source);
+                true
+            }
+            PatchCommand::ReplaceLastChar(unit) => {
+                if src_utf16_len == 0 {
+                    out.clear();
+                    out.push_str(source);
+                    return true;
+                }
+                if is_utf16_surrogate(*unit) {
+                    return false;
+                }
+                let Some((start, last)) = source.char_indices().next_back() else {
+                    return false;
+                };
+                if last.len_utf16() != 1 {
+                    return false;
+                }
+                out.clear();
+                out.reserve(source.len().saturating_sub(last.len_utf8()).saturating_add(3));
+                out.push_str(&source[..start]);
+                push_utf16_unit_lossy(out, *unit);
+                true
+            }
+            PatchCommand::ReplaceFirstChar(unit) => {
+                if src_utf16_len == 0 {
+                    out.clear();
+                    out.push_str(source);
+                    return true;
+                }
+                if is_utf16_surrogate(*unit) {
+                    return false;
+                }
+                let Some((_, first)) = source.char_indices().next() else {
+                    return false;
+                };
+                if first.len_utf16() != 1 {
+                    return false;
+                }
+                out.clear();
+                out.reserve(source.len().saturating_sub(first.len_utf8()).saturating_add(3));
+                push_utf16_unit_lossy(out, *unit);
+                out.push_str(&source[first.len_utf8()..]);
+                true
+            }
+            _ => false,
+        }
+    }
+
+    /// Return a stable diagnostic signature for a backward compound patch.
+    ///
+    /// Delete/skip operands are emitted as UTF-16-unit counts. Insert/replace
+    /// operands are emitted as hexadecimal UTF-16 code units. The method is
+    /// diagnostic-only and is never called by the normal stemming hot path.
+    pub fn backward_compound_signature(&self) -> Option<String> {
+        let PatchCommand::BackwardCompound {
+            opcodes, operands, ..
+        } = self
+        else {
+            return None;
+        };
+
+        let mut signature = String::new();
+        for (index, (&opcode, &operand)) in opcodes.iter().zip(operands.iter()).enumerate() {
+            if index != 0 {
+                signature.push(',');
+            }
+            signature.push(opcode as char);
+            signature.push(':');
+            match opcode {
+                SKIP | DELETE => signature.push_str(&operand.to_string()),
+                INSERT | REPLACE => signature.push_str(&format!("{operand:04X}")),
+                NOOP => signature.push('0'),
+                _ => signature.push('?'),
+            }
+        }
+        Some(signature)
     }
 
     pub fn apply(&self, source: &[u16]) -> Vec<u16> {
@@ -490,5 +694,164 @@ fn apply_forward_into(
     out[o..o + remaining].copy_from_slice(&source[s..s + remaining]);
     if out_idx as usize + remaining != produced_len {
         fill_with_source(out, source);
+    }
+}
+
+
+#[cfg(test)]
+mod tests {
+    use super::PatchCommand;
+
+    fn legacy_result(command: &PatchCommand, source: &str) -> String {
+        let source_utf16: Vec<u16> = source.encode_utf16().collect();
+        let mut output = Vec::new();
+        command.apply_into(&source_utf16, &mut output);
+        String::from_utf16_lossy(&output)
+    }
+
+    #[test]
+    fn source_slice_preserve_matches_legacy_result() {
+        let source = "Příliš";
+        let command = PatchCommand::Preserve;
+        let source_utf16_len = source.encode_utf16().count();
+        assert_eq!(command.source_slice_utf8(source, source_utf16_len), Some(source));
+        assert_eq!(legacy_result(&command, source), source);
+    }
+
+    #[test]
+    fn source_slice_delete_suffix_handles_ascii() {
+        let source = "running";
+        let command = PatchCommand::DeleteSuffix(3);
+        let source_utf16_len = source.encode_utf16().count();
+        let fast = command.source_slice_utf8(source, source_utf16_len).unwrap();
+        assert_eq!(fast, "runn");
+        assert_eq!(fast, legacy_result(&command, source));
+    }
+
+    #[test]
+    fn source_slice_delete_suffix_handles_bmp_unicode() {
+        let source = "kočky";
+        let command = PatchCommand::DeleteSuffix(1);
+        let source_utf16_len = source.encode_utf16().count();
+        let fast = command.source_slice_utf8(source, source_utf16_len).unwrap();
+        assert_eq!(fast, "kočk");
+        assert_eq!(fast, legacy_result(&command, source));
+    }
+
+    #[test]
+    fn source_slice_delete_prefix_handles_bmp_unicode() {
+        let source = "český";
+        let command = PatchCommand::DeletePrefix(1);
+        let source_utf16_len = source.encode_utf16().count();
+        let fast = command.source_slice_utf8(source, source_utf16_len).unwrap();
+        assert_eq!(fast, "eský");
+        assert_eq!(fast, legacy_result(&command, source));
+    }
+
+    #[test]
+    fn source_slice_rejected_deletion_preserves_source() {
+        let source = "a";
+        let command = PatchCommand::DeleteSuffix(1);
+        let source_utf16_len = source.encode_utf16().count();
+        assert_eq!(command.source_slice_utf8(source, source_utf16_len), Some(source));
+        assert_eq!(legacy_result(&command, source), source);
+    }
+
+    #[test]
+    fn source_slice_falls_back_when_utf16_boundary_splits_scalar() {
+        let source = "a😀b";
+        let command = PatchCommand::DeleteSuffix(2);
+        let source_utf16_len = source.encode_utf16().count();
+        assert_eq!(command.source_slice_utf8(source, source_utf16_len), None);
+    }
+
+    #[test]
+    fn source_slice_handles_complete_supplementary_scalar_deletion() {
+        let source = "a😀b";
+        let command = PatchCommand::DeleteSuffix(3);
+        let source_utf16_len = source.encode_utf16().count();
+        let fast = command.source_slice_utf8(source, source_utf16_len).unwrap();
+        assert_eq!(fast, "a");
+        assert_eq!(fast, legacy_result(&command, source));
+    }
+
+    #[test]
+    fn source_slice_returns_none_for_non_slice_patch() {
+        let source = "cars";
+        let command = PatchCommand::AppendChar(b'x' as u16);
+        let source_utf16_len = source.encode_utf16().count();
+        assert_eq!(command.source_slice_utf8(source, source_utf16_len), None);
+    }
+
+    #[test]
+    fn direct_utf8_append_matches_legacy_result() {
+        let source = "kočk";
+        let command = PatchCommand::AppendChar('a' as u16);
+        let mut fast = String::new();
+        assert!(command.apply_simple_utf8_into(source, source.encode_utf16().count(), &mut fast));
+        assert_eq!(fast, legacy_result(&command, source));
+    }
+
+    #[test]
+    fn direct_utf8_prepend_matches_legacy_result() {
+        let source = "eský";
+        let command = PatchCommand::PrependChar('č' as u16);
+        let mut fast = String::new();
+        assert!(command.apply_simple_utf8_into(source, source.encode_utf16().count(), &mut fast));
+        assert_eq!(fast, legacy_result(&command, source));
+    }
+
+    #[test]
+    fn direct_utf8_replace_last_matches_legacy_result() {
+        let source = "koty";
+        let command = PatchCommand::ReplaceLastChar('a' as u16);
+        let mut fast = String::new();
+        assert!(command.apply_simple_utf8_into(source, source.encode_utf16().count(), &mut fast));
+        assert_eq!(fast, legacy_result(&command, source));
+    }
+
+    #[test]
+    fn direct_utf8_replace_first_matches_legacy_result() {
+        let source = "ceský";
+        let command = PatchCommand::ReplaceFirstChar('č' as u16);
+        let mut fast = String::new();
+        assert!(command.apply_simple_utf8_into(source, source.encode_utf16().count(), &mut fast));
+        assert_eq!(fast, legacy_result(&command, source));
+    }
+
+    #[test]
+    fn direct_utf8_replace_last_falls_back_for_supplementary_scalar() {
+        let source = "a😀";
+        let command = PatchCommand::ReplaceLastChar('x' as u16);
+        let mut fast = String::new();
+        assert!(!command.apply_simple_utf8_into(source, source.encode_utf16().count(), &mut fast));
+    }
+
+    #[test]
+    fn direct_utf8_replace_first_falls_back_for_supplementary_scalar() {
+        let source = "😀a";
+        let command = PatchCommand::ReplaceFirstChar('x' as u16);
+        let mut fast = String::new();
+        assert!(!command.apply_simple_utf8_into(source, source.encode_utf16().count(), &mut fast));
+    }
+
+    #[test]
+    fn direct_utf8_append_surrogate_matches_lossy_legacy_result() {
+        let source = "a";
+        let command = PatchCommand::AppendChar(0xD800);
+        let mut fast = String::new();
+        assert!(command.apply_simple_utf8_into(source, source.encode_utf16().count(), &mut fast));
+        assert_eq!(fast, legacy_result(&command, source));
+    }
+
+    #[test]
+    fn backward_compound_signature_is_stable() {
+        let command = PatchCommand::BackwardCompound {
+            opcodes: vec![b'D', b'R', b'I'],
+            operands: vec![2, 'a' as u32, 'x' as u32],
+            length_delta: 0,
+            min_len: 2,
+        };
+        assert_eq!(command.backward_compound_signature().as_deref(), Some("D:2,R:0061,I:0078"));
     }
 }

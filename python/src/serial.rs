@@ -45,7 +45,6 @@
 
 use std::collections::HashMap;
 use std::io::{self, Read, Write};
-use std::sync::Arc;
 
 use flate2::read::GzDecoder;
 use flate2::write::GzEncoder;
@@ -391,10 +390,10 @@ pub(crate) fn read_stream(data: &[u8]) -> io::Result<FrequencyTrie> {
     let backward = matches!(metadata.traversal, TraversalDirection::Backward);
 
     let value_table_len = r.i32()? as usize;
-    let mut value_table: Vec<Arc<PatchCommand>> = Vec::with_capacity(value_table_len);
+    let mut patches: Vec<PatchCommand> = Vec::with_capacity(value_table_len);
     for _ in 0..value_table_len {
         let patch = r.java_utf()?;
-        value_table.push(Arc::new(PatchCommand::parse(&patch, backward)));
+        patches.push(PatchCommand::parse(&patch, backward));
     }
 
     let mut edge_start: Vec<u32> = Vec::with_capacity(node_count + 1);
@@ -402,7 +401,7 @@ pub(crate) fn read_stream(data: &[u8]) -> io::Result<FrequencyTrie> {
     let mut edge_targets: Vec<u32> = Vec::new();
     let mut accepts: Vec<bool> = Vec::with_capacity(node_count);
     let mut value_start: Vec<u32> = Vec::with_capacity(node_count + 1);
-    let mut values: Vec<Arc<PatchCommand>> = Vec::new();
+    let mut value_ids: Vec<u32> = Vec::new();
     edge_start.push(0);
     value_start.push(0);
 
@@ -421,15 +420,15 @@ pub(crate) fn read_stream(data: &[u8]) -> io::Result<FrequencyTrie> {
         for _ in 0..value_count {
             let value_id = r.i32()? as usize;
             let _count = r.i32()?; // frequency: not used at runtime
-            if value_id >= value_table.len() {
+            if value_id >= patches.len() {
                 return Err(io::Error::new(
                     io::ErrorKind::InvalidData,
                     "value id out of range",
                 ));
             }
-            values.push(Arc::clone(&value_table[value_id]));
+            value_ids.push(value_id as u32);
         }
-        value_start.push(values.len() as u32);
+        value_start.push(value_ids.len() as u32);
     }
 
     let (dense_start, dense_base, dense_targets) =
@@ -441,7 +440,8 @@ pub(crate) fn read_stream(data: &[u8]) -> io::Result<FrequencyTrie> {
         edge_targets,
         accepts,
         value_start,
-        values,
+        value_ids,
+        patches,
         dense_start,
         dense_base,
         dense_targets,

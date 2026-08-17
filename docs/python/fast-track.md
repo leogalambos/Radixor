@@ -57,6 +57,9 @@ stemmer.stemWords(["running", "unknown_word"])
 These methods return the original input whenever no patch command is found, so
 their results are always strings rather than `None`.
 
+`import Stemmer` is optional and only for zero-source-change migration when
+PyStemmer is absent; otherwise use `from radixor import Stemmer`.
+
 ## Next
 
 - Continue with the [Python Quick Start](quick-start.md) for model selection,

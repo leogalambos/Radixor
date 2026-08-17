@@ -646,14 +646,48 @@ pub(crate) fn build_frozen(
     freeze(&reduced_root, backward)
 }
 
+/// Convert serialized/build-order patch strings into compact runtime patch ids.
+///
+/// The frozen builder representation keeps patch text parallel to value
+/// occurrences because the v7 writer needs that exact ordering. The runtime
+/// trie instead stores each parsed command once and represents every node value
+/// with a compact `u32` identifier.
+fn compact_runtime_values(
+    value_strings: &[String],
+    backward: bool,
+) -> (Vec<u32>, Vec<PatchCommand>) {
+    let mut patch_ids: HashMap<&str, u32> = HashMap::new();
+    let mut value_ids: Vec<u32> = Vec::with_capacity(value_strings.len());
+    let mut patches: Vec<PatchCommand> = Vec::new();
+
+    for value in value_strings {
+        let patch_id = if let Some(&existing) = patch_ids.get(value.as_str()) {
+            existing
+        } else {
+            let id = patches.len() as u32;
+            patches.push(PatchCommand::parse(value, backward));
+            patch_ids.insert(value.as_str(), id);
+            id
+        };
+        value_ids.push(patch_id);
+    }
+
+    (value_ids, patches)
+}
+
+/// Convert the frozen build representation into the compact runtime trie.
 fn frozen_into_trie(frozen: FrozenTrie, metadata: TrieMetadata) -> FrequencyTrie {
+    let backward = matches!(metadata.traversal, TraversalDirection::Backward);
+    let (value_ids, patches) = compact_runtime_values(&frozen.value_strings, backward);
+
     FrequencyTrie::new(
         frozen.edge_start,
         frozen.edge_labels,
         frozen.edge_targets,
         frozen.accepts,
         frozen.value_start,
-        frozen.values,
+        value_ids,
+        patches,
         frozen.dense_start,
         frozen.dense_base,
         frozen.dense_targets,

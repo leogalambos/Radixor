@@ -18,6 +18,7 @@ s.stem_batch(["cats", "ran"])   # ['cat', 'run']
 - [Quick Start](quick-start.md) — the complete application-oriented learning path.
 - [Installation and building](installation.md) — Linux, Windows, macOS.
 - [Usage and examples](usage.md) — batch API, caching, and custom models.
+- [Migration methods](usage.md) — `Stemmer`, `stemWord`, `stemWords`, `algorithms`, and `version`; optional compatibility `import Stemmer` when legacy import migration is used.
 - [Dictionary compilation](model-compilation.md) — prepare a version 7 binary
   once and share it with Python or Java.
 - [Performance](performance.md) — fair, reproducible comparisons vs PyStemmer,
@@ -49,7 +50,7 @@ stated explicitly. **Neither is “better”** — they target different runtime
 | Runtime | JVM library | Compiled extension (Rust/PyO3), no JVM |
 | Distribution | Maven JAR + model JARs | `abi3` wheel (one wheel per OS/arch, Python ≥ 3.9) |
 | Hot-path data structure | `CompiledNode` graph; routines operate on caller-owned **`char[]`** with zero-copy normalized lookups and visitor sinks (`EntrySink`) | Flat **CSR arrays** (no per-node objects); reused UTF‑16 scratch buffers |
-| Result cache | **None** — `get()` is stateless and re-stems every call | **Bounded**, 10,000 entries by default (matching PyStemmer); `Stemmer(cache_size=0)` disables it |
+| Result cache | **None** — `get()` is stateless and re-stems every call | **Bounded**, 10,000 entries by default (matching PyStemmer); `Stemmer(cache_size=0)` disables it (`maxCacheSize` is a supported alias) |
 | Batch API | Not a batch call; you loop and reuse `char[]`/visitors to avoid allocation | **`stem_batch()` / `stem_all_batch()`** — one Python↔Rust crossing amortized over the whole list |
 | Reduction modes | All three modes selectable at compile time | Fixed to the production `DOMINANT` mode |
 | Extending a compiled trie | **Supported** — add words/transformations to an already-compiled trie without recompiling | **Not exposed** — compile from a dictionary (or load a compiled binary) |
@@ -75,10 +76,10 @@ To avoid surprises, these Java capabilities are **not** in the Python package:
 
 - A **batch API** (`stem_batch`) that amortizes the Python↔native boundary — the
   single most important call for throughput from Python.
-- A **bounded result cache** (`cache_size=10_000` by default) for workloads with
-  repeated tokens. It is shared by `stem()`, `stemWord()`, `stem_batch()`, and
-  `stemWords()`; pass `cache_size=0` to disable it. The `stem_all*()` methods are
-  not cached.
+- A **bounded result cache** (`cache_size=10_000` by default; `maxCacheSize` is
+  a supported alias) for workloads with repeated tokens. It is shared by
+  `stem()`, `stemWord()`, `stem_batch()`, and `stemWords()`; pass
+  `cache_size=0` to disable it. The `stem_all*()` methods are not cached.
 - A `lowercase=False` mode to skip per-lookup lowercasing when the caller
   guarantees already-lowercased input.
 
