@@ -6,10 +6,11 @@ is made fair. The scripts are in the repository (`python/benchmarks/`); anyone
 can reproduce the numbers.
 
 !!! info "Published single-machine measurement"
-    These results were regenerated on 2026-08-08 on the current benchmark
-    workstation: Fedora Linux 44 (`7.1.6-201.fc44.x86_64`), AMD Ryzen 5 5625U
-    (6 cores / 12 threads), CPython 3.14.6, Rust 1.97.1, and a release wheel.
-    All logical CPUs used the `schedutil` governor. Absolute timings remain
+    These results were regenerated on 2026-08-18 on the current benchmark
+    workstation: AMD Ryzen 5 8600G with Radeon 760M Graphics (6 cores / 12
+    threads), Linux-7.1.8-200.fc44.x86_64-x86_64-with-glibc2.43,
+    CPython 3.14.6, Rust 1.97.1, and a release wheel.
+    All logical CPUs used the `performance` governor. Absolute timings remain
     machine-specific; compare ratios only within this run.
 
 ## What is measured
@@ -21,10 +22,9 @@ can reproduce the numbers.
   with its line's root, normalized `trim().lower()`, keeping only tokens that
   differ from their root (the forms a stemmer must actually rewrite), padded to
   ≥ 5 000 tokens. This is identical to the Java `LanguageBenchmarkCorpus`.
-- **Batch sizes 10/20/50/100** are swept and a line is fit to `per_call(N) =
-  intercept + N · slope` as a descriptive scaling summary. This is an
-  unconstrained OLS fit, so noise may produce a negative intercept; it is not a
-  physical decomposition of runtime. The *best* of many repeats is reported.
+- The benchmark is now run at a single fixed batch size **N = 100**.
+  This avoids fitting a scaling model and reports the measured batch performance
+  directly.
 
 ## Fairness: making the comparison apples-to-apples
 
@@ -57,26 +57,31 @@ where it **cannot** be neutralized the effect is described.
 
 | Item | Published value |
 |---|---|
-| CPU | AMD Ryzen 5 5625U with Radeon Graphics |
+| CPU | AMD Ryzen 5 8600G with Radeon 760M Graphics |
 | CPU topology | 6 physical cores / 12 logical CPUs |
-| OS | Fedora Linux 44, kernel `7.1.6-201.fc44.x86_64` |
-| CPU governor | `schedutil` on all 12 logical CPUs; boost enabled |
+| OS | Linux-7.1.8-200.fc44.x86_64-x86_64-with-glibc2.43 |
+| CPU governor | `performance` on all 12 logical CPUs; boost enabled |
 | Python | CPython 3.14.6 |
-| Radixor | 4.1.0, release-mode ABI3 wheel, cache disabled |
+| Radixor | 4.1.2, release-mode ABI3 wheel, cache disabled |
 | PyStemmer | 3.1.0 (`libstemmer_c` 3.1.0), cache disabled |
 | snowballstemmer | 3.1.1, forced pure-Python backend |
-| NLTK | 3.10.2 |
+| NLTK | 3.10.3 |
 | Workload | 5,000 changed tokens per language and measurement |
-| Batch sizes | 10, 20, 50, 100 |
-| Timing | best of 15 measured passes after 3 warm-up passes |
+| Batch sizes | 100 |
+| Timing | median of 3 measured passes after 3 warm-up passes |
 
 The authoritative command was:
 
 ```bash
-./gradlew pythonBenchmarkAllLanguagesBatch --rerun-tasks
+./gradlew pythonBenchmarkAllLanguagesBatch \
+  -PpythonBenchmarkEngines=radixor,PyStemmer,snowballstemmer-pure,cistem,nltk-porter \
+  -PpythonBenchmarkWords=5000 \
+  -PpythonBenchmarkRepeats=3 \
+  -PpythonBenchmarkWarmup=3 \
+  --rerun-tasks
 ```
 
-It completed successfully in 3 minutes 33 seconds and emitted
+The run completed successfully and emitted
 the full per-size CSV and JSON reports under
 `build/reports/python-benchmarks/`.
 
@@ -89,31 +94,31 @@ partitioning.
 
 | Language | Radixor | PyStemmer (Snowball C) | CISTEM (pure Py) | snowballstemmer (pure Py) | NLTK Porter (pure Py) |
 |---|---:|---:|---:|---:|---:|
-| Czech (`cs`) | **224.3** | 236.6 | — | 4,835.2 | — |
-| Danish (`da`) | **178.3** | 267.6 | — | 8,568.9 | — |
-| German (`de`) | **230.9** | 635.5 | 3,341.9 | 33,654.1 | — |
-| English (`en`) | **180.5** | 331.9 | — | 20,195.0 | 7,740.3 |
-| Spanish (`es`) | **184.2** | 316.6 | — | 19,640.1 | — |
-| Persian (`fa`) | **210.1** | 497.1 | — | 32,732.3 | — |
-| Finnish (`fi`) | **227.8** | 258.8 | — | 12,339.5 | — |
-| French (`fr`) | **234.2** | 503.7 | — | 36,161.9 | — |
-| Hebrew (`he`) | **228.6** | — | — | — | — |
-| Hungarian (`hu`) | **198.2** | 264.7 | — | 13,694.3 | — |
-| Italian (`it`) | **170.8** | 517.0 | — | 34,504.6 | — |
-| Norwegian Bokmål (`nb`) | **187.1** | 239.7 | — | 7,457.6 | — |
-| Dutch (`nl`) | **187.1** | 354.8 | — | 18,148.2 | — |
-| Norwegian Nynorsk (`nn`) | **168.7** | 231.2 | — | 7,489.4 | — |
-| Polish (`pl`) | **194.6** | 214.5 | — | 5,282.9 | — |
-| Portuguese (`pt`) | **166.9** | 293.2 | — | 21,157.2 | — |
-| Russian (`ru`) | **273.4** | 414.4 | — | 15,703.8 | — |
-| Swedish (`sv`) | **189.3** | 212.5 | — | 5,351.4 | — |
-| Ukrainian (`uk`) | **221.5** | — | — | — | — |
-| Yiddish (`yi`) | **227.5** | 624.2 | — | 33,251.6 | — |
+| Czech (`cs`) | **151.6** | 158.7 | — | 3194.4 | — |
+| Danish (`da`) | **115.8** | 181.9 | — | 5643.1 | — |
+| German (`de`) | **156.1** | 453.3 | 2306.4 | 22351.7 | — |
+| English (`en`) | **127.4** | 251.2 | — | 12806.1 | 5335.1 |
+| Spanish (`es`) | **134.3** | 209.9 | — | 13053.4 | — |
+| Persian (`fa`) | **147.4** | 324.2 | — | 20816.9 | — |
+| Finnish (`fi`) | **171.7** | 188.3 | — | 7790.9 | — |
+| French (`fr`) | **167.4** | 349.8 | — | 22760.1 | — |
+| Hebrew (`he`) | **161.6** | — | — | — | — |
+| Hungarian (`hu`) | **133.2** | 190.7 | — | 9040.2 | — |
+| Italian (`it`) | **137.6** | 363.8 | — | 22083.6 | — |
+| Norwegian Bokmål (`nb`) | **115.1** | 166.4 | — | 4926.5 | — |
+| Dutch (`nl`) | **120.4** | 246.3 | — | 11720.3 | — |
+| Norwegian Nynorsk (`nn`) | **106.5** | 164.3 | — | 4828.7 | — |
+| Polish (`pl`) | **125.6** | 137.2 | — | 3489.3 | — |
+| Portuguese (`pt`) | **114.5** | 198.7 | — | 14330.2 | — |
+| Russian (`ru`) | **192.3** | 278.5 | — | 10333.2 | — |
+| Swedish (`sv`) | **122.6** | 138.0 | — | 3576.5 | — |
+| Ukrainian (`uk`) | **149.6** | — | — | — | — |
+| Yiddish (`yi`) | **159.5** | 434.1 | — | 20835.4 | — |
 
-Radixor won all **18 / 18** direct PyStemmer comparisons. At `N=100`, its
-geometric-mean speedup was **1.67×**; the largest direct advantage was **3.03×**
-for Italian. Across all 20 Radixor languages, throughput ranged from **3.66 to
-5.99 million words/s**.
+Radixor won **18 / 18** direct PyStemmer comparisons. At `N=100`, its
+geometric-mean speedup was **1.68×**; the largest direct advantage was **2.90×**
+for German. Across all 20 Radixor languages, throughput ranged from **5.20 to
+9.39 million words/s**.
 
 ### CISTEM comparison for German
 
@@ -121,15 +126,15 @@ The German row also provides a direct comparison with CISTEM:
 
 | Engine | Implementation | N=100 | vs radixor |
 |---|---|---|---|
-| **radixor** | Rust trie | **230.9 ns/word** | — |
-| PyStemmer (de) | Snowball C | 635.5 ns/word | 2.75× slower |
-| **CISTEM** | pure Python (`nltk`) | **3,341.9 ns/word** | **14.47× slower** |
+| **radixor** | Rust trie | **156.1 ns/word** | — |
+| PyStemmer (de) | Snowball C | 453.3 ns/word | 2.90× slower |
+| **CISTEM** | pure Python (`nltk`) | **2,306.4 ns/word** | **14.79× slower** |
 
 CISTEM has no batch entry point (it is a per-word Python loop), so its per-word
 cost is flat across batch sizes and batching cannot amortize it. It is a compact
 ~40-rule German heuristic with no dictionary — a different design point that
 trades coverage for simplicity. Because CISTEM's unavoidable normalization work
-modestly biases the measurement in radixor's favour (point 2 above), the 14.47×
+modestly biases the measurement in radixor's favour (point 2 above), the 14.82×
 result is not a perfectly normalization-matched ratio.
 
 The all-language Gradle task does not measure stage-level profiling or cached
@@ -151,7 +156,12 @@ quality is assessed separately from throughput.
 
 ```bash
 pip install -r python/benchmarks/requirements-bench.txt
-./gradlew pythonBenchmarkAllLanguagesBatch --rerun-tasks
+./gradlew pythonBenchmarkAllLanguagesBatch \
+  -PpythonBenchmarkEngines=radixor,PyStemmer,snowballstemmer-pure,cistem,nltk-porter \
+  -PpythonBenchmarkWords=5000 \
+  -PpythonBenchmarkRepeats=3 \
+  -PpythonBenchmarkWarmup=3 \
+  --rerun-tasks
 ```
 
 The run prints the machine/Python/engine versions and each engine's backing

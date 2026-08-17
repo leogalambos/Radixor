@@ -128,9 +128,9 @@ generalization does not require accepting a runtime advantage over Radixor:
 
 - **18 / 18** direct language comparisons are won by Radixor against PyStemmer
   3.1.0;
-- the geometric-mean speedup is **1.67×**;
-- the largest measured direct advantage is **3.03×** (Italian);
-- Radixor spans **3.66–5.99 million words/s** across all 20 measured Radixor
+- the geometric-mean speedup is **1.68×**;
+- the largest measured direct advantage is **2.90×** (German);
+- Radixor spans **5.20–9.39 million words/s** across all 20 measured Radixor
   languages at batch size `N=100`.
 
 Those are performance results. The newly integrated official Snowball 3.1.0 Java
@@ -160,7 +160,7 @@ Finnish remains another useful illustration. The published `ALL_WORDS`
 primary-output quality result is **0.984838** balanced accuracy for Radixor
 versus **0.740279** for the Snowball Finnish Lucene path, with under-stemming
 **3.032474%** versus **51.944179%**. At `N=100` in the current Python batch run,
-Radixor is **1.14×** faster than PyStemmer's Finnish implementation.
+Radixor is **1.10×** faster than PyStemmer's Finnish implementation.
 
 See the [Finnish benchmark](benchmarks/languages/finnish.md), the
 [Czech benchmark](benchmarks/languages/czech.md), the

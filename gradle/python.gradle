@@ -28,8 +28,40 @@ def rustToolIdentity = providers.exec {
     commandLine('rustc', '--version')
 }.standardOutput.asText.map { String value -> value.strip() }
 def pythonBenchmarkWords = providers.gradleProperty('pythonBenchmarkWords').orElse('5000')
-def pythonBenchmarkRepeats = providers.gradleProperty('pythonBenchmarkRepeats').orElse('15')
+def pythonBenchmarkRepeats = providers.gradleProperty('pythonBenchmarkRepeats').orElse('3')
 def pythonBenchmarkWarmup = providers.gradleProperty('pythonBenchmarkWarmup').orElse('3')
+def pythonBenchmarkEngines = providers.gradleProperty('pythonBenchmarkEngines')
+        .orElse('radixor,PyStemmer,snowballstemmer-pure')
+        .get()
+        .split(',')
+        .collect { it.trim() }
+        .findAll { it }
+        .toSet()
+
+def pythonBenchmarkEnginePackages = [
+        'radixor'           : [],
+        'PyStemmer'         : ['PyStemmer'],
+        'snowballstemmer-pure': ['snowballstemmer'],
+        'nltk-porter'       : ['nltk'],
+        'cistem'            : ['nltk'],
+]
+
+def pythonBenchmarkRuntimeVenvDirectory = layout.buildDirectory.dir('python/runtime/benchmark-envs')
+def pythonBenchmarkReportFileName = { String engine -> engine.replaceAll(/[^A-Za-z0-9._-]/, '_') }
+
+def pythonVenvPythonExecutable = { File venvDir ->
+    if (hostPlatform == 'windows') {
+        return new File(venvDir, 'Scripts\\python.exe').absolutePath
+    }
+    return new File(venvDir, 'bin/python').absolutePath
+}
+
+def pythonVenvPipExecutable = { File venvDir ->
+    if (hostPlatform == 'windows') {
+        return new File(venvDir, 'Scripts\\pip.exe').absolutePath
+    }
+    return new File(venvDir, 'bin/pip').absolutePath
+}
 
 def rustTargets = [
         linux  : [x86_64: 'x86_64-unknown-linux-gnu', aarch64: 'aarch64-unknown-linux-gnu'],
@@ -293,42 +325,196 @@ tasks.register('pythonVerifyDistributions', Exec) {
     )
 }
 
-tasks.register('pythonBenchmarkAllLanguagesBatch', Exec) {
+def pythonRequestedBenchmarkEngines = pythonBenchmarkEngines.toList()
+def unknownBenchmarkEngines = pythonRequestedBenchmarkEngines.findAll { !pythonBenchmarkEnginePackages.containsKey(it) }
+if (!unknownBenchmarkEngines.isEmpty()) {
+    throw new GradleException("Unsupported pythonBenchmarkEngines: ${unknownBenchmarkEngines}. Available: ${pythonBenchmarkEnginePackages.keySet()}")
+}
+
+def pythonBenchmarkPerEngineTasks = []
+pythonRequestedBenchmarkEngines.each { String engineName ->
+    final String safeEngineName = pythonBenchmarkReportFileName(engineName)
+    final String taskSuffix = safeEngineName.replaceAll(/[^A-Za-z0-9]+/, '_').capitalize()
+    final String venvTaskName = "pythonBenchmarkPrepareVenv${taskSuffix}"
+    final String installTaskName = "pythonBenchmarkInstallDependencies${taskSuffix}"
+    final String runTaskName = "pythonBenchmarkSingleEngine${taskSuffix}"
+    final List<String> packages = pythonBenchmarkEnginePackages[engineName]
+    final boolean usesRuntimePath = engineName == 'radixor'
+    def pythonExecutableProvider = pythonExecutable
+    def benchmarkWarmup = pythonBenchmarkWarmup
+    def benchmarkWords = pythonBenchmarkWords
+    def benchmarkRepeats = pythonBenchmarkRepeats
+
+    def prepareTask = tasks.register(venvTaskName, Exec) {
+        group = 'verification'
+        description = "Prepares an isolated virtual environment for ${engineName}"
+        inputs.property('pythonExecutable', pythonExecutable)
+        inputs.property('engineName', engineName)
+        inputs.property('packageList', packages.join(','))
+        outputs.dir(pythonBenchmarkRuntimeVenvDirectory.map { it.dir(safeEngineName) })
+
+        doFirst {
+            final File venvDirectory = new File(
+                    pythonBenchmarkRuntimeVenvDirectory.get().asFile.absolutePath, safeEngineName
+            )
+            if (venvDirectory.exists() && !venvDirectory.deleteDir()) {
+                throw new GradleException("Cannot clean benchmark venv directory: ${venvDirectory}")
+            }
+            commandLine(pythonExecutableProvider.get(), '-m', 'venv', venvDirectory.absolutePath, '--clear')
+        }
+    }
+
+    def installTask = tasks.register(installTaskName, Exec) {
+        group = 'verification'
+        description = "Installs benchmark-only Python dependencies for ${engineName}"
+        dependsOn(prepareTask)
+        onlyIf { !packages.isEmpty() }
+
+        doFirst {
+            if (packages.isEmpty()) {
+                return
+            }
+            final File venvDirectory = new File(
+                    pythonBenchmarkRuntimeVenvDirectory.get().asFile.absolutePath, safeEngineName
+            )
+            final String pipBinary = pythonVenvPipExecutable(venvDirectory)
+            commandLine(
+                    pipBinary,
+                    'install',
+                    '--no-input',
+                    '--no-warn-script-location',
+                    '--disable-pip-version-check',
+                    *packages
+            )
+        }
+    }
+
+    def runTask = tasks.register(runTaskName, Exec) {
+        group = 'verification'
+        description = "Runs ${engineName} benchmark in an isolated virtual environment."
+
+        dependsOn(tasks.named('preparePythonBenchmarkRuntime'), prepareTask, installTask)
+        inputs.files(pythonProjectDirectory.file('benchmarks/run_benchmark.py'),
+                pythonProjectDirectory.file('benchmarks/corpus.py'),
+                pythonProjectDirectory.file('benchmarks/engines.py'),
+                layout.projectDirectory.file('gradle/python.gradle'))
+        inputs.dir(pythonBenchmarkRuntimeDirectory)
+        inputs.dir({ new File(pythonBenchmarkRuntimeVenvDirectory.get().asFile, safeEngineName) })
+        inputs.property('pythonExecutable', pythonExecutable)
+        inputs.property('pythonToolIdentity', pythonToolIdentity)
+        inputs.property('pythonBenchmarkWords', benchmarkWords)
+        inputs.property('pythonBenchmarkRepeats', benchmarkRepeats)
+        inputs.property('pythonBenchmarkWarmup', benchmarkWarmup)
+        outputs.file(pythonBenchmarkReportDirectory.map { it.file("${safeEngineName}-all-languages-batch.csv") })
+        outputs.file(pythonBenchmarkReportDirectory.map { it.file("${safeEngineName}-all-languages-batch.json") })
+        outputs.upToDateWhen { false }
+
+        workingDir(pythonProjectDirectory)
+        doFirst {
+            final File reportDirectory = pythonBenchmarkReportDirectory.get().asFile
+            final File venvDirectory = new File(
+                    pythonBenchmarkRuntimeVenvDirectory.get().asFile.absolutePath, safeEngineName
+            )
+            final String pythonBinary = pythonVenvPythonExecutable(venvDirectory)
+            reportDirectory.mkdirs()
+            final String runtimePath = usesRuntimePath ?
+                    pythonBenchmarkRuntimeDirectory.get().asFile.absolutePath : ''
+            environment('PYTHONNOUSERSITE', '1')
+            environment('PYTHONPATH', runtimePath)
+            commandLine(
+                    pythonBinary,
+                    'benchmarks/run_benchmark.py',
+                    '--all-languages',
+                    '--engines', engineName,
+                    '--sizes', '100',
+                    '--words', benchmarkWords.get(),
+                    '--repeats', benchmarkRepeats.get(),
+                    '--warmup', benchmarkWarmup.get(),
+                    '--csv', new File(reportDirectory, "${safeEngineName}-all-languages-batch.csv").absolutePath,
+                    '--json', new File(reportDirectory, "${safeEngineName}-all-languages-batch.json").absolutePath
+            )
+        }
+    }
+
+    pythonBenchmarkPerEngineTasks.add(runTask)
+}
+
+tasks.register('pythonBenchmarkAllLanguagesBatch') {
     group = 'verification'
-    description = 'Benchmarks the host Python wheel and available competitors for every supported language.'
+    description = 'Runs each configured engine in an isolated venv and merges per-engine results.'
 
-    dependsOn(tasks.named('preparePythonBenchmarkRuntime'))
+    dependsOn(pythonBenchmarkPerEngineTasks)
 
-    inputs.files(pythonProjectDirectory.file('benchmarks/run_benchmark.py'),
-            pythonProjectDirectory.file('benchmarks/corpus.py'),
-            pythonProjectDirectory.file('benchmarks/engines.py'),
-            layout.projectDirectory.file('gradle/python.gradle'))
-    inputs.dir(pythonBenchmarkRuntimeDirectory)
-    inputs.property('pythonExecutable', pythonExecutable)
-    inputs.property('pythonToolIdentity', pythonToolIdentity)
-    inputs.property('pythonBenchmarkWords', pythonBenchmarkWords)
-    inputs.property('pythonBenchmarkRepeats', pythonBenchmarkRepeats)
-    inputs.property('pythonBenchmarkWarmup', pythonBenchmarkWarmup)
-    outputs.file(pythonBenchmarkReportDirectory.map { it.file('all-languages-batch.csv') })
-    outputs.file(pythonBenchmarkReportDirectory.map { it.file('all-languages-batch.json') })
-    outputs.upToDateWhen { false }
-
-    workingDir(pythonProjectDirectory)
-    doFirst {
+    doLast {
         final File reportDirectory = pythonBenchmarkReportDirectory.get().asFile
         reportDirectory.mkdirs()
-        environment('PYTHONPATH', pythonBenchmarkRuntimeDirectory.get().asFile.absolutePath)
-        commandLine(
-                pythonExecutable.get(),
-                'benchmarks/run_benchmark.py',
-                '--all-languages',
-                '--sizes', '10', '20', '50', '100',
-                '--words', pythonBenchmarkWords.get(),
-                '--repeats', pythonBenchmarkRepeats.get(),
-                '--warmup', pythonBenchmarkWarmup.get(),
-                '--csv', new File(reportDirectory, 'all-languages-batch.csv').absolutePath,
-                '--json', new File(reportDirectory, 'all-languages-batch.json').absolutePath
+
+        final String mergedCsvName = 'all-languages-batch.csv'
+        final String mergedJsonName = 'all-languages-batch.json'
+        final File mergedCsv = reportDirectory.toPath().resolve(mergedCsvName).toFile()
+        final File mergedJson = reportDirectory.toPath().resolve(mergedJsonName).toFile()
+
+        def mergedRows = []
+        def header = null
+
+        mergedCsv.withWriter('UTF-8') { writer ->
+            pythonRequestedBenchmarkEngines.each { String engineName ->
+                final File perEngineCsv = reportDirectory.toPath().resolve(
+                        "${pythonBenchmarkReportFileName(engineName)}-all-languages-batch.csv"
+                ).toFile()
+                if (!perEngineCsv.isFile()) {
+                    throw new GradleException("Missing per-engine benchmark CSV: ${perEngineCsv}")
+                }
+                def lines = perEngineCsv.readLines('UTF-8')
+                if (lines.isEmpty()) {
+                    return
+                }
+                if (header == null) {
+                    header = lines[0]
+                    writer.append(header).append('\n')
+                }
+                lines.drop(1).each { writer.append(it).append('\n') }
+            }
+        }
+
+        def jsonParser = new groovy.json.JsonSlurper()
+        def runSummaries = []
+
+        pythonRequestedBenchmarkEngines.each { String engineName ->
+            final File perEngineJson = reportDirectory.toPath().resolve(
+                    "${pythonBenchmarkReportFileName(engineName)}-all-languages-batch.json"
+            ).toFile()
+            if (!perEngineJson.isFile()) {
+                throw new GradleException("Missing per-engine benchmark JSON: ${perEngineJson}")
+            }
+            def report = jsonParser.parse(perEngineJson, 'UTF-8')
+            mergedRows.addAll(report.results ?: [])
+            runSummaries << [
+                    'engine': engineName,
+                    'environment': report.environment ?: [:],
+                    'parameters': report.parameters ?: [:],
+            ]
+        }
+
+        def mergedReport = [
+                'engines'    : pythonRequestedBenchmarkEngines,
+                'runs'       : runSummaries,
+                'results'    : mergedRows,
+                'environment': [
+                        'merged_from_engines': pythonRequestedBenchmarkEngines,
+                        'merging_task'      : 'pythonBenchmarkAllLanguagesBatch',
+                ],
+                'parameters' : [
+                        'word_budget'      : pythonBenchmarkWords.get(),
+                        'repeats'          : pythonBenchmarkRepeats.get(),
+                        'warmup'           : pythonBenchmarkWarmup.get(),
+                        'sizes'            : [100],
+                ],
+        ]
+        mergedJson.text = groovy.json.JsonOutput.prettyPrint(
+                groovy.json.JsonOutput.toJson(mergedReport)
         )
+        println("Wrote merged Python benchmark reports to ${mergedCsv} and ${mergedJson}")
     }
 }
 

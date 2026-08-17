@@ -7,12 +7,8 @@ every timing. Anyone can reproduce the numbers on their own machine.
 ## What is measured, and why batch sizes
 
 Each engine is driven through its batch entry point over a fixed word budget
-(default 5 000 tokens), split into batches of **10, 20, 50, 100** words. The
-harness fits the descriptive line `per_call(N) ≈ intercept + N · slope` across
-those sizes. The fit is unconstrained and timing noise can make its intercept
-negative, so it describes observed scaling rather than physically separating
-overhead from word work. We report the *best* (minimum) of many repeats — the
-microbenchmark convention that suppresses OS/GC noise.
+(default 5 000 tokens), at a single batch size of **100** words. We report the
+*median* of calibrated repeats as the benchmark convention used for this suite.
 
 ## Data — identical to the Java JMH benchmarks
 
@@ -69,25 +65,28 @@ cd ..
 pip install --no-deps build/python/dist/standard/radixor_models_standard-0.0.0-py3-none-any.whl
 cd python/
 pip install -r benchmarks/requirements-bench.txt
-python benchmarks/run_benchmark.py --language en de fr ru fi \
-    --sizes 10 20 50 100 --repeats 21 \
-    --json benchmarks/results.json --csv benchmarks/results.csv
+taskset -c 2 python -u benchmarks/run_benchmark.py \
+    --all-languages --sizes 100 \
+    --words 5000 --repeats 3 --sample-ms 250 --warmup-ms 500 \
+    --json ../build/reports/python-benchmarks/published-benchmark.json \
+    --csv ../build/reports/python-benchmarks/published-benchmark.csv
 ```
 
-From the repository root, the Gradle integration builds an isolated host wheel
-and benchmarks Radixor plus every available comparison engine over all
-supported languages with the fixed 10/20/50/100 size sweep:
+From the repository root, the Gradle integration now runs each configured engine
+in its own virtual environment (only one stemmer package per run) and merges the
+results, over all supported languages with fixed batch size 100:
 
 ```bash
-./gradlew pythonBenchmarkAllLanguagesBatch
+./gradlew pythonBenchmarkAllLanguagesBatch \
+    -PpythonBenchmarkEngines=radixor,PyStemmer,snowballstemmer-pure
 ```
 
 The generated CSV and JSON reports are placed in
 `build/reports/python-benchmarks/`.
 
-Comparison engines are auto-detected in the environment selected by the Gradle
-`pythonExecutable` property. Install `requirements-bench.txt` in that environment
-to enable the complete comparison set.
+Comparison engines are now intentionally isolated per task by benchmark task
+configuration (`pythonBenchmarkEngines`) instead of depending on what is
+installed in the global environment of `pythonExecutable`.
 
 The run prints machine/Python/engine versions and each engine's backing module,
 and writes per-point rows (CSV) plus the full report incl. environment and
@@ -102,7 +101,7 @@ prevents results from different CPUs or benchmark runs from being mixed.
 
 ## Interpretation
 
-- In the published 2026-08-08 run, **radixor is the fastest stemmer measured in
+- In the published 2026-08-17 run, **radixor is the fastest stemmer measured in
   Python** in all 18 languages directly shared with PyStemmer.
 - The benchmark intentionally disables caches. Cached-operation performance is
   outside this suite and must not be inferred from its results.

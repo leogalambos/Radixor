@@ -52,6 +52,10 @@ the benchmark runs with whatever the user has.
 from __future__ import annotations
 
 import inspect
+import importlib
+import importlib.util
+from importlib.machinery import PathFinder
+import types
 from pathlib import Path
 from typing import Callable, Optional
 
@@ -79,6 +83,81 @@ def _module_info(obj) -> dict:
         "backing_file": file,
         "compiled_extension": compiled,
     }
+
+
+_PATH_CACHE: dict[str, Optional[Path]] = {}
+
+
+def _distribution_root(name: str) -> Optional[Path]:
+    if name in _PATH_CACHE:
+        cached = _PATH_CACHE[name]
+        return cached
+    try:
+        import importlib.metadata as metadata
+
+        root = metadata.distribution(name).locate_file("").resolve()
+        _PATH_CACHE[name] = root
+        return root
+    except Exception:
+        _PATH_CACHE[name] = None
+        return None
+
+
+def _module_from_distribution(module_name: str, distribution_name: str):
+    """Load a module from a distribution root, ignoring other sys.path entries."""
+    root = _distribution_root(distribution_name)
+    if root is None:
+        return None
+    spec = PathFinder.find_spec(module_name, [str(root)])
+    if spec is None or spec.origin is None or spec.loader is None:
+        return None
+    try:
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module
+    except Exception:
+        return None
+
+
+def _module_within_distribution(module, distribution_name: str) -> bool:
+    import sys
+
+    if not isinstance(module, types.ModuleType):
+        module_name = getattr(type(module), "__module__", None)
+        module = sys.modules.get(module_name) if module_name else None
+    elif not hasattr(module, "__file__"):
+        module_name = getattr(module, "__name__", None)
+        module = sys.modules.get(module_name) if module_name else None
+
+    if module is None:
+        return False
+
+    try:
+        path = Path(getattr(module, "__file__", "")).resolve()
+        root = _distribution_root(distribution_name)
+        if not (path.is_file() and root):
+            return False
+        try:
+            return path == root or path.is_relative_to(root)
+        except Exception:
+            root_s = str(root)
+            path_s = str(path)
+            if not root_s.endswith("/"):
+                root_s = root_s + "/"
+            return path_s.startswith(root_s)
+    except Exception:
+        return False
+
+
+def _load_dist_module(module_name: str, distribution_name: str):
+    """Resolve a module robustly from the named distribution."""
+    try:
+        module = importlib.import_module(module_name)
+        if _module_within_distribution(module, distribution_name):
+            return module
+    except Exception:
+        pass
+    return _module_from_distribution(module_name, distribution_name)
 
 
 # ISO-639-1 -> Snowball algorithm name (matches the Java SnowballLanguageCase
@@ -167,6 +246,7 @@ class RadixorEngine(Engine):
         info = _module_info(s._core)
         info["algorithm"] = "radixor-trie"
         info["lowercase"] = self._lowercase
+        info["case_mode"] = s._core._case_mode()
         info["cache_disabled"] = True
         return info
 
@@ -175,18 +255,18 @@ class PyStemmerEngine(Engine):
     name = "PyStemmer"
     kind = "c-batch"
 
-    def available(self) -> bool:
-        try:
-            import Stemmer  # noqa: F401
+    @staticmethod
+    def _stemmer_module():
+        return _load_dist_module("Stemmer", "PyStemmer")
 
-            return True
-        except Exception:
-            return False
+    def available(self) -> bool:
+        return self._stemmer_module() is not None
 
     def _algorithms(self) -> set[str]:
-        import Stemmer
-
-        return {a.lower() for a in Stemmer.algorithms()}
+        stemmer = self._stemmer_module()
+        if stemmer is None:
+            return set()
+        return {a.lower() for a in stemmer.algorithms()}
 
     def supports(self, code: str) -> bool:
         name = _SNOWBALL_NAMES.get(code)
@@ -194,8 +274,9 @@ class PyStemmerEngine(Engine):
 
     @staticmethod
     def _new_stemmer(code: str):
-        import Stemmer
-
+        Stemmer = PyStemmerEngine._stemmer_module()
+        if Stemmer is None:
+            raise RuntimeError("PyStemmer distribution is not importable")
         stemmer = Stemmer.Stemmer(_SNOWBALL_NAMES[code])
         # Repeated passes would otherwise measure PyStemmer's default cache
         # after the first pass. Both native engines therefore run uncached.
@@ -212,6 +293,8 @@ class PyStemmerEngine(Engine):
         info = _module_info(stemmer)
         info["algorithm"] = _SNOWBALL_NAMES[code]
         info["cache_disabled"] = True
+        info["distribution"] = "PyStemmer"
+        info["distribution_verified"] = _module_within_distribution(stemmer, "PyStemmer")
         # Record whether PyStemmer resolves to an independent native extension.
         try:
             import snowballstemmer
@@ -254,9 +337,21 @@ class SnowballStemmerEngine(Engine):
         name = _SNOWBALL_NAMES.get(code)
         if not name:
             return None
-        module = importlib.import_module(f"snowballstemmer.{name}_stemmer")
+        module_name = f"snowballstemmer.{name}_stemmer"
+        module = _load_dist_module(module_name, "snowballstemmer")
+        if module is None:
+            return None
+        module_file = getattr(module, "__file__", "").lower()
+        if not module_file.endswith(".py"):
+            return None
         class_name = name.capitalize() + "Stemmer"
-        return getattr(module, class_name, None)
+        stemmer_class = getattr(module, class_name, None)
+        if not inspect.isclass(stemmer_class):
+            return None
+        stem_method = getattr(stemmer_class, "stemWords", None)
+        if not inspect.isfunction(stem_method):
+            return None
+        return stemmer_class
 
     def supports(self, code: str) -> bool:
         try:
@@ -272,6 +367,8 @@ class SnowballStemmerEngine(Engine):
         stemmer = self._load_class(code)()
         info = _module_info(stemmer)
         info["algorithm"] = _SNOWBALL_NAMES[code]
+        info["distribution"] = "snowballstemmer"
+        info["distribution_verified"] = _module_within_distribution(stemmer, "snowballstemmer")
         return info
 
 

@@ -35,10 +35,10 @@
 Measures ONLY runtime stemming throughput — model construction / dictionary
 compilation happens once in setup and is excluded from all timings.
 
-Batch sizes are swept (default 10/20/50/100) and an unconstrained descriptive
-line is fitted for each engine: per_call_time(N) = intercept + slope * N. The
-fit summarizes scaling across the measured sizes; timing noise can make its
-intercept negative, so it must not be read as a physical overhead measurement.
+The default batch size is fixed to **100**. Each measurement point is
+automatically calibrated so one timed sample lasts approximately 250 ms by
+default. The median of repeated samples is the primary throughput estimator;
+the minimum is retained only as a diagnostic statistic.
 
 Data is the same as the Java JMH benchmarks: the changed-token corpus derived
 from the bundled UniMorph gold-standard dictionaries (see corpus.py).
@@ -47,8 +47,8 @@ Examples
 --------
     python run_benchmark.py --language en
     python run_benchmark.py --all-languages --engines radixor
-    python run_benchmark.py --language en de ru --repeats 15 --csv results.csv
-    python run_benchmark.py --language en --sizes 10 20 50 100 200 --json out.json
+    python run_benchmark.py --language en de ru --repeats 3 --csv results.csv
+    python run_benchmark.py --language en --sizes 100 --json out.json
 """
 from __future__ import annotations
 
@@ -56,10 +56,9 @@ import argparse
 import csv as csvmod
 import gc
 import json
+import os
 import platform
-import statistics
 import sys
-import time
 from pathlib import Path
 from typing import Optional
 
@@ -68,6 +67,7 @@ sys.path.insert(0, str(HERE))  # allow running as a plain script
 
 import corpus as corpus_mod  # noqa: E402
 import engines as engines_mod  # noqa: E402
+import timing as timing_mod  # noqa: E402
 
 _FALLBACK_LANGUAGE_MODEL_IDS: tuple[str, ...] = (
     "cs-cz-default",
@@ -81,6 +81,7 @@ _FALLBACK_LANGUAGE_MODEL_IDS: tuple[str, ...] = (
     "hu-hu-default",
     "it-it-default",
     "nb-no-default",
+    "nn-no-default",
     "nl-nl-default",
     "pl-pl-unimorph",
     "pt-pt-default",
@@ -111,6 +112,7 @@ _FALLBACK_LANGUAGE_ALIASES: dict[str, str] = {
     "it": "it-it-default",
     "italian": "it-it-default",
     "nb": "nb-no-default",
+    "nn": "nn-no-default",
     "nor": "nb-no-default",
     "no": "nb-no-default",
     "norwegian": "nb-no-default",
@@ -161,16 +163,72 @@ def _load_language_aliases() -> dict[str, str]:
     except Exception:
         return _FALLBACK_LANGUAGE_ALIASES.copy()
 
+
+def _index_language_aliases(
+    aliases: dict[str, str]
+) -> dict[str, list[str]]:
+    by_model: dict[str, list[str]] = {}
+    for alias, model_id in aliases.items():
+        by_model.setdefault(model_id, []).append(alias)
+    return {model_id: sorted(set(values)) for model_id, values in by_model.items()}
+
+
+def _normalize_language_requests(
+    requested: list[str], aliases: dict[str, str]
+) -> list[tuple[str, str]]:
+    seen_models: set[str] = set()
+    normalized: list[tuple[str, str]] = []
+    for requested_code in requested:
+        model_id = aliases.get(requested_code, requested_code)
+        if model_id in seen_models:
+            continue
+        seen_models.add(model_id)
+        normalized.append((requested_code, model_id))
+    return normalized
+
+
+def _primary_code_for_model(model_id: str, aliases: list[str]) -> str:
+    if not aliases:
+        return model_id
+    for alias in aliases:
+        if len(alias) == 2:
+            return alias
+    return aliases[0]
+
+
+def _all_language_requests(
+    aliases: dict[str, str]
+) -> list[tuple[str, str]]:
+    by_model = _index_language_aliases(aliases)
+    requests: list[tuple[str, str]] = []
+    for model_id in sorted(by_model):
+        request_code = _primary_code_for_model(model_id, by_model[model_id])
+        requests.append((request_code, model_id))
+    return requests
+
+
+def _resolve_supported_language_code(
+    engine,
+    requested_code: str,
+    model_id: str,
+    aliases_by_model: dict[str, list[str]],
+) -> str | None:
+    if engine.supports(requested_code):
+        return requested_code
+
+    for candidate in aliases_by_model.get(model_id, ()):
+        if candidate == requested_code:
+            continue
+        if engine.supports(candidate):
+            return candidate
+
+    if engine.supports(model_id):
+        return model_id
+
+    return None
+
 def _chunks(seq: list[str], n: int) -> list[list[str]]:
     return [seq[i : i + n] for i in range(0, len(seq), n)]
-
-
-def _time_sequence_ns(batch_fn, batches: list[list[str]]) -> int:
-    """Time one full pass over all batches (nanoseconds)."""
-    start = time.perf_counter_ns()
-    for b in batches:
-        batch_fn(b)
-    return time.perf_counter_ns() - start
 
 
 def _linfit(xs: list[float], ys: list[float]) -> tuple[float, float]:
@@ -194,6 +252,26 @@ _DIST_NAMES = {
 
 
 def _engine_version(name: str) -> Optional[str]:
+    try:
+        if name == "radixor":
+            import radixor
+
+            getter = getattr(radixor, "version", None)
+            if callable(getter):
+                return str(getter())
+            value = getattr(radixor, "__version__", None)
+            return str(value) if value is not None else None
+    except Exception:
+        return None
+
+    try:
+        if name == "PyStemmer":
+            import importlib.metadata as md
+
+            return md.version("PyStemmer")
+    except Exception:
+        return None
+
     import importlib.metadata as md
 
     dist = _DIST_NAMES.get(name)
@@ -202,7 +280,51 @@ def _engine_version(name: str) -> Optional[str]:
     try:
         return md.version(dist)
     except Exception:
-        return "editable" if name == "radixor" else None
+        return None
+
+
+def _assert_expected_provenance(
+    engine_name: str, prov: dict, language_code: str, model_id: str
+) -> None:
+    def _fail(msg: str) -> None:
+        raise RuntimeError(f"[{language_code}/{model_id}:{engine_name}] {msg}")
+
+    dist = prov.get("distribution")
+    dist_verified = bool(prov.get("distribution_verified"))
+    backing_module = prov.get("backing_module")
+    backing_file = str(prov.get("backing_file", "")).lower()
+
+    if engine_name == "PyStemmer":
+        if dist != "PyStemmer" or not dist_verified:
+            _fail(
+                f"expected PyStemmer distribution-backed backend, got distribution={dist!r} "
+                f"verified={dist_verified} (backing_module={backing_module}, file={prov.get('backing_file')})"
+            )
+        if not prov.get("independent_of_snowballstemmer", False):
+            _fail(
+                f"PyStemmer is unexpectedly sourced from snowballstemmer or a shimmed module "
+                f"(backing_file={prov.get('backing_file')})"
+            )
+        if not prov.get("compiled_extension", False):
+            _fail(
+                "PyStemmer is expected to be a native C extension for benchmark fairness"
+            )
+        return
+
+    if engine_name == "snowballstemmer-pure":
+        if dist != "snowballstemmer" or not dist_verified:
+            _fail(
+                f"expected pure snowballstemmer module, got distribution={dist!r} "
+                f"verified={dist_verified} (backing_module={backing_module}, file={prov.get('backing_file')})"
+            )
+        if not backing_module or not str(backing_module).startswith("snowballstemmer."):
+            _fail(
+                f"expected snowballstemmer language module, got backing_module={backing_module}"
+            )
+        if prov.get("compiled_extension", False):
+            _fail(
+                f"snowballstemmer-pure must not use compiled extensions (backing_file={prov.get('backing_file')})"
+            )
 
 
 def _processor_name() -> str:
@@ -221,6 +343,44 @@ def _processor_name() -> str:
                     return name
 
     return "unknown"
+
+
+
+
+def _read_sysfs_value(path: str) -> Optional[str]:
+    """Return a stripped sysfs value when available on the current platform."""
+    file_path = Path(path)
+    try:
+        return file_path.read_text(encoding="utf-8").strip()
+    except OSError:
+        return None
+
+
+def _cpu_affinity() -> Optional[list[int]]:
+    """Return the process CPU-affinity set where the operating system exposes it."""
+    try:
+        return sorted(os.sched_getaffinity(0))
+    except (AttributeError, OSError):
+        return None
+
+
+def _performance_environment() -> dict:
+    """Return CPU power-policy metadata relevant to reproducible benchmarking."""
+    return {
+        "cpu_affinity": _cpu_affinity(),
+        "scaling_driver": _read_sysfs_value(
+            "/sys/devices/system/cpu/cpu0/cpufreq/scaling_driver"
+        ),
+        "scaling_governor": _read_sysfs_value(
+            "/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor"
+        ),
+        "energy_performance_preference": _read_sysfs_value(
+            "/sys/devices/system/cpu/cpu0/cpufreq/energy_performance_preference"
+        ),
+        "amd_pstate_status": _read_sysfs_value(
+            "/sys/devices/system/cpu/amd_pstate/status"
+        ),
+    }
 
 
 def run(args) -> dict:
@@ -243,8 +403,14 @@ def run(args) -> dict:
         failures.append(f"engine unavailable: {missing_engine}")
 
     language_aliases = _load_language_aliases()
+    aliases_by_model = _index_language_aliases(language_aliases)
+    language_requests = (
+        _all_language_requests(language_aliases)
+        if args.all_languages
+        else _normalize_language_requests(args.language or ["en"], language_aliases)
+    )
 
-    for code in args.language:
+    for code, model_id in language_requests:
         model_id = language_aliases.get(code, code)
         if args.model_path:
             dict_path = Path(args.model_path)
@@ -277,19 +443,22 @@ def run(args) -> dict:
         )
 
         for engine in engines:
-            if not engine.supports(code):
-                if engine.name in strict_engine_names:
-                    failures.append(f"{code}: engine does not support {engine.name}")
+            engine_code = _resolve_supported_language_code(
+                engine, code, model_id, aliases_by_model
+            )
+            if engine_code is None:
                 continue
             try:
-                batch_fn = engine.make(code)
+                batch_fn = engine.make(engine_code)
             except Exception as exc:  # pragma: no cover - engine setup failure
                 print(f"  [{engine.name}] setup failed: {exc}", file=sys.stderr)
                 if engine.name in strict_engine_names:
                     failures.append(f"{code}: {engine.name} setup failed: {exc}")
                 continue
 
-            prov = engine.provenance(code)
+            engine_version = _engine_version(engine.name)
+            prov = engine.provenance(engine_code)
+            _assert_expected_provenance(engine.name, prov, code, model_id)
             results.append(
                 {
                     "language": code,
@@ -297,13 +466,14 @@ def run(args) -> dict:
                     "engine": engine.name,
                     "kind": engine.kind,
                     "batch_size": "PROVENANCE",
+                    "engine_version": engine_version,
                     **prov,
                 }
             )
             print(
                 f"  {engine.name:<16} backing={prov.get('backing_module')} "
                 f"compiled={prov.get('compiled_extension')} "
-                f"algo={prov.get('algorithm')}"
+                f"algo={prov.get('algorithm')} version={engine_version or 'unknown'}"
             )
 
             # sanity: output length must equal input length
@@ -319,36 +489,36 @@ def run(args) -> dict:
                     )
                 continue
 
-            per_call_best: list[float] = []
+            per_call_medians: list[float] = []
             for size in args.sizes:
                 batches = _chunks(pool, size)
                 n_calls = len(batches)
                 n_words = len(pool)
 
-                # warmup
-                for _ in range(args.warmup):
-                    _time_sequence_ns(batch_fn, batches)
-
                 gc_was_enabled = gc.isenabled()
                 gc.disable()
                 try:
-                    totals = [
-                        _time_sequence_ns(batch_fn, batches)
-                        for _ in range(args.repeats)
-                    ]
+                    timing = timing_mod.measure(
+                        batch_fn,
+                        batches,
+                        repeats=args.repeats,
+                        target_sample_ns=int(args.sample_ms * 1_000_000),
+                        warmup_passes=args.warmup,
+                        warmup_duration_ns=int(args.warmup_ms * 1_000_000),
+                    )
                 finally:
                     if gc_was_enabled:
                         gc.enable()
 
-                med_total = statistics.median(totals)
-                min_total = min(totals)
-                # Per-word/per-call reported from the best (min) pass — the
-                # microbenchmark convention that suppresses OS/GC scheduling
-                # noise. The later OLS fit is descriptive and unconstrained.
-                per_word_ns = min_total / n_words
-                per_call_ns = min_total / n_calls
-                per_call_best.append(per_call_ns)
-                throughput = n_words / (min_total / 1e9)
+                measured_words = n_words * timing.passes_per_sample
+                measured_calls = n_calls * timing.passes_per_sample
+                per_word_ns = timing.median_ns / measured_words
+                min_per_word_ns = timing.minimum_ns / measured_words
+                per_call_ns = timing.median_ns / measured_calls
+                min_per_call_ns = timing.minimum_ns / measured_calls
+                per_call_medians.append(per_call_ns)
+                throughput = measured_words / (timing.median_ns / 1e9)
+                min_throughput = measured_words / (timing.minimum_ns / 1e9)
 
                 row = {
                     "language": code,
@@ -356,28 +526,41 @@ def run(args) -> dict:
                     "engine": engine.name,
                     "kind": engine.kind,
                     "batch_size": size,
+                    "engine_version": engine_version,
                     "calls": n_calls,
                     "words": n_words,
+                    "sample_passes": timing.passes_per_sample,
+                    "sample_calls": measured_calls,
+                    "sample_words": measured_words,
                     "repeats": args.repeats,
-                    "median_total_ms": med_total / 1e6,
-                    "min_total_ms": min_total / 1e6,
+                    "median_total_ms": timing.median_ns / 1e6,
+                    "min_total_ms": timing.minimum_ns / 1e6,
+                    "max_total_ms": timing.maximum_ns / 1e6,
+                    "relative_mad_pct": timing.relative_mad_percent,
                     "per_word_ns": per_word_ns,
+                    "min_per_word_ns": min_per_word_ns,
                     "per_call_us": per_call_ns / 1e3,
+                    "min_per_call_us": min_per_call_ns / 1e3,
                     "throughput_words_per_s": throughput,
+                    "min_throughput_words_per_s": min_throughput,
                 }
                 results.append(row)
                 print(
                     f"  {engine.name:<16} [{engine.kind:<12}] "
                     f"N={size:<4} {per_word_ns:8.1f} ns/word  "
                     f"{per_call_ns / 1e3:8.2f} us/call  "
-                    f"{throughput / 1e6:6.2f} M words/s"
+                    f"{throughput / 1e6:6.2f} M words/s  "
+                    f"passes={timing.passes_per_sample:<5} "
+                    f"MAD={timing.relative_mad_percent:5.2f}% "
+                    f"min={min_per_word_ns:7.1f} ns/word"
                 )
 
-            # Unconstrained descriptive OLS fit across batch sizes. Keep the
-            # historical JSON key for report compatibility.
+            # Unconstrained descriptive OLS fit across batch sizes. The fit is
+            # now based on the median measurement for each size. Keep the
+            # historical JSON keys for report compatibility.
             if len(args.sizes) >= 2:
                 intercept_ns, slope_ns = _linfit(
-                    [float(s) for s in args.sizes], per_call_best
+                    [float(s) for s in args.sizes], per_call_medians
                 )
                 results.append(
                     {
@@ -386,6 +569,7 @@ def run(args) -> dict:
                         "engine": engine.name,
                         "kind": engine.kind,
                         "batch_size": "FIT",
+                        "engine_version": engine_version,
                         "regie_ns_per_call": intercept_ns,
                         "real_ns_per_word": slope_ns,
                     }
@@ -397,11 +581,20 @@ def run(args) -> dict:
                 )
 
     if args.all_languages:
+        language_codes = [code for code, _ in language_requests]
         expected_measurements = {
             (code, engine_name, size)
-            for code in args.language
+            for code, model_id in language_requests
             for engine_name in strict_engine_names
             for size in args.sizes
+            for engine in engines
+            if (
+                    engine.name == engine_name
+                    and _resolve_supported_language_code(
+                        engine, code, model_id, aliases_by_model
+                    )
+                    is not None
+            )
         }
         actual_measurements = {
             (row["language"], row["engine"], row["batch_size"])
@@ -422,14 +615,16 @@ def run(args) -> dict:
             "processor": _processor_name(),
             "python": sys.version.split()[0],
             "python_impl": platform.python_implementation(),
-            "engine_versions": {e.name: _engine_version(e.name) for e in engines},
+            **_performance_environment(),
         },
         "parameters": {
-            "languages": args.language,
+            "languages": [code for code, _ in language_requests],
             "sizes": args.sizes,
             "words_budget": args.words,
             "repeats": args.repeats,
+            "sample_ms": args.sample_ms,
             "warmup": args.warmup,
+            "warmup_ms": args.warmup_ms,
         },
         "results": results,
     }
@@ -457,8 +652,8 @@ def main() -> None:
         "-s",
         type=int,
         nargs="+",
-        default=[10, 20, 50, 100],
-        help="Batch sizes to sweep. Default: 10 20 50 100",
+        default=[100],
+        help="Batch sizes to benchmark. Default: 100",
     )
     p.add_argument(
         "--words",
@@ -471,10 +666,27 @@ def main() -> None:
         "--repeats",
         "-r",
         type=int,
-        default=15,
-        help="Timed repeats per point (best/min reported). Default: 15",
+        default=3,
+        help="Timed repeats per point (median reported). Default: 3",
     )
-    p.add_argument("--warmup", type=int, default=3, help="Warmup passes. Default: 3")
+    p.add_argument(
+        "--sample-ms",
+        type=float,
+        default=250.0,
+        help="Approximate duration of each calibrated timed sample. Default: 250 ms",
+    )
+    p.add_argument(
+        "--warmup",
+        type=int,
+        default=3,
+        help="Minimum warmup corpus passes; retained for CLI compatibility. Default: 3",
+    )
+    p.add_argument(
+        "--warmup-ms",
+        type=float,
+        default=500.0,
+        help="Minimum warmup duration for each measurement point. Default: 500 ms",
+    )
     p.add_argument(
         "--engines",
         nargs="+",
@@ -492,9 +704,18 @@ def main() -> None:
     )
     args = p.parse_args()
 
-    if args.all_languages:
-        args.language = sorted(_load_language_aliases())
-    elif args.language is None:
+    if args.sample_ms <= 0:
+        p.error("--sample-ms must be positive")
+    if args.warmup_ms < 0:
+        p.error("--warmup-ms must be non-negative")
+    if args.warmup < 0:
+        p.error("--warmup must be non-negative")
+    if args.repeats <= 0:
+        p.error("--repeats must be positive")
+    if any(size <= 0 for size in args.sizes):
+        p.error("all --sizes values must be positive")
+
+    if args.language is None:
         args.language = ["en"]
 
     report = run(args)
