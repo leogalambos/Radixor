@@ -252,8 +252,8 @@ _DIST_NAMES = {
 
 
 def _engine_version(name: str) -> Optional[str]:
-    try:
-        if name == "radixor":
+    if name == "radixor":
+        try:
             import radixor
 
             getter = getattr(radixor, "version", None)
@@ -261,26 +261,26 @@ def _engine_version(name: str) -> Optional[str]:
                 return str(getter())
             value = getattr(radixor, "__version__", None)
             return str(value) if value is not None else None
-    except Exception:
-        return None
+        except Exception:
+            return None
 
-    try:
-        if name == "PyStemmer":
+    elif name == "PyStemmer":
+        try:
             import importlib.metadata as md
 
             return md.version("PyStemmer")
-    except Exception:
-        return None
+        except Exception:
+            return None
 
-    import importlib.metadata as md
-
-    dist = _DIST_NAMES.get(name)
-    if not dist:
-        return None
-    try:
-        return md.version(dist)
-    except Exception:
-        return None
+    else:
+        import importlib.metadata as md
+        dist = _DIST_NAMES.get(name)
+        if not dist:
+            return None
+        try:
+            return md.version(dist)
+        except Exception:
+            return None
 
 
 def _assert_expected_provenance(
@@ -411,7 +411,6 @@ def run(args) -> dict:
     )
 
     for code, model_id in language_requests:
-        model_id = language_aliases.get(code, code)
         if args.model_path:
             dict_path = Path(args.model_path)
         else:
