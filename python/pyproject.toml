@@ -5,7 +5,7 @@ build-backend = "maturin"
 [project]
 name = "radixor"
 version = "0.0.0"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 description = "Radixor stemmer – fastest stemming for Python, backed by Rust"
 readme = "README.md"
 license = "BSD-3-Clause"
@@ -45,7 +45,6 @@ classifiers = [
     "Natural Language :: Yiddish",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -83,7 +82,7 @@ exclude = [
 [tool.ruff]
 extend-exclude = ["models-standard/build", "target"]
 line-length = 88
-target-version = "py39"
+target-version = "py310"
 
 [tool.ruff.lint]
 select = ["E4", "E7", "E9", "F", "I"]

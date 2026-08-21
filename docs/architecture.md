@@ -31,7 +31,7 @@ JARs, `ServiceLoader`, descriptors, or the Java registry.
 it does not parse a textual dictionary at application startup.
 `radixor.compile(...)` remains available for application-owned textual
 dictionaries, and `Stemmer(compiled=...)` loads the resulting version 7
-artifact. The Java and Python in-memory layouts are intentionally different;
+artifact. The Java, Python, and Python-C in-memory layouts are intentionally different;
 the shared dictionary syntax and version 7 binary stream are their
 interoperability boundaries. See [Radixor for Python](python/index.md) and
 [Compiling Dictionaries in Python](python/model-compilation.md).

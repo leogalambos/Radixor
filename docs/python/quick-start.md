@@ -1,8 +1,9 @@
 # Python Quick Start
 
-Radixor's Python implementation is a native Rust extension with a Python API.
-It uses the same learned patch-command model and version 7 compiled-trie format
-as the Java implementation, without requiring a JVM.
+Python (PyO3) is a native Rust extension with a Python API. It uses the same
+learned patch-command model and interoperable
+[compiled model format](../data-formats.md) as the Java implementation,
+without requiring a JVM.
 
 ## 1. Install the runtime and standard models
 
@@ -106,7 +107,7 @@ Use `from radixor import Stemmer` (or `import radixor as Stemmer`) in migration 
 ## 5. Load a custom compiled model
 
 The standard installation covers the maintained default catalog. A custom
-version 7 model can be loaded directly:
+[compiled Radixor model](../data-formats.md) can be loaded directly:
 
 ```python
 custom = Stemmer(compiled="models/domain-english.rxc")

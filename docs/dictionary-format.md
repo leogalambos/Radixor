@@ -1,6 +1,6 @@
 # Dictionary Format
 
-Radixor uses a simple line-oriented dictionary format designed for practical stemming workflows. The textual source format is tab-separated values, meaning that columns are separated by the tab character.
+Radixor uses a simple line-oriented dictionary format designed for practical stemming workflows. The textual source format is tab-separated values, meaning that columns are separated by the tab character (`U+0009`). Where a visible separator is needed, this documentation uses **`⇥`** to represent one real tab. Never write the symbol `⇥` or the two characters `\t` into a dictionary file.
 
 ## Source text, model resource, and compiled trie
 
@@ -8,7 +8,7 @@ Three artifacts must not be confused:
 
 | Artifact | Representation | Consumer |
 |---|---|---|
-| Source textual dictionary | Plain UTF-8 tab-separated rows, optionally GZip-compressed | Java and Python loaders or compilation tools |
+| Source textual dictionary | Plain UTF-8 tab-separated rows, optionally GZip-compressed | Java and Python (PyO3) loaders or compilation tools; not Python-C |
 | Registered Java model resource | The same dictionary bytes under GZip, accompanied by index, descriptor, checksum, and license | Java `StemmerModelRegistry` and `StemmerPatchTrieLoader` |
 | Standard Python model resource | A precompiled version 7 `.rxc` artifact in the required `radixor-models-standard` data package | Python `Stemmer("<alias>")` |
 | Persisted compiled trie | GZip-compressed Radixor version 7 binary, commonly `.radixor.gz` in Java or `.rxc` in Python | Java `loadBinaryCompiled(...)` and Python `Stemmer(compiled=...)` |

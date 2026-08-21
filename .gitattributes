@@ -1,3 +1,6 @@
+# Default
+*               text=auto eol=lf
+
 #
 # https://help.github.com/articles/dealing-with-line-endings/
 #
@@ -8,5 +11,5 @@
 *.bat           text eol=crlf
 
 # Binary files should be left untouched
-*.jar           binary
-*.gz            binary
+*.jar           binary !eol
+*.gz            binary !eol

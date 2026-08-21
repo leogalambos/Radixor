@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block extrahead %}{{ super() }}<meta name="theme-color" content="#ffffff"><meta property="og:title" content="Radixor — High-quality multilingual stemming"><meta property="og:description" content="Learned transformation stemming for Java and Python: compact patch-command tries, 20 languages, and reproducible quality and performance benchmarks.">{% endblock %}
+{% block extrahead %}{{ super() }}<meta name="theme-color" content="#ffffff"><meta property="og:title" content="Radixor — High-quality multilingual stemming"><meta property="og:description" content="A flagship Java stemmer and two native Python runtimes over shared compiled patch-command tries.">{% endblock %}
 {% block header %}<header class="rx2-header"><div class="rx2-header-inner"><a class="rx2-brand" href="{{ base_url }}/"><img src="{{ base_url }}/assets/images/radixor-logo.png" alt=""><span>RADIXOR</span></a><button class="rx2-menu" type="button" aria-label="Toggle menu" aria-expanded="false">☰</button><nav class="rx2-nav"><a href="{{ base_url }}/benchmarks/">Benchmarks</a><a href="{{ base_url }}/why-radixor-is-different/">Why Radixor</a><a href="{{ base_url }}/python/fast-track/">Python</a><a href="{{ base_url }}/fast-track/">Java</a><a href="{{ base_url }}/stemmer-models/">Models</a><a href="{{ base_url }}/getting-started/">Documentation</a><a href="https://github.com/leogalambos/Radixor">GitHub ↗</a></nav></div></header>{% endblock %}
 {% block tabs %}{% endblock %}
 {% block site_nav %}{% endblock %}
@@ -10,14 +10,14 @@
       <div class="rx2-hero-copy">
         <div class="rx2-kicker"><span></span>Dictionary-trained. Not dictionary-bound.</div>
         <h1>High-quality multilingual stemming.<br><span>Built for <b>Java</b> and <em>Python</em>.</span></h1>
-        <p>Radixor learns word-to-stem transformations from lexical evidence, compiles them into a reduced trie of patch commands, and applies those commands algorithmically at runtime. The training dictionary supplies evidence&mdash;it does not define a closed runtime vocabulary.</p>
+        <p>Radixor learns word-to-stem transformations from lexical evidence, compiles them into compact tries of patch commands, and applies those transformations algorithmically at runtime. It combines deterministic results, small deployable models, and high throughput across 20 languages. The training dictionary supplies evidence&mdash;it does not define a closed runtime vocabulary.</p>
       </div>
 
       <div class="rx2-hero-actions" aria-label="Get Radixor and project assurances">
         <div class="rx2-action-eyebrow">Choose your runtime</div>
         <div class="rx2-cta-row">
           <a class="rx2-btn rx2-java" href="{{ base_url }}/quick-start/"><span class="rx2-btn-icon">♨</span>Get Radixor for Java <b>→</b></a>
-          <a class="rx2-btn rx2-python" href="{{ base_url }}/python/fast-track/"><span class="rx2-python-glyph">Py</span>Get Radixor for Python <b>→</b></a>
+          <a class="rx2-btn rx2-python" href="{{ base_url }}/python/fast-track/"><span class="rx2-python-glyph">Py</span>Choose a Python runtime <b>→</b></a>
         </div>
         <div class="rx2-assurances">
           <div><svg viewBox="0 0 32 32" aria-hidden="true"><path d="m7 9 9-5 9 5v14l-9 5-9-5Z" fill="none" stroke="currentColor" stroke-width="2.1"/><path d="m7 9 9 5 9-5M16 14v14" fill="none" stroke="currentColor" stroke-width="2.1"/></svg><span><b>Learned transformations</b><small>Trie + compact patch commands</small></span></div>

@@ -35,6 +35,7 @@ mod serial;
 mod trie;
 
 use flate2::read::GzDecoder;
+use pyo3::ffi;
 use pyo3::prelude::*;
 use pyo3::pybacked::PyBackedStr;
 use pyo3::types::{PyAny, PyBytes, PyIterator, PyList, PyString, PyTuple};
@@ -208,15 +209,33 @@ impl StemmerCore {
         py: Python<'py>,
         words: &[PyBackedStr],
     ) -> PyResult<Bound<'py, PyList>> {
+        let n = words.len();
         let mut key_buf: Vec<u16> = Vec::new();
         let mut u16_buf: Vec<u16> = Vec::new();
         let mut u8_buf = String::new();
-        let list = PyList::empty_bound(py);
         let source_slice_fast_path = self.trie.source_slice_fast_path_enabled();
 
-        for key in words {
+        // Pre-allocate the result list at the correct size.  Using PyList_New(n)
+        // + PyList_SET_ITEM avoids the per-item refcount pair and the repeated
+        // realloc of an initially-empty list that PyList_Append triggers.
+        //
+        // SAFETY: PyList_New zero-initialises all n slots and sets ob_size = n.
+        // CPython's list_dealloc uses Py_XDECREF (null-safe) and the cyclic-GC
+        // traversal uses Py_VISIT which skips NULL, so a partial fill during an
+        // early return is always safe.  We fill every slot before returning Ok.
+        let list_ptr = unsafe { ffi::PyList_New(n as ffi::Py_ssize_t) };
+        if list_ptr.is_null() {
+            return Err(PyErr::take(py).unwrap_or_else(|| {
+                pyo3::exceptions::PyMemoryError::new_err("failed to allocate output list")
+            }));
+        }
+
+        for (i, key) in words.iter().enumerate() {
             let key: &str = key.as_ref();
-            if let Some(stem) = self.stem_uncached_str_with_mode(
+            // into_ptr() moves ownership to the raw pointer (mem::forget on the
+            // Py<PyAny>), so the refcount stays at 1.  PyList_SET_ITEM then
+            // takes (steals) that reference — no additional INCREF needed.
+            let item_ptr = match self.stem_uncached_str_with_mode(
                 py,
                 key,
                 &mut key_buf,
@@ -224,13 +243,20 @@ impl StemmerCore {
                 &mut u8_buf,
                 source_slice_fast_path,
             ) {
-                list.append(stem)?;
-            } else {
-                let none = py.None();
-                list.append(none.bind(py))?;
-            }
+                Some(stem) => stem.into_any().unbind().into_ptr(),
+                None => py.None().into_ptr(),
+            };
+            // SAFETY: list_ptr is a valid PyListObject; i is in [0, n); item_ptr
+            // is a freshly-owned reference that we are handing off to the list.
+            // SAFETY: list_ptr valid, i in [0,n), item_ptr is an owned reference that
+// PyList_SetItem steals.  Slots were NULL-initialised by PyList_New so the
+// Py_XDECREF on the displaced item is a no-op.
+let _ret = unsafe { ffi::PyList_SetItem(list_ptr, i as ffi::Py_ssize_t, item_ptr) };
+debug_assert_eq!(_ret, 0, "PyList_SetItem out of bounds");
         }
-        Ok(list)
+
+        // SAFETY: list_ptr is a valid PyListObject with all n slots filled.
+        Ok(unsafe { Py::<PyList>::from_owned_ptr(py, list_ptr) }.into_bound(py))
     }
 
     /// PyStemmer-compatible batch kernel for cache-disabled operation.
@@ -239,13 +265,20 @@ impl StemmerCore {
         py: Python<'py>,
         words: &[PyBackedStr],
     ) -> PyResult<Bound<'py, PyList>> {
+        let n = words.len();
         let mut key_buf: Vec<u16> = Vec::new();
         let mut u16_buf: Vec<u16> = Vec::new();
         let mut u8_buf = String::new();
-        let list = PyList::empty_bound(py);
         let source_slice_fast_path = self.trie.source_slice_fast_path_enabled();
 
-        for key in words {
+        let list_ptr = unsafe { ffi::PyList_New(n as ffi::Py_ssize_t) };
+        if list_ptr.is_null() {
+            return Err(PyErr::take(py).unwrap_or_else(|| {
+                pyo3::exceptions::PyMemoryError::new_err("failed to allocate output list")
+            }));
+        }
+
+        for (i, key) in words.iter().enumerate() {
             let key: &str = key.as_ref();
             let stemmed = self.stem_uncached_str_with_mode(
                 py,
@@ -255,13 +288,21 @@ impl StemmerCore {
                 &mut u8_buf,
                 source_slice_fast_path,
             );
-            if stemmed.is_none() || Self::preserve_legacy_mismatch(key) {
-                list.append(PyString::new_bound(py, key))?;
+            let item_ptr = if stemmed.is_none() || Self::preserve_legacy_mismatch(key) {
+                PyString::new_bound(py, key).into_any().unbind().into_ptr()
             } else if let Some(stem) = stemmed {
-                list.append(stem)?;
-            }
+                stem.into_any().unbind().into_ptr()
+            } else {
+                unreachable!()
+            };
+            // SAFETY: list_ptr valid, i in [0,n), item_ptr is an owned reference that
+// PyList_SetItem steals.  Slots were NULL-initialised by PyList_New so the
+// Py_XDECREF on the displaced item is a no-op.
+let _ret = unsafe { ffi::PyList_SetItem(list_ptr, i as ffi::Py_ssize_t, item_ptr) };
+debug_assert_eq!(_ret, 0, "PyList_SetItem out of bounds");
         }
-        Ok(list)
+
+        Ok(unsafe { Py::<PyList>::from_owned_ptr(py, list_ptr) }.into_bound(py))
     }
 
     /// Batch kernel used when the result cache is enabled.
@@ -271,25 +312,111 @@ impl StemmerCore {
         words: &[PyBackedStr],
         fallback_to_original: bool,
     ) -> PyResult<Bound<'py, PyList>> {
+        let n = words.len();
         let mut key_buf: Vec<u16> = Vec::new();
         let mut u16_buf: Vec<u16> = Vec::new();
         let mut u8_buf = String::new();
-        let list = PyList::empty_bound(py);
+
+        let list_ptr = unsafe { ffi::PyList_New(n as ffi::Py_ssize_t) };
+        if list_ptr.is_null() {
+            return Err(PyErr::take(py).unwrap_or_else(|| {
+                pyo3::exceptions::PyMemoryError::new_err("failed to allocate output list")
+            }));
+        }
 
         // Misses remain cached as None so calls through the compatibility API
         // cannot change the existing stem/stem_batch missing-value contract.
-        for key in words {
+        for (i, key) in words.iter().enumerate() {
             let key: &str = key.as_ref();
             let obj = self.stem_cached(py, key, &mut key_buf, &mut u16_buf, &mut u8_buf);
-            if fallback_to_original
+            let item_ptr = if fallback_to_original
                 && (obj.bind(py).is_none() || Self::preserve_legacy_mismatch(key))
             {
-                list.append(PyString::new_bound(py, key))?;
+                PyString::new_bound(py, key).into_any().unbind().into_ptr()
             } else {
-                list.append(obj.bind(py))?;
-            }
+                obj.into_ptr()
+            };
+            // SAFETY: list_ptr valid, i in [0,n), item_ptr is an owned reference that
+// PyList_SetItem steals.  Slots were NULL-initialised by PyList_New so the
+// Py_XDECREF on the displaced item is a no-op.
+let _ret = unsafe { ffi::PyList_SetItem(list_ptr, i as ffi::Py_ssize_t, item_ptr) };
+debug_assert_eq!(_ret, 0, "PyList_SetItem out of bounds");
         }
-        Ok(list)
+
+        Ok(unsafe { Py::<PyList>::from_owned_ptr(py, list_ptr) }.into_bound(py))
+    }
+
+    /// Zero-INCREF, zero-allocation input + output kernel for the common case:
+    /// a Python list of str with the result cache disabled.
+    ///
+    /// **Input**: `PyList_GetItem` returns a borrowed reference (no INCREF).
+    /// `PyUnicode_AsUTF8AndSize` returns a pointer to the unicode object's
+    /// internal UTF-8 cache (added to the stable ABI in Python 3.10).  After
+    /// the first call CPython caches the result inside the object; in practice
+    /// the cache is always warm after warmup, so subsequent calls are ~5 ns.
+    ///
+    /// **Output**: `PyList_New(n)` + `PyList_SetItem` (reference-stealing).
+    ///
+    /// Net per word: 0 INCREF, 0 DECREF, 0 heap allocations for the bridge.
+    fn stem_batch_zero_overhead<'py>(
+        &self,
+        py: Python<'py>,
+        list_ptr: *mut ffi::PyObject,
+        n: usize,
+    ) -> PyResult<Bound<'py, PyList>> {
+        let out_ptr = unsafe { ffi::PyList_New(n as ffi::Py_ssize_t) };
+        if out_ptr.is_null() {
+            return Err(PyErr::take(py).unwrap_or_else(|| {
+                pyo3::exceptions::PyMemoryError::new_err("failed to allocate output list")
+            }));
+        }
+
+        let source_slice_fast_path = self.trie.source_slice_fast_path_enabled();
+        let mut key_buf: Vec<u16> = Vec::new();
+        let mut u16_buf: Vec<u16> = Vec::new();
+        let mut u8_buf = String::new();
+
+        for i in 0..n {
+            // Borrowed reference — no INCREF, no DECREF.
+            // SAFETY: list_ptr is a valid PyListObject and i < n.
+            let item = unsafe { ffi::PyList_GetItem(list_ptr, i as ffi::Py_ssize_t) };
+
+            // Internal UTF-8 cache pointer — no allocation, no refcount change.
+            // SAFETY: item is alive while list_ptr is alive (the caller holds it).
+            let mut size: ffi::Py_ssize_t = 0;
+            let utf8_ptr = unsafe { ffi::PyUnicode_AsUTF8AndSize(item, &mut size) };
+
+            let item_out_ptr = if utf8_ptr.is_null() {
+                // item was not a str — clear the error and emit None.
+                unsafe { ffi::PyErr_Clear() };
+                py.None().into_ptr()
+            } else {
+                // SAFETY: CPython guarantees the buffer is valid UTF-8 and
+                // remains live as long as item is alive (see above).
+                let key = unsafe {
+                    std::str::from_utf8_unchecked(std::slice::from_raw_parts(
+                        utf8_ptr as *const u8,
+                        size as usize,
+                    ))
+                };
+                match self.stem_uncached_str_with_mode(
+                    py, key, &mut key_buf, &mut u16_buf, &mut u8_buf,
+                    source_slice_fast_path,
+                ) {
+                    Some(stem) => stem.into_any().unbind().into_ptr(),
+                    None => py.None().into_ptr(),
+                }
+            };
+
+            // SAFETY: out_ptr valid, i in [0,n), item_out_ptr is an owned
+            // reference that PyList_SetItem steals.  Null-init slots make the
+            // XDECREF on the displaced slot a no-op.
+            let _ret =
+                unsafe { ffi::PyList_SetItem(out_ptr, i as ffi::Py_ssize_t, item_out_ptr) };
+            debug_assert_eq!(_ret, 0, "PyList_SetItem out of bounds");
+        }
+
+        Ok(unsafe { Py::<PyList>::from_owned_ptr(py, out_ptr) }.into_bound(py))
     }
 
     /// Dispatch once per batch between cache-disabled and cached kernels.
@@ -531,9 +658,19 @@ impl StemmerCore {
     fn stem_batch<'py>(
         &self,
         py: Python<'py>,
-        words: Vec<PyBackedStr>,
+        words: &Bound<'py, PyAny>,
     ) -> PyResult<Bound<'py, PyList>> {
-        self.stem_batch_impl(py, &words, false)
+        // Fast path: Python list + cache disabled → zero-INCREF/zero-alloc kernel.
+        if self.cache.is_none() {
+            if let Ok(list) = words.downcast::<PyList>() {
+                return self.stem_batch_zero_overhead(py, list.as_ptr(), list.len());
+            }
+        }
+        // Fallback: tuple / other str-only sequence, or cache enabled.
+        if let Some(str_words) = self.try_stem_words_str_sequence(words) {
+            return self.stem_batch_impl(py, &str_words, false);
+        }
+        self.stem_words_generic(py, words, false)
     }
 
     /// PyStemmer-compatible batch API. Unrecognized words keep their position
@@ -655,6 +792,45 @@ impl StemmerCore {
         words.iter().map(|w| self.trie.stem_all(w)).collect()
     }
 
+    /// Diagnostic: stem_batch using Vec<PyBackedStr> input extraction (pre-v3
+    /// approach).  Lets us compare the INCREF-per-item cost in the same process
+    /// as the current PyList_GetItem + PyUnicode_AsUTF8AndSize path.
+    fn _stem_batch_py_backed_str<'py>(
+        &self,
+        py: Python<'py>,
+        words: Vec<PyBackedStr>,
+    ) -> PyResult<Bound<'py, PyList>> {
+        self.stem_batch_uncached_native(py, &words)
+    }
+
+    /// Diagnostic: same algorithm as `stem_batch` but using `PyList::empty_bound`
+    /// + per-item `append()` (the pre-v2 list-building approach).  Lets us
+    /// measure the list-construction overhead delta in the same process as
+    /// the current `PyList_New + PyList_SetItem` path.
+    fn _stem_batch_append<'py>(
+        &self,
+        py: Python<'py>,
+        words: Vec<PyBackedStr>,
+    ) -> PyResult<Bound<'py, PyList>> {
+        let mut key_buf: Vec<u16> = Vec::new();
+        let mut u16_buf: Vec<u16> = Vec::new();
+        let mut u8_buf = String::new();
+        let list = PyList::empty_bound(py);
+        let source_slice_fast_path = self.trie.source_slice_fast_path_enabled();
+
+        for key in &words {
+            let key: &str = key.as_ref();
+            if let Some(stem) = self.stem_uncached_str_with_mode(
+                py, key, &mut key_buf, &mut u16_buf, &mut u8_buf, source_slice_fast_path,
+            ) {
+                list.append(stem)?;
+            } else {
+                list.append(py.None().bind(py))?;
+            }
+        }
+        Ok(list)
+    }
+
     /// Diagnostic: report the effective runtime case-processing mode.
     fn _case_mode(&self) -> &'static str {
         self.trie.case_mode_name()
@@ -662,7 +838,7 @@ impl StemmerCore {
 
     /// Diagnostic: identify the native optimization build used by benchmarks.
     fn _optimization_tag(&self) -> &'static str {
-        "phase5-direct-simple-utf8-v1"
+        "phase5-direct-simple-utf8-v3-zero-overhead"
     }
 
     /// Diagnostic: report compact runtime value-layout cardinalities.

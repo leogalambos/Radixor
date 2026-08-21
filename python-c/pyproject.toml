@@ -1,0 +1,51 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "radixor-c"
+version = "0.0.0"
+requires-python = ">=3.10"
+description = "Radixor stemmer — C extension backend"
+readme = "README.md"
+license = "BSD-3-Clause"
+license-files = ["LICENSE"]
+dependencies = ["radixor-models-standard>=1.0,<2.0"]
+keywords = ["stemming", "nlp", "c-extension"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["radixor_c*"]
+
+[tool.setuptools.package-data]
+radixor_c = ["py.typed"]
+
+[tool.cibuildwheel]
+build = "cp310-* cp311-* cp312-* cp313-* cp314-*"
+test-command = 'python -c "import radixor_c, radixor_c._radixor_c"'
+# musllinux is fine — we no longer use towlower (locale-dependent); lowercasing
+# goes through Python's str.lower() which is locale-independent.
+skip = "*-win32"
+
+[tool.cibuildwheel.linux]
+archs = ["x86_64", "aarch64"]
+manylinux-x86_64-image  = "manylinux2014"
+manylinux-aarch64-image = "manylinux2014"
+
+[tool.cibuildwheel.macos]
+archs = ["universal2"]
+
+[tool.cibuildwheel.windows]
+archs = ["AMD64"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py310"

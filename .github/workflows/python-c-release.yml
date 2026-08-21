@@ -1,0 +1,181 @@
+name: Python C Distribution Release
+
+on:
+  push:
+    tags:
+      - 'python@*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Stable distribution version to validate without publishing
+        required: true
+        default: '0.1.0'
+        type: string
+      publish_to_pypi:
+        description: Publish to PyPI after building
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: github-python-c-pypi
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    name: Validate and prepare
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.release.outputs.version }}
+      tag: ${{ steps.release.outputs.tag }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Select and validate release
+        id: release
+        shell: bash
+        env:
+          REQUESTED_VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          if [[ "${GITHUB_EVENT_NAME}" == 'push' ]]; then
+            tag="${GITHUB_REF_NAME}"
+          else
+            tag="python@${REQUESTED_VERSION}"
+          fi
+          eval "$(bash ./tools/parse-python-release-tag.sh "${tag}")"
+          [[ "${PYTHON_DISTRIBUTION}" == 'radixor' ]]
+          if [[ "${GITHUB_EVENT_NAME}" == 'push' ]]; then
+            [[ "$(git rev-parse "${tag}^{commit}")" == "${GITHUB_SHA}" ]]
+            git merge-base --is-ancestor "${GITHUB_SHA}" origin/main
+          fi
+          printf 'version=%s\ntag=%s\n' "${PYTHON_VERSION}" "${tag}" >> "${GITHUB_OUTPUT}"
+
+      - name: Pin version in pyproject.toml
+        shell: bash
+        run: |
+          set -euo pipefail
+          sed -i "s/^version = .*/version = \"${{ steps.release.outputs.version }}\"/" python-c/pyproject.toml
+          grep "^version = " python-c/pyproject.toml
+
+      - name: Upload versioned source
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: python-c-source-${{ steps.release.outputs.version }}
+          path: python-c/
+          if-no-files-found: error
+          retention-days: 1
+
+  build-wheels:
+    name: Build wheels (${{ matrix.os }})
+    needs: prepare
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest       # x86_64 + aarch64 (via QEMU)
+          - macos-14            # universal2
+          - windows-2022        # AMD64 with MSVC
+
+    steps:
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.12'
+
+      - name: Download versioned source
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: python-c-source-${{ needs.prepare.outputs.version }}
+          path: python-c
+
+      - name: Set up QEMU (Linux cross-arch)
+        if: runner.os == 'Linux'
+        uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3.7.0
+
+      - name: Build wheels
+        uses: pypa/cibuildwheel@c923d83ad9c1bc00211c5041d0c3f73294ff88f6 # v3.1.4
+        with:
+          package-dir: python-c
+          output-dir: wheelhouse
+
+      - name: Upload wheels
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: python-c-wheels-${{ matrix.os }}-${{ needs.prepare.outputs.version }}
+          path: wheelhouse/*.whl
+          if-no-files-found: error
+          retention-days: 14
+
+  build-sdist:
+    name: Build source distribution
+    needs: prepare
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.12'
+
+      - name: Download versioned source
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: python-c-source-${{ needs.prepare.outputs.version }}
+          path: python-c
+
+      - name: Install build
+        run: pip install --disable-pip-version-check build==1.2.2.post1
+
+      - name: Build sdist
+        run: python -m build --sdist python-c/ --outdir dist/
+
+      - name: Upload sdist
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: python-c-sdist-${{ needs.prepare.outputs.version }}
+          path: dist/*.tar.gz
+          if-no-files-found: error
+          retention-days: 14
+
+  publish:
+    name: Publish to PyPI
+    needs: [prepare, build-wheels, build-sdist]
+    if: >-
+      always() &&
+      needs.build-wheels.result == 'success' &&
+      needs.build-sdist.result == 'success' &&
+      ((github.event_name == 'push') ||
+       (github.event_name == 'workflow_dispatch' && inputs.publish_to_pypi))
+    runs-on: ubuntu-latest
+    environment: python-c-pypi
+    permissions:
+      id-token: write
+
+    steps:
+      - name: Download all wheels
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          pattern: python-c-wheels-*-${{ needs.prepare.outputs.version }}
+          merge-multiple: true
+          path: dist/
+
+      - name: Download sdist
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: python-c-sdist-${{ needs.prepare.outputs.version }}
+          path: dist/
+
+      - name: Publish with PyPI Trusted Publishing
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist/

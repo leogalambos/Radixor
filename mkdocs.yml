@@ -1,5 +1,5 @@
 site_name: Radixor
-site_description: Learned transformation stemming with compiled patch-command tries for Java and Python
+site_description: Learned transformation stemming with interoperable Java, Python, and Python-C runtimes
 site_url: https://leogalambos.github.io/Radixor/
 repo_url: https://github.com/leogalambos/Radixor
 repo_name: leogalambos/Radixor
@@ -56,8 +56,8 @@ nav:
      - Choose a Runtime: getting-started.md
      - Why Radixor Is Different: why-radixor-is-different.md
      - Python Fast Track: python/fast-track.md
+     - Python-C Fast Track: python-c/quick-start.md
      - Java Fast Track: fast-track.md
-     - Python Quick Start: python/quick-start.md
      - Java Quick Start: quick-start.md
 
   - Java:
@@ -70,19 +70,26 @@ nav:
      - Migration and Backward Compatibility: migration-and-backward-compatibility.md
      - CLI Compilation: cli-compilation.md
 
-  - Python:
+  - Python Runtimes:
+     - Choose a Python Runtime: python/index.md
      - Fast Track: python/fast-track.md
-     - Quick Start: python/quick-start.md
-     - Overview: python/index.md
-     - Installation and Builds: python/installation.md
-     - Usage and API: python/usage.md
-     - Dictionary Compilation: python/model-compilation.md
-     - Benchmarks: python/performance.md
+     - Shared Benchmarks: python/performance.md
+     - Python (PyO3):
+        - Quick Start: python/quick-start.md
+        - Installation and Builds: python/installation.md
+        - Usage and API: python/usage.md
+        - Dictionary Compilation: python/model-compilation.md
+     - Python-C:
+        - Overview: python-c/index.md
+        - Quick Start: python-c/quick-start.md
+        - Installation and Builds: python-c/installation.md
+        - Usage and API: python-c/usage.md
 
   - Dictionaries and Languages:
      - Stemmer Models: stemmer-models.md
      - Published Model Catalog: stemmer-model-catalog.md
      - Built-in Languages: built-in-languages.md
+     - Data Formats: data-formats.md
      - Dictionary Format: dictionary-format.md
      - Contributing Dictionaries: contributing-dictionaries.md
 

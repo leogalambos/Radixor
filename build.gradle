@@ -1136,6 +1136,7 @@ apply from: 'gradle/opennlp-benchmarks.gradle'
 apply from: 'gradle/hunspell-benchmarks.gradle'
 apply from: 'gradle/cistem-benchmarks.gradle'
 apply from: 'gradle/python.gradle'
+apply from: 'gradle/python-c.gradle'
 
 gradle.taskGraph.whenReady { taskGraph ->
     def banner = """

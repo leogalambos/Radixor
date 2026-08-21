@@ -1,5 +1,6 @@
 def pythonProjectDirectory = layout.projectDirectory.dir('python')
 def pythonHostDistributionDirectory = layout.buildDirectory.dir('python/dist/host')
+def pythonCHostDistributionDirectory = layout.buildDirectory.dir('python-c/dist/host')
 def pythonSdistDistributionDirectory = layout.buildDirectory.dir('python/dist/sdist')
 def pythonStandardDistributionDirectory = layout.buildDirectory.dir('python/dist/standard')
 def pythonGeneratedStandardProjectDirectory = layout.buildDirectory.dir('python/generated/models-standard')
@@ -31,7 +32,7 @@ def pythonBenchmarkWords = providers.gradleProperty('pythonBenchmarkWords').orEl
 def pythonBenchmarkRepeats = providers.gradleProperty('pythonBenchmarkRepeats').orElse('3')
 def pythonBenchmarkWarmup = providers.gradleProperty('pythonBenchmarkWarmup').orElse('3')
 def pythonBenchmarkEngines = providers.gradleProperty('pythonBenchmarkEngines')
-        .orElse('radixor,PyStemmer,snowballstemmer-pure')
+        .orElse('radixor,radixor-c,PyStemmer,snowballstemmer-pure')
         .get()
         .split(',')
         .collect { it.trim() }
@@ -40,6 +41,7 @@ def pythonBenchmarkEngines = providers.gradleProperty('pythonBenchmarkEngines')
 
 def pythonBenchmarkEnginePackages = [
         'radixor'           : [],
+        'radixor-c'         : [],
         'PyStemmer'         : ['PyStemmer'],
         'snowballstemmer-pure': ['snowballstemmer'],
         'nltk-porter'       : ['nltk'],
@@ -239,6 +241,7 @@ tasks.register('preparePythonBenchmarkRuntime') {
 
     dependsOn(pythonBuild)
     inputs.dir(pythonHostDistributionDirectory)
+    inputs.dir(pythonCHostDistributionDirectory)
     inputs.dir(pythonStandardDistributionDirectory)
     outputs.dir(pythonBenchmarkRuntimeDirectory)
 
@@ -251,6 +254,7 @@ tasks.register('preparePythonBenchmarkRuntime') {
         output.mkdirs()
         copy {
             from zipTree(locateSingleWheel(pythonHostDistributionDirectory))
+            from zipTree(locateSingleWheel(pythonCHostDistributionDirectory))
             from zipTree(locateSingleWheel(pythonStandardDistributionDirectory))
             into output
         }
@@ -339,7 +343,7 @@ pythonRequestedBenchmarkEngines.each { String engineName ->
     final String installTaskName = "pythonBenchmarkInstallDependencies${taskSuffix}"
     final String runTaskName = "pythonBenchmarkSingleEngine${taskSuffix}"
     final List<String> packages = pythonBenchmarkEnginePackages[engineName]
-    final boolean usesRuntimePath = engineName == 'radixor'
+    final boolean usesRuntimePath = engineName in ['radixor', 'radixor-c']
     def pythonExecutableProvider = pythonExecutable
     def benchmarkWarmup = pythonBenchmarkWarmup
     def benchmarkWords = pythonBenchmarkWords

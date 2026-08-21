@@ -27,15 +27,16 @@ Three asymmetries, if left in, make the numbers meaningless:
 1. **Result caching.** PyStemmer caches results by default (`maxCacheSize=10000`).
    Because a benchmark stems the same corpus every repeat, that cache turns
    measured passes into dict lookups rather than stemming. **The harness
-   explicitly disables both caches**: PyStemmer uses `maxCacheSize=0` and
-   radixor uses `cache_size=0`, so both engines do real stemming.
+   explicitly disables all native caches**: PyStemmer uses `maxCacheSize=0`,
+   while radixor and radixor-c use `cache_size=0`, so every engine does real stemming.
    snowballstemmer-pure, nltk-porter, and cistem have no cache.
 
 2. **Lowercasing.** Snowball/PyStemmer do no case handling — they assume the
    caller pre-lowercased the input (our corpus is pre-lowercased for everyone).
    radixor normally lowercases internally; for a same-work comparison the
-   harness runs radixor with **`lowercase=False`** (assume-already-lowercased),
-   so Snowball and radixor do identical normalization work on identical input.
+   harness runs radixor and radixor-c with **`lowercase=False`**
+   (assume-already-lowercased), so all native engines receive identical input
+   without redundant normalization.
    CISTEM always performs its own lowercasing and German umlaut normalization;
    that unavoidable extra work modestly biases its comparison in radixor's
    favour.
@@ -50,6 +51,7 @@ Three asymmetries, if left in, make the numbers meaningless:
 | Engine | Implementation | Batch API |
 |---|---|---|
 | `radixor` | Rust patch-command trie (cache disabled) | `stem_batch` — one FFI call per batch |
+| `radixor-c` | CPython C patch-command trie (cache disabled) | `stem_batch` — one C call per batch |
 | `PyStemmer` | Snowball C `libstemmer` (cache disabled) | `stemWords(list)` — one C call per batch |
 | `snowballstemmer-pure` | Official **pure-Python** Snowball | `stemWords(list)` — Python loop |
 | `nltk-porter` | Porter (English), pure Python | scalar loop |
@@ -78,7 +80,7 @@ results, over all supported languages with fixed batch size 100:
 
 ```bash
 ./gradlew pythonBenchmarkAllLanguagesBatch \
-    -PpythonBenchmarkEngines=radixor,PyStemmer,snowballstemmer-pure
+    -PpythonBenchmarkEngines=radixor,radixor-c,PyStemmer,snowballstemmer-pure
 ```
 
 The generated CSV and JSON reports are placed in

@@ -1,0 +1,73 @@
+def pythonCProjectDirectory = layout.projectDirectory.dir('python-c')
+def pythonCStagingDirectory = layout.buildDirectory.dir('python-c/staging')
+def pythonCWheelDistributionDirectory = layout.buildDirectory.dir('python-c/dist/host')
+def pythonCSdistDistributionDirectory = layout.buildDirectory.dir('python-c/dist/sdist')
+def pythonCTemporaryDirectory = layout.buildDirectory.dir('python-c/tmp')
+
+def pythonCExecutable = providers.gradleProperty('pythonExecutable')
+        .orElse(System.getProperty('os.name', '').toLowerCase(Locale.ROOT).contains('win') ? 'python' : 'python3')
+def pythonCToolIdentity = providers.exec {
+    commandLine(pythonCExecutable.get(), '--version')
+}.standardOutput.asText.map { String value -> value.strip() }
+
+def preparePythonCSource = tasks.register('preparePythonCSource', Sync) {
+    group = 'python'
+    description = 'Prepares an isolated radixor-c source tree for packaging.'
+    from(pythonCProjectDirectory) {
+        exclude 'build/**', 'dist/**', '*.egg-info/**', '**/__pycache__/**'
+    }
+    into(pythonCStagingDirectory)
+}
+
+def registerPythonCDistribution = { String taskName, String distributionKind,
+        Provider<Directory> outputDirectory ->
+    tasks.register(taskName, Exec) {
+        group = 'python'
+        description = "Builds the radixor-c ${distributionKind} distribution."
+
+        dependsOn(preparePythonCSource)
+        inputs.dir(pythonCStagingDirectory)
+        inputs.property('pythonExecutable', pythonCExecutable)
+        inputs.property('pythonToolIdentity', pythonCToolIdentity)
+        outputs.dir(outputDirectory)
+        workingDir(pythonCStagingDirectory)
+
+        doFirst {
+            final File output = outputDirectory.get().asFile
+            if (output.exists() && !output.deleteDir()) {
+                throw new GradleException("Cannot clean radixor-c ${distributionKind} output directory: ${output}")
+            }
+            output.mkdirs()
+            commandLine(
+                    pythonCExecutable.get(), '-m', 'build', "--${distributionKind}", '--no-isolation',
+                    '--outdir', output.absolutePath, '.'
+            )
+            final File temporaryDirectory = pythonCTemporaryDirectory.get().asFile
+            temporaryDirectory.mkdirs()
+            environment('TMPDIR', temporaryDirectory.absolutePath)
+            environment('TEMP', temporaryDirectory.absolutePath)
+            environment('TMP', temporaryDirectory.absolutePath)
+        }
+    }
+}
+
+def pythonCBuildWheel = registerPythonCDistribution(
+        'pythonCBuildWheel', 'wheel', pythonCWheelDistributionDirectory
+)
+def pythonCBuildSdist = registerPythonCDistribution(
+        'pythonCBuildSdist', 'sdist', pythonCSdistDistributionDirectory
+)
+pythonCBuildSdist.configure {
+    mustRunAfter(pythonCBuildWheel)
+}
+
+def pythonCBuild = tasks.register('pythonCBuild') {
+    group = 'python'
+    description = 'Builds the radixor-c host native wheel and source distribution.'
+    dependsOn(pythonCBuildWheel, pythonCBuildSdist)
+}
+
+tasks.named('pythonBuild') {
+    description = 'Builds both Python ports and the generated standard-model distributions.'
+    dependsOn(pythonCBuild)
+}

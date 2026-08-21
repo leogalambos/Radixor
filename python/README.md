@@ -1,6 +1,23 @@
-# radixor — Fastest Stemming for Python
+# radixor — High-throughput Radixor for Python
 
-**radixor** is a Python extension for the [Radixor](https://github.com/leogalambos/Radixor) stemmer library, built on a Rust core via [PyO3](https://pyo3.rs/). It provides sub-microsecond per-word stemming with a batch API that amortises the Python↔Rust bridge overhead across thousands of words at once.
+**radixor** is the progressively expanded Python port of the
+[Radixor](https://github.com/leogalambos/Radixor) Java flagship. It is built on
+a Rust core via [PyO3](https://pyo3.rs/) and provides a batch API that amortises
+the Python↔Rust bridge overhead across many words at once. Java remains the
+primary and most complete implementation; new model-management capabilities
+will be brought to this package over time.
+
+For simple applications dominated by calls for individual words, also consider
+**`radixor-c`**. Its direct CPython C implementation is designed for low scalar
+call overhead, but currently loads only prepared models. Both packages use the
+same standard model distribution and results; `radixor` is the Python choice
+for batch throughput and text dictionary compilation.
+
+| Runtime | Best fit | Current model capabilities |
+|---|---|---|
+| Java Radixor | Complete flagship API | Build, reduce, extend, persist and load tries |
+| Python (PyO3) — `radixor` | Large batches and Python-side preparation | Compile text dictionaries and load [compiled Radixor models](https://leogalambos.github.io/Radixor/data-formats/); progressively converging on Java |
+| Python-C — `radixor-c` | Fast individual calls | Load standard or prepared [compiled Radixor models](https://leogalambos.github.io/Radixor/data-formats/) |
 
 ## Why radixor?
 

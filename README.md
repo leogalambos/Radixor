@@ -27,6 +27,21 @@ It also retains the operational advantages of a compiled artifact model: predict
 
 ## Choose a runtime
 
+Radixor has three interoperable implementations. **Java Radixor is the primary,
+flagship and most complete implementation.** The **Python (PyO3)** package,
+distributed as `radixor`,
+is the Python port that will progressively converge on Java; it reaches its
+highest throughput by batching words across the Python/native boundary. The
+direct C **`radixor-c`** package focuses on basic stemming from prepared tries
+and keeps the overhead of individual Python calls low. Trie compilation and
+modification will reach Python-C later.
+
+| Runtime | Choose it for | Model capabilities |
+|---|---|---|
+| Java | Full API and model development | Build, configure, extend, persist and load |
+| Python (PyO3) | Batch throughput and Python-side compilation | Compile text dictionaries and load [compiled Radixor models](docs/data-formats.md); expanding toward Java |
+| Python-C | Fast scalar calls with basic stemming APIs | Load standard or prepared [compiled Radixor models](docs/data-formats.md) |
+
 For Python, one installation provides the native runtime and the separate
 standard package of 20 precompiled models:
 
@@ -52,6 +67,9 @@ print(english.stemWord("running"))  # run
 
 Continue with the [Python Fast Track](docs/python/fast-track.md) or
 [Python Quick Start](docs/python/quick-start.md).
+
+For the C runtime, install `radixor-c`, import `Stemmer` from `radixor_c`, and
+continue with the [Python-C Quick Start](docs/python-c/quick-start.md).
 
 ### Java dependencies
 
@@ -243,7 +261,7 @@ The repository keeps the front page concise and places detailed documentation un
 ### Python
 
 The Python installation installs the native package together with the pure
-`radixor-models-standard` 1.x distribution of the 2026.1 catalog: 20 precompiled v7 models, excluding
+`radixor-models-standard` 1.x distribution of the 2026.1 catalog: 20 [compiled Radixor models](docs/data-formats.md), excluding
 the optional PoliMorf model. Python runtime distributions contain no textual
 dictionaries.
 
@@ -254,7 +272,7 @@ dictionaries.
   Single and batch stemming, caching, custom dictionaries, and compiled models.
 
 - [Dictionary Compilation](docs/python/model-compilation.md)
-  Compile a textual dictionary once, load it directly, or share its version 7 binary with Java.
+  Compile a textual dictionary once, load it directly, or share its [compiled model](docs/data-formats.md) with Java.
 
 - [Python Benchmarks](docs/python/performance.md)
   Batch methodology and comparisons with available Python stemmers.

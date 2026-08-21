@@ -153,7 +153,7 @@ for current software:
 - binary persistence;
 - independent language-model versioning and integrity verification;
 - reopening and extending compiled structures;
-- Java and Python native runtimes;
+- a flagship Java runtime plus native Python and Python-C runtimes;
 - reproducible quality and performance benchmark infrastructure.
 
 For the historical lineage and how Stempel, Morfologik, Snowball, and other

@@ -251,6 +251,55 @@ class RadixorEngine(Engine):
         return info
 
 
+class RadixorCEngine(Engine):
+    """Radixor runtime implemented directly against the CPython C API."""
+
+    name = "radixor-c"
+    kind = "native-batch"
+
+    def __init__(self, lowercase: bool = False) -> None:
+        # The shared corpus is already lowercase, matching RadixorEngine's
+        # normalization policy for a like-for-like runtime measurement.
+        self._lowercase = lowercase
+
+    def available(self) -> bool:
+        try:
+            import radixor_c  # noqa: F401
+
+            return True
+        except Exception:
+            return False
+
+    def supports(self, code: str) -> bool:
+        try:
+            from radixor_c import _LANGUAGE_ALIASES
+
+            return code in _LANGUAGE_ALIASES
+        except Exception:
+            return False
+
+    def make(self, code: str) -> BatchFn:
+        from radixor_c import Stemmer
+
+        stemmer = Stemmer(code, lowercase=self._lowercase, cache_size=0)
+        return stemmer.stem_batch
+
+    def provenance(self, code: str) -> dict:
+        from radixor_c import Stemmer
+
+        stemmer = Stemmer(code, lowercase=self._lowercase, cache_size=0)
+        info = _module_info(stemmer._core)
+        info["algorithm"] = "radixor-trie"
+        info["lowercase"] = self._lowercase
+        info["case_mode"] = "pre-normalized" if not self._lowercase else "lowercase"
+        info["cache_disabled"] = True
+        info["distribution"] = "radixor-c"
+        info["distribution_verified"] = _module_within_distribution(
+            stemmer._core, "radixor-c"
+        )
+        return info
+
+
 class PyStemmerEngine(Engine):
     name = "PyStemmer"
     kind = "c-batch"
@@ -443,6 +492,7 @@ class CistemEngine(Engine):
 
 ALL_ENGINES: list[Engine] = [
     RadixorEngine(),
+    RadixorCEngine(),
     PyStemmerEngine(),
     SnowballStemmerEngine(),
     NltkPorterEngine(),

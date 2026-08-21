@@ -30,15 +30,45 @@ git push origin 'python-models-standard@1.0.0'
 ```
 
 Wait until the models workflow has published its GitHub Release and Pages
-index entry. Then publish the native distribution:
+index entry. Then publish both native Python distributions:
 
 ```bash
 git tag -a 'python@4.1.0' -m 'Python Radixor 4.1.0'
 git push origin 'python@4.1.0'
 ```
 
+The `python@X.Y.Z` tag starts both `python-release.yml` and
+`python-c-release.yml`. They publish the same version to the independent PyPI
+projects `radixor` and `radixor-c`, respectively. Do not create a separate
+`python-c@X.Y.Z` tag.
+
 Do not push both tags together: native publication requires the standard-model
 release to exist first.
+
+## Bootstrap the radixor-c PyPI project
+
+The distribution name is `radixor-c`; its import package remains `radixor_c`.
+It cannot share the existing `radixor` PyPI project because PyPI project names
+identify a single independently versioned distribution.
+
+Before pushing the first `python@X.Y.Z` release tag:
+
+1. In the GitHub repository settings, create an environment named
+   `python-c-pypi`. Apply the same deployment protection rules used for
+   `python-pypi` if publishing requires maintainer approval.
+2. On PyPI, open account publishing settings and add a pending trusted
+   publisher with project name `radixor-c`, owner `leogalambos`, repository
+   `Radixor`, workflow `python-c-release.yml`, and environment
+   `python-c-pypi`.
+3. Push the normal `python@X.Y.Z` tag. The first successful trusted publication
+   creates the `radixor-c` project. Do not create or store a PyPI API token.
+4. After publication, verify the project owners/maintainers, description,
+   release files, and Trusted Publisher entry on PyPI. Enable mandatory 2FA for
+   every project owner.
+
+If `radixor-c` is created manually instead of through a pending publisher, add
+the same trusted publisher under that project's Publishing settings before the
+workflow is run.
 
 ## Artifact identity
 

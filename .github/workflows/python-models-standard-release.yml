@@ -63,7 +63,7 @@ jobs:
           else
             tag="python-models-standard@${REQUESTED_VERSION}"
           fi
-          eval "$(./tools/parse-python-release-tag.sh "${tag}")"
+          eval "$(bash ./tools/parse-python-release-tag.sh "${tag}")"
           [[ "${PYTHON_DISTRIBUTION}" == 'radixor-models-standard' ]]
           if [[ "${GITHUB_EVENT_NAME}" == 'push' ]]; then
             [[ "$(git rev-parse "${tag}^{commit}")" == "${GITHUB_SHA}" ]]

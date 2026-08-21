@@ -1,4 +1,24 @@
-# Radixor for Python
+# Choose a Python Runtime
+
+Radixor provides two native CPython packages over the same standard models and
+stemming semantics. They are complementary, not successive package names.
+
+| | Python (PyO3) | Python-C |
+|---|---|---|
+| Distribution | `radixor` | `radixor-c` |
+| Native implementation | Rust/PyO3 | CPython C API |
+| Primary strength | High throughput through batch processing | Low overhead for individual word calls |
+| Text dictionary compilation | Yes | No; load a prepared compiled model |
+| [Compiled model](../data-formats.md) loading | Yes | Yes |
+| Direction of future expansion | Progressively toward the Java flagship API | Basic runtime first; trie modification will come later |
+| Import | `from radixor import Stemmer` | `from radixor_c import Stemmer` |
+
+Use [Python-C](../python-c/index.md) for simple, fast scalar stemming from
+prepared models. Use the `radixor` package described below for batch-oriented
+processing and Python-side model compilation. Java remains the primary and most
+complete implementation.
+
+## Python (PyO3)
 
 The **`radixor`** package is Radixor's native Python implementation. It is not
 a wrapper around the Java library and does not require a JVM: it is a
@@ -39,7 +59,7 @@ versioned model JARs.
     implementations return the same dominant stem. The compiled **binary format
     is shared** (see below), so a model compiled by one side loads in the other.
 
-## Java vs. Python: read this first
+## Java vs. `radixor`: detailed capabilities
 
 The two implementations solve the same problem but make different runtime
 trade-offs. Mixing their mental models causes confusion, so the differences are

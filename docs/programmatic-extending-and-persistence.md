@@ -1,6 +1,9 @@
 # Extending and Persisting Compiled Tries
 
-This document explains how compiled Radixor tries can be reopened, extended, rebuilt, and stored for deployment.
+This document explains how compiled Radixor tries can be reopened, extended
+with domain vocabulary, rebuilt, and stored for deployment. This is currently
+a Java capability. The resulting [compiled Radixor model](data-formats.md) can
+be loaded by Java, Python (PyO3), and Python-C.
 
 ## Reopen and extend a compiled trie
 
@@ -35,9 +38,19 @@ public final class ExtendCompiledStemmerExample {
                 String[]::new,
                 settings);
 
-        builder.put("microservices", "Na");
+        final String word = "microservices";
+        final String stem = "microservice";
+        final String patch = PatchCommandEncoder.builder().build().encode(word, stem);
+        builder.put(word, patch);
 
         final FrequencyTrie<String> updatedTrie = builder.build();
+
+        final String storedPatch = updatedTrie.get(word);
+        final String actualStem = PatchCommandEncoder.apply(
+                word,
+                storedPatch,
+                updatedTrie.traversalDirection());
+        System.out.println(word + " -> " + actualStem);
 
         StemmerPatchTrieBinaryIO.write(
                 updatedTrie,
@@ -50,8 +63,15 @@ This enables a layered workflow:
 
 1. start from a bundled or already compiled stemmer,
 2. reconstruct a builder,
-3. add custom lexical data,
+3. encode each new word-to-stem relationship as a patch command and add it,
 4. compile and persist a new binary artifact.
+
+The insertion key is the observed word (`microservices`), while the stored
+value is the encoded transformation to its desired stem (`microservice`). Do
+not copy a patch string from another word: generate it with
+`PatchCommandEncoder` so offsets and traversal direction remain correct. Add
+the canonical stem as a no-op relationship too when the custom vocabulary must
+recognize it as an input in its own right.
 
 ## Persist and deploy compiled tries
 

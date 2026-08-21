@@ -1,9 +1,14 @@
-# Performance (Python)
+# Performance (Python Runtimes)
 
-This page reports **runtime stemming throughput** of the Python implementation against
+This page reports **runtime stemming throughput** of Python (PyO3) against
 common Python stemmers, and — crucially — documents exactly how the comparison
 is made fair. The scripts are in the repository (`python/benchmarks/`); anyone
 can reproduce the numbers.
+
+`radixor-c` belongs in this same benchmark rather than in a separate table,
+because both packages expose the same workload and models. It has not yet been
+measured by the published harness, so its column is explicitly `N/A`. No
+performance claim on this page should be inferred from those placeholders.
 
 !!! info "Published single-machine measurement"
     These results were regenerated on 2026-08-18 on the current benchmark
@@ -92,28 +97,28 @@ means that the engine has no implementation for that language. Every available
 competitor was measured in the same process, with the same corpus and batch
 partitioning.
 
-| Language | Radixor | PyStemmer (Snowball C) | CISTEM (pure Py) | snowballstemmer (pure Py) | NLTK Porter (pure Py) |
-|---|---:|---:|---:|---:|---:|
-| Czech (`cs`) | **151.6** | 158.7 | — | 3194.4 | — |
-| Danish (`da`) | **115.8** | 181.9 | — | 5643.1 | — |
-| German (`de`) | **156.1** | 453.3 | 2306.4 | 22351.7 | — |
-| English (`en`) | **127.4** | 251.2 | — | 12806.1 | 5335.1 |
-| Spanish (`es`) | **134.3** | 209.9 | — | 13053.4 | — |
-| Persian (`fa`) | **147.4** | 324.2 | — | 20816.9 | — |
-| Finnish (`fi`) | **171.7** | 188.3 | — | 7790.9 | — |
-| French (`fr`) | **167.4** | 349.8 | — | 22760.1 | — |
-| Hebrew (`he`) | **161.6** | — | — | — | — |
-| Hungarian (`hu`) | **133.2** | 190.7 | — | 9040.2 | — |
-| Italian (`it`) | **137.6** | 363.8 | — | 22083.6 | — |
-| Norwegian Bokmål (`nb`) | **115.1** | 166.4 | — | 4926.5 | — |
-| Dutch (`nl`) | **120.4** | 246.3 | — | 11720.3 | — |
-| Norwegian Nynorsk (`nn`) | **106.5** | 164.3 | — | 4828.7 | — |
-| Polish (`pl`) | **125.6** | 137.2 | — | 3489.3 | — |
-| Portuguese (`pt`) | **114.5** | 198.7 | — | 14330.2 | — |
-| Russian (`ru`) | **192.3** | 278.5 | — | 10333.2 | — |
-| Swedish (`sv`) | **122.6** | 138.0 | — | 3576.5 | — |
-| Ukrainian (`uk`) | **149.6** | — | — | — | — |
-| Yiddish (`yi`) | **159.5** | 434.1 | — | 20835.4 | — |
+| Language | Python (PyO3) | Python-C | PyStemmer (Snowball C) | CISTEM (pure Py) | snowballstemmer (pure Py) | NLTK Porter (pure Py) |
+|---|---:|---:|---:|---:|---:|---:|
+| Czech (`cs`) | **151.6** | N/A | 158.7 | — | 3194.4 | — |
+| Danish (`da`) | **115.8** | N/A | 181.9 | — | 5643.1 | — |
+| German (`de`) | **156.1** | N/A | 453.3 | 2306.4 | 22351.7 | — |
+| English (`en`) | **127.4** | N/A | 251.2 | — | 12806.1 | 5335.1 |
+| Spanish (`es`) | **134.3** | N/A | 209.9 | — | 13053.4 | — |
+| Persian (`fa`) | **147.4** | N/A | 324.2 | — | 20816.9 | — |
+| Finnish (`fi`) | **171.7** | N/A | 188.3 | — | 7790.9 | — |
+| French (`fr`) | **167.4** | N/A | 349.8 | — | 22760.1 | — |
+| Hebrew (`he`) | **161.6** | N/A | — | — | — | — |
+| Hungarian (`hu`) | **133.2** | N/A | 190.7 | — | 9040.2 | — |
+| Italian (`it`) | **137.6** | N/A | 363.8 | — | 22083.6 | — |
+| Norwegian Bokmål (`nb`) | **115.1** | N/A | 166.4 | — | 4926.5 | — |
+| Dutch (`nl`) | **120.4** | N/A | 246.3 | — | 11720.3 | — |
+| Norwegian Nynorsk (`nn`) | **106.5** | N/A | 164.3 | — | 4828.7 | — |
+| Polish (`pl`) | **125.6** | N/A | 137.2 | — | 3489.3 | — |
+| Portuguese (`pt`) | **114.5** | N/A | 198.7 | — | 14330.2 | — |
+| Russian (`ru`) | **192.3** | N/A | 278.5 | — | 10333.2 | — |
+| Swedish (`sv`) | **122.6** | N/A | 138.0 | — | 3576.5 | — |
+| Ukrainian (`uk`) | **149.6** | N/A | — | — | — | — |
+| Yiddish (`yi`) | **159.5** | N/A | 434.1 | — | 20835.4 | — |
 
 Radixor won **18 / 18** direct PyStemmer comparisons. At `N=100`, its
 geometric-mean speedup was **1.68×**; the largest direct advantage was **2.90×**

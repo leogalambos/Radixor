@@ -245,6 +245,7 @@ def _linfit(xs: list[float], ys: list[float]) -> tuple[float, float]:
 
 _DIST_NAMES = {
     "radixor": "radixor",
+    "radixor-c": "radixor-c",
     "PyStemmer": "PyStemmer",
     "snowballstemmer-pure": "snowballstemmer",
     "nltk-porter": "nltk",
@@ -252,8 +253,8 @@ _DIST_NAMES = {
 
 
 def _engine_version(name: str) -> Optional[str]:
-    if name == "radixor":
-        try:
+    try:
+        if name == "radixor":
             import radixor
 
             getter = getattr(radixor, "version", None)
@@ -261,26 +262,38 @@ def _engine_version(name: str) -> Optional[str]:
                 return str(getter())
             value = getattr(radixor, "__version__", None)
             return str(value) if value is not None else None
-        except Exception:
-            return None
+    except Exception:
+        return None
 
-    elif name == "PyStemmer":
-        try:
+    try:
+        if name == "radixor-c":
+            import radixor_c
+
+            getter = getattr(radixor_c, "version", None)
+            if callable(getter):
+                return str(getter())
+            value = getattr(radixor_c, "__version__", None)
+            return str(value) if value is not None else None
+    except Exception:
+        return None
+
+    try:
+        if name == "PyStemmer":
             import importlib.metadata as md
 
             return md.version("PyStemmer")
-        except Exception:
-            return None
+    except Exception:
+        return None
 
-    else:
-        import importlib.metadata as md
-        dist = _DIST_NAMES.get(name)
-        if not dist:
-            return None
-        try:
-            return md.version(dist)
-        except Exception:
-            return None
+    import importlib.metadata as md
+
+    dist = _DIST_NAMES.get(name)
+    if not dist:
+        return None
+    try:
+        return md.version(dist)
+    except Exception:
+        return None
 
 
 def _assert_expected_provenance(
@@ -293,6 +306,18 @@ def _assert_expected_provenance(
     dist_verified = bool(prov.get("distribution_verified"))
     backing_module = prov.get("backing_module")
     backing_file = str(prov.get("backing_file", "")).lower()
+
+    if engine_name == "radixor-c":
+        if dist != "radixor-c" or not dist_verified:
+            _fail(
+                f"expected radixor-c distribution-backed backend, got distribution={dist!r} "
+                f"verified={dist_verified} (backing_module={backing_module}, file={prov.get('backing_file')})"
+            )
+        if not prov.get("compiled_extension", False):
+            _fail("radixor-c must be backed by its native CPython extension")
+        if not prov.get("cache_disabled", False) or prov.get("lowercase") is not False:
+            _fail("radixor-c benchmark must disable caching and redundant lowercasing")
+        return
 
     if engine_name == "PyStemmer":
         if dist != "PyStemmer" or not dist_verified:
@@ -411,6 +436,7 @@ def run(args) -> dict:
     )
 
     for code, model_id in language_requests:
+        model_id = language_aliases.get(code, code)
         if args.model_path:
             dict_path = Path(args.model_path)
         else:
@@ -690,7 +716,7 @@ def main() -> None:
         "--engines",
         nargs="+",
         default=None,
-        help="Restrict to named engines (radixor PyStemmer snowballstemmer nltk-porter)",
+        help="Restrict to named engines (radixor radixor-c PyStemmer snowballstemmer-pure nltk-porter cistem)",
     )
     p.add_argument(
         "--model-path",
