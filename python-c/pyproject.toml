@@ -11,15 +11,56 @@ readme = "README.md"
 license = "BSD-3-Clause"
 license-files = ["LICENSE"]
 dependencies = ["radixor-models-standard>=1.0,<2.0"]
-keywords = ["stemming", "nlp", "c-extension"]
+keywords = [
+    "python",
+    "information retrieval",
+    "language processing",
+    "morphology",
+    "stemming algorithms",
+    "stemmers",
+    "nlp",
+    "c-extension",
+]
 classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Natural Language :: Czech",
+    "Natural Language :: Danish",
+    "Natural Language :: Dutch",
+    "Natural Language :: English",
+    "Natural Language :: Finnish",
+    "Natural Language :: French",
+    "Natural Language :: German",
+    "Natural Language :: Hebrew",
+    "Natural Language :: Hungarian",
+    "Natural Language :: Italian",
+    "Natural Language :: Norwegian",
+    "Natural Language :: Persian",
+    "Natural Language :: Polish",
+    "Natural Language :: Portuguese",
+    "Natural Language :: Russian",
+    "Natural Language :: Spanish",
+    "Natural Language :: Swedish",
+    "Natural Language :: Ukrainian",
+    "Natural Language :: Yiddish",
+    "Programming Language :: C",
+    "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
+    "Topic :: Internet :: WWW/HTTP :: Indexing/Search",
+    "Topic :: Text Processing :: Indexing",
+    "Topic :: Text Processing :: Linguistic",
 ]
+
+[project.urls]
+Homepage = "https://github.com/leogalambos/Radixor"
+Documentation = "https://leogalambos.github.io/Radixor/python-c/"
+Repository = "https://github.com/leogalambos/Radixor"
+Issues = "https://github.com/leogalambos/Radixor/issues"
 
 [tool.setuptools.packages.find]
 where = ["."]
