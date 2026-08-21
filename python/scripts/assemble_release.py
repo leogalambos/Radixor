@@ -39,6 +39,7 @@ import hashlib
 import re
 import shutil
 from pathlib import Path
+from typing import Callable
 
 from verify_distributions import (
     _verify_main_sdist,
@@ -50,6 +51,7 @@ from verify_distributions import (
 REPOSITORY = Path(__file__).resolve().parents[2]
 BUILD_ROOT = (REPOSITORY / "build").resolve()
 VERSION = re.compile(r"(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\Z")
+NATIVE_ABI_TAG = "cp310-abi3"
 
 
 def _release_files(root: Path) -> list[Path]:
@@ -74,17 +76,9 @@ def _require_one(files: list[Path], predicate, description: str) -> Path:
     return matches[0]
 
 
-def _validate_native(files: list[Path], version: str) -> None:
-    prefix = f"radixor-{version}-cp39-abi3-"
-    wheels = [path for path in files if path.suffix == ".whl"]
-    sdist = _require_one(
-        files, lambda name: name == f"radixor-{version}.tar.gz", "native sdist"
-    )
-    if len(wheels) != 4:
-        raise ValueError(
-            f"Expected four native wheels, found {[path.name for path in wheels]}"
-        )
-    expected = {
+def _native_wheel_predicates(version: str) -> dict[str, Callable[[str], bool]]:
+    prefix = f"radixor-{version}-{NATIVE_ABI_TAG}-"
+    return {
         "linux-x86_64": lambda name: name.startswith(prefix)
         and "manylinux" in name
         and name.endswith("x86_64.whl"),
@@ -96,7 +90,18 @@ def _validate_native(files: list[Path], version: str) -> None:
         and name.endswith("universal2.whl"),
         "windows-x86_64": lambda name: name == f"{prefix}win_amd64.whl",
     }
-    for description, predicate in expected.items():
+
+
+def _validate_native(files: list[Path], version: str) -> None:
+    wheels = [path for path in files if path.suffix == ".whl"]
+    sdist = _require_one(
+        files, lambda name: name == f"radixor-{version}.tar.gz", "native sdist"
+    )
+    if len(wheels) != 4:
+        raise ValueError(
+            f"Expected four native wheels, found {[path.name for path in wheels]}"
+        )
+    for description, predicate in _native_wheel_predicates(version).items():
         _require_one(wheels, predicate, description)
     for wheel in wheels:
         _verify_main_wheel(wheel, version)
