@@ -3,7 +3,7 @@ name: Python C Distribution Release
 on:
   push:
     tags:
-      - 'python@*'
+      - 'python-c@*'
   workflow_dispatch:
     inputs:
       version:
@@ -21,7 +21,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: github-python-c-pypi
+  group: github-python-pages
   cancel-in-progress: false
 
 jobs:
@@ -34,6 +34,7 @@ jobs:
 
     steps:
       - name: Check out repository
+        if: env.ACT != 'true'
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           fetch-depth: 0
@@ -49,10 +50,10 @@ jobs:
           if [[ "${GITHUB_EVENT_NAME}" == 'push' ]]; then
             tag="${GITHUB_REF_NAME}"
           else
-            tag="python@${REQUESTED_VERSION}"
+            tag="python-c@${REQUESTED_VERSION}"
           fi
           eval "$(bash ./tools/parse-python-release-tag.sh "${tag}")"
-          [[ "${PYTHON_DISTRIBUTION}" == 'radixor' ]]
+          [[ "${PYTHON_DISTRIBUTION}" == 'radixor-c' ]]
           if [[ "${GITHUB_EVENT_NAME}" == 'push' ]]; then
             [[ "$(git rev-parse "${tag}^{commit}")" == "${GITHUB_SHA}" ]]
             git merge-base --is-ancestor "${GITHUB_SHA}" origin/main
@@ -99,8 +100,13 @@ jobs:
           path: python-c
 
       - name: Set up QEMU (Linux cross-arch)
-        if: runner.os == 'Linux'
+        if: runner.os == 'Linux' && env.ACT != 'true'
         uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3.7.0
+
+      - name: Limit local act build
+        if: env.ACT == 'true'
+        shell: bash
+        run: echo 'CIBW_BUILD=cp312-manylinux_x86_64' >> "${GITHUB_ENV}"
 
       - name: Build wheels
         uses: pypa/cibuildwheel@c923d83ad9c1bc00211c5041d0c3f73294ff88f6 # v3.1.4
@@ -147,35 +153,208 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
-  publish:
-    name: Publish to PyPI
+  assemble:
+    name: Assemble verified release
     needs: [prepare, build-wheels, build-sdist]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        if: env.ACT != 'true'
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.12'
+
+      - name: Download all wheels
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          pattern: python-c-wheels-*-${{ needs.prepare.outputs.version }}
+          merge-multiple: true
+          path: build/python-c-release/artifacts
+
+      - name: Download sdist
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: python-c-sdist-${{ needs.prepare.outputs.version }}
+          path: build/python-c-release/artifacts
+
+      - name: Enforce release inventory and checksums
+        run: >-
+          python python-c/scripts/assemble_c_release.py
+          '${{ needs.prepare.outputs.version }}'
+          build/python-c-release/artifacts build/python-c-release/release
+
+      - name: Validate distribution metadata
+        run: |
+          python -m pip install --disable-pip-version-check twine==6.1.0
+          python -m twine check build/python-c-release/release/*.whl \
+            build/python-c-release/release/*.tar.gz
+
+      - name: Prepare complete PEP 503 index candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          index_root='build/python-c-release/index/python/simple'
+          if git ls-remote --exit-code --heads origin gh-pages >/dev/null 2>&1; then
+            git fetch origin gh-pages:refs/remotes/origin/gh-pages
+            git worktree add --detach build/python-c-release/pages origin/gh-pages
+            mkdir -p "$(dirname "${index_root}")"
+            if [[ -d build/python-c-release/pages/python/simple ]]; then
+              cp -R build/python-c-release/pages/python/simple "${index_root}"
+            fi
+          fi
+          python python/scripts/update_simple_index.py \
+            --root "${index_root}" \
+            --repository "${GITHUB_REPOSITORY}" \
+            --package radixor-c \
+            --version '${{ needs.prepare.outputs.version }}' \
+            --tag '${{ needs.prepare.outputs.tag }}' \
+            --artifacts build/python-c-release/release
+
+      - name: Upload verified release candidate
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: python-c-release-${{ needs.prepare.outputs.version }}
+          path: build/python-c-release/release/*
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload package-index candidate
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: python-c-index-${{ needs.prepare.outputs.version }}
+          path: build/python-c-release/index/python/simple
+          if-no-files-found: error
+          retention-days: 14
+
+  publish-release:
+    name: Publish immutable GitHub Release
+    if: github.event_name == 'push'
+    needs: [prepare, assemble]
+    runs-on: ubuntu-latest
+    environment: python-github-release
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+
+    steps:
+      - name: Download verified release candidate
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: python-c-release-${{ needs.prepare.outputs.version }}
+          path: release
+
+      - name: Verify release inventory
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd release
+          sha256sum --check SHA256SUMS
+          awk '{print $2}' SHA256SUMS | LC_ALL=C sort > expected-files
+          find . -maxdepth 1 -type f \( -name '*.whl' -o -name '*.tar.gz' \) \
+            -printf '%f\n' | LC_ALL=C sort > actual-files
+          diff -u expected-files actual-files
+
+      - name: Attest package artifacts
+        uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2
+        with:
+          subject-path: |
+            release/*.whl
+            release/*.tar.gz
+
+      - name: Create GitHub Release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ needs.prepare.outputs.tag }}
+          RELEASE_VERSION: ${{ needs.prepare.outputs.version }}
+        run: |
+          set -euo pipefail
+          if gh release view "${RELEASE_TAG}" --repo "${GITHUB_REPOSITORY}" >/dev/null 2>&1; then
+            echo "Release already exists; refusing to replace its assets: ${RELEASE_TAG}" >&2
+            exit 1
+          fi
+          gh release create "${RELEASE_TAG}" \
+            release/*.whl release/*.tar.gz release/SHA256SUMS \
+            --repo "${GITHUB_REPOSITORY}" --verify-tag --draft \
+            --title "radixor-c ${RELEASE_VERSION}" \
+            --notes "Native CPython C Radixor distribution ${RELEASE_VERSION}."
+          gh release edit "${RELEASE_TAG}" \
+            --repo "${GITHUB_REPOSITORY}" --draft=false
+
+  publish-pypi:
+    name: Publish to PyPI
     if: >-
       always() &&
-      needs.build-wheels.result == 'success' &&
-      needs.build-sdist.result == 'success' &&
-      ((github.event_name == 'push') ||
+      ((github.event_name == 'push' && needs.publish-release.result == 'success') ||
        (github.event_name == 'workflow_dispatch' && inputs.publish_to_pypi))
+    needs: [prepare, assemble, publish-release]
     runs-on: ubuntu-latest
     environment: python-c-pypi
     permissions:
       id-token: write
 
     steps:
-      - name: Download all wheels
+      - name: Download verified release candidate
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
-          pattern: python-c-wheels-*-${{ needs.prepare.outputs.version }}
-          merge-multiple: true
-          path: dist/
+          name: python-c-release-${{ needs.prepare.outputs.version }}
+          path: dist
 
-      - name: Download sdist
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
-        with:
-          name: python-c-sdist-${{ needs.prepare.outputs.version }}
-          path: dist/
+      - name: Verify checksums and stage distributions
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd dist
+          sha256sum --check SHA256SUMS
+          mkdir ../pypi
+          find . -maxdepth 1 -type f \( -name '*.whl' -o -name '*.tar.gz' \) \
+            -exec cp -- '{}' ../pypi/ \;
 
       - name: Publish with PyPI Trusted Publishing
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          packages-dir: dist/
+          packages-dir: pypi/
+
+  publish-index:
+    name: Publish Python package index
+    if: github.event_name == 'push'
+    needs: [prepare, assemble, publish-release]
+    runs-on: ubuntu-latest
+    environment: python-github-pages
+    permissions:
+      contents: write
+
+    steps:
+      - name: Check out gh-pages only
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: gh-pages
+          path: pages
+
+      - name: Download validated index candidate
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: python-c-index-${{ needs.prepare.outputs.version }}
+          path: candidate
+
+      - name: Commit package index
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p pages/python/simple
+          rsync -a --delete candidate/ pages/python/simple/
+          cd pages
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add python/simple
+          git diff --cached --quiet && exit 0
+          git commit -m 'Index radixor-c ${{ needs.prepare.outputs.version }}'
+          git push origin HEAD:gh-pages

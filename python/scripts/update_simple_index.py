@@ -42,7 +42,12 @@ from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import quote
 
-PACKAGES = ("radixor", "radixor-models-standard")
+PACKAGES = ("radixor", "radixor-c", "radixor-models-standard")
+REQUIRES_PYTHON = {
+    "radixor": ">=3.10",
+    "radixor-c": ">=3.10",
+    "radixor-models-standard": ">=3.9",
+}
 REPOSITORY = re.compile(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+\Z")
 SHA256 = re.compile(r"[0-9a-f]{64}\Z")
 VERSION = re.compile(r"(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\Z")
@@ -99,9 +104,10 @@ def _render_root(root: Path) -> None:
 
 
 def _render_project(path: Path, package: str, links: dict[str, str]) -> None:
+    requires_python = html.escape(REQUIRES_PYTHON[package], quote=True)
     anchors = "\n".join(
         f'    <a href="{html.escape(href, quote=True)}" '
-        f'data-requires-python="&gt;=3.9">{html.escape(filename)}</a><br>'
+        f'data-requires-python="{requires_python}">{html.escape(filename)}</a><br>'
         for filename, href in sorted(links.items())
     )
     path.write_text(
@@ -127,11 +133,12 @@ def main() -> int:
         raise SystemExit("Invalid GitHub repository identity")
     if VERSION.fullmatch(args.version) is None:
         raise SystemExit("Invalid stable release version")
-    expected_tag = (
-        f"python@{args.version}"
-        if args.package == "radixor"
-        else f"python-models-standard@{args.version}"
-    )
+    tag_prefixes = {
+        "radixor": "python",
+        "radixor-c": "python-c",
+        "radixor-models-standard": "python-models-standard",
+    }
+    expected_tag = f"{tag_prefixes[args.package]}@{args.version}"
     if args.tag != expected_tag:
         raise SystemExit(f"Tag {args.tag!r} does not match {expected_tag!r}")
 
