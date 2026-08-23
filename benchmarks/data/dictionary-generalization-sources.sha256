@@ -1,0 +1,5 @@
+9ec439a4f2bfc3acec4bd34bfed38ee461876941165cffca394cd53ac419edef  src/main/java/org/egothor/stemmer/WordTraversalDirection.java
+c27f621b70e27990b5521ea37bab31f4d9ac3580cc7795d5ddbe684139aae276  src/main/java/org/egothor/stemmer/FrequencyTrie.java
+fa2ed1872a375240d127d82580f43df82ec4af2ea542e48934f6ab56a4ada46e  src/main/java/org/egothor/stemmer/PatchCommandEncoder.java
+1d7c2d217b5069dbb7f298a263fd9c92e895c68a780ff7f904081e9f800c80c5  src/main/java/org/egothor/stemmer/StemmerPatchTrieLoader.java
+126964f216a48d2164d136a490698301111aae7f050209ced21caf73f8c01fb8  src/test/java/org/egothor/stemmer/benchmark/generalization/DictionaryGeneralizationApplication.java

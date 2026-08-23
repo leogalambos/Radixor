@@ -1,0 +1,5858 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Learned transformation stemming with interoperable Java, Python, and Python-C runtimes">
+      
+      
+      
+        <link rel="canonical" href="https://leogalambos.github.io/Radixor/benchmarks/generalization/">
+      
+      
+        <link rel="prev" href="../../benchmarking/">
+      
+      
+        <link rel="next" href="../../python/performance/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/radixor-logo.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Multilingual Generalization - Radixor</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/extra.css">
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/landing-v2.css">
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/radixor-docs-safety.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="white" data-md-color-accent="blue">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#dictionary-family-generalization" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Radixor" class="md-header__button md-logo" aria-label="Radixor" data-md-component="logo">
+      
+  <img src="../../assets/images/radixor-logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Radixor
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Multilingual Generalization
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="white" data-md-color-accent="blue"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/leogalambos/Radixor" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    leogalambos/Radixor
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Radixor" class="md-nav__button md-logo" aria-label="Radixor" data-md-component="logo">
+      
+  <img src="../../assets/images/radixor-logo.png" alt="logo">
+
+    </a>
+    Radixor
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/leogalambos/Radixor" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    leogalambos/Radixor
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Get Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Choose a Runtime
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../why-radixor-is-different/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Why Radixor Is Different
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../fast-track/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Java in 5 Minutes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python/fast-track/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python in 5 Minutes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python-c/quick-start/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python-C in 5 Minutes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Evaluate Radixor
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Evaluate Radixor
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Results Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../benchmarking/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How to Read the Evidence
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Multilingual Generalization
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Multilingual Generalization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#all-language-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        All-Language Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#per-language-curves" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Per-Language Curves
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#provenance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Provenance
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python/performance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python Runtime Performance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_5" id="__nav_3_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Language Comparisons
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Language Comparisons
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../languages/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../languages/czech/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Czech
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../languages/danish/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Danish
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../languages/dutch/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dutch
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../languages/english/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    English
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../languages/finnish/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Finnish
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../languages/french/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    French
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../languages/german/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    German
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../languages/hebrew/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hebrew
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../languages/hungarian/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hungarian
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../languages/italian/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Italian
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../languages/norwegian-bokmal/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Norwegian Bokmal
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../languages/norwegian-nynorsk/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Norwegian Nynorsk
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../languages/persian/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Persian
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../languages/polish/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Polish
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../languages/portuguese/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Portuguese
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../languages/russian/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Russian
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../languages/spanish/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Spanish
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../languages/swedish/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Swedish
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../languages/ukrainian/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ukrainian
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../languages/yiddish/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Yiddish
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_6" id="__nav_3_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Methods and Reproduction
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Methods and Reproduction
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/methodology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Comparison Methodology
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/linguistic-quality/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Linguistic Quality
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/generalization-methodology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Generalization Protocol
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/tested-stemmers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tested Stemmers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/reproducibility/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reproducibility and Raw Data
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/corpora/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Corpora
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/environment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Environment and Reports
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/english-coverage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    English Coverage and Speed
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/candidates/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Candidate Evaluation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Integrate
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Integrate
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_1" id="__nav_4_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Java
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Java
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../quick-start/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../integration-deep-dive/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Integration Deep Dive
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programmatic-usage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../model-selection-and-loading/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model Selection and Loading
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programmatic-loading-and-building/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Loading and Building Stemmers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programmatic-querying-and-ambiguity/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Querying and Ambiguity
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programmatic-extending-and-persistence/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Extending and Persistence
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../migration-and-backward-compatibility/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Migration Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cli-compilation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Compilation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_2" id="__nav_4_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python Runtimes
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Python Runtimes
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Choose a Runtime
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python/fast-track/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python in 5 Minutes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_2_3" id="__nav_4_2_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python (PyO3)
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Python (PyO3)
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python/quick-start/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation and Builds
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python/usage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Usage and API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python/model-compilation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dictionary Compilation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_2_4" id="__nav_4_2_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python-C
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Python-C
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python-c/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python-c/quick-start/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python-C in 5 Minutes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python-c/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation and Builds
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python-c/usage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Usage and API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_3" id="__nav_4_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Models and Dictionaries
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Models and Dictionaries
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../stemmer-models/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../stemmer-model-catalog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Published Model Catalog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../built-in-languages/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Built-in Languages
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dictionary-format/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dictionary Format
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing-dictionaries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing Dictionaries
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Engineering Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Engineering Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../technology-lineage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Technology and Lineage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture-and-reduction/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Detail
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reduction-semantics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reduction Semantics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../lookup-edge-optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lookup Edge Optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data-formats/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Formats
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compatibility-and-guarantees/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compatibility and Guarantees
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Operate and Contribute
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Operate and Contribute
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../trust-security-and-support/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Trust, Security and Support
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../quality-and-operations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quality and Operations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../stemming-quality/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stemming Quality
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reports/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Published Reports
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../builds/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Historical Builds
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../test-taxonomy-and-filtering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Test Taxonomy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#all-language-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        All-Language Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#per-language-curves" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Per-Language Curves
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#provenance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Provenance
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="dictionary-family-generalization">Dictionary-Family Generalization</h1>
+<p>Radixor learns transformations from lexical families rather than storing a closed
+word-to-root answer list. This experiment measures how those transformations transfer
+to dictionary families that were not used to build the Java trie.</p>
+<p>For every one of the 20 default models, complete dictionary rows are placed in a
+frozen pseudorandom order. Exact-size, nested prefixes retain 10% through 100% of
+the rows for training. Five predeclared splits are evaluated against the complete
+dictionary; the primary <code>Unseen</code> columns exclude a held-out occurrence whenever its
+normalized surface form also appeared in training. This prevents a duplicated form
+from being presented as unseen evidence.</p>
+<p>The experiment measures <strong>within-resource dictionary-family generalization</strong>. It does
+not claim performance on new domains, misspellings, arbitrary compounds, or other
+out-of-distribution text. See the <a href="../reference/generalization-methodology/">methodology and limitations</a>.</p>
+<h2 id="all-language-summary">All-Language Summary</h2>
+<p>Each cell is the language-macro mean of 20 per-language split medians, so large
+dictionaries do not dominate small ones. Changed-form exactness is the most demanding
+measure because it excludes words whose expected root is already the input token.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">Training rows</th>
+<th style="text-align: right;">Unseen all exact</th>
+<th style="text-align: right;">Unseen changed exact</th>
+<th style="text-align: right;">Unseen root preserved</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">100%</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">n/a</td>
+</tr>
+<tr>
+<td style="text-align: right;">90%</td>
+<td style="text-align: right;">74.21%</td>
+<td style="text-align: right;">69.07%</td>
+<td style="text-align: right;">94.66%</td>
+</tr>
+<tr>
+<td style="text-align: right;">80%</td>
+<td style="text-align: right;">73.76%</td>
+<td style="text-align: right;">68.54%</td>
+<td style="text-align: right;">94.24%</td>
+</tr>
+<tr>
+<td style="text-align: right;">70%</td>
+<td style="text-align: right;">73.53%</td>
+<td style="text-align: right;">68.20%</td>
+<td style="text-align: right;">93.83%</td>
+</tr>
+<tr>
+<td style="text-align: right;">60%</td>
+<td style="text-align: right;">72.87%</td>
+<td style="text-align: right;">67.55%</td>
+<td style="text-align: right;">93.50%</td>
+</tr>
+<tr>
+<td style="text-align: right;">50%</td>
+<td style="text-align: right;">72.31%</td>
+<td style="text-align: right;">66.80%</td>
+<td style="text-align: right;">93.17%</td>
+</tr>
+<tr>
+<td style="text-align: right;">40%</td>
+<td style="text-align: right;">71.60%</td>
+<td style="text-align: right;">65.97%</td>
+<td style="text-align: right;">92.67%</td>
+</tr>
+<tr>
+<td style="text-align: right;">30%</td>
+<td style="text-align: right;">70.51%</td>
+<td style="text-align: right;">64.72%</td>
+<td style="text-align: right;">92.14%</td>
+</tr>
+<tr>
+<td style="text-align: right;">20%</td>
+<td style="text-align: right;">69.19%</td>
+<td style="text-align: right;">63.13%</td>
+<td style="text-align: right;">91.55%</td>
+</tr>
+<tr>
+<td style="text-align: right;">10%</td>
+<td style="text-align: right;">66.96%</td>
+<td style="text-align: right;">60.50%</td>
+<td style="text-align: right;">90.80%</td>
+</tr>
+</tbody>
+</table>
+<p>The range across languages is material. Rich, regular resources such as Portuguese,
+Hungarian, Italian, Spanish and Finnish transfer strongly even at low coverage; very
+small resources and some scripts do not. Persian has only 69 dictionary rows, while
+Yiddish has 802, so their low-coverage results are evidence of insufficient training
+data rather than a universal unknown-word guarantee.</p>
+<h2 id="per-language-curves">Per-Language Curves</h2>
+<p>Values are the median across five frozen splits. Parentheses show the minimum–maximum
+split range. <code>Whole all exact</code> retains comparability with the earlier English coverage
+curve but mixes trained and held-out rows; the unseen columns are the generalization
+evidence. At 100% there is no held-out set, so unseen metrics are <code>n/a</code>.</p>
+<details>
+<summary><strong>Czech</strong> — <code>cs-cz-default</code> 1.0.0</summary>
+<div>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">Training</th>
+<th style="text-align: right;">Selected / total rows</th>
+<th style="text-align: right;">Median unseen occurrences</th>
+<th style="text-align: right;">Overlap excluded</th>
+<th style="text-align: right;">Unseen all exact</th>
+<th style="text-align: right;">Unseen changed exact</th>
+<th style="text-align: right;">Unseen root preserved</th>
+<th style="text-align: right;">Whole all exact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">100%</td>
+<td style="text-align: right;">5,113 / 5,113</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">99.465%</td>
+</tr>
+<tr>
+<td style="text-align: right;">90%</td>
+<td style="text-align: right;">4,602 / 5,113</td>
+<td style="text-align: right;">5,497</td>
+<td style="text-align: right;">52</td>
+<td style="text-align: right;">73.270% (71.970–75.506)</td>
+<td style="text-align: right;">69.900% (67.596–72.033)</td>
+<td style="text-align: right;">91.296% (89.606–92.449)</td>
+<td style="text-align: right;">96.872% (96.693–97.110)</td>
+</tr>
+<tr>
+<td style="text-align: right;">80%</td>
+<td style="text-align: right;">4,090 / 5,113</td>
+<td style="text-align: right;">11,295</td>
+<td style="text-align: right;">108</td>
+<td style="text-align: right;">74.375% (72.961–75.341)</td>
+<td style="text-align: right;">70.977% (68.757–71.820)</td>
+<td style="text-align: right;">91.822% (89.763–92.700)</td>
+<td style="text-align: right;">94.512% (94.070–94.620)</td>
+</tr>
+<tr>
+<td style="text-align: right;">70%</td>
+<td style="text-align: right;">3,579 / 5,113</td>
+<td style="text-align: right;">16,910</td>
+<td style="text-align: right;">167</td>
+<td style="text-align: right;">74.517% (73.186–75.890)</td>
+<td style="text-align: right;">70.679% (69.464–72.757)</td>
+<td style="text-align: right;">91.409% (90.430–92.421)</td>
+<td style="text-align: right;">91.850% (91.537–92.385)</td>
+</tr>
+<tr>
+<td style="text-align: right;">60%</td>
+<td style="text-align: right;">3,068 / 5,113</td>
+<td style="text-align: right;">22,567</td>
+<td style="text-align: right;">171</td>
+<td style="text-align: right;">74.064% (73.458–75.665)</td>
+<td style="text-align: right;">70.641% (69.532–72.243)</td>
+<td style="text-align: right;">91.201% (89.195–91.780)</td>
+<td style="text-align: right;">89.311% (89.002–89.831)</td>
+</tr>
+<tr>
+<td style="text-align: right;">50%</td>
+<td style="text-align: right;">2,557 / 5,113</td>
+<td style="text-align: right;">28,195</td>
+<td style="text-align: right;">172</td>
+<td style="text-align: right;">74.013% (73.648–74.299)</td>
+<td style="text-align: right;">70.612% (69.908–70.743)</td>
+<td style="text-align: right;">91.128% (89.182–91.481)</td>
+<td style="text-align: right;">86.632% (86.397–86.793)</td>
+</tr>
+<tr>
+<td style="text-align: right;">40%</td>
+<td style="text-align: right;">2,045 / 5,113</td>
+<td style="text-align: right;">33,944</td>
+<td style="text-align: right;">151</td>
+<td style="text-align: right;">74.037% (73.092–74.837)</td>
+<td style="text-align: right;">70.380% (69.385–71.348)</td>
+<td style="text-align: right;">90.721% (89.903–91.126)</td>
+<td style="text-align: right;">84.092% (83.521–84.645)</td>
+</tr>
+<tr>
+<td style="text-align: right;">30%</td>
+<td style="text-align: right;">1,534 / 5,113</td>
+<td style="text-align: right;">39,562</td>
+<td style="text-align: right;">122</td>
+<td style="text-align: right;">73.325% (71.387–74.104)</td>
+<td style="text-align: right;">69.913% (67.160–70.569)</td>
+<td style="text-align: right;">90.571% (89.035–90.982)</td>
+<td style="text-align: right;">81.062% (79.736–81.666)</td>
+</tr>
+<tr>
+<td style="text-align: right;">20%</td>
+<td style="text-align: right;">1,023 / 5,113</td>
+<td style="text-align: right;">45,111</td>
+<td style="text-align: right;">109</td>
+<td style="text-align: right;">72.003% (69.047–72.412)</td>
+<td style="text-align: right;">68.155% (64.204–68.726)</td>
+<td style="text-align: right;">89.767% (89.232–91.428)</td>
+<td style="text-align: right;">77.461% (75.136–77.787)</td>
+</tr>
+<tr>
+<td style="text-align: right;">10%</td>
+<td style="text-align: right;">511 / 5,113</td>
+<td style="text-align: right;">50,905</td>
+<td style="text-align: right;">74</td>
+<td style="text-align: right;">69.921% (66.235–70.712)</td>
+<td style="text-align: right;">65.439% (60.991–66.671)</td>
+<td style="text-align: right;">89.636% (88.686–90.665)</td>
+<td style="text-align: right;">72.859% (69.489–73.555)</td>
+</tr>
+</tbody>
+</table>
+</div>
+</details>
+<details>
+<summary><strong>Danish</strong> — <code>da-dk-default</code> 1.0.0</summary>
+<div>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">Training</th>
+<th style="text-align: right;">Selected / total rows</th>
+<th style="text-align: right;">Median unseen occurrences</th>
+<th style="text-align: right;">Overlap excluded</th>
+<th style="text-align: right;">Unseen all exact</th>
+<th style="text-align: right;">Unseen changed exact</th>
+<th style="text-align: right;">Unseen root preserved</th>
+<th style="text-align: right;">Whole all exact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">100%</td>
+<td style="text-align: right;">4,179 / 4,179</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">99.371%</td>
+</tr>
+<tr>
+<td style="text-align: right;">90%</td>
+<td style="text-align: right;">3,761 / 4,179</td>
+<td style="text-align: right;">3,232</td>
+<td style="text-align: right;">38</td>
+<td style="text-align: right;">74.192% (73.356–75.186)</td>
+<td style="text-align: right;">67.504% (66.790–69.750)</td>
+<td style="text-align: right;">92.718% (90.865–93.961)</td>
+<td style="text-align: right;">96.813% (96.698–96.897)</td>
+</tr>
+<tr>
+<td style="text-align: right;">80%</td>
+<td style="text-align: right;">3,343 / 4,179</td>
+<td style="text-align: right;">6,419</td>
+<td style="text-align: right;">59</td>
+<td style="text-align: right;">74.015% (73.293–74.244)</td>
+<td style="text-align: right;">67.477% (67.434–67.862)</td>
+<td style="text-align: right;">92.377% (90.132–93.494)</td>
+<td style="text-align: right;">94.212% (94.063–94.358)</td>
+</tr>
+<tr>
+<td style="text-align: right;">70%</td>
+<td style="text-align: right;">2,925 / 4,179</td>
+<td style="text-align: right;">9,622</td>
+<td style="text-align: right;">72</td>
+<td style="text-align: right;">72.901% (72.673–74.059)</td>
+<td style="text-align: right;">66.648% (65.699–67.713)</td>
+<td style="text-align: right;">91.066% (90.273–92.613)</td>
+<td style="text-align: right;">91.447% (91.276–91.726)</td>
+</tr>
+<tr>
+<td style="text-align: right;">60%</td>
+<td style="text-align: right;">2,507 / 4,179</td>
+<td style="text-align: right;">12,858</td>
+<td style="text-align: right;">89</td>
+<td style="text-align: right;">72.406% (72.124–72.935)</td>
+<td style="text-align: right;">65.740% (65.579–67.061)</td>
+<td style="text-align: right;">90.565% (89.988–91.933)</td>
+<td style="text-align: right;">88.498% (88.442–88.641)</td>
+</tr>
+<tr>
+<td style="text-align: right;">50%</td>
+<td style="text-align: right;">2,090 / 4,179</td>
+<td style="text-align: right;">16,078</td>
+<td style="text-align: right;">86</td>
+<td style="text-align: right;">71.433% (70.792–72.016)</td>
+<td style="text-align: right;">64.706% (63.871–65.934)</td>
+<td style="text-align: right;">90.561% (89.489–90.758)</td>
+<td style="text-align: right;">85.333% (85.042–85.612)</td>
+</tr>
+<tr>
+<td style="text-align: right;">40%</td>
+<td style="text-align: right;">1,672 / 4,179</td>
+<td style="text-align: right;">19,316</td>
+<td style="text-align: right;">87</td>
+<td style="text-align: right;">70.449% (69.207–70.919)</td>
+<td style="text-align: right;">63.495% (61.895–64.640)</td>
+<td style="text-align: right;">90.106% (88.956–90.560)</td>
+<td style="text-align: right;">81.882% (81.244–82.196)</td>
+</tr>
+<tr>
+<td style="text-align: right;">30%</td>
+<td style="text-align: right;">1,254 / 4,179</td>
+<td style="text-align: right;">22,543</td>
+<td style="text-align: right;">70</td>
+<td style="text-align: right;">68.316% (67.096–69.463)</td>
+<td style="text-align: right;">60.962% (59.342–62.755)</td>
+<td style="text-align: right;">89.335% (88.687–90.062)</td>
+<td style="text-align: right;">77.558% (76.727–78.444)</td>
+</tr>
+<tr>
+<td style="text-align: right;">20%</td>
+<td style="text-align: right;">836 / 4,179</td>
+<td style="text-align: right;">25,755</td>
+<td style="text-align: right;">61</td>
+<td style="text-align: right;">65.725% (64.691–66.441)</td>
+<td style="text-align: right;">57.555% (56.445–58.672)</td>
+<td style="text-align: right;">89.232% (88.279–90.082)</td>
+<td style="text-align: right;">72.436% (71.615–73.034)</td>
+</tr>
+<tr>
+<td style="text-align: right;">10%</td>
+<td style="text-align: right;">418 / 4,179</td>
+<td style="text-align: right;">29,022</td>
+<td style="text-align: right;">28</td>
+<td style="text-align: right;">61.104% (59.899–62.277)</td>
+<td style="text-align: right;">51.055% (49.995–53.218)</td>
+<td style="text-align: right;">88.238% (87.507–89.957)</td>
+<td style="text-align: right;">64.847% (63.836–65.997)</td>
+</tr>
+</tbody>
+</table>
+</div>
+</details>
+<details>
+<summary><strong>German</strong> — <code>de-de-default</code> 1.0.0</summary>
+<div>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">Training</th>
+<th style="text-align: right;">Selected / total rows</th>
+<th style="text-align: right;">Median unseen occurrences</th>
+<th style="text-align: right;">Overlap excluded</th>
+<th style="text-align: right;">Unseen all exact</th>
+<th style="text-align: right;">Unseen changed exact</th>
+<th style="text-align: right;">Unseen root preserved</th>
+<th style="text-align: right;">Whole all exact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">100%</td>
+<td style="text-align: right;">54,092 / 54,092</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">92.725%</td>
+</tr>
+<tr>
+<td style="text-align: right;">90%</td>
+<td style="text-align: right;">48,683 / 54,092</td>
+<td style="text-align: right;">27,967</td>
+<td style="text-align: right;">5,327</td>
+<td style="text-align: right;">67.322% (66.336–67.716)</td>
+<td style="text-align: right;">59.108% (57.552–59.642)</td>
+<td style="text-align: right;">93.117% (92.600–93.345)</td>
+<td style="text-align: right;">89.908% (89.841–89.987)</td>
+</tr>
+<tr>
+<td style="text-align: right;">80%</td>
+<td style="text-align: right;">43,274 / 54,092</td>
+<td style="text-align: right;">57,109</td>
+<td style="text-align: right;">9,524</td>
+<td style="text-align: right;">66.531% (65.981–66.706)</td>
+<td style="text-align: right;">58.016% (57.177–58.316)</td>
+<td style="text-align: right;">92.441% (91.771–92.581)</td>
+<td style="text-align: right;">87.066% (86.980–87.121)</td>
+</tr>
+<tr>
+<td style="text-align: right;">70%</td>
+<td style="text-align: right;">37,864 / 54,092</td>
+<td style="text-align: right;">87,177</td>
+<td style="text-align: right;">12,653</td>
+<td style="text-align: right;">65.784% (65.442–66.138)</td>
+<td style="text-align: right;">56.948% (56.648–57.396)</td>
+<td style="text-align: right;">91.897% (91.743–91.984)</td>
+<td style="text-align: right;">84.105% (83.974–84.251)</td>
+</tr>
+<tr>
+<td style="text-align: right;">60%</td>
+<td style="text-align: right;">32,455 / 54,092</td>
+<td style="text-align: right;">118,916</td>
+<td style="text-align: right;">14,631</td>
+<td style="text-align: right;">65.062% (64.946–65.321)</td>
+<td style="text-align: right;">56.115% (55.912–56.303)</td>
+<td style="text-align: right;">91.372% (91.222–91.619)</td>
+<td style="text-align: right;">81.048% (80.993–81.213)</td>
+</tr>
+<tr>
+<td style="text-align: right;">50%</td>
+<td style="text-align: right;">27,046 / 54,092</td>
+<td style="text-align: right;">151,254</td>
+<td style="text-align: right;">15,476</td>
+<td style="text-align: right;">64.493% (64.083–64.603)</td>
+<td style="text-align: right;">55.371% (54.795–55.510)</td>
+<td style="text-align: right;">90.896% (90.661–91.008)</td>
+<td style="text-align: right;">78.014% (77.799–78.062)</td>
+</tr>
+<tr>
+<td style="text-align: right;">40%</td>
+<td style="text-align: right;">21,637 / 54,092</td>
+<td style="text-align: right;">184,273</td>
+<td style="text-align: right;">15,105</td>
+<td style="text-align: right;">63.564% (63.219–63.981)</td>
+<td style="text-align: right;">54.206% (53.646–54.739)</td>
+<td style="text-align: right;">90.246% (89.885–90.446)</td>
+<td style="text-align: right;">74.680% (74.544–74.924)</td>
+</tr>
+<tr>
+<td style="text-align: right;">30%</td>
+<td style="text-align: right;">16,228 / 54,092</td>
+<td style="text-align: right;">219,296</td>
+<td style="text-align: right;">13,318</td>
+<td style="text-align: right;">62.696% (62.282–63.101)</td>
+<td style="text-align: right;">53.083% (52.613–53.663)</td>
+<td style="text-align: right;">89.436% (88.996–89.500)</td>
+<td style="text-align: right;">71.309% (71.004–71.509)</td>
+</tr>
+<tr>
+<td style="text-align: right;">20%</td>
+<td style="text-align: right;">10,818 / 54,092</td>
+<td style="text-align: right;">255,708</td>
+<td style="text-align: right;">10,520</td>
+<td style="text-align: right;">61.569% (60.724–61.785)</td>
+<td style="text-align: right;">51.959% (50.533–52.161)</td>
+<td style="text-align: right;">88.244% (88.017–88.723)</td>
+<td style="text-align: right;">67.504% (66.844–67.696)</td>
+</tr>
+<tr>
+<td style="text-align: right;">10%</td>
+<td style="text-align: right;">5,409 / 54,092</td>
+<td style="text-align: right;">293,618</td>
+<td style="text-align: right;">6,095</td>
+<td style="text-align: right;">59.280% (58.219–59.702)</td>
+<td style="text-align: right;">49.432% (48.026–49.731)</td>
+<td style="text-align: right;">86.150% (85.836–86.733)</td>
+<td style="text-align: right;">62.456% (61.579–62.888)</td>
+</tr>
+</tbody>
+</table>
+</div>
+</details>
+<details>
+<summary><strong>Spanish</strong> — <code>es-es-default</code> 1.0.0</summary>
+<div>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">Training</th>
+<th style="text-align: right;">Selected / total rows</th>
+<th style="text-align: right;">Median unseen occurrences</th>
+<th style="text-align: right;">Overlap excluded</th>
+<th style="text-align: right;">Unseen all exact</th>
+<th style="text-align: right;">Unseen changed exact</th>
+<th style="text-align: right;">Unseen root preserved</th>
+<th style="text-align: right;">Whole all exact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">100%</td>
+<td style="text-align: right;">65,059 / 65,059</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">97.459%</td>
+</tr>
+<tr>
+<td style="text-align: right;">90%</td>
+<td style="text-align: right;">58,553 / 65,059</td>
+<td style="text-align: right;">89,614</td>
+<td style="text-align: right;">4,602</td>
+<td style="text-align: right;">89.801% (89.306–90.166)</td>
+<td style="text-align: right;">89.176% (88.546–89.533)</td>
+<td style="text-align: right;">94.711% (94.645–94.920)</td>
+<td style="text-align: right;">96.465% (96.421–96.497)</td>
+</tr>
+<tr>
+<td style="text-align: right;">80%</td>
+<td style="text-align: right;">52,047 / 65,059</td>
+<td style="text-align: right;">177,896</td>
+<td style="text-align: right;">8,264</td>
+<td style="text-align: right;">89.154% (88.946–89.572)</td>
+<td style="text-align: right;">88.448% (88.281–88.984)</td>
+<td style="text-align: right;">93.934% (93.855–94.442)</td>
+<td style="text-align: right;">95.426% (95.336–95.476)</td>
+</tr>
+<tr>
+<td style="text-align: right;">70%</td>
+<td style="text-align: right;">45,541 / 65,059</td>
+<td style="text-align: right;">265,246</td>
+<td style="text-align: right;">11,087</td>
+<td style="text-align: right;">88.730% (88.448–88.971)</td>
+<td style="text-align: right;">88.095% (87.737–88.338)</td>
+<td style="text-align: right;">93.593% (93.457–93.713)</td>
+<td style="text-align: right;">94.284% (94.253–94.406)</td>
+</tr>
+<tr>
+<td style="text-align: right;">60%</td>
+<td style="text-align: right;">39,035 / 65,059</td>
+<td style="text-align: right;">357,877</td>
+<td style="text-align: right;">12,540</td>
+<td style="text-align: right;">88.208% (87.787–88.272)</td>
+<td style="text-align: right;">87.558% (87.076–87.614)</td>
+<td style="text-align: right;">92.915% (92.860–93.031)</td>
+<td style="text-align: right;">93.165% (92.993–93.209)</td>
+</tr>
+<tr>
+<td style="text-align: right;">50%</td>
+<td style="text-align: right;">32,530 / 65,059</td>
+<td style="text-align: right;">450,843</td>
+<td style="text-align: right;">13,130</td>
+<td style="text-align: right;">87.642% (87.181–87.836)</td>
+<td style="text-align: right;">86.991% (86.460–87.243)</td>
+<td style="text-align: right;">92.320% (92.067–92.411)</td>
+<td style="text-align: right;">91.924% (91.593–92.011)</td>
+</tr>
+<tr>
+<td style="text-align: right;">40%</td>
+<td style="text-align: right;">26,024 / 65,059</td>
+<td style="text-align: right;">544,394</td>
+<td style="text-align: right;">12,694</td>
+<td style="text-align: right;">86.496% (86.375–86.920)</td>
+<td style="text-align: right;">85.764% (85.618–86.311)</td>
+<td style="text-align: right;">91.721% (91.215–91.822)</td>
+<td style="text-align: right;">90.292% (90.188–90.515)</td>
+</tr>
+<tr>
+<td style="text-align: right;">30%</td>
+<td style="text-align: right;">19,518 / 65,059</td>
+<td style="text-align: right;">638,770</td>
+<td style="text-align: right;">11,224</td>
+<td style="text-align: right;">85.558% (85.336–86.089)</td>
+<td style="text-align: right;">84.789% (84.495–85.404)</td>
+<td style="text-align: right;">90.925% (90.760–91.204)</td>
+<td style="text-align: right;">88.586% (88.400–88.986)</td>
+</tr>
+<tr>
+<td style="text-align: right;">20%</td>
+<td style="text-align: right;">13,012 / 65,059</td>
+<td style="text-align: right;">732,142</td>
+<td style="text-align: right;">8,653</td>
+<td style="text-align: right;">84.175% (83.996–84.838)</td>
+<td style="text-align: right;">83.310% (83.160–84.044)</td>
+<td style="text-align: right;">90.087% (89.771–90.303)</td>
+<td style="text-align: right;">86.484% (86.255–86.945)</td>
+</tr>
+<tr>
+<td style="text-align: right;">10%</td>
+<td style="text-align: right;">6,506 / 65,059</td>
+<td style="text-align: right;">827,660</td>
+<td style="text-align: right;">4,802</td>
+<td style="text-align: right;">82.066% (81.789–82.910)</td>
+<td style="text-align: right;">80.995% (80.671–81.943)</td>
+<td style="text-align: right;">89.364% (88.856–89.475)</td>
+<td style="text-align: right;">83.486% (83.188–84.145)</td>
+</tr>
+</tbody>
+</table>
+</div>
+</details>
+<details>
+<summary><strong>Persian</strong> — <code>fa-ir-default</code> 1.0.0</summary>
+<div>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">Training</th>
+<th style="text-align: right;">Selected / total rows</th>
+<th style="text-align: right;">Median unseen occurrences</th>
+<th style="text-align: right;">Overlap excluded</th>
+<th style="text-align: right;">Unseen all exact</th>
+<th style="text-align: right;">Unseen changed exact</th>
+<th style="text-align: right;">Unseen root preserved</th>
+<th style="text-align: right;">Whole all exact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">100%</td>
+<td style="text-align: right;">69 / 69</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">95.836%</td>
+</tr>
+<tr>
+<td style="text-align: right;">90%</td>
+<td style="text-align: right;">62 / 69</td>
+<td style="text-align: right;">360</td>
+<td style="text-align: right;">29</td>
+<td style="text-align: right;">18.699% (15.833–19.469)</td>
+<td style="text-align: right;">15.493% (13.006–16.000)</td>
+<td style="text-align: right;">100.000% (85.714–100.000)</td>
+<td style="text-align: right;">87.878% (87.745–88.594)</td>
+</tr>
+<tr>
+<td style="text-align: right;">80%</td>
+<td style="text-align: right;">55 / 69</td>
+<td style="text-align: right;">743</td>
+<td style="text-align: right;">29</td>
+<td style="text-align: right;">15.979% (13.625–19.473)</td>
+<td style="text-align: right;">12.725% (10.400–16.031)</td>
+<td style="text-align: right;">100.000% (92.857–100.000)</td>
+<td style="text-align: right;">79.204% (79.072–81.247)</td>
+</tr>
+<tr>
+<td style="text-align: right;">70%</td>
+<td style="text-align: right;">48 / 69</td>
+<td style="text-align: right;">1,054</td>
+<td style="text-align: right;">87</td>
+<td style="text-align: right;">17.998% (15.808–19.631)</td>
+<td style="text-align: right;">14.544% (12.546–16.211)</td>
+<td style="text-align: right;">100.000% (95.238–100.000)</td>
+<td style="text-align: right;">73.077% (71.645–73.899)</td>
+</tr>
+<tr>
+<td style="text-align: right;">60%</td>
+<td style="text-align: right;">41 / 69</td>
+<td style="text-align: right;">1,474</td>
+<td style="text-align: right;">87</td>
+<td style="text-align: right;">17.843% (16.847–18.371)</td>
+<td style="text-align: right;">14.739% (13.572–15.175)</td>
+<td style="text-align: right;">100.000% (96.429–100.000)</td>
+<td style="text-align: right;">65.305% (63.740–65.517)</td>
+</tr>
+<tr>
+<td style="text-align: right;">50%</td>
+<td style="text-align: right;">35 / 69</td>
+<td style="text-align: right;">1,792</td>
+<td style="text-align: right;">88</td>
+<td style="text-align: right;">17.796% (17.243–18.567)</td>
+<td style="text-align: right;">14.596% (13.979–15.398)</td>
+<td style="text-align: right;">100.000% (97.059–100.000)</td>
+<td style="text-align: right;">58.090% (57.560–59.019)</td>
+</tr>
+<tr>
+<td style="text-align: right;">40%</td>
+<td style="text-align: right;">28 / 69</td>
+<td style="text-align: right;">2,185</td>
+<td style="text-align: right;">87</td>
+<td style="text-align: right;">18.078% (16.720–19.128)</td>
+<td style="text-align: right;">14.979% (13.479–15.918)</td>
+<td style="text-align: right;">100.000% (97.561–100.000)</td>
+<td style="text-align: right;">50.186% (49.310–51.114)</td>
+</tr>
+<tr>
+<td style="text-align: right;">30%</td>
+<td style="text-align: right;">21 / 69</td>
+<td style="text-align: right;">2,604</td>
+<td style="text-align: right;">58</td>
+<td style="text-align: right;">17.696% (16.285–18.267)</td>
+<td style="text-align: right;">14.648% (13.104–15.153)</td>
+<td style="text-align: right;">100.000% (97.917–100.000)</td>
+<td style="text-align: right;">41.857% (40.981–42.706)</td>
+</tr>
+<tr>
+<td style="text-align: right;">20%</td>
+<td style="text-align: right;">14 / 69</td>
+<td style="text-align: right;">2,978</td>
+<td style="text-align: right;">30</td>
+<td style="text-align: right;">18.105% (16.353–18.304)</td>
+<td style="text-align: right;">15.009% (13.145–15.164)</td>
+<td style="text-align: right;">100.000% (98.182–100.000)</td>
+<td style="text-align: right;">34.058% (33.130–34.536)</td>
+</tr>
+<tr>
+<td style="text-align: right;">10%</td>
+<td style="text-align: right;">7 / 69</td>
+<td style="text-align: right;">3,367</td>
+<td style="text-align: right;">29</td>
+<td style="text-align: right;">17.987% (16.428–17.998)</td>
+<td style="text-align: right;">14.842% (13.213–14.887)</td>
+<td style="text-align: right;">100.000%</td>
+<td style="text-align: right;">25.995% (24.987–26.180)</td>
+</tr>
+</tbody>
+</table>
+</div>
+</details>
+<details>
+<summary><strong>Finnish</strong> — <code>fi-fi-default</code> 1.0.0</summary>
+<div>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">Training</th>
+<th style="text-align: right;">Selected / total rows</th>
+<th style="text-align: right;">Median unseen occurrences</th>
+<th style="text-align: right;">Overlap excluded</th>
+<th style="text-align: right;">Unseen all exact</th>
+<th style="text-align: right;">Unseen changed exact</th>
+<th style="text-align: right;">Unseen root preserved</th>
+<th style="text-align: right;">Whole all exact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">100%</td>
+<td style="text-align: right;">57,027 / 57,027</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">98.661%</td>
+</tr>
+<tr>
+<td style="text-align: right;">90%</td>
+<td style="text-align: right;">51,324 / 57,027</td>
+<td style="text-align: right;">181,248</td>
+<td style="text-align: right;">5,149</td>
+<td style="text-align: right;">86.644% (86.280–86.823)</td>
+<td style="text-align: right;">86.177% (85.790–86.342)</td>
+<td style="text-align: right;">94.835% (94.730–95.762)</td>
+<td style="text-align: right;">97.363% (97.337–97.369)</td>
+</tr>
+<tr>
+<td style="text-align: right;">80%</td>
+<td style="text-align: right;">45,622 / 57,027</td>
+<td style="text-align: right;">363,208</td>
+<td style="text-align: right;">9,479</td>
+<td style="text-align: right;">86.152% (86.055–86.432)</td>
+<td style="text-align: right;">85.686% (85.568–85.979)</td>
+<td style="text-align: right;">94.265% (94.183–94.726)</td>
+<td style="text-align: right;">95.981% (95.972–96.026)</td>
+</tr>
+<tr>
+<td style="text-align: right;">70%</td>
+<td style="text-align: right;">39,919 / 57,027</td>
+<td style="text-align: right;">546,876</td>
+<td style="text-align: right;">12,346</td>
+<td style="text-align: right;">85.689% (85.586–85.804)</td>
+<td style="text-align: right;">85.219% (85.114–85.335)</td>
+<td style="text-align: right;">93.710% (93.575–93.808)</td>
+<td style="text-align: right;">94.531% (94.518–94.560)</td>
+</tr>
+<tr>
+<td style="text-align: right;">60%</td>
+<td style="text-align: right;">34,216 / 57,027</td>
+<td style="text-align: right;">730,977</td>
+<td style="text-align: right;">14,257</td>
+<td style="text-align: right;">85.172% (85.110–85.293)</td>
+<td style="text-align: right;">84.708% (84.639–84.829)</td>
+<td style="text-align: right;">93.033% (92.895–93.427)</td>
+<td style="text-align: right;">92.999% (92.978–93.035)</td>
+</tr>
+<tr>
+<td style="text-align: right;">50%</td>
+<td style="text-align: right;">28,514 / 57,027</td>
+<td style="text-align: right;">917,680</td>
+<td style="text-align: right;">14,946</td>
+<td style="text-align: right;">84.681% (84.520–84.723)</td>
+<td style="text-align: right;">84.232% (84.039–84.280)</td>
+<td style="text-align: right;">92.203% (92.123–92.566)</td>
+<td style="text-align: right;">91.382% (91.295–91.404)</td>
+</tr>
+<tr>
+<td style="text-align: right;">40%</td>
+<td style="text-align: right;">22,811 / 57,027</td>
+<td style="text-align: right;">1,103,628</td>
+<td style="text-align: right;">14,607</td>
+<td style="text-align: right;">83.991% (83.783–84.165)</td>
+<td style="text-align: right;">83.556% (83.313–83.715)</td>
+<td style="text-align: right;">91.299% (91.199–91.628)</td>
+<td style="text-align: right;">89.582% (89.463–89.675)</td>
+</tr>
+<tr>
+<td style="text-align: right;">30%</td>
+<td style="text-align: right;">17,108 / 57,027</td>
+<td style="text-align: right;">1,292,480</td>
+<td style="text-align: right;">12,981</td>
+<td style="text-align: right;">83.290% (82.866–83.366)</td>
+<td style="text-align: right;">82.848% (82.399–82.936)</td>
+<td style="text-align: right;">90.499% (90.312–90.537)</td>
+<td style="text-align: right;">87.658% (87.378–87.720)</td>
+</tr>
+<tr>
+<td style="text-align: right;">20%</td>
+<td style="text-align: right;">11,405 / 57,027</td>
+<td style="text-align: right;">1,481,274</td>
+<td style="text-align: right;">10,279</td>
+<td style="text-align: right;">81.958% (81.525–81.970)</td>
+<td style="text-align: right;">81.481% (81.032–81.508)</td>
+<td style="text-align: right;">89.459% (89.355–89.678)</td>
+<td style="text-align: right;">85.129% (84.780–85.155)</td>
+</tr>
+<tr>
+<td style="text-align: right;">10%</td>
+<td style="text-align: right;">5,703 / 57,027</td>
+<td style="text-align: right;">1,672,373</td>
+<td style="text-align: right;">6,067</td>
+<td style="text-align: right;">79.210% (78.547–79.594)</td>
+<td style="text-align: right;">78.644% (77.966–79.067)</td>
+<td style="text-align: right;">88.247% (87.860–88.496)</td>
+<td style="text-align: right;">81.064% (80.468–81.422)</td>
+</tr>
+</tbody>
+</table>
+</div>
+</details>
+<details>
+<summary><strong>French</strong> — <code>fr-fr-default</code> 1.0.0</summary>
+<div>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">Training</th>
+<th style="text-align: right;">Selected / total rows</th>
+<th style="text-align: right;">Median unseen occurrences</th>
+<th style="text-align: right;">Overlap excluded</th>
+<th style="text-align: right;">Unseen all exact</th>
+<th style="text-align: right;">Unseen changed exact</th>
+<th style="text-align: right;">Unseen root preserved</th>
+<th style="text-align: right;">Whole all exact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">100%</td>
+<td style="text-align: right;">59,240 / 59,240</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">94.831%</td>
+</tr>
+<tr>
+<td style="text-align: right;">90%</td>
+<td style="text-align: right;">53,316 / 59,240</td>
+<td style="text-align: right;">41,750</td>
+<td style="text-align: right;">5,161</td>
+<td style="text-align: right;">83.469% (82.278–83.711)</td>
+<td style="text-align: right;">80.031% (78.595–80.412)</td>
+<td style="text-align: right;">96.664% (96.351–96.813)</td>
+<td style="text-align: right;">93.302% (93.201–93.351)</td>
+</tr>
+<tr>
+<td style="text-align: right;">80%</td>
+<td style="text-align: right;">47,392 / 59,240</td>
+<td style="text-align: right;">85,315</td>
+<td style="text-align: right;">9,281</td>
+<td style="text-align: right;">82.721% (81.861–83.091)</td>
+<td style="text-align: right;">79.345% (78.141–79.693)</td>
+<td style="text-align: right;">96.074% (95.896–96.266)</td>
+<td style="text-align: right;">91.731% (91.568–91.794)</td>
+</tr>
+<tr>
+<td style="text-align: right;">70%</td>
+<td style="text-align: right;">41,468 / 59,240</td>
+<td style="text-align: right;">130,120</td>
+<td style="text-align: right;">12,345</td>
+<td style="text-align: right;">82.101% (81.643–82.329)</td>
+<td style="text-align: right;">78.644% (78.015–78.839)</td>
+<td style="text-align: right;">95.431% (95.257–95.560)</td>
+<td style="text-align: right;">90.086% (89.942–90.135)</td>
+</tr>
+<tr>
+<td style="text-align: right;">60%</td>
+<td style="text-align: right;">35,544 / 59,240</td>
+<td style="text-align: right;">175,326</td>
+<td style="text-align: right;">14,017</td>
+<td style="text-align: right;">81.224% (80.630–81.431)</td>
+<td style="text-align: right;">77.560% (76.779–77.867)</td>
+<td style="text-align: right;">94.813% (94.641–94.831)</td>
+<td style="text-align: right;">88.270% (88.228–88.450)</td>
+</tr>
+<tr>
+<td style="text-align: right;">50%</td>
+<td style="text-align: right;">29,620 / 59,240</td>
+<td style="text-align: right;">222,533</td>
+<td style="text-align: right;">14,808</td>
+<td style="text-align: right;">80.344% (79.709–80.528)</td>
+<td style="text-align: right;">76.569% (75.778–76.888)</td>
+<td style="text-align: right;">94.006% (93.785–94.099)</td>
+<td style="text-align: right;">86.507% (86.336–86.609)</td>
+</tr>
+<tr>
+<td style="text-align: right;">40%</td>
+<td style="text-align: right;">23,696 / 59,240</td>
+<td style="text-align: right;">270,536</td>
+<td style="text-align: right;">14,411</td>
+<td style="text-align: right;">79.255% (79.039–79.552)</td>
+<td style="text-align: right;">75.314% (75.088–75.702)</td>
+<td style="text-align: right;">93.386% (93.086–93.418)</td>
+<td style="text-align: right;">84.453% (84.319–84.752)</td>
+</tr>
+<tr>
+<td style="text-align: right;">30%</td>
+<td style="text-align: right;">17,772 / 59,240</td>
+<td style="text-align: right;">318,984</td>
+<td style="text-align: right;">12,728</td>
+<td style="text-align: right;">78.161% (78.141–78.274)</td>
+<td style="text-align: right;">74.079% (73.976–74.276)</td>
+<td style="text-align: right;">92.537% (92.395–92.906)</td>
+<td style="text-align: right;">82.316% (82.244–82.378)</td>
+</tr>
+<tr>
+<td style="text-align: right;">20%</td>
+<td style="text-align: right;">11,848 / 59,240</td>
+<td style="text-align: right;">369,337</td>
+<td style="text-align: right;">9,783</td>
+<td style="text-align: right;">76.769% (76.583–76.946)</td>
+<td style="text-align: right;">72.504% (72.339–72.772)</td>
+<td style="text-align: right;">91.463% (90.996–91.884)</td>
+<td style="text-align: right;">79.741% (79.646–79.873)</td>
+</tr>
+<tr>
+<td style="text-align: right;">10%</td>
+<td style="text-align: right;">5,924 / 59,240</td>
+<td style="text-align: right;">420,578</td>
+<td style="text-align: right;">5,742</td>
+<td style="text-align: right;">74.276% (73.276–74.926)</td>
+<td style="text-align: right;">69.627% (68.400–70.528)</td>
+<td style="text-align: right;">90.013% (89.987–90.359)</td>
+<td style="text-align: right;">75.978% (75.101–76.554)</td>
+</tr>
+</tbody>
+</table>
+</div>
+</details>
+<details>
+<summary><strong>Hebrew</strong> — <code>he-il-default</code> 1.0.0</summary>
+<div>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">Training</th>
+<th style="text-align: right;">Selected / total rows</th>
+<th style="text-align: right;">Median unseen occurrences</th>
+<th style="text-align: right;">Overlap excluded</th>
+<th style="text-align: right;">Unseen all exact</th>
+<th style="text-align: right;">Unseen changed exact</th>
+<th style="text-align: right;">Unseen root preserved</th>
+<th style="text-align: right;">Whole all exact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">100%</td>
+<td style="text-align: right;">2,358 / 2,358</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">98.250%</td>
+</tr>
+<tr>
+<td style="text-align: right;">90%</td>
+<td style="text-align: right;">2,122 / 2,358</td>
+<td style="text-align: right;">5,914</td>
+<td style="text-align: right;">196</td>
+<td style="text-align: right;">21.813% (21.558–23.195)</td>
+<td style="text-align: right;">16.362% (15.846–17.917)</td>
+<td style="text-align: right;">88.785% (87.416–93.636)</td>
+<td style="text-align: right;">90.688% (90.578–90.888)</td>
+</tr>
+<tr>
+<td style="text-align: right;">80%</td>
+<td style="text-align: right;">1,886 / 2,358</td>
+<td style="text-align: right;">11,868</td>
+<td style="text-align: right;">390</td>
+<td style="text-align: right;">21.715% (19.936–22.602)</td>
+<td style="text-align: right;">16.441% (14.182–17.242)</td>
+<td style="text-align: right;">89.628% (87.585–91.818)</td>
+<td style="text-align: right;">83.007% (82.678–83.339)</td>
+</tr>
+<tr>
+<td style="text-align: right;">70%</td>
+<td style="text-align: right;">1,651 / 2,358</td>
+<td style="text-align: right;">17,846</td>
+<td style="text-align: right;">499</td>
+<td style="text-align: right;">21.488% (20.548–21.734)</td>
+<td style="text-align: right;">16.059% (15.072–16.256)</td>
+<td style="text-align: right;">88.713% (88.166–89.569)</td>
+<td style="text-align: right;">75.314% (75.106–75.538)</td>
+</tr>
+<tr>
+<td style="text-align: right;">60%</td>
+<td style="text-align: right;">1,415 / 2,358</td>
+<td style="text-align: right;">23,856</td>
+<td style="text-align: right;">551</td>
+<td style="text-align: right;">20.530% (20.267–21.311)</td>
+<td style="text-align: right;">15.043% (14.721–15.824)</td>
+<td style="text-align: right;">88.702% (87.417–89.456)</td>
+<td style="text-align: right;">67.302% (67.264–67.705)</td>
+</tr>
+<tr>
+<td style="text-align: right;">50%</td>
+<td style="text-align: right;">1,179 / 2,358</td>
+<td style="text-align: right;">29,985</td>
+<td style="text-align: right;">576</td>
+<td style="text-align: right;">20.205% (19.833–20.807)</td>
+<td style="text-align: right;">14.533% (14.185–15.123)</td>
+<td style="text-align: right;">88.771% (87.642–90.375)</td>
+<td style="text-align: right;">59.531% (59.185–59.763)</td>
+</tr>
+<tr>
+<td style="text-align: right;">40%</td>
+<td style="text-align: right;">943 / 2,358</td>
+<td style="text-align: right;">36,073</td>
+<td style="text-align: right;">547</td>
+<td style="text-align: right;">19.758% (19.628–20.304)</td>
+<td style="text-align: right;">14.068% (13.841–14.608)</td>
+<td style="text-align: right;">89.236% (88.497–90.062)</td>
+<td style="text-align: right;">51.381% (51.289–51.799)</td>
+</tr>
+<tr>
+<td style="text-align: right;">30%</td>
+<td style="text-align: right;">707 / 2,358</td>
+<td style="text-align: right;">42,248</td>
+<td style="text-align: right;">465</td>
+<td style="text-align: right;">19.125% (18.459–19.270)</td>
+<td style="text-align: right;">13.345% (12.730–13.462)</td>
+<td style="text-align: right;">88.961% (87.481–90.603)</td>
+<td style="text-align: right;">43.063% (42.627–43.264)</td>
+</tr>
+<tr>
+<td style="text-align: right;">20%</td>
+<td style="text-align: right;">472 / 2,358</td>
+<td style="text-align: right;">48,464</td>
+<td style="text-align: right;">365</td>
+<td style="text-align: right;">17.734% (17.573–18.304)</td>
+<td style="text-align: right;">11.846% (11.656–12.416)</td>
+<td style="text-align: right;">89.000% (88.647–89.233)</td>
+<td style="text-align: right;">34.046% (33.884–34.388)</td>
+</tr>
+<tr>
+<td style="text-align: right;">10%</td>
+<td style="text-align: right;">236 / 2,358</td>
+<td style="text-align: right;">54,723</td>
+<td style="text-align: right;">206</td>
+<td style="text-align: right;">16.532% (15.398–18.499)</td>
+<td style="text-align: right;">10.423% (9.169–12.678)</td>
+<td style="text-align: right;">89.756% (88.191–91.158)</td>
+<td style="text-align: right;">24.765% (23.666–26.661)</td>
+</tr>
+</tbody>
+</table>
+</div>
+</details>
+<details>
+<summary><strong>Hungarian</strong> — <code>hu-hu-default</code> 1.0.0</summary>
+<div>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">Training</th>
+<th style="text-align: right;">Selected / total rows</th>
+<th style="text-align: right;">Median unseen occurrences</th>
+<th style="text-align: right;">Overlap excluded</th>
+<th style="text-align: right;">Unseen all exact</th>
+<th style="text-align: right;">Unseen changed exact</th>
+<th style="text-align: right;">Unseen root preserved</th>
+<th style="text-align: right;">Whole all exact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">100%</td>
+<td style="text-align: right;">19,406 / 19,406</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">99.222%</td>
+</tr>
+<tr>
+<td style="text-align: right;">90%</td>
+<td style="text-align: right;">17,465 / 19,406</td>
+<td style="text-align: right;">92,253</td>
+<td style="text-align: right;">1,360</td>
+<td style="text-align: right;">92.212% (91.551–92.510)</td>
+<td style="text-align: right;">92.203% (91.476–92.460)</td>
+<td style="text-align: right;">93.446% (92.426–93.786)</td>
+<td style="text-align: right;">98.479% (98.407–98.493)</td>
+</tr>
+<tr>
+<td style="text-align: right;">80%</td>
+<td style="text-align: right;">15,525 / 19,406</td>
+<td style="text-align: right;">184,401</td>
+<td style="text-align: right;">2,417</td>
+<td style="text-align: right;">91.771% (91.652–92.138)</td>
+<td style="text-align: right;">91.756% (91.609–92.123)</td>
+<td style="text-align: right;">92.536% (92.147–92.726)</td>
+<td style="text-align: right;">97.646% (97.626–97.712)</td>
+</tr>
+<tr>
+<td style="text-align: right;">70%</td>
+<td style="text-align: right;">13,584 / 19,406</td>
+<td style="text-align: right;">277,343</td>
+<td style="text-align: right;">3,300</td>
+<td style="text-align: right;">91.756% (91.390–92.053)</td>
+<td style="text-align: right;">91.744% (91.350–92.058)</td>
+<td style="text-align: right;">91.940% (90.827–92.376)</td>
+<td style="text-align: right;">96.861% (96.757–96.947)</td>
+</tr>
+<tr>
+<td style="text-align: right;">60%</td>
+<td style="text-align: right;">11,644 / 19,406</td>
+<td style="text-align: right;">370,552</td>
+<td style="text-align: right;">3,836</td>
+<td style="text-align: right;">91.156% (91.058–91.366)</td>
+<td style="text-align: right;">91.187% (91.074–91.418)</td>
+<td style="text-align: right;">90.673% (90.092–91.129)</td>
+<td style="text-align: right;">95.888% (95.829–95.941)</td>
+</tr>
+<tr>
+<td style="text-align: right;">50%</td>
+<td style="text-align: right;">9,703 / 19,406</td>
+<td style="text-align: right;">463,693</td>
+<td style="text-align: right;">3,952</td>
+<td style="text-align: right;">90.729% (90.537–90.756)</td>
+<td style="text-align: right;">90.777% (90.567–90.810)</td>
+<td style="text-align: right;">89.530% (89.200–89.806)</td>
+<td style="text-align: right;">94.834% (94.749–94.863)</td>
+</tr>
+<tr>
+<td style="text-align: right;">40%</td>
+<td style="text-align: right;">7,762 / 19,406</td>
+<td style="text-align: right;">557,829</td>
+<td style="text-align: right;">3,717</td>
+<td style="text-align: right;">90.002% (89.679–90.181)</td>
+<td style="text-align: right;">90.053% (89.707–90.254)</td>
+<td style="text-align: right;">88.776% (88.318–89.016)</td>
+<td style="text-align: right;">93.526% (93.390–93.683)</td>
+</tr>
+<tr>
+<td style="text-align: right;">30%</td>
+<td style="text-align: right;">5,822 / 19,406</td>
+<td style="text-align: right;">651,802</td>
+<td style="text-align: right;">3,207</td>
+<td style="text-align: right;">89.047% (88.909–89.354)</td>
+<td style="text-align: right;">89.126% (89.006–89.437)</td>
+<td style="text-align: right;">87.178% (86.603–87.420)</td>
+<td style="text-align: right;">92.006% (91.882–92.204)</td>
+</tr>
+<tr>
+<td style="text-align: right;">20%</td>
+<td style="text-align: right;">3,881 / 19,406</td>
+<td style="text-align: right;">746,292</td>
+<td style="text-align: right;">2,401</td>
+<td style="text-align: right;">88.280% (87.847–88.842)</td>
+<td style="text-align: right;">88.393% (87.931–88.968)</td>
+<td style="text-align: right;">85.865% (85.589–85.920)</td>
+<td style="text-align: right;">90.395% (90.054–90.844)</td>
+</tr>
+<tr>
+<td style="text-align: right;">10%</td>
+<td style="text-align: right;">1,941 / 19,406</td>
+<td style="text-align: right;">840,551</td>
+<td style="text-align: right;">1,399</td>
+<td style="text-align: right;">86.761% (86.100–87.668)</td>
+<td style="text-align: right;">86.876% (86.177–87.841)</td>
+<td style="text-align: right;">84.086% (83.633–85.050)</td>
+<td style="text-align: right;">87.963% (87.354–88.786)</td>
+</tr>
+</tbody>
+</table>
+</div>
+</details>
+<details>
+<summary><strong>Italian</strong> — <code>it-it-default</code> 1.0.0</summary>
+<div>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">Training</th>
+<th style="text-align: right;">Selected / total rows</th>
+<th style="text-align: right;">Median unseen occurrences</th>
+<th style="text-align: right;">Overlap excluded</th>
+<th style="text-align: right;">Unseen all exact</th>
+<th style="text-align: right;">Unseen changed exact</th>
+<th style="text-align: right;">Unseen root preserved</th>
+<th style="text-align: right;">Whole all exact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">100%</td>
+<td style="text-align: right;">10,009 / 10,009</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">99.056%</td>
+</tr>
+<tr>
+<td style="text-align: right;">90%</td>
+<td style="text-align: right;">9,008 / 10,009</td>
+<td style="text-align: right;">33,156</td>
+<td style="text-align: right;">558</td>
+<td style="text-align: right;">93.965% (93.205–94.474)</td>
+<td style="text-align: right;">93.600% (92.783–94.134)</td>
+<td style="text-align: right;">99.900% (99.600–100.000)</td>
+<td style="text-align: right;">98.473% (98.385–98.520)</td>
+</tr>
+<tr>
+<td style="text-align: right;">80%</td>
+<td style="text-align: right;">8,007 / 10,009</td>
+<td style="text-align: right;">66,376</td>
+<td style="text-align: right;">1,008</td>
+<td style="text-align: right;">93.594% (93.308–93.801)</td>
+<td style="text-align: right;">93.192% (92.886–93.418)</td>
+<td style="text-align: right;">99.900% (99.750–99.950)</td>
+<td style="text-align: right;">97.816% (97.782–97.848)</td>
+</tr>
+<tr>
+<td style="text-align: right;">70%</td>
+<td style="text-align: right;">7,006 / 10,009</td>
+<td style="text-align: right;">99,459</td>
+<td style="text-align: right;">1,285</td>
+<td style="text-align: right;">93.065% (92.894–93.176)</td>
+<td style="text-align: right;">92.631% (92.450–92.747)</td>
+<td style="text-align: right;">99.867% (99.800–99.900)</td>
+<td style="text-align: right;">97.072% (97.043–97.115)</td>
+</tr>
+<tr>
+<td style="text-align: right;">60%</td>
+<td style="text-align: right;">6,005 / 10,009</td>
+<td style="text-align: right;">132,730</td>
+<td style="text-align: right;">1,556</td>
+<td style="text-align: right;">92.510% (92.196–92.768)</td>
+<td style="text-align: right;">92.037% (91.712–92.312)</td>
+<td style="text-align: right;">99.863% (99.750–99.900)</td>
+<td style="text-align: right;">96.267% (96.099–96.348)</td>
+</tr>
+<tr>
+<td style="text-align: right;">50%</td>
+<td style="text-align: right;">5,005 / 10,009</td>
+<td style="text-align: right;">166,665</td>
+<td style="text-align: right;">1,637</td>
+<td style="text-align: right;">91.882% (91.717–92.283)</td>
+<td style="text-align: right;">91.375% (91.195–91.801)</td>
+<td style="text-align: right;">99.840% (99.780–99.920)</td>
+<td style="text-align: right;">95.296% (95.190–95.476)</td>
+</tr>
+<tr>
+<td style="text-align: right;">40%</td>
+<td style="text-align: right;">4,004 / 10,009</td>
+<td style="text-align: right;">199,950</td>
+<td style="text-align: right;">1,479</td>
+<td style="text-align: right;">91.606% (91.107–91.863)</td>
+<td style="text-align: right;">91.077% (90.547–91.356)</td>
+<td style="text-align: right;">99.842% (99.783–99.883)</td>
+<td style="text-align: right;">94.458% (94.135–94.521)</td>
+</tr>
+<tr>
+<td style="text-align: right;">30%</td>
+<td style="text-align: right;">3,003 / 10,009</td>
+<td style="text-align: right;">234,119</td>
+<td style="text-align: right;">1,370</td>
+<td style="text-align: right;">90.846% (90.583–91.131)</td>
+<td style="text-align: right;">90.272% (89.989–90.573)</td>
+<td style="text-align: right;">99.879% (99.800–99.929)</td>
+<td style="text-align: right;">93.137% (92.971–93.395)</td>
+</tr>
+<tr>
+<td style="text-align: right;">20%</td>
+<td style="text-align: right;">2,002 / 10,009</td>
+<td style="text-align: right;">268,626</td>
+<td style="text-align: right;">1,035</td>
+<td style="text-align: right;">89.611% (89.163–90.122)</td>
+<td style="text-align: right;">88.964% (88.479–89.500)</td>
+<td style="text-align: right;">99.888% (99.725–99.963)</td>
+<td style="text-align: right;">91.388% (91.005–91.839)</td>
+</tr>
+<tr>
+<td style="text-align: right;">10%</td>
+<td style="text-align: right;">1,001 / 10,009</td>
+<td style="text-align: right;">303,036</td>
+<td style="text-align: right;">513</td>
+<td style="text-align: right;">87.447% (87.014–87.906)</td>
+<td style="text-align: right;">86.665% (86.198–87.161)</td>
+<td style="text-align: right;">99.794% (99.556–99.917)</td>
+<td style="text-align: right;">88.555% (88.194–88.979)</td>
+</tr>
+</tbody>
+</table>
+</div>
+</details>
+<details>
+<summary><strong>Norwegian Bokmål</strong> — <code>nb-no-default</code> 1.0.0</summary>
+<div>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">Training</th>
+<th style="text-align: right;">Selected / total rows</th>
+<th style="text-align: right;">Median unseen occurrences</th>
+<th style="text-align: right;">Overlap excluded</th>
+<th style="text-align: right;">Unseen all exact</th>
+<th style="text-align: right;">Unseen changed exact</th>
+<th style="text-align: right;">Unseen root preserved</th>
+<th style="text-align: right;">Whole all exact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">100%</td>
+<td style="text-align: right;">17,929 / 17,929</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">96.852%</td>
+</tr>
+<tr>
+<td style="text-align: right;">90%</td>
+<td style="text-align: right;">16,136 / 17,929</td>
+<td style="text-align: right;">8,682</td>
+<td style="text-align: right;">459</td>
+<td style="text-align: right;">79.616% (79.365–80.300)</td>
+<td style="text-align: right;">70.546% (70.229–71.560)</td>
+<td style="text-align: right;">95.510% (95.252–96.117)</td>
+<td style="text-align: right;">95.003% (94.958–95.075)</td>
+</tr>
+<tr>
+<td style="text-align: right;">80%</td>
+<td style="text-align: right;">14,343 / 17,929</td>
+<td style="text-align: right;">17,357</td>
+<td style="text-align: right;">841</td>
+<td style="text-align: right;">79.282% (78.391–79.483)</td>
+<td style="text-align: right;">69.935% (68.919–70.124)</td>
+<td style="text-align: right;">95.430% (94.759–95.606)</td>
+<td style="text-align: right;">93.090% (92.952–93.176)</td>
+</tr>
+<tr>
+<td style="text-align: right;">70%</td>
+<td style="text-align: right;">12,550 / 17,929</td>
+<td style="text-align: right;">26,235</td>
+<td style="text-align: right;">1,056</td>
+<td style="text-align: right;">78.616% (78.247–79.117)</td>
+<td style="text-align: right;">69.080% (68.975–69.623)</td>
+<td style="text-align: right;">95.083% (94.075–95.571)</td>
+<td style="text-align: right;">91.051% (91.022–91.248)</td>
+</tr>
+<tr>
+<td style="text-align: right;">60%</td>
+<td style="text-align: right;">10,757 / 17,929</td>
+<td style="text-align: right;">35,053</td>
+<td style="text-align: right;">1,222</td>
+<td style="text-align: right;">77.888% (77.692–78.230)</td>
+<td style="text-align: right;">68.373% (67.934–68.693)</td>
+<td style="text-align: right;">94.544% (94.086–94.654)</td>
+<td style="text-align: right;">88.955% (88.860–89.131)</td>
+</tr>
+<tr>
+<td style="text-align: right;">50%</td>
+<td style="text-align: right;">8,965 / 17,929</td>
+<td style="text-align: right;">44,080</td>
+<td style="text-align: right;">1,264</td>
+<td style="text-align: right;">77.213% (76.853–77.697)</td>
+<td style="text-align: right;">67.372% (67.269–68.071)</td>
+<td style="text-align: right;">94.168% (93.324–94.348)</td>
+<td style="text-align: right;">86.679% (86.578–86.965)</td>
+</tr>
+<tr>
+<td style="text-align: right;">40%</td>
+<td style="text-align: right;">7,172 / 17,929</td>
+<td style="text-align: right;">53,261</td>
+<td style="text-align: right;">1,266</td>
+<td style="text-align: right;">76.064% (75.979–76.622)</td>
+<td style="text-align: right;">66.133% (65.907–66.950)</td>
+<td style="text-align: right;">93.222% (92.859–93.532)</td>
+<td style="text-align: right;">84.095% (83.980–84.407)</td>
+</tr>
+<tr>
+<td style="text-align: right;">30%</td>
+<td style="text-align: right;">5,379 / 17,929</td>
+<td style="text-align: right;">62,496</td>
+<td style="text-align: right;">1,103</td>
+<td style="text-align: right;">74.899% (74.255–75.323)</td>
+<td style="text-align: right;">64.655% (63.730–65.508)</td>
+<td style="text-align: right;">92.387% (92.185–92.553)</td>
+<td style="text-align: right;">81.227% (80.765–81.536)</td>
+</tr>
+<tr>
+<td style="text-align: right;">20%</td>
+<td style="text-align: right;">3,586 / 17,929</td>
+<td style="text-align: right;">71,829</td>
+<td style="text-align: right;">816</td>
+<td style="text-align: right;">72.851% (72.564–73.423)</td>
+<td style="text-align: right;">62.099% (61.353–62.757)</td>
+<td style="text-align: right;">91.669% (91.337–91.848)</td>
+<td style="text-align: right;">77.536% (77.244–77.940)</td>
+</tr>
+<tr>
+<td style="text-align: right;">10%</td>
+<td style="text-align: right;">1,793 / 17,929</td>
+<td style="text-align: right;">81,276</td>
+<td style="text-align: right;">458</td>
+<td style="text-align: right;">69.855% (69.368–70.692)</td>
+<td style="text-align: right;">58.598% (57.048–59.496)</td>
+<td style="text-align: right;">89.971% (89.224–90.585)</td>
+<td style="text-align: right;">72.437% (72.066–73.258)</td>
+</tr>
+</tbody>
+</table>
+</div>
+</details>
+<details>
+<summary><strong>Dutch</strong> — <code>nl-nl-default</code> 1.0.0</summary>
+<div>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">Training</th>
+<th style="text-align: right;">Selected / total rows</th>
+<th style="text-align: right;">Median unseen occurrences</th>
+<th style="text-align: right;">Overlap excluded</th>
+<th style="text-align: right;">Unseen all exact</th>
+<th style="text-align: right;">Unseen changed exact</th>
+<th style="text-align: right;">Unseen root preserved</th>
+<th style="text-align: right;">Whole all exact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">100%</td>
+<td style="text-align: right;">4,992 / 4,992</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">99.120%</td>
+</tr>
+<tr>
+<td style="text-align: right;">90%</td>
+<td style="text-align: right;">4,493 / 4,992</td>
+<td style="text-align: right;">3,085</td>
+<td style="text-align: right;">57</td>
+<td style="text-align: right;">74.468% (73.250–76.272)</td>
+<td style="text-align: right;">65.891% (63.190–67.730)</td>
+<td style="text-align: right;">94.512% (92.371–95.697)</td>
+<td style="text-align: right;">96.574% (96.437–96.777)</td>
+</tr>
+<tr>
+<td style="text-align: right;">80%</td>
+<td style="text-align: right;">3,994 / 4,992</td>
+<td style="text-align: right;">6,160</td>
+<td style="text-align: right;">110</td>
+<td style="text-align: right;">74.369% (74.091–75.340)</td>
+<td style="text-align: right;">64.865% (64.550–66.383)</td>
+<td style="text-align: right;">94.408% (92.901–95.806)</td>
+<td style="text-align: right;">94.083% (94.025–94.245)</td>
+</tr>
+<tr>
+<td style="text-align: right;">70%</td>
+<td style="text-align: right;">3,494 / 4,992</td>
+<td style="text-align: right;">9,298</td>
+<td style="text-align: right;">148</td>
+<td style="text-align: right;">74.137% (73.135–74.845)</td>
+<td style="text-align: right;">64.553% (63.215–66.338)</td>
+<td style="text-align: right;">94.412% (93.155–95.287)</td>
+<td style="text-align: right;">91.461% (91.190–91.734)</td>
+</tr>
+<tr>
+<td style="text-align: right;">60%</td>
+<td style="text-align: right;">2,995 / 4,992</td>
+<td style="text-align: right;">12,412</td>
+<td style="text-align: right;">171</td>
+<td style="text-align: right;">73.828% (73.295–73.872)</td>
+<td style="text-align: right;">64.368% (63.661–64.668)</td>
+<td style="text-align: right;">94.242% (93.471–95.070)</td>
+<td style="text-align: right;">88.817% (88.524–88.845)</td>
+</tr>
+<tr>
+<td style="text-align: right;">50%</td>
+<td style="text-align: right;">2,496 / 4,992</td>
+<td style="text-align: right;">15,581</td>
+<td style="text-align: right;">174</td>
+<td style="text-align: right;">73.408% (73.027–73.660)</td>
+<td style="text-align: right;">63.952% (63.070–64.202)</td>
+<td style="text-align: right;">94.186% (93.539–94.678)</td>
+<td style="text-align: right;">86.068% (85.791–86.153)</td>
+</tr>
+<tr>
+<td style="text-align: right;">40%</td>
+<td style="text-align: right;">1,997 / 4,992</td>
+<td style="text-align: right;">18,714</td>
+<td style="text-align: right;">171</td>
+<td style="text-align: right;">72.501% (71.803–73.110)</td>
+<td style="text-align: right;">62.655% (61.524–63.525)</td>
+<td style="text-align: right;">93.853% (93.540–94.029)</td>
+<td style="text-align: right;">82.969% (82.495–83.280)</td>
+</tr>
+<tr>
+<td style="text-align: right;">30%</td>
+<td style="text-align: right;">1,498 / 4,992</td>
+<td style="text-align: right;">21,856</td>
+<td style="text-align: right;">141</td>
+<td style="text-align: right;">71.097% (70.602–72.004)</td>
+<td style="text-align: right;">61.026% (59.937–61.731)</td>
+<td style="text-align: right;">93.565% (92.739–94.166)</td>
+<td style="text-align: right;">79.432% (79.003–79.969)</td>
+</tr>
+<tr>
+<td style="text-align: right;">20%</td>
+<td style="text-align: right;">998 / 4,992</td>
+<td style="text-align: right;">25,065</td>
+<td style="text-align: right;">109</td>
+<td style="text-align: right;">69.543% (68.997–70.471)</td>
+<td style="text-align: right;">58.908% (57.908–60.208)</td>
+<td style="text-align: right;">92.781% (92.430–93.088)</td>
+<td style="text-align: right;">75.447% (74.855–76.168)</td>
+</tr>
+<tr>
+<td style="text-align: right;">10%</td>
+<td style="text-align: right;">499 / 4,992</td>
+<td style="text-align: right;">28,267</td>
+<td style="text-align: right;">62</td>
+<td style="text-align: right;">67.039% (65.411–67.577)</td>
+<td style="text-align: right;">55.524% (53.812–55.891)</td>
+<td style="text-align: right;">92.616% (90.386–92.866)</td>
+<td style="text-align: right;">70.231% (68.760–70.692)</td>
+</tr>
+</tbody>
+</table>
+</div>
+</details>
+<details>
+<summary><strong>Norwegian Nynorsk</strong> — <code>nn-no-default</code> 1.0.0</summary>
+<div>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">Training</th>
+<th style="text-align: right;">Selected / total rows</th>
+<th style="text-align: right;">Median unseen occurrences</th>
+<th style="text-align: right;">Overlap excluded</th>
+<th style="text-align: right;">Unseen all exact</th>
+<th style="text-align: right;">Unseen changed exact</th>
+<th style="text-align: right;">Unseen root preserved</th>
+<th style="text-align: right;">Whole all exact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">100%</td>
+<td style="text-align: right;">4,688 / 4,688</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">93.089%</td>
+</tr>
+<tr>
+<td style="text-align: right;">90%</td>
+<td style="text-align: right;">4,219 / 4,688</td>
+<td style="text-align: right;">1,714</td>
+<td style="text-align: right;">230</td>
+<td style="text-align: right;">78.608% (77.071–80.395)</td>
+<td style="text-align: right;">70.338% (68.194–72.339)</td>
+<td style="text-align: right;">95.153% (94.473–97.054)</td>
+<td style="text-align: right;">91.278% (91.145–91.385)</td>
+</tr>
+<tr>
+<td style="text-align: right;">80%</td>
+<td style="text-align: right;">3,750 / 4,688</td>
+<td style="text-align: right;">3,536</td>
+<td style="text-align: right;">415</td>
+<td style="text-align: right;">77.555% (74.632–78.831)</td>
+<td style="text-align: right;">68.830% (64.861–70.289)</td>
+<td style="text-align: right;">95.308% (94.801–95.734)</td>
+<td style="text-align: right;">89.242% (88.866–89.563)</td>
+</tr>
+<tr>
+<td style="text-align: right;">70%</td>
+<td style="text-align: right;">3,282 / 4,688</td>
+<td style="text-align: right;">5,324</td>
+<td style="text-align: right;">569</td>
+<td style="text-align: right;">76.278% (73.779–76.665)</td>
+<td style="text-align: right;">67.482% (64.436–68.148)</td>
+<td style="text-align: right;">94.306% (93.322–94.907)</td>
+<td style="text-align: right;">87.054% (86.449–87.247)</td>
+</tr>
+<tr>
+<td style="text-align: right;">60%</td>
+<td style="text-align: right;">2,813 / 4,688</td>
+<td style="text-align: right;">7,179</td>
+<td style="text-align: right;">679</td>
+<td style="text-align: right;">74.537% (72.582–75.521)</td>
+<td style="text-align: right;">65.383% (63.050–67.121)</td>
+<td style="text-align: right;">93.672% (92.678–95.267)</td>
+<td style="text-align: right;">84.601% (83.970–84.998)</td>
+</tr>
+<tr>
+<td style="text-align: right;">50%</td>
+<td style="text-align: right;">2,344 / 4,688</td>
+<td style="text-align: right;">9,118</td>
+<td style="text-align: right;">713</td>
+<td style="text-align: right;">72.900% (71.989–74.007)</td>
+<td style="text-align: right;">62.808% (62.003–65.179)</td>
+<td style="text-align: right;">93.120% (92.681–94.000)</td>
+<td style="text-align: right;">81.986% (81.456–82.423)</td>
+</tr>
+<tr>
+<td style="text-align: right;">40%</td>
+<td style="text-align: right;">1,875 / 4,688</td>
+<td style="text-align: right;">11,136</td>
+<td style="text-align: right;">714</td>
+<td style="text-align: right;">70.773% (70.483–71.887)</td>
+<td style="text-align: right;">60.799% (60.313–62.437)</td>
+<td style="text-align: right;">92.181% (91.901–92.710)</td>
+<td style="text-align: right;">78.826% (78.688–79.390)</td>
+</tr>
+<tr>
+<td style="text-align: right;">30%</td>
+<td style="text-align: right;">1,406 / 4,688</td>
+<td style="text-align: right;">13,143</td>
+<td style="text-align: right;">632</td>
+<td style="text-align: right;">68.697% (68.490–69.926)</td>
+<td style="text-align: right;">58.151% (57.820–59.696)</td>
+<td style="text-align: right;">91.536% (91.227–91.890)</td>
+<td style="text-align: right;">75.436% (75.045–75.894)</td>
+</tr>
+<tr>
+<td style="text-align: right;">20%</td>
+<td style="text-align: right;">938 / 4,688</td>
+<td style="text-align: right;">15,283</td>
+<td style="text-align: right;">459</td>
+<td style="text-align: right;">66.030% (65.878–67.801)</td>
+<td style="text-align: right;">55.037% (54.754–57.088)</td>
+<td style="text-align: right;">90.572% (89.668–91.189)</td>
+<td style="text-align: right;">71.121% (70.882–72.220)</td>
+</tr>
+<tr>
+<td style="text-align: right;">10%</td>
+<td style="text-align: right;">469 / 4,688</td>
+<td style="text-align: right;">17,401</td>
+<td style="text-align: right;">298</td>
+<td style="text-align: right;">63.195% (60.378–64.426)</td>
+<td style="text-align: right;">51.191% (46.485–52.220)</td>
+<td style="text-align: right;">90.470% (89.673–91.396)</td>
+<td style="text-align: right;">66.017% (63.259–66.984)</td>
+</tr>
+</tbody>
+</table>
+</div>
+</details>
+<details>
+<summary><strong>Polish</strong> — <code>pl-pl-unimorph</code> 1.0.0</summary>
+<div>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">Training</th>
+<th style="text-align: right;">Selected / total rows</th>
+<th style="text-align: right;">Median unseen occurrences</th>
+<th style="text-align: right;">Overlap excluded</th>
+<th style="text-align: right;">Unseen all exact</th>
+<th style="text-align: right;">Unseen changed exact</th>
+<th style="text-align: right;">Unseen root preserved</th>
+<th style="text-align: right;">Whole all exact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">100%</td>
+<td style="text-align: right;">9,990 / 9,990</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">98.837%</td>
+</tr>
+<tr>
+<td style="text-align: right;">90%</td>
+<td style="text-align: right;">8,991 / 9,990</td>
+<td style="text-align: right;">12,963</td>
+<td style="text-align: right;">296</td>
+<td style="text-align: right;">73.070% (71.833–74.408)</td>
+<td style="text-align: right;">69.972% (68.686–71.530)</td>
+<td style="text-align: right;">90.985% (89.948–91.264)</td>
+<td style="text-align: right;">96.179% (96.039–96.269)</td>
+</tr>
+<tr>
+<td style="text-align: right;">80%</td>
+<td style="text-align: right;">7,992 / 9,990</td>
+<td style="text-align: right;">25,947</td>
+<td style="text-align: right;">560</td>
+<td style="text-align: right;">73.298% (71.542–73.560)</td>
+<td style="text-align: right;">70.344% (68.301–70.589)</td>
+<td style="text-align: right;">90.225% (89.430–90.594)</td>
+<td style="text-align: right;">93.619% (93.242–93.666)</td>
+</tr>
+<tr>
+<td style="text-align: right;">70%</td>
+<td style="text-align: right;">6,993 / 9,990</td>
+<td style="text-align: right;">39,130</td>
+<td style="text-align: right;">726</td>
+<td style="text-align: right;">72.217% (71.567–72.865)</td>
+<td style="text-align: right;">69.231% (68.375–70.016)</td>
+<td style="text-align: right;">89.428% (88.990–89.729)</td>
+<td style="text-align: right;">90.660% (90.510–90.869)</td>
+</tr>
+<tr>
+<td style="text-align: right;">60%</td>
+<td style="text-align: right;">5,994 / 9,990</td>
+<td style="text-align: right;">52,228</td>
+<td style="text-align: right;">831</td>
+<td style="text-align: right;">71.858% (71.219–72.488)</td>
+<td style="text-align: right;">68.868% (68.033–69.513)</td>
+<td style="text-align: right;">89.261% (88.574–89.356)</td>
+<td style="text-align: right;">87.814% (87.665–88.121)</td>
+</tr>
+<tr>
+<td style="text-align: right;">50%</td>
+<td style="text-align: right;">4,995 / 9,990</td>
+<td style="text-align: right;">65,434</td>
+<td style="text-align: right;">856</td>
+<td style="text-align: right;">71.160% (70.975–71.928)</td>
+<td style="text-align: right;">68.066% (67.805–69.051)</td>
+<td style="text-align: right;">88.517% (88.330–89.078)</td>
+<td style="text-align: right;">84.847% (84.707–85.211)</td>
+</tr>
+<tr>
+<td style="text-align: right;">40%</td>
+<td style="text-align: right;">3,996 / 9,990</td>
+<td style="text-align: right;">78,368</td>
+<td style="text-align: right;">857</td>
+<td style="text-align: right;">70.344% (69.790–71.025)</td>
+<td style="text-align: right;">67.165% (66.449–67.971)</td>
+<td style="text-align: right;">88.216% (88.039–88.588)</td>
+<td style="text-align: right;">81.587% (81.365–81.994)</td>
+</tr>
+<tr>
+<td style="text-align: right;">30%</td>
+<td style="text-align: right;">2,997 / 9,990</td>
+<td style="text-align: right;">91,501</td>
+<td style="text-align: right;">747</td>
+<td style="text-align: right;">69.088% (68.299–70.063)</td>
+<td style="text-align: right;">65.677% (64.723–66.909)</td>
+<td style="text-align: right;">88.256% (87.960–88.753)</td>
+<td style="text-align: right;">78.020% (77.407–78.451)</td>
+</tr>
+<tr>
+<td style="text-align: right;">20%</td>
+<td style="text-align: right;">1,998 / 9,990</td>
+<td style="text-align: right;">105,119</td>
+<td style="text-align: right;">565</td>
+<td style="text-align: right;">68.340% (67.352–68.619)</td>
+<td style="text-align: right;">64.876% (63.830–65.097)</td>
+<td style="text-align: right;">87.827% (87.200–88.611)</td>
+<td style="text-align: right;">74.371% (73.606–74.469)</td>
+</tr>
+<tr>
+<td style="text-align: right;">10%</td>
+<td style="text-align: right;">999 / 9,990</td>
+<td style="text-align: right;">118,711</td>
+<td style="text-align: right;">291</td>
+<td style="text-align: right;">65.763% (65.395–67.001)</td>
+<td style="text-align: right;">61.996% (61.861–63.283)</td>
+<td style="text-align: right;">86.633% (85.310–87.965)</td>
+<td style="text-align: right;">69.126% (68.742–70.110)</td>
+</tr>
+</tbody>
+</table>
+</div>
+</details>
+<details>
+<summary><strong>Portuguese</strong> — <code>pt-pt-default</code> 1.0.0</summary>
+<div>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">Training</th>
+<th style="text-align: right;">Selected / total rows</th>
+<th style="text-align: right;">Median unseen occurrences</th>
+<th style="text-align: right;">Overlap excluded</th>
+<th style="text-align: right;">Unseen all exact</th>
+<th style="text-align: right;">Unseen changed exact</th>
+<th style="text-align: right;">Unseen root preserved</th>
+<th style="text-align: right;">Whole all exact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">100%</td>
+<td style="text-align: right;">4,001 / 4,001</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">99.815%</td>
+</tr>
+<tr>
+<td style="text-align: right;">90%</td>
+<td style="text-align: right;">3,601 / 4,001</td>
+<td style="text-align: right;">21,519</td>
+<td style="text-align: right;">66</td>
+<td style="text-align: right;">94.620% (93.771–95.072)</td>
+<td style="text-align: right;">94.412% (93.530–94.882)</td>
+<td style="text-align: right;">100.000% (99.749–100.000)</td>
+<td style="text-align: right;">99.279% (99.194–99.326)</td>
+</tr>
+<tr>
+<td style="text-align: right;">80%</td>
+<td style="text-align: right;">3,201 / 4,001</td>
+<td style="text-align: right;">43,021</td>
+<td style="text-align: right;">113</td>
+<td style="text-align: right;">94.273% (93.721–94.673)</td>
+<td style="text-align: right;">94.056% (93.478–94.472)</td>
+<td style="text-align: right;">100.000% (99.875–100.000)</td>
+<td style="text-align: right;">98.675% (98.576–98.762)</td>
+</tr>
+<tr>
+<td style="text-align: right;">70%</td>
+<td style="text-align: right;">2,801 / 4,001</td>
+<td style="text-align: right;">64,495</td>
+<td style="text-align: right;">146</td>
+<td style="text-align: right;">93.982% (93.731–94.081)</td>
+<td style="text-align: right;">93.752% (93.489–93.852)</td>
+<td style="text-align: right;">100.000% (99.917–100.000)</td>
+<td style="text-align: right;">98.035% (97.952–98.049)</td>
+</tr>
+<tr>
+<td style="text-align: right;">60%</td>
+<td style="text-align: right;">2,401 / 4,001</td>
+<td style="text-align: right;">85,970</td>
+<td style="text-align: right;">216</td>
+<td style="text-align: right;">93.987% (93.386–94.179)</td>
+<td style="text-align: right;">93.758% (93.130–93.957)</td>
+<td style="text-align: right;">99.938% (99.937–100.000)</td>
+<td style="text-align: right;">97.430% (97.204–97.509)</td>
+</tr>
+<tr>
+<td style="text-align: right;">50%</td>
+<td style="text-align: right;">2,001 / 4,001</td>
+<td style="text-align: right;">107,492</td>
+<td style="text-align: right;">243</td>
+<td style="text-align: right;">93.601% (93.084–94.280)</td>
+<td style="text-align: right;">93.358% (92.822–94.061)</td>
+<td style="text-align: right;">99.900% (99.800–100.000)</td>
+<td style="text-align: right;">96.646% (96.404–97.001)</td>
+</tr>
+<tr>
+<td style="text-align: right;">40%</td>
+<td style="text-align: right;">1,600 / 4,001</td>
+<td style="text-align: right;">129,092</td>
+<td style="text-align: right;">242</td>
+<td style="text-align: right;">93.154% (92.758–94.021)</td>
+<td style="text-align: right;">92.889% (92.480–93.795)</td>
+<td style="text-align: right;">99.958% (99.875–100.000)</td>
+<td style="text-align: right;">95.791% (95.526–96.281)</td>
+</tr>
+<tr>
+<td style="text-align: right;">30%</td>
+<td style="text-align: right;">1,200 / 4,001</td>
+<td style="text-align: right;">150,645</td>
+<td style="text-align: right;">201</td>
+<td style="text-align: right;">92.584% (91.628–93.106)</td>
+<td style="text-align: right;">92.297% (91.306–92.854)</td>
+<td style="text-align: right;">99.893% (99.643–100.000)</td>
+<td style="text-align: right;">94.717% (94.035–95.078)</td>
+</tr>
+<tr>
+<td style="text-align: right;">20%</td>
+<td style="text-align: right;">800 / 4,001</td>
+<td style="text-align: right;">172,258</td>
+<td style="text-align: right;">154</td>
+<td style="text-align: right;">91.775% (90.674–92.113)</td>
+<td style="text-align: right;">91.460% (90.315–91.809)</td>
+<td style="text-align: right;">99.938% (99.750–100.000)</td>
+<td style="text-align: right;">93.379% (92.481–93.616)</td>
+</tr>
+<tr>
+<td style="text-align: right;">10%</td>
+<td style="text-align: right;">400 / 4,001</td>
+<td style="text-align: right;">193,881</td>
+<td style="text-align: right;">56</td>
+<td style="text-align: right;">90.423% (88.898–91.005)</td>
+<td style="text-align: right;">90.053% (88.476–90.666)</td>
+<td style="text-align: right;">99.833% (99.778–100.000)</td>
+<td style="text-align: right;">91.313% (89.988–91.878)</td>
+</tr>
+</tbody>
+</table>
+</div>
+</details>
+<details>
+<summary><strong>Russian</strong> — <code>ru-ru-default</code> 1.0.0</summary>
+<div>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">Training</th>
+<th style="text-align: right;">Selected / total rows</th>
+<th style="text-align: right;">Median unseen occurrences</th>
+<th style="text-align: right;">Overlap excluded</th>
+<th style="text-align: right;">Unseen all exact</th>
+<th style="text-align: right;">Unseen changed exact</th>
+<th style="text-align: right;">Unseen root preserved</th>
+<th style="text-align: right;">Whole all exact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">100%</td>
+<td style="text-align: right;">37,410 / 37,410</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">98.807%</td>
+</tr>
+<tr>
+<td style="text-align: right;">90%</td>
+<td style="text-align: right;">33,669 / 37,410</td>
+<td style="text-align: right;">79,477</td>
+<td style="text-align: right;">1,784</td>
+<td style="text-align: right;">82.007% (81.842–82.574)</td>
+<td style="text-align: right;">80.744% (80.515–81.372)</td>
+<td style="text-align: right;">94.506% (94.455–94.967)</td>
+<td style="text-align: right;">97.047% (97.012–97.088)</td>
+</tr>
+<tr>
+<td style="text-align: right;">80%</td>
+<td style="text-align: right;">29,928 / 37,410</td>
+<td style="text-align: right;">158,745</td>
+<td style="text-align: right;">3,165</td>
+<td style="text-align: right;">81.665% (81.300–82.243)</td>
+<td style="text-align: right;">80.343% (79.956–81.034)</td>
+<td style="text-align: right;">94.359% (93.988–94.456)</td>
+<td style="text-align: right;">95.273% (95.172–95.333)</td>
+</tr>
+<tr>
+<td style="text-align: right;">70%</td>
+<td style="text-align: right;">26,187 / 37,410</td>
+<td style="text-align: right;">238,018</td>
+<td style="text-align: right;">4,273</td>
+<td style="text-align: right;">81.575% (81.414–81.952)</td>
+<td style="text-align: right;">80.296% (80.115–80.758)</td>
+<td style="text-align: right;">94.006% (93.750–94.173)</td>
+<td style="text-align: right;">93.468% (93.397–93.575)</td>
+</tr>
+<tr>
+<td style="text-align: right;">60%</td>
+<td style="text-align: right;">22,446 / 37,410</td>
+<td style="text-align: right;">318,625</td>
+<td style="text-align: right;">4,709</td>
+<td style="text-align: right;">81.182% (80.809–81.611)</td>
+<td style="text-align: right;">79.915% (79.506–80.371)</td>
+<td style="text-align: right;">93.632% (93.525–93.734)</td>
+<td style="text-align: right;">91.517% (91.394–91.717)</td>
+</tr>
+<tr>
+<td style="text-align: right;">50%</td>
+<td style="text-align: right;">18,705 / 37,410</td>
+<td style="text-align: right;">398,725</td>
+<td style="text-align: right;">5,007</td>
+<td style="text-align: right;">80.854% (80.304–81.219)</td>
+<td style="text-align: right;">79.578% (78.976–79.972)</td>
+<td style="text-align: right;">93.316% (93.219–93.447)</td>
+<td style="text-align: right;">89.614% (89.371–89.752)</td>
+</tr>
+<tr>
+<td style="text-align: right;">40%</td>
+<td style="text-align: right;">14,964 / 37,410</td>
+<td style="text-align: right;">479,920</td>
+<td style="text-align: right;">4,763</td>
+<td style="text-align: right;">80.312% (79.666–80.706)</td>
+<td style="text-align: right;">79.019% (78.331–79.445)</td>
+<td style="text-align: right;">93.010% (92.649–93.088)</td>
+<td style="text-align: right;">87.513% (87.184–87.695)</td>
+</tr>
+<tr>
+<td style="text-align: right;">30%</td>
+<td style="text-align: right;">11,223 / 37,410</td>
+<td style="text-align: right;">560,108</td>
+<td style="text-align: right;">4,217</td>
+<td style="text-align: right;">79.739% (79.241–79.963)</td>
+<td style="text-align: right;">78.423% (77.874–78.684)</td>
+<td style="text-align: right;">92.571% (92.488–92.673)</td>
+<td style="text-align: right;">85.305% (84.992–85.415)</td>
+</tr>
+<tr>
+<td style="text-align: right;">20%</td>
+<td style="text-align: right;">7,482 / 37,410</td>
+<td style="text-align: right;">640,968</td>
+<td style="text-align: right;">3,381</td>
+<td style="text-align: right;">78.648% (78.391–79.002)</td>
+<td style="text-align: right;">77.254% (76.977–77.673)</td>
+<td style="text-align: right;">91.951% (91.925–92.274)</td>
+<td style="text-align: right;">82.544% (82.404–82.868)</td>
+</tr>
+<tr>
+<td style="text-align: right;">10%</td>
+<td style="text-align: right;">3,741 / 37,410</td>
+<td style="text-align: right;">723,165</td>
+<td style="text-align: right;">1,916</td>
+<td style="text-align: right;">76.473% (76.268–77.001)</td>
+<td style="text-align: right;">74.948% (74.735–75.545)</td>
+<td style="text-align: right;">91.268% (90.883–91.995)</td>
+<td style="text-align: right;">78.669% (78.459–79.115)</td>
+</tr>
+</tbody>
+</table>
+</div>
+</details>
+<details>
+<summary><strong>Swedish</strong> — <code>sv-se-default</code> 1.0.0</summary>
+<div>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">Training</th>
+<th style="text-align: right;">Selected / total rows</th>
+<th style="text-align: right;">Median unseen occurrences</th>
+<th style="text-align: right;">Overlap excluded</th>
+<th style="text-align: right;">Unseen all exact</th>
+<th style="text-align: right;">Unseen changed exact</th>
+<th style="text-align: right;">Unseen root preserved</th>
+<th style="text-align: right;">Whole all exact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">100%</td>
+<td style="text-align: right;">12,371 / 12,371</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">96.713%</td>
+</tr>
+<tr>
+<td style="text-align: right;">90%</td>
+<td style="text-align: right;">11,134 / 12,371</td>
+<td style="text-align: right;">10,386</td>
+<td style="text-align: right;">675</td>
+<td style="text-align: right;">82.188% (81.351–82.660)</td>
+<td style="text-align: right;">78.458% (77.818–79.022)</td>
+<td style="text-align: right;">94.926% (93.807–95.482)</td>
+<td style="text-align: right;">95.085% (95.025–95.156)</td>
+</tr>
+<tr>
+<td style="text-align: right;">80%</td>
+<td style="text-align: right;">9,897 / 12,371</td>
+<td style="text-align: right;">20,899</td>
+<td style="text-align: right;">1,144</td>
+<td style="text-align: right;">81.612% (81.194–82.294)</td>
+<td style="text-align: right;">78.137% (77.386–78.776)</td>
+<td style="text-align: right;">94.577% (93.139–94.972)</td>
+<td style="text-align: right;">93.421% (93.317–93.570)</td>
+</tr>
+<tr>
+<td style="text-align: right;">70%</td>
+<td style="text-align: right;">8,660 / 12,371</td>
+<td style="text-align: right;">31,613</td>
+<td style="text-align: right;">1,500</td>
+<td style="text-align: right;">81.378% (80.737–81.694)</td>
+<td style="text-align: right;">77.755% (77.158–78.370)</td>
+<td style="text-align: right;">93.450% (93.333–94.124)</td>
+<td style="text-align: right;">91.702% (91.610–91.808)</td>
+</tr>
+<tr>
+<td style="text-align: right;">60%</td>
+<td style="text-align: right;">7,423 / 12,371</td>
+<td style="text-align: right;">42,503</td>
+<td style="text-align: right;">1,726</td>
+<td style="text-align: right;">80.584% (80.441–80.710)</td>
+<td style="text-align: right;">77.113% (76.939–77.166)</td>
+<td style="text-align: right;">93.114% (92.742–93.192)</td>
+<td style="text-align: right;">89.845% (89.812–89.898)</td>
+</tr>
+<tr>
+<td style="text-align: right;">50%</td>
+<td style="text-align: right;">6,186 / 12,371</td>
+<td style="text-align: right;">53,431</td>
+<td style="text-align: right;">1,736</td>
+<td style="text-align: right;">79.553% (79.081–79.924)</td>
+<td style="text-align: right;">75.813% (75.376–76.278)</td>
+<td style="text-align: right;">92.204% (92.067–92.705)</td>
+<td style="text-align: right;">87.777% (87.484–87.889)</td>
+</tr>
+<tr>
+<td style="text-align: right;">40%</td>
+<td style="text-align: right;">4,948 / 12,371</td>
+<td style="text-align: right;">64,540</td>
+<td style="text-align: right;">1,677</td>
+<td style="text-align: right;">78.689% (78.113–78.970)</td>
+<td style="text-align: right;">74.894% (74.347–75.197)</td>
+<td style="text-align: right;">91.778% (91.278–92.147)</td>
+<td style="text-align: right;">85.502% (85.283–85.636)</td>
+</tr>
+<tr>
+<td style="text-align: right;">30%</td>
+<td style="text-align: right;">3,711 / 12,371</td>
+<td style="text-align: right;">75,916</td>
+<td style="text-align: right;">1,458</td>
+<td style="text-align: right;">77.249% (76.663–77.381)</td>
+<td style="text-align: right;">73.248% (72.517–73.345)</td>
+<td style="text-align: right;">91.335% (90.486–91.670)</td>
+<td style="text-align: right;">82.749% (82.497–82.863)</td>
+</tr>
+<tr>
+<td style="text-align: right;">20%</td>
+<td style="text-align: right;">2,474 / 12,371</td>
+<td style="text-align: right;">87,316</td>
+<td style="text-align: right;">1,095</td>
+<td style="text-align: right;">75.205% (74.488–75.890)</td>
+<td style="text-align: right;">70.861% (70.211–72.027)</td>
+<td style="text-align: right;">89.668% (89.346–90.344)</td>
+<td style="text-align: right;">79.323% (78.735–79.852)</td>
+</tr>
+<tr>
+<td style="text-align: right;">10%</td>
+<td style="text-align: right;">1,237 / 12,371</td>
+<td style="text-align: right;">98,793</td>
+<td style="text-align: right;">636</td>
+<td style="text-align: right;">72.010% (70.983–72.505)</td>
+<td style="text-align: right;">67.214% (66.144–68.191)</td>
+<td style="text-align: right;">87.789% (86.974–88.659)</td>
+<td style="text-align: right;">74.396% (73.426–74.785)</td>
+</tr>
+</tbody>
+</table>
+</div>
+</details>
+<details>
+<summary><strong>Ukrainian</strong> — <code>uk-ua-default</code> 1.0.0</summary>
+<div>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">Training</th>
+<th style="text-align: right;">Selected / total rows</th>
+<th style="text-align: right;">Median unseen occurrences</th>
+<th style="text-align: right;">Overlap excluded</th>
+<th style="text-align: right;">Unseen all exact</th>
+<th style="text-align: right;">Unseen changed exact</th>
+<th style="text-align: right;">Unseen root preserved</th>
+<th style="text-align: right;">Whole all exact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">100%</td>
+<td style="text-align: right;">1,493 / 1,493</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">99.307%</td>
+</tr>
+<tr>
+<td style="text-align: right;">90%</td>
+<td style="text-align: right;">1,344 / 1,493</td>
+<td style="text-align: right;">1,576</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">63.233% (61.940–65.736)</td>
+<td style="text-align: right;">57.218% (55.192–59.594)</td>
+<td style="text-align: right;">90.476% (88.514–93.243)</td>
+<td style="text-align: right;">95.673% (95.418–95.876)</td>
+</tr>
+<tr>
+<td style="text-align: right;">80%</td>
+<td style="text-align: right;">1,194 / 1,493</td>
+<td style="text-align: right;">3,166</td>
+<td style="text-align: right;">34</td>
+<td style="text-align: right;">62.236% (61.727–64.985)</td>
+<td style="text-align: right;">56.335% (54.703–59.359)</td>
+<td style="text-align: right;">88.475% (87.879–93.255)</td>
+<td style="text-align: right;">91.987% (91.580–92.514)</td>
+</tr>
+<tr>
+<td style="text-align: right;">70%</td>
+<td style="text-align: right;">1,045 / 1,493</td>
+<td style="text-align: right;">4,675</td>
+<td style="text-align: right;">36</td>
+<td style="text-align: right;">62.139% (60.712–63.062)</td>
+<td style="text-align: right;">55.456% (54.248–56.768)</td>
+<td style="text-align: right;">89.367% (85.811–90.562)</td>
+<td style="text-align: right;">87.990% (87.526–88.575)</td>
+</tr>
+<tr>
+<td style="text-align: right;">60%</td>
+<td style="text-align: right;">896 / 1,493</td>
+<td style="text-align: right;">6,256</td>
+<td style="text-align: right;">53</td>
+<td style="text-align: right;">61.416% (58.976–62.308)</td>
+<td style="text-align: right;">54.708% (52.041–55.903)</td>
+<td style="text-align: right;">90.211% (87.669–91.525)</td>
+<td style="text-align: right;">84.076% (83.332–84.393)</td>
+</tr>
+<tr>
+<td style="text-align: right;">50%</td>
+<td style="text-align: right;">747 / 1,493</td>
+<td style="text-align: right;">7,838</td>
+<td style="text-align: right;">50</td>
+<td style="text-align: right;">60.214% (59.232–62.314)</td>
+<td style="text-align: right;">53.268% (51.925–55.648)</td>
+<td style="text-align: right;">90.135% (88.140–91.180)</td>
+<td style="text-align: right;">79.793% (79.138–80.587)</td>
+</tr>
+<tr>
+<td style="text-align: right;">40%</td>
+<td style="text-align: right;">597 / 1,493</td>
+<td style="text-align: right;">9,392</td>
+<td style="text-align: right;">66</td>
+<td style="text-align: right;">58.933% (57.994–60.117)</td>
+<td style="text-align: right;">51.880% (50.380–53.150)</td>
+<td style="text-align: right;">89.013% (87.486–90.578)</td>
+<td style="text-align: right;">75.097% (74.309–75.599)</td>
+</tr>
+<tr>
+<td style="text-align: right;">30%</td>
+<td style="text-align: right;">448 / 1,493</td>
+<td style="text-align: right;">10,951</td>
+<td style="text-align: right;">60</td>
+<td style="text-align: right;">58.222% (57.492–59.390)</td>
+<td style="text-align: right;">51.048% (50.564–52.388)</td>
+<td style="text-align: right;">87.380% (86.917–89.403)</td>
+<td style="text-align: right;">70.566% (69.918–71.240)</td>
+</tr>
+<tr>
+<td style="text-align: right;">20%</td>
+<td style="text-align: right;">299 / 1,493</td>
+<td style="text-align: right;">12,528</td>
+<td style="text-align: right;">27</td>
+<td style="text-align: right;">55.281% (54.207–58.249)</td>
+<td style="text-align: right;">47.743% (46.925–51.631)</td>
+<td style="text-align: right;">87.400% (85.313–88.161)</td>
+<td style="text-align: right;">64.002% (63.220–66.404)</td>
+</tr>
+<tr>
+<td style="text-align: right;">10%</td>
+<td style="text-align: right;">149 / 1,493</td>
+<td style="text-align: right;">14,144</td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">50.982% (50.365–54.332)</td>
+<td style="text-align: right;">42.530% (42.187–47.222)</td>
+<td style="text-align: right;">85.464% (84.667–88.227)</td>
+<td style="text-align: right;">55.754% (55.227–58.849)</td>
+</tr>
+</tbody>
+</table>
+</div>
+</details>
+<details>
+<summary><strong>English</strong> — <code>us-uk-default</code> 1.0.0</summary>
+<div>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">Training</th>
+<th style="text-align: right;">Selected / total rows</th>
+<th style="text-align: right;">Median unseen occurrences</th>
+<th style="text-align: right;">Overlap excluded</th>
+<th style="text-align: right;">Unseen all exact</th>
+<th style="text-align: right;">Unseen changed exact</th>
+<th style="text-align: right;">Unseen root preserved</th>
+<th style="text-align: right;">Whole all exact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">100%</td>
+<td style="text-align: right;">396,939 / 396,939</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">97.478%</td>
+</tr>
+<tr>
+<td style="text-align: right;">90%</td>
+<td style="text-align: right;">357,245 / 396,939</td>
+<td style="text-align: right;">96,669</td>
+<td style="text-align: right;">3,944</td>
+<td style="text-align: right;">94.687% (94.620–94.833)</td>
+<td style="text-align: right;">78.855% (78.658–79.377)</td>
+<td style="text-align: right;">98.752% (98.660–98.774)</td>
+<td style="text-align: right;">97.055% (97.047–97.061)</td>
+</tr>
+<tr>
+<td style="text-align: right;">80%</td>
+<td style="text-align: right;">317,551 / 396,939</td>
+<td style="text-align: right;">193,867</td>
+<td style="text-align: right;">7,072</td>
+<td style="text-align: right;">94.583% (94.503–94.610)</td>
+<td style="text-align: right;">78.787% (78.522–78.959)</td>
+<td style="text-align: right;">98.591% (98.583–98.651)</td>
+<td style="text-align: right;">96.629% (96.627–96.642)</td>
+</tr>
+<tr>
+<td style="text-align: right;">70%</td>
+<td style="text-align: right;">277,857 / 396,939</td>
+<td style="text-align: right;">291,950</td>
+<td style="text-align: right;">9,364</td>
+<td style="text-align: right;">94.403% (94.284–94.425)</td>
+<td style="text-align: right;">78.504% (77.939–78.529)</td>
+<td style="text-align: right;">98.454% (98.420–98.494)</td>
+<td style="text-align: right;">96.195% (96.177–96.203)</td>
+</tr>
+<tr>
+<td style="text-align: right;">60%</td>
+<td style="text-align: right;">238,163 / 396,939</td>
+<td style="text-align: right;">390,876</td>
+<td style="text-align: right;">10,914</td>
+<td style="text-align: right;">94.146% (94.130–94.222)</td>
+<td style="text-align: right;">78.028% (77.810–78.270)</td>
+<td style="text-align: right;">98.305% (98.265–98.317)</td>
+<td style="text-align: right;">95.735% (95.724–95.759)</td>
+</tr>
+<tr>
+<td style="text-align: right;">50%</td>
+<td style="text-align: right;">198,470 / 396,939</td>
+<td style="text-align: right;">490,651</td>
+<td style="text-align: right;">11,549</td>
+<td style="text-align: right;">93.923% (93.893–93.995)</td>
+<td style="text-align: right;">77.663% (77.425–77.783)</td>
+<td style="text-align: right;">98.127% (98.087–98.184)</td>
+<td style="text-align: right;">95.255% (95.232–95.291)</td>
+</tr>
+<tr>
+<td style="text-align: right;">40%</td>
+<td style="text-align: right;">158,776 / 396,939</td>
+<td style="text-align: right;">591,471</td>
+<td style="text-align: right;">11,405</td>
+<td style="text-align: right;">93.704% (93.685–93.716)</td>
+<td style="text-align: right;">77.397% (77.203–77.459)</td>
+<td style="text-align: right;">97.941% (97.914–97.946)</td>
+<td style="text-align: right;">94.757% (94.731–94.787)</td>
+</tr>
+<tr>
+<td style="text-align: right;">30%</td>
+<td style="text-align: right;">119,082 / 396,939</td>
+<td style="text-align: right;">692,903</td>
+<td style="text-align: right;">10,319</td>
+<td style="text-align: right;">93.446% (93.425–93.467)</td>
+<td style="text-align: right;">76.954% (76.788–77.019)</td>
+<td style="text-align: right;">97.729% (97.716–97.746)</td>
+<td style="text-align: right;">94.232% (94.195–94.256)</td>
+</tr>
+<tr>
+<td style="text-align: right;">20%</td>
+<td style="text-align: right;">79,388 / 396,939</td>
+<td style="text-align: right;">795,289</td>
+<td style="text-align: right;">8,404</td>
+<td style="text-align: right;">93.168% (93.110–93.217)</td>
+<td style="text-align: right;">76.641% (76.310–76.730)</td>
+<td style="text-align: right;">97.520% (97.455–97.540)</td>
+<td style="text-align: right;">93.645% (93.618–93.708)</td>
+</tr>
+<tr>
+<td style="text-align: right;">10%</td>
+<td style="text-align: right;">39,694 / 396,939</td>
+<td style="text-align: right;">898,575</td>
+<td style="text-align: right;">5,565</td>
+<td style="text-align: right;">92.815% (92.774–92.848)</td>
+<td style="text-align: right;">76.133% (75.502–76.392)</td>
+<td style="text-align: right;">97.185% (97.159–97.294)</td>
+<td style="text-align: right;">92.980% (92.960–93.033)</td>
+</tr>
+</tbody>
+</table>
+</div>
+</details>
+<details>
+<summary><strong>Yiddish</strong> — <code>yi-default</code> 1.0.0</summary>
+<div>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">Training</th>
+<th style="text-align: right;">Selected / total rows</th>
+<th style="text-align: right;">Median unseen occurrences</th>
+<th style="text-align: right;">Overlap excluded</th>
+<th style="text-align: right;">Unseen all exact</th>
+<th style="text-align: right;">Unseen changed exact</th>
+<th style="text-align: right;">Unseen root preserved</th>
+<th style="text-align: right;">Whole all exact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">100%</td>
+<td style="text-align: right;">802 / 802</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">98.698%</td>
+</tr>
+<tr>
+<td style="text-align: right;">90%</td>
+<td style="text-align: right;">722 / 802</td>
+<td style="text-align: right;">413</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">60.291% (58.962–66.986)</td>
+<td style="text-align: right;">45.318% (42.007–51.673)</td>
+<td style="text-align: right;">93.007% (87.500–94.631)</td>
+<td style="text-align: right;">94.907% (94.651–95.558)</td>
+</tr>
+<tr>
+<td style="text-align: right;">80%</td>
+<td style="text-align: right;">642 / 802</td>
+<td style="text-align: right;">823</td>
+<td style="text-align: right;">24</td>
+<td style="text-align: right;">60.402% (59.246–64.234)</td>
+<td style="text-align: right;">45.180% (42.938–49.067)</td>
+<td style="text-align: right;">90.508% (84.028–92.388)</td>
+<td style="text-align: right;">90.930% (90.907–91.767)</td>
+</tr>
+<tr>
+<td style="text-align: right;">70%</td>
+<td style="text-align: right;">561 / 802</td>
+<td style="text-align: right;">1,258</td>
+<td style="text-align: right;">26</td>
+<td style="text-align: right;">61.924% (60.048–63.121)</td>
+<td style="text-align: right;">46.748% (43.499–48.335)</td>
+<td style="text-align: right;">90.562% (86.577–92.511)</td>
+<td style="text-align: right;">87.512% (87.070–87.860)</td>
+</tr>
+<tr>
+<td style="text-align: right;">60%</td>
+<td style="text-align: right;">481 / 802</td>
+<td style="text-align: right;">1,687</td>
+<td style="text-align: right;">34</td>
+<td style="text-align: right;">59.833% (59.576–62.234)</td>
+<td style="text-align: right;">45.164% (42.091–46.740)</td>
+<td style="text-align: right;">89.933% (86.464–91.792)</td>
+<td style="text-align: right;">83.070% (82.767–83.930)</td>
+</tr>
+<tr>
+<td style="text-align: right;">50%</td>
+<td style="text-align: right;">401 / 802</td>
+<td style="text-align: right;">2,115</td>
+<td style="text-align: right;">38</td>
+<td style="text-align: right;">60.189% (57.729–64.180)</td>
+<td style="text-align: right;">44.428% (39.314–49.554)</td>
+<td style="text-align: right;">90.483% (88.108–91.345)</td>
+<td style="text-align: right;">79.256% (77.953–81.326)</td>
+</tr>
+<tr>
+<td style="text-align: right;">40%</td>
+<td style="text-align: right;">321 / 802</td>
+<td style="text-align: right;">2,542</td>
+<td style="text-align: right;">34</td>
+<td style="text-align: right;">60.386% (59.274–63.676)</td>
+<td style="text-align: right;">43.712% (43.647–48.674)</td>
+<td style="text-align: right;">88.840% (87.723–91.081)</td>
+<td style="text-align: right;">75.419% (74.884–77.488)</td>
+</tr>
+<tr>
+<td style="text-align: right;">30%</td>
+<td style="text-align: right;">241 / 802</td>
+<td style="text-align: right;">2,983</td>
+<td style="text-align: right;">26</td>
+<td style="text-align: right;">57.138% (55.881–62.209)</td>
+<td style="text-align: right;">39.886% (37.598–46.865)</td>
+<td style="text-align: right;">88.752% (87.027–90.258)</td>
+<td style="text-align: right;">69.535% (68.535–72.930)</td>
+</tr>
+<tr>
+<td style="text-align: right;">20%</td>
+<td style="text-align: right;">160 / 802</td>
+<td style="text-align: right;">3,423</td>
+<td style="text-align: right;">19</td>
+<td style="text-align: right;">56.968% (54.863–59.445)</td>
+<td style="text-align: right;">38.615% (36.885–43.362)</td>
+<td style="text-align: right;">88.588% (86.935–90.646)</td>
+<td style="text-align: right;">65.186% (63.488–67.140)</td>
+</tr>
+<tr>
+<td style="text-align: right;">10%</td>
+<td style="text-align: right;">80 / 802</td>
+<td style="text-align: right;">3,853</td>
+<td style="text-align: right;">14</td>
+<td style="text-align: right;">56.133% (53.401–59.770)</td>
+<td style="text-align: right;">37.767% (32.786–44.588)</td>
+<td style="text-align: right;">89.466% (84.791–91.028)</td>
+<td style="text-align: right;">60.233% (57.884–63.419)</td>
+</tr>
+</tbody>
+</table>
+</div>
+</details>
+<h2 id="provenance">Provenance</h2>
+<ul>
+<li>Radixor/Java: <code>4.2.0</code></li>
+<li>Core source revision: <code>31e3b9d31379060cd75a3219381e09218f8a2ef6</code></li>
+<li>Release identity: <code>4.2.0</code></li>
+<li>Generalization generator SHA-256: <code>126964f216a48d2164d136a490698301111aae7f050209ced21caf73f8c01fb8</code></li>
+<li>Measured-source manifest: <a href="../data/dictionary-generalization-sources.sha256"><code>dictionary-generalization-sources.sha256</code></a></li>
+<li>Split protocol: <code>radixor-generalization-v1</code></li>
+<li>Splits per coverage level: 5</li>
+<li>Authoritative raw counters: <a href="../data/dictionary-generalization.csv"><code>dictionary-generalization.csv</code></a></li>
+<li>CSV SHA-256: <code>564baec7ee48379b49173dfa5cef5eb518be7c7cc1d9bb3927703f67f6b7f6bc</code></li>
+<li>Model artifact IDs, independent versions, and SHA-256 values are recorded on every raw row.</li>
+<li>Runtime speed is intentionally excluded: speed does not establish generalization. The
+  <a href="../reference/english-coverage/">English coverage deep dive</a> retains its separately measured
+  JMH quality/speed curve.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      © 2026 Egothor · Radixor software is BSD-3-Clause licensed.
+    </div>
+  
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.sections", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="https://unpkg.com/mermaid@11/dist/mermaid.min.js"></script>
+      
+        <script src="../../assets/javascripts/mermaid.js"></script>
+      
+    
+  </body>
+</html>
