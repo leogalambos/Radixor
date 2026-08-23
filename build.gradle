@@ -994,6 +994,42 @@ tasks.register('benchmarkCorpusReport', JavaExec) {
     maxHeapSize = '6g'
 }
 
+def dictionaryGeneralizationReleaseVersion = providers
+        .gradleProperty('dictionaryGeneralizationReleaseVersion')
+        .orElse(providers.provider { project.version.toString() })
+
+tasks.register('dictionaryGeneralization', JavaExec) {
+    group = 'verification'
+    description = 'Evaluates held-out dictionary-family generalization for every default Java model.'
+    dependsOn(tasks.named('testClasses'))
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'org.egothor.stemmer.benchmark.generalization.DictionaryGeneralizationApplication'
+    args layout.buildDirectory.file('reports/generalization/dictionary-generalization.csv')
+            .get().asFile.absolutePath,
+            dictionaryGeneralizationReleaseVersion.get(),
+            providers.exec { commandLine 'git', 'rev-parse', 'HEAD' }.standardOutput.asText.get().trim(),
+            dictionaryGeneralizationReleaseVersion.get(),
+            layout.projectDirectory.file('src/test/java/org/egothor/stemmer/benchmark/generalization/DictionaryGeneralizationApplication.java').asFile.absolutePath
+    maxHeapSize = '8g'
+}
+
+tasks.register('publishDictionaryGeneralizationDocumentation', Exec) {
+    group = 'documentation'
+    description = 'Publishes the validated multilingual dictionary-generalization report.'
+    dependsOn(tasks.named('dictionaryGeneralization'))
+    commandLine 'python3', layout.projectDirectory.file('tools/update-generalization-documentation.py').asFile,
+            layout.buildDirectory.file('reports/generalization/dictionary-generalization.csv').get().asFile,
+            layout.projectDirectory.dir('docs').asFile, 'update'
+}
+
+tasks.register('verifyDictionaryGeneralizationDocumentation', Exec) {
+    group = 'verification'
+    description = 'Verifies the rendered generalization page and checked-in raw counters.'
+    commandLine 'python3', layout.projectDirectory.file('tools/update-generalization-documentation.py').asFile,
+            layout.projectDirectory.file('docs/benchmarks/data/dictionary-generalization.csv').asFile,
+            layout.projectDirectory.dir('docs').asFile, 'verify'
+}
+
 tasks.register('writeJmhRuntimeClasspath') {
     group = 'verification'
     description = 'Writes the complete modular JMH runtime classpath for isolated direct JMH execution.'
@@ -1052,6 +1088,7 @@ tasks.register('verifyStemmingQualityDocumentation', JavaExec) {
 
 tasks.named('check') {
     dependsOn(tasks.named('verifyStemmingQualityDocumentation'))
+    dependsOn(tasks.named('verifyDictionaryGeneralizationDocumentation'))
 }
 
 tasks.register('verifyStemmingQualitySourceSets') {

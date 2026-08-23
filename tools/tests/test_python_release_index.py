@@ -8,6 +8,8 @@ from pathlib import Path
 
 REPOSITORY = Path(__file__).resolve().parents[2]
 TAG_PARSER = REPOSITORY / "tools" / "parse-python-release-tag.sh"
+MODEL_VERSION_READER = REPOSITORY / "tools" / "read-python-models-standard-version.sh"
+MODEL_VERSION_FILE = REPOSITORY / "python" / "models-standard-version.txt"
 INDEX_UPDATER = REPOSITORY / "python" / "scripts" / "update_simple_index.py"
 
 
@@ -23,6 +25,41 @@ def test_python_c_release_tag() -> None:
         "PYTHON_DISTRIBUTION=radixor-c",
         "PYTHON_VERSION=1.2.3",
     ]
+
+
+def test_standard_model_release_version() -> None:
+    result = subprocess.run(
+        ["bash", str(MODEL_VERSION_READER), str(MODEL_VERSION_FILE), "1.0.1"],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.stdout == "1.0.1\n"
+
+
+def test_standard_model_release_version_rejects_mismatch() -> None:
+    result = subprocess.run(
+        ["bash", str(MODEL_VERSION_READER), str(MODEL_VERSION_FILE), "1.0.0"],
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode != 0
+    assert "does not match" in result.stderr
+
+
+def test_standard_model_release_version_rejects_invalid_files(tmp_path: Path) -> None:
+    for contents in ("", "1.0.1", "1.0.1\n\n", " 1.0.1\n", "2.0.0\n"):
+        version_file = tmp_path / "models-version.txt"
+        version_file.write_text(contents, encoding="utf-8")
+        result = subprocess.run(
+            ["bash", str(MODEL_VERSION_READER), str(version_file)],
+            capture_output=True,
+            text=True,
+        )
+
+        assert result.returncode != 0, contents
 
 
 def test_python_c_static_index_entry(tmp_path: Path) -> None:

@@ -87,6 +87,9 @@ public final class StemmerPatchTrieLoader {
      */
     private static final String NOOP_PATCH_COMMAND = PatchCommandEncoder.NOOP_PATCH;
 
+    /** Default traversal for natural-language suffix models. */
+    private static final WordTraversalDirection SUFFIX_TRAVERSAL_DIRECTION = WordTraversalDirection.BACKWARD;
+
     /**
      * Utility class.
      */
@@ -107,9 +110,10 @@ public final class StemmerPatchTrieLoader {
      * </ul>
      *
      * <p>
-     * The right-to-left flag is intended for consumers that need to decide whether
-     * affix-oriented processing should conceptually traverse words from the visual
-     * end or from the logical beginning of the stored form.
+     * The right-to-left flag is orthographic metadata for presentation and user
+     * interface decisions. It does not select trie traversal: natural-language
+     * suffixes occupy the end of the stored character sequence in every supported
+     * script.
      * </p>
      */
     public enum Language {
@@ -276,9 +280,8 @@ public final class StemmerPatchTrieLoader {
          * Returns whether the language is written right-to-left.
          *
          * <p>
-         * This flag can be used by trie-building and lookup logic to decide whether
-         * suffix-oriented traversal should operate on the stored word form as-is rather
-         * than by reversing the logical character sequence.
+         * This flag describes writing direction only. It does not imply a
+         * {@link WordTraversalDirection}.
          * </p>
          *
          * @return {@code true} when the language is written right-to-left, otherwise
@@ -297,9 +300,8 @@ public final class StemmerPatchTrieLoader {
      * to the supplied {@code reductionSettings}:
      * </p>
      * <ul>
-     * <li>traversal direction is derived from {@link Language#isRightToLeft()}
-     * ({@link WordTraversalDirection#FORWARD} for right-to-left languages,
-     * {@link WordTraversalDirection#BACKWARD} otherwise)</li>
+     * <li>traversal direction is {@link WordTraversalDirection#BACKWARD}, so
+     * suffixes are processed from the end of the stored character sequence</li>
      * <li>case processing mode is
      * {@link CaseProcessingMode#LOWERCASE_WITH_LOCALE_ROOT}</li>
      * <li>diacritic processing mode is {@link DiacriticProcessingMode#AS_IS}</li>
@@ -327,7 +329,7 @@ public final class StemmerPatchTrieLoader {
             final ReductionSettings reductionSettings) throws IOException {
         Objects.requireNonNull(language, "language");
         Objects.requireNonNull(reductionSettings, "reductionSettings");
-        final TrieMetadata metadata = metadataForCompilation(traversalDirectionOf(language), reductionSettings,
+        final TrieMetadata metadata = metadataForCompilation(SUFFIX_TRAVERSAL_DIRECTION, reductionSettings,
                 CaseProcessingMode.LOWERCASE_WITH_LOCALE_ROOT, DiacriticProcessingMode.AS_IS);
         return load(language, storeOriginal, metadata);
     }
@@ -436,7 +438,7 @@ public final class StemmerPatchTrieLoader {
             final boolean storeOriginal, final ReductionMode reductionMode) throws IOException {
         Objects.requireNonNull(descriptor, "descriptor");
         Objects.requireNonNull(reductionMode, "reductionMode");
-        final TrieMetadata metadata = metadataForCompilation(traversalDirectionOf(descriptor.language()),
+        final TrieMetadata metadata = metadataForCompilation(SUFFIX_TRAVERSAL_DIRECTION,
                 ReductionSettings.withDefaults(reductionMode), CaseProcessingMode.LOWERCASE_WITH_LOCALE_ROOT,
                 DiacriticProcessingMode.AS_IS);
         return compilePatchTrie(load(descriptor, storeOriginal, metadata));
@@ -1255,16 +1257,6 @@ public final class StemmerPatchTrieLoader {
                 .withUniformSubtreeContraction(reductionSettings);
         return TrieMetadata.forCompilation(traversalDirection, patchReductionSettings, diacriticProcessingMode,
                 caseProcessingMode);
-    }
-
-    /**
-     * Resolves the traversal direction implied by a language definition.
-     *
-     * @param language language definition
-     * @return traversal direction to use for that language
-     */
-    private static WordTraversalDirection traversalDirectionOf(final Language language) {
-        return language.isRightToLeft() ? WordTraversalDirection.FORWARD : WordTraversalDirection.BACKWARD;
     }
 
     /**

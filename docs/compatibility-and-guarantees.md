@@ -4,6 +4,18 @@ This document explains what Radixor treats as stable public behavior, what shoul
 
 Its purpose is to make adoption safer. Users should be able to understand which parts of the project are intended as supported API, which parts may evolve more freely, and which kinds of change are expected to remain compatible in future releases.
 
+## Supported release policy
+
+The public project supports the latest published release of each runtime.
+Older releases are supported only under a separate contract.
+
+The major number identifies major change affecting the project as a whole; the
+minor number identifies a shared fix or improvement affecting all runtimes.
+Patch numbers belong to each runtime's own fix and improvement stream, so Java,
+PyO3 and Python-C patch versions may differ. Model and model-catalog versions
+evolve independently. See [Trust, Security and Support](trust-security-and-support.md)
+for the support and private vulnerability-reporting channels.
+
 ## Compatibility philosophy
 
 Radixor is designed to be used as a real library, not only as a code drop. That means compatibility matters.

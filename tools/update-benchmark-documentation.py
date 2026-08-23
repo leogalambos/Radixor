@@ -458,6 +458,12 @@ def update_language_pages(
     for file_name, language in LANGUAGES.items():
         path = directory / file_name
         text = path.read_text(encoding="utf-8")
+        text = re.sub(
+            r'Radixor must not be read as simply "slower".*?speed rows must be read together with the accuracy table above them\.',
+            "Runtime and exact-root agreement measure different properties. Light, minimal, possessive, and other rule-based filters intentionally have different transformation scopes, so a lower runtime can coexist with lower dictionary-root agreement. Read the speed and accuracy tables together. The Radixor rows in this refresh use the contracted compiled patch trie: compilation collapses uniform patch-command subtrees into accepting leaves, reducing hot lookup depth while preserving the preferred stemming result measured by the accuracy pass. The [EnglishRadixorDictionaryCoverageBenchmark](../reference/english-coverage.md) shows the resulting quality/speed envelope explicitly.",
+            text,
+            count=1,
+        )
         corpus_start = text.index("## Dictionary Corpus")
         accuracy_start = text.index("## Accuracy", corpus_start)
         text = (
@@ -467,8 +473,8 @@ def update_language_pages(
         )
         text = re.sub(
             r"Speed uses JMH average time, \d+ warmup iterations, \d+ measurement iterations, "
-            r"\d+ forks?, and 1 thread\.",
-            "Speed uses JMH average time, 5 warmup iterations, 10 measurement iterations, "
+            r"\d+ (?:independent )?forks?, and 1 thread\.",
+            "Speed uses JMH average time, 5 warmup iterations, 7 measurement iterations, "
             "3 independent forks, and 1 thread.",
             text,
             count=1,

@@ -16,9 +16,10 @@ Radixor has two separate phases:
 The practical rule is simple: compile rarely, stem often.
 
 For production systems, prefer a startup-owned or dependency-injected
-`FrequencyTrie<CompiledPatchCommand>` per language/configuration. The compiled structure has no
-mutating API. The project does not currently publish a formal cross-thread safety guarantee, so
-applications should use normal safe-publication practices when sharing a loaded trie.
+`FrequencyTrie<CompiledPatchCommand>` per language/configuration. The compiled
+structure has no mutating API and is thread-safe for concurrent reads after
+normal safe publication. Visitor sinks and output buffers remain caller-owned
+and must not be shared unsafely between operations.
 
 ## Dependency Coordinates
 
@@ -28,12 +29,16 @@ The Maven coordinates are:
 org.egothor:radixor
 ```
 
+Resolve the placeholders below from the
+[Maven Central artifact page](https://central.sonatype.com/artifact/org.egothor/radixor)
+and the [model catalog](stemmer-model-catalog.md), respectively.
+
 Gradle:
 
 ```kotlin
 dependencies {
-    implementation("org.egothor:radixor:<radixor-version>")
-    runtimeOnly("org.egothor:radixor-models-standard:<catalog-version>")
+    implementation("org.egothor:radixor:<latest-java-version>")
+    runtimeOnly("org.egothor:radixor-models-standard:<compatible-catalog-version>")
 }
 ```
 
@@ -43,12 +48,12 @@ Maven:
 <dependency>
     <groupId>org.egothor</groupId>
     <artifactId>radixor</artifactId>
-    <version>${radixor.version}</version>
+    <version>REPLACE_WITH_LATEST_JAVA_VERSION</version>
 </dependency>
 <dependency>
     <groupId>org.egothor</groupId>
     <artifactId>radixor-models-standard</artifactId>
-    <version>${model.catalog.version}</version>
+    <version>REPLACE_WITH_COMPATIBLE_CATALOG_VERSION</version>
     <scope>runtime</scope>
 </dependency>
 ```

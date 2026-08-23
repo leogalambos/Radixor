@@ -4,12 +4,32 @@
 
 - Machine-readable CSV: [stemming-quality.csv](../data/stemming-quality.csv)
 - SHA-256 record: [stemming-quality.sha256](../data/stemming-quality.sha256)
-- SHA-256: `d34f325da320a2e040b54d8d8b5c216d70448f08cfb8659a423e99882aa1afb5`
+- SHA-256: `f15f8e653022e0333955b8b82f42944aa1c5a14a5ce54e628bb1a9c9aed42132`
 - Complete scenarios: 314
 - Authoritative language universe: 20 languages
 - Language-page scenarios: 314 across 20 benchmark pages
 
 The CSV contains the model ID, independent model version, descriptor SHA-256, raw pair counts, raw over/under numerators and denominators, candidate statistics, and relation metrics. Reserved partition-metric columns remain empty because the gold standard is an overlapping cover. Documentation is regenerated from this file rather than manually transcribed. Publication fails when any row uses a model other than the language's registered default.
+
+## Published generalization snapshot
+
+- Machine-readable CSV: [dictionary-generalization.csv](../data/dictionary-generalization.csv)
+- SHA-256 record: [dictionary-generalization.sha256](../data/dictionary-generalization.sha256)
+- SHA-256: `564baec7ee48379b49173dfa5cef5eb518be7c7cc1d9bb3927703f67f6b7f6bc`
+- Measured-source manifest: [dictionary-generalization-sources.sha256](../data/dictionary-generalization-sources.sha256)
+- Complete scenarios: 1,000
+- Matrix: 20 default models × 10 coverage levels × 5 frozen splits
+- Algorithm version: Radixor/Java 4.2.0
+
+This CSV retains integer numerators and denominators for complete-dictionary,
+withheld-row, and unseen-surface scopes. It also records selected and total rows,
+overlap exclusions, split seed, protocol version, and exact model provenance.
+The [generalization methodology](generalization-methodology.md) defines the
+frozen split and the limits of the claim.
+
+The accompanying manifest records the byte identity of the generator and the
+Java implementation files that determine trie construction, traversal, patch
+encoding, and lookup. The final `4.2.0` tag is the long-term release anchor.
 
 ## Commands
 
@@ -17,15 +37,23 @@ The CSV contains the model ID, independent model version, descriptor SHA-256, ra
 ./gradlew --no-daemon stemmingQuality \
     publishStemmingQualityDocumentation \
     verifyStemmingQualityDocumentation
+./gradlew --no-daemon -PdictionaryGeneralizationReleaseVersion=4.2.0 \
+    dictionaryGeneralization \
+    publishDictionaryGeneralizationDocumentation \
+    verifyDictionaryGeneralizationDocumentation
 ./gradlew --no-daemon benchmarkCorpusReport writeJmhRuntimeClasspath
-tools/run-published-accuracy-benchmarks.sh 2026-08-10
-tools/run-published-speed-benchmarks.sh 2026-08-10
+tools/run-published-accuracy-benchmarks.sh 2026-08-23
+tools/run-published-speed-benchmarks.sh 2026-08-23 4.2.0
 python3 tools/update-benchmark-documentation.py \
     --corpus build/reports/jmh/benchmark-corpora.csv \
-    --accuracy build/reports/jmh/stemmer-accuracy-2026-08-10.csv \
-    --speed build/reports/jmh/stemmer-speed-2026-08-10.csv \
-    --coverage-accuracy build/reports/jmh/english-coverage-accuracy-2026-08-10.csv \
-    --coverage-speed build/reports/jmh/english-coverage-speed-2026-08-10.csv
+    --accuracy build/reports/jmh/stemmer-accuracy-2026-08-23.csv \
+    --speed build/reports/jmh/stemmer-speed-2026-08-23.csv \
+    --coverage-accuracy build/reports/jmh/english-coverage-accuracy-2026-08-23.csv \
+    --coverage-speed build/reports/jmh/english-coverage-speed-2026-08-23.csv
+python3 tools/update-python-benchmark-documentation.py \
+    --csv build/reports/python-benchmarks/all-languages-batch.csv \
+    --date 2026-08-23 \
+    --release-version 4.2.0
 ./gradlew test
 ./gradlew prepareMkDocsSource
 mkdocs build --strict --config-file build/mkdocs/mkdocs.yml
@@ -72,15 +100,15 @@ The current accuracy, speed, and coverage commands are:
 
 ```bash
 ./gradlew --no-daemon benchmarkCorpusReport writeJmhRuntimeClasspath
-tools/run-published-accuracy-benchmarks.sh 2026-08-10
-tools/run-published-speed-benchmarks.sh 2026-08-10
+tools/run-published-accuracy-benchmarks.sh 2026-08-23
+tools/run-published-speed-benchmarks.sh 2026-08-23 4.2.0
 ```
 
 The speed runner refuses to start unless every CPU uses the `performance` governor, materializes the exact selected benchmark list, rejects quality/Polimorf/gold-standard methods, and requires the Hebrew speed path. It records hardware, JVM, source-state, JAR, classpath, corpus, quality, load, temperature, and governor provenance before running. The accuracy runner evaluates all four exact-root benchmark classes and verifies that every new Snowball 3.1.0 candidate exposes all six accuracy counters. The exact JMH configuration is listed in [Environment and reports](environment.md). Quality and performance reports are separate datasets and are not combined into an undocumented scalar.
 
 ## Recorded and unavailable provenance
 
-The performance documentation records its 2026-08-10 environment, JDK, operating system, hardware, base revision, exact dirty patch, untracked-source checksums, executable JMH JAR checksum, and model descriptor checksums. The quality CSV embeds model identity and checksum in every row; run date, core source state, JVM, OS, and hardware are shared provenance on the environment page.
+The performance documentation records its 2026-08-23 environment, JDK, operating system, hardware, base revision, exact measured-source patch, untracked-source checksums, executable JMH JAR checksum, and model descriptor checksums. The quality CSV embeds model identity and checksum in every row; run date, core source state, JVM, OS, and hardware are shared provenance on the environment page.
 
 Exact immutable upstream revisions were not recorded for every legacy UniMorph import. That limitation remains explicit in model descriptors and cannot be repaired from filesystem timestamps. Dependency versions reproducible from repository configuration include Apache Lucene 10.5.0, Morfologik 2.1.9, the Ukrainian dictionary artifact 4.9.1, and JMH 1.37.
 

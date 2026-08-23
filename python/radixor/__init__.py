@@ -97,12 +97,6 @@ _SUPPORTED_PYSTEMMER_MODEL_IDS = frozenset(
     model_id for model_id, _supported, *_ in _PYSTEMMER_MODEL_MAP
 )
 
-# Right-to-left languages use FORWARD traversal; everything else BACKWARD.
-# Keyed by model ID prefix (language part).
-_RIGHT_TO_LEFT_MODELS: frozenset[str] = frozenset(
-    {"fa-ir-default", "he-il-default", "yi-default"}
-)
-
 _STANDARD_PACKAGE = "radixor_models_standard"
 _STANDARD_CATALOG_VERSION = "2026.1"
 _STANDARD_DISTRIBUTION_VERSION = re.compile(
@@ -266,11 +260,6 @@ def _standard_model_path(model_id: str) -> Iterator[Path]:
         ) from exc
 
 
-def _is_backward(model_id: str) -> bool:
-    """Traversal direction implied by the model's language (RTL => FORWARD)."""
-    return model_id not in _RIGHT_TO_LEFT_MODELS
-
-
 class Stemmer:
     """Thread-safe stemmer backed by a Radixor patch-command trie.
 
@@ -291,9 +280,9 @@ class Stemmer:
         :func:`compile`).  For compiled input, ``backward`` / ``store_original``
         are baked into the file and ignored.
     backward:
-        Traversal direction override.  When ``None`` (default) it is derived
-        from the language (BACKWARD, except right-to-left fa/he/yi which use
-        FORWARD).  Only consulted for ``path``-based construction if given.
+        Traversal direction override. ``None`` (default) selects BACKWARD for
+        natural-language suffixes in every writing system. Only consulted for
+        text-dictionary construction; compiled artifacts persist their direction.
     store_original:
         When ``True`` (default) each canonical stem maps to the no-op patch,
         so the stem itself is recognised.
@@ -348,7 +337,7 @@ class Stemmer:
                 )
             else:
                 raise KeyError(language)
-            is_backward = _is_backward(model_id) if backward is None else backward
+            is_backward = True if backward is None else backward
             model_path = None
         else:
             raise ValueError("Provide 'language', 'path', or 'compiled'.")
@@ -461,11 +450,11 @@ def compile(
     out_path:
         Destination compiled file (conventionally ``*.rxc``).
     language:
-        Optional language code/model ID used only to derive ``backward`` when
-        it is not given (right-to-left fa/he/yi compile FORWARD).
+        Optional language code/model ID retained for API compatibility. It is not
+        persisted, and writing direction does not select trie traversal.
     backward:
-        Traversal direction.  When ``None`` it is derived from ``language`` if
-        provided, otherwise defaults to BACKWARD.
+        Traversal direction. ``None`` defaults to BACKWARD for suffix-oriented
+        natural-language data, regardless of writing direction.
     store_original, lowercase:
         Same meaning as :class:`Stemmer`; baked into the compiled file.
 
@@ -473,10 +462,7 @@ def compile(
     ``StemmerPatchTrieBinaryIO`` v7 format, so Java and Python can share it.
     """
     if backward is None:
-        if language is not None:
-            backward = _is_backward(_LANGUAGE_ALIASES.get(language, language))
-        else:
-            backward = True
+        backward = True
     _compile(source, out_path, backward, store_original, lowercase)
 
 

@@ -109,7 +109,9 @@ class CompileTest {
                 () -> assertTrue(result.standardError().contains("--output <file>"),
                         "Help output must describe the output option."),
                 () -> assertTrue(result.standardError().contains("--reduction-mode <mode>"),
-                        "Help output must describe the reduction mode option."));
+                        "Help output must describe the reduction mode option."),
+                () -> assertTrue(result.standardError().contains("--traversal-direction <BACKWARD|FORWARD>"),
+                        "Help output must describe explicit stored-character traversal."));
     }
 
     @Test
@@ -138,6 +140,20 @@ class CompileTest {
         assertAll(() -> assertEquals(0, exitCode, "Compilation with store-original must succeed."),
                 () -> assertTrue(Files.exists(outputFile), "Compilation must create the output file."),
                 () -> assertTrue(Files.size(outputFile) > 0L, "The written output file must not be empty."));
+    }
+
+    @Test
+    @DisplayName("should persist an explicit forward traversal for prefix-oriented custom data")
+    void shouldPersistExplicitForwardTraversal() throws Exception {
+        final Path inputFile = createMinimalDictionaryFile("forward-dictionary.txt");
+        final Path outputFile = temporaryDirectory.resolve("compiled-forward.dat.gz");
+
+        final int exitCode = Compile.run("--input", inputFile.toString(), "--output", outputFile.toString(),
+                "--reduction-mode", validReductionModeName(), "--traversal-direction", "FORWARD");
+        final FrequencyTrie<CompiledPatchCommand> trie = StemmerPatchTrieLoader.loadBinaryCompiled(outputFile);
+
+        assertAll(() -> assertEquals(0, exitCode),
+                () -> assertEquals(WordTraversalDirection.FORWARD, trie.traversalDirection()));
     }
 
     @Test
@@ -240,6 +256,16 @@ class CompileTest {
                             "The diagnostic message must identify the unknown option."),
                     () -> assertTrue(result.standardError().contains("Usage:"),
                             "Usage help must be printed for invalid invocation."));
+        }
+
+        @Test
+        @DisplayName("should guide migration from the former right-to-left option")
+        void shouldGuideMigrationFromFormerRightToLeftOption() {
+            final CommandResult result = runWithCapturedStandardError("--right-to-left");
+
+            assertAll(() -> assertEquals(2, result.exitCode()),
+                    () -> assertTrue(result.standardError().contains("has been replaced")),
+                    () -> assertTrue(result.standardError().contains("--traversal-direction FORWARD")));
         }
 
         @Test

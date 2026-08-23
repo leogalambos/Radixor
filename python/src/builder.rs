@@ -37,7 +37,7 @@
 //     store_original) and every variant != stem mapped to
 //     encode_patch(variant, stem, backward).
 //   * Keys are indexed per WordTraversalDirection: BACKWARD consumes characters
-//     right-to-left (logicalIndex = len-1-offset), FORWARD left-to-right.
+//     the sequence end (logicalIndex = len-1-offset), FORWARD from index zero.
 //   * Reduction hardcodes the production configuration verified from the Java
 //     source: ReductionMode = MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS,
 //     dominantWinnerMinPercent = 75, dominantWinnerOverSecondRatio = 3,
@@ -701,8 +701,8 @@ fn frozen_into_trie(frozen: FrozenTrie, metadata: TrieMetadata) -> FrequencyTrie
 /// reproducing the Java `StemmerPatchTrieLoader.load` build followed by
 /// `FrequencyTrie.Builder.build` (reduce + freeze).
 ///
-/// * `backward` — `true` selects BACKWARD traversal (all languages except the
-///   right-to-left fa/he/yi), `false` selects FORWARD.
+/// * `backward` — `true` selects BACKWARD traversal for suffix-oriented data;
+///   `false` selects FORWARD for deliberately prefix-oriented custom data.
 /// * `store_original` — when `true`, each stem is inserted mapped to the NOOP
 ///   patch `"Na"` so the stem itself is recognised.
 pub fn build_trie_from_dict(

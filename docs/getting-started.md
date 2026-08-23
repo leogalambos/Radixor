@@ -11,6 +11,18 @@ Radixor is available through three implementations. They share the standard
 language catalog and interoperable [compiled Radixor models](data-formats.md),
 but differ in integration surface and model-management capabilities.
 
+## Choose by task
+
+| I want to... | Recommended path |
+|---|---|
+| Stem words from Python with the smallest scalar-call overhead | [Python-C Fast Track](python-c/quick-start.md) |
+| Process Python batches or compile a custom dictionary | [Python Fast Track](python/fast-track.md) |
+| Integrate the complete reference implementation into a JVM application | [Java Fast Track](fast-track.md) |
+| Move from PyStemmer without changing familiar method names | [Python migration methods](python/fast-track.md#3-use-pystemmer-compatible-fallback-semantics) |
+| Select, compile or deploy a model | [Data Formats](data-formats.md) |
+| Evaluate measured quality and throughput | [Benchmark Results](benchmarks/index.md) and [Python Performance](python/performance.md) |
+| Review support, security and release policy | [Trust, Security and Support](trust-security-and-support.md) |
+
 | Implementation | Role | Best fit | Performance model | Model capabilities |
 |---|---|---|---|---|
 | **Java** (`org.egothor:radixor`) | Primary, flagship and reference implementation | JVM applications and model development | Direct JVM calls; allocation-conscious APIs | Complete functionality: selectable reduction and normalization, trie construction, extension and persistence |
@@ -22,6 +34,19 @@ the path toward Java-level capabilities. `radixor-c` is not a reduced-quality
 stemmer: it uses the same compiled models and produces the same stemming
 results. It deliberately has a smaller **management API**, so it can concentrate
 on fast, simple runtime use.
+
+## Supported releases and versioning
+
+The latest published release of each runtime is supported. The major number
+identifies a major change affecting the project as a whole; the minor number
+identifies a shared fix or improvement affecting all runtimes. Each runtime
+maintains its own patch number for local
+fixes and improvements, so the three patch versions are not expected to remain
+equal. Model and model-catalog versions are independent.
+
+Only the latest release of each runtime receives public project support. See
+[Trust, Security and Support](trust-security-and-support.md) for support and
+private vulnerability-reporting channels.
 
 ## Fast track
 
@@ -66,6 +91,6 @@ on fast, simple runtime use.
   which runtime can create them, and how they move between implementations.
 - [Built-in Languages](built-in-languages.md) documents aliases, model IDs and defaults.
 - [Python Performance](python/performance.md) is the shared benchmark page for
-  both Python runtimes; unmeasured Python-C cells are explicitly marked `N/A`.
+  both Python runtimes, measured over the same corpus and benchmark session.
 - [Architecture](architecture.md) explains the common stemming semantics and
   runtime-specific data structures.

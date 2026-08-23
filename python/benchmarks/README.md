@@ -10,14 +10,16 @@ Each engine is driven through its batch entry point over a fixed word budget
 (default 5 000 tokens), at a single batch size of **100** words. We report the
 *median* of calibrated repeats as the benchmark convention used for this suite.
 
-## Data — identical to the Java JMH benchmarks
+## Data — same construction as the Java JMH benchmarks
 
 The workload is the **changed-token corpus** built from the repository's
 canonical dictionaries (`models/<model>/src/modelInput/stemmer.gz`),
 mirroring `LanguageBenchmarkCorpus` in the Java project: each dictionary field
 is paired with its line's root, normalized `trim().lower()`, and only tokens
 that **differ** from their root are kept, in dictionary order, padded to ≥ 5 000
-tokens. See `corpus.py`.
+tokens. Python then measures the fixed first 5,000-token prefix for every
+language; Java retains the complete constructed corpus when it is larger. See
+`corpus.py`.
 
 ## Fairness — three things that quietly break stemmer comparisons
 
@@ -103,8 +105,13 @@ prevents results from different CPUs or benchmark runs from being mixed.
 
 ## Interpretation
 
-- In the published 2026-08-17 run, **radixor is the fastest stemmer measured in
-  Python** in all 18 languages directly shared with PyStemmer.
+- In the published 2026-08-23 run, **both radixor 4.2.0 runtimes recorded lower
+  median processing time than PyStemmer** in all 18 directly shared languages.
+  Python (PyO3) has a 2.25×
+  geometric-mean speedup and Python-C has a 2.29× speedup at batch size 100.
+- Python-C and PyO3 each lead in 10 of the 20 Radixor languages;
+  the native implementations remain close enough that language and API needs
+  are more informative than a universal performance ranking.
 - The benchmark intentionally disables caches. Cached-operation performance is
   outside this suite and must not be inferred from its results.
 - radixor and Snowball remain different *classes* of stemmer: radixor is

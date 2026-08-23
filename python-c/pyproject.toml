@@ -71,7 +71,8 @@ radixor_c = ["py.typed"]
 
 [tool.cibuildwheel]
 build = "cp310-* cp311-* cp312-* cp313-* cp314-*"
-test-command = 'python -c "import radixor_c, radixor_c._radixor_c"'
+test-requires = ["radixor-models-standard>=1.0,<2.0"]
+test-command = 'python -c "from radixor_c import Stemmer; assert Stemmer(\"en\").stem(\"running\") == \"run\""'
 # musllinux is fine — we no longer use towlower (locale-dependent); lowercasing
 # goes through Python's str.lower() which is locale-independent.
 skip = "*-win32"

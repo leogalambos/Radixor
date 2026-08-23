@@ -1,6 +1,12 @@
 # Java Programmatic Usage
 
-Radixor code and model data are separate runtime components. Every example on this page requires `org.egothor:radixor:<radixor-version>` as an `implementation` dependency and at least one model JAR as a runtime dependency. The core JAR contains no `stemmer.gz`.
+Radixor code and model data are separate runtime components. Every example on
+this page requires `org.egothor:radixor:<latest-java-version>` as an
+`implementation` dependency and at least one compatible model JAR as a runtime
+dependency. Resolve the placeholders from the
+[Maven Central artifact page](https://central.sonatype.com/artifact/org.egothor/radixor)
+and the [model catalog](stemmer-model-catalog.md), respectively. The core JAR
+contains no `stemmer.gz`.
 
 The Python implementation has its own native API. `pip install radixor` also
 installs the separate standard data package containing 20 precompiled models.
@@ -14,8 +20,8 @@ For complete dependency patterns, lifecycle guidance, and troubleshooting, use [
 Dependency prerequisite:
 
 ```groovy
-implementation 'org.egothor:radixor:<radixor-version>'
-runtimeOnly 'org.egothor:radixor-model-pl-pl-unimorph:1.0.0'
+implementation 'org.egothor:radixor:<latest-java-version>'
+runtimeOnly 'org.egothor:radixor-model-pl-pl-unimorph:<compatible-model-version>'
 ```
 
 ```java
@@ -39,7 +45,8 @@ final String stem = patch == null ? word : patch.apply(word);
 
 ## 2. Explicit model selection
 
-Dependency prerequisite: replace or supplement the default dependency with `runtimeOnly 'org.egothor:radixor-model-pl-pl-polimorf:1.0.0'`.
+Dependency prerequisite: replace or supplement the default dependency with
+`runtimeOnly 'org.egothor:radixor-model-pl-pl-polimorf:<compatible-model-version>'`.
 
 ```java
 final StemmerModelRegistry registry = StemmerModelRegistry.fromContextClassLoader();
@@ -63,7 +70,8 @@ final FrequencyTrie<CompiledPatchCommand> trie =
 
 ## 3. Multiple variants for one language
 
-Dependency prerequisite: both `radixor-model-pl-pl-unimorph:1.0.0` and `radixor-model-pl-pl-polimorf:1.0.0` at runtime.
+Dependency prerequisite: compatible releases of both
+`radixor-model-pl-pl-unimorph` and `radixor-model-pl-pl-polimorf` at runtime.
 
 ```java
 final StemmerModelRegistry registry = StemmerModelRegistry.fromContextClassLoader();

@@ -6,27 +6,34 @@ is made fair. The scripts are in the repository (`python/benchmarks/`); anyone
 can reproduce the numbers.
 
 `radixor-c` belongs in this same benchmark rather than in a separate table,
-because both packages expose the same workload and models. It has not yet been
-measured by the published harness, so its column is explicitly `N/A`. No
-performance claim on this page should be inferred from those placeholders.
+because both packages expose the same workload and models. The published run
+measures both native runtimes from version 4.2.0: `radixor` through Rust/PyO3
+and `radixor-c` through the CPython C API.
+
+The matching patch number in this run does not couple their release streams.
+Radixor runtimes share project-wide major and minor versions, while each
+runtime advances its patch version independently for local fixes and
+improvements.
 
 !!! info "Published single-machine measurement"
-    These results were regenerated on 2026-08-18 on the current benchmark
-    workstation: AMD Ryzen 5 8600G with Radeon 760M Graphics (6 cores / 12
-    threads), Linux-7.1.8-200.fc44.x86_64-x86_64-with-glibc2.43,
-    CPython 3.14.6, Rust 1.97.1, and a release wheel.
-    All logical CPUs used the `performance` governor. Absolute timings remain
+    These results were regenerated on 2026-08-23 on the current benchmark
+    workstation: AMD Ryzen 5 7600 6-Core Processor (6 cores / 12 threads),
+    Fedora Linux 44 with kernel `7.1.8-200.fc44.x86_64`, CPython 3.14.7,
+    Rust 1.97.1, GCC 16.2.1, and locally built release-mode wheels for both
+    Radixor 4.2.0 Python runtimes. All logical CPUs used the `performance`
+    governor and `performance` energy preference. Absolute timings remain
     machine-specific; compare ratios only within this run.
 
 ## What is measured
 
 - **Runtime stemming only.** Model construction / dictionary compilation happens
   once in setup and is excluded from every timing.
-- **Workload = the Java JMH corpus.** The *changed-token* corpus derived from
+- **Same corpus construction as Java JMH.** The *changed-token* corpus is derived from
   the bundled UniMorph gold-standard dictionaries: every dictionary field paired
   with its line's root, normalized `trim().lower()`, keeping only tokens that
   differ from their root (the forms a stemmer must actually rewrite), padded to
-  ≥ 5 000 tokens. This is identical to the Java `LanguageBenchmarkCorpus`.
+  ≥ 5 000 tokens. Python measures the fixed first 5,000-token prefix for every
+  language; Java measures the complete constructed corpus when it is larger.
 - The benchmark is now run at a single fixed batch size **N = 100**.
   This avoids fitting a scaling model and reports the measured batch performance
   directly.
@@ -39,17 +46,18 @@ where it **cannot** be neutralized the effect is described.
 1. **Result caching — neutralized.** PyStemmer caches results by default
    (`maxCacheSize=10000`). Since a benchmark stems the same corpus repeatedly,
    that cache would turn measured passes into dictionary lookups rather than
-   stemming. The harness explicitly disables **both** PyStemmer's cache
-   (`maxCacheSize=0`) and radixor's default cache (`cache_size=0`). The other
-   engines have no cache.
+   stemming. The harness explicitly disables PyStemmer's cache
+   (`maxCacheSize=0`) and both Radixor runtimes' default caches
+   (`cache_size=0`). The other engines have no cache.
 2. **Lowercasing — neutralized.** Snowball (PyStemmer, snowballstemmer) and
    CISTEM differ in whether they case-fold. Snowball does **no** case handling;
    it assumes pre-lowercased input. The corpus is pre-lowercased for every
-   engine, and radixor is therefore run with **`lowercase=False`** so it does
-   the same work. On already-lowercased input radixor returns identical results
-   either way. **Exception — CISTEM:** it always performs its own lowercasing
-   and German umlaut normalization internally and cannot be told to skip it, so
-   CISTEM does *slightly more* normalization work than the others. This
+   engine, and both Radixor runtimes are therefore run with
+   **`lowercase=False`** so they do the same work. On already-lowercased input
+   they return identical results either way. **Exception — CISTEM:** it always
+   performs its own lowercasing and German umlaut normalization internally and
+   cannot be told to skip it, so CISTEM does *slightly more* normalization work
+   than the others. This
    unavoidable extra work biases the comparison modestly **in radixor's
    favour**, not CISTEM's.
 3. **Hidden delegation — neutralized.** `snowballstemmer` delegates to PyStemmer
@@ -62,24 +70,32 @@ where it **cannot** be neutralized the effect is described.
 
 | Item | Published value |
 |---|---|
-| CPU | AMD Ryzen 5 8600G with Radeon 760M Graphics |
+| CPU | AMD Ryzen 5 7600 6-Core Processor |
 | CPU topology | 6 physical cores / 12 logical CPUs |
-| OS | Linux-7.1.8-200.fc44.x86_64-x86_64-with-glibc2.43 |
-| CPU governor | `performance` on all 12 logical CPUs; boost enabled |
-| Python | CPython 3.14.6 |
-| Radixor | 4.1.2, release-mode ABI3 wheel, cache disabled |
+| OS | Fedora Linux 44, kernel `7.1.8-200.fc44.x86_64`, glibc 2.43 |
+| CPU policy | `amd-pstate-epp` active; `performance` governor and energy preference on all 12 logical CPUs; boost enabled |
+| Python | CPython 3.14.7 |
+| Python (PyO3) | Radixor 4.2.0, locally built release-mode ABI3 wheel, cache disabled |
+| Python-C | Radixor 4.2.0, locally built CPython 3.14 C-extension wheel, cache disabled |
+| Native toolchains | Rust 1.97.1; GCC 16.2.1 |
+| Source identity | Radixor 4.2.0 release source based on Git commit `31e3b9d`; the Java benchmark provenance retains the exact measured source patch and untracked-source checksums |
 | PyStemmer | 3.1.0 (`libstemmer_c` 3.1.0), cache disabled |
 | snowballstemmer | 3.1.1, forced pure-Python backend |
 | NLTK | 3.10.3 |
 | Workload | 5,000 changed tokens per language and measurement |
 | Batch sizes | 100 |
-| Timing | median of 3 measured passes after 3 warm-up passes |
+| Timing | median of 3 calibrated ~250 ms samples after a warm-up of at least 3 complete-corpus passes and 500 ms |
+
+The checkout represents the 4.2.0 Python runtimes. The repository's local
+benchmark build deliberately leaves wheel metadata at its `0.0.0` packaging
+placeholder, which is why the raw report records `engine_version=0.0.0` even
+though the measured source version is 4.2.0.
 
 The authoritative command was:
 
 ```bash
 ./gradlew pythonBenchmarkAllLanguagesBatch \
-  -PpythonBenchmarkEngines=radixor,PyStemmer,snowballstemmer-pure,cistem,nltk-porter \
+  -PpythonBenchmarkEngines=radixor,radixor-c,PyStemmer,snowballstemmer-pure,cistem,nltk-porter \
   -PpythonBenchmarkWords=5000 \
   -PpythonBenchmarkRepeats=3 \
   -PpythonBenchmarkWarmup=3 \
@@ -93,54 +109,70 @@ the full per-size CSV and JSON reports under
 ## Results — batch size 100, cache disabled
 
 The table reports nanoseconds per word at `N=100` (lower is better). A dash
-means that the engine has no implementation for that language. Every available
-competitor was measured in the same process, with the same corpus and batch
-partitioning.
+means that the engine has no implementation for that language. Each engine ran
+in an isolated virtual environment and process during the same controlled
+benchmark session, with the same corpus construction and batch partitioning.
+Bold values identify the fastest measured engine for that language.
+
+These are point estimates from the documented single-machine session, not
+formal confidence intervals. Small differences—especially the close PyO3 and
+Python-C rows—should be treated as workload-specific unless they reproduce in
+the deployment environment. The all-language geometric means are more useful
+for the broad comparison than an isolated near-tie.
 
 | Language | Python (PyO3) | Python-C | PyStemmer (Snowball C) | CISTEM (pure Py) | snowballstemmer (pure Py) | NLTK Porter (pure Py) |
 |---|---:|---:|---:|---:|---:|---:|
-| Czech (`cs`) | **151.6** | N/A | 158.7 | — | 3194.4 | — |
-| Danish (`da`) | **115.8** | N/A | 181.9 | — | 5643.1 | — |
-| German (`de`) | **156.1** | N/A | 453.3 | 2306.4 | 22351.7 | — |
-| English (`en`) | **127.4** | N/A | 251.2 | — | 12806.1 | 5335.1 |
-| Spanish (`es`) | **134.3** | N/A | 209.9 | — | 13053.4 | — |
-| Persian (`fa`) | **147.4** | N/A | 324.2 | — | 20816.9 | — |
-| Finnish (`fi`) | **171.7** | N/A | 188.3 | — | 7790.9 | — |
-| French (`fr`) | **167.4** | N/A | 349.8 | — | 22760.1 | — |
-| Hebrew (`he`) | **161.6** | N/A | — | — | — | — |
-| Hungarian (`hu`) | **133.2** | N/A | 190.7 | — | 9040.2 | — |
-| Italian (`it`) | **137.6** | N/A | 363.8 | — | 22083.6 | — |
-| Norwegian Bokmål (`nb`) | **115.1** | N/A | 166.4 | — | 4926.5 | — |
-| Dutch (`nl`) | **120.4** | N/A | 246.3 | — | 11720.3 | — |
-| Norwegian Nynorsk (`nn`) | **106.5** | N/A | 164.3 | — | 4828.7 | — |
-| Polish (`pl`) | **125.6** | N/A | 137.2 | — | 3489.3 | — |
-| Portuguese (`pt`) | **114.5** | N/A | 198.7 | — | 14330.2 | — |
-| Russian (`ru`) | **192.3** | N/A | 278.5 | — | 10333.2 | — |
-| Swedish (`sv`) | **122.6** | N/A | 138.0 | — | 3576.5 | — |
-| Ukrainian (`uk`) | **149.6** | N/A | — | — | — | — |
-| Yiddish (`yi`) | **159.5** | N/A | 434.1 | — | 20835.4 | — |
+| Czech (`cs`) | 105.2 | **95.5** | 147.7 | — | 3385.8 | — |
+| Danish (`da`) | **76.3** | 84.6 | 171.5 | — | 5991.8 | — |
+| German (`de`) | **118.4** | 134.7 | 428.8 | 2305.5 | 23667.1 | — |
+| English (`en`) | 91.2 | **90.3** | 228.3 | — | 12724.9 | 5307.5 |
+| Spanish (`es`) | 91.4 | **84.9** | 194.9 | — | 13100.4 | — |
+| Persian (`fa`) | 109.6 | **95.1** | 325.3 | — | 20884.6 | — |
+| Finnish (`fi`) | 136.0 | **115.2** | 177.5 | — | 7951.3 | — |
+| French (`fr`) | 127.5 | **122.3** | 324.0 | — | 24327.4 | — |
+| Hebrew (`he`) | 131.5 | **124.6** | — | — | — | — |
+| Hungarian (`hu`) | **87.8** | 89.5 | 166.4 | — | 9059.7 | — |
+| Italian (`it`) | 97.0 | **77.7** | 339.4 | — | 23162.9 | — |
+| Norwegian Bokmål (`nb`) | **80.6** | 86.7 | 145.1 | — | 5169.2 | — |
+| Dutch (`nl`) | 83.4 | **77.9** | 240.4 | — | 11800.1 | — |
+| Norwegian Nynorsk (`nn`) | **68.9** | 74.3 | 141.3 | — | 4969.1 | — |
+| Polish (`pl`) | **84.2** | 84.8 | 131.2 | — | 3667.3 | — |
+| Portuguese (`pt`) | 73.4 | **67.3** | 180.4 | — | 14282.9 | — |
+| Russian (`ru`) | **143.7** | 144.6 | 257.7 | — | 10633.2 | — |
+| Swedish (`sv`) | **84.1** | 92.4 | 132.6 | — | 3800.7 | — |
+| Ukrainian (`uk`) | **98.8** | 106.0 | — | — | — | — |
+| Yiddish (`yi`) | **91.5** | 95.9 | 419.0 | — | 21410.5 | — |
 
-Radixor won **18 / 18** direct PyStemmer comparisons. At `N=100`, its
-geometric-mean speedup was **1.68×**; the largest direct advantage was **2.90×**
-for German. Across all 20 Radixor languages, throughput ranged from **5.20 to
-9.39 million words/s**.
+Both Radixor runtimes recorded lower median processing time in **18 / 18**
+direct PyStemmer comparisons. At `N=100`,
+Python (PyO3) achieved a **2.25×** geometric-mean speedup, with a largest direct
+advantage of **4.58×** for Yiddish and throughput of **6.96–14.52 million
+words/s** across its 20 languages. Python-C achieved a **2.29×** geometric-mean
+speedup, with a largest direct advantage of **4.37×** for Yiddish and throughput
+of **6.92–14.85 million words/s**. Python-C was faster than PyO3 in 10 languages
+and PyO3 was faster in 10; Python-C's geometric-mean advantage over PyO3 was
+**1.02×**, so workload and language remain more useful selection criteria than
+a universal ranking.
 
 ### CISTEM comparison for German
 
 The German row also provides a direct comparison with CISTEM:
 
-| Engine | Implementation | N=100 | vs radixor |
+| Engine | Implementation | N=100 | vs Python (PyO3) |
 |---|---|---|---|
-| **radixor** | Rust trie | **156.1 ns/word** | — |
-| PyStemmer (de) | Snowball C | 453.3 ns/word | 2.90× slower |
-| **CISTEM** | pure Python (`nltk`) | **2,306.4 ns/word** | **14.79× slower** |
+| **Python (PyO3)** | Rust trie | **118.4 ns/word** | — |
+| Python-C | CPython C trie | 134.7 ns/word | 1.14× slower |
+| PyStemmer (de) | Snowball C | 428.8 ns/word | 3.62× slower |
+| **CISTEM** | pure Python (`nltk`) | **2,305.5 ns/word** | **19.48× slower** |
 
-CISTEM has no batch entry point (it is a per-word Python loop), so its per-word
-cost is flat across batch sizes and batching cannot amortize it. It is a compact
-~40-rule German heuristic with no dictionary — a different design point that
-trades coverage for simplicity. Because CISTEM's unavoidable normalization work
-modestly biases the measurement in radixor's favour (point 2 above), the 14.82×
-result is not a perfectly normalization-matched ratio.
+CISTEM has no batch entry point, so the harness invokes it through a per-word
+Python loop and cannot amortize work through a native batch API. This run
+measures only `N=100` and does not claim a CISTEM scaling curve across batch
+sizes. CISTEM is a compact ~40-rule German heuristic with no dictionary — a
+different design point that trades coverage for simplicity. Because CISTEM's
+unavoidable normalization work modestly biases the measurement in Radixor's
+favour (point 2 above), the 19.48× result is not a perfectly
+normalization-matched ratio.
 
 The all-language Gradle task does not measure stage-level profiling or cached
 lookup performance. This page therefore does not mix such figures from an older
@@ -162,7 +194,7 @@ quality is assessed separately from throughput.
 ```bash
 pip install -r python/benchmarks/requirements-bench.txt
 ./gradlew pythonBenchmarkAllLanguagesBatch \
-  -PpythonBenchmarkEngines=radixor,PyStemmer,snowballstemmer-pure,cistem,nltk-porter \
+  -PpythonBenchmarkEngines=radixor,radixor-c,PyStemmer,snowballstemmer-pure,cistem,nltk-porter \
   -PpythonBenchmarkWords=5000 \
   -PpythonBenchmarkRepeats=3 \
   -PpythonBenchmarkWarmup=3 \

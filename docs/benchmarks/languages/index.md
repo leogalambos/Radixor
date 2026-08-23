@@ -9,6 +9,7 @@ This section splits Radixor stemmer benchmark results by language. Each of the 2
 | [Methodology](../reference/methodology.md) | Workload design, normalization, speed metrics, and exact-root quality metrics. Pairwise quality definitions are also reproduced on every language page. |
 | [Corpora](../reference/corpora.md) | Dictionary sizes and changed-token timing workloads. |
 | [Environment and reports](../reference/environment.md) | Hardware, JVM, JMH settings, report files, and badge policy. |
+| [Dictionary-family generalization](../generalization.md) | Separate all-language evaluation of Java transformations on families withheld from model training. |
 | [English dictionary coverage](../reference/english-coverage.md) | Quality/speed operating curve for contracted Radixor tries built from 100% down to 10% of English dictionary rows. |
 | [Candidate evaluation](../reference/candidates.md) | Included and skipped stemmer candidates. |
 
@@ -41,6 +42,6 @@ This section splits Radixor stemmer benchmark results by language. Each of the 2
 
 - Speed benchmarks process only changed dictionary tokens where the surface form differs from the expected root.
 - Accuracy benchmarks process the complete dictionary and report `All exact`, `Changed exact`, and `Root preserved`.
-- Radixor speed must be interpreted together with exact-root quality. A slower Radixor row must not be read as a simple performance weakness when Radixor is also the row with accuracy close to 100% and competing stemmers are much lower. Many fast light, minimal, possessive, or aggressive rule-based stemmers are fast because they do much less linguistic work. The measured Radixor cost buys dictionary-trained precision, and that precision is what improves search quality when queries and indexed text are reduced to the same intended roots. The [EnglishRadixorDictionaryCoverageBenchmark](../reference/english-coverage.md) table shows this contracted-trie operating curve explicitly.
+- Runtime and exact-root agreement measure different properties. Light, minimal, possessive, and other rule-based filters intentionally have different transformation scopes, so compare every speed row with the adjacent quality table. The [English coverage benchmark](../reference/english-coverage.md) shows the quality/speed operating curve; the [multilingual generalization benchmark](../generalization.md) separately tests transformations on withheld families.
 - Results are comparable only within the same language and benchmark family.
 - The historical Porter badge is retired; no JMH badge JSON is generated.

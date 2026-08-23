@@ -185,6 +185,7 @@ jobs:
       - name: Publish GitHub release assets
         uses: softprops/action-gh-release@v2
         with:
+          make_latest: true
           body_path: build/generated/release-notes/CHANGELOG.md
           files: |
             build/distributions/*.zip

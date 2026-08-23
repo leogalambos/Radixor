@@ -79,8 +79,10 @@ archives. After downloading a release, maintainers and users can verify it with:
 
 ```bash
 sha256sum --check SHA256SUMS
-gh attestation verify radixor-<version>-<wheel-tags>.whl \
-  --repo leogalambos/Radixor
+gh attestation verify "radixor-<version>-<wheel-tags>.whl" \
+  --repo leogalambos/Radixor \
+  --signer-workflow leogalambos/Radixor/.github/workflows/python-release.yml \
+  --source-ref "refs/tags/python@<version>"
 ```
 
 Python packages do **not** reuse the OpenPGP key configured for Java/Maven
@@ -219,8 +221,9 @@ pytest -q
   dictionaries. `radixor-models-standard` ships 20 compiled gzip v7 resources,
   the checksum/provenance manifest, and CC BY-SA 3.0 notices; optional
   `pl-pl-polimorf` is excluded.
-- **Catalog compatibility.** Radixor 4.1 accepts model-distribution major 1
-  (`>=1.0,<2.0`) carrying the independent 2026.1 catalog identity. Missing,
+- **Catalog compatibility.** The current supported Python runtime accepts the
+  documented compatible model-distribution major (`>=1.0,<2.0`) carrying an
+  independent model-catalog identity. Missing,
   incompatible, or corrupt data produces an
   actionable error before native loading.
 - **Toolchain PATH.** After installing rustup, open a fresh shell (or ensure

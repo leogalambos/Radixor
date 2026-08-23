@@ -2,7 +2,7 @@
 
 The stemmer comparison suite measures Radixor and Java stemmers on the same language and deterministic Radixor model dictionary-derived data. Published Radixor rows in this refresh use contracted compiled patch tries, where uniform preferred-command subtrees are collapsed into accepting leaves before the trie is frozen for lookup. For each language, the registered default model resource stores the expected root as the first tab-separated field on a line and its surface forms on the same line. Every single-token field on that line can therefore be paired with the same expected root.
 
-Published speed results come only from the exact method selection retained in `published-speed-benchmarks-2026-08-10.txt`. Internal `FrequencyTrie*` microbenchmarks, quality methods, the CISTEM gold-standard experiment, and the optional `PolishPolimorfStemmerComparisonBenchmark` are not part of those results. The Snowball 3.1.0 refresh adds direct Czech, Persian, and Polish workloads; the existing Radixor and Lucene workload domains are unchanged.
+Published speed results come only from the exact method selection retained in `published-speed-benchmarks-2026-08-23.txt`. Internal `FrequencyTrie*` microbenchmarks, quality methods, the CISTEM gold-standard experiment, and the optional `PolishPolimorfStemmerComparisonBenchmark` are not part of those results. The Snowball 3.1.0 matrix includes direct Czech, Persian, and Polish workloads; all published Java comparators were measured in the same refresh.
 
 ## Benchmark Passes
 
@@ -13,7 +13,7 @@ There are two distinct benchmark passes:
 
 Timing corpora are generated once per JMH JVM and kept in memory as shared `{token, expectedRoot}` arrays. Corpus construction, dictionary loading, trie loading, table loading, and analyzer construction are setup work and are not included in measured benchmark methods.
 
-The deterministic and timed workloads are executed separately. Corpus statistics, patch-command counts, exact-root counters, coverage accuracy, and pairwise quality do not use or interpret warmup or runtime scores. Published speed and coverage-speed methods use three independent forks, five one-second warmup iterations and ten one-second measurement iterations per fork, one benchmark thread, and a fixed 6 GiB heap.
+The deterministic and timed workloads are executed separately. Corpus statistics, patch-command counts, exact-root counters, coverage accuracy, and pairwise quality do not use or interpret warmup or runtime scores. Published speed and coverage-speed methods use three independent forks, five one-second warmup iterations and seven one-second measurement iterations per fork, one benchmark thread, and a fixed 6 GiB heap.
 
 Performance is interpreted as average time per input token:
 
@@ -35,14 +35,14 @@ Radixor is measured over dictionary tokens from its own resources: lower-case wi
 
 Lucene TokenFilter paths include required normalization in the measured pipeline. Examples include lower-case normalization for filters requiring lower-case input, German normalization before German light/minimal stemming, and Persian decimal, Arabic, and Persian normalization before Persian stemming. No ASCII folding is applied to Czech or Polish paths, because those Lucene stemmers are diacritic-aware or dictionary/table-backed for those languages. TokenFilter throughput methods materialize each emitted `CharTermAttribute` as a `String` before passing it to the JMH `Blackhole`, so output consumption is easier to inspect and closer to the direct stemmer methods.
 
-For right-to-left Radixor languages, patch application uses the traversal direction stored in trie metadata. This is required because static backward patch application is not correct for all registered language models.
+Trie metadata records the language writing direction for inspection and interchange. Natural-language suffix models apply their learned patches from the end of the stored Unicode string, independently of whether the script is displayed left-to-right or right-to-left.
 
 ## Quality Metric
 
 The quality pass reports exact-root agreement against the expected root from the default-model dictionary line. External-stemmer counters are written to:
 
-- `build/reports/jmh/stemmer-accuracy-2026-08-10.csv`
-- `build/reports/jmh/stemmer-accuracy-2026-08-10.txt`
+- `build/reports/jmh/stemmer-accuracy-2026-08-23.csv`
+- `build/reports/jmh/stemmer-accuracy-2026-08-23.txt`
 
 Accuracy is computed from standard JMH secondary rows:
 

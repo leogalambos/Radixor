@@ -4,7 +4,7 @@ This page reports same-language stemming benchmarks for Norwegian Bokmal. Accura
 
 All speed values are environment-specific and were measured on the hardware and JVM listed in the [benchmark overview](../index.md). Speed benchmark operations process changed dictionary tokens only. Accuracy uses the complete Radixor dictionary for the language.
 
-Radixor must not be read as simply "slower" when a narrow competitor has a lower timing row. In these tables Radixor is the quality-oriented baseline: its exact-root accuracy is typically close to 100%, while many faster rule-based, light, minimal, or possessive filters reach that speed by doing much less linguistic work and often score far lower in `All exact` and `Changed exact`. The Radixor rows in this benchmark refresh use the contracted compiled patch trie: compilation collapses uniform patch-command subtrees into accepting leaves, reducing hot lookup depth while preserving the preferred stemming result measured by the accuracy pass. The [EnglishRadixorDictionaryCoverageBenchmark](../reference/english-coverage.md) table shows the resulting quality/speed envelope explicitly. The same interpretation applies to this language page: speed rows must be read together with the accuracy table above them.
+Runtime and exact-root agreement measure different properties. Light, minimal, possessive, and other rule-based filters intentionally have different transformation scopes, so a lower runtime can coexist with lower dictionary-root agreement. Read the speed and accuracy tables together. The Radixor rows in this refresh use the contracted compiled patch trie: compilation collapses uniform patch-command subtrees into accepting leaves, reducing hot lookup depth while preserving the preferred stemming result measured by the accuracy pass. The [EnglishRadixorDictionaryCoverageBenchmark](../reference/english-coverage.md) shows the resulting quality/speed envelope explicitly.
 
 ## Dictionary Corpus
 
@@ -38,15 +38,15 @@ Accuracy is computed from JMH auxiliary counters in the current report. The coun
 
 ## Speed
 
-Speed uses JMH average time, 5 warmup iterations, 10 measurement iterations, 3 independent forks, and 1 thread. Relative factor is computed against the single Radixor row on this language page. Values below 1.000 are faster than that Radixor baseline; values above 1.000 are slower.
+Speed uses JMH average time, 5 warmup iterations, 7 measurement iterations, 3 independent forks, and 1 thread. Relative factor is computed against the single Radixor row on this language page. Values below 1.000 are faster than that Radixor baseline; values above 1.000 are slower.
 
 | Stemmer | Benchmark method | Score ms/op | Error ms | ns/token | Relative vs Radixor | Note |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
-| Radixor | `norwegianBokmalRadixor` | 3.240 | 0.087 | 56.5 | 1.000 | Radixor dictionary-trained patch-command stemmer. |
-| Lucene NorwegianMinimalStemFilter | `norwegianBokmalLuceneNorwegianMinimalStemFilter` | 2.726 | 0.022 | 47.5 | 0.841 | Minimal Norwegian suffix reducer. |
-| Lucene NorwegianLightStemFilter | `norwegianBokmalLuceneNorwegianLightStemFilter` | 3.136 | 0.028 | 54.6 | 0.968 | Light Norwegian suffix stemmer. |
-| Official Snowball direct | `snowballDirect[NORWEGIAN_BOKMAL]` | 4.711 | 0.410 | 82.1 | 1.454 | Official Snowball generated Java stemmer; direct API. |
-| Lucene SnowballFilter | `luceneSnowballFilter[NORWEGIAN_BOKMAL]` | 5.681 | 0.206 | 99.0 | 1.753 | Lucene TokenFilter path around Snowball; includes TokenStream overhead. |
+| Radixor | `norwegianBokmalRadixor` | 3.237 | 0.059 | 56.4 | 1.000 | Radixor dictionary-trained patch-command stemmer. |
+| Lucene NorwegianMinimalStemFilter | `norwegianBokmalLuceneNorwegianMinimalStemFilter` | 2.763 | 0.054 | 48.2 | 0.854 | Minimal Norwegian suffix reducer. |
+| Lucene NorwegianLightStemFilter | `norwegianBokmalLuceneNorwegianLightStemFilter` | 3.139 | 0.050 | 54.7 | 0.970 | Light Norwegian suffix stemmer. |
+| Official Snowball direct | `snowballDirect[NORWEGIAN_BOKMAL]` | 4.788 | 0.521 | 83.4 | 1.479 | Official Snowball generated Java stemmer; direct API. |
+| Lucene SnowballFilter | `luceneSnowballFilter[NORWEGIAN_BOKMAL]` | 5.721 | 0.314 | 99.7 | 1.767 | Lucene TokenFilter path around Snowball; includes TokenStream overhead. |
 
 ## Interpretation Notes
 
@@ -326,7 +326,7 @@ Standard ARI, homogeneity, completeness, V-measure, and NMI are not calculated: 
 ### Provenance
 
 - Authoritative source: `docs/benchmarks/data/stemming-quality.csv`
-- Source SHA-256: `d34f325da320a2e040b54d8d8b5c216d70448f08cfb8659a423e99882aa1afb5`
+- Source SHA-256: `f15f8e653022e0333955b8b82f42944aa1c5a14a5ce54e628bb1a9c9aed42132`
 - Evaluation command: `./gradlew stemmingQuality --no-daemon`
 - Dictionary language: `NB_NO`
 - Processing modes: `ALL_WORDS`, `LOWERCASE_GROUPS_ONLY`

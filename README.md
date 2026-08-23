@@ -77,11 +77,16 @@ The core artifact contains the algorithm and registry, but no language dictionar
 
 ```groovy
 dependencies {
-    implementation 'org.egothor:radixor:<radixor-version>'
-    runtimeOnly 'org.egothor:radixor-model-pl-pl-unimorph:1.0.0'
-    // Or: runtimeOnly 'org.egothor:radixor-models-standard:<catalog-version>'
+    implementation 'org.egothor:radixor:<latest-java-version>'
+    runtimeOnly 'org.egothor:radixor-model-pl-pl-unimorph:<compatible-model-version>'
+    // Or: runtimeOnly 'org.egothor:radixor-models-standard:<compatible-catalog-version>'
 }
 ```
+
+Resolve the current Radixor/Java version from its
+[Maven Central artifact page](https://central.sonatype.com/artifact/org.egothor/radixor)
+and compatible model versions from the
+[model catalog](docs/stemmer-model-catalog.md).
 
 ```java
 final FrequencyTrie<CompiledPatchCommand> polish =
@@ -136,16 +141,16 @@ Radixor performance is best read together with stemming quality. The English dic
 
 | Used rows | Actual row ratio | All exact | Changed exact | Root preserved | Speed ms/op | Error ms | ns/token |
 | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| 100% | 100.000% | 97.478% | 97.197% | 97.552% | 15.064 | 0.658 | 71.6 |
-| 90% | 90.000% | 97.047% | 94.913% | 97.613% | 17.798 | 2.161 | 84.6 |
-| 80% | 80.000% | 96.635% | 92.768% | 97.661% | 13.900 | 0.941 | 66.0 |
-| 70% | 70.000% | 96.209% | 90.565% | 97.705% | 14.809 | 1.376 | 70.3 |
-| 60% | 60.000% | 95.750% | 88.384% | 97.703% | 13.186 | 0.930 | 62.6 |
-| 50% | 50.000% | 95.262% | 86.107% | 97.690% | 12.852 | 0.943 | 61.1 |
-| 40% | 40.000% | 94.753% | 83.855% | 97.643% | 12.358 | 0.831 | 58.7 |
-| 30% | 30.000% | 94.208% | 81.651% | 97.537% | 11.657 | 0.921 | 55.4 |
-| 20% | 20.000% | 93.633% | 79.366% | 97.416% | 11.494 | 1.256 | 54.6 |
-| 10% | 10.000% | 92.868% | 76.516% | 97.204% | 9.895 | 0.925 | 47.0 |
+| 100% | 100.000% | 97.478% | 97.197% | 97.552% | 18.349 | 4.042 | 87.2 |
+| 90% | 90.000% | 97.047% | 94.913% | 97.613% | 14.767 | 1.331 | 70.2 |
+| 80% | 80.000% | 96.635% | 92.768% | 97.661% | 14.233 | 1.242 | 67.6 |
+| 70% | 70.000% | 96.209% | 90.565% | 97.705% | 15.195 | 2.398 | 72.2 |
+| 60% | 60.000% | 95.750% | 88.384% | 97.703% | 13.539 | 1.173 | 64.3 |
+| 50% | 50.000% | 95.262% | 86.107% | 97.690% | 12.624 | 1.054 | 60.0 |
+| 40% | 40.000% | 94.753% | 83.855% | 97.643% | 13.419 | 1.587 | 63.8 |
+| 30% | 30.000% | 94.208% | 81.651% | 97.537% | 12.299 | 1.418 | 58.4 |
+| 20% | 20.000% | 93.633% | 79.366% | 97.416% | 10.937 | 1.250 | 52.0 |
+| 10% | 10.000% | 92.868% | 76.516% | 97.204% | 10.911 | 1.798 | 51.8 |
 
 Column meanings:
 
@@ -158,7 +163,15 @@ Column meanings:
 - `Error ms` is the JMH score error converted to milliseconds.
 - `ns/token` is average nanoseconds per changed token in that operation.
 
-The contracted trie result is materially stronger than the older uncontracted profile: full English coverage reaches 97.478% all-token exactness and 97.197% changed-token exactness at 71.6 ns/token, while even a 10% deterministic dictionary slice remains at 92.868% all-token exactness and 76.516% changed-token exactness at 47.0 ns/token. This is why Radixor benchmark results are documented with both speed and quality instead of a single Porter speed badge.
+The contracted trie result is materially stronger than the older uncontracted profile: full English coverage reaches 97.478% all-token exactness and 97.197% changed-token exactness at 87.2 ns/token, while even a 10% deterministic dictionary slice remains at 92.868% all-token exactness and 76.516% changed-token exactness at 51.8 ns/token. This is why Radixor benchmark results are documented with both speed and quality instead of a single Porter speed badge.
+
+The English curve evaluates the complete dictionary, so it intentionally mixes
+trained and withheld rows. The separate
+[20-language dictionary-family generalization report](docs/benchmarks/generalization.md)
+isolates held-out rows, removes surface forms duplicated in training, and reports
+five frozen splits at every 10% coverage step. It contains 1,000 raw scenarios
+with exact model provenance and makes clear where transfer is strong—and where a
+small resource does not support a broad generalization claim.
 
 For benchmark scope, workload design, environment, commands, report locations, and interpretation guidance, see [Benchmarking](docs/benchmarking.md).
 
@@ -260,8 +273,9 @@ The repository keeps the front page concise and places detailed documentation un
 
 ### Python
 
-The Python installation installs the native package together with the pure
-`radixor-models-standard` 1.x distribution of the 2026.1 catalog: 20 [compiled Radixor models](docs/data-formats.md), excluding
+The Python installation installs the native package together with the
+compatible pure-Python `radixor-models-standard` distribution: 20
+[compiled Radixor models](docs/data-formats.md), excluding
 the optional PoliMorf model. Python runtime distributions contain no textual
 dictionaries.
 
@@ -328,10 +342,15 @@ dictionaries.
   JMH benchmark methodology, dictionary coverage trade-offs, speed, quality, and result interpretation.
 
 - [Benchmark Results](docs/benchmarks/index.md)  
-  Structured reference for methodology, corpora, environment, English coverage, and per-language result pages.
+  Structured reference for methodology, corpora, environment, multilingual
+  generalization, English coverage, and per-language result pages.
 
 - [Published Reports](docs/reports.md)  
   Entry points to CI-published reports and GitHub Pages artifacts.
+
+- [Trust, Security and Support](docs/trust-security-and-support.md)
+  Supported releases, runtime versioning, public support, private vulnerability
+  reporting, supply-chain evidence, and lifecycle expectations.
 
 ## Project philosophy
 
@@ -371,7 +390,7 @@ directory because the root artifact contains no model data.
 
 ```groovy
 dependencies {
-    implementation 'org.egothor:radixor:4.0.0'
-    runtimeOnly 'org.egothor:radixor-model-pl-pl-polimorf:1.0.0'
+    implementation 'org.egothor:radixor:<latest-java-version>'
+    runtimeOnly 'org.egothor:radixor-model-pl-pl-polimorf:<compatible-model-version>'
 }
 ```

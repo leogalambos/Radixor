@@ -33,7 +33,7 @@ package org.egothor.stemmer;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
@@ -60,7 +60,8 @@ class TrieMetadataTest {
                 () -> assertEquals(metadata.reductionSettings(), parsed.reductionSettings()),
                 () -> assertEquals(metadata.diacriticProcessingMode(), parsed.diacriticProcessingMode()),
                 () -> assertEquals(metadata.caseProcessingMode(), parsed.caseProcessingMode()),
-                () -> assertTrue(textBlock.contains("rightToLeft=true")));
+                () -> assertFalse(textBlock.contains("rightToLeft="),
+                        "Traversal metadata and writing direction must remain independent."));
     }
 
     @Test

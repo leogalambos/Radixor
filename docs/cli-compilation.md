@@ -48,7 +48,7 @@ The CLI supports the following arguments:
 --output <file>
 --reduction-mode <mode>
 [--store-original]
-[--right-to-left]
+[--traversal-direction <BACKWARD|FORWARD>]
 [--case-processing-mode <mode>]
 [--dominant-winner-min-percent <1..100>]
 [--dominant-winner-over-second-ratio <1..n>]
@@ -108,15 +108,15 @@ When this flag is present, the canonical stem itself is inserted using the no-op
 
 This is usually a sensible default for real dictionaries because it ensures that canonical forms are directly representable in the compiled trie rather than relying only on their variants.
 
-### `--right-to-left`
+### `--traversal-direction <BACKWARD|FORWARD>`
 
-When present, compilation uses forward traversal (`WordTraversalDirection.FORWARD`) so stored forms are processed from their logical beginning.
+Selects traversal by stored character index. The default is `BACKWARD`, which starts at the end of the sequence and is correct for natural-language suffixes in both left-to-right and right-to-left writing systems. `FORWARD` starts at index zero and is intended only for deliberately prefix-oriented custom data.
 
 ```text
---right-to-left
+--traversal-direction FORWARD
 ```
 
-This option is intended for right-to-left languages where affix behavior should operate on the written form without externally reversing words.
+The former `--right-to-left` spelling is rejected with migration guidance so model traversal is always expressed explicitly. Omit it for suffix-oriented dictionaries.
 
 ### `--case-processing-mode <mode>`
 
@@ -220,7 +220,7 @@ The CLI is best used as a preparation step during packaging, deployment, or cont
 
 A `.radixor.gz` file should be handled as a versioned output artifact. It represents a specific dictionary state, a specific reduction mode, whether uniform-subtree contraction was used, and, where relevant, specific dominant-result thresholds.
 
-Compiled tries also persist a human-readable metadata block (`key=value` lines) that includes format version, traversal direction, RTL indicator, reduction mode, contraction flag, dominant thresholds, diacritic-processing mode, and case-processing mode. After decompression, you can inspect this block directly to identify what dictionary/trie configuration the artifact contains. The current CLI uses `DiacriticProcessingMode.AS_IS`; custom diacritic stripping is available through the programmatic builder and loader APIs rather than through a CLI flag.
+Compiled tries also persist a human-readable metadata block (`key=value` lines) that includes format version, traversal direction, reduction mode, contraction flag, dominant thresholds, diacritic-processing mode, and case-processing mode. After decompression, you can inspect this block directly to identify what dictionary/trie configuration the artifact contains. Writing direction is language metadata and is intentionally not encoded as a trie traversal property. The current CLI uses `DiacriticProcessingMode.AS_IS`; custom diacritic stripping is available through the programmatic builder and loader APIs rather than through a CLI flag.
 
 ### Choose reduction mode deliberately
 

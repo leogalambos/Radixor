@@ -15,6 +15,25 @@ The install resolves `radixor-models-standard>=1.0,<2.0`. That pure-Python data
 package is shared with `radixor`; installing both runtimes does not duplicate
 the model catalog.
 
+## Integrity and provenance
+
+Every Python-C GitHub Release publishes `SHA256SUMS` and GitHub build-provenance
+attestations for its wheels and source archive. After downloading a release,
+verify both the file inventory and that the artifact came from the intended
+tagged release workflow:
+
+```bash
+sha256sum --check SHA256SUMS
+gh attestation verify "radixor_c-<version>-<wheel-tags>.whl" \
+  --repo leogalambos/Radixor \
+  --signer-workflow leogalambos/Radixor/.github/workflows/python-c-release.yml \
+  --source-ref "refs/tags/python-c@<version>"
+```
+
+Checksums detect corruption; workflow- and tag-bound provenance identifies the
+repository release path that produced the downloaded artifact. Neither makes
+an artifact from an untrusted source safe merely because its filename matches.
+
 ## Build from the repository
 
 A C compiler, matching Python development headers and Python build tooling are

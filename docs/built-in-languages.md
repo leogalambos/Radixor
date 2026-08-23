@@ -60,12 +60,16 @@ Polish default implicitly.
 
 ## Dependency patterns
 
+Resolve the placeholders below from the
+[Maven Central artifact page](https://central.sonatype.com/artifact/org.egothor/radixor)
+and the [model catalog](stemmer-model-catalog.md), respectively.
+
 Minimal English:
 
 ```groovy
 dependencies {
-    implementation 'org.egothor:radixor:<radixor-version>'
-    runtimeOnly 'org.egothor:radixor-model-us-uk-default:1.0.0'
+    implementation 'org.egothor:radixor:<latest-java-version>'
+    runtimeOnly 'org.egothor:radixor-model-us-uk-default:<compatible-model-version>'
 }
 ```
 
@@ -73,8 +77,8 @@ All documented defaults:
 
 ```groovy
 dependencies {
-    implementation 'org.egothor:radixor:<radixor-version>'
-    runtimeOnly 'org.egothor:radixor-models-standard:<catalog-version>'
+    implementation 'org.egothor:radixor:<latest-java-version>'
+    runtimeOnly 'org.egothor:radixor-models-standard:<compatible-catalog-version>'
 }
 ```
 
@@ -101,7 +105,7 @@ The call discovers the default descriptor from the runtime classpath, verifies i
 
 ## Writing direction
 
-Persian, Hebrew, and Yiddish declare right-to-left language metadata and use forward traversal over stored forms. Other defaults use historical backward Egothor traversal. This setting must remain aligned across dictionary parsing, trie lookup, patch generation, persistence, and application. Model identity remains separate from writing direction.
+Persian, Hebrew, and Yiddish declare right-to-left writing metadata for presentation. Writing direction does not reorder characters in a Java `String`: all built-in natural-language models therefore use backward traversal from the stored sequence end, where suffixes remain located. Explicit forward traversal is reserved for deliberately prefix-oriented custom data. The selected traversal must remain aligned across dictionary parsing, trie lookup, patch generation, persistence, and application; model identity and writing direction are separate concerns.
 
 ## Custom and persisted alternatives
 

@@ -33,14 +33,18 @@ Radixor transformations and limited protectable contributions without claiming t
 
 ## Choose runtime dependencies
 
-Radixor 4 is an architectural migration that is not yet represented by a published release in this working tree, so core and catalog versions below use placeholders. Every source-controlled model currently has model version `1.0.0`.
+Use the latest published Radixor/Java release together with compatible model
+versions from the [published model catalog](stemmer-model-catalog.md). Runtime,
+individual model and model-catalog versions evolve independently. The examples
+below use descriptive placeholders so that this page does not become stale when
+one release stream advances.
 
 ### Core plus the default Polish model
 
 ```groovy
 dependencies {
-    implementation 'org.egothor:radixor:<radixor-version>'
-    runtimeOnly 'org.egothor:radixor-model-pl-pl-unimorph:1.0.0'
+    implementation 'org.egothor:radixor:<latest-java-version>'
+    runtimeOnly 'org.egothor:radixor-model-pl-pl-unimorph:<compatible-model-version>'
 }
 ```
 
@@ -48,8 +52,8 @@ dependencies {
 
 ```groovy
 dependencies {
-    implementation 'org.egothor:radixor:<radixor-version>'
-    runtimeOnly 'org.egothor:radixor-model-pl-pl-polimorf:1.0.0'
+    implementation 'org.egothor:radixor:<latest-java-version>'
+    runtimeOnly 'org.egothor:radixor-model-pl-pl-polimorf:<compatible-model-version>'
 }
 ```
 
@@ -59,9 +63,9 @@ This dependency makes `pl-pl-polimorf` discoverable; it does not change the defa
 
 ```groovy
 dependencies {
-    implementation 'org.egothor:radixor:<radixor-version>'
-    runtimeOnly 'org.egothor:radixor-model-pl-pl-unimorph:1.0.0'
-    runtimeOnly 'org.egothor:radixor-model-pl-pl-polimorf:1.0.0'
+    implementation 'org.egothor:radixor:<latest-java-version>'
+    runtimeOnly 'org.egothor:radixor-model-pl-pl-unimorph:<compatible-model-version>'
+    runtimeOnly 'org.egothor:radixor-model-pl-pl-polimorf:<compatible-model-version>'
 }
 ```
 
@@ -69,8 +73,8 @@ dependencies {
 
 ```groovy
 dependencies {
-    implementation 'org.egothor:radixor:<radixor-version>'
-    runtimeOnly 'org.egothor:radixor-models-standard:<catalog-version>'
+    implementation 'org.egothor:radixor:<latest-java-version>'
+    runtimeOnly 'org.egothor:radixor-models-standard:<compatible-catalog-version>'
 }
 ```
 
@@ -80,8 +84,8 @@ The standard aggregate is POM-only. Its POM supplies exactly one default model p
 
 ```groovy
 dependencies {
-    implementation 'org.egothor:radixor:<radixor-version>'
-    implementation platform('org.egothor:radixor-models-bom:<catalog-version>')
+    implementation 'org.egothor:radixor:<latest-java-version>'
+    implementation platform('org.egothor:radixor-models-bom:<compatible-catalog-version>')
     runtimeOnly 'org.egothor:radixor-model-pl-pl-unimorph'
     runtimeOnly 'org.egothor:radixor-model-pl-pl-polimorf'
 }
@@ -93,12 +97,12 @@ Equivalent Maven dependencies use ordinary runtime scope:
 <dependency>
   <groupId>org.egothor</groupId>
   <artifactId>radixor</artifactId>
-  <version>${radixor.version}</version>
+  <version>REPLACE_WITH_LATEST_JAVA_VERSION</version>
 </dependency>
 <dependency>
   <groupId>org.egothor</groupId>
   <artifactId>radixor-model-pl-pl-unimorph</artifactId>
-  <version>1.0.0</version>
+  <version>REPLACE_WITH_COMPATIBLE_MODEL_VERSION</version>
   <scope>runtime</scope>
 </dependency>
 ```

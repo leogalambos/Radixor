@@ -126,12 +126,14 @@ than learned from lexical evidence.
 At `N=100`, the current Python batch benchmark shows that rule-based
 generalization does not require accepting a runtime advantage over Radixor:
 
-- **18 / 18** direct language comparisons are won by Radixor against PyStemmer
-  3.1.0;
-- the geometric-mean speedup is **1.68×**;
-- the largest measured direct advantage is **2.90×** (German);
-- Radixor spans **5.20–9.39 million words/s** across all 20 measured Radixor
-  languages at batch size `N=100`.
+- each Radixor 4.2.0 Python runtime records lower median processing time than
+  PyStemmer 3.1.0 in all **18 / 18** direct language comparisons;
+- Python (PyO3) has a **2.25×** geometric-mean speedup and a largest measured
+  direct advantage of **4.58×** (Yiddish);
+- Python-C has a **2.29×** geometric-mean speedup and a largest measured direct
+  advantage of **4.37×** (Yiddish);
+- Python (PyO3) spans **6.96–14.52 million words/s**, while Python-C spans
+  **6.92–14.85 million words/s**, across all 20 languages at batch size `N=100`.
 
 Those are performance results. The newly integrated official Snowball 3.1.0 Java
 quality comparators also make the linguistic trade-off visible for the three
@@ -140,14 +142,14 @@ algorithms added in that Snowball generation:
 | Language, `ALL_WORDS` | Radixor balanced accuracy | Snowball 3.1.0 balanced accuracy | Radixor OI / UI | Snowball OI / UI |
 | --- | ---: | ---: | ---: | ---: |
 | Czech | **0.996617** | 0.786366 | **0% / 0.676519%** | 0.000904% / 42.725842% |
-| Persian | **0.976360** | 0.535123 | **0% / 4.728041%** | 0.001278% / 92.974054% |
+| Persian | **0.975610** | 0.535123 | **0% / 4.877973%** | 0.001278% / 92.974054% |
 | Polish | **0.991105** | 0.823625 | **0% / 1.779024%** | 0.000967% / 35.273970% |
 
 The lowercase-only evaluation gives the same picture:
 
 - **Czech:** 0.997195 vs 0.784821 balanced accuracy, with UI 0.561033% vs
   43.034822%;
-- **Persian:** 0.976360 vs 0.535123, with UI 4.728041% vs 92.974054%;
+- **Persian:** 0.975610 vs 0.535123, with UI 4.877973% vs 92.974054%;
 - **Polish:** 0.991301 vs 0.823465, with UI 1.739895% vs 35.306102%.
 
 The dominant difference is under-stemming rather than excessive conflation.
@@ -160,7 +162,8 @@ Finnish remains another useful illustration. The published `ALL_WORDS`
 primary-output quality result is **0.984838** balanced accuracy for Radixor
 versus **0.740279** for the Snowball Finnish Lucene path, with under-stemming
 **3.032474%** versus **51.944179%**. At `N=100` in the current Python batch run,
-Radixor is **1.10×** faster than PyStemmer's Finnish implementation.
+Python (PyO3) is **1.31×** faster and Python-C is **1.54×** faster than
+PyStemmer's Finnish implementation.
 
 See the [Finnish benchmark](benchmarks/languages/finnish.md), the
 [Czech benchmark](benchmarks/languages/czech.md), the

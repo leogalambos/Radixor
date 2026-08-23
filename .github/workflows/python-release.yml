@@ -9,7 +9,6 @@ on:
       version:
         description: Stable distribution version to validate without publishing
         required: true
-        default: '4.1.0'
         type: string
       publish_existing_to_pypi:
         description: Publish the existing GitHub Release to PyPI
@@ -25,9 +24,31 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  release_context:
+    name: Resolve release dependencies
+    runs-on: ubuntu-latest
+    outputs:
+      model_version: ${{ steps.models.outputs.version }}
+
+    steps:
+      - name: Check out repository
+        if: ${{ env.ACT != 'true' }}
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: Resolve standard-model distribution
+        id: models
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(bash ./tools/read-python-models-standard-version.sh)"
+          printf 'version=%s\n' "${version}" >> "${GITHUB_OUTPUT}"
+
   prepare:
     name: Prepare versioned sources and sdist
     if: github.event_name == 'push' || inputs.publish_existing_to_pypi != true
+    needs: release_context
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.release.outputs.version }}
@@ -98,7 +119,7 @@ jobs:
           PYTHONPATH=build/python-release/compiler-runtime \
             python python/scripts/build_standard_models.py \
               --project build/python-release/models-source \
-              --distribution-version 1.0.0
+              --distribution-version '${{ needs.release_context.outputs.model_version }}'
           maturin sdist --manifest-path build/python-release/native-source/Cargo.toml \
             --out build/python-release/native-sdist
           python python/scripts/build_standard_distribution.py \
@@ -106,7 +127,7 @@ jobs:
             --outdir build/python-release/models
           python python/scripts/verify_distributions.py \
             --standard-dir build/python-release/models \
-            --standard-version 1.0.0
+            --standard-version '${{ needs.release_context.outputs.model_version }}'
           PYTHONPATH=python/scripts python -c \
             "from pathlib import Path; from verify_distributions import _verify_main_sdist; _verify_main_sdist(next(Path('build/python-release/native-sdist').glob('*.tar.gz')), '${{ steps.release.outputs.version }}')"
 
@@ -361,7 +382,7 @@ jobs:
   publish:
     name: Publish immutable GitHub Release
     if: github.event_name == 'push'
-    needs: [prepare, assemble]
+    needs: [release_context, prepare, assemble]
     runs-on: ubuntu-latest
     environment: python-github-release
     permissions:
@@ -392,10 +413,26 @@ jobs:
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
+          MODEL_VERSION: ${{ needs.release_context.outputs.model_version }}
         run: |
           set -euo pipefail
-          [[ "$(gh release view 'python-models-standard@1.0.0' \
-            --repo "${GITHUB_REPOSITORY}" --json isDraft --jq '.isDraft')" == 'false' ]]
+          status="$(gh release view "python-models-standard@${MODEL_VERSION}" \
+            --repo "${GITHUB_REPOSITORY}" --json isDraft,isPrerelease \
+            --jq '[.isDraft, .isPrerelease] | @tsv')"
+          [[ "${status}" == $'false\tfalse' ]]
+          curl --fail --silent --show-error \
+            "https://pypi.org/pypi/radixor-models-standard/${MODEL_VERSION}/json" \
+            --output model-release.json
+          python - "${MODEL_VERSION}" model-release.json <<'PY'
+          import json
+          import sys
+
+          with open(sys.argv[2], encoding="utf-8") as source:
+              release = json.load(source)
+          expected = sys.argv[1]
+          assert release["info"]["version"] == expected
+          assert any(not artifact.get("yanked", False) for artifact in release["urls"])
+          PY
 
       - name: Attest package artifacts
         uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2
@@ -420,18 +457,19 @@ jobs:
           gh release create "${RELEASE_TAG}" \
             release/*.whl release/*.tar.gz release/SHA256SUMS \
             --repo "${GITHUB_REPOSITORY}" \
-            --verify-tag --draft --title "radixor ${RELEASE_VERSION}" \
+            --verify-tag --draft --latest=false --title "radixor ${RELEASE_VERSION}" \
             --notes "Native Rust/Python Radixor distribution ${RELEASE_VERSION}."
           gh release edit "${RELEASE_TAG}" \
-            --repo "${GITHUB_REPOSITORY}" --draft=false
+            --repo "${GITHUB_REPOSITORY}" --draft=false --latest=false
 
   publish-pypi:
     name: Publish native distributions to PyPI
     if: >-
       always() &&
+      needs.release_context.result == 'success' &&
       ((github.event_name == 'push' && needs.publish.result == 'success') ||
        (github.event_name == 'workflow_dispatch' && inputs.publish_existing_to_pypi))
-    needs: [prepare, assemble, publish]
+    needs: [release_context, prepare, assemble, publish]
     runs-on: ubuntu-latest
     environment: python-pypi
     permissions:
@@ -480,10 +518,24 @@ jobs:
             --pattern '*.whl' --pattern '*.tar.gz' --pattern SHA256SUMS
 
       - name: Verify required model dependency on PyPI
-        run: >-
-          curl --fail --silent --show-error
-          https://pypi.org/pypi/radixor-models-standard/1.0.0/json
-          > /dev/null
+        shell: bash
+        env:
+          MODEL_VERSION: ${{ needs.release_context.outputs.model_version }}
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error \
+            "https://pypi.org/pypi/radixor-models-standard/${MODEL_VERSION}/json" \
+            --output model-release.json
+          python - "${MODEL_VERSION}" model-release.json <<'PY'
+          import json
+          import sys
+
+          with open(sys.argv[2], encoding="utf-8") as source:
+              release = json.load(source)
+          expected = sys.argv[1]
+          assert release["info"]["version"] == expected
+          assert any(not artifact.get("yanked", False) for artifact in release["urls"])
+          PY
 
       - name: Verify and stage PyPI distributions
         shell: bash

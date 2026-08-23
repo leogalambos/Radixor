@@ -587,9 +587,9 @@ impl StemmerCore {
     /// * `path` — path to either a gzipped TSV source dictionary
     ///   (`stem\tvariant1\tvariant2...` per line) OR a compiled `.rxc` trie
     ///   (Java-interoperable v7 format). The format is auto-detected.
-    /// * `backward` — BACKWARD traversal (all languages except the
-    ///   right-to-left fa/he/yi, which use FORWARD). Ignored for compiled input
-    ///   (baked into the file).
+    /// * `backward` — BACKWARD traversal for suffix-oriented data in every
+    ///   writing system. Set false only for deliberately prefix-oriented custom
+    ///   data. Ignored for compiled input (baked into the file).
     /// * `store_original` — map each canonical stem to the no-op patch so the
     ///   stem itself is recognised. Ignored for compiled input.
     #[new]

@@ -2,6 +2,11 @@
 set -euo pipefail
 
 report_date="${1:-$(date +%F)}"
+release_identity="${2:-}"
+if [[ ! "${release_identity}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    printf 'Usage: %s <report-date> <release-version>\n' "$0" >&2
+    exit 2
+fi
 project_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "${project_root}"
 
@@ -53,8 +58,7 @@ jmh_jar="${jmh_classpath%%:*}"
     printf 'Project root: %s\n' "${project_root}"
     printf 'Core base commit: '
     git rev-parse HEAD
-    printf 'Git describe: '
-    git describe --always --dirty
+    printf 'Release identity: %s\n' "${release_identity}"
     printf 'JMH runtime classpath SHA-256: '
     sha256sum "${classpath_file}" | cut -d' ' -f1
     printf 'JMH executable JAR SHA-256: '
@@ -94,12 +98,12 @@ jmh_jar="${jmh_classpath%%:*}"
     git status --short
 } > "${environment_file}"
 
-sleep 120
+sleep 30
 {
-    printf '\nPre-run load after 120 s idle interval:\n'
+    printf '\nPre-run load after 30 s idle interval:\n'
     cat /proc/loadavg
     if command -v sensors >/dev/null 2>&1; then
-        printf '\nPre-run sensors after 120 s idle interval:\n'
+        printf '\nPre-run sensors after 30 s idle interval:\n'
         sensors
     fi
 } >> "${environment_file}"
@@ -107,7 +111,7 @@ sleep 120
 common_arguments=(
     -f 3
     -wi 5
-    -i 10
+    -i 7
     -w 1s
     -r 1s
     -t 1
@@ -123,7 +127,7 @@ java -Djava.io.tmpdir="${tmp_dir}" -Xms512m -Xmx1g \
     -rff "${report_dir}/stemmer-speed-${report_date}.csv" \
     -o "${report_dir}/stemmer-speed-${report_date}.txt"
 
-sleep 60
+sleep 15
 
 java -Djava.io.tmpdir="${tmp_dir}" -Xms512m -Xmx1g \
     -cp "${jmh_classpath}" org.openjdk.jmh.Main \

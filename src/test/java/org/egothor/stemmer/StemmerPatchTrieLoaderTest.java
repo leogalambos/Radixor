@@ -559,12 +559,12 @@ final class StemmerPatchTrieLoaderTest {
     final class InternalLoaderBehaviorTests {
 
         /**
-         * Verifies that bundled language loading follows explicit
-         * right-to-left metadata mapping.
+         * Verifies that bundled natural-language models use suffix traversal
+         * independently of writing direction.
          */
         @Test
-        @DisplayName("bundled language loading must infer traversal direction from language metadata")
-        void shouldLoadBundledLanguagesUsingLanguageRightToLeftMetadata() throws IOException {
+        @DisplayName("bundled language loading must use backward suffix traversal for every writing direction")
+        void shouldLoadBundledLanguagesUsingBackwardSuffixTraversal() throws IOException {
             final ReductionSettings settings = ReductionSettings.withDefaults(DEFAULT_REDUCTION_MODE);
             final FrequencyTrie<String> leftToRightDictionary = StemmerPatchTrieLoader.load(
                     StemmerPatchTrieLoader.Language.US_UK, true, settings);
@@ -573,8 +573,8 @@ final class StemmerPatchTrieLoaderTest {
 
             assertEquals(WordTraversalDirection.BACKWARD, leftToRightDictionary.traversalDirection(),
                     "Left-to-right languages should use backward traversal.");
-            assertEquals(WordTraversalDirection.FORWARD, rightToLeftDictionary.traversalDirection(),
-                    "Right-to-left languages should use forward traversal.");
+            assertEquals(WordTraversalDirection.BACKWARD, rightToLeftDictionary.traversalDirection(),
+                    "Right-to-left writing must not move stored suffixes to the beginning of a String.");
         }
 
         /**
@@ -763,16 +763,16 @@ final class StemmerPatchTrieLoaderTest {
         }
 
         /**
-         * Verifies that the loader honors forward traversal for right-to-left
-         * dictionaries loaded from filesystem overloads.
+         * Verifies that an explicit forward traversal remains available for
+         * deliberately prefix-oriented custom dictionaries.
          *
          * @throws IOException if the test file cannot be written or read
          */
         @Test
-        @DisplayName("Explicit right-to-left loading must use forward traversal semantics")
-        void shouldUseForwardTraversalForExplicitRightToLeftLoading() throws IOException {
+        @DisplayName("Explicit forward loading must support prefix-oriented custom data")
+        void shouldUseForwardTraversalForExplicitPrefixLoading() throws IOException {
             final Path dictionaryFile = writeDictionary("""
-                    كتب	كتابة	كتاب
+                    happy	unhappy
                     """);
 
             final ReductionSettings settings = ReductionSettings.withDefaults(DEFAULT_REDUCTION_MODE);
@@ -780,8 +780,8 @@ final class StemmerPatchTrieLoaderTest {
                     WordTraversalDirection.FORWARD);
 
             assertEquals(WordTraversalDirection.FORWARD, trie.traversalDirection(),
-                    "Right-to-left loading must produce a forward-traversed trie.");
-            assertEquals(Set.of("كتب"), reconstructAllStemCandidates(trie, "كتابة"),
+                    "An explicit direction must remain authoritative for custom data.");
+            assertEquals(Set.of("happy"), reconstructAllStemCandidates(trie, "unhappy"),
                     "Patch reconstruction must use the trie traversal direction.");
         }
 
@@ -1075,8 +1075,8 @@ final class StemmerPatchTrieLoaderTest {
 
             assertNotNull(trie, "Compiled trie must be created.");
             assertFalse(expectedStemsByWord.isEmpty(), "Bundled dictionary must not be empty.");
-            assertEquals(language.isRightToLeft() ? WordTraversalDirection.FORWARD : WordTraversalDirection.BACKWARD,
-                    trie.traversalDirection(), "Trie traversal direction must match language metadata.");
+            assertEquals(WordTraversalDirection.BACKWARD, trie.traversalDirection(),
+                    "Every bundled dictionary must traverse natural-language suffixes from the String end.");
 
             for (Map.Entry<String, Set<String>> entry : expectedStemsByWord.entrySet()) {
                 final String word = entry.getKey();

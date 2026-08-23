@@ -61,7 +61,7 @@ import java.util.logging.Logger;
  * --output &lt;file&gt;
  * --reduction-mode &lt;mode&gt;
  * [--store-original]
- * [--right-to-left]
+ * [--traversal-direction &lt;BACKWARD|FORWARD&gt;]
  * [--case-processing-mode &lt;mode&gt;]
  * [--dominant-winner-min-percent &lt;1..100&gt;]
  * [--dominant-winner-over-second-ratio &lt;1..n&gt;]
@@ -152,10 +152,8 @@ public final class Compile {
         final ReductionSettings reductionSettings = new ReductionSettings(arguments.reductionMode(),
                 arguments.dominantWinnerMinPercent(), arguments.dominantWinnerOverSecondRatio());
 
-        final WordTraversalDirection traversalDirection = arguments.rightToLeft() ? WordTraversalDirection.FORWARD
-                : WordTraversalDirection.BACKWARD;
         final FrequencyTrie<String> trie = StemmerPatchTrieLoader.load(arguments.inputFile(), arguments.storeOriginal(),
-                reductionSettings, traversalDirection, arguments.caseProcessingMode());
+                reductionSettings, arguments.traversalDirection(), arguments.caseProcessingMode());
 
         final Path outputFile = arguments.outputFile();
         final Path parent = outputFile.toAbsolutePath().getParent();
@@ -171,10 +169,10 @@ public final class Compile {
 
         if (LOGGER.isLoggable(Level.INFO)) {
             LOGGER.log(Level.INFO,
-                    "Compiled dictionary {0} to {1} using mode {2}, storeOriginal={3}, rightToLeft={4}, caseProcessingMode={5}, dominantWinnerMinPercent={6}, dominantWinnerOverSecondRatio={7}.",
+                    "Compiled dictionary {0} to {1} using mode {2}, storeOriginal={3}, traversalDirection={4}, caseProcessingMode={5}, dominantWinnerMinPercent={6}, dominantWinnerOverSecondRatio={7}.",
                     new Object[] { arguments.inputFile().toAbsolutePath().toString(),
                             arguments.outputFile().toAbsolutePath().toString(), arguments.reductionMode().name(),
-                            arguments.storeOriginal(), arguments.rightToLeft(), arguments.caseProcessingMode(),
+                            arguments.storeOriginal(), arguments.traversalDirection(), arguments.caseProcessingMode(),
                             arguments.dominantWinnerMinPercent(), arguments.dominantWinnerOverSecondRatio() });
         }
     }
@@ -189,6 +187,7 @@ public final class Compile {
         System.err.println("      --output <file> \\");
         System.err.println("      --reduction-mode <mode> \\");
         System.err.println("      [--store-original] \\");
+        System.err.println("      [--traversal-direction <BACKWARD|FORWARD>] \\");
         System.err.println("      [--case-processing-mode <mode>] \\");
         System.err.println("      [--dominant-winner-min-percent <1..100>] \\");
         System.err.println("      [--dominant-winner-over-second-ratio <1..n>] \\");
@@ -197,10 +196,10 @@ public final class Compile {
         System.err.println("Options:");
         System.err.println("  --store-original");
         System.err.println("      Inserts each canonical stem itself using the no-operation patch.");
-        System.err.println("  --right-to-left");
-        System.err.println("      Uses forward word traversal for right-to-left languages.");
-        System.err.println("      In this mode, trie keys are constructed from the logical beginning");
-        System.err.println("      of the stored word form and patch commands are encoded likewise.");
+        System.err.println("  --traversal-direction");
+        System.err.println("      Selects traversal by stored character index. BACKWARD (default)");
+        System.err.println("      processes natural-language suffixes from the end of the sequence.");
+        System.err.println("      FORWARD is intended only for explicitly prefix-oriented custom data.");
         System.err.println("  --overwrite");
         System.err.println("      Replaces the target file when it already exists.");
         System.err.println("  --case-processing-mode");
@@ -263,9 +262,7 @@ public final class Compile {
      * @param outputFile                    output compressed trie file
      * @param reductionMode                 subtree reduction mode
      * @param storeOriginal                 whether original stems are stored
-     * @param rightToLeft                   whether dictionary compilation should
-     *                                      use forward traversal on stored word
-     *                                      forms
+     * @param traversalDirection            stored character traversal direction
      * @param dominantWinnerMinPercent      dominant winner minimum percent
      * @param dominantWinnerOverSecondRatio dominant winner over second ratio
      * @param caseProcessingMode            dictionary case processing mode
@@ -275,7 +272,7 @@ public final class Compile {
      */
     @SuppressWarnings("PMD.LongVariable")
     private record Arguments(Path inputFile, Path outputFile, ReductionMode reductionMode, boolean storeOriginal,
-            boolean rightToLeft, int dominantWinnerMinPercent, int dominantWinnerOverSecondRatio,
+            WordTraversalDirection traversalDirection, int dominantWinnerMinPercent, int dominantWinnerOverSecondRatio,
             CaseProcessingMode caseProcessingMode, boolean overwrite, boolean help) {
 
         /**
@@ -292,7 +289,7 @@ public final class Compile {
             Path outputFile = null;
             ReductionMode reductionMode = null;
             boolean storeOriginal = false;
-            boolean rightToLeft = false;
+            WordTraversalDirection traversalDirection = WordTraversalDirection.BACKWARD;
             boolean overwrite = false;
             boolean help = false;
             CaseProcessingMode caseProcessingMode = CaseProcessingMode.LOWERCASE_WITH_LOCALE_ROOT;
@@ -317,7 +314,13 @@ public final class Compile {
                         break;
 
                     case "--right-to-left":
-                        rightToLeft = true;
+                        throw new IllegalArgumentException("--right-to-left has been replaced by the explicit "
+                                + "--traversal-direction option. Omit it for suffix-oriented dictionaries, or use "
+                                + "--traversal-direction FORWARD for deliberately prefix-oriented custom data.");
+
+                    case "--traversal-direction":
+                        traversalDirection = WordTraversalDirection.valueOf(
+                                requireValue(arguments, ++index, "--traversal-direction").toUpperCase(Locale.ROOT));
                         break;
 
                     case "--input":
@@ -355,7 +358,7 @@ public final class Compile {
             }
 
             if (help) {
-                return new Arguments(inputFile, outputFile, reductionMode, storeOriginal, rightToLeft,
+                return new Arguments(inputFile, outputFile, reductionMode, storeOriginal, traversalDirection,
                         dominantWinnerMinPercent, dominantWinnerOverSecondRatio, caseProcessingMode, overwrite, true);
             }
 
@@ -369,7 +372,7 @@ public final class Compile {
                 throw new IllegalArgumentException("Missing required argument --reduction-mode.");
             }
 
-            return new Arguments(inputFile, outputFile, reductionMode, storeOriginal, rightToLeft,
+            return new Arguments(inputFile, outputFile, reductionMode, storeOriginal, traversalDirection,
                     dominantWinnerMinPercent, dominantWinnerOverSecondRatio, caseProcessingMode, overwrite, false);
         }
 

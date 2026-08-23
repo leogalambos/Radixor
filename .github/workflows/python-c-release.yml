@@ -9,7 +9,6 @@ on:
       version:
         description: Stable distribution version to validate without publishing
         required: true
-        default: '0.1.0'
         type: string
       publish_to_pypi:
         description: Publish to PyPI after building
@@ -31,6 +30,7 @@ jobs:
     outputs:
       version: ${{ steps.release.outputs.version }}
       tag: ${{ steps.release.outputs.tag }}
+      model_version: ${{ steps.models.outputs.version }}
 
     steps:
       - name: Check out repository
@@ -60,6 +60,14 @@ jobs:
           fi
           printf 'version=%s\ntag=%s\n' "${PYTHON_VERSION}" "${tag}" >> "${GITHUB_OUTPUT}"
 
+      - name: Resolve standard-model distribution
+        id: models
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(bash ./tools/read-python-models-standard-version.sh)"
+          printf 'version=%s\n' "${version}" >> "${GITHUB_OUTPUT}"
+
       - name: Pin version in pyproject.toml
         shell: bash
         run: |
@@ -79,6 +87,8 @@ jobs:
     name: Build wheels (${{ matrix.os }})
     needs: prepare
     runs-on: ${{ matrix.os }}
+    env:
+      CIBW_TEST_REQUIRES: radixor-models-standard==${{ needs.prepare.outputs.model_version }}
     strategy:
       fail-fast: false
       matrix:
@@ -262,6 +272,31 @@ jobs:
             -printf '%f\n' | LC_ALL=C sort > actual-files
           diff -u expected-files actual-files
 
+      - name: Require published standard models
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MODEL_VERSION: ${{ needs.prepare.outputs.model_version }}
+        run: |
+          set -euo pipefail
+          status="$(gh release view "python-models-standard@${MODEL_VERSION}" \
+            --repo "${GITHUB_REPOSITORY}" --json isDraft,isPrerelease \
+            --jq '[.isDraft, .isPrerelease] | @tsv')"
+          [[ "${status}" == $'false\tfalse' ]]
+          curl --fail --silent --show-error \
+            "https://pypi.org/pypi/radixor-models-standard/${MODEL_VERSION}/json" \
+            --output model-release.json
+          python - "${MODEL_VERSION}" model-release.json <<'PY'
+          import json
+          import sys
+
+          with open(sys.argv[2], encoding="utf-8") as source:
+              release = json.load(source)
+          expected = sys.argv[1]
+          assert release["info"]["version"] == expected
+          assert any(not artifact.get("yanked", False) for artifact in release["urls"])
+          PY
+
       - name: Attest package artifacts
         uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2
         with:
@@ -283,11 +318,11 @@ jobs:
           fi
           gh release create "${RELEASE_TAG}" \
             release/*.whl release/*.tar.gz release/SHA256SUMS \
-            --repo "${GITHUB_REPOSITORY}" --verify-tag --draft \
+            --repo "${GITHUB_REPOSITORY}" --verify-tag --draft --latest=false \
             --title "radixor-c ${RELEASE_VERSION}" \
             --notes "Native CPython C Radixor distribution ${RELEASE_VERSION}."
           gh release edit "${RELEASE_TAG}" \
-            --repo "${GITHUB_REPOSITORY}" --draft=false
+            --repo "${GITHUB_REPOSITORY}" --draft=false --latest=false
 
   publish-pypi:
     name: Publish to PyPI
@@ -302,6 +337,26 @@ jobs:
       id-token: write
 
     steps:
+      - name: Verify required model dependency on PyPI
+        shell: bash
+        env:
+          MODEL_VERSION: ${{ needs.prepare.outputs.model_version }}
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error \
+            "https://pypi.org/pypi/radixor-models-standard/${MODEL_VERSION}/json" \
+            --output model-release.json
+          python - "${MODEL_VERSION}" model-release.json <<'PY'
+          import json
+          import sys
+
+          with open(sys.argv[2], encoding="utf-8") as source:
+              release = json.load(source)
+          expected = sys.argv[1]
+          assert release["info"]["version"] == expected
+          assert any(not artifact.get("yanked", False) for artifact in release["urls"])
+          PY
+
       - name: Download verified release candidate
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:

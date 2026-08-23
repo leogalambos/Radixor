@@ -30,9 +30,12 @@ for batch throughput and text dictionary compilation.
 
 **Performance.** On the shared UniMorph gold-standard corpus, measuring runtime
 stemming only (construction excluded) and with a fair, cache-disabled,
-same-input methodology, radixor won all **18 / 18** direct comparisons with
-PyStemmer 3.1.0 (Snowball's C `libstemmer`) in the published 2026-08-08 run.
-At batch size 100, the geometric-mean speedup was **1.67×**. The complete
+same-input methodology, radixor 4.2.0 recorded lower median processing time in
+all **18 / 18** direct comparisons with PyStemmer 3.1.0 (Snowball's C
+`libstemmer`) in the published 2026-08-23 run. At batch size 100, the
+geometric-mean speedup was **2.25×**. The companion radixor-c 4.2.0 runtime did
+the same in all 18 comparisons, with a **2.29×** geometric-mean speedup. The
+complete
 machine metadata and current results are in the [Python performance
 documentation](https://leogalambos.github.io/Radixor/python/performance/);
 benchmark implementation and fairness notes are in the
@@ -148,9 +151,10 @@ s = Stemmer(path="/data/custom.gz")        # custom gzipped dictionary
 s = Stemmer(compiled="/data/custom.rxc")   # prepared v7 binary
 ```
 
-`backward` selects the traversal direction; when left as `None` it is derived
-from the language (BACKWARD, except right-to-left `fa`/`he`/`yi` which use
-FORWARD). `store_original` (default `True`) maps each canonical stem to a no-op
+`backward` selects the traversal direction; when left as `None` it defaults to
+BACKWARD for suffix-oriented data in every writing system. Set it to `False`
+only for deliberately prefix-oriented custom data. `store_original` (default
+`True`) maps each canonical stem to a no-op
 patch so the stem itself is recognised. `lowercase=False` skips runtime
 lowercasing for already-normalized input, and `cache_size` enables the bounded
 result cache. The default holds up to 10,000 entries, matching PyStemmer;
@@ -222,7 +226,7 @@ load it directly:
 
 ```python
 s = Stemmer(path="my_dictionary.gz")            # BACKWARD by default
-s = Stemmer(path="my_rtl_dictionary.gz", backward=False)   # right-to-left
+s = Stemmer(path="my_prefix_dictionary.gz", backward=False)  # prefix-oriented
 ```
 
 The dictionary is compiled to a patch-command trie in Rust at construction time.
@@ -278,8 +282,8 @@ generation; repository topology selects the 20 defaults and excludes optional
 `pl-pl-polimorf`.
 
 `radixor` requires `radixor-models-standard>=1.0,<2.0`. The Python distribution
-version is independent of its `2026.1` Java model-catalog identity and of the
-individual model versions recorded in the manifest.
+version is independent of the Java model-catalog identity and of the individual
+model versions recorded in the manifest.
 
 ## License
 

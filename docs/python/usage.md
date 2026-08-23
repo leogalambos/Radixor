@@ -11,9 +11,10 @@ s = Stemmer(path="my_dictionary.gz")   # a custom gzipped TSV source dictionary
 s = Stemmer(compiled="en.rxc")         # a pre-compiled binary (instant load)
 ```
 
-The traversal direction is derived from the language (right-to-left `fa`/`he`/`yi`
-use FORWARD, all others BACKWARD); override with `backward=True|False` for a
-custom `path=`.
+The default traversal is BACKWARD from the stored sequence end for suffix-oriented
+data in every writing system. Override with `backward=False` only for a
+deliberately prefix-oriented custom `path=`; writing direction does not reverse
+the character order stored by Python or Java.
 
 ## Stemming a single word
 

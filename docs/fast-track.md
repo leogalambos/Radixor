@@ -26,14 +26,17 @@ groupId:    org.egothor
 artifactId: radixor
 ```
 
-Radixor 4 is not yet represented by a published release in this working tree. Replace the version placeholder with the reviewed release you deploy.
+Use the latest published Radixor/Java release. Resolve the runtime and model
+placeholders below from the
+[Maven Central artifact page](https://central.sonatype.com/artifact/org.egothor/radixor)
+and the [model catalog](stemmer-model-catalog.md), respectively.
 
 For a Gradle project:
 
 ```kotlin
 dependencies {
-    implementation("org.egothor:radixor:<radixor-version>")
-    runtimeOnly("org.egothor:radixor-model-us-uk-default:1.0.0")
+    implementation("org.egothor:radixor:<latest-java-version>")
+    runtimeOnly("org.egothor:radixor-model-us-uk-default:<compatible-model-version>")
 }
 ```
 
@@ -43,12 +46,12 @@ For a Maven project:
 <dependency>
     <groupId>org.egothor</groupId>
     <artifactId>radixor</artifactId>
-    <version>${radixor.version}</version>
+    <version>REPLACE_WITH_LATEST_JAVA_VERSION</version>
 </dependency>
 <dependency>
     <groupId>org.egothor</groupId>
     <artifactId>radixor-model-us-uk-default</artifactId>
-    <version>1.0.0</version>
+    <version>REPLACE_WITH_COMPATIBLE_MODEL_VERSION</version>
     <scope>runtime</scope>
 </dependency>
 ```

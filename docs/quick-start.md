@@ -15,12 +15,20 @@ From version 4 onward, the core and models are explicit dependencies:
 
 ```groovy
 dependencies {
-    implementation 'org.egothor:radixor:<radixor-version>'
-    runtimeOnly 'org.egothor:radixor-models-standard:<catalog-version>'
+    implementation 'org.egothor:radixor:<latest-java-version>'
+    runtimeOnly 'org.egothor:radixor-models-standard:<compatible-catalog-version>'
 }
 ```
 
-The core JAR contains no dictionary. Replace the standard pack with `runtimeOnly 'org.egothor:radixor-model-us-uk-default:1.0.0'` for the minimal English example below. For Polish, `Language.PL_PL` resolves `pl-pl-unimorph`; installing optional `pl-pl-polimorf` does not select it automatically.
+Resolve the current Radixor/Java version from its
+[Maven Central artifact page](https://central.sonatype.com/artifact/org.egothor/radixor)
+and compatible model versions from the
+[model catalog](stemmer-model-catalog.md). The core JAR contains no dictionary.
+Replace the standard pack with
+`runtimeOnly 'org.egothor:radixor-model-us-uk-default:<compatible-model-version>'`
+for the minimal English example below. For Polish, `Language.PL_PL` resolves
+`pl-pl-unimorph`; installing optional `pl-pl-polimorf` does not select it
+automatically.
 
 Explicit PoliMorf loading uses `StemmerPatchTrieLoader.loadCompiled("pl-pl-polimorf", true, reductionMode)`. Its complete dictionary is supported, but construction is exceptional enough that repository verification runs it separately with a 6 GiB maximum heap. See [Model Selection and Loading](model-selection-and-loading.md#load-polimorf-explicitly) for the complete dependency and Java example.
 

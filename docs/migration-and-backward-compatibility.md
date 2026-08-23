@@ -6,19 +6,24 @@ Radixor 3.x published algorithm classes and language dictionaries together as `o
 
 ### Before and after: dependencies
 
+Resolve current runtime and model versions from the
+[Maven Central artifact page](https://central.sonatype.com/artifact/org.egothor/radixor)
+and the [model catalog](stemmer-model-catalog.md), respectively; the placeholders
+below are deliberately not release-specific.
+
 | Deployment | 3.x | 4.x |
 |---|---|---|
-| Core | `org.egothor:radixor:<3.x-version>` included dictionaries | `org.egothor:radixor:<radixor-version>` contains code only |
-| Minimal Polish | No separate data dependency | Add `radixor-model-pl-pl-unimorph:1.0.0` |
-| All defaults | Implicitly embedded | Add optional `radixor-models-standard:<catalog-version>` |
-| Optional Polish variant | Not independently selectable | Add and explicitly select `radixor-model-pl-pl-polimorf:1.0.0` |
+| Core | `org.egothor:radixor:<3.x-version>` included dictionaries | `org.egothor:radixor:<4.x-version>` contains code only |
+| Minimal Polish | No separate data dependency | Add a compatible `radixor-model-pl-pl-unimorph` release |
+| All defaults | Implicitly embedded | Add a compatible `radixor-models-standard` release |
+| Optional Polish variant | Not independently selectable | Add and explicitly select a compatible `radixor-model-pl-pl-polimorf` release |
 
 Gradle, preserving the previous Polish default:
 
 ```groovy
 dependencies {
-    implementation 'org.egothor:radixor:<radixor-version>'
-    runtimeOnly 'org.egothor:radixor-model-pl-pl-unimorph:1.0.0'
+    implementation 'org.egothor:radixor:<latest-java-version>'
+    runtimeOnly 'org.egothor:radixor-model-pl-pl-unimorph:<compatible-model-version>'
 }
 ```
 
@@ -26,8 +31,8 @@ Gradle, broad default coverage:
 
 ```groovy
 dependencies {
-    implementation 'org.egothor:radixor:<radixor-version>'
-    runtimeOnly 'org.egothor:radixor-models-standard:<catalog-version>'
+    implementation 'org.egothor:radixor:<latest-java-version>'
+    runtimeOnly 'org.egothor:radixor-models-standard:<compatible-catalog-version>'
 }
 ```
 
@@ -37,12 +42,12 @@ Maven, preserving the Polish default:
 <dependency>
   <groupId>org.egothor</groupId>
   <artifactId>radixor</artifactId>
-  <version>${radixor.version}</version>
+  <version>REPLACE_WITH_LATEST_JAVA_VERSION</version>
 </dependency>
 <dependency>
   <groupId>org.egothor</groupId>
   <artifactId>radixor-model-pl-pl-unimorph</artifactId>
-  <version>1.0.0</version>
+  <version>REPLACE_WITH_COMPATIBLE_MODEL_VERSION</version>
   <scope>runtime</scope>
 </dependency>
 ```
@@ -123,9 +128,9 @@ Rolling the whole application back to 3.x instead requires restoring the reviewe
 Core, model, and catalog releases are independent:
 
 ```bash
-git tag -a "release@4.0.0" -m "Release Radixor 4.0.0"
-git tag -a "model/pl-pl-polimorf@1.0.0" -m "Release Polish PoliMorf model 1.0.0"
-git tag -a "models-catalog@2026.1" -m "Release Radixor model catalog 2026.1"
+git tag -a "release@<release-version>" -m "Release Radixor <release-version>"
+git tag -a "model/pl-pl-polimorf@<model-version>" -m "Release Polish PoliMorf model <model-version>"
+git tag -a "models-catalog@<catalog-version>" -m "Release Radixor model catalog <catalog-version>"
 ```
 
 A core tag publishes only the root `org.egothor:radixor` software artifacts, never model JARs. A model tag validates and publishes exactly its matching module, never core, standard, BOM, JMH, or the multilingual quality suite. A catalog tag publishes only BOM and standard aggregate metadata. Local model dry-run:
@@ -133,10 +138,10 @@ A core tag publishes only the root `org.egothor:radixor` software artifacts, nev
 The catalog artifacts are POM-only: `radixor-models-standard` carries runtime dependencies on the 20 defaults, while `radixor-models-bom` carries dependency-management constraints for all 21 individual models. Neither publishes an empty binary, sources, or Javadoc JAR. This Maven BOM is distinct from the root CycloneDX SBOM report under `build/reports/sbom/`.
 
 ```bash
-./tools/parse-model-release-tag.sh "model/pl-pl-polimorf@1.0.0" .
+./tools/parse-model-release-tag.sh "model/pl-pl-polimorf@<model-version>" .
 ./gradlew --no-daemon :models:pl-pl-polimorf:check
-./gradlew --no-daemon :models:pl-pl-polimorf:validateModelRelease -PmodelReleaseVersion=1.0.0
-./gradlew --no-daemon :models:pl-pl-polimorf:packageModelReleaseCandidate -PmodelReleaseVersion=1.0.0
+./gradlew --no-daemon :models:pl-pl-polimorf:validateModelRelease "-PmodelReleaseVersion=<model-version>"
+./gradlew --no-daemon :models:pl-pl-polimorf:packageModelReleaseCandidate "-PmodelReleaseVersion=<model-version>"
 ```
 
 Model format compatibility is descriptor-level and does not alter migrated bytes. Version 1 is `radixor-dictionary-tsv-gzip`. Model versions come from each module's `model-version.txt` or the matching explicit release property; catalog version comes from `models/catalog-version.txt`; only core uses Git-derived `release@` versioning.

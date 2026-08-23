@@ -157,8 +157,6 @@ public record TrieMetadata(int formatVersion, WordTraversalDirection traversalDi
                 //
                 .append("traversalDirection=").append(this.traversalDirection.name()).append('\n')
                 //
-                .append("rightToLeft=").append(this.traversalDirection == WordTraversalDirection.FORWARD).append('\n')
-                //
                 .append("reductionMode=").append(this.reductionSettings.reductionMode().name()).append('\n')
                 //
                 .append("dominantWinnerMinPercent=").append(this.reductionSettings.dominantWinnerMinPercent())

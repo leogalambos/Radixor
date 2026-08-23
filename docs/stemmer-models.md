@@ -153,12 +153,12 @@ The Maven dependency BOM is not a software bill of materials. The root `cycloned
 7. Run:
 
 ```bash
-./gradlew --no-daemon :models:<model-id>:validateModelInput
-./gradlew --no-daemon :models:<model-id>:prepareModelResources
-./gradlew --no-daemon :models:<model-id>:verifyModelDescriptor
-./gradlew --no-daemon :models:<model-id>:verifyModelJar
-./gradlew --no-daemon :models:<model-id>:check
-./gradlew --no-daemon runtimeModelIntegrationTest -PmodelId=<model-id>
+./gradlew --no-daemon ":models:<model-id>:validateModelInput"
+./gradlew --no-daemon ":models:<model-id>:prepareModelResources"
+./gradlew --no-daemon ":models:<model-id>:verifyModelDescriptor"
+./gradlew --no-daemon ":models:<model-id>:verifyModelJar"
+./gradlew --no-daemon ":models:<model-id>:check"
+./gradlew --no-daemon runtimeModelIntegrationTest "-PmodelId=<model-id>"
 ```
 
 Validation fails for missing inputs, notices, attribution, repository, revision status, Radixor contribution and transformation disclosures, ShareAlike and no-endorsement statements, notice byte identity, unsafe or mismatched ID, invalid semantic version, invalid GZip/UTF-8, invalid dictionary rows, checksum mismatch, wrong packaged path, duplicate dictionaries, or dictionaries in sources/Javadoc artifacts. The explicit legacy revision sentinel is valid; an absent revision or status is not. The PoliMorf module separately validates its complete BSD-2-Clause license and attribution.
@@ -173,16 +173,16 @@ Copying an arbitrary `stemmer.gz` into an application is insufficient: registry 
 | `model/<model-id>@<model-version>` | Exactly the matching independently versioned model | Core, other models, standard pack, BOM, JMH, or full quality suite |
 | `models-catalog@<catalog-version>` | Standard aggregate and models BOM | Individual model JARs or core |
 
-Local validation for PoliMorf 1.0.0 is:
+Local validation for a PoliMorf model release is:
 
 ```bash
-./tools/parse-model-release-tag.sh "model/pl-pl-polimorf@1.0.0" .
+./tools/parse-model-release-tag.sh "model/pl-pl-polimorf@<model-version>" .
 ./gradlew --no-daemon :models:pl-pl-polimorf:check
 ./gradlew --no-daemon runtimeModelIntegrationTest -PmodelId=pl-pl-polimorf
 ./gradlew --no-daemon :models:pl-pl-polimorf:validateModelRelease \
-  -PmodelReleaseVersion=1.0.0
+  "-PmodelReleaseVersion=<model-version>"
 ./gradlew --no-daemon :models:pl-pl-polimorf:packageModelReleaseCandidate \
-  -PmodelReleaseVersion=1.0.0
+  "-PmodelReleaseVersion=<model-version>"
 ```
 
 `runtimeModelIntegrationTest` uses an isolated JVM, defaults to a 6 GiB maximum heap, and can be overridden with `-PradixorLargeModelMaxHeap=10g`. For PoliMorf, `validateModelRelease` depends on this complete runtime construction and real stemming smoke verification in addition to descriptor, checksum, license, and package validation. The generic release workflow still selects and publishes only the requested model. The commands above are local validation only; repository owners control tags and publication.

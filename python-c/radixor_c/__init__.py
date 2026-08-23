@@ -63,8 +63,6 @@ for _mid, _supported, _aliases, _native in _PYSTEMMER_MODEL_MAP:
 
 _SUPPORTED_PYSTEMMER_ALIASES = list(dict.fromkeys(_SUPPORTED_PYSTEMMER_ALIASES))
 _SUPPORTED_PYSTEMMER_MODEL_IDS = frozenset(mid for mid, *_ in _PYSTEMMER_MODEL_MAP)
-_RIGHT_TO_LEFT_MODELS: frozenset[str] = frozenset({"fa-ir-default", "he-il-default", "yi-default"})
-
 _STANDARD_PACKAGE = "radixor_models_standard"
 _STANDARD_CATALOG_VERSION = "2026.1"
 _STANDARD_DISTRIBUTION_VERSION = re.compile(
@@ -183,10 +181,6 @@ def _standard_model_path(model_id: str) -> Iterator[Path]:
         ) from exc
 
 
-def _is_backward(model_id: str) -> bool:
-    return model_id not in _RIGHT_TO_LEFT_MODELS
-
-
 class Stemmer:
     """Thread-safe Radixor stemmer backed by the C extension.
 
@@ -230,7 +224,7 @@ class Stemmer:
                 raise ValueError(f"Invalid model ID {language!r}.")
             else:
                 raise KeyError(language)
-            is_backward = _is_backward(model_id_val) if backward is None else backward
+            is_backward = True if backward is None else backward
             model_path = None
         else:
             raise ValueError("Provide 'language', 'path', or 'compiled'.")

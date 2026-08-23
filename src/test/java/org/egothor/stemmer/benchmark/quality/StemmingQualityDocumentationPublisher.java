@@ -525,10 +525,14 @@ public final class StemmingQualityDocumentationPublisher {
                 .append(pages.size()).append("-language Radixor default-model universe, with one benchmark page per language. The direct ranking below uses only deterministic `PRIMARY_OUTPUT` rows over identical per-language inputs. Candidate-aware rows are intentionally excluded from this claim.\n\n");
         int radixorWins = 0;
         int comparisons = 0;
+        int directComparisons = 0;
         for (String mode : MODES) {
             for (String language : pages.keySet()) {
                 final List<ResultRow> ranked = primaryRows(rows, language, mode);
                 comparisons++;
+                if (ranked.size() > 1) {
+                    directComparisons++;
+                }
                 if (ranked.getFirst().stemmer().endsWith("_RADIXOR")) {
                     radixorWins++;
                 }
@@ -536,7 +540,8 @@ public final class StemmingQualityDocumentationPublisher {
         }
         if (radixorWins == comparisons) {
             output.append("!!! success \"Evidence-based primary-output result\"\n    Radixor achieved the highest balanced accuracy among the evaluated deterministic stemmers for every documented language in both `ALL_WORDS` and `LOWERCASE_GROUPS_ONLY`: **")
-                    .append(radixorWins).append(" wins in ").append(comparisons).append(" language-mode comparisons, with no exact first-place ties**. This statement is limited to the evaluated implementations, versions, dictionaries, adapters, and balanced-accuracy metric; it is not a universal claim about every stemming use case.\n\n");
+                    .append("first place in all ").append(comparisons).append(" evaluated language-mode matrices, with no exact first-place ties**. ")
+                    .append(directComparisons).append(" matrices include at least one direct comparator; the two Hebrew modes report Radixor independently because no same-language adapter is configured. This statement is limited to the evaluated implementations, versions, dictionaries, adapters, and balanced-accuracy metric; it is not a universal claim about every stemming use case.\n\n");
         } else {
             output.append("Radixor ranks first in **").append(radixorWins).append(" of ").append(comparisons)
                     .append("** documented primary-output language-mode comparisons.\n\n");

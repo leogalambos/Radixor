@@ -4,7 +4,7 @@ This page reports same-language stemming benchmarks for English. Accuracy is lis
 
 All speed values are environment-specific and were measured on the hardware and JVM listed in the [benchmark overview](../index.md). Speed benchmark operations process changed dictionary tokens only. Accuracy uses the complete Radixor dictionary for the language.
 
-Radixor must not be read as simply "slower" when a narrow competitor has a lower timing row. In these tables Radixor is the quality-oriented baseline: its exact-root accuracy is typically close to 100%, while many faster rule-based, light, minimal, or possessive filters reach that speed by doing much less linguistic work and often score far lower in `All exact` and `Changed exact`. The Radixor rows in this benchmark refresh use the contracted compiled patch trie: compilation collapses uniform patch-command subtrees into accepting leaves, reducing hot lookup depth while preserving the preferred stemming result measured by the accuracy pass. The [EnglishRadixorDictionaryCoverageBenchmark](../reference/english-coverage.md) table shows the resulting quality/speed envelope explicitly. The same interpretation applies to this language page: speed rows must be read together with the accuracy table above them.
+Runtime and exact-root agreement measure different properties. Light, minimal, possessive, and other rule-based filters intentionally have different transformation scopes, so a lower runtime can coexist with lower dictionary-root agreement. Read the speed and accuracy tables together. The Radixor rows in this refresh use the contracted compiled patch trie: compilation collapses uniform patch-command subtrees into accepting leaves, reducing hot lookup depth while preserving the preferred stemming result measured by the accuracy pass. The [EnglishRadixorDictionaryCoverageBenchmark](../reference/english-coverage.md) shows the resulting quality/speed envelope explicitly.
 
 ## Dictionary Corpus
 
@@ -44,21 +44,21 @@ Accuracy is computed from JMH auxiliary counters in the current report. The coun
 
 ## Speed
 
-Speed uses JMH average time, 5 warmup iterations, 10 measurement iterations, 3 independent forks, and 1 thread. Relative factor is computed against the single Radixor row on this language page. Values below 1.000 are faster than that Radixor baseline; values above 1.000 are slower.
+Speed uses JMH average time, 5 warmup iterations, 7 measurement iterations, 3 independent forks, and 1 thread. Relative factor is computed against the single Radixor row on this language page. Values below 1.000 are faster than that Radixor baseline; values above 1.000 are slower.
 
 | Stemmer | Benchmark method | Score ms/op | Error ms | ns/token | Relative vs Radixor | Note |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
-| Radixor | `radixorUsUkProfiPreferredStem` | 14.397 | 0.915 | 68.4 | 1.000 | Full dictionary patch-command stemmer using compiled patch commands. |
-| Lucene EnglishPossessiveFilter | `luceneEnglishPossessiveFilter` | 15.034 | 0.322 | 71.4 | 1.044 | Possessive-ending remover only; not a full stemmer. |
-| Lucene EnglishMinimalStemFilter | `luceneEnglishMinimalStemFilter` | 16.352 | 0.244 | 77.7 | 1.136 | Narrow plural reduction filter; not a full stemmer. |
-| Lucene PorterStemmer direct copy | `lucenePorterStemmerCopied` | 16.491 | 0.149 | 78.3 | 1.145 | Benchmark-only generated copy of Lucene package-private Porter implementation. |
-| OpenNLP PorterStemmer | `opennlpPorterStemmer` | 16.481 | 0.175 | 78.3 | 1.145 | Apache OpenNLP Porter implementation. |
-| Snowball original Porter | `snowballOriginalPorter` | 30.634 | 1.620 | 145.5 | 2.128 | Classic Porter suffix-rule stemmer; historical English baseline, not a dictionary-equivalent stemmer. |
-| Lucene PorterStemFilter | `lucenePorterStemFilter` | 29.666 | 0.536 | 140.9 | 2.061 | Lucene TokenFilter integration path for Porter; includes TokenStream overhead. |
-| Lucene KStemFilter | `luceneKStemFilter` | 41.485 | 0.509 | 197.1 | 2.882 | Krovetz-style English TokenFilter; broader than minimal suffix filters. |
-| Lucene HunspellStemFilter | `luceneHunspellStemFilter` | 74.399 | 1.223 | 353.4 | 5.168 | Benchmark-only English Hunspell comparison using the benchmark Hunspell corpus. |
-| Snowball English / Porter2 | `snowballEnglishPorter2` | 43.117 | 1.983 | 204.8 | 2.995 | Porter2 suffix-rule stemmer, distinct from original Porter. |
-| Paice/Husk Lancaster | `paiceHuskLancaster` | 137.952 | 2.443 | 655.4 | 9.582 | Aggressive rule-based English stemmer. |
+| Radixor | `radixorUsUkProfiPreferredStem` | 14.704 | 1.264 | 69.9 | 1.000 | Full dictionary patch-command stemmer using compiled patch commands. |
+| Lucene EnglishPossessiveFilter | `luceneEnglishPossessiveFilter` | 14.863 | 0.185 | 70.6 | 1.011 | Possessive-ending remover only; not a full stemmer. |
+| Lucene EnglishMinimalStemFilter | `luceneEnglishMinimalStemFilter` | 16.355 | 0.203 | 77.7 | 1.112 | Narrow plural reduction filter; not a full stemmer. |
+| Lucene PorterStemmer direct copy | `lucenePorterStemmerCopied` | 16.307 | 0.186 | 77.5 | 1.109 | Benchmark-only generated copy of Lucene package-private Porter implementation. |
+| OpenNLP PorterStemmer | `opennlpPorterStemmer` | 16.589 | 0.187 | 78.8 | 1.128 | Apache OpenNLP Porter implementation. |
+| Snowball original Porter | `snowballOriginalPorter` | 31.038 | 2.329 | 147.4 | 2.111 | Classic Porter suffix-rule stemmer; historical English baseline, not a dictionary-equivalent stemmer. |
+| Lucene PorterStemFilter | `lucenePorterStemFilter` | 29.161 | 0.379 | 138.5 | 1.983 | Lucene TokenFilter integration path for Porter; includes TokenStream overhead. |
+| Lucene KStemFilter | `luceneKStemFilter` | 40.642 | 0.542 | 193.1 | 2.764 | Krovetz-style English TokenFilter; broader than minimal suffix filters. |
+| Lucene HunspellStemFilter | `luceneHunspellStemFilter` | 72.868 | 1.118 | 346.2 | 4.956 | Benchmark-only English Hunspell comparison using the benchmark Hunspell corpus. |
+| Snowball English / Porter2 | `snowballEnglishPorter2` | 44.546 | 2.449 | 211.6 | 3.030 | Porter2 suffix-rule stemmer, distinct from original Porter. |
+| Paice/Husk Lancaster | `paiceHuskLancaster` | 138.567 | 3.367 | 658.3 | 9.424 | Aggressive rule-based English stemmer. |
 
 ## Interpretation Notes
 
@@ -400,7 +400,7 @@ Standard ARI, homogeneity, completeness, V-measure, and NMI are not calculated: 
 ### Provenance
 
 - Authoritative source: `docs/benchmarks/data/stemming-quality.csv`
-- Source SHA-256: `d34f325da320a2e040b54d8d8b5c216d70448f08cfb8659a423e99882aa1afb5`
+- Source SHA-256: `f15f8e653022e0333955b8b82f42944aa1c5a14a5ce54e628bb1a9c9aed42132`
 - Evaluation command: `./gradlew stemmingQuality --no-daemon`
 - Dictionary language: `US_UK`
 - Processing modes: `ALL_WORDS`, `LOWERCASE_GROUPS_ONLY`

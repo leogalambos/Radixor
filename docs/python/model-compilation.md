@@ -37,10 +37,11 @@ radixor.compile(
 )
 ```
 
-`language` is used to choose traversal direction when `backward` is omitted.
-Persian (`fa`), Hebrew (`he`), and Yiddish (`yi`) use forward traversal; the
-other bundled languages use backward traversal. For a custom language, select
-the direction explicitly:
+`backward` defaults to `True` when omitted. This processes suffixes from the end
+of the stored character sequence for Persian, Hebrew, Yiddish, and every other
+natural-language model. The optional `language` is retained for API compatibility,
+is not written to the compiled artifact, and does not select traversal. Set `backward=False` explicitly only
+for deliberately prefix-oriented custom data:
 
 ```python
 radixor.compile(
@@ -58,8 +59,8 @@ The arguments are:
 |---|---|
 | `source` | Plain or GZip-compressed textual dictionary. |
 | `out_path` | Destination for the GZip-compressed version 7 trie. |
-| `language` | Optional alias or model ID used only to infer traversal direction. |
-| `backward` | Explicit traversal direction; overrides inference from `language`. |
+| `language` | Optional alias or model ID retained for API compatibility; it is not persisted. |
+| `backward` | Traversal direction; defaults to `True` for suffix-oriented data. |
 | `store_original` | Include a no-op mapping for every canonical stem. Defaults to `True`. |
 | `lowercase` | Record lowercase lookup normalization in the compiled metadata. Defaults to `True`. |
 

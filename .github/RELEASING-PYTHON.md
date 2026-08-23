@@ -11,33 +11,48 @@ non-deterministic output; generated payload must never be added to Git.
 
 ## Validate without publishing
 
-Run **Python Standard Models Release** manually with version `1.0.0`, then run
-**Python Native Release** with version `4.1.0`. The default manual mode validates
-artifacts without publishing. The native run must pass Linux x86-64, Linux
-ARM64, macOS universal2, and Windows x86-64.
+Read the intended standard-model distribution version from
+`python/models-standard-version.txt`. Run **Python Standard Models Release**
+manually with that version, then run **Python Native Release** with its intended
+release version. Manual validation requires the version to be entered explicitly
+and does not publish unless its publish option is selected. **Python C
+Distribution Release** installs the exact model distribution in every wheel
+test, so its full validation for a new model version runs after that model is
+published to PyPI. The native runs must pass Linux x86-64, Linux ARM64, macOS
+universal2, and Windows x86-64 where configured.
 
 For the Linux paths, maintainers can use `act` with rootless Podman and the
 event files under `.github/act/`. Do not pass production secrets to `act`.
 
 ## Publish in dependency order
 
-Both tags must point to a commit already contained in `main`.
+All tags must point to a commit already contained in `main`. Set the intended
+versions explicitly. When creating a new standard-model release, its version
+must match the tracked version file. The recovery-only option that republishes
+an already immutable GitHub Release to PyPI may instead name that existing
+historical release version.
 
 ```bash
-git tag -a 'python-models-standard@1.0.0' \
-  -m 'Python standard models 1.0.0'
-git push origin 'python-models-standard@1.0.0'
+MODEL_VERSION="$(tools/read-python-models-standard-version.sh)"
+PYTHON_VERSION='REPLACE_WITH_PYTHON_VERSION'
+PYTHON_C_VERSION='REPLACE_WITH_PYTHON_C_VERSION'
+
+git tag -a "python-models-standard@${MODEL_VERSION}" \
+  -m "Python standard models ${MODEL_VERSION}"
+git push origin "python-models-standard@${MODEL_VERSION}"
 ```
 
-Wait until the models workflow has published its GitHub Release and Pages
-index entry. Then publish the native Python distributions independently:
+Wait until the models workflow has published its non-draft GitHub Release,
+PyPI distribution, and Pages index entry. Then publish the native Python
+distributions one at a time, waiting for each workflow to finish:
 
 ```bash
-git tag -a 'python@4.1.0' -m 'Python Radixor 4.1.0'
-git push origin 'python@4.1.0'
+git tag -a "python@${PYTHON_VERSION}" -m "Python Radixor ${PYTHON_VERSION}"
+git push origin "python@${PYTHON_VERSION}"
 
-git tag -a 'python-c@4.1.0' -m 'Python-C Radixor 4.1.0'
-git push origin 'python-c@4.1.0'
+git tag -a "python-c@${PYTHON_C_VERSION}" \
+  -m "Python-C Radixor ${PYTHON_C_VERSION}"
+git push origin "python-c@${PYTHON_C_VERSION}"
 ```
 
 The `python@X.Y.Z` tag starts `python-release.yml` and publishes `radixor`.
@@ -45,7 +60,14 @@ The `python-c@X.Y.Z` tag starts `python-c-release.yml` and publishes
 `radixor-c`. Each distribution owns its GitHub Release and its entry in the
 shared PEP 503 index. Keep their versions aligned for coordinated releases.
 
-Do not push either native tag until the standard-model release exists.
+Both runtime workflows require the exact tracked standard-model version to be
+available as a final GitHub Release and as a non-yanked PyPI artifact. Do not
+push either native tag until those checks can pass.
+
+Python runtime and model GitHub Releases intentionally use `make_latest=false`.
+The repository-level **Latest release** designation is reserved for the current
+Radixor/Java release; use PyPI to resolve the current version of each Python
+distribution.
 
 ## Bootstrap the radixor-c PyPI project
 

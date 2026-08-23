@@ -71,7 +71,7 @@ public final class LoadTextDictionaryExample {
 }
 ```
 
-Additional `StemmerPatchTrieLoader.loadCompiled(...)` overloads let callers provide explicit `WordTraversalDirection`, `CaseProcessingMode`, `DiacriticProcessingMode`, or a complete `TrieMetadata` instance. Use those overloads when a custom dictionary must be compiled with forward traversal for right-to-left languages, case-sensitive keys, or diacritic stripping.
+Additional `StemmerPatchTrieLoader.loadCompiled(...)` overloads let callers provide explicit `WordTraversalDirection`, `CaseProcessingMode`, `DiacriticProcessingMode`, or a complete `TrieMetadata` instance. Built-in and other suffix-oriented natural-language dictionaries use `BACKWARD` regardless of writing direction. Use an explicit `FORWARD` direction only for deliberately prefix-oriented custom data; the other overloads also support case-sensitive keys and diacritic stripping.
 
 When `ReductionSettings` are supplied through these compiled loader APIs, uniform-subtree
 contraction is still enabled as an internal pre-reduction step. The public `ReductionMode` remains

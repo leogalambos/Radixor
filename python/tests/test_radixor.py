@@ -49,6 +49,7 @@ import inspect
 from pathlib import Path
 import pytest
 
+import radixor
 from radixor import Stemmer
 
 
@@ -316,12 +317,22 @@ def test_lowercase_false_assumes_prelowered(tmp_path: Path):
 
 
 def test_forward_prefix_stemming(tmp_path: Path):
-    # Forward traversal handles prefix-oriented morphology (RTL languages).
+    # Forward traversal remains available for deliberately prefix-oriented data.
     path = _write_gz_dict(["kitab\talkitab\talkitabu"], tmp_path)
     s = Stemmer(path=path, backward=False, store_original=True)
     assert s.stem("alkitab") == "kitab"
     assert s.stem("alkitabu") == "kitab"
     assert s.stem("kitab") == "kitab"
+
+
+def test_language_does_not_change_suffix_traversal(tmp_path: Path):
+    source = _write_gz_dict(["כתב\tכתבים"], tmp_path)
+    compiled = tmp_path / "hebrew.rxc"
+
+    radixor.compile(source, str(compiled), language="he")
+    stemmer = Stemmer(compiled=str(compiled))
+
+    assert stemmer.stem("כתבים") == "כתב"
 
 
 def test_stem_all_returns_candidates(tmp_path: Path):

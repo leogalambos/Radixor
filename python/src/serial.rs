@@ -113,11 +113,6 @@ fn text_block(meta: &TrieMetadata) -> String {
     } else {
         "traversalDirection=BACKWARD\n"
     });
-    s.push_str(if forward {
-        "rightToLeft=true\n"
-    } else {
-        "rightToLeft=false\n"
-    });
     s.push_str("reductionMode=MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS\n");
     s.push_str("dominantWinnerMinPercent=75\n");
     s.push_str("dominantWinnerOverSecondRatio=3\n");

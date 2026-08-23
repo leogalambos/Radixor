@@ -4,7 +4,7 @@ This page reports same-language stemming benchmarks for Portuguese. Accuracy is 
 
 All speed values are environment-specific and were measured on the hardware and JVM listed in the [benchmark overview](../index.md). Speed benchmark operations process changed dictionary tokens only. Accuracy uses the complete Radixor dictionary for the language.
 
-Radixor must not be read as simply "slower" when a narrow competitor has a lower timing row. In these tables Radixor is the quality-oriented baseline: its exact-root accuracy is typically close to 100%, while many faster rule-based, light, minimal, or possessive filters reach that speed by doing much less linguistic work and often score far lower in `All exact` and `Changed exact`. The Radixor rows in this benchmark refresh use the contracted compiled patch trie: compilation collapses uniform patch-command subtrees into accepting leaves, reducing hot lookup depth while preserving the preferred stemming result measured by the accuracy pass. The [EnglishRadixorDictionaryCoverageBenchmark](../reference/english-coverage.md) table shows the resulting quality/speed envelope explicitly. The same interpretation applies to this language page: speed rows must be read together with the accuracy table above them.
+Runtime and exact-root agreement measure different properties. Light, minimal, possessive, and other rule-based filters intentionally have different transformation scopes, so a lower runtime can coexist with lower dictionary-root agreement. Read the speed and accuracy tables together. The Radixor rows in this refresh use the contracted compiled patch trie: compilation collapses uniform patch-command subtrees into accepting leaves, reducing hot lookup depth while preserving the preferred stemming result measured by the accuracy pass. The [EnglishRadixorDictionaryCoverageBenchmark](../reference/english-coverage.md) shows the resulting quality/speed envelope explicitly.
 
 ## Dictionary Corpus
 
@@ -39,16 +39,16 @@ Accuracy is computed from JMH auxiliary counters in the current report. The coun
 
 ## Speed
 
-Speed uses JMH average time, 5 warmup iterations, 10 measurement iterations, 3 independent forks, and 1 thread. Relative factor is computed against the single Radixor row on this language page. Values below 1.000 are faster than that Radixor baseline; values above 1.000 are slower.
+Speed uses JMH average time, 5 warmup iterations, 7 measurement iterations, 3 independent forks, and 1 thread. Relative factor is computed against the single Radixor row on this language page. Values below 1.000 are faster than that Radixor baseline; values above 1.000 are slower.
 
 | Stemmer | Benchmark method | Score ms/op | Error ms | ns/token | Relative vs Radixor | Note |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
-| Radixor | `portugueseRadixor` | 10.902 | 0.166 | 52.5 | 1.000 | Radixor dictionary-trained patch-command stemmer. |
-| Lucene PortugueseLightStemFilter | `portugueseLucenePortugueseLightStemFilter` | 10.125 | 0.161 | 48.8 | 0.929 | Light Portuguese suffix stemmer. |
-| Lucene PortugueseMinimalStemFilter | `portugueseLucenePortugueseMinimalStemFilter` | 14.338 | 0.156 | 69.1 | 1.315 | Minimal Portuguese suffix reducer. |
-| Official Snowball direct | `snowballDirect[PORTUGUESE]` | 52.193 | 1.905 | 251.5 | 4.788 | Official Snowball generated Java stemmer; direct API. |
-| Lucene SnowballFilter | `luceneSnowballFilter[PORTUGUESE]` | 58.991 | 2.457 | 284.3 | 5.411 | Lucene TokenFilter path around Snowball; includes TokenStream overhead. |
-| Lucene PortugueseStemFilter | `portugueseLucenePortugueseStemFilter` | 164.457 | 8.688 | 792.6 | 15.085 | Portuguese RSLP-style Lucene TokenFilter. |
+| Radixor | `portugueseRadixor` | 10.787 | 0.397 | 52.0 | 1.000 | Radixor dictionary-trained patch-command stemmer. |
+| Lucene PortugueseLightStemFilter | `portugueseLucenePortugueseLightStemFilter` | 10.034 | 0.212 | 48.4 | 0.930 | Light Portuguese suffix stemmer. |
+| Lucene PortugueseMinimalStemFilter | `portugueseLucenePortugueseMinimalStemFilter` | 14.378 | 0.306 | 69.3 | 1.333 | Minimal Portuguese suffix reducer. |
+| Official Snowball direct | `snowballDirect[PORTUGUESE]` | 50.534 | 2.096 | 243.6 | 4.685 | Official Snowball generated Java stemmer; direct API. |
+| Lucene SnowballFilter | `luceneSnowballFilter[PORTUGUESE]` | 61.541 | 1.959 | 296.6 | 5.705 | Lucene TokenFilter path around Snowball; includes TokenStream overhead. |
+| Lucene PortugueseStemFilter | `portugueseLucenePortugueseStemFilter` | 159.835 | 11.266 | 770.3 | 14.817 | Portuguese RSLP-style Lucene TokenFilter. |
 
 ## Interpretation Notes
 
@@ -336,7 +336,7 @@ Standard ARI, homogeneity, completeness, V-measure, and NMI are not calculated: 
 ### Provenance
 
 - Authoritative source: `docs/benchmarks/data/stemming-quality.csv`
-- Source SHA-256: `d34f325da320a2e040b54d8d8b5c216d70448f08cfb8659a423e99882aa1afb5`
+- Source SHA-256: `f15f8e653022e0333955b8b82f42944aa1c5a14a5ce54e628bb1a9c9aed42132`
 - Evaluation command: `./gradlew stemmingQuality --no-daemon`
 - Dictionary language: `PT_PT`
 - Processing modes: `ALL_WORDS`, `LOWERCASE_GROUPS_ONLY`

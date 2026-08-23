@@ -45,28 +45,28 @@ import java.util.Objects;
  * </ul>
  *
  * <p>
- * {@link #FORWARD} means that processing starts at the logical beginning of the
- * stored form and moves toward its end. {@link #BACKWARD} means that processing
- * starts at the logical end of the stored form and moves toward its beginning.
+ * {@link #FORWARD} means that processing starts at index {@code 0} of the stored
+ * character sequence and moves toward its end. {@link #BACKWARD} means that
+ * processing starts at the final index and moves toward index {@code 0}.
  * </p>
  *
  * <p>
- * For traditional suffix-oriented Egothor data, {@link #BACKWARD} matches the
- * historical behavior. For right-to-left languages whose affix logic should
- * operate on the stored form as written, {@link #FORWARD} can be used so that
- * neither trie construction nor patch application needs to reverse words
- * externally.
+ * Writing direction does not change character indices in a Java {@link String}.
+ * Natural-language suffixes therefore remain at the end of the stored sequence
+ * for both left-to-right and right-to-left scripts, and suffix-oriented models
+ * use {@link #BACKWARD}. {@link #FORWARD} is available for deliberately
+ * prefix-oriented or otherwise custom data.
  * </p>
  */
 public enum WordTraversalDirection {
 
     /**
-     * Traverses a word from its logical beginning toward its logical end.
+     * Traverses a word from index {@code 0} toward its final index.
      */
     FORWARD,
 
     /**
-     * Traverses a word from its logical end toward its logical beginning.
+     * Traverses a word from its final index toward index {@code 0}.
      */
     BACKWARD;
 
