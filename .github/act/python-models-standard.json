@@ -1,6 +1,6 @@
 {
   "inputs": {
-    "version": "1.0.1",
+    "version": "2.0.0",
     "publish_existing_to_pypi": false
   }
 }

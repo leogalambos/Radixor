@@ -41,6 +41,9 @@ from pathlib import Path
 import pytest
 
 import radixor
+import radixor_models_standard
+
+REPOSITORY = Path(__file__).resolve().parents[2]
 
 EXPECTED_MODEL_IDS = {
     "cs-cz-default",
@@ -73,12 +76,25 @@ def _manifest() -> dict:
 
 def test_standard_manifest_model_set_versions_and_license():
     manifest = _manifest()
-    assert manifest["catalog_version"] == "2026.1"
+    expected_catalog_version = (
+        REPOSITORY / "models/catalog-version.txt"
+    ).read_text(encoding="utf-8").strip()
+    expected_model_versions = {
+        model_id: (REPOSITORY / "models" / model_id / "model-version.txt")
+        .read_text(encoding="utf-8")
+        .strip()
+        for model_id in EXPECTED_MODEL_IDS
+    }
+    assert manifest["catalog_version"] == expected_catalog_version
+    assert radixor_models_standard.CATALOG_VERSION == expected_catalog_version
     assert manifest["distribution_version"] == "0.0.0"
+    assert radixor_models_standard.__version__ == manifest["distribution_version"]
     assert manifest["format"] == {"compression": "gzip", "magic": "EGTR", "version": 7}
     assert {model["id"] for model in manifest["models"]} == EXPECTED_MODEL_IDS
     assert "pl-pl-polimorf" not in {model["id"] for model in manifest["models"]}
-    assert {model["version"] for model in manifest["models"]} == {"1.0.0"}
+    assert {
+        model["id"]: model["version"] for model in manifest["models"]
+    } == expected_model_versions
     assert {model["provenance"]["license"] for model in manifest["models"]} == {
         "CC-BY-SA-3.0"
     }
@@ -116,7 +132,7 @@ def test_missing_standard_model_is_actionable():
     ("mutation", "message"),
     [
         (
-            lambda manifest: manifest.update(catalog_version="2027.1"),
+            lambda manifest: manifest.update(catalog_version="not-a-catalog"),
             "incompatible or corrupt",
         ),
         (
@@ -124,7 +140,7 @@ def test_missing_standard_model_is_actionable():
             "incompatible or corrupt",
         ),
         (
-            lambda manifest: manifest.update(distribution_version="2.0.0"),
+            lambda manifest: manifest.update(distribution_version="1.0.2"),
             "incompatible or corrupt",
         ),
     ],
@@ -138,6 +154,15 @@ def test_incompatible_manifest_is_actionable(
     monkeypatch.setattr(radixor.importlib.resources, "files", lambda package: tmp_path)
     with pytest.raises(RuntimeError, match=message):
         radixor.Stemmer("en")
+
+
+def test_new_catalog_release_remains_runtime_compatible(tmp_path: Path, monkeypatch):
+    manifest = _manifest()
+    manifest["catalog_version"] = "2027.1"
+    (tmp_path / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+    monkeypatch.setattr(radixor.importlib.resources, "files", lambda package: tmp_path)
+
+    assert radixor._load_standard_manifest()["catalog_version"] == "2027.1"
 
 
 def test_checksum_failure_is_detected(tmp_path: Path, monkeypatch):

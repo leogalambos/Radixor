@@ -98,9 +98,11 @@ _SUPPORTED_PYSTEMMER_MODEL_IDS = frozenset(
 )
 
 _STANDARD_PACKAGE = "radixor_models_standard"
-_STANDARD_CATALOG_VERSION = "2026.1"
+_CATALOG_VERSION_PATTERN = re.compile(
+    r"[1-9][0-9]{3}\.[1-9][0-9]*\Z"
+)
 _STANDARD_DISTRIBUTION_VERSION = re.compile(
-    r"(?:0\.0\.0|1\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*))\Z"
+    r"(?:0\.0\.0|2\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*))\Z"
 )
 _MODEL_ID = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*\Z")
 _SHA256 = re.compile(r"[0-9a-f]{64}\Z")
@@ -137,7 +139,7 @@ def _load_standard_manifest() -> dict[str, Any]:
     except (ModuleNotFoundError, TypeError) as exc:
         raise ModuleNotFoundError(
             "The standard Radixor model package is not installed. Install a compatible "
-            "provider with 'pip install radixor-models-standard>=1.0,<2.0', "
+            "provider with 'pip install radixor-models-standard>=2.0,<3.0', "
             "or reinstall Radixor with 'pip install radixor'."
         ) from exc
     try:
@@ -153,11 +155,11 @@ def _load_standard_manifest() -> dict[str, Any]:
         format_info = manifest["format"]
         if manifest["schema_version"] != 1:
             raise ValueError("unsupported schema_version")
-        if manifest["catalog_version"] != _STANDARD_CATALOG_VERSION:
-            raise ValueError(
-                f"catalog {manifest['catalog_version']!r} is incompatible with "
-                f"Radixor catalog {_STANDARD_CATALOG_VERSION!r}"
-            )
+        catalog_version = manifest["catalog_version"]
+        if not isinstance(catalog_version, str):
+            raise ValueError("invalid catalog_version")
+        if _CATALOG_VERSION_PATTERN.fullmatch(catalog_version) is None:
+            raise ValueError("invalid catalog_version")
         distribution_version = manifest["distribution_version"]
         if (
             not isinstance(distribution_version, str)
@@ -184,7 +186,7 @@ def _load_standard_manifest() -> dict[str, Any]:
     except (KeyError, TypeError, ValueError) as exc:
         raise RuntimeError(
             f"The installed radixor-models-standard manifest is incompatible or corrupt: {exc}. "
-            "Install radixor-models-standard>=1.0,<2.0."
+            "Install radixor-models-standard>=2.0,<3.0."
         ) from exc
     return manifest
 

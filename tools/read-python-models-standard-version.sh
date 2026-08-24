@@ -17,8 +17,8 @@ if [[ "${#version_lines[@]}" -ne 1 ]] || [[ "$(wc -l < "${version_file}")" -ne 1
 fi
 
 version="${version_lines[0]}"
-if [[ ! "${version}" =~ ^1\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then
-  echo "Standard-model version must be a canonical stable 1.x.y version: ${version}" >&2
+if [[ ! "${version}" =~ ^2\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then
+  echo "Standard-model version must be a canonical stable 2.x.y version: ${version}" >&2
   exit 1
 fi
 

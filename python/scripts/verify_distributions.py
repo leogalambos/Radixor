@@ -39,6 +39,7 @@ import gzip
 import hashlib
 import json
 import os
+import re
 import stat
 import subprocess
 import sys
@@ -49,35 +50,56 @@ from email.parser import BytesParser
 from pathlib import Path, PurePosixPath
 
 EXPECTED_DEFAULT_COUNT = 20
-EXPECTED_DEPENDENCY = "radixor-models-standard>=1.0,<2.0"
+EXPECTED_DEPENDENCY = "radixor-models-standard>=2.0,<3.0"
 REPOSITORY = Path(__file__).resolve().parents[2]
 EXPECTED_NATIVE_LICENSE = REPOSITORY.joinpath("LICENSE").read_bytes()
-EXPECTED_MODEL_IDS = {
-    "cs-cz-default",
-    "da-dk-default",
-    "de-de-default",
-    "es-es-default",
-    "fa-ir-default",
-    "fi-fi-default",
-    "fr-fr-default",
-    "he-il-default",
-    "hu-hu-default",
-    "it-it-default",
-    "nb-no-default",
-    "nl-nl-default",
-    "nn-no-default",
-    "pl-pl-unimorph",
-    "pt-pt-default",
-    "ru-ru-default",
-    "sv-se-default",
-    "uk-ua-default",
-    "us-uk-default",
-    "yi-default",
-}
+MODEL_TOPOLOGY = REPOSITORY / "models" / "model-projects.properties"
+CATALOG_VERSION_FILE = REPOSITORY / "models" / "catalog-version.txt"
+CATALOG_VERSION_PATTERN = re.compile(r"[1-9][0-9]{3}\.[1-9][0-9]*\Z")
+MODEL_VERSION_PATTERN = re.compile(
+    r"(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\Z"
+)
 STANDARD_NAME = "radixor-models-standard"
 STANDARD_VERSION = "0.0.0"
 MAIN_NAME = "radixor"
 MAIN_VERSION = "0.0.0"
+
+
+def _tracked_catalog_version() -> str:
+    catalog_version = CATALOG_VERSION_FILE.read_text(encoding="utf-8").strip()
+    if CATALOG_VERSION_PATTERN.fullmatch(catalog_version) is None:
+        raise ValueError(
+            f"Invalid catalog version in {CATALOG_VERSION_FILE}: {catalog_version!r}"
+        )
+    return catalog_version
+
+
+def _tracked_default_model_versions() -> dict[str, str]:
+    versions: dict[str, str] = {}
+    for raw_line in MODEL_TOPOLOGY.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#"):
+            continue
+        model_id, separator, membership = line.partition("=")
+        if not separator or membership not in {"default", "optional"}:
+            raise ValueError(f"Invalid model topology line: {raw_line!r}")
+        if membership != "default":
+            continue
+        version_file = REPOSITORY / "models" / model_id / "model-version.txt"
+        version = version_file.read_text(encoding="utf-8").strip()
+        if MODEL_VERSION_PATTERN.fullmatch(version) is None:
+            raise ValueError(f"Invalid model version in {version_file}: {version!r}")
+        versions[model_id] = version
+    if len(versions) != EXPECTED_DEFAULT_COUNT or "pl-pl-polimorf" in versions:
+        raise ValueError(
+            "Standard Python catalog must contain 20 defaults and exclude pl-pl-polimorf"
+        )
+    return versions
+
+
+EXPECTED_CATALOG_VERSION = _tracked_catalog_version()
+EXPECTED_MODEL_VERSIONS = _tracked_default_model_versions()
+EXPECTED_MODEL_IDS = frozenset(EXPECTED_MODEL_VERSIONS)
 
 
 def _one(directory: Path, pattern: str) -> Path:
@@ -167,7 +189,9 @@ def _tar_file_bytes(archive: tarfile.TarFile, name: str) -> bytes:
 
 
 def _validate_standard_manifest(
-    manifest: object, expected_version: str = STANDARD_VERSION
+    manifest: object,
+    expected_version: str = STANDARD_VERSION,
+    expected_catalog_version: str = EXPECTED_CATALOG_VERSION,
 ) -> list[dict]:
     if not isinstance(manifest, dict) or set(manifest) != {
         "catalog_version",
@@ -180,7 +204,7 @@ def _validate_standard_manifest(
         raise ValueError("Standard model manifest has an invalid top-level schema")
     if (
         manifest["schema_version"] != 1
-        or manifest["catalog_version"] != "2026.1"
+        or manifest["catalog_version"] != expected_catalog_version
         or manifest["distribution_version"] != expected_version
         or manifest["topology"] != "models/model-projects.properties"
         or manifest["format"] != {"compression": "gzip", "magic": "EGTR", "version": 7}
@@ -225,7 +249,7 @@ def _validate_standard_manifest(
         if (
             model["file"] != f"models/{model_id}.rxc"
             or model["notice"] != f"notices/{model_id}/NOTICE-model-data.txt"
-            or model["version"] != "1.0.0"
+            or model["version"] != EXPECTED_MODEL_VERSIONS[model_id]
             or not isinstance(model["sha256"], str)
             or len(model["sha256"]) != 64
             or set(model["provenance"]) != provenance_keys
@@ -372,7 +396,9 @@ def _verify_main_sdist(path: Path, expected_version: str = MAIN_VERSION) -> None
 
 
 def _verify_standard_wheel(
-    path: Path, expected_version: str = STANDARD_VERSION
+    path: Path,
+    expected_version: str = STANDARD_VERSION,
+    expected_catalog_version: str = EXPECTED_CATALOG_VERSION,
 ) -> None:
     if not path.name.endswith("-py3-none-any.whl"):
         raise ValueError(f"Standard model wheel is not pure py3-none-any: {path.name}")
@@ -387,7 +413,9 @@ def _verify_standard_wheel(
         if metadata.get("License-Expression") != "CC-BY-SA-3.0":
             raise ValueError("Standard model data must declare CC-BY-SA-3.0")
         manifest = json.loads(archive.read("radixor_models_standard/manifest.json"))
-        models = _validate_standard_manifest(manifest, expected_version)
+        models = _validate_standard_manifest(
+            manifest, expected_version, expected_catalog_version
+        )
         dist_info = next(
             name.rsplit("/", 1)[0]
             for name in names
@@ -430,7 +458,9 @@ def _verify_standard_wheel(
 
 
 def _verify_standard_sdist(
-    path: Path, expected_version: str = STANDARD_VERSION
+    path: Path,
+    expected_version: str = STANDARD_VERSION,
+    expected_catalog_version: str = EXPECTED_CATALOG_VERSION,
 ) -> None:
     with tarfile.open(path, "r:gz") as archive:
         names = _validate_tar_members(archive, path.name)
@@ -445,7 +475,9 @@ def _verify_standard_sdist(
         )
         manifest_name = f"{root}/radixor_models_standard/manifest.json"
         models = _validate_standard_manifest(
-            json.loads(_tar_file_bytes(archive, manifest_name)), expected_version
+            json.loads(_tar_file_bytes(archive, manifest_name)),
+            expected_version,
+            expected_catalog_version,
         )
         egg_info = f"{root}/radixor_models_standard.egg-info"
         allowed_files = {
@@ -567,6 +599,7 @@ def main() -> int:
     parser.add_argument("--standard-dir", type=Path)
     parser.add_argument("--main-version", default=MAIN_VERSION)
     parser.add_argument("--standard-version", default=STANDARD_VERSION)
+    parser.add_argument("--catalog-version", default=EXPECTED_CATALOG_VERSION)
     parser.add_argument("--skip-install", action="store_true")
     args = parser.parse_args()
 
@@ -575,6 +608,8 @@ def main() -> int:
         parser.error("--main-wheel-dir and --main-sdist-dir must be used together")
     if args.main_wheel_dir is None and args.standard_dir is None:
         parser.error("at least one distribution directory must be provided")
+    if CATALOG_VERSION_PATTERN.fullmatch(args.catalog_version) is None:
+        parser.error(f"invalid catalog version: {args.catalog_version!r}")
 
     main_wheel = None
     standard_wheel = None
@@ -586,8 +621,12 @@ def main() -> int:
     if args.standard_dir is not None:
         standard_wheel = _one(args.standard_dir, "radixor_models_standard-*.whl")
         standard_sdist = _one(args.standard_dir, "radixor_models_standard-*.tar.gz")
-        _verify_standard_wheel(standard_wheel, args.standard_version)
-        _verify_standard_sdist(standard_sdist, args.standard_version)
+        _verify_standard_wheel(
+            standard_wheel, args.standard_version, args.catalog_version
+        )
+        _verify_standard_sdist(
+            standard_sdist, args.standard_version, args.catalog_version
+        )
     if not args.skip_install and main_wheel is not None and standard_wheel is not None:
         _verify_fresh_install(main_wheel, standard_wheel)
     print("verified requested Radixor distributions")

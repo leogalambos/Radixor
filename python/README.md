@@ -281,7 +281,7 @@ in Git. `./gradlew regeneratePythonStandardModels` performs this deterministic
 generation; repository topology selects the 20 defaults and excludes optional
 `pl-pl-polimorf`.
 
-`radixor` requires `radixor-models-standard>=1.0,<2.0`. The Python distribution
+`radixor` requires `radixor-models-standard>=2.0,<3.0`. The Python distribution
 version is independent of the Java model-catalog identity and of the individual
 model versions recorded in the manifest.
 

@@ -63,7 +63,7 @@ published packages carry normal release versions and dependency resolution
 works automatically.
 
 The native distribution requires
-`radixor-models-standard>=1.0,<2.0`; an installation of `radixor`
+`radixor-models-standard>=2.0,<3.0`; an installation of `radixor`
 resolves it automatically. The local `--no-deps` command installs the generated
 data wheel for development without contacting a package index.
 
@@ -222,7 +222,7 @@ pytest -q
   the checksum/provenance manifest, and CC BY-SA 3.0 notices; optional
   `pl-pl-polimorf` is excluded.
 - **Catalog compatibility.** The current supported Python runtime accepts the
-  documented compatible model-distribution major (`>=1.0,<2.0`) carrying an
+  documented compatible model-distribution major (`>=2.0,<3.0`) carrying an
   independent model-catalog identity. Missing,
   incompatible, or corrupt data produces an
   actionable error before native loading.

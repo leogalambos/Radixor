@@ -137,6 +137,29 @@ def pythonBuildStandardModels = tasks.register('pythonBuildStandardModels', Exec
     }
 }
 
+tasks.register('pythonVerifyStandardModelsDistribution', Exec) {
+    group = 'verification'
+    description = 'Verifies the generated standard-model wheel and sdist against tracked catalog inputs.'
+
+    dependsOn(pythonBuildStandardModels)
+    inputs.dir(pythonStandardDistributionDirectory)
+    inputs.file(layout.projectDirectory.file('models/catalog-version.txt'))
+    inputs.file(layout.projectDirectory.file('models/model-projects.properties'))
+    inputs.files(fileTree(layout.projectDirectory.dir('models')) {
+        include '*/model-version.txt'
+    })
+    inputs.file(pythonProjectDirectory.file('scripts/verify_distributions.py'))
+    outputs.upToDateWhen { false }
+
+    workingDir(layout.projectDirectory)
+    commandLine(
+            pythonExecutable.get(), 'python/scripts/verify_distributions.py',
+            '--standard-dir', pythonStandardDistributionDirectory.get().asFile.absolutePath,
+            '--standard-version', '0.0.0',
+            '--skip-install'
+    )
+}
+
 def pythonBuildSdist = tasks.register('pythonBuildSdist', Exec) {
     group = 'python'
     description = 'Builds the Radixor native source distribution without runtime model data.'

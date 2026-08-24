@@ -29,9 +29,21 @@
 # POSSIBILITY OF SUCH DAMAGE.
 ###############################################################################
 
-"""Installed resources for the Radixor 2026.1 standard model catalog."""
+"""Installed resources for a generated Radixor standard model catalog."""
 
-CATALOG_VERSION = "2026.1"
-__version__ = "0.0.0"
+import json
+from importlib import resources
+
+
+def _manifest_identity() -> tuple[str, str]:
+    """Return the catalog and distribution identities from the package manifest."""
+
+    manifest = json.loads(
+        resources.files(__name__).joinpath("manifest.json").read_text(encoding="utf-8")
+    )
+    return manifest["catalog_version"], manifest["distribution_version"]
+
+
+CATALOG_VERSION, __version__ = _manifest_identity()
 
 __all__ = ["CATALOG_VERSION"]

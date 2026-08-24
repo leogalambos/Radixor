@@ -81,7 +81,7 @@ def test_standard_model_build_ignores_local_build_state() -> None:
 
 def test_native_distribution_requires_compatible_standard_models() -> None:
     metadata = Message()
-    metadata["Requires-Dist"] = "radixor-models-standard >=1.0, <2.0"
+    metadata["Requires-Dist"] = "radixor-models-standard >=2.0, <3.0"
 
     _assert_main_dependency(metadata, "radixor-4.1.0.tar.gz")
 

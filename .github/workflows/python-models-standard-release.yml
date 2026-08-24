@@ -108,8 +108,20 @@ jobs:
           build/python-release/venv/bin/python -m pip install \
             --no-index --find-links build/python-release/release \
             radixor-models-standard
-          build/python-release/venv/bin/python -c \
-            "from importlib import resources; assert resources.files('radixor_models_standard').joinpath('manifest.json').is_file()"
+          build/python-release/venv/bin/python <<'PY'
+          import json
+          from importlib import resources
+
+          import radixor_models_standard
+
+          manifest = json.loads(
+              resources.files("radixor_models_standard")
+              .joinpath("manifest.json")
+              .read_text(encoding="utf-8")
+          )
+          assert radixor_models_standard.CATALOG_VERSION == manifest["catalog_version"]
+          assert radixor_models_standard.__version__ == manifest["distribution_version"]
+          PY
 
       - name: Prepare complete PEP 503 index candidate
         shell: bash

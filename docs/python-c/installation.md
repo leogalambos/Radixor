@@ -11,7 +11,7 @@ the stable-ABI `radixor` distribution, Radixor-C produces a wheel for each
 supported CPython version and platform because it is compiled directly against
 the CPython C API.
 
-The install resolves `radixor-models-standard>=1.0,<2.0`. That pure-Python data
+The install resolves `radixor-models-standard>=2.0,<3.0`. That pure-Python data
 package is shared with `radixor`; installing both runtimes does not duplicate
 the model catalog.
 

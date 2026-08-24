@@ -8,6 +8,12 @@ by the tag. Never commit a release-number rewrite of the descriptors.
 Standard `.rxc` resources are also generated in that staging tree from the
 canonical model sources. The workflow compiles every model twice and rejects
 non-deterministic output; generated payload must never be added to Git.
+The generated standard-model manifest obtains its aggregate catalog release
+identity from `models/catalog-version.txt` and each model version from its own
+`model-version.txt`; do not synchronize Python constants manually. The package
+exposes `CATALOG_VERSION` directly from that manifest. The catalog identity is
+provenance, not a runtime compatibility lock; the manifest schema, compiled
+format, and model-distribution major version are the compatibility boundaries.
 
 ## Validate without publishing
 
@@ -21,6 +27,12 @@ test, so its full validation for a new model version runs after that model is
 published to PyPI. The native runs must pass Linux x86-64, Linux ARM64, macOS
 universal2, and Windows x86-64 where configured.
 
+Before the manual workflow run, validate the standard-model archives locally:
+
+```bash
+./gradlew --no-daemon pythonVerifyStandardModelsDistribution
+```
+
 For the Linux paths, maintainers can use `act` with rootless Podman and the
 event files under `.github/act/`. Do not pass production secrets to `act`.
 
@@ -31,6 +43,11 @@ versions explicitly. When creating a new standard-model release, its version
 must match the tracked version file. The recovery-only option that republishes
 an already immutable GitHub Release to PyPI may instead name that existing
 historical release version.
+
+If a failed workflow produced no release artifact or index entry, delete its
+tag locally and remotely before recreating the same unpublished version on the
+corrected commit. Never move an existing remote tag, and never reuse a version
+for which any artifact was published.
 
 ```bash
 MODEL_VERSION="$(tools/read-python-models-standard-version.sh)"

@@ -10,7 +10,7 @@ description = "Radixor stemmer – fastest stemming for Python, backed by Rust"
 readme = "README.md"
 license = "BSD-3-Clause"
 license-files = ["LICENSE"]
-dependencies = ["radixor-models-standard>=1.0,<2.0"]
+dependencies = ["radixor-models-standard>=2.0,<3.0"]
 keywords = [
     "python",
     "information retrieval",

@@ -58,6 +58,7 @@ TOPOLOGY = REPOSITORY / "models" / "model-projects.properties"
 CATALOG_VERSION = REPOSITORY / "models" / "catalog-version.txt"
 EXPECTED_FORMAT = {"compression": "gzip", "magic": "EGTR", "version": 7}
 VERSION = re.compile(r"(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\Z")
+CATALOG_VERSION_PATTERN = re.compile(r"[1-9][0-9]{3}\.[1-9][0-9]*\Z")
 METADATA_FIELDS = (
     "sourceName",
     "sourceVersion",
@@ -121,6 +122,17 @@ def _replace_once(path: Path, pattern: str, replacement: str) -> None:
     path.write_text(updated, encoding="utf-8", newline="\n")
 
 
+def _catalog_version() -> str:
+    """Return the validated catalog identity tracked by the repository."""
+
+    catalog_version = CATALOG_VERSION.read_text(encoding="utf-8").strip()
+    if CATALOG_VERSION_PATTERN.fullmatch(catalog_version) is None:
+        raise ValueError(
+            f"Invalid catalog version in {CATALOG_VERSION}: {catalog_version!r}"
+        )
+    return catalog_version
+
+
 def _stage_project(output: Path, distribution_version: str) -> Path:
     project = output.resolve()
     try:
@@ -150,11 +162,6 @@ def _stage_project(output: Path, distribution_version: str) -> Path:
         project / "pyproject.toml",
         r'^version = "0\.0\.0"$',
         f'version = "{distribution_version}"',
-    )
-    _replace_once(
-        project / "radixor_models_standard" / "__init__.py",
-        r'^__version__ = "0\.0\.0"$',
-        f'__version__ = "{distribution_version}"',
     )
     return project
 
@@ -235,6 +242,7 @@ def main() -> int:
         print(f"detail: {exc}", file=sys.stderr)
         return 2
 
+    catalog_version = _catalog_version()
     project = _stage_project(args.project, args.distribution_version)
     package_root = project / "radixor_models_standard"
     model_ids = _default_models()
@@ -265,7 +273,7 @@ def main() -> int:
             for model_id in model_ids
         ]
     manifest = {
-        "catalog_version": CATALOG_VERSION.read_text(encoding="utf-8").strip(),
+        "catalog_version": catalog_version,
         "distribution_version": args.distribution_version,
         "format": EXPECTED_FORMAT,
         "models": models,

@@ -139,23 +139,39 @@ excludes the optional `pl-pl-polimorf` model. A change to any default model
 therefore requires a new Python standard-model distribution.
 
 Manually set `python/models-standard-version.txt` to a new, unpublished stable
-`1.x.y` distribution version. This version belongs to the complete Python
+`2.x.y` distribution version. This version belongs to the complete Python
 model distribution; it is independent of the changed Java model version and
 the Java catalog version and does not have to use the same number. If the file
 already contains the intended unpublished version, do not increment it again.
 Published versions are immutable and must never be overwritten.
 
+Do not manually edit
+`python/models-standard/radixor_models_standard/__init__.py`, Python runtime
+catalog constants, generated manifests, or release validators when the Java
+catalog version changes. `models/catalog-version.txt` is the single source of
+`catalog_version` in the generated manifest, and the package exposes
+`CATALOG_VERSION` by reading that manifest rather than duplicating the value in
+Python source. Each model's `model-version.txt` is the single source of that
+model's version. Archive verification checks all generated values against the
+tracked inputs. The catalog version identifies the aggregate used to build the
+distribution but is not a runtime compatibility boundary. Manifest schema,
+compiled-trie format, and the model distribution's major version define
+runtime compatibility.
+
 Compile and package all Python standard models locally:
 
 ```bash
 ./gradlew --no-daemon pythonBuildStandardModels
+./gradlew --no-daemon pythonVerifyStandardModelsDistribution
 ```
 
 This task reads every default model's canonical `stemmer.gz`,
 `model-version.txt`, notice, and Gradle provenance metadata. It compiles each
 dictionary twice and rejects non-deterministic output. The generated project,
 manifest, notices, `.rxc` files, wheel, and source distribution remain below
-`build/python/`; do not add any of them to Git.
+`build/python/`; do not add any of them to Git. The verification task inspects
+both archives, checks that the manifest uses the tracked aggregate identity,
+and checks every manifest model version against that model's own version file.
 
 Before publishing, run **Python Standard Models Release** manually with the
 version from `python/models-standard-version.txt`. A manual run validates the
@@ -179,8 +195,14 @@ Release, PyPI wheel and source distribution, build attestations, and Python
 package-index entry. The generated manifest records the Java catalog version
 and the individual version and source checksum of every compiled model.
 
+If a tag-triggered workflow fails before creating any GitHub Release, PyPI
+artifact, attestation, or package-index entry, delete the failed tag locally and
+on the remote before reusing its unpublished version on the corrected commit.
+Never move a tag that still exists remotely. If any artifact was published, use
+a new version because release artifacts are immutable.
+
 The `radixor` and `radixor-c` runtime distributions depend on
-`radixor-models-standard>=1.0,<2.0`; they do not need a new runtime release for
+`radixor-models-standard>=2.0,<3.0`; they do not need a new runtime release for
 a dictionary-only update. If a coordinated runtime release is planned for
 another reason, publish the Python standard-model distribution first because
 the runtime release workflows test against the exact version recorded in
@@ -196,11 +218,19 @@ For a default dictionary update, keep this order:
 2. Publish `model/<model-id>@<model-version>` and wait for Maven Central.
 3. Increment and merge `models/catalog-version.txt`.
 4. Publish `models-catalog@<catalog-version>`.
-5. Set and merge the new `python/models-standard-version.txt` value, validate
-   `pythonBuildStandardModels`, and publish
-   `python-models-standard@<python-model-distribution-version>`.
+5. Set and merge the new `python/models-standard-version.txt` value, run
+   `pythonBuildStandardModels` and `pythonVerifyStandardModelsDistribution`,
+   and publish `python-models-standard@<python-model-distribution-version>`.
 
 Never publish the catalog first: its POMs would reference a model version that
 consumers cannot resolve yet. Never publish the Python package from a commit
 that does not contain the intended Java model and catalog versions, because
 those identities are embedded in its generated manifest.
+
+The migration from the already published model 1.x line to 2.0.0 is a one-time
+exception to runtime-independent dictionary releases. Existing runtimes require
+`>=1,<2` and hard-code catalog `2026.1`, so 2.0.0 deliberately remains outside
+their dependency range. Publish `radixor-models-standard` 2.0.0 first, then
+release updated `radixor` and `radixor-c` runtimes that require `>=2,<3`. After
+that migration, later 2.x dictionary releases follow the normal five-step
+sequence above without a runtime release.

@@ -4,12 +4,14 @@ This pure-Python distribution supplies Radixor's 20 precompiled standard
 language models. It is installed automatically by `pip install radixor`; users
 normally do not import it directly.
 
-The catalog version is `2026.1`. Individual model versions recorded in the
-generated `radixor_models_standard/manifest.json` are currently `1.0.0`. The
-optional Polish PoliMorf model is intentionally not part of the standard
-catalog.
-The first Python model distribution is released as `1.0.0`; its version is
-independent of both the catalog identity and the individual model versions.
+The aggregate Java catalog and individual model versions are recorded in the
+generated `radixor_models_standard/manifest.json`. Release staging reads them from
+`models/catalog-version.txt` and the individual `model-version.txt` files; they
+are not maintained separately in this packaging skeleton. The optional Polish
+PoliMorf model is intentionally not part of the standard catalog.
+The distribution version is independent of both the catalog identity and the
+individual model versions. Its major version is the runtime compatibility
+boundary; catalog releases within a supported major line are provenance only.
 The checked-in descriptors use `0.0.0` as a deliberate non-release placeholder.
 The release workflow creates an isolated project below `build/`, injects the Git
 tag version, and deterministically compiles all model resources there.

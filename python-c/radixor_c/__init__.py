@@ -64,9 +64,9 @@ for _mid, _supported, _aliases, _native in _PYSTEMMER_MODEL_MAP:
 _SUPPORTED_PYSTEMMER_ALIASES = list(dict.fromkeys(_SUPPORTED_PYSTEMMER_ALIASES))
 _SUPPORTED_PYSTEMMER_MODEL_IDS = frozenset(mid for mid, *_ in _PYSTEMMER_MODEL_MAP)
 _STANDARD_PACKAGE = "radixor_models_standard"
-_STANDARD_CATALOG_VERSION = "2026.1"
+_CATALOG_VERSION_PATTERN = re.compile(r"[1-9][0-9]{3}\.[1-9][0-9]*\Z")
 _STANDARD_DISTRIBUTION_VERSION = re.compile(
-    r"(?:0\.0\.0|1\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*))\Z"
+    r"(?:0\.0\.0|2\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*))\Z"
 )
 _MODEL_ID = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*\Z")
 _SHA256 = re.compile(r"[0-9a-f]{64}\Z")
@@ -93,7 +93,7 @@ def _load_standard_manifest() -> dict[str, Any]:
     except (ModuleNotFoundError, TypeError) as exc:
         raise ModuleNotFoundError(
             "The standard Radixor model package is not installed. "
-            "Install with 'pip install radixor-models-standard>=1.0,<2.0'."
+            "Install with 'pip install radixor-models-standard>=2.0,<3.0'."
         ) from exc
     try:
         manifest = json.loads(ref.read_text(encoding="utf-8"))
@@ -105,8 +105,11 @@ def _load_standard_manifest() -> dict[str, Any]:
         format_info = manifest["format"]
         if manifest["schema_version"] != 1:
             raise ValueError("unsupported schema_version")
-        if manifest["catalog_version"] != _STANDARD_CATALOG_VERSION:
-            raise ValueError(f"catalog version mismatch")
+        catalog_version = manifest["catalog_version"]
+        if not isinstance(catalog_version, str):
+            raise ValueError("invalid catalog_version")
+        if _CATALOG_VERSION_PATTERN.fullmatch(catalog_version) is None:
+            raise ValueError("invalid catalog_version")
         dv = manifest["distribution_version"]
         if not isinstance(dv, str) or _STANDARD_DISTRIBUTION_VERSION.fullmatch(dv) is None:
             raise ValueError("incompatible distribution_version")
