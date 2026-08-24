@@ -190,10 +190,10 @@ public final class FrequencyTrieBuilders {
      */
     public static TrieStatistics computeStatistics(final FrequencyTrie<?> trie) {
         Objects.requireNonNull(trie, "trie");
-        final IdentityHashMap<CompiledNode<?>, Boolean> visited = new IdentityHashMap<>();
+        final Map<CompiledNode<?>, Boolean> visited = new IdentityHashMap<>();
         final long[] counters = { 0L, 0L, 0L, 0L }; // internal, leaf, longestPath, leafDepthSum
         collectStats(trie.root(), 0, visited, counters);
-        final double avgLeafDepth = counters[1] == 0L ? 0.0d : (double) counters[3] / (double) counters[1];
+        final double avgLeafDepth = counters[1] == 0L ? 0.0d : counters[3] / (double) counters[1];
         return new TrieStatistics(counters[0], counters[1], counters[2], avgLeafDepth);
     }
 
@@ -206,7 +206,7 @@ public final class FrequencyTrieBuilders {
      * @param counters shared counter array: [internal, leaf, longestPath, leafDepthSum]
      */
     private static void collectStats(final CompiledNode<?> node, final int depth,
-            final IdentityHashMap<CompiledNode<?>, Boolean> visited, final long[] counters) {
+            final Map<CompiledNode<?>, Boolean> visited, final long... counters) {
         if (visited.put(node, Boolean.TRUE) != null) {
             return;
         }
