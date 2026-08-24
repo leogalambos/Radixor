@@ -42,6 +42,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.function.IntFunction;
 
+import org.egothor.stemmer.trie.CompiledNode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -286,6 +287,45 @@ class FrequencyTrieBuildersTest {
                 () -> assertArrayEquals(new String[] { "mapped-A1", "mapped-A2" }, mapped.getAll("a")),
                 () -> assertIterableEquals(List.of(new ValueCount<String>("mapped-AB1", 5),
                         new ValueCount<String>("mapped-AB2", 2)), mapped.getEntries("ab")));
+    }
+
+    /**
+     * Verifies that path statistics account for two paths reaching the same leaf
+     * at different depths instead of assigning the leaf its first discovery depth.
+     */
+    @Test
+    @DisplayName("should measure every logical path through a shared compiled subtree")
+    void shouldMeasureLogicalPathsThroughSharedSubtree() {
+        final CompiledNode<String>[] noChildren = nodes();
+        final CompiledNode<String> sharedLeaf = new CompiledNode<>(new char[0], noChildren,
+                new String[] { "patch" }, false, CompiledNode.DEFAULT_MAX_EXPANDED_INDEX, 1);
+        final CompiledNode<String>[] intermediateChildren = nodes(sharedLeaf);
+        final CompiledNode<String> intermediate = new CompiledNode<>(new char[] { 'x' }, intermediateChildren,
+                new String[0], false, CompiledNode.DEFAULT_MAX_EXPANDED_INDEX);
+        final CompiledNode<String>[] rootChildren = nodes(sharedLeaf, intermediate);
+        final CompiledNode<String> root = new CompiledNode<>(new char[] { 'a', 'b' }, rootChildren,
+                new String[0], false, CompiledNode.DEFAULT_MAX_EXPANDED_INDEX);
+        final TrieMetadata metadata = TrieMetadata.current(FrequencyTrie.currentFormatVersion(),
+                WordTraversalDirection.FORWARD, RANKED_SETTINGS);
+        final FrequencyTrie<String> trie = FrequencyTrie.fromCompiled(String[]::new, root, metadata);
+
+        final TrieStatistics statistics = FrequencyTrieBuilders.computeStatistics(trie);
+
+        assertAll(
+                () -> assertEquals(2L, statistics.internalNodeCount(), "Two unique nodes have child edges."),
+                () -> assertEquals(1L, statistics.leafNodeCount(), "The shared leaf must be stored once."),
+                () -> assertEquals(3L, statistics.edgeCount(), "Every stored edge must be counted."),
+                () -> assertEquals(1L, statistics.valueReferenceCount(), "One physical value reference is stored."),
+                () -> assertEquals(1L, statistics.distinctValueCount(), "One distinct patch value is stored."),
+                () -> assertEquals(2L, statistics.logicalLeafPathCount(), "Both logical paths must be counted."),
+                () -> assertEquals(2L, statistics.longestPath(), "The deeper logical path has two edges."),
+                () -> assertEquals(1.5d, statistics.averageLeafDepth(), "Path depths one and two average to 1.5."));
+    }
+
+    /** Creates a typed compiled-node array for manually assembled DAG fixtures. */
+    @SafeVarargs
+    private static <V> CompiledNode<V>[] nodes(final CompiledNode<V>... nodes) {
+        return nodes;
     }
 
     /**

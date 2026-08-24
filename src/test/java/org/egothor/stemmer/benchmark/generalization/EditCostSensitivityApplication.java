@@ -31,17 +31,23 @@
 package org.egothor.stemmer.benchmark.generalization;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -73,50 +79,59 @@ import org.egothor.stemmer.benchmark.quality.QualityResult;
  * configurations.
  *
  * <p>
- * For every bundled language and every combination of
- * (delete, insert, replace, match) costs drawn from the configured value sets,
- * the application:
+ * For every bundled language, deterministic split seed, and non-redundant
+ * combination of (delete, insert, replace, match) costs drawn from the
+ * configured value sets, the application:
  * <ol>
- * <li>Counts the number of distinct patch commands generated from the full
- *     dictionary using the candidate cost configuration.</li>
- * <li>Compares the count against the baseline (1, 1, 1, 0) count to determine
+ * <li>Builds a trie from the selected training rows at each knowledge level.</li>
+ * <li>Counts both generated training commands and commands physically retained
+ *     by that reduced trie.</li>
+ * <li>Compares the retained command count against a baseline (1, 1, 1, 0) trie
+ *     built from the identical training rows to determine
  *     viability: configurations with &gt;10&times; baseline patch commands are
  *     {@code NOT_VIABLE}; configurations with &gt;5&times; are {@code MARGINAL}
- *     and currently not evaluated.</li>
- * <li>For viable configurations, evaluates generalization quality at each
+ *     classifications. Classification is reported but does not censor results.</li>
+ * <li>Evaluates generalization quality at each
  *     training-knowledge level (10 %, 20 %, …, 100 %) using the dictionary
  *     itself as the gold standard.</li>
- * <li>Computes trie structural statistics and pairwise stemming-quality metrics
- *     for each (cost configuration, knowledge level) combination.</li>
+ * <li>Computes trie structural statistics and separate whole-dictionary,
+ *     withheld-family, and unseen-surface pairwise quality metrics.</li>
  * </ol>
  *
  * <p>
  * Output is a single UTF-8 CSV file whose rows cover all selected languages,
  * cost configurations, and knowledge levels. The application discovers model
  * descriptors through the context class loader, reads model resources from the
- * runtime class path, retains the report in memory while it runs, creates the
- * output parent directory when necessary, and replaces an existing output
- * file.</p>
+ * runtime class path, streams rows through a temporary file, creates the output
+ * parent directory when necessary, and atomically replaces an existing output
+ * file when supported by the filesystem.</p>
  *
  * <p>The implementation has no mutable global state. Separate invocations may
  * run concurrently provided that they write to different output paths.</p>
+ *
+ * @apiNote The report contains raw exploratory observations and does not select
+ *          an optimal configuration. Any subsequent selection must predeclare
+ *          its quality-versus-size objective, use an independent validation
+ *          scope, and reserve an untouched external test set for the final
+ *          estimate.
  */
+@SuppressWarnings("PMD.CyclomaticComplexity")
 public final class EditCostSensitivityApplication {
 
     /** Cost values used for the delete, insert, and replace operations. */
-    static final List<Integer> EDIT_COST_VALUES = List.of(1, 2, 3, 5, 10);
+    /* default */ static final List<Integer> EDIT_COST_VALUES = List.of(1, 2, 3, 5, 10);
 
     /** Cost values used for the match (skip) operation. */
-    static final List<Integer> MATCH_COST_VALUES = List.of(0, 1);
+    /* default */ static final List<Integer> MATCH_COST_VALUES = List.of(0, 1);
 
     /** Ratio threshold above which a configuration is flagged as {@code MARGINAL}. */
-    static final double MARGINAL_THRESHOLD = 5.0d;
+    /* default */ static final double MARGINAL_THRESHOLD = 5.0d;
 
     /** Ratio threshold above which a configuration is flagged as {@code NOT_VIABLE}. */
-    static final double NOT_VIABLE_THRESHOLD = 10.0d;
+    /* default */ static final double NOT_VIABLE_THRESHOLD = 10.0d;
 
-    /** Default deterministic seed. */
-    static final long DEFAULT_SEED = DictionaryGeneralizationApplication.SEEDS[0];
+    /** Default deterministic seed retained for explicitly requested single-seed runs. */
+    /* default */ static final long DEFAULT_SEED = DictionaryGeneralizationApplication.SEEDS[0];
 
     /** Traversal direction used by the production stemmer. */
     private static final WordTraversalDirection DIRECTION = WordTraversalDirection.BACKWARD;
@@ -128,33 +143,57 @@ public final class EditCostSensitivityApplication {
             ReductionSettings.DEFAULT_DOMINANT_WINNER_OVER_SECOND_RATIO, true);
 
     /** Baseline cost configuration. */
-    static final CostConfig BASELINE = new CostConfig(1, 1, 1, 0);
+    /* default */ static final CostConfig BASELINE = new CostConfig(1, 1, 1, 0);
 
-    private static final String PROTOCOL_VERSION = "radixor-cost-sensitivity-v1";
+    private static final String PROTOCOL_VERSION = "radixor-cost-sensitivity-v2";
 
-    static final String HEADER = String.join(",",
-            "protocol_version", "language", "model_id", "model_version",
+    /** Required provenance arguments before optional seed and language filters. */
+    private static final int REQUIRED_ARGUMENT_COUNT = 5;
+
+    /** Largest accepted argument count. */
+    private static final int MAXIMUM_ARGUMENT_COUNT = 7;
+
+    /* default */ static final String HEADER = String.join(",",
+            "protocol_version", "radixor_java_version", "source_revision", "source_state", "generator_sha256",
+            "language", "model_id", "model_version", "model_sha256", "seed",
             "delete_cost", "insert_cost", "replace_cost", "match_cost", "cost_label",
-            "patch_command_count", "baseline_patch_command_count", "patch_count_ratio", "viability",
             "training_percent", "selected_rows", "total_rows", "withheld_rows", "excluded_overlap_occurrences",
+            "training_generated_distinct_patch_commands", "baseline_training_generated_distinct_patch_commands",
+            "trie_distinct_patch_commands", "baseline_trie_distinct_patch_commands",
+            "trie_distinct_patch_command_ratio", "viability",
             "whole_correct", "whole_total", "whole_changed_correct", "whole_changed_total",
             "whole_root_correct", "whole_root_total",
             "withheld_correct", "withheld_total", "withheld_changed_correct", "withheld_changed_total",
             "withheld_root_correct", "withheld_root_total",
             "unseen_correct", "unseen_total", "unseen_changed_correct", "unseen_changed_total",
             "unseen_root_correct", "unseen_root_total",
-            "trie_internal_nodes", "trie_leaves", "trie_longest_path", "trie_avg_path_length",
-            "tp", "fp", "fn", "tn",
-            "over_error_pairs", "over_possible_pairs", "over_percent",
-            "under_error_pairs", "under_possible_pairs", "under_percent",
-            "precision", "recall", "specificity", "balanced_accuracy",
-            "f05", "f1", "f2", "jaccard", "fowlkes_mallows", "mcc", "error_rate");
+            "trie_internal_nodes", "trie_leaves", "trie_edges", "trie_accepting_leaves",
+            "trie_value_references", "trie_logical_leaf_paths", "trie_longest_path",
+            "trie_avg_path_length", "trie_dense_lookup_nodes", "trie_dense_table_slots",
+            "whole_tp", "whole_fp", "whole_fn", "whole_tn",
+            "whole_over_error_pairs", "whole_over_possible_pairs", "whole_over_percent",
+            "whole_under_error_pairs", "whole_under_possible_pairs", "whole_under_percent",
+            "whole_precision", "whole_recall", "whole_specificity", "whole_balanced_accuracy",
+            "whole_f05", "whole_f1", "whole_f2", "whole_jaccard", "whole_fowlkes_mallows", "whole_mcc",
+            "whole_error_rate",
+            "withheld_tp", "withheld_fp", "withheld_fn", "withheld_tn",
+            "withheld_over_error_pairs", "withheld_over_possible_pairs", "withheld_over_percent",
+            "withheld_under_error_pairs", "withheld_under_possible_pairs", "withheld_under_percent",
+            "withheld_precision", "withheld_recall", "withheld_specificity", "withheld_balanced_accuracy",
+            "withheld_f05", "withheld_f1", "withheld_f2", "withheld_jaccard", "withheld_fowlkes_mallows",
+            "withheld_mcc", "withheld_error_rate",
+            "unseen_tp", "unseen_fp", "unseen_fn", "unseen_tn",
+            "unseen_over_error_pairs", "unseen_over_possible_pairs", "unseen_over_percent",
+            "unseen_under_error_pairs", "unseen_under_possible_pairs", "unseen_under_percent",
+            "unseen_precision", "unseen_recall", "unseen_specificity", "unseen_balanced_accuracy",
+            "unseen_f05", "unseen_f1", "unseen_f2", "unseen_jaccard", "unseen_fowlkes_mallows", "unseen_mcc",
+            "unseen_error_rate");
 
-    /** Number of columns emitted by {@link #appendCommonPrefix}. */
-    private static final int COMMON_PREFIX_FIELD_COUNT = 13;
-
-    /** Total number of columns declared by {@link #HEADER}. */
+    /** Number of columns required in every emitted report row. */
     private static final int HEADER_FIELD_COUNT = HEADER.split(",", -1).length;
+
+    /** Field delimiter used by the unquoted protocol CSV. */
+    private static final char CSV_DELIMITER = ',';
 
     /** Utility class. */
     private EditCostSensitivityApplication() {
@@ -164,21 +203,103 @@ public final class EditCostSensitivityApplication {
     /**
      * Generates and writes the complete cost-sensitivity CSV report.
      *
-     * @param arguments output CSV path, optionally a long seed, and optionally
-     *                  an exact {@link StemmerPatchTrieLoader.Language} name
+     * @param arguments output CSV path, Radixor Java version, source revision,
+     *                  source state, generator source path, optionally one long
+     *                  seed (or {@code all}), and optionally an exact
+     *                  {@link StemmerPatchTrieLoader.Language} name
      * @throws IOException when a model dictionary cannot be read or the CSV cannot
      *                     be written
      * @throws IllegalArgumentException if the argument count, seed, or language
      *                                  name is invalid
      */
     public static void main(final String[] arguments) throws IOException {
-        if (arguments.length < 1 || arguments.length > 3) {
-            throw new IllegalArgumentException("Expected: output-csv [seed [language-name]]");
+        final RunOptions options = parseArguments(arguments);
+        writeReport(options);
+    }
+
+    /** Parses and validates command-line options without performing report I/O. */
+    private static RunOptions parseArguments(final String... arguments) throws IOException {
+        if (arguments.length < REQUIRED_ARGUMENT_COUNT || arguments.length > MAXIMUM_ARGUMENT_COUNT) {
+            throw new IllegalArgumentException("Expected: output-csv Radixor-Java-version source-revision "
+                    + "source-state generator-source [seed|all [language-name]]");
         }
         final Path output = Path.of(arguments[0]);
-        final long seed = arguments.length >= 2 ? Long.parseLong(arguments[1]) : DEFAULT_SEED;
-        final String languageFilter = arguments.length == 3 ? arguments[2].toUpperCase(Locale.ROOT) : null;
+        final ExperimentProvenance provenance = new ExperimentProvenance(requireText(arguments[1],
+                "Radixor Java version"), requireText(arguments[2], "source revision"),
+                requireText(arguments[3], "source state"), sha256(Files.readAllBytes(Path.of(arguments[4]))));
+        final long[] seeds = arguments.length >= 6 && !"all".equalsIgnoreCase(arguments[5])
+                ? new long[] { Long.parseLong(arguments[5]) }
+                : DictionaryGeneralizationApplication.SEEDS.clone();
+        final String languageFilter = arguments.length == MAXIMUM_ARGUMENT_COUNT
+                ? arguments[6].toUpperCase(Locale.ROOT) : null;
+        return new RunOptions(output, provenance, seeds, languageFilter);
+    }
 
+    /** Writes the report through a temporary file and publishes it atomically when supported. */
+    private static void writeReport(final RunOptions options) throws IOException {
+        final Path output = options.output().toAbsolutePath();
+        final Path outputDirectory = output.getParent();
+        Files.createDirectories(outputDirectory);
+        final Path temporaryOutput = Files.createTempFile(outputDirectory,
+                output.getFileName().toString() + '.', ".tmp");
+        boolean published = false;
+        try {
+            final long dataRows = writeReportContent(temporaryOutput, options);
+            publishReport(temporaryOutput, output);
+            published = true;
+            System.out.printf(Locale.ROOT, "Cost-sensitivity CSV: %s (%,d data rows)%n", output, dataRows);
+        } finally {
+            if (!published) {
+                Files.deleteIfExists(temporaryOutput);
+            }
+        }
+    }
+
+    /** Executes all requested experiment scenarios into an already resolved temporary path. */
+    private static long writeReportContent(final Path temporaryOutput, final RunOptions options) throws IOException {
+        final List<StemmerPatchTrieLoader.Language> languages = selectLanguages(options.languageFilter());
+        final StemmerModelRegistry registry = StemmerModelRegistry.fromContextClassLoader();
+        final List<CostConfig> grid = generateGrid();
+        final long[] seeds = options.seeds();
+        long dataRows = 0L;
+        try (BufferedWriter writer = Files.newBufferedWriter(temporaryOutput, StandardCharsets.UTF_8)) {
+            writer.write(HEADER);
+            writer.newLine();
+            for (final StemmerPatchTrieLoader.Language language : languages) {
+                final StemmerModelDescriptor descriptor = registry.requireDefault(language);
+                final List<DictionaryRow> rows = readRows(descriptor);
+                final List<GoldStandardGroup> goldGroups = toGoldGroups(rows);
+                verifyProductionEquivalence(language, rows);
+
+                System.out.printf(Locale.ROOT, "Language %s (%s): %,d rows, %d seeds, %d normalized configs%n",
+                        language, descriptor.id(), rows.size(), seeds.length, grid.size());
+
+                for (final long seed : seeds) {
+                    final List<DictionaryRow> ranked = rankRows(rows, descriptor.id(), seed);
+                    final List<ScenarioContext> scenarios = createScenarioContexts(ranked, goldGroups);
+                    int configIndex = 0;
+                    for (final CostConfig config : grid) {
+                        configIndex++;
+                        for (final ScenarioContext scenario : scenarios) {
+                            final String row = evaluateScenario(language, descriptor, ranked,
+                                    config, seed, scenario, options.provenance());
+                            writeCsvRow(writer, row);
+                            dataRows++;
+                        }
+                        if (configIndex % 50 == 0) {
+                            System.out.printf(Locale.ROOT, "  %s seed %s: %d/%d configs processed%n",
+                                    language, Long.toUnsignedString(seed), configIndex, grid.size());
+                        }
+                    }
+                }
+                System.out.printf(Locale.ROOT, "  Completed %s: %d configs%n", language, grid.size());
+            }
+        }
+        return dataRows;
+    }
+
+    /** Resolves an optional exact language filter. */
+    private static List<StemmerPatchTrieLoader.Language> selectLanguages(final String languageFilter) {
         final List<StemmerPatchTrieLoader.Language> languages = new ArrayList<>();
         for (final StemmerPatchTrieLoader.Language candidate : StemmerPatchTrieLoader.Language.values()) {
             if (languageFilter == null || candidate.name().equals(languageFilter)) {
@@ -188,59 +309,38 @@ public final class EditCostSensitivityApplication {
         if (languages.isEmpty()) {
             throw new IllegalArgumentException("No language matches filter: " + languageFilter);
         }
+        return List.copyOf(languages);
+    }
 
-        final List<String> lines = new ArrayList<>();
-        lines.add(HEADER);
+    /** Writes one validated CSV data row. */
+    private static void writeCsvRow(final BufferedWriter writer, final String row) throws IOException {
+        final int actualFieldCount = fieldCount(row);
+        if (actualFieldCount != HEADER_FIELD_COUNT) {
+            throw new IllegalStateException("CSV row contains " + actualFieldCount + " fields; expected "
+                    + HEADER_FIELD_COUNT + ".");
+        }
+        writer.write(row);
+        writer.newLine();
+    }
 
-        final StemmerModelRegistry registry = StemmerModelRegistry.fromContextClassLoader();
-        final List<CostConfig> grid = generateGrid();
-
-        for (final StemmerPatchTrieLoader.Language language : languages) {
-            final StemmerModelDescriptor descriptor = registry.requireDefault(language);
-            final List<DictionaryRow> rows = readRows(descriptor);
-
-            final long baselineCount = countDistinctPatchCommands(rows, BASELINE);
-
-            System.out.printf(Locale.ROOT, "Language %s (%s): %,d rows, baseline patch commands: %,d%n",
-                    language, descriptor.id(), rows.size(), baselineCount);
-
-            final List<DictionaryRow> ranked = rankRows(rows, descriptor.id(), seed);
-            final List<GoldStandardGroup> goldGroups = toGoldGroups(rows);
-
-            int configIndex = 0;
-            for (final CostConfig config : grid) {
-                configIndex++;
-                final long patchCount = countDistinctPatchCommands(rows, config);
-                final double ratio = baselineCount == 0L ? 1.0d : (double) patchCount / (double) baselineCount;
-                final Viability viability = classifyViability(ratio);
-
-                if (viability == Viability.NOT_VIABLE || viability == Viability.MARGINAL) {
-                    lines.add(buildSummaryRow(language, descriptor, config, patchCount,
-                            baselineCount, ratio, viability));
-                } else {
-                    for (int percent = 10; percent <= 100; percent += 10) {
-                        final String row = evaluateScenario(language, descriptor, ranked, goldGroups,
-                                config, patchCount, baselineCount, ratio, viability, percent);
-                        lines.add(row);
-                    }
-                }
-
-                if (configIndex % 50 == 0) {
-                    System.out.printf(Locale.ROOT, "  %s: %d/%d configs processed%n",
-                            language, configIndex, grid.size());
-                }
+    /** Counts fields in an unquoted protocol CSV row. */
+    private static int fieldCount(final String row) {
+        int fields = 1;
+        for (int index = 0; index < row.length(); index++) {
+            if (row.charAt(index) == CSV_DELIMITER) {
+                fields++;
             }
-
-            System.out.printf(Locale.ROOT, "  Completed %s: %d configs%n", language, grid.size());
         }
+        return fields;
+    }
 
-        final Path parent = output.getParent();
-        if (parent != null) {
-            Files.createDirectories(parent);
+    /** Replaces the destination atomically when the filesystem supports it. */
+    private static void publishReport(final Path temporaryOutput, final Path output) throws IOException {
+        try {
+            Files.move(temporaryOutput, output, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+        } catch (final AtomicMoveNotSupportedException exception) {
+            Files.move(temporaryOutput, output, StandardCopyOption.REPLACE_EXISTING);
         }
-        Files.write(output, lines, StandardCharsets.UTF_8);
-        System.out.printf(Locale.ROOT, "Cost-sensitivity CSV: %s (%d data rows)%n",
-                output.toAbsolutePath(), lines.size() - 1);
     }
 
     /**
@@ -249,15 +349,20 @@ public final class EditCostSensitivityApplication {
      * @return immutable list of all combinations from {@link #EDIT_COST_VALUES}
      *         and {@link #MATCH_COST_VALUES}
      */
-    static List<CostConfig> generateGrid() {
+    @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
+    /* default */ static List<CostConfig> generateGrid() {
         final List<CostConfig> grid = new ArrayList<>(
                 EDIT_COST_VALUES.size() * EDIT_COST_VALUES.size()
                         * EDIT_COST_VALUES.size() * MATCH_COST_VALUES.size());
+        final Set<String> normalizedRatios = new HashSet<>();
         for (final int deleteCost : EDIT_COST_VALUES) {
             for (final int insertCost : EDIT_COST_VALUES) {
                 for (final int replaceCost : EDIT_COST_VALUES) {
                     for (final int matchCost : MATCH_COST_VALUES) {
-                        grid.add(new CostConfig(deleteCost, insertCost, replaceCost, matchCost));
+                        final CostConfig config = new CostConfig(deleteCost, insertCost, replaceCost, matchCost);
+                        if (normalizedRatios.add(config.normalizedRatioKey())) {
+                            grid.add(config);
+                        }
                     }
                 }
             }
@@ -269,11 +374,11 @@ public final class EditCostSensitivityApplication {
      * Counts distinct patch command strings generated for all word-stem pairs in
      * the supplied dictionary rows using the specified cost configuration.
      *
-     * @param rows   all dictionary rows
+     * @param rows   training dictionary rows for one knowledge level
      * @param config cost configuration
      * @return number of distinct patch command strings
      */
-    static long countDistinctPatchCommands(final List<DictionaryRow> rows, final CostConfig config) {
+    /* default */ static long countDistinctPatchCommands(final List<DictionaryRow> rows, final CostConfig config) {
         final PatchCommandEncoder encoder = config.buildEncoder();
         final Set<String> distinct = new HashSet<>();
         for (final DictionaryRow row : rows) {
@@ -286,37 +391,30 @@ public final class EditCostSensitivityApplication {
     }
 
     /**
-     * Evaluates one cost-configuration and training-knowledge scenario.
+     * Prepares all nested knowledge-level scenarios for one deterministic split.
+     * Baseline command counts are derived from the exact rows used to build each
+     * partial trie.
      *
-     * @param language        bundled language
-     * @param descriptor      model descriptor
-     * @param ranked          deterministically ranked dictionary rows
-     * @param goldGroups      gold groups derived from all dictionary rows
-     * @param config          cost configuration under evaluation
-     * @param patchCount      distinct patch command count for this configuration
-     * @param baselineCount   baseline distinct patch command count
-     * @param ratio           patch count ratio to baseline
-     * @param viability       viability classification
-     * @param percent         training knowledge percentage (10–100)
-     * @return one CSV data row without a trailing line separator
+     * @param ranked     deterministically ranked dictionary rows
+     * @param goldGroups gold groups for the complete dictionary
+     * @return immutable scenarios ordered from 10 to 100 percent knowledge
      */
-    @SuppressWarnings("PMD.ExcessiveParameterList")
-    private static String evaluateScenario(
-            final StemmerPatchTrieLoader.Language language,
-            final StemmerModelDescriptor descriptor,
-            final List<DictionaryRow> ranked,
-            final List<GoldStandardGroup> goldGroups,
-            final CostConfig config,
-            final long patchCount,
-            final long baselineCount,
-            final double ratio,
-            final Viability viability,
-            final int percent) {
+    /* default */ static List<ScenarioContext> createScenarioContexts(final List<DictionaryRow> ranked,
+            final List<GoldStandardGroup> goldGroups) {
+        final List<ScenarioContext> scenarios = new ArrayList<>(10);
+        for (int percent = 10; percent <= 100; percent += 10) {
+            scenarios.add(createScenarioContext(ranked, goldGroups, percent));
+        }
+        return List.copyOf(scenarios);
+    }
 
+    /** Creates one immutable knowledge-level scenario and its baseline measurements. */
+    @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
+    private static ScenarioContext createScenarioContext(final List<DictionaryRow> ranked,
+            final List<GoldStandardGroup> goldGroups, final int percent) {
         final int selectedCount = percent == 100 ? ranked.size()
                 : Math.max(1, (ranked.size() * percent + 50) / 100);
-        final List<DictionaryRow> selectedRows = ranked.subList(0, selectedCount);
-
+        final List<DictionaryRow> selectedRows = List.copyOf(ranked.subList(0, selectedCount));
         final Set<Integer> selectedLineNumbers = new HashSet<>(selectedCount * 2);
         final Set<String> trainingForms = new HashSet<>();
         for (final DictionaryRow row : selectedRows) {
@@ -327,108 +425,140 @@ public final class EditCostSensitivityApplication {
             }
         }
 
-        final FrequencyTrie<CompiledPatchCommand> trie = buildCompiledTrie(selectedRows, config);
+        final List<GoldStandardGroup> withheldGroups = new ArrayList<>(ranked.size() - selectedCount);
+        final List<GoldStandardGroup> unseenGroups = new ArrayList<>(ranked.size() - selectedCount);
+        long excludedOverlapOccurrences = 0L;
+        for (final DictionaryRow row : ranked) {
+            if (selectedLineNumbers.contains(row.lineNumber())) {
+                continue;
+            }
+            final List<String> forms = row.forms();
+            withheldGroups.add(new GoldStandardGroup(row.lineNumber(), forms));
+            final List<String> unseenForms = new ArrayList<>(forms.size());
+            for (final String form : forms) {
+                if (trainingForms.contains(form)) {
+                    excludedOverlapOccurrences++;
+                } else {
+                    unseenForms.add(form);
+                }
+            }
+            if (!unseenForms.isEmpty()) {
+                unseenGroups.add(new GoldStandardGroup(row.lineNumber(), unseenForms));
+            }
+        }
+
+        final long baselineGeneratedCount = countDistinctPatchCommands(selectedRows, BASELINE);
+        final FrequencyTrie<CompiledPatchCommand> baselineTrie = buildCompiledTrie(selectedRows, BASELINE);
+        final long baselineTrieCommandCount = FrequencyTrieBuilders.computeStatistics(baselineTrie)
+                .distinctValueCount();
+        return new ScenarioContext(percent, selectedRows, Set.copyOf(selectedLineNumbers), Set.copyOf(trainingForms),
+                goldGroups, List.copyOf(withheldGroups), List.copyOf(unseenGroups), excludedOverlapOccurrences,
+                baselineGeneratedCount, baselineTrieCommandCount);
+    }
+
+    /**
+     * Evaluates one cost-configuration and training-knowledge scenario.
+     *
+     * @param language        bundled language
+     * @param descriptor      model descriptor
+     * @param ranked          deterministically ranked dictionary rows
+     * @param config          cost configuration under evaluation
+     * @param seed            deterministic split seed
+     * @param scenario        prepared knowledge-level scenario
+     * @param provenance      immutable build and source provenance
+     * @return one CSV data row without a trailing line separator
+     */
+    private static String evaluateScenario(
+            final StemmerPatchTrieLoader.Language language,
+            final StemmerModelDescriptor descriptor,
+            final List<DictionaryRow> ranked,
+            final CostConfig config,
+            final long seed,
+            final ScenarioContext scenario,
+            final ExperimentProvenance provenance) {
+
+        final FrequencyTrie<CompiledPatchCommand> trie = buildCompiledTrie(scenario.selectedRows(), config);
+        final TrieStatistics trieStats = FrequencyTrieBuilders.computeStatistics(trie);
+        final long generatedCommandCount = countDistinctPatchCommands(scenario.selectedRows(), config);
+        final double ratio = scenario.baselineTrieCommandCount() == 0L ? 1.0d
+                : trieStats.distinctValueCount() / (double) scenario.baselineTrieCommandCount();
+        final Viability viability = classifyViability(ratio);
 
         Counts whole = Counts.empty();
         Counts withheld = Counts.empty();
         Counts unseen = Counts.empty();
-        long excluded = 0L;
 
         for (final DictionaryRow row : ranked) {
-            final boolean selected = selectedLineNumbers.contains(row.lineNumber());
+            final boolean selected = scenario.selectedLineNumbers().contains(row.lineNumber());
             final List<String> forms = row.forms();
             for (final String form : forms) {
                 final boolean correct = Objects.equals(row.stem(), stem(trie, form));
                 whole = whole.add(form, row.stem(), correct);
                 if (!selected) {
                     withheld = withheld.add(form, row.stem(), correct);
-                    if (trainingForms.contains(form)) {
-                        excluded++;
-                    } else {
+                    if (!scenario.trainingForms().contains(form)) {
                         unseen = unseen.add(form, row.stem(), correct);
                     }
                 }
             }
         }
 
-        final TrieStatistics trieStats = FrequencyTrieBuilders.computeStatistics(trie);
+        final QualityResult wholePairwise = computePairwiseMetrics(language, config, scenario.wholeGroups(), trie);
+        final QualityResult withheldPairwise = computePairwiseMetrics(language, config, scenario.withheldGroups(), trie);
+        final QualityResult unseenPairwise = computePairwiseMetrics(language, config, scenario.unseenGroups(), trie);
 
-        final QualityResult pairwise = computePairwiseMetrics(language, config, goldGroups, trie);
-
-        final StringBuilder sb = new StringBuilder(256);
-        appendCommonPrefix(sb, language, descriptor, config, patchCount, baselineCount, ratio, viability);
-        sb.append(',').append(percent);
-        sb.append(',').append(selectedCount);
-        sb.append(',').append(ranked.size());
-        sb.append(',').append(ranked.size() - selectedCount);
-        sb.append(',').append(excluded);
-        sb.append(',').append(whole.csv());
-        sb.append(',').append(withheld.csv());
-        sb.append(',').append(unseen.csv());
+        final StringBuilder sb = new StringBuilder(1024);
+        appendIdentity(sb, language, descriptor, config, seed, provenance);
+        sb.append(',').append(scenario.percent())
+                .append(',').append(scenario.selectedRows().size())
+                .append(',').append(ranked.size())
+                .append(',').append(ranked.size() - scenario.selectedRows().size())
+                .append(',').append(scenario.excludedOverlapOccurrences())
+                .append(',').append(generatedCommandCount)
+                .append(',').append(scenario.baselineGeneratedCount())
+                .append(',').append(trieStats.distinctValueCount())
+                .append(',').append(scenario.baselineTrieCommandCount())
+                .append(',').append(ratio)
+                .append(',').append(viability.name())
+                .append(',').append(whole.csv())
+                .append(',').append(withheld.csv())
+                .append(',').append(unseen.csv());
         appendTrieStats(sb, trieStats);
-        appendPairwiseMetrics(sb, pairwise);
+        appendPairwiseMetrics(sb, wholePairwise);
+        appendPairwiseMetrics(sb, withheldPairwise);
+        appendPairwiseMetrics(sb, unseenPairwise);
         return sb.toString();
     }
 
     /**
-     * Builds a summary-only row for a marginal or non-viable configuration.
+     * Appends experiment provenance, model identity, seed, and cost configuration.
      *
-     * @param language      bundled language
-     * @param descriptor    model descriptor
-     * @param config        cost configuration
-     * @param patchCount    distinct patch command count for this configuration
-     * @param baselineCount baseline distinct patch command count
-     * @param ratio         patch count ratio
-     * @param viability     viability classification
-     * @return CSV row string with empty evaluation fields
+     * @param builder    destination CSV row builder
+     * @param language   bundled language
+     * @param descriptor descriptor of the evaluated model
+     * @param config     evaluated cost configuration
+     * @param seed       deterministic split seed
+     * @param provenance source and generator provenance
      */
-    private static String buildSummaryRow(
-            final StemmerPatchTrieLoader.Language language,
-            final StemmerModelDescriptor descriptor,
-            final CostConfig config,
-            final long patchCount,
-            final long baselineCount,
-            final double ratio,
-            final Viability viability) {
-        final StringBuilder sb = new StringBuilder(128);
-        appendCommonPrefix(sb, language, descriptor, config, patchCount, baselineCount, ratio, viability);
-        // All per-scenario fields are empty for configurations that were not evaluated.
-        final int emptyFields = HEADER_FIELD_COUNT - COMMON_PREFIX_FIELD_COUNT;
-        for (int index = 0; index < emptyFields; index++) {
-            sb.append(',');
-        }
-        return sb.toString();
-    }
-
-    /**
-     * Appends the common prefix columns shared by all CSV rows.
-     *
-     * @param builder       destination CSV row builder
-     * @param language      bundled language
-     * @param descriptor    descriptor of the evaluated model
-     * @param config        evaluated cost configuration
-     * @param patchCount    distinct patch command count for the configuration
-     * @param baselineCount distinct patch command count for the baseline
-     * @param ratio         ratio of {@code patchCount} to {@code baselineCount}
-     * @param viability     viability classification of the configuration
-     */
-    private static void appendCommonPrefix(final StringBuilder builder,
+    private static void appendIdentity(final StringBuilder builder,
             final StemmerPatchTrieLoader.Language language,
             final StemmerModelDescriptor descriptor, final CostConfig config,
-            final long patchCount, final long baselineCount, final double ratio, final Viability viability) {
-        builder.append(PROTOCOL_VERSION);
-        builder.append(',').append(language.name());
-        builder.append(',').append(descriptor.id());
-        builder.append(',').append(descriptor.version());
-        builder.append(',').append(config.deleteCost());
-        builder.append(',').append(config.insertCost());
-        builder.append(',').append(config.replaceCost());
-        builder.append(',').append(config.matchCost());
-        builder.append(',').append(config.label());
-        builder.append(',').append(patchCount);
-        builder.append(',').append(baselineCount);
-        builder.append(',').append(String.format(Locale.ROOT, "%.6f", ratio));
-        builder.append(',').append(viability.name());
+            final long seed, final ExperimentProvenance provenance) {
+        builder.append(PROTOCOL_VERSION)
+                .append(',').append(provenance.radixorJavaVersion())
+                .append(',').append(provenance.sourceRevision())
+                .append(',').append(provenance.sourceState())
+                .append(',').append(provenance.generatorSha256())
+                .append(',').append(language.name())
+                .append(',').append(descriptor.id())
+                .append(',').append(descriptor.version())
+                .append(',').append(descriptor.sha256())
+                .append(',').append(Long.toUnsignedString(seed))
+                .append(',').append(config.deleteCost())
+                .append(',').append(config.insertCost())
+                .append(',').append(config.replaceCost())
+                .append(',').append(config.matchCost())
+                .append(',').append(config.label());
     }
 
     /**
@@ -438,10 +568,16 @@ public final class EditCostSensitivityApplication {
      * @param stats   structural statistics to append
      */
     private static void appendTrieStats(final StringBuilder builder, final TrieStatistics stats) {
-        builder.append(',').append(stats.internalNodeCount());
-        builder.append(',').append(stats.leafNodeCount());
-        builder.append(',').append(stats.longestPath());
-        builder.append(',').append(String.format(Locale.ROOT, "%.6f", stats.averageLeafDepth()));
+        builder.append(',').append(stats.internalNodeCount())
+                .append(',').append(stats.leafNodeCount())
+                .append(',').append(stats.edgeCount())
+                .append(',').append(stats.acceptingLeafNodeCount())
+                .append(',').append(stats.valueReferenceCount())
+                .append(',').append(stats.logicalLeafPathCount())
+                .append(',').append(stats.longestPath())
+                .append(',').append(stats.averageLeafDepth())
+                .append(',').append(stats.denseLookupNodeCount())
+                .append(',').append(stats.denseTableSlotCount());
     }
 
     /**
@@ -450,41 +586,40 @@ public final class EditCostSensitivityApplication {
      * @param builder  destination CSV row builder
      * @param pairwise evaluated pairwise quality result
      */
-    @SuppressWarnings("PMD.LinguisticNaming")
     private static void appendPairwiseMetrics(final StringBuilder builder, final QualityResult pairwise) {
         final PairwiseMetrics pm = pairwise.pairwiseMetrics();
-        builder.append(',').append(pm.truePositivePairs());
-        builder.append(',').append(pm.falsePositivePairs());
-        builder.append(',').append(pm.falseNegativePairs());
-        builder.append(',').append(pm.trueNegativePairs());
-        builder.append(',').append(pairwise.overErrorPairs());
-        builder.append(',').append(pairwise.overPossiblePairs());
-        builder.append(',').append(formatOptional(pairwise.overPercentage()));
-        builder.append(',').append(pairwise.underErrorPairs());
-        builder.append(',').append(pairwise.underPossiblePairs());
-        builder.append(',').append(formatOptional(pairwise.underPercentage()));
-        builder.append(',').append(formatOptional(pm.precision()));
-        builder.append(',').append(formatOptional(pm.recall()));
-        builder.append(',').append(formatOptional(pm.specificity()));
-        builder.append(',').append(formatOptional(pm.balancedAccuracy()));
-        builder.append(',').append(formatOptional(pm.f05()));
-        builder.append(',').append(formatOptional(pm.f1()));
-        builder.append(',').append(formatOptional(pm.f2()));
-        builder.append(',').append(formatOptional(pm.jaccard()));
-        builder.append(',').append(formatOptional(pm.fowlkesMallows()));
-        builder.append(',').append(formatOptional(pm.matthewsCorrelationCoefficient()));
-        builder.append(',').append(formatOptional(pm.errorRate()));
+        builder.append(',').append(pm.truePositivePairs())
+                .append(',').append(pm.falsePositivePairs())
+                .append(',').append(pm.falseNegativePairs())
+                .append(',').append(pm.trueNegativePairs())
+                .append(',').append(pairwise.overErrorPairs())
+                .append(',').append(pairwise.overPossiblePairs())
+                .append(',').append(formatOptional(pairwise.overPercentage()))
+                .append(',').append(pairwise.underErrorPairs())
+                .append(',').append(pairwise.underPossiblePairs())
+                .append(',').append(formatOptional(pairwise.underPercentage()))
+                .append(',').append(formatOptional(pm.precision()))
+                .append(',').append(formatOptional(pm.recall()))
+                .append(',').append(formatOptional(pm.specificity()))
+                .append(',').append(formatOptional(pm.balancedAccuracy()))
+                .append(',').append(formatOptional(pm.f05()))
+                .append(',').append(formatOptional(pm.f1()))
+                .append(',').append(formatOptional(pm.f2()))
+                .append(',').append(formatOptional(pm.jaccard()))
+                .append(',').append(formatOptional(pm.fowlkesMallows()))
+                .append(',').append(formatOptional(pm.matthewsCorrelationCoefficient()))
+                .append(',').append(formatOptional(pm.errorRate()));
     }
 
     /**
      * Formats an optional metric value for CSV output.
      *
      * @param value optional value
-     * @return decimal text with twelve fractional digits, or an empty string
-     *         when the metric is undefined
+     * @return unrounded decimal text, or an empty string when the metric is
+     *         undefined
      */
     private static String formatOptional(final OptionalDouble value) {
-        return value.isEmpty() ? "" : String.format(Locale.ROOT, "%.12f", value.getAsDouble());
+        return value.isEmpty() ? "" : Double.toString(value.getAsDouble());
     }
 
     /**
@@ -494,7 +629,7 @@ public final class EditCostSensitivityApplication {
      * @param config cost configuration
      * @return immutable compiled trie containing pre-compiled patch commands
      */
-    static FrequencyTrie<CompiledPatchCommand> buildCompiledTrie(final List<DictionaryRow> rows,
+    /* default */ static FrequencyTrie<CompiledPatchCommand> buildCompiledTrie(final List<DictionaryRow> rows,
             final CostConfig config) {
         final FrequencyTrie.Builder<String> builder = new FrequencyTrie.Builder<>(String[]::new,
                 REDUCTION_SETTINGS, DIRECTION);
@@ -515,12 +650,12 @@ public final class EditCostSensitivityApplication {
     }
 
     /**
-     * Computes pairwise stemming-quality metrics using all gold groups and the
-     * compiled trie as the stemmer under evaluation.
+     * Computes pairwise stemming-quality metrics for one explicitly supplied
+     * evaluation scope.
      *
      * @param language   bundled language (used as label)
      * @param config     cost configuration (used as stemmer name)
-     * @param goldGroups gold-standard groups derived from the full dictionary
+     * @param goldGroups gold-standard groups in the requested evaluation scope
      * @param trie       compiled trie under evaluation
      * @return pairwise quality result
      */
@@ -540,7 +675,7 @@ public final class EditCostSensitivityApplication {
      * @param token input word form
      * @return stemmed form, or the original token when no patch is stored
      */
-    static String stem(final FrequencyTrie<CompiledPatchCommand> trie, final String token) {
+    /* default */ static String stem(final FrequencyTrie<CompiledPatchCommand> trie, final String token) {
         final CompiledPatchCommand patch = trie.getNormalizedString(token);
         return patch == null || patch.preservesAllSources() ? token : patch.apply(token);
     }
@@ -551,12 +686,47 @@ public final class EditCostSensitivityApplication {
      * @param rows all dictionary rows
      * @return immutable list of gold-standard groups in row order
      */
-    static List<GoldStandardGroup> toGoldGroups(final List<DictionaryRow> rows) {
+    /* default */ static List<GoldStandardGroup> toGoldGroups(final List<DictionaryRow> rows) {
         final List<GoldStandardGroup> groups = new ArrayList<>(rows.size());
         for (final DictionaryRow row : rows) {
             groups.add(new GoldStandardGroup(row.lineNumber(), row.forms()));
         }
         return List.copyOf(groups);
+    }
+
+    /**
+     * Verifies that the baseline full-knowledge experiment reproduces the
+     * corresponding production model for every dictionary form.
+     *
+     * @param language bundled language
+     * @param rows     complete parsed dictionary
+     * @throws IOException if the production model cannot be loaded
+     * @throws IllegalStateException if any experiment output differs from production
+     */
+    private static void verifyProductionEquivalence(final StemmerPatchTrieLoader.Language language,
+            final List<DictionaryRow> rows) throws IOException {
+        final FrequencyTrie<CompiledPatchCommand> experiment = buildCompiledTrie(rows, BASELINE);
+        final FrequencyTrie<CompiledPatchCommand> production = StemmerPatchTrieLoader.loadCompiled(language, true,
+                ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS);
+        for (final DictionaryRow row : rows) {
+            verifyEquivalentStem(language, experiment, production, row.stem());
+            for (final String variant : row.variants()) {
+                verifyEquivalentStem(language, experiment, production, variant);
+            }
+        }
+    }
+
+    /** Verifies one baseline experiment output against the production trie. */
+    private static void verifyEquivalentStem(final StemmerPatchTrieLoader.Language language,
+            final FrequencyTrie<CompiledPatchCommand> experiment,
+            final FrequencyTrie<CompiledPatchCommand> production, final String form) {
+        final String experimentStem = stem(experiment, form);
+        final String productionStem = stem(production, form);
+        if (!Objects.equals(experimentStem, productionStem)) {
+            throw new IllegalStateException("Full-coverage baseline differs from production for " + language
+                    + " form '" + form + "': experiment produced '" + experimentStem
+                    + "' but production produced '" + productionStem + "'.");
+        }
     }
 
     /**
@@ -568,7 +738,8 @@ public final class EditCostSensitivityApplication {
      * @return mutable list containing the same row instances in deterministic
      *         rank order
      */
-    static List<DictionaryRow> rankRows(final List<DictionaryRow> rows, final String modelId, final long seed) {
+    /* default */ static List<DictionaryRow> rankRows(final List<DictionaryRow> rows, final String modelId,
+            final long seed) {
         final List<DictionaryRow> ranked = new ArrayList<>(rows);
         ranked.sort(Comparator.comparingLong((DictionaryRow row) -> rank(row, modelId, seed))
                 .thenComparingInt(DictionaryRow::lineNumber));
@@ -615,13 +786,34 @@ public final class EditCostSensitivityApplication {
         return result;
     }
 
+    /** Calculates a lowercase SHA-256 digest for report provenance. */
+    private static String sha256(final byte[] content) {
+        try {
+            return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(content));
+        } catch (final NoSuchAlgorithmException exception) {
+            throw new IllegalStateException("SHA-256 is unavailable.", exception);
+        }
+    }
+
+    /** Validates and normalizes one required provenance label. */
+    private static String requireText(final String value, final String label) {
+        if (value == null || value.isBlank()) {
+            throw new IllegalArgumentException(label + " must not be blank.");
+        }
+        final String result = value.strip();
+        if (result.indexOf(',') >= 0 || result.indexOf('\n') >= 0 || result.indexOf('\r') >= 0) {
+            throw new IllegalArgumentException(label + " must not contain CSV delimiters or line separators.");
+        }
+        return result;
+    }
+
     /**
      * Classifies a patch-command-count ratio into a viability category.
      *
      * @param ratio ratio of candidate patch count to baseline patch count
      * @return viability classification
      */
-    static Viability classifyViability(final double ratio) {
+    /* default */ static Viability classifyViability(final double ratio) {
         if (ratio > NOT_VIABLE_THRESHOLD) {
             return Viability.NOT_VIABLE;
         }
@@ -640,15 +832,10 @@ public final class EditCostSensitivityApplication {
      * @throws IllegalStateException if the resource is absent, empty, or fails
      *                               checksum verification
      */
-    static List<DictionaryRow> readRows(final StemmerModelDescriptor descriptor) throws IOException {
-        final InputStream resource = StemmerPatchTrieLoader.class.getClassLoader()
-                .getResourceAsStream(descriptor.resource());
-        if (resource == null) {
-            throw new IllegalStateException("Missing bundled dictionary resource " + descriptor.resource() + '.');
-        }
+    /* default */ static List<DictionaryRow> readRows(final StemmerModelDescriptor descriptor) throws IOException {
         final byte[] compressed;
-        try (InputStream input = resource) {
-            compressed = input.readAllBytes();
+        try (InputStream resource = openDictionaryResource(descriptor)) {
+            compressed = resource.readAllBytes();
         }
         DictionaryGeneralizationApplication.verifySha256(compressed, descriptor.sha256(), descriptor.resource());
         final List<DictionaryRow> rows = new ArrayList<>();
@@ -665,16 +852,105 @@ public final class EditCostSensitivityApplication {
         return List.copyOf(rows);
     }
 
+    /** Opens one dictionary resource through the experiment context class loader. */
+    private static InputStream openDictionaryResource(final StemmerModelDescriptor descriptor) {
+        final ClassLoader classLoader = Objects.requireNonNull(Thread.currentThread().getContextClassLoader(),
+                "context class loader");
+        final InputStream resource = classLoader.getResourceAsStream(descriptor.resource());
+        if (resource == null) {
+            throw new IllegalStateException("Missing bundled dictionary resource " + descriptor.resource() + '.');
+        }
+        return resource;
+    }
+
     /**
      * Viability classification for one cost configuration.
      */
-    enum Viability {
+    /* default */ enum Viability {
         /** Patch command count is within acceptable range (&le;5&times; baseline). */
         VIABLE,
-        /** Patch command count is between 5&times; and 10&times; baseline and is not evaluated. */
+        /** Patch command count is between 5&times; and 10&times; baseline. */
         MARGINAL,
-        /** Patch command count exceeds 10&times; baseline — not viable. */
+        /** Patch command count exceeds 10&times; baseline. */
         NOT_VIABLE
+    }
+
+    /**
+     * Immutable provenance attached to every report row.
+     *
+     * @param radixorJavaVersion evaluated Radixor Java version
+     * @param sourceRevision     exact source revision
+     * @param sourceState        source state such as {@code clean} or {@code dirty}
+     * @param generatorSha256    SHA-256 of this experiment application's source
+     */
+    private record ExperimentProvenance(String radixorJavaVersion, String sourceRevision,
+            String sourceState, String generatorSha256) { }
+
+    /**
+     * Immutable validated command-line configuration.
+     *
+     * @param output destination CSV path
+     * @param provenance source and generator provenance
+     * @param seeds deterministic split seeds
+     * @param languageFilter optional exact language name
+     */
+    private record RunOptions(Path output, ExperimentProvenance provenance, long[] seeds, String languageFilter) {
+
+        /** Validates and defensively snapshots command-line options. */
+        RunOptions {
+            Objects.requireNonNull(output, "output");
+            Objects.requireNonNull(provenance, "provenance");
+            seeds = Objects.requireNonNull(seeds, "seeds").clone();
+            if (seeds.length == 0) {
+                throw new IllegalArgumentException("At least one deterministic seed is required.");
+            }
+        }
+
+        /** Returns a caller-owned copy of the configured seeds. */
+        @Override
+        public long[] seeds() {
+            return this.seeds.clone();
+        }
+    }
+
+    /**
+     * Immutable data split and baseline measurements for one knowledge level.
+     *
+     * @param percent requested training knowledge percentage
+     * @param selectedRows rows used to build the partial trie
+     * @param selectedLineNumbers source line numbers represented in training
+     * @param trainingForms normalized surface forms observed in training
+     * @param wholeGroups complete dictionary gold-standard groups
+     * @param withheldGroups gold-standard groups whose rows were withheld
+     * @param unseenGroups withheld groups after removing training-surface overlaps
+     * @param excludedOverlapOccurrences withheld occurrences excluded from unseen scope
+     * @param baselineGeneratedCount distinct commands generated from the selected
+     *                               rows by baseline costs
+     * @param baselineTrieCommandCount distinct commands physically retained by
+     *                                 the baseline partial trie
+     */
+    /* default */ record ScenarioContext(int percent, List<DictionaryRow> selectedRows,
+            Set<Integer> selectedLineNumbers, Set<String> trainingForms,
+            List<GoldStandardGroup> wholeGroups, List<GoldStandardGroup> withheldGroups,
+            List<GoldStandardGroup> unseenGroups, long excludedOverlapOccurrences,
+            long baselineGeneratedCount, long baselineTrieCommandCount) {
+
+        /** Validates and defensively snapshots one prepared scenario. */
+        ScenarioContext {
+            if (percent < 10 || percent > 100 || percent % 10 != 0) {
+                throw new IllegalArgumentException("percent must be a multiple of ten from 10 through 100.");
+            }
+            selectedRows = List.copyOf(selectedRows);
+            selectedLineNumbers = Set.copyOf(selectedLineNumbers);
+            trainingForms = Set.copyOf(trainingForms);
+            wholeGroups = List.copyOf(wholeGroups);
+            withheldGroups = List.copyOf(withheldGroups);
+            unseenGroups = List.copyOf(unseenGroups);
+            if (excludedOverlapOccurrences < 0L || baselineGeneratedCount < 0L
+                    || baselineTrieCommandCount < 0L) {
+                throw new IllegalArgumentException("Scenario counts must not be negative.");
+            }
+        }
     }
 
     /**
@@ -685,7 +961,7 @@ public final class EditCostSensitivityApplication {
      * @param replaceCost cost of one replace operation
      * @param matchCost   cost of one match (skip) operation
      */
-    record CostConfig(int deleteCost, int insertCost, int replaceCost, int matchCost) {
+    /* default */ record CostConfig(int deleteCost, int insertCost, int replaceCost, int matchCost) {
 
         /**
          * Creates a validated cost configuration.
@@ -707,8 +983,23 @@ public final class EditCostSensitivityApplication {
          *
          * @return label string like {@code D1I1R1M0}
          */
-        String label() {
+        /* default */ String label() {
             return "D" + deleteCost + "I" + insertCost + "R" + replaceCost + "M" + matchCost;
+        }
+
+        /**
+         * Returns a scale-normalized cost-ratio key. Multiplying all operation
+         * costs by one positive integer produces the same key and cannot change
+         * the encoder's minimum-cost decisions.
+         *
+         * @return colon-delimited normalized cost tuple
+         */
+        /* default */ String normalizedRatioKey() {
+            final int divisor = Math.max(1, greatestCommonDivisor(
+                    greatestCommonDivisor(deleteCost, insertCost),
+                    greatestCommonDivisor(replaceCost, matchCost)));
+            return deleteCost / divisor + ":" + insertCost / divisor + ":"
+                    + replaceCost / divisor + ":" + matchCost / divisor;
         }
 
         /**
@@ -716,7 +1007,7 @@ public final class EditCostSensitivityApplication {
          *
          * @return configured encoder
          */
-        PatchCommandEncoder buildEncoder() {
+        /* default */ PatchCommandEncoder buildEncoder() {
             return PatchCommandEncoder.builder()
                     .traversalDirection(DIRECTION)
                     .deleteCost(deleteCost)
@@ -724,6 +1015,18 @@ public final class EditCostSensitivityApplication {
                     .replaceCost(replaceCost)
                     .matchCost(matchCost)
                     .build();
+        }
+
+        /** Calculates a non-negative greatest common divisor. */
+        private static int greatestCommonDivisor(final int first, final int second) {
+            int left = first;
+            int right = second;
+            while (right != 0) {
+                final int remainder = left % right;
+                left = right;
+                right = remainder;
+            }
+            return left;
         }
     }
 
@@ -734,7 +1037,7 @@ public final class EditCostSensitivityApplication {
      * @param stem       canonical stem
      * @param variants   all surface forms that should map to this stem
      */
-    record DictionaryRow(int lineNumber, String stem, String[] variants) {
+    /* default */ record DictionaryRow(int lineNumber, String stem, String[] variants) {
 
         DictionaryRow {
             Objects.requireNonNull(stem, "stem");
@@ -760,7 +1063,7 @@ public final class EditCostSensitivityApplication {
          * @return caller-owned list containing the stem and variants in source
          *         order
          */
-        List<String> forms() {
+        /* default */ List<String> forms() {
             final List<String> result = new ArrayList<>(this.variants.length + 1);
             result.add(this.stem);
             for (final String variant : this.variants) {
@@ -782,7 +1085,7 @@ public final class EditCostSensitivityApplication {
      *                       stem (root/stem forms themselves)
      * @param rootTotal      total count of forms that equal their stem
      */
-    record Counts(long correct, long total, long changedCorrect, long changedTotal,
+    /* default */ record Counts(long correct, long total, long changedCorrect, long changedTotal,
             long rootCorrect, long rootTotal) {
 
         /**
@@ -790,7 +1093,7 @@ public final class EditCostSensitivityApplication {
          *
          * @return empty counter value
          */
-        static Counts empty() {
+        /* default */ static Counts empty() {
             return new Counts(0L, 0L, 0L, 0L, 0L, 0L);
         }
 
@@ -802,15 +1105,16 @@ public final class EditCostSensitivityApplication {
          * @param exact whether the produced stem exactly matched {@code stem}
          * @return new counters including the supplied observation
          */
-        Counts add(final String token, final String stem, final boolean exact) {
-            final boolean changed = !Objects.equals(token, stem);
+        /* default */ Counts add(final String token, final String stem, final boolean exact) {
+            final boolean rootForm = Objects.equals(token, stem);
+            final boolean changed = !rootForm;
             return new Counts(
                     this.correct + (exact ? 1L : 0L),
                     this.total + 1L,
                     this.changedCorrect + (changed && exact ? 1L : 0L),
                     this.changedTotal + (changed ? 1L : 0L),
-                    this.rootCorrect + (!changed && exact ? 1L : 0L),
-                    this.rootTotal + (!changed ? 1L : 0L));
+                    this.rootCorrect + (rootForm && exact ? 1L : 0L),
+                    this.rootTotal + (rootForm ? 1L : 0L));
         }
 
         /**
@@ -818,7 +1122,7 @@ public final class EditCostSensitivityApplication {
          *
          * @return comma-separated counter values without a trailing separator
          */
-        String csv() {
+        /* default */ String csv() {
             return this.correct + "," + this.total + ","
                     + this.changedCorrect + "," + this.changedTotal + ","
                     + this.rootCorrect + "," + this.rootTotal;

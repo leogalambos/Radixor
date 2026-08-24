@@ -36,10 +36,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.egothor.stemmer.CompiledPatchCommand;
 import org.egothor.stemmer.FrequencyTrie;
+import org.egothor.stemmer.PatchCommandEncoder;
 import org.egothor.stemmer.benchmark.generalization.EditCostSensitivityApplication.CostConfig;
 import org.egothor.stemmer.benchmark.generalization.EditCostSensitivityApplication.DictionaryRow;
 import org.egothor.stemmer.benchmark.generalization.EditCostSensitivityApplication.Viability;
@@ -67,11 +70,18 @@ final class EditCostSensitivityApplicationTest {
     @DisplayName("generateGrid should produce the expected number of cost combinations")
     void generateGridShouldProduceExpectedCombinations() {
         final List<CostConfig> grid = EditCostSensitivityApplication.generateGrid();
-        final int expected = EditCostSensitivityApplication.EDIT_COST_VALUES.size()
+        final int cartesianProductSize = EditCostSensitivityApplication.EDIT_COST_VALUES.size()
                 * EditCostSensitivityApplication.EDIT_COST_VALUES.size()
                 * EditCostSensitivityApplication.EDIT_COST_VALUES.size()
                 * EditCostSensitivityApplication.MATCH_COST_VALUES.size();
-        assertEquals(expected, grid.size(), "The grid must contain every Cartesian-product combination.");
+        assertEquals(234, grid.size(), "The normalized grid size is part of the experiment protocol.");
+        assertTrue(grid.size() < cartesianProductSize,
+                "The grid must remove configurations that differ only by a common positive scale.");
+        final Set<String> normalizedKeys = new HashSet<>();
+        for (final CostConfig config : grid) {
+            assertTrue(normalizedKeys.add(config.normalizedRatioKey()),
+                    "Every normalized cost ratio must occur exactly once.");
+        }
     }
 
     @Test
@@ -194,22 +204,94 @@ final class EditCostSensitivityApplicationTest {
     }
 
     @Test
+    @DisplayName("scaled operation costs should have the same normalized ratio and commands")
+    void scaledOperationCostsShouldBeEquivalent() {
+        final CostConfig unit = new CostConfig(1, 1, 1, 0);
+        final CostConfig scaled = new CostConfig(10, 10, 10, 0);
+        assertEquals(unit.normalizedRatioKey(), scaled.normalizedRatioKey(),
+                "A common positive scale must not create a distinct search point.");
+        assertEquals(EditCostSensitivityApplication.countDistinctPatchCommands(SAMPLE_ROWS, unit),
+                EditCostSensitivityApplication.countDistinctPatchCommands(SAMPLE_ROWS, scaled),
+                "Scaled costs must generate the same command vocabulary.");
+        final PatchCommandEncoder unitEncoder = unit.buildEncoder();
+        final PatchCommandEncoder scaledEncoder = scaled.buildEncoder();
+        for (final DictionaryRow row : SAMPLE_ROWS) {
+            for (final String form : row.forms()) {
+                assertEquals(unitEncoder.encode(form, row.stem()), scaledEncoder.encode(form, row.stem()),
+                        "A common positive scale must preserve every generated command.");
+            }
+        }
+    }
+
+    @Test
+    @DisplayName("scenario command baselines should use only selected training rows")
+    void scenarioCommandBaselinesShouldUseSelectedRows() {
+        final List<GoldStandardGroup> groups = EditCostSensitivityApplication.toGoldGroups(SAMPLE_ROWS);
+        final List<EditCostSensitivityApplication.ScenarioContext> scenarios =
+                EditCostSensitivityApplication.createScenarioContexts(SAMPLE_ROWS, groups);
+        final EditCostSensitivityApplication.ScenarioContext tenPercent = scenarios.get(0);
+        final EditCostSensitivityApplication.ScenarioContext fullKnowledge = scenarios.get(9);
+
+        assertEquals(1, tenPercent.selectedRows().size(),
+                "The smallest scenario must contain only its rounded training-row selection.");
+        assertEquals(EditCostSensitivityApplication.countDistinctPatchCommands(
+                tenPercent.selectedRows(), EditCostSensitivityApplication.BASELINE),
+                tenPercent.baselineGeneratedCount(),
+                "The generated-command baseline must be scoped to selected rows.");
+        assertTrue(tenPercent.baselineGeneratedCount()
+                < fullKnowledge.baselineGeneratedCount(),
+                "The synthetic fixture must distinguish partial and full-dictionary command vocabularies.");
+        final FrequencyTrie<CompiledPatchCommand> partialTrie = EditCostSensitivityApplication.buildCompiledTrie(
+                tenPercent.selectedRows(), EditCostSensitivityApplication.BASELINE);
+        assertEquals(org.egothor.stemmer.FrequencyTrieBuilders.computeStatistics(partialTrie).distinctValueCount(),
+                tenPercent.baselineTrieCommandCount(),
+                "The trie-command baseline must describe the reduced partial trie.");
+        assertEquals(SAMPLE_ROWS.size(), fullKnowledge.selectedRows().size(),
+                "The 100-percent scenario must contain the complete dictionary.");
+    }
+
+    @Test
+    @DisplayName("unseen pairwise scope should exclude training-surface overlaps")
+    void unseenPairwiseScopeShouldExcludeTrainingSurfaceOverlaps() {
+        final List<DictionaryRow> overlappingRows = List.of(
+                new DictionaryRow(1, "first", new String[] { "shared", "firsts" }),
+                new DictionaryRow(2, "second", new String[] { "shared", "seconds" }));
+        final List<EditCostSensitivityApplication.ScenarioContext> scenarios =
+                EditCostSensitivityApplication.createScenarioContexts(overlappingRows,
+                        EditCostSensitivityApplication.toGoldGroups(overlappingRows));
+        final EditCostSensitivityApplication.ScenarioContext tenPercent = scenarios.get(0);
+
+        assertEquals(1L, tenPercent.excludedOverlapOccurrences(),
+                "The withheld occurrence observed in training must be excluded from unseen evaluation.");
+        assertTrue(tenPercent.withheldGroups().get(0).forms().contains("shared"),
+                "The broader withheld scope must retain the overlapping surface.");
+        assertTrue(!tenPercent.unseenGroups().get(0).forms().contains("shared"),
+                "The unseen scope must not retain a surface observed in training.");
+    }
+
+    @Test
     @DisplayName("header should contain expected key column names")
     void headerShouldContainExpectedColumnNames() {
         assertTrue(EditCostSensitivityApplication.HEADER.contains("delete_cost"),
                 "The report schema must identify delete costs.");
-        assertTrue(EditCostSensitivityApplication.HEADER.contains("patch_command_count"),
-                "The report schema must expose patch-command counts.");
+        assertTrue(EditCostSensitivityApplication.HEADER.contains("trie_distinct_patch_commands"),
+                "The report schema must expose commands physically retained by each partial trie.");
+        assertTrue(EditCostSensitivityApplication.HEADER.contains("seed"),
+                "The report schema must identify the deterministic split seed.");
+        assertTrue(EditCostSensitivityApplication.HEADER.contains("model_sha256"),
+                "The report schema must identify the exact evaluated model.");
         assertTrue(EditCostSensitivityApplication.HEADER.contains("viability"),
                 "The report schema must expose viability.");
         assertTrue(EditCostSensitivityApplication.HEADER.contains("unseen_correct"),
                 "The report schema must expose unseen-form correctness.");
         assertTrue(EditCostSensitivityApplication.HEADER.contains("trie_internal_nodes"),
                 "The report schema must expose trie structure.");
-        assertTrue(EditCostSensitivityApplication.HEADER.contains("over_error_pairs"),
-                "The report schema must expose over-stemming errors.");
-        assertTrue(EditCostSensitivityApplication.HEADER.contains("mcc"),
-                "The report schema must expose Matthews correlation.");
+        assertTrue(EditCostSensitivityApplication.HEADER.contains("whole_over_error_pairs"),
+                "The report schema must expose whole-dictionary over-stemming errors.");
+        assertTrue(EditCostSensitivityApplication.HEADER.contains("withheld_mcc"),
+                "The report schema must expose withheld-family Matthews correlation.");
+        assertTrue(EditCostSensitivityApplication.HEADER.contains("unseen_mcc"),
+                "The report schema must expose unseen-surface Matthews correlation.");
     }
 
     @Test

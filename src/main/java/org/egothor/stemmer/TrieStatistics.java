@@ -35,11 +35,10 @@ package org.egothor.stemmer;
  * {@link FrequencyTrie}.
  *
  * <p>
- * Statistics are computed over unique node instances in the compiled trie
- * graph. Shared nodes &mdash; reachable through multiple paths after reduction
- * &mdash; are counted once, at the depth at which they are first encountered
- * during traversal. Consequently, path measurements describe that unique-node
- * traversal rather than every logical path through a reduced graph.
+ * Structural storage statistics are computed over unique node instances in the
+ * compiled trie graph. Logical path statistics account for every distinct
+ * root-to-leaf path, including paths that converge on a shared node after
+ * subtree reduction.
  * </p>
  *
  * <p>This value type is immutable and thread-safe.</p>
@@ -47,12 +46,25 @@ package org.egothor.stemmer;
  * @param internalNodeCount number of nodes that have at least one outgoing
  *                          child edge
  * @param leafNodeCount     number of nodes with no outgoing child edges
- * @param longestPath       maximum discovery depth of a unique leaf node,
- *                          measured in edges from the root
- * @param averageLeafDepth  arithmetic mean of the unique leaf discovery depths,
- *                          or {@code 0.0} when there are no leaves
+ * @param edgeCount         number of outgoing edges stored by unique nodes
+ * @param acceptingLeafNodeCount number of unique contracted leaves accepting
+ *                               any remaining lookup input
+ * @param valueReferenceCount number of value references stored by unique nodes
+ * @param distinctValueCount number of distinct stored values according to
+ *                           {@link Object#equals(Object)}
+ * @param logicalLeafPathCount number of distinct root-to-leaf paths represented
+ *                             by the compiled graph
+ * @param longestPath       maximum root-to-leaf path length in edges
+ * @param averageLeafDepth  arithmetic mean root-to-leaf path length, weighted
+ *                          by distinct logical paths, or {@code 0.0} when there
+ *                          are no leaves
+ * @param denseLookupNodeCount number of unique nodes using a dense child table
+ * @param denseTableSlotCount total number of dense child-table slots
  */
-public record TrieStatistics(long internalNodeCount, long leafNodeCount, long longestPath, double averageLeafDepth) {
+public record TrieStatistics(long internalNodeCount, long leafNodeCount, long edgeCount,
+        long acceptingLeafNodeCount, long valueReferenceCount, long distinctValueCount,
+        long logicalLeafPathCount, long longestPath, double averageLeafDepth,
+        long denseLookupNodeCount, long denseTableSlotCount) {
 
     /** Smallest valid count or path length. */
     private static final long MINIMUM_COUNT = 0L;
@@ -63,10 +75,15 @@ public record TrieStatistics(long internalNodeCount, long leafNodeCount, long lo
      * @param internalNodeCount number of nodes that have at least one outgoing
      *                          child edge
      * @param leafNodeCount     number of nodes with no outgoing child edges
-     * @param longestPath       maximum discovery depth of a unique leaf node,
-     *                          measured in edges from the root
-     * @param averageLeafDepth  arithmetic mean of the unique leaf discovery
-     *                          depths, or {@code 0.0} when there are no leaves
+     * @param edgeCount         number of stored outgoing edges
+     * @param acceptingLeafNodeCount number of contracted accepting leaves
+     * @param valueReferenceCount number of stored value references
+     * @param distinctValueCount number of distinct stored values
+     * @param logicalLeafPathCount number of represented root-to-leaf paths
+     * @param longestPath       maximum root-to-leaf path length in edges
+     * @param averageLeafDepth  arithmetic mean root-to-leaf path length
+     * @param denseLookupNodeCount number of nodes using dense child lookup
+     * @param denseTableSlotCount total number of dense child-table slots
      * @throws IllegalArgumentException if a count or path length is negative, or
      *                                  if {@code averageLeafDepth} is negative or
      *                                  not finite
@@ -78,8 +95,18 @@ public record TrieStatistics(long internalNodeCount, long leafNodeCount, long lo
         if (leafNodeCount < MINIMUM_COUNT) {
             throw new IllegalArgumentException("leafNodeCount must not be negative.");
         }
-        if (longestPath < MINIMUM_COUNT) {
-            throw new IllegalArgumentException("longestPath must not be negative.");
+        final long[] nonNegativeCounts = { edgeCount, acceptingLeafNodeCount, valueReferenceCount,
+                distinctValueCount, logicalLeafPathCount, longestPath, denseLookupNodeCount, denseTableSlotCount };
+        for (final long count : nonNegativeCounts) {
+            if (count < MINIMUM_COUNT) {
+                throw new IllegalArgumentException("Trie statistics must not contain negative counts.");
+            }
+        }
+        if (acceptingLeafNodeCount > leafNodeCount) {
+            throw new IllegalArgumentException("acceptingLeafNodeCount must not exceed leafNodeCount.");
+        }
+        if (distinctValueCount > valueReferenceCount) {
+            throw new IllegalArgumentException("distinctValueCount must not exceed valueReferenceCount.");
         }
         if (!Double.isFinite(averageLeafDepth) || averageLeafDepth < 0.0d) {
             throw new IllegalArgumentException("averageLeafDepth must be finite and not negative.");

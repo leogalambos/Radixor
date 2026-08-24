@@ -56,7 +56,10 @@ import java.util.concurrent.locks.ReentrantLock;
  * <p>
  * The encoder computes a minimum-cost edit script using weighted insert,
  * delete, replace, and match transitions. The resulting trace is then
- * serialized into the compact patch language.
+ * serialized into the compact patch language. Equal-cost transitions use a
+ * stable priority order of delete, match, insert, then replace. Consequently,
+ * changing cost ratios can change both the minimum cost and the canonical
+ * command selected among equally expensive scripts.
  * </p>
  *
  * <p>
@@ -127,11 +130,6 @@ public final class PatchCommandEncoder {
      * Prefix used in unsupported patch opcode exceptions.
      */
     private static final String MSG_OPCODE = "Unsupported patch opcode: ";
-
-    /**
-     * Safety penalty used to prevent a mismatch from being selected as a match.
-     */
-    private static final int MISMATCH_PENALTY = 100;
 
     /**
      * Extra matrix headroom reserved beyond the immediately required dimensions.
@@ -1710,8 +1708,9 @@ public final class PatchCommandEncoder {
                 final int deleteCandidate = this.costMatrix[sourceNeighbor][targetIndex] + this.deleteCost;
                 final int insertCandidate = this.costMatrix[sourceIndex][targetNeighbor] + this.insertCost;
                 final int replaceCandidate = this.costMatrix[sourceNeighbor][targetNeighbor] + this.replaceCost;
-                final int matchCandidate = this.costMatrix[sourceNeighbor][targetNeighbor]
-                        + (sourceCharacter == targetCharacter ? this.matchCost : MISMATCH_PENALTY);
+                final int matchCandidate = sourceCharacter == targetCharacter
+                        ? this.costMatrix[sourceNeighbor][targetNeighbor] + this.matchCost
+                        : Integer.MAX_VALUE;
 
                 int bestCost = matchCandidate;
                 Trace bestTrace = Trace.MATCH;

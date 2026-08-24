@@ -30,9 +30,11 @@
  ******************************************************************************/
 package org.egothor.stemmer;
 
+import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.logging.Level;
@@ -179,9 +181,10 @@ public final class FrequencyTrieBuilders {
      * Computes structural statistics for one compiled trie.
      *
      * <p>
-     * Each unique node instance is visited exactly once. Shared nodes — nodes
-     * reachable via multiple paths after subtree merging — contribute at the depth
-     * at which they are first encountered during depth-first traversal.
+     * Each unique node instance contributes once to storage counts. Root-to-leaf
+     * path statistics are computed independently with memoized dynamic programming,
+     * so every logical path through shared reduced subtrees contributes at its
+     * actual depth.
      * </p>
      *
      * @param trie source compiled trie
@@ -191,38 +194,115 @@ public final class FrequencyTrieBuilders {
     public static TrieStatistics computeStatistics(final FrequencyTrie<?> trie) {
         Objects.requireNonNull(trie, "trie");
         final Map<CompiledNode<?>, Boolean> visited = new IdentityHashMap<>();
-        final long[] counters = { 0L, 0L, 0L, 0L }; // internal, leaf, longestPath, leafDepthSum
-        collectStats(trie.root(), 0, visited, counters);
-        final double avgLeafDepth = counters[1] == 0L ? 0.0d : counters[3] / (double) counters[1];
-        return new TrieStatistics(counters[0], counters[1], counters[2], avgLeafDepth);
+        final Set<Object> distinctValues = new HashSet<>();
+        final StructuralCounters counters = new StructuralCounters();
+        collectStructuralStats(trie.root(), visited, distinctValues, counters);
+
+        final Map<CompiledNode<?>, PathSummary> pathCache = new IdentityHashMap<>();
+        final PathSummary paths = summarizePaths(trie.root(), pathCache);
+        final double averageLeafDepth = paths.leafPathCount() == 0L ? 0.0d
+                : paths.totalLeafDepth() / (double) paths.leafPathCount();
+        return new TrieStatistics(counters.internalNodes, counters.leafNodes, counters.edges,
+                counters.acceptingLeaves, counters.valueReferences, distinctValues.size(),
+                paths.leafPathCount(), paths.longestPath(), averageLeafDepth,
+                counters.denseLookupNodes, counters.denseTableSlots);
     }
 
     /**
      * Recursive depth-first helper that accumulates trie structure counters.
      *
-     * @param node     current node
-     * @param depth    current depth (number of edges from root)
-     * @param visited  identity set of already-visited nodes
-     * @param counters shared counter array: [internal, leaf, longestPath, leafDepthSum]
+     * @param node           current node
+     * @param visited        identity set of already-visited nodes
+     * @param distinctValues distinct stored values
+     * @param counters       mutable structural counters
      */
-    private static void collectStats(final CompiledNode<?> node, final int depth,
-            final Map<CompiledNode<?>, Boolean> visited, final long... counters) {
+    private static void collectStructuralStats(final CompiledNode<?> node,
+            final Map<CompiledNode<?>, Boolean> visited, final Set<Object> distinctValues,
+            final StructuralCounters counters) {
         if (visited.put(node, Boolean.TRUE) != null) {
             return;
         }
-        if (node.edgeLabels().length == 0) {
-            counters[1]++;
-            if (depth > counters[2]) {
-                counters[2] = depth;
+        counters.edges = checkedAdd(counters.edges, node.edgeCount(), "edge count");
+        counters.valueReferences = checkedAdd(counters.valueReferences, node.valueCount(), "value-reference count");
+        for (final Object value : node.orderedValues()) {
+            distinctValues.add(value);
+        }
+        if (node.isLeaf()) {
+            counters.leafNodes = checkedAdd(counters.leafNodes, 1L, "leaf-node count");
+            if (node.acceptsRemainingInput()) {
+                counters.acceptingLeaves = checkedAdd(counters.acceptingLeaves, 1L, "accepting-leaf count");
             }
-            counters[3] += depth;
         } else {
-            counters[0]++;
-            for (final CompiledNode<?> child : node.children()) {
-                collectStats(child, depth + 1, visited, counters);
-            }
+            counters.internalNodes = checkedAdd(counters.internalNodes, 1L, "internal-node count");
+        }
+        if (node.hasDenseLookup()) {
+            counters.denseLookupNodes = checkedAdd(counters.denseLookupNodes, 1L, "dense-lookup-node count");
+            counters.denseTableSlots = checkedAdd(counters.denseTableSlots, node.denseTableLength(),
+                    "dense-table-slot count");
+        }
+        for (final CompiledNode<?> child : node.children()) {
+            collectStructuralStats(child, visited, distinctValues, counters);
         }
     }
+
+    /**
+     * Computes all logical root-to-leaf suffix paths below one node.
+     *
+     * @param node  current node
+     * @param cache identity-keyed summaries for shared subtrees
+     * @return immutable path summary relative to {@code node}
+     */
+    private static PathSummary summarizePaths(final CompiledNode<?> node,
+            final Map<CompiledNode<?>, PathSummary> cache) {
+        final PathSummary existing = cache.get(node);
+        if (existing != null) {
+            return existing;
+        }
+        final PathSummary result;
+        if (node.isLeaf()) {
+            result = new PathSummary(1L, 0L, 0L);
+        } else {
+            long leafPaths = 0L;
+            long totalDepth = 0L;
+            long longestPath = 0L;
+            for (final CompiledNode<?> child : node.children()) {
+                final PathSummary childSummary = summarizePaths(child, cache);
+                leafPaths = checkedAdd(leafPaths, childSummary.leafPathCount(), "logical leaf-path count");
+                totalDepth = checkedAdd(totalDepth,
+                        checkedAdd(childSummary.totalLeafDepth(), childSummary.leafPathCount(),
+                                "logical leaf-depth sum"),
+                        "logical leaf-depth sum");
+                longestPath = Math.max(longestPath,
+                        checkedAdd(childSummary.longestPath(), 1L, "longest logical path"));
+            }
+            result = new PathSummary(leafPaths, totalDepth, longestPath);
+        }
+        cache.put(node, result);
+        return result;
+    }
+
+    /** Adds one structural quantity with an explicit overflow failure. */
+    private static long checkedAdd(final long left, final long right, final String label) {
+        try {
+            return Math.addExact(left, right);
+        } catch (final ArithmeticException exception) {
+            throw new IllegalStateException("Arithmetic overflow while calculating trie " + label + '.', exception);
+        }
+    }
+
+    /** Mutable counters confined to one statistics traversal. */
+    private static final class StructuralCounters {
+        private long internalNodes;
+        private long leafNodes;
+        private long edges;
+        private long acceptingLeaves;
+        private long valueReferences;
+        private long denseLookupNodes;
+        private long denseTableSlots;
+    }
+
+    /** Memoized logical-path summary relative to one compiled node. */
+    private record PathSummary(long leafPathCount, long totalLeafDepth, long longestPath) { }
 
     /**
      * Copies one compiled node and all reachable descendants into the target

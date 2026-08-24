@@ -1012,14 +1012,23 @@ tasks.register('dictionaryGeneralization', JavaExec) {
 
 tasks.register('editCostSensitivity', JavaExec) {
     group = 'verification'
-    description = 'Grid-searches edit-operation costs and evaluates their impact on stemming quality across all bundled dictionaries.'
+    description = 'Evaluates normalized edit-cost ratios across knowledge levels and deterministic dictionary splits.'
     dependsOn(tasks.named('testClasses'))
     classpath = sourceSets.test.runtimeClasspath
     mainClass = 'org.egothor.stemmer.benchmark.generalization.EditCostSensitivityApplication'
-    final List<Object> editCostArgs = [layout.buildDirectory.file('reports/generalization/edit-cost-sensitivity.csv').get().asFile.absolutePath]
+    final String editCostSourceState = providers.exec {
+        commandLine 'git', 'status', '--porcelain'
+    }.standardOutput.asText.get().trim().isEmpty() ? 'clean' : 'dirty'
+    final List<Object> editCostArgs = [
+            layout.buildDirectory.file('reports/generalization/edit-cost-sensitivity.csv').get().asFile.absolutePath,
+            dictionaryGeneralizationReleaseVersion.get(),
+            providers.exec { commandLine 'git', 'rev-parse', 'HEAD' }.standardOutput.asText.get().trim(),
+            editCostSourceState,
+            layout.projectDirectory.file('src/test/java/org/egothor/stemmer/benchmark/generalization/EditCostSensitivityApplication.java').asFile.absolutePath
+    ]
     final boolean hasLanguage = project.hasProperty('editCostLanguage')
     if (project.hasProperty('editCostSeed') || hasLanguage) {
-        editCostArgs.add(project.hasProperty('editCostSeed') ? project.property('editCostSeed') : '2654435761')
+        editCostArgs.add(project.hasProperty('editCostSeed') ? project.property('editCostSeed') : 'all')
     }
     if (hasLanguage) { editCostArgs.add(project.property('editCostLanguage').toString().toUpperCase(java.util.Locale.ROOT)) }
     args editCostArgs
