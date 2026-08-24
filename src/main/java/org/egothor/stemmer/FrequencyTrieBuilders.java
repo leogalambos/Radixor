@@ -176,6 +176,55 @@ public final class FrequencyTrieBuilders {
     }
 
     /**
+     * Computes structural statistics for one compiled trie.
+     *
+     * <p>
+     * Each unique node instance is visited exactly once. Shared nodes — nodes
+     * reachable via multiple paths after subtree merging — contribute at the depth
+     * at which they are first encountered during depth-first traversal.
+     * </p>
+     *
+     * @param trie source compiled trie
+     * @return structural statistics
+     * @throws NullPointerException if {@code trie} is {@code null}
+     */
+    public static TrieStatistics computeStatistics(final FrequencyTrie<?> trie) {
+        Objects.requireNonNull(trie, "trie");
+        final IdentityHashMap<CompiledNode<?>, Boolean> visited = new IdentityHashMap<>();
+        final long[] counters = { 0L, 0L, 0L, 0L }; // internal, leaf, longestPath, leafDepthSum
+        collectStats(trie.root(), 0, visited, counters);
+        final double avgLeafDepth = counters[1] == 0L ? 0.0d : (double) counters[3] / (double) counters[1];
+        return new TrieStatistics(counters[0], counters[1], counters[2], avgLeafDepth);
+    }
+
+    /**
+     * Recursive depth-first helper that accumulates trie structure counters.
+     *
+     * @param node     current node
+     * @param depth    current depth (number of edges from root)
+     * @param visited  identity set of already-visited nodes
+     * @param counters shared counter array: [internal, leaf, longestPath, leafDepthSum]
+     */
+    private static void collectStats(final CompiledNode<?> node, final int depth,
+            final IdentityHashMap<CompiledNode<?>, Boolean> visited, final long[] counters) {
+        if (visited.put(node, Boolean.TRUE) != null) {
+            return;
+        }
+        if (node.edgeLabels().length == 0) {
+            counters[1]++;
+            if (depth > counters[2]) {
+                counters[2] = depth;
+            }
+            counters[3] += depth;
+        } else {
+            counters[0]++;
+            for (final CompiledNode<?> child : node.children()) {
+                collectStats(child, depth + 1, visited, counters);
+            }
+        }
+    }
+
+    /**
      * Copies one compiled node and all reachable descendants into the target
      * builder.
      *

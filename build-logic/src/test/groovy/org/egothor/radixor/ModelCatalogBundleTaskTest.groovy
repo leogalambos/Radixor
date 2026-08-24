@@ -21,9 +21,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue
 /** Exercises catalog publication filtering, isolation, checksums, and semantic verification. */
 final class ModelCatalogBundleTaskTest {
     private static final String CATALOG_VERSION = '2026.1'
-    private static final String MODEL_VERSION = '1.0.0'
     private static final List<String> DEFAULTS = ['alpha', 'beta']
     private static final List<String> ALL = ['alpha', 'beta', 'pl-pl-polimorf']
+    private static final Map<String, String> MODEL_VERSIONS = [
+            alpha: '1.0.0', beta: '1.0.1', 'pl-pl-polimorf': '2.0.0'
+    ]
 
     @TempDir Path temporaryDirectory
 
@@ -123,8 +125,22 @@ final class ModelCatalogBundleTaskTest {
         PrepareModelCatalogBundleInputTask.prepareBundle(fixture(false), prepared, CATALOG_VERSION)
         final File archive = zip(prepared, temporaryDirectory.resolve('catalog.zip'))
         final List<String> entries = VerifyModelCatalogReleaseCandidateTask.verifyBundle(
-                archive, CATALOG_VERSION, MODEL_VERSION, DEFAULTS, ALL)
+                archive, CATALOG_VERSION, MODEL_VERSIONS, DEFAULTS, ALL)
         assertEquals(6, entries.size())
+    }
+
+    /** Rejects a catalog dependency that does not use its model's recorded version. */
+    @Test
+    void rejectsIncorrectPerModelVersion() {
+        final Path prepared = temporaryDirectory.resolve('prepared')
+        PrepareModelCatalogBundleInputTask.prepareBundle(fixture(false), prepared, CATALOG_VERSION)
+        final File archive = zip(prepared, temporaryDirectory.resolve('catalog.zip'))
+        final Map<String, String> incorrectVersions = new TreeMap<>(MODEL_VERSIONS)
+        incorrectVersions.put('beta', '9.9.9')
+        assertThrows(GradleException) {
+            VerifyModelCatalogReleaseCandidateTask.verifyBundle(
+                    archive, CATALOG_VERSION, incorrectVersions, DEFAULTS, ALL)
+        }
     }
 
     /** Rejects an archived checksum that does not match its POM. */
@@ -136,7 +152,7 @@ final class ModelCatalogBundleTaskTest {
         final File archive = zip(prepared, temporaryDirectory.resolve('catalog.zip'))
         assertThrows(GradleException) {
             VerifyModelCatalogReleaseCandidateTask.verifyBundle(
-                    archive, CATALOG_VERSION, MODEL_VERSION, DEFAULTS, ALL)
+                    archive, CATALOG_VERSION, MODEL_VERSIONS, DEFAULTS, ALL)
         }
     }
 
@@ -206,7 +222,7 @@ tasks.register('bundle', Zip) {
         final List<String> ids = managed ? ALL : DEFAULTS
         final String dependencies = ids.collect { String id ->
             "<dependency><groupId>org.egothor</groupId><artifactId>radixor-model-${id}</artifactId>" +
-                    "<version>${MODEL_VERSION}</version>${managed ? '' : '<scope>runtime</scope>'}</dependency>"
+                    "<version>${MODEL_VERSIONS.get(id)}</version>${managed ? '' : '<scope>runtime</scope>'}</dependency>"
         }.join()
         final String body = managed ? "<dependencyManagement><dependencies>${dependencies}</dependencies></dependencyManagement>"
                 : "<dependencies>${dependencies}</dependencies>"

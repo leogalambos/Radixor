@@ -330,9 +330,10 @@ final class RadixorModelPlugin implements Plugin<Project> {
     }
 
     /** Validates required content in one UniMorph model-data notice. */
-    static void validateShareAlikeNoticeText(final String text, final String noticeName,
+    static void validateShareAlikeNoticeText(final String rawText, final String noticeName,
             final String modelId, final String repository, final String licenseUri,
             final String revision, final String revisionStatus) {
+        final String text = rawText.replace('\r\n', '\n')
         final List<String> required = [
                 "Model ID: ${modelId}",
                 "Official repository: ${repository}",

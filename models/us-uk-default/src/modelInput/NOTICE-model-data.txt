@@ -35,4 +35,4 @@ Radixor modifications: Cleaning, normalization, grouping inflected forms by lemm
 
 The derived model data is distributed under CC BY-SA 3.0. UniMorph supplies morphological data; Radixor constructs its own patch-command trie at runtime. Neither UniMorph nor any upstream contributor endorses Radixor.
 
-Upstream information verified: 2026-07-22
+Upstream information verified: 2026-08-24

@@ -17,7 +17,7 @@ radixorModel {
     sourceLicense = 'CC-BY-SA-3.0'
     sourceLicenseUri = 'https://creativecommons.org/licenses/by-sa/3.0/'
     sourceAttribution = 'UniMorph and Wikipedia contributors'
-    sourceVerificationDate = '2026-07-22'
+    sourceVerificationDate = '2026-08-24'
     transformationsSummary = 'Cleaning, normalization, grouping inflected forms by lemma, deduplication, filtering invalid rows, reformatting into Radixor dictionary groups, GZip packaging, and generation of runtime descriptor and checksum metadata'
     noticeFileName = 'NOTICE-model-data.txt'
 }

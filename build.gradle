@@ -651,18 +651,15 @@ def modelCatalogCentralBundle = tasks.register('modelCatalogCentralBundle', Zip)
     }
 }
 
-def publishedModelVersions = modelProjects().collect { Project modelProject ->
-    modelProject.file('model-version.txt').getText('UTF-8').trim()
-}.toSet()
-if (publishedModelVersions.size() != 1) {
-    throw new GradleException("The catalog verifier requires one common model version; found ${publishedModelVersions}.")
+def publishedModelVersions = modelProjects().collectEntries { Project modelProject ->
+    [(modelProject.name): modelProject.file('model-version.txt').getText('UTF-8').trim()]
 }
 
 tasks.named('verifyModelCatalogReleaseCandidate') {
     bundleFile = modelCatalogCentralBundle.flatMap { Zip archive -> archive.archiveFile }
     reportFile = layout.buildDirectory.file('reports/models/catalog-release-candidate.txt')
     catalogVersion = project(':models:standard').version.toString()
-    modelVersion = publishedModelVersions.first()
+    modelVersions = publishedModelVersions
     defaultModelIds = defaultModelProjects().collect { Project modelProject -> modelProject.name }
     allModelIds = modelProjects().collect { Project modelProject -> modelProject.name }
 }
@@ -1011,6 +1008,33 @@ tasks.register('dictionaryGeneralization', JavaExec) {
             dictionaryGeneralizationReleaseVersion.get(),
             layout.projectDirectory.file('src/test/java/org/egothor/stemmer/benchmark/generalization/DictionaryGeneralizationApplication.java').asFile.absolutePath
     maxHeapSize = '8g'
+}
+
+tasks.register('editCostSensitivity', JavaExec) {
+    group = 'verification'
+    description = 'Grid-searches edit-operation costs and evaluates their impact on stemming quality across all bundled dictionaries.'
+    dependsOn(tasks.named('testClasses'))
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'org.egothor.stemmer.benchmark.generalization.EditCostSensitivityApplication'
+    final List<Object> editCostArgs = [layout.buildDirectory.file('reports/generalization/edit-cost-sensitivity.csv').get().asFile.absolutePath]
+    final boolean hasLanguage = project.hasProperty('editCostLanguage')
+    if (project.hasProperty('editCostSeed') || hasLanguage) {
+        editCostArgs.add(project.hasProperty('editCostSeed') ? project.property('editCostSeed') : '2654435761')
+    }
+    if (hasLanguage) { editCostArgs.add(project.property('editCostLanguage').toString().toUpperCase(java.util.Locale.ROOT)) }
+    args editCostArgs
+    maxHeapSize = '8g'
+}
+
+tasks.register('patchCommandDump', JavaExec) {
+    group = 'verification'
+    description = 'Dumps all patch commands (with counts) for a given language to a TSV file. Use -PpatchDumpLanguage=US_UK.'
+    dependsOn(tasks.named('testClasses'))
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'org.egothor.stemmer.benchmark.generalization.PatchCommandDumpApplication'
+    final String lang = project.hasProperty('patchDumpLanguage') ? project.property('patchDumpLanguage').toString().toUpperCase(java.util.Locale.ROOT) : 'US_UK'
+    args layout.buildDirectory.file("reports/generalization/patch-commands-${lang.toLowerCase(java.util.Locale.ROOT)}.tsv").get().asFile.absolutePath, lang
+    maxHeapSize = '2g'
 }
 
 tasks.register('publishDictionaryGeneralizationDocumentation', Exec) {

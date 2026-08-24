@@ -36,7 +36,7 @@ import java.util.OptionalDouble;
  * Derives scientifically labelled pairwise confusion metrics from unrounded raw counts.
  * Undefined ratios are represented by empty optionals; no method returns NaN or infinity.
  */
-record PairwiseMetrics(long truePositivePairs, long falsePositivePairs, long falseNegativePairs,
+public record PairwiseMetrics(long truePositivePairs, long falsePositivePairs, long falseNegativePairs,
         long trueNegativePairs, boolean coherentConfusionMatrix) {
     /** Creates metrics for one coherent binary relation. */
     PairwiseMetrics(final long truePositivePairs, final long falsePositivePairs,
@@ -52,26 +52,26 @@ record PairwiseMetrics(long truePositivePairs, long falsePositivePairs, long fal
                 result.outputPolicy() != OutputPolicy.ANY_CANDIDATE);
     }
 
-    /** @return pairwise precision */ OptionalDouble precision() { return coherentRatio(truePositivePairs, Math.addExact(truePositivePairs, falsePositivePairs)); }
-    /** @return pairwise recall */ OptionalDouble recall() { return coherentRatio(truePositivePairs, Math.addExact(truePositivePairs, falseNegativePairs)); }
-    /** @return pairwise specificity */ OptionalDouble specificity() { return coherentRatio(trueNegativePairs, Math.addExact(trueNegativePairs, falsePositivePairs)); }
+    /** @return pairwise precision */ public OptionalDouble precision() { return coherentRatio(truePositivePairs, Math.addExact(truePositivePairs, falsePositivePairs)); }
+    /** @return pairwise recall */ public OptionalDouble recall() { return coherentRatio(truePositivePairs, Math.addExact(truePositivePairs, falseNegativePairs)); }
+    /** @return pairwise specificity */ public OptionalDouble specificity() { return coherentRatio(trueNegativePairs, Math.addExact(trueNegativePairs, falsePositivePairs)); }
     /** @return pairwise accuracy, potentially dominated by true negatives */
-    OptionalDouble accuracy() { return coherentRatio(Math.addExact(truePositivePairs, trueNegativePairs), total()); }
+    public OptionalDouble accuracy() { return coherentRatio(Math.addExact(truePositivePairs, trueNegativePairs), total()); }
     /** @return arithmetic mean of recall and specificity */
-    OptionalDouble balancedAccuracy() { return mean(recall(), specificity()); }
-    /** @return pairwise F0.5 */ OptionalDouble f05() { return fBeta(0.25); }
-    /** @return pairwise F1 */ OptionalDouble f1() { return fBeta(1.0); }
-    /** @return pairwise F2 */ OptionalDouble f2() { return fBeta(4.0); }
+    public OptionalDouble balancedAccuracy() { return mean(recall(), specificity()); }
+    /** @return pairwise F0.5 */ public OptionalDouble f05() { return fBeta(0.25); }
+    /** @return pairwise F1 */ public OptionalDouble f1() { return fBeta(1.0); }
+    /** @return pairwise F2 */ public OptionalDouble f2() { return fBeta(4.0); }
     /** @return Jaccard index */
-    OptionalDouble jaccard() { return coherentRatio(truePositivePairs, Math.addExact(Math.addExact(truePositivePairs, falsePositivePairs), falseNegativePairs)); }
+    public OptionalDouble jaccard() { return coherentRatio(truePositivePairs, Math.addExact(Math.addExact(truePositivePairs, falsePositivePairs), falseNegativePairs)); }
     /** @return Fowlkes-Mallows index */
-    OptionalDouble fowlkesMallows() {
+    public OptionalDouble fowlkesMallows() {
         final OptionalDouble precisionValue = precision(); final OptionalDouble recallValue = recall();
         return precisionValue.isEmpty() || recallValue.isEmpty() ? OptionalDouble.empty()
                 : OptionalDouble.of(Math.sqrt(precisionValue.getAsDouble() * recallValue.getAsDouble()));
     }
     /** @return Matthews correlation coefficient using scaled double arithmetic */
-    OptionalDouble matthewsCorrelationCoefficient() {
+    public OptionalDouble matthewsCorrelationCoefficient() {
         if (!coherentConfusionMatrix) { return OptionalDouble.empty(); }
         final double a = (double) truePositivePairs + falsePositivePairs;
         final double b = (double) truePositivePairs + falseNegativePairs;
@@ -84,7 +84,7 @@ record PairwiseMetrics(long truePositivePairs, long falsePositivePairs, long fal
         return OptionalDouble.of(numerator / denominator);
     }
     /** @return pairwise error rate */
-    OptionalDouble errorRate() { return coherentRatio(Math.addExact(falsePositivePairs, falseNegativePairs), total()); }
+    public OptionalDouble errorRate() { return coherentRatio(Math.addExact(falsePositivePairs, falseNegativePairs), total()); }
 
     /** Calculates F-beta directly from raw counts. */
     private OptionalDouble fBeta(final double betaSquared) {

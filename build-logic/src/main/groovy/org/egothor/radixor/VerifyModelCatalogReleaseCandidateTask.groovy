@@ -4,6 +4,7 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
@@ -31,7 +32,7 @@ abstract class VerifyModelCatalogReleaseCandidateTask extends DefaultTask {
     abstract RegularFileProperty getReportFile()
 
     @Input abstract Property<String> getCatalogVersion()
-    @Input abstract Property<String> getModelVersion()
+    @Input abstract MapProperty<String, String> getModelVersions()
     @Input abstract ListProperty<String> getDefaultModelIds()
     @Input abstract ListProperty<String> getAllModelIds()
 
@@ -39,7 +40,7 @@ abstract class VerifyModelCatalogReleaseCandidateTask extends DefaultTask {
     @TaskAction
     void verify() {
         final List<String> entries = verifyBundle(bundleFile.get().asFile, catalogVersion.get(),
-                modelVersion.get(), defaultModelIds.get(), allModelIds.get())
+                modelVersions.get(), defaultModelIds.get(), allModelIds.get())
         final File report = reportFile.get().asFile
         Files.createDirectories(report.toPath().parent)
         Files.writeString(report.toPath(), "Bundle: ${bundleFile.get().asFile.name}\nBytes: ${bundleFile.get().asFile.length()}\n"
@@ -47,7 +48,7 @@ abstract class VerifyModelCatalogReleaseCandidateTask extends DefaultTask {
     }
 
     static List<String> verifyBundle(final File bundle, final String catalogVersion,
-            final String modelVersion, final List<String> defaultIds, final List<String> allIds) {
+            final Map<String, String> modelVersions, final List<String> defaultIds, final List<String> allIds) {
         if (!bundle.isFile() || bundle.length() == 0L) {
             throw new GradleException("The model catalog Central bundle is missing or empty: ${bundle}.")
         }
@@ -94,22 +95,33 @@ abstract class VerifyModelCatalogReleaseCandidateTask extends DefaultTask {
 
         final Map<String, String> standardDependencies = dependencies(standard, false)
         final Map<String, String> bomConstraints = dependencies(bom, true)
-        final Set<String> expectedDefaults = defaultIds.collect { String id -> "org.egothor:radixor-model-${id}" } as Set<String>
-        final Set<String> expectedAll = allIds.collect { String id -> "org.egothor:radixor-model-${id}" } as Set<String>
-        if (standardDependencies.keySet() != expectedDefaults
-                || standardDependencies.values().any { String version -> version != modelVersion }
+        final Set<String> expectedVersionIds = allIds as Set<String>
+        if (modelVersions.keySet() != expectedVersionIds) {
+            throw new GradleException('The catalog verifier requires exactly one recorded version for every model ID.')
+        }
+        final Map<String, String> expectedDefaults = expectedDependencies(defaultIds, modelVersions)
+        final Map<String, String> expectedAll = expectedDependencies(allIds, modelVersions)
+        if (standardDependencies != expectedDefaults
                 || standardDependencies.containsKey('org.egothor:radixor-model-pl-pl-polimorf')
                 || dependencyScopes(standard).any { String scope -> scope != 'runtime' }) {
-            throw new GradleException('The standard catalog POM must reference exactly the 20 default model artifacts at the model version.')
+            throw new GradleException('The standard catalog POM must reference every default model at its recorded model version.')
         }
         if (!dependencies(bom, false).isEmpty()) {
             throw new GradleException('The model BOM must not introduce runtime dependencies.')
         }
-        if (bomConstraints.keySet() != expectedAll
-                || bomConstraints.values().any { String version -> version != modelVersion }) {
-            throw new GradleException('The model BOM must manage exactly all 21 model artifacts at the model version.')
+        if (bomConstraints != expectedAll) {
+            throw new GradleException('The model BOM must manage every model artifact at its recorded model version.')
         }
         return entries
+    }
+
+    private static Map<String, String> expectedDependencies(final List<String> modelIds,
+            final Map<String, String> modelVersions) {
+        final Map<String, String> expected = new TreeMap<>()
+        modelIds.each { String modelId ->
+            expected.put("org.egothor:radixor-model-${modelId}".toString(), modelVersions.get(modelId))
+        }
+        return expected
     }
 
     private static String expectedPomPath(final String kind, final String version) {
