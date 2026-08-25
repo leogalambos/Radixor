@@ -2783,6 +2783,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../filtered-models/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Filtered Candidate Models
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../built-in-languages/" class="md-nav__link">
         
   
@@ -3786,6 +3814,11 @@ its BSD-2-Clause data license.</p>
 <p>Neither catalog artifact publishes a binary, sources, or Javadoc JAR. The standard aggregate resolves model JARs because its POM contains runtime dependencies. Importing the BOM only manages versions and resolves no model by itself. JMH, tests, and quality evaluation depend directly on individual model projects through non-production Gradle configurations.</p>
 <p>The Maven dependency BOM is not a software bill of materials. The root <code>cyclonedxDirectBom</code> task generates the project-wide CycloneDX SBOM under <code>build/reports/sbom/</code>; it does not write into <code>models/bom/build/</code>.</p>
 <p><code>models/build/</code> is an ignored Gradle output directory for the implicit lifecycle parent <code>:models</code>, not a source module. CycloneDX direct tasks exposed on subprojects by the root plugin are disabled, so the supported build does not write an SBOM there. Aggregate model reports are owned by the root project under <code>build/reports/models/</code>; individual model reports and publication files stay under <code>models/&lt;model-id&gt;/build/</code>.</p>
+<p>Filtered alternatives under <code>models/*-filtered</code> are complete, locally buildable
+candidate modules, but are excluded from the published topology, catalog, BOM,
+standard pack, and Python packages. Their construction, measured results, local
+loading procedure, and promotion boundary are documented on the
+<a href="../filtered-models/">Filtered Candidate Models</a> page.</p>
 <h2 id="create-or-update-a-model-module">Create or update a model module</h2>
 <ol>
 <li>Choose a stable lowercase model ID matching the module directory.</li>
