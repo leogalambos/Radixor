@@ -1,11 +1,11 @@
 # Benchmark Results
 
 This section contains the published Radixor benchmark reference set. It is intentionally split into
-two layers:
+three layers:
 
 - **benchmark reference pages**, which explain methodology, corpora, environment, candidate
   selection, multilingual generalization, and the English coverage-speed deep dive;
-- **language result pages**, which contain the actual same-language accuracy and throughput tables.
+- **language result pages**, which contain the actual same-language accuracy and throughput tables;
 - **pairwise quality pages and generated sections**, which publish over-stemming, under-stemming,
   candidate-policy, classification, and partition measurements from one checked result snapshot.
 
@@ -39,6 +39,8 @@ the preferred result measured by the accuracy pass.
 | [Environment and reports](reference/environment.md) | Hardware, JVM, JMH settings, report files, and badge/report policy. |
 | [Dictionary-family generalization](generalization.md) | All-language, five-split held-out-family results from 10% through 100% Java model training coverage. |
 | [Generalization methodology](reference/generalization-methodology.md) | Frozen nested splits, unseen-surface leakage control, formulas, reproduction, and limitations. |
+| [Edit-cost sensitivity](edit-cost-sensitivity.md) | Language-specific edit-cost recommendations, exact command-equivalence classes, trie structure, and generalization associations. |
+| [Edit-cost methodology](reference/edit-cost-methodology.md) | Normalized cost grid, exact equivalence verification, frozen splits, outcomes, analysis rules, and reproduction. |
 | [English dictionary coverage](reference/english-coverage.md) | Quality/speed operating curve for contracted Radixor tries built from 100% down to 10% of English dictionary rows. |
 | [Candidate evaluation](reference/candidates.md) | Included benchmark families and evaluated candidates that were skipped. |
 
@@ -52,6 +54,7 @@ Each language page contains:
 - throughput metrics,
 - pairwise linguistic-quality metrics showing whether same-group forms share a stem and forms with
   no shared dictionary-group membership remain separated,
+- a language-specific edit-cost and dictionary-knowledge evidence table, factor analysis, and conclusion,
 - interpretation notes for the compared stemmers.
 
 Open [Language Benchmark Pages](languages/index.md) for the complete language list.
@@ -59,9 +62,9 @@ Open [Language Benchmark Pages](languages/index.md) for the complete language li
 ## Key Published Result
 
 The English dictionary coverage benchmark shows the current contracted-trie operating curve. With
-the full English dictionary, Radixor reaches `97.478%` all-token exactness and `97.197%`
-changed-token exactness at `87.2 ns/token`. Even with a deterministic 10% dictionary slice, it
-keeps `92.868%` all-token exactness and `76.516%` changed-token exactness at `51.8 ns/token`.
+the full English dictionary, Radixor reaches `97.668%` all-token exactness and `98.110%`
+changed-token exactness at `97.9 ns/token`. Even with a deterministic 10% dictionary slice, it
+keeps `93.057%` all-token exactness and `77.327%` changed-token exactness at `68.9 ns/token`.
 
 Those figures should not be reduced to a single speed badge. The professional interpretation is a
 quality/speed envelope: the amount and quality of dictionary knowledge affect stemming precision,
@@ -69,7 +72,7 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 
 ## Quality versus performance
 
-Each language page keeps exact-root accuracy, JMH latency, and pairwise linguistic-quality results in separate tables. No undocumented scalar combines them. The 2026-08-23 language tables are generated from the current corpus/command report, exact-root and speed JMH reports, and pairwise-quality snapshot produced for this refresh. The Snowball 3.1.0 matrix includes direct Czech, Persian, and Polish stemmers; all published Java stemmers were measured in the same run. Readers should inspect the quality and speed dimensions side by side; no cross-language Pareto ranking is inferred from workloads with different dictionaries and token counts.
+Each language page keeps exact-root accuracy, JMH latency, and pairwise linguistic-quality results in separate tables. No undocumented scalar combines them. The 2026-08-25 language tables are generated from the current corpus/command report, exact-root and speed JMH reports, and pairwise-quality snapshot produced for this refresh. The Snowball 3.1.0 matrix includes direct Czech, Persian, and Polish stemmers; all published Java stemmers were measured in the same run. Readers should inspect the quality and speed dimensions side by side; no cross-language Pareto ranking is inferred from workloads with different dictionaries and token counts.
 
 ### New Snowball 3.1.0 rows
 
@@ -100,8 +103,8 @@ The validated snapshot is a broad multilingual comparison covering the complete 
 |Danish (`DA_DK`)|LOWERCASE_GROUPS_ONLY|Radixor|0.996482|SNOWBALL DANISH DIRECT|0.054099342|no|3|
 |Dutch (`NL_NL`)|ALL_WORDS|Radixor|0.988733|SNOWBALL DUTCH DIRECT|0.261639748|no|4|
 |Dutch (`NL_NL`)|LOWERCASE_GROUPS_ONLY|Radixor|0.989114|SNOWBALL DUTCH DIRECT|0.258605347|no|4|
-|English (`US_UK`)|ALL_WORDS|Radixor|0.965537|ENGLISH LUCENE PORTER COPIED|0.010741250|no|11|
-|English (`US_UK`)|LOWERCASE_GROUPS_ONLY|Radixor|0.966202|ENGLISH LUCENE PORTER COPIED|0.011138557|no|11|
+|English (`US_UK`)|ALL_WORDS|Radixor|0.976120|ENGLISH LUCENE PORTER COPIED|0.010985401|no|11|
+|English (`US_UK`)|LOWERCASE_GROUPS_ONLY|Radixor|0.976863|ENGLISH LUCENE PORTER COPIED|0.011393230|no|11|
 |Finnish (`FI_FI`)|ALL_WORDS|Radixor|0.984838|SNOWBALL FINNISH LUCENE FILTER|0.244558928|no|4|
 |Finnish (`FI_FI`)|LOWERCASE_GROUPS_ONLY|Radixor|0.988242|SNOWBALL FINNISH DIRECT|0.249699076|no|4|
 |French (`FR_FR`)|ALL_WORDS|Radixor|0.958627|SNOWBALL FRENCH DIRECT|0.109964908|no|6|
@@ -323,13 +326,13 @@ These aggregates cover all 20 documented languages. Macro balanced accuracy give
 
 | Dictionary mode | Languages | Macro balanced accuracy | Micro balanced accuracy | Micro precision | Micro recall | Micro F1 |
 |---|---:|---:|---:|---:|---:|---:|
-|ALL_WORDS|20|0.980696|0.987977|0.999988|0.975953|0.987824|
-|LOWERCASE_GROUPS_ONLY|20|0.983862|0.989614|0.999992|0.979228|0.989501|
+|ALL_WORDS|20|0.981225|0.988003|0.999988|0.976005|0.987851|
+|LOWERCASE_GROUPS_ONLY|20|0.984395|0.989641|0.999992|0.979282|0.989529|
 
 ### Reproducible data
 
 - [Machine-readable quality snapshot](data/stemming-quality.csv)
-- SHA-256: `f15f8e653022e0333955b8b82f42944aa1c5a14a5ce54e628bb1a9c9aed42132`
+- SHA-256: `85763189eab4d0fbb047c2d5d3554c66abf9732182bd0d8fd758d7aef680e66f`
 - [Linguistic quality methodology](reference/linguistic-quality.md)
 - [Tested stemmer inventory](reference/tested-stemmers.md)
 - [Reproducibility and raw data](reference/reproducibility.md)

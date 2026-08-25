@@ -48,6 +48,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.HexFormat;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -145,18 +146,20 @@ public final class EditCostSensitivityApplication {
     /** Baseline cost configuration. */
     /* default */ static final CostConfig BASELINE = new CostConfig(1, 1, 1, 0);
 
-    private static final String PROTOCOL_VERSION = "radixor-cost-sensitivity-v2";
+    private static final String PROTOCOL_VERSION = "radixor-cost-sensitivity-v4";
 
     /** Required provenance arguments before optional seed and language filters. */
     private static final int REQUIRED_ARGUMENT_COUNT = 5;
 
     /** Largest accepted argument count. */
-    private static final int MAXIMUM_ARGUMENT_COUNT = 7;
+    private static final int MAXIMUM_ARGUMENT_COUNT = 8;
 
     /* default */ static final String HEADER = String.join(",",
-            "protocol_version", "radixor_java_version", "source_revision", "source_state", "generator_sha256",
+            "protocol_version", "record_type", "radixor_java_version", "source_revision", "source_state",
+            "generator_sha256",
             "language", "model_id", "model_version", "model_sha256", "seed",
             "delete_cost", "insert_cost", "replace_cost", "match_cost", "cost_label",
+            "equivalent_cost_labels",
             "training_percent", "selected_rows", "total_rows", "withheld_rows", "excluded_overlap_occurrences",
             "training_generated_distinct_patch_commands", "baseline_training_generated_distinct_patch_commands",
             "trie_distinct_patch_commands", "baseline_trie_distinct_patch_commands",
@@ -206,7 +209,8 @@ public final class EditCostSensitivityApplication {
      * @param arguments output CSV path, Radixor Java version, source revision,
      *                  source state, generator source path, optionally one long
      *                  seed (or {@code all}), and optionally an exact
-     *                  {@link StemmerPatchTrieLoader.Language} name
+     *                  {@link StemmerPatchTrieLoader.Language} name, and optionally
+     *                  one exact cost label such as {@code D1I1R1M0}
      * @throws IOException when a model dictionary cannot be read or the CSV cannot
      *                     be written
      * @throws IllegalArgumentException if the argument count, seed, or language
@@ -214,14 +218,43 @@ public final class EditCostSensitivityApplication {
      */
     public static void main(final String[] arguments) throws IOException {
         final RunOptions options = parseArguments(arguments);
-        writeReport(options);
+        if ("PREFLIGHT".equals(options.costFilter())) {
+            writePreflight(options);
+        } else {
+            writeReport(options);
+        }
+    }
+
+    /** Writes the inexpensive dictionary order and exact-equivalence class census. */
+    private static void writePreflight(final RunOptions options) throws IOException {
+        final StemmerModelRegistry registry = StemmerModelRegistry.fromContextClassLoader();
+        final List<LanguageWork> languages = orderLanguagesByBaselineCommandCount(
+                selectLanguages(options.languageFilter()), registry);
+        final List<CostConfig> grid = generateGrid();
+        final List<String> lines = new ArrayList<>(languages.size() + 1);
+        lines.add("language,model_id,model_version,model_sha256,dictionary_rows,baseline_patch_commands,"
+                + "normalized_configurations,exact_equivalence_classes");
+        for (final LanguageWork language : languages) {
+            final List<DictionaryRow> rows = readRows(language.descriptor());
+            final int classes = groupEquivalentConfigurations(rows, grid).size();
+            lines.add(language.language() + "," + language.descriptor().id() + ","
+                    + language.descriptor().version() + "," + language.descriptor().sha256() + ","
+                    + language.dictionaryRows() + "," + language.baselineCommandCount() + ","
+                    + grid.size() + "," + classes);
+            System.out.printf(Locale.ROOT, "Preflight %s: %,d baseline commands, %d equivalence classes%n",
+                    language.language(), language.baselineCommandCount(), classes);
+        }
+        final Path output = options.output().toAbsolutePath();
+        Files.createDirectories(output.getParent());
+        Files.write(output, lines, StandardCharsets.UTF_8);
+        System.out.println("Cost-sensitivity preflight CSV: " + output);
     }
 
     /** Parses and validates command-line options without performing report I/O. */
     private static RunOptions parseArguments(final String... arguments) throws IOException {
         if (arguments.length < REQUIRED_ARGUMENT_COUNT || arguments.length > MAXIMUM_ARGUMENT_COUNT) {
             throw new IllegalArgumentException("Expected: output-csv Radixor-Java-version source-revision "
-                    + "source-state generator-source [seed|all [language-name]]");
+                    + "source-state generator-source [seed|all [language-name [cost-label]]]");
         }
         final Path output = Path.of(arguments[0]);
         final ExperimentProvenance provenance = new ExperimentProvenance(requireText(arguments[1],
@@ -230,9 +263,11 @@ public final class EditCostSensitivityApplication {
         final long[] seeds = arguments.length >= 6 && !"all".equalsIgnoreCase(arguments[5])
                 ? new long[] { Long.parseLong(arguments[5]) }
                 : DictionaryGeneralizationApplication.SEEDS.clone();
-        final String languageFilter = arguments.length == MAXIMUM_ARGUMENT_COUNT
+        final String languageFilter = arguments.length >= 7
                 ? arguments[6].toUpperCase(Locale.ROOT) : null;
-        return new RunOptions(output, provenance, seeds, languageFilter);
+        final String costFilter = arguments.length == MAXIMUM_ARGUMENT_COUNT
+                ? arguments[7].toUpperCase(Locale.ROOT) : null;
+        return new RunOptions(output, provenance, seeds, languageFilter, costFilter);
     }
 
     /** Writes the report through a temporary file and publishes it atomically when supported. */
@@ -240,8 +275,8 @@ public final class EditCostSensitivityApplication {
         final Path output = options.output().toAbsolutePath();
         final Path outputDirectory = output.getParent();
         Files.createDirectories(outputDirectory);
-        final Path temporaryOutput = Files.createTempFile(outputDirectory,
-                output.getFileName().toString() + '.', ".tmp");
+        final Path temporaryOutput = output.resolveSibling(output.getFileName().toString() + ".partial");
+        Files.deleteIfExists(temporaryOutput);
         boolean published = false;
         try {
             final long dataRows = writeReportContent(temporaryOutput, options);
@@ -250,49 +285,61 @@ public final class EditCostSensitivityApplication {
             System.out.printf(Locale.ROOT, "Cost-sensitivity CSV: %s (%,d data rows)%n", output, dataRows);
         } finally {
             if (!published) {
-                Files.deleteIfExists(temporaryOutput);
+                System.err.println("Incomplete cost-sensitivity data retained at " + temporaryOutput);
             }
         }
     }
 
     /** Executes all requested experiment scenarios into an already resolved temporary path. */
     private static long writeReportContent(final Path temporaryOutput, final RunOptions options) throws IOException {
-        final List<StemmerPatchTrieLoader.Language> languages = selectLanguages(options.languageFilter());
         final StemmerModelRegistry registry = StemmerModelRegistry.fromContextClassLoader();
-        final List<CostConfig> grid = generateGrid();
+        final List<LanguageWork> languages = orderLanguagesByBaselineCommandCount(
+                selectLanguages(options.languageFilter()), registry);
+        final List<CostConfig> grid = selectConfigurations(options.costFilter());
         final long[] seeds = options.seeds();
+        System.out.println("Dictionary execution order by full-dictionary baseline patch-command count:");
+        for (final LanguageWork language : languages) {
+            System.out.printf(Locale.ROOT, "  %s: %,d%n", language.language(), language.baselineCommandCount());
+        }
         long dataRows = 0L;
         try (BufferedWriter writer = Files.newBufferedWriter(temporaryOutput, StandardCharsets.UTF_8)) {
             writer.write(HEADER);
             writer.newLine();
-            for (final StemmerPatchTrieLoader.Language language : languages) {
-                final StemmerModelDescriptor descriptor = registry.requireDefault(language);
+            for (final LanguageWork languageWork : languages) {
+                final StemmerPatchTrieLoader.Language language = languageWork.language();
+                final StemmerModelDescriptor descriptor = languageWork.descriptor();
                 final List<DictionaryRow> rows = readRows(descriptor);
                 final List<GoldStandardGroup> goldGroups = toGoldGroups(rows);
                 verifyProductionEquivalence(language, rows);
+                final List<EquivalentCostClass> costClasses = groupEquivalentConfigurations(rows, grid);
 
-                System.out.printf(Locale.ROOT, "Language %s (%s): %,d rows, %d seeds, %d normalized configs%n",
-                        language, descriptor.id(), rows.size(), seeds.length, grid.size());
+                System.out.printf(Locale.ROOT, "Language %s (%s): %,d rows, %,d baseline patch commands, "
+                        + "%d seeds, %d normalized configs in %d exact equivalence classes%n",
+                        language, descriptor.id(), rows.size(), languageWork.baselineCommandCount(), seeds.length,
+                        grid.size(), costClasses.size());
 
                 for (final long seed : seeds) {
                     final List<DictionaryRow> ranked = rankRows(rows, descriptor.id(), seed);
                     final List<ScenarioContext> scenarios = createScenarioContexts(ranked, goldGroups);
                     int configIndex = 0;
-                    for (final CostConfig config : grid) {
+                    for (final EquivalentCostClass costClass : costClasses) {
+                        final CostConfig config = costClass.representative();
                         configIndex++;
                         for (final ScenarioContext scenario : scenarios) {
                             final String row = evaluateScenario(language, descriptor, ranked,
-                                    config, seed, scenario, options.provenance());
+                                    config, costClass.labels(), seed, scenario, options.provenance());
                             writeCsvRow(writer, row);
                             dataRows++;
                         }
-                        if (configIndex % 50 == 0) {
-                            System.out.printf(Locale.ROOT, "  %s seed %s: %d/%d configs processed%n",
-                                    language, Long.toUnsignedString(seed), configIndex, grid.size());
+                        if (configIndex % 25 == 0) {
+                            System.out.printf(Locale.ROOT, "  %s seed %s: %d/%d equivalence classes processed%n",
+                                    language, Long.toUnsignedString(seed), configIndex, costClasses.size());
                         }
                     }
                 }
-                System.out.printf(Locale.ROOT, "  Completed %s: %d configs%n", language, grid.size());
+                System.out.printf(Locale.ROOT, "  Completed %s: %d equivalence classes%n",
+                        language, costClasses.size());
+                writer.flush();
             }
         }
         return dataRows;
@@ -302,7 +349,7 @@ public final class EditCostSensitivityApplication {
     private static List<StemmerPatchTrieLoader.Language> selectLanguages(final String languageFilter) {
         final List<StemmerPatchTrieLoader.Language> languages = new ArrayList<>();
         for (final StemmerPatchTrieLoader.Language candidate : StemmerPatchTrieLoader.Language.values()) {
-            if (languageFilter == null || candidate.name().equals(languageFilter)) {
+            if (languageFilter == null || "ALL".equals(languageFilter) || candidate.name().equals(languageFilter)) {
                 languages.add(candidate);
             }
         }
@@ -310,6 +357,25 @@ public final class EditCostSensitivityApplication {
             throw new IllegalArgumentException("No language matches filter: " + languageFilter);
         }
         return List.copyOf(languages);
+    }
+
+    /**
+     * Measures production-baseline command vocabularies and orders dictionaries
+     * from least to most expensive before any grid scenario is evaluated.
+     */
+    /* default */ static List<LanguageWork> orderLanguagesByBaselineCommandCount(
+            final List<StemmerPatchTrieLoader.Language> languages, final StemmerModelRegistry registry)
+            throws IOException {
+        final List<LanguageWork> ordered = new ArrayList<>(languages.size());
+        for (final StemmerPatchTrieLoader.Language language : languages) {
+            final StemmerModelDescriptor descriptor = registry.requireDefault(language);
+            final List<DictionaryRow> rows = readRows(descriptor);
+            ordered.add(new LanguageWork(language, descriptor, rows.size(),
+                    countDistinctPatchCommands(rows, BASELINE)));
+        }
+        ordered.sort(Comparator.comparingLong(LanguageWork::baselineCommandCount)
+                .thenComparing(work -> work.language().name()));
+        return List.copyOf(ordered);
     }
 
     /** Writes one validated CSV data row. */
@@ -368,6 +434,110 @@ public final class EditCostSensitivityApplication {
             }
         }
         return List.copyOf(grid);
+    }
+
+    /** Resolves an optional exact configuration label for pilot and shard runs. */
+    /* default */ static List<CostConfig> selectConfigurations(final String costFilter) {
+        final List<CostConfig> grid = generateGrid();
+        if (costFilter == null) {
+            return grid;
+        }
+        for (final CostConfig config : grid) {
+            if (config.label().equals(costFilter)) {
+                return List.of(config);
+            }
+        }
+        throw new IllegalArgumentException("No normalized cost configuration matches filter: " + costFilter);
+    }
+
+    /**
+     * Groups configurations that generate exactly the same command for every
+     * full-dictionary input pair. Such configurations necessarily build the same
+     * trie for every nested training subset used by this protocol.
+     */
+    /* default */ static List<EquivalentCostClass> groupEquivalentConfigurations(
+            final List<DictionaryRow> rows, final List<CostConfig> configurations) {
+        final Map<String, List<CostConfig>> byFingerprint = new LinkedHashMap<>();
+        for (final CostConfig configuration : configurations) {
+            byFingerprint.computeIfAbsent(commandFingerprint(rows, configuration), ignored -> new ArrayList<>())
+                    .add(configuration);
+        }
+        final List<EquivalentCostClass> result = new ArrayList<>(byFingerprint.size());
+        for (final List<CostConfig> fingerprintBucket : byFingerprint.values()) {
+            final List<List<CostConfig>> exactGroups = new ArrayList<>();
+            for (final CostConfig candidate : fingerprintBucket) {
+                List<CostConfig> matchingGroup = null;
+                for (final List<CostConfig> group : exactGroups) {
+                    if (commandsEquivalent(rows, group.get(0), candidate)) {
+                        matchingGroup = group;
+                        break;
+                    }
+                }
+                if (matchingGroup == null) {
+                    matchingGroup = new ArrayList<>();
+                    exactGroups.add(matchingGroup);
+                }
+                matchingGroup.add(candidate);
+            }
+            for (final List<CostConfig> members : exactGroups) {
+                CostConfig representative = members.get(0);
+                if (members.contains(BASELINE)) {
+                    representative = BASELINE;
+                }
+                final List<String> labels = members.stream().map(CostConfig::label).sorted().toList();
+                result.add(new EquivalentCostClass(representative, labels));
+            }
+        }
+        return List.copyOf(result);
+    }
+
+    /** Verifies command-by-command equality after fingerprint bucketing. */
+    private static boolean commandsEquivalent(final List<DictionaryRow> rows,
+            final CostConfig leftConfiguration, final CostConfig rightConfiguration) {
+        final PatchCommandEncoder left = leftConfiguration.buildEncoder();
+        final PatchCommandEncoder right = rightConfiguration.buildEncoder();
+        for (final DictionaryRow row : rows) {
+            if (!left.encode(row.stem(), row.stem()).equals(right.encode(row.stem(), row.stem()))) {
+                return false;
+            }
+            for (final String variant : row.variants()) {
+                if (!variant.equals(row.stem())
+                        && !left.encode(variant, row.stem()).equals(right.encode(variant, row.stem()))) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    /** Computes a length-delimited SHA-256 fingerprint of all generated commands. */
+    private static String commandFingerprint(final List<DictionaryRow> rows, final CostConfig configuration) {
+        final MessageDigest digest;
+        try {
+            digest = MessageDigest.getInstance("SHA-256");
+        } catch (final NoSuchAlgorithmException exception) {
+            throw new IllegalStateException("SHA-256 is unavailable.", exception);
+        }
+        final PatchCommandEncoder encoder = configuration.buildEncoder();
+        for (final DictionaryRow row : rows) {
+            updateCommandFingerprint(digest, encoder.encode(row.stem(), row.stem()));
+            for (final String variant : row.variants()) {
+                if (!variant.equals(row.stem())) {
+                    updateCommandFingerprint(digest, encoder.encode(variant, row.stem()));
+                }
+            }
+        }
+        return HexFormat.of().formatHex(digest.digest());
+    }
+
+    /** Adds one unambiguously length-delimited UTF-8 command to a fingerprint. */
+    private static void updateCommandFingerprint(final MessageDigest digest, final String command) {
+        final byte[] bytes = command.getBytes(StandardCharsets.UTF_8);
+        digest.update((byte) (bytes.length >>> 24));
+        digest.update((byte) (bytes.length >>> 16));
+        digest.update((byte) (bytes.length >>> 8));
+        digest.update((byte) bytes.length);
+        digest.update(bytes);
     }
 
     /**
@@ -473,6 +643,7 @@ public final class EditCostSensitivityApplication {
             final StemmerModelDescriptor descriptor,
             final List<DictionaryRow> ranked,
             final CostConfig config,
+            final List<String> equivalentCostLabels,
             final long seed,
             final ScenarioContext scenario,
             final ExperimentProvenance provenance) {
@@ -508,7 +679,7 @@ public final class EditCostSensitivityApplication {
         final QualityResult unseenPairwise = computePairwiseMetrics(language, config, scenario.unseenGroups(), trie);
 
         final StringBuilder sb = new StringBuilder(1024);
-        appendIdentity(sb, language, descriptor, config, seed, provenance);
+        appendIdentity(sb, language, descriptor, config, equivalentCostLabels, seed, provenance);
         sb.append(',').append(scenario.percent())
                 .append(',').append(scenario.selectedRows().size())
                 .append(',').append(ranked.size())
@@ -537,14 +708,17 @@ public final class EditCostSensitivityApplication {
      * @param language   bundled language
      * @param descriptor descriptor of the evaluated model
      * @param config     evaluated cost configuration
+     * @param equivalentCostLabels all normalized grid labels proven equivalent
      * @param seed       deterministic split seed
      * @param provenance source and generator provenance
      */
     private static void appendIdentity(final StringBuilder builder,
             final StemmerPatchTrieLoader.Language language,
             final StemmerModelDescriptor descriptor, final CostConfig config,
+            final List<String> equivalentCostLabels,
             final long seed, final ExperimentProvenance provenance) {
         builder.append(PROTOCOL_VERSION)
+                .append(",MEASUREMENT")
                 .append(',').append(provenance.radixorJavaVersion())
                 .append(',').append(provenance.sourceRevision())
                 .append(',').append(provenance.sourceState())
@@ -558,7 +732,8 @@ public final class EditCostSensitivityApplication {
                 .append(',').append(config.insertCost())
                 .append(',').append(config.replaceCost())
                 .append(',').append(config.matchCost())
-                .append(',').append(config.label());
+                .append(',').append(config.label())
+                .append(',').append(String.join(";", equivalentCostLabels));
     }
 
     /**
@@ -893,8 +1068,10 @@ public final class EditCostSensitivityApplication {
      * @param provenance source and generator provenance
      * @param seeds deterministic split seeds
      * @param languageFilter optional exact language name
+     * @param costFilter optional exact normalized cost label
      */
-    private record RunOptions(Path output, ExperimentProvenance provenance, long[] seeds, String languageFilter) {
+    private record RunOptions(Path output, ExperimentProvenance provenance, long[] seeds,
+            String languageFilter, String costFilter) {
 
         /** Validates and defensively snapshots command-line options. */
         RunOptions {
@@ -910,6 +1087,46 @@ public final class EditCostSensitivityApplication {
         @Override
         public long[] seeds() {
             return this.seeds.clone();
+        }
+    }
+
+    /**
+     * Preflight identity and production-baseline command count for one dictionary.
+     *
+     * @param language bundled language
+     * @param descriptor exact default-model descriptor
+     * @param dictionaryRows number of source dictionary rows
+     * @param baselineCommandCount distinct full-dictionary commands produced by
+     *                             the production baseline edit costs
+     */
+    /* default */ record LanguageWork(StemmerPatchTrieLoader.Language language,
+            StemmerModelDescriptor descriptor, int dictionaryRows, long baselineCommandCount) {
+
+        /** Validates one preflight measurement. */
+        LanguageWork {
+            Objects.requireNonNull(language, "language");
+            Objects.requireNonNull(descriptor, "descriptor");
+            if (dictionaryRows <= 0 || baselineCommandCount <= 0L) {
+                throw new IllegalArgumentException("Dictionary preflight counts must be positive.");
+            }
+        }
+    }
+
+    /**
+     * One exact dictionary-specific equivalence class of normalized cost settings.
+     *
+     * @param representative configuration evaluated by the expensive stages
+     * @param labels all normalized grid labels with the same generated-command sequence
+     */
+    /* default */ record EquivalentCostClass(CostConfig representative, List<String> labels) {
+
+        /** Validates and snapshots one nonempty equivalence class. */
+        EquivalentCostClass {
+            Objects.requireNonNull(representative, "representative");
+            labels = List.copyOf(labels);
+            if (labels.isEmpty() || !labels.contains(representative.label())) {
+                throw new IllegalArgumentException("An equivalence class must contain its representative.");
+            }
         }
     }
 

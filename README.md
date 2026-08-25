@@ -141,16 +141,16 @@ Radixor performance is best read together with stemming quality. The English dic
 
 | Used rows | Actual row ratio | All exact | Changed exact | Root preserved | Speed ms/op | Error ms | ns/token |
 | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| 100% | 100.000% | 97.478% | 97.197% | 97.552% | 18.349 | 4.042 | 87.2 |
-| 90% | 90.000% | 97.047% | 94.913% | 97.613% | 14.767 | 1.331 | 70.2 |
-| 80% | 80.000% | 96.635% | 92.768% | 97.661% | 14.233 | 1.242 | 67.6 |
-| 70% | 70.000% | 96.209% | 90.565% | 97.705% | 15.195 | 2.398 | 72.2 |
-| 60% | 60.000% | 95.750% | 88.384% | 97.703% | 13.539 | 1.173 | 64.3 |
-| 50% | 50.000% | 95.262% | 86.107% | 97.690% | 12.624 | 1.054 | 60.0 |
-| 40% | 40.000% | 94.753% | 83.855% | 97.643% | 13.419 | 1.587 | 63.8 |
-| 30% | 30.000% | 94.208% | 81.651% | 97.537% | 12.299 | 1.418 | 58.4 |
-| 20% | 20.000% | 93.633% | 79.366% | 97.416% | 10.937 | 1.250 | 52.0 |
-| 10% | 10.000% | 92.868% | 76.516% | 97.204% | 10.911 | 1.798 | 51.8 |
+| 100% | 100.000% | 97.668% | 98.110% | 97.552% | 20.425 | 3.636 | 97.9 |
+| 90% | 90.000% | 97.239% | 95.821% | 97.612% | 17.779 | 1.827 | 85.3 |
+| 80% | 80.000% | 96.827% | 93.673% | 97.656% | 15.343 | 1.321 | 73.6 |
+| 70% | 70.000% | 96.392% | 91.430% | 97.695% | 16.444 | 2.027 | 78.9 |
+| 60% | 60.000% | 95.935% | 89.244% | 97.693% | 14.330 | 1.350 | 68.7 |
+| 50% | 50.000% | 95.453% | 86.979% | 97.678% | 14.953 | 2.625 | 71.7 |
+| 40% | 40.000% | 94.939% | 84.667% | 97.638% | 12.919 | 1.155 | 62.0 |
+| 30% | 30.000% | 94.398% | 82.443% | 97.538% | 12.166 | 1.305 | 58.3 |
+| 20% | 20.000% | 93.821% | 80.174% | 97.406% | 11.549 | 1.535 | 55.4 |
+| 10% | 10.000% | 93.057% | 77.327% | 97.190% | 14.360 | 3.524 | 68.9 |
 
 Column meanings:
 
@@ -163,7 +163,7 @@ Column meanings:
 - `Error ms` is the JMH score error converted to milliseconds.
 - `ns/token` is average nanoseconds per changed token in that operation.
 
-The contracted trie result is materially stronger than the older uncontracted profile: full English coverage reaches 97.478% all-token exactness and 97.197% changed-token exactness at 87.2 ns/token, while even a 10% deterministic dictionary slice remains at 92.868% all-token exactness and 76.516% changed-token exactness at 51.8 ns/token. This is why Radixor benchmark results are documented with both speed and quality instead of a single Porter speed badge.
+The contracted trie result is materially stronger than the older uncontracted profile: full English coverage reaches 97.668% all-token exactness and 98.110% changed-token exactness at 97.9 ns/token, while even a 10% deterministic dictionary slice remains at 93.057% all-token exactness and 77.327% changed-token exactness at 68.9 ns/token. This is why Radixor benchmark results are documented with both speed and quality instead of a single Porter speed badge.
 
 The English curve evaluates the complete dictionary, so it intentionally mixes
 trained and withheld rows. The separate
@@ -172,6 +172,14 @@ isolates held-out rows, removes surface forms duplicated in training, and report
 five frozen splits at every 10% coverage step. It contains 1,000 raw scenarios
 with exact model provenance and makes clear where transfer is strong—and where a
 small resource does not support a broad generalization claim.
+
+The complementary [edit-cost sensitivity experiment](docs/benchmarks/edit-cost-sensitivity.md)
+expands 16,700 physically measured exact command classes into a validated 234,000-observation
+logical matrix. It finds that suitable relative edit costs and their structural effect are
+language-dependent. Each [language benchmark page](docs/benchmarks/languages/index.md) therefore
+publishes its own 10%–90% knowledge curve, command-equivalence evidence, selected-cost effect,
+factor associations, and bounded conclusion; exploratory non-baseline settings are not presented
+as production defaults without external validation.
 
 For benchmark scope, workload design, environment, commands, report locations, and interpretation guidance, see [Benchmarking](docs/benchmarking.md).
 
@@ -185,11 +193,11 @@ Useful historical references:
 
 - [Egothor project](http://www.egothor.org/)
 - [Stempel overview](https://www.getopt.org/stempel/)
-- [Leo Galambos, *Lemmatizer for Document Information Retrieval Systems in JAVA* (SOFSEM 2001)](https://www.researchgate.net/publication/221512865_Lemmatizer_for_Document_Information_Retrieval_Systems_in_JAVA)
+- [Leo Galambos, *Lemmatizer for Document Information Retrieval Systems in JAVA* (SOFSEM 2001)](https://doi.org/10.1007/3-540-45627-9_21)
 - [Lucene Stempel overview](https://lucene.apache.org/core/5_3_0/analyzers-stempel/index.html)
 - [Elasticsearch Stempel plugin](https://www.elastic.co/docs/reference/elasticsearch/plugins/analysis-stempel)
 
-The Galambos paper is a useful historical reference for the semi-automatic, transformation-based stemming idea that later informed the Egothor lineage and, in turn, the conceptual background of Radixor. It should be read as research and heritage context rather than as a description of Radixor's present-day implementation.
+The 2001 paper documents the general P-command method used by the Egothor/Radixor lineage: minimum-cost partial edit commands encode word-to-stem transformations and are organized in a trie. It is the historical method reference for this lineage rather than a description of Radixor's present-day implementation.
 
 Radixor is not a repackaging of legacy code. It is a modern implementation that preserves the valuable core idea while reworking the engineering around maintainability, testing, persistence, and long-term operational use.
 

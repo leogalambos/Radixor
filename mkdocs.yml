@@ -62,7 +62,10 @@ nav:
   - Evaluate Radixor:
      - Results Overview: benchmarks/index.md
      - How to Read the Evidence: benchmarking.md
-     - Multilingual Generalization: benchmarks/generalization.md
+     - Model Behavior and Generalization:
+        - Multilingual Generalization: benchmarks/generalization.md
+        - Edit-Cost Sensitivity: benchmarks/edit-cost-sensitivity.md
+        - English Coverage and Speed: benchmarks/reference/english-coverage.md
      - Python Runtime Performance: python/performance.md
      - Language Comparisons:
         - Overview: benchmarks/languages/index.md
@@ -90,11 +93,11 @@ nav:
         - Comparison Methodology: benchmarks/reference/methodology.md
         - Linguistic Quality: benchmarks/reference/linguistic-quality.md
         - Generalization Protocol: benchmarks/reference/generalization-methodology.md
+        - Edit-Cost Protocol: benchmarks/reference/edit-cost-methodology.md
         - Tested Stemmers: benchmarks/reference/tested-stemmers.md
         - Reproducibility and Raw Data: benchmarks/reference/reproducibility.md
         - Corpora: benchmarks/reference/corpora.md
         - Environment and Reports: benchmarks/reference/environment.md
-        - English Coverage and Speed: benchmarks/reference/english-coverage.md
         - Candidate Evaluation: benchmarks/reference/candidates.md
 
   - Integrate:

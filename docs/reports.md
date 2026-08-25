@@ -2,9 +2,11 @@
 
 Radixor publishes durable build outputs to GitHub Pages from qualifying runs of `.github/workflows/pages.yml`.
 
-The workflow builds maintained MkDocs documentation and the generated model catalog from the staged source tree under `build/mkdocs-source/`. It then merges the rendered site into the separate `gh-pages` publication worktree while preserving `builds/`. The main branch stores neither generated Markdown nor rendered site output. The publication retains the ten newest numbered report sets and maintains `builds/latest/` as a stable alias.
+The workflow stages maintained MkDocs documentation under `build/mkdocs-source/` and independently regenerates the model catalog there. `verifyModelCatalogDocumentation` requires that staged copy to be byte-identical to the reviewed, checked-in `docs/stemmer-model-catalog.md`; the workflow does not rewrite repository documentation. It then merges the rendered site into the separate `gh-pages` publication worktree while preserving `builds/`. Rendered site output remains untracked. The publication retains the ten newest numbered report sets and maintains `builds/latest/` as a stable alias.
 
 This page is the central entry point for published project artifacts, including build summaries, API documentation, test and quality reports, benchmark outputs, and software composition materials. It is intended both for routine project inspection and for linking stable report surfaces from external references such as the README, release notes, or development workflows.
+
+For the verification policy behind these artifacts, see [Quality and Operations](quality-and-operations.md). The local [Historical Builds](builds.md) route is replaced with the retained index during Pages staging.
 
 ## Stable entry points
 
@@ -51,7 +53,7 @@ These resources expose benchmark results and generated badge metadata derived fr
 - [Coverage badge metadata](https://leogalambos.github.io/Radixor/builds/latest/metrics/coverage-badge.json)
 - [Mutation badge metadata](https://leogalambos.github.io/Radixor/builds/latest/metrics/pitest-badge.json)
 
-The benchmark outputs provide direct access to the published JMH result files. Coverage and mutation badge metadata endpoints are intended for status surfaces such as the project README or other generated dashboards.
+These JMH files are rolling, representative CI measurements produced by the Pages workflow. They are not the source of the frozen all-language scientific tables dated 2026-08-25. For those reviewed snapshots, conclusions, exact inputs, and reproduction commands, start with the [benchmark results overview](benchmarks/index.md) and [reproducibility page](benchmarks/reference/reproducibility.md). Coverage and mutation badge metadata endpoints are intended for status surfaces such as the project README or other generated dashboards.
 
 ## Practical usage
 

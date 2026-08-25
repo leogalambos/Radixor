@@ -2,7 +2,12 @@
 
 This page reports same-language stemming benchmarks for Hungarian. Accuracy is listed first because speed without root agreement is not enough to interpret stemmer quality.
 
-All speed values are environment-specific and were measured on the hardware and JVM listed in the [benchmark overview](../index.md). Speed benchmark operations process changed dictionary tokens only. Accuracy uses the complete Radixor dictionary for the language.
+All speed values are environment-specific and were measured on the hardware and JVM listed in the [benchmark overview](../index.md). The command distribution, exact-root accuracy, and speed tables belong to the published 2026-08-25 Radixor/Java `4.2.0-6-g84e57fb` snapshot. Speed benchmark operations process changed dictionary tokens only. Accuracy uses the complete Radixor dictionary for the language.
+
+<!-- BENCHMARK-EVIDENCE-MAP:START -->
+!!! info "How to read this page"
+    Start with the [corpus](#dictionary-corpus) and [patch-command distribution](#radixor-patch-command-distribution), then compare [exact-root agreement](#accuracy) with [runtime](#speed). The [dictionary-family experiment](#dictionary-family-generalization-conclusion), [edit-cost experiment](#edit-costs-and-dictionary-knowledge-generalization), and [pairwise linguistic evaluation](#stemming-quality) answer separate questions. Their 10–90% curves use independent frozen protocols and must not be substituted for one another.
+<!-- BENCHMARK-EVIDENCE-MAP:END -->
 
 Runtime and exact-root agreement measure different properties. Light, minimal, possessive, and other rule-based filters intentionally have different transformation scopes, so a lower runtime can coexist with lower dictionary-root agreement. Read the speed and accuracy tables together. The Radixor rows in this refresh use the contracted compiled patch trie: compilation collapses uniform patch-command subtrees into accepting leaves, reducing hot lookup depth while preserving the preferred stemming result measured by the accuracy pass. The [EnglishRadixorDictionaryCoverageBenchmark](../reference/english-coverage.md) shows the resulting quality/speed envelope explicitly.
 
@@ -41,10 +46,10 @@ Speed uses JMH average time, 5 warmup iterations, 7 measurement iterations, 3 in
 
 | Stemmer | Benchmark method | Score ms/op | Error ms | ns/token | Relative vs Radixor | Note |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
-| Radixor | `hungarianRadixor` | 51.864 | 1.193 | 57.8 | 1.000 | Radixor dictionary-trained patch-command stemmer. |
-| Lucene HungarianLightStemFilter | `hungarianLuceneHungarianLightStemFilter` | 90.099 | 5.756 | 100.5 | 1.737 | Light Hungarian suffix stemmer. |
-| Official Snowball direct | `snowballDirect[HUNGARIAN]` | 161.436 | 10.993 | 180.0 | 3.113 | Official Snowball generated Java stemmer; direct API. |
-| Lucene SnowballFilter | `luceneSnowballFilter[HUNGARIAN]` | 179.732 | 7.331 | 200.4 | 3.465 | Lucene TokenFilter path around Snowball; includes TokenStream overhead. |
+| Radixor | `hungarianRadixor` | 55.040 | 0.877 | 61.4 | 1.000 | Radixor dictionary-trained patch-command stemmer. |
+| Lucene HungarianLightStemFilter | `hungarianLuceneHungarianLightStemFilter` | 88.848 | 3.854 | 99.1 | 1.614 | Light Hungarian suffix stemmer. |
+| Official Snowball direct | `snowballDirect[HUNGARIAN]` | 167.949 | 9.811 | 187.2 | 3.051 | Official Snowball generated Java stemmer; direct API. |
+| Lucene SnowballFilter | `luceneSnowballFilter[HUNGARIAN]` | 186.896 | 11.344 | 208.4 | 3.396 | Lucene TokenFilter path around Snowball; includes TokenStream overhead. |
 
 ## Interpretation Notes
 
@@ -53,6 +58,132 @@ Speed uses JMH average time, 5 warmup iterations, 7 measurement iterations, 3 in
 - Lucene TokenFilter rows include TokenStream, attribute, and required normalization overhead. Direct rows measure exposed direct APIs.
 - Morfologik rows are dictionary-based and can emit multiple terms for one input token. Quality rows use the first returned term when no ranking weight is available.
 - Snowball rows are rule-based generated suffix stemmers; they are useful algorithmic baselines, not dictionary-root equivalence guarantees.
+
+<!-- DICTIONARY-GENERALIZATION:START -->
+
+## Dictionary-Family Generalization Conclusion
+
+This is the language-specific conclusion from the independent `radixor-generalization-v1` baseline
+experiment. It is intentionally separate from the wider edit-cost protocol below; values from
+the two frozen snapshots are not substituted for one another.
+
+### Evidence
+
+Model `hu-hu-default` version `1.0.0` is evaluated over five
+predeclared nested splits. Unseen metrics remove withheld occurrences whose normalized surface
+also appeared in training. Parentheses show the observed split minimum–maximum.
+
+| Training rows | Median unseen occurrences | Unseen all exact | Unseen changed exact | Unseen root preserved |
+| ---: | ---: | ---: | ---: | ---: |
+| 10% | 840,551 | 86.761% (86.100–87.668) | 86.876% (86.177–87.841) | 84.086% (83.633–85.050) |
+| 20% | 746,292 | 88.280% (87.847–88.842) | 88.393% (87.931–88.968) | 85.865% (85.589–85.920) |
+| 30% | 651,802 | 89.047% (88.909–89.354) | 89.126% (89.006–89.437) | 87.178% (86.603–87.420) |
+| 40% | 557,829 | 90.002% (89.679–90.181) | 90.053% (89.707–90.254) | 88.776% (88.318–89.016) |
+| 50% | 463,693 | 90.729% (90.537–90.756) | 90.777% (90.567–90.810) | 89.530% (89.200–89.806) |
+| 60% | 370,552 | 91.156% (91.058–91.366) | 91.187% (91.074–91.418) | 90.673% (90.092–91.129) |
+| 70% | 277,343 | 91.756% (91.390–92.053) | 91.744% (91.350–92.058) | 91.940% (90.827–92.376) |
+| 80% | 184,401 | 91.771% (91.652–92.138) | 91.756% (91.609–92.123) | 92.536% (92.147–92.726) |
+| 90% | 92,253 | 92.212% (91.551–92.510) | 92.203% (91.476–92.460) | 93.446% (92.426–93.786) |
+
+### Generalization conclusion
+
+- Median exactness on genuinely unseen changed forms moves from **86.876%**
+  at 10% training knowledge to **92.203%** at 90%, a measured
+  **+5.327 percentage-point** change for this dictionary.
+- Over the same endpoints, unseen all-form exactness changes by **+5.450 pp** and
+  preservation of unseen already-root forms changes by **+9.360 pp**. These separate
+  outcomes show whether the changed-form result coexists with preservation behavior.
+- The evidence establishes within-resource transfer across withheld dictionary families. It
+  does not estimate unrelated domains, misspellings, arbitrary compounds, or external corpora.
+
+The complete ten-level table and split ranges remain in the
+[independent generalization report](../generalization.md); raw counters and provenance are in
+[`dictionary-generalization.csv`](../data/dictionary-generalization.csv). The
+[frozen methodology](../reference/generalization-methodology.md) defines family-level
+splitting, unseen-surface leakage control, aggregation, and the limits of the claim.
+
+<!-- DICTIONARY-GENERALIZATION:END -->
+
+<!-- EDIT-COST-GENERALIZATION:START -->
+
+## Edit Costs and Dictionary-Knowledge Generalization
+
+This section interprets the edit-cost and held-out-family experiment for `HU_HU`
+separately from the cross-language macro summary. Each knowledge point is the median of
+five frozen, nested splits. The primary exactness outcome covers changed forms in withheld
+families after excluding normalized surfaces seen in training. Thus the complete dictionary
+is the evaluation population, while only genuinely unseen surfaces contribute to this outcome.
+
+Cost labels have the fixed form `D<delete>I<insert>R<replace>M<match>`. `D` is the cost
+of deleting a source character, `I` of inserting a target character, `R` of replacing a
+source character, and `M` of keeping an equal source/target character unchanged (the match
+or skip step). For example, `D2I5R3M0` means delete cost 2, insert cost 5, replace cost 3,
+and match cost 0. The numbers are relative dynamic-programming costs, not command counts.
+
+### Evidence
+
+| Dictionary rows | Evaluated forms | Changed-form share | Baseline commands | Exact cost classes | Grid reduction | Largest exact class |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 19,406 | 935,713 | 95.86% | 462 | 12 | 19.50× | 54 |
+
+The exact classes are based on command-by-command equality over the complete dictionary,
+not equality of aggregate trie metrics. A higher class count means that this dictionary
+exposes more cost-dependent encoder decisions; it does not by itself mean better quality.
+
+| Knowledge | Baseline unseen changed exact | Selected-cost exact | Δ | Baseline F0.5 | Selected F0.5 | Baseline commands | Selected commands |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 10% | 86.780% | 86.780% | +0.000 pp | 0.9561 | 0.9561 | 1.000× | 0.876× |
+| 20% | 88.502% | 88.502% | +0.000 pp | 0.9625 | 0.9625 | 1.000× | 0.896× |
+| 30% | 89.578% | 89.578% | +0.000 pp | 0.9667 | 0.9667 | 1.000× | 0.888× |
+| 40% | 90.256% | 90.256% | +0.000 pp | 0.9690 | 0.9690 | 1.000× | 0.888× |
+| 50% | 90.699% | 90.699% | +0.000 pp | 0.9703 | 0.9703 | 1.000× | 0.889× |
+| 60% | 91.040% | 91.040% | +0.000 pp | 0.9719 | 0.9719 | 1.000× | 0.889× |
+| 70% | 91.447% | 91.447% | +0.000 pp | 0.9726 | 0.9726 | 1.000× | 0.885× |
+| 80% | 91.759% | 91.759% | +0.000 pp | 0.9743 | 0.9743 | 1.000× | 0.888× |
+| 90% | 91.867% | 91.867% | +0.000 pp | 0.9748 | 0.9748 | 1.000× | 0.888× |
+
+### Within-language associations
+
+Spearman coefficients are calculated independently inside each seed × knowledge
+stratum across the normalized cost grid. The table reports the median and central
+95% empirical interval across up to 45 strata. A relationship is called stable
+only when it is defined in all 45 strata and the interval retains one sign.
+These intervals are descriptive, not multiplicity-adjusted confidence intervals.
+Every predictor and outcome label is defined in the [methodology glossary](../reference/edit-cost-methodology.md#predictor-and-outcome-glossary).
+
+The strongest structural pairs whose central interval retains one sign are:
+
+| Predictor | Structural outcome | Median Spearman ρ | Central 95% | Strata |
+| --- | --- | ---: | ---: | ---: |
+| `patch_command_ratio` | `value_references` | +0.910 | +0.849…+1.000 | 45 |
+| `replace_to_delete_insert` | `patch_command_ratio` | -0.778 | -0.849…-0.584 | 45 |
+| `replace_to_delete_insert` | `value_references` | -0.509 | -0.577…-0.371 | 45 |
+| `delete_cost` | `patch_command_ratio` | +0.399 | +0.338…+0.407 | 45 |
+| `insert_cost` | `patch_command_ratio` | +0.399 | +0.338…+0.407 | 45 |
+| `replace_cost` | `patch_command_ratio` | -0.509 | -0.593…-0.328 | 45 |
+
+For each quality outcome, the largest absolute median association is shown even when its
+interval crosses zero. This prevents a large median in heterogeneous strata from being
+misreported as a portable language-level effect.
+
+| Predictor | Quality outcome | Median Spearman ρ | Central 95% | Stable | Defined strata |
+| --- | --- | ---: | ---: | --- | ---: |
+| `replace_to_delete_insert` | `unseen_changed_exact` | +0.849 | +0.849…+0.849 | no | 1 / 45 |
+| `trie_edges` | `unseen_f05` | -0.694 | -0.748…-0.010 | no | 24 / 45 |
+| `replace_to_delete_insert` | `unseen_over_percent` | -0.709 | -0.889…+0.730 | no | 9 / 45 |
+| `trie_edges` | `unseen_under_percent` | +0.707 | +0.042…+0.851 | no | 24 / 45 |
+
+### Edit-cost conclusion
+
+- With baseline costs, median unseen changed-form exactness changes from **86.780%** at 10% knowledge to **91.867%** at 90%, a **+5.087 pp** measured knowledge effect.
+- The predeclared selection is `D1I1R10M0`. Its median unseen changed-form exactness differs from baseline by **+0.000 pp** and it reduces the median retained-command count by **11.17%** (0.888× baseline).
+- Under the selected costs, the 10%–90% knowledge change is **+5.087 pp**. This quantifies generalization for this dictionary; it is not a claim about unrelated domains or lexical resources.
+- The non-baseline setting is an efficiency candidate, not a production default: it was selected and evaluated on the same matrix and therefore requires external-corpus or external-dictionary validation before adoption.
+- No cost or representation predictor is both defined in all 45 strata and retains one association sign over the central 95% interval for an unseen-form quality outcome. Effects with partial coverage are insufficient for a stable language-level claim; the remaining measured effects are heterogeneous across knowledge levels and splits.
+
+The complete evidence is available in the [raw logical matrix](../data/edit-cost-sensitivity.csv.gz), the [per-language knowledge curves](../data/edit-cost-language-knowledge-curve.csv), and the [per-language association table](../data/edit-cost-language-correlations.csv). See the [cross-language analysis](../edit-cost-sensitivity.md) and [frozen methodology](../reference/edit-cost-methodology.md) for scope and limitations.
+
+<!-- EDIT-COST-GENERALIZATION:END -->
 
 <!-- STEMMING-QUALITY:START -->
 
@@ -316,7 +447,7 @@ Standard ARI, homogeneity, completeness, V-measure, and NMI are not calculated: 
 ### Provenance
 
 - Authoritative source: `docs/benchmarks/data/stemming-quality.csv`
-- Source SHA-256: `f15f8e653022e0333955b8b82f42944aa1c5a14a5ce54e628bb1a9c9aed42132`
+- Source SHA-256: `85763189eab4d0fbb047c2d5d3554c66abf9732182bd0d8fd758d7aef680e66f`
 - Evaluation command: `./gradlew stemmingQuality --no-daemon`
 - Dictionary language: `HU_HU`
 - Processing modes: `ALL_WORDS`, `LOWERCASE_GROUPS_ONLY`

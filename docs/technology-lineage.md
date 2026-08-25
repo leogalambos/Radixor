@@ -8,10 +8,12 @@ as a set of **algorithmic lineages and runtime models**.
 
 ## The Egothor lineage
 
-The transformation-based approach behind Radixor was described by Leo Galambos
-in *Lemmatizer for Document Information Retrieval Systems in JAVA* (SOFSEM
-2001). The Egothor implementation developed the patch-command/trie approach used
-to compile word-form transformations into a compact stemming structure.
+The general P-command method used by this lineage was published by Leo Galambos
+in [*Lemmatizer for Document Information Retrieval Systems in JAVA*](https://doi.org/10.1007/3-540-45627-9_21)
+(SOFSEM 2001). The paper derives compact partial edit commands from a
+minimum-cost transformation between a word form and its stem and organizes the
+resulting commands in a trie. Egothor implemented this patch-command/trie method
+as a compact stemming structure.
 
 Radixor is a modern implementation of that lineage. It is not a binary or source
 repackaging of the old project: the current implementation has a new runtime
@@ -126,14 +128,14 @@ than learned from lexical evidence.
 At `N=100`, the current Python batch benchmark shows that rule-based
 generalization does not require accepting a runtime advantage over Radixor:
 
-- each Radixor 4.2.0 Python runtime records lower median processing time than
+- each Radixor 4.2.1 Python runtime records lower median processing time than
   PyStemmer 3.1.0 in all **18 / 18** direct language comparisons;
-- Python (PyO3) has a **2.25×** geometric-mean speedup and a largest measured
-  direct advantage of **4.58×** (Yiddish);
-- Python-C has a **2.29×** geometric-mean speedup and a largest measured direct
-  advantage of **4.37×** (Yiddish);
-- Python (PyO3) spans **6.96–14.52 million words/s**, while Python-C spans
-  **6.92–14.85 million words/s**, across all 20 languages at batch size `N=100`.
+- Python (PyO3) has a **2.19×** geometric-mean speedup and a largest measured
+  direct advantage of **4.52×** (Yiddish);
+- Python-C has a **2.28×** geometric-mean speedup and a largest measured direct
+  advantage of **4.38×** (Yiddish);
+- Python (PyO3) spans **6.85–13.87 million words/s**, while Python-C spans
+  **6.76–14.63 million words/s**, across all 20 languages at batch size `N=100`.
 
 Those are performance results. The newly integrated official Snowball 3.1.0 Java
 quality comparators also make the linguistic trade-off visible for the three
@@ -162,7 +164,7 @@ Finnish remains another useful illustration. The published `ALL_WORDS`
 primary-output quality result is **0.984838** balanced accuracy for Radixor
 versus **0.740279** for the Snowball Finnish Lucene path, with under-stemming
 **3.032474%** versus **51.944179%**. At `N=100` in the current Python batch run,
-Python (PyO3) is **1.31×** faster and Python-C is **1.54×** faster than
+Python (PyO3) is **1.30×** faster and Python-C is **1.51×** faster than
 PyStemmer's Finnish implementation.
 
 See the [Finnish benchmark](benchmarks/languages/finnish.md), the
@@ -228,10 +230,18 @@ The benchmark pages remain the authority for each language and comparator. The
 purpose of this page is to make the **technology categories** explicit so readers
 do not have to infer them from implementation names.
 
+The current edit-cost experiment also rules out presenting one cost setting or one
+generalization slope as universally optimal. Across 20 dictionaries, the normalized grid produces
+dictionary-specific exact command classes and the quality associations vary with language,
+knowledge level, and split. The [cross-language analysis](benchmarks/edit-cost-sensitivity.md)
+therefore links to separate evidence and conclusions on every
+[language benchmark page](benchmarks/languages/index.md); selected non-baseline costs remain
+external-validation candidates.
+
 ## Historical references
 
-- Leo Galambos, *Lemmatizer for Document Information Retrieval Systems in JAVA*
-  (SOFSEM 2001)
+- [Leo Galambos, *Lemmatizer for Document Information Retrieval Systems in JAVA*
+  (SOFSEM 2001)](https://doi.org/10.1007/3-540-45627-9_21)
 - [Lucene StempelStemmer documentation](https://lucene.apache.org/core/9_9_1/analysis/stempel/org/apache/lucene/analysis/stempel/StempelStemmer.html)
 - [Lucene Morfologik package documentation](https://lucene.apache.org/core/10_3_2/analysis/morfologik/org/apache/lucene/analysis/morfologik/package-summary.html)
 - [Architecture](architecture.md)

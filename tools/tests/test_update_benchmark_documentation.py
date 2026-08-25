@@ -35,6 +35,7 @@ from __future__ import annotations
 
 import importlib.util
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -168,6 +169,25 @@ class BenchmarkDocumentationTest(unittest.TestCase):
             updated,
             MODULE.update_accuracy_table(updated, data, "FA_IR", {}),
         )
+
+    def test_verify_mode_rejects_stale_document_without_writing(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "page.md"
+            path.write_text("reviewed\n", encoding="utf-8")
+
+            with self.assertRaisesRegex(SystemExit, "documentation is stale"):
+                MODULE.Publication("verify").write(path, "generated\n")
+
+            self.assertEqual("reviewed\n", path.read_text(encoding="utf-8"))
+
+    def test_update_mode_replaces_stale_document(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "page.md"
+            path.write_text("old\n", encoding="utf-8")
+
+            MODULE.Publication("update").write(path, "current\n")
+
+            self.assertEqual("current\n", path.read_text(encoding="utf-8"))
 
 
 if __name__ == "__main__":

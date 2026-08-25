@@ -93,6 +93,17 @@ final class EditCostSensitivityApplicationTest {
     }
 
     @Test
+    @DisplayName("configuration filter should select one exact normalized grid point")
+    void configurationFilterShouldSelectExactLabel() {
+        assertEquals(List.of(EditCostSensitivityApplication.BASELINE),
+                EditCostSensitivityApplication.selectConfigurations("D1I1R1M0"),
+                "A shard filter must select exactly the requested normalized cost configuration.");
+        assertThrows(IllegalArgumentException.class,
+                () -> EditCostSensitivityApplication.selectConfigurations("D10I10R10M0"),
+                "A scale-duplicate label omitted from the normalized grid must be rejected.");
+    }
+
+    @Test
     @DisplayName("countDistinctPatchCommands should return positive count for sample rows")
     void countDistinctPatchCommandsShouldReturnPositiveCount() {
         final long count = EditCostSensitivityApplication.countDistinctPatchCommands(
@@ -224,6 +235,20 @@ final class EditCostSensitivityApplicationTest {
     }
 
     @Test
+    @DisplayName("command fingerprints should collapse exactly equivalent configurations")
+    void equivalentConfigurationsShouldShareOneClass() {
+        final CostConfig unit = new CostConfig(1, 1, 1, 0);
+        final CostConfig scaled = new CostConfig(10, 10, 10, 0);
+        final List<EditCostSensitivityApplication.EquivalentCostClass> classes =
+                EditCostSensitivityApplication.groupEquivalentConfigurations(
+                        SAMPLE_ROWS, List.of(unit, scaled));
+        assertEquals(1, classes.size(),
+                "Configurations generating the same command for every pair need one expensive evaluation.");
+        assertEquals(Set.of(unit.label(), scaled.label()), Set.copyOf(classes.get(0).labels()),
+                "The equivalence class must retain every original configuration label.");
+    }
+
+    @Test
     @DisplayName("scenario command baselines should use only selected training rows")
     void scenarioCommandBaselinesShouldUseSelectedRows() {
         final List<GoldStandardGroup> groups = EditCostSensitivityApplication.toGoldGroups(SAMPLE_ROWS);
@@ -292,6 +317,10 @@ final class EditCostSensitivityApplicationTest {
                 "The report schema must expose withheld-family Matthews correlation.");
         assertTrue(EditCostSensitivityApplication.HEADER.contains("unseen_mcc"),
                 "The report schema must expose unseen-surface Matthews correlation.");
+        assertTrue(EditCostSensitivityApplication.HEADER.contains("record_type"),
+                "The report schema must identify physical measurement rows explicitly.");
+        assertTrue(EditCostSensitivityApplication.HEADER.contains("equivalent_cost_labels"),
+                "The report schema must preserve every exactly equivalent normalized grid point.");
     }
 
     @Test

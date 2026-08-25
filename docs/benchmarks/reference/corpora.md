@@ -7,7 +7,7 @@ The table below describes the Radixor resources used to build speed and quality 
 | `cs-cz-default` | `1.0.0` | `62afdaa6dc7a721b54a0dc278a0c648a63ad52a34a412d27b5b52fbcde9c1ce4` | `CS_CZ` | 5,113 | 56,612 | 10,049 | 46,563 | 46,563 |
 | `da-dk-default` | `1.0.0` | `3f7b670a0e7b872bda0381f5154ce058a4656297b39b7157b4ccf6560257cb90` | `DA_DK` | 4,179 | 32,256 | 8,356 | 23,900 | 23,900 |
 | `nl-nl-default` | `1.0.0` | `c098034adc42da2ca3e419160e6dd2c2b3868f8af334303b3a191e09caadaf5e` | `NL_NL` | 4,992 | 31,466 | 9,981 | 21,485 | 21,485 |
-| `us-uk-default` | `1.0.0` | `8c79122993499e437ea8b54b620832dca29019298f281c1f3132f4d1be885460` | `US_UK` | 396,939 | 1,004,374 | 793,874 | 210,500 | 210,500 |
+| `us-uk-default` | `1.0.1` | `0a3ec1fddd5ddb859f5ffa8003efe9200a5ef6203df1fddaf53a58003f33582c` | `US_UK` | 396,939 | 1,002,414 | 793,874 | 208,540 | 208,540 |
 | `fi-fi-default` | `1.0.0` | `ca2628b3db31fee92f1b612ebbbd5e956a6dbbfb10e721325e55ef528f26072f` | `FI_FI` | 57,027 | 1,865,215 | 110,525 | 1,754,690 | 1,754,690 |
 | `fr-fr-default` | `1.0.0` | `a988658758952fd599dc7360e0234178a6d65ac46e5cedc7dcd325a7cb7e71d9` | `FR_FR` | 59,240 | 474,110 | 108,141 | 365,969 | 365,969 |
 | `de-de-default` | `1.0.0` | `cbfa038122823f02e4bdb54b0035492c356b6ecd80f11eb11290d7a7248a59f5` | `DE_DE` | 54,092 | 333,036 | 90,535 | 242,501 | 242,501 |

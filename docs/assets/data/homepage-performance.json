@@ -1,17 +1,31 @@
 {
-  "source": "Python all-language batch benchmark, 2026-08-23",
+  "source": "Python all-language batch benchmark, 2026-08-25",
   "environment": {
-    "processor": "AMD Ryzen 5 7600 6-Core Processor",
-    "platform": "Fedora Linux 44, Linux-7.1.8-200.fc44.x86_64, glibc 2.43",
+    "processor": "AMD Ryzen 5 8600G w/ Radeon 760M Graphics",
+    "platform": "Linux-7.1.8-200.fc44.x86_64-x86_64-with-glibc2.43",
     "python": "CPython 3.14.7",
-    "rust": "1.97.1",
-    "gcc": "16.2.1",
+    "cpu_affinity": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11
+    ],
+    "scaling_driver": "amd-pstate-epp",
     "cpu_governor": "performance",
-    "energy_performance_preference": "performance"
+    "energy_performance_preference": "performance",
+    "amd_pstate_status": "active"
   },
   "versions": {
-    "radixor": "4.2.0",
-    "radixor-c": "4.2.0",
+    "radixor": "4.2.1",
+    "radixor-c": "4.2.1",
     "PyStemmer": "3.1.0",
     "snowballstemmer": "3.1.1",
     "NLTK": "3.10.3"
@@ -19,225 +33,225 @@
   "batch_size": 100,
   "direct_pystemmer_comparisons": 18,
   "direct_pystemmer_wins": 18,
-  "geometric_mean_speedup_vs_pystemmer": 2.2455,
+  "geometric_mean_speedup_vs_pystemmer": 2.1912,
   "maximum_speedup_vs_pystemmer": {
     "language": "yi",
-    "speedup": 4.5791
+    "speedup": 4.5216
   },
   "radixor_throughput_mwords_per_second": {
     "minimum": {
       "language": "ru",
-      "value": 6.9592
+      "value": 6.8508
     },
     "maximum": {
       "language": "nn",
-      "value": 14.5217
+      "value": 13.8657
     }
   },
   "python_c": {
     "direct_pystemmer_comparisons": 18,
     "direct_pystemmer_wins": 18,
-    "geometric_mean_speedup_vs_pystemmer": 2.2898,
+    "geometric_mean_speedup_vs_pystemmer": 2.2798,
     "maximum_speedup_vs_pystemmer": {
       "language": "yi",
-      "speedup": 4.3712
+      "speedup": 4.3801
     },
     "throughput_mwords_per_second": {
       "minimum": {
         "language": "ru",
-        "value": 6.9173
+        "value": 6.761
       },
       "maximum": {
         "language": "pt",
-        "value": 14.8515
+        "value": 14.634
       }
     },
     "head_to_head_vs_pyo3": {
       "wins": 10,
       "losses": 10,
-      "geometric_mean_speedup": 1.0169
+      "geometric_mean_speedup": 1.0313
     }
   },
   "languages": {
     "cs": {
-      "radixor_ns_per_word": 105.1542,
-      "radixor_mwords_per_second": 9.5098,
-      "radixor_c_ns_per_word": 95.4872,
-      "radixor_c_mwords_per_second": 10.4726,
-      "pystemmer_ns_per_word": 147.7303,
-      "speedup_vs_pystemmer": 1.4049,
-      "radixor_c_speedup_vs_pystemmer": 1.5471
+      "radixor_ns_per_word": 108.5693,
+      "radixor_mwords_per_second": 9.2107,
+      "radixor_c_ns_per_word": 97.7176,
+      "radixor_c_mwords_per_second": 10.2336,
+      "pystemmer_ns_per_word": 154.257,
+      "speedup_vs_pystemmer": 1.4208,
+      "radixor_c_speedup_vs_pystemmer": 1.5786
     },
     "da": {
-      "radixor_ns_per_word": 76.3191,
-      "radixor_mwords_per_second": 13.1029,
-      "radixor_c_ns_per_word": 84.6118,
-      "radixor_c_mwords_per_second": 11.8187,
-      "pystemmer_ns_per_word": 171.5027,
-      "speedup_vs_pystemmer": 2.2472,
-      "radixor_c_speedup_vs_pystemmer": 2.0269
+      "radixor_ns_per_word": 82.3884,
+      "radixor_mwords_per_second": 12.1376,
+      "radixor_c_ns_per_word": 85.4932,
+      "radixor_c_mwords_per_second": 11.6968,
+      "pystemmer_ns_per_word": 176.7327,
+      "speedup_vs_pystemmer": 2.1451,
+      "radixor_c_speedup_vs_pystemmer": 2.0672
     },
     "de": {
-      "radixor_ns_per_word": 118.3511,
-      "radixor_mwords_per_second": 8.4494,
-      "radixor_c_ns_per_word": 134.6743,
-      "radixor_c_mwords_per_second": 7.4253,
-      "pystemmer_ns_per_word": 428.7618,
-      "speedup_vs_pystemmer": 3.6228,
-      "radixor_c_speedup_vs_pystemmer": 3.1837
+      "radixor_ns_per_word": 120.5133,
+      "radixor_mwords_per_second": 8.2978,
+      "radixor_c_ns_per_word": 134.9876,
+      "radixor_c_mwords_per_second": 7.4081,
+      "pystemmer_ns_per_word": 442.122,
+      "speedup_vs_pystemmer": 3.6687,
+      "radixor_c_speedup_vs_pystemmer": 3.2753
     },
     "en": {
-      "radixor_ns_per_word": 91.187,
-      "radixor_mwords_per_second": 10.9665,
-      "radixor_c_ns_per_word": 90.3037,
-      "radixor_c_mwords_per_second": 11.0737,
-      "pystemmer_ns_per_word": 228.2504,
-      "speedup_vs_pystemmer": 2.5031,
-      "radixor_c_speedup_vs_pystemmer": 2.5276
+      "radixor_ns_per_word": 94.576,
+      "radixor_mwords_per_second": 10.5735,
+      "radixor_c_ns_per_word": 91.5763,
+      "radixor_c_mwords_per_second": 10.9199,
+      "pystemmer_ns_per_word": 233.3893,
+      "speedup_vs_pystemmer": 2.4677,
+      "radixor_c_speedup_vs_pystemmer": 2.5486
     },
     "es": {
-      "radixor_ns_per_word": 91.4162,
-      "radixor_mwords_per_second": 10.939,
-      "radixor_c_ns_per_word": 84.8732,
-      "radixor_c_mwords_per_second": 11.7823,
-      "pystemmer_ns_per_word": 194.885,
-      "speedup_vs_pystemmer": 2.1318,
-      "radixor_c_speedup_vs_pystemmer": 2.2962
+      "radixor_ns_per_word": 96.6087,
+      "radixor_mwords_per_second": 10.351,
+      "radixor_c_ns_per_word": 87.4843,
+      "radixor_c_mwords_per_second": 11.4306,
+      "pystemmer_ns_per_word": 201.0881,
+      "speedup_vs_pystemmer": 2.0815,
+      "radixor_c_speedup_vs_pystemmer": 2.2986
     },
     "fa": {
-      "radixor_ns_per_word": 109.5515,
-      "radixor_mwords_per_second": 9.1281,
-      "radixor_c_ns_per_word": 95.0834,
-      "radixor_c_mwords_per_second": 10.5171,
-      "pystemmer_ns_per_word": 325.2598,
-      "speedup_vs_pystemmer": 2.969,
-      "radixor_c_speedup_vs_pystemmer": 3.4208
+      "radixor_ns_per_word": 112.2558,
+      "radixor_mwords_per_second": 8.9082,
+      "radixor_c_ns_per_word": 97.4969,
+      "radixor_c_mwords_per_second": 10.2567,
+      "pystemmer_ns_per_word": 329.0118,
+      "speedup_vs_pystemmer": 2.9309,
+      "radixor_c_speedup_vs_pystemmer": 3.3746
     },
     "fi": {
-      "radixor_ns_per_word": 136.0294,
-      "radixor_mwords_per_second": 7.3514,
-      "radixor_c_ns_per_word": 115.2285,
-      "radixor_c_mwords_per_second": 8.6784,
-      "pystemmer_ns_per_word": 177.5384,
-      "speedup_vs_pystemmer": 1.3051,
-      "radixor_c_speedup_vs_pystemmer": 1.5407
+      "radixor_ns_per_word": 137.6457,
+      "radixor_mwords_per_second": 7.265,
+      "radixor_c_ns_per_word": 118.2842,
+      "radixor_c_mwords_per_second": 8.4542,
+      "pystemmer_ns_per_word": 179.0719,
+      "speedup_vs_pystemmer": 1.301,
+      "radixor_c_speedup_vs_pystemmer": 1.5139
     },
     "fr": {
-      "radixor_ns_per_word": 127.4881,
-      "radixor_mwords_per_second": 7.8439,
-      "radixor_c_ns_per_word": 122.287,
-      "radixor_c_mwords_per_second": 8.1775,
-      "pystemmer_ns_per_word": 323.9953,
-      "speedup_vs_pystemmer": 2.5414,
-      "radixor_c_speedup_vs_pystemmer": 2.6495
+      "radixor_ns_per_word": 133.4841,
+      "radixor_mwords_per_second": 7.4915,
+      "radixor_c_ns_per_word": 124.0849,
+      "radixor_c_mwords_per_second": 8.059,
+      "pystemmer_ns_per_word": 330.3007,
+      "speedup_vs_pystemmer": 2.4745,
+      "radixor_c_speedup_vs_pystemmer": 2.6619
     },
     "he": {
-      "radixor_ns_per_word": 131.4974,
-      "radixor_mwords_per_second": 7.6047,
-      "radixor_c_ns_per_word": 124.588,
-      "radixor_c_mwords_per_second": 8.0265,
+      "radixor_ns_per_word": 136.8469,
+      "radixor_mwords_per_second": 7.3074,
+      "radixor_c_ns_per_word": 141.9508,
+      "radixor_c_mwords_per_second": 7.0447,
       "pystemmer_ns_per_word": null,
       "speedup_vs_pystemmer": null,
       "radixor_c_speedup_vs_pystemmer": null
     },
     "hu": {
-      "radixor_ns_per_word": 87.7906,
-      "radixor_mwords_per_second": 11.3907,
-      "radixor_c_ns_per_word": 89.545,
-      "radixor_c_mwords_per_second": 11.1676,
-      "pystemmer_ns_per_word": 166.4121,
-      "speedup_vs_pystemmer": 1.8956,
-      "radixor_c_speedup_vs_pystemmer": 1.8584
+      "radixor_ns_per_word": 91.2273,
+      "radixor_mwords_per_second": 10.9616,
+      "radixor_c_ns_per_word": 91.9708,
+      "radixor_c_mwords_per_second": 10.873,
+      "pystemmer_ns_per_word": 164.5169,
+      "speedup_vs_pystemmer": 1.8034,
+      "radixor_c_speedup_vs_pystemmer": 1.7888
     },
     "it": {
-      "radixor_ns_per_word": 96.9892,
-      "radixor_mwords_per_second": 10.3104,
-      "radixor_c_ns_per_word": 77.668,
-      "radixor_c_mwords_per_second": 12.8753,
-      "pystemmer_ns_per_word": 339.4001,
-      "speedup_vs_pystemmer": 3.4994,
-      "radixor_c_speedup_vs_pystemmer": 4.3699
+      "radixor_ns_per_word": 103.0003,
+      "radixor_mwords_per_second": 9.7087,
+      "radixor_c_ns_per_word": 79.8332,
+      "radixor_c_mwords_per_second": 12.5261,
+      "pystemmer_ns_per_word": 347.3633,
+      "speedup_vs_pystemmer": 3.3724,
+      "radixor_c_speedup_vs_pystemmer": 4.3511
     },
     "nb": {
-      "radixor_ns_per_word": 80.5654,
-      "radixor_mwords_per_second": 12.4123,
-      "radixor_c_ns_per_word": 86.7408,
-      "radixor_c_mwords_per_second": 11.5286,
-      "pystemmer_ns_per_word": 145.1321,
-      "speedup_vs_pystemmer": 1.8014,
-      "radixor_c_speedup_vs_pystemmer": 1.6732
+      "radixor_ns_per_word": 82.9529,
+      "radixor_mwords_per_second": 12.055,
+      "radixor_c_ns_per_word": 88.3232,
+      "radixor_c_mwords_per_second": 11.3221,
+      "pystemmer_ns_per_word": 148.3329,
+      "speedup_vs_pystemmer": 1.7882,
+      "radixor_c_speedup_vs_pystemmer": 1.6794
     },
     "nl": {
-      "radixor_ns_per_word": 83.4119,
-      "radixor_mwords_per_second": 11.9887,
-      "radixor_c_ns_per_word": 77.8552,
-      "radixor_c_mwords_per_second": 12.8444,
-      "pystemmer_ns_per_word": 240.3863,
-      "speedup_vs_pystemmer": 2.8819,
-      "radixor_c_speedup_vs_pystemmer": 3.0876
+      "radixor_ns_per_word": 89.3445,
+      "radixor_mwords_per_second": 11.1926,
+      "radixor_c_ns_per_word": 80.079,
+      "radixor_c_mwords_per_second": 12.4877,
+      "pystemmer_ns_per_word": 240.8205,
+      "speedup_vs_pystemmer": 2.6954,
+      "radixor_c_speedup_vs_pystemmer": 3.0073
     },
     "nn": {
-      "radixor_ns_per_word": 68.8623,
-      "radixor_mwords_per_second": 14.5217,
-      "radixor_c_ns_per_word": 74.2641,
-      "radixor_c_mwords_per_second": 13.4655,
-      "pystemmer_ns_per_word": 141.284,
-      "speedup_vs_pystemmer": 2.0517,
-      "radixor_c_speedup_vs_pystemmer": 1.9025
+      "radixor_ns_per_word": 72.1205,
+      "radixor_mwords_per_second": 13.8657,
+      "radixor_c_ns_per_word": 76.7494,
+      "radixor_c_mwords_per_second": 13.0294,
+      "pystemmer_ns_per_word": 145.1089,
+      "speedup_vs_pystemmer": 2.012,
+      "radixor_c_speedup_vs_pystemmer": 1.8907
     },
     "pl": {
-      "radixor_ns_per_word": 84.1816,
-      "radixor_mwords_per_second": 11.8791,
-      "radixor_c_ns_per_word": 84.7984,
-      "radixor_c_mwords_per_second": 11.7927,
-      "pystemmer_ns_per_word": 131.21,
-      "speedup_vs_pystemmer": 1.5587,
-      "radixor_c_speedup_vs_pystemmer": 1.5473
+      "radixor_ns_per_word": 89.0246,
+      "radixor_mwords_per_second": 11.2328,
+      "radixor_c_ns_per_word": 87.2593,
+      "radixor_c_mwords_per_second": 11.4601,
+      "pystemmer_ns_per_word": 130.5499,
+      "speedup_vs_pystemmer": 1.4664,
+      "radixor_c_speedup_vs_pystemmer": 1.4961
     },
     "pt": {
-      "radixor_ns_per_word": 73.3768,
-      "radixor_mwords_per_second": 13.6283,
-      "radixor_c_ns_per_word": 67.333,
-      "radixor_c_mwords_per_second": 14.8515,
-      "pystemmer_ns_per_word": 180.4383,
-      "speedup_vs_pystemmer": 2.4591,
-      "radixor_c_speedup_vs_pystemmer": 2.6798
+      "radixor_ns_per_word": 77.3538,
+      "radixor_mwords_per_second": 12.9276,
+      "radixor_c_ns_per_word": 68.3339,
+      "radixor_c_mwords_per_second": 14.634,
+      "pystemmer_ns_per_word": 183.0963,
+      "speedup_vs_pystemmer": 2.367,
+      "radixor_c_speedup_vs_pystemmer": 2.6794
     },
     "ru": {
-      "radixor_ns_per_word": 143.6948,
-      "radixor_mwords_per_second": 6.9592,
-      "radixor_c_ns_per_word": 144.5643,
-      "radixor_c_mwords_per_second": 6.9173,
-      "pystemmer_ns_per_word": 257.6975,
-      "speedup_vs_pystemmer": 1.7934,
-      "radixor_c_speedup_vs_pystemmer": 1.7826
+      "radixor_ns_per_word": 145.9692,
+      "radixor_mwords_per_second": 6.8508,
+      "radixor_c_ns_per_word": 147.9071,
+      "radixor_c_mwords_per_second": 6.761,
+      "pystemmer_ns_per_word": 263.3541,
+      "speedup_vs_pystemmer": 1.8042,
+      "radixor_c_speedup_vs_pystemmer": 1.7805
     },
     "sv": {
-      "radixor_ns_per_word": 84.1259,
-      "radixor_mwords_per_second": 11.8869,
-      "radixor_c_ns_per_word": 92.3821,
-      "radixor_c_mwords_per_second": 10.8246,
-      "pystemmer_ns_per_word": 132.6202,
-      "speedup_vs_pystemmer": 1.5764,
-      "radixor_c_speedup_vs_pystemmer": 1.4356
+      "radixor_ns_per_word": 86.851,
+      "radixor_mwords_per_second": 11.514,
+      "radixor_c_ns_per_word": 93.0726,
+      "radixor_c_mwords_per_second": 10.7443,
+      "pystemmer_ns_per_word": 130.1728,
+      "speedup_vs_pystemmer": 1.4988,
+      "radixor_c_speedup_vs_pystemmer": 1.3986
     },
     "uk": {
-      "radixor_ns_per_word": 98.8018,
-      "radixor_mwords_per_second": 10.1213,
-      "radixor_c_ns_per_word": 105.9678,
-      "radixor_c_mwords_per_second": 9.4368,
+      "radixor_ns_per_word": 103.8232,
+      "radixor_mwords_per_second": 9.6318,
+      "radixor_c_ns_per_word": 110.3185,
+      "radixor_c_mwords_per_second": 9.0647,
       "pystemmer_ns_per_word": null,
       "speedup_vs_pystemmer": null,
       "radixor_c_speedup_vs_pystemmer": null
     },
     "yi": {
-      "radixor_ns_per_word": 91.5025,
-      "radixor_mwords_per_second": 10.9287,
-      "radixor_c_ns_per_word": 95.8555,
-      "radixor_c_mwords_per_second": 10.4324,
-      "pystemmer_ns_per_word": 419.0031,
-      "speedup_vs_pystemmer": 4.5791,
-      "radixor_c_speedup_vs_pystemmer": 4.3712
+      "radixor_ns_per_word": 95.6651,
+      "radixor_mwords_per_second": 10.4531,
+      "radixor_c_ns_per_word": 98.7555,
+      "radixor_c_mwords_per_second": 10.126,
+      "pystemmer_ns_per_word": 432.5561,
+      "speedup_vs_pystemmer": 4.5216,
+      "radixor_c_speedup_vs_pystemmer": 4.3801
     }
   },
   "pystemmer_missing_for_radixor_languages": [

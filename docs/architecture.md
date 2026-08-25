@@ -14,7 +14,7 @@ This document explains the structural architecture of **Radixor**: what data is 
 | Standard aggregate | POM-only transitive runtime dependencies for one default per language |
 | Verification classpaths | Direct individual-model dependencies for tests, quality evaluation, and JMH, including optional PoliMorf |
 | Models BOM | POM-only recommended individual model versions in Maven dependency management |
-| Documentation staging | Maintained `docs/` plus generated catalog under `build/mkdocs-source/` |
+| Documentation staging | Reviewed `docs/`, including the checked-in generated catalog; staging independently regenerates a byte-identical catalog under `build/mkdocs-source/` |
 | Release workflows | Independent core, one-model, and catalog publication boundaries |
 
 Read [Model Selection and Loading](model-selection-and-loading.md) for executable application examples and [Stemmer Models](stemmer-models.md) for artifact maintenance.
@@ -107,7 +107,9 @@ License inclusion, strict metadata paths, resource presence, SHA-256 verificatio
 
 ## The central idea
 
-Radixor does not store final stems directly as a large flat lookup table. Instead, it stores **patch commands** that describe how a word form should be transformed into a canonical stem.
+Radixor does not store final stems directly as a large flat lookup table. Instead, it stores
+[**patch commands**](why-radixor-is-different.md#what-a-patch-command-looks-like) that describe how
+a word form should be transformed into a canonical stem.
 
 For example, if a dictionary states that `running` should reduce to `run`, the final runtime artifact does not need to store a full redundant `running -> run` output string entry in the simplest possible form. It can store a compact transformation command that expresses how to turn the source form into the target form.
 

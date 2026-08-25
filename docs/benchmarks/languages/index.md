@@ -1,6 +1,14 @@
 # Language Benchmark Pages
 
-This section splits Radixor stemmer benchmark results by language. Each of the 20 registered default models has one language page containing the refreshed corpus, patch-command distribution, exact-root accuracy, runtime performance, and pairwise stemming-quality tables for both dictionary-processing modes.
+This section splits Radixor stemmer benchmark results by language. Each of the 20 registered default models has one language page containing the refreshed corpus, patch-command distribution, exact-root accuracy, runtime performance, pairwise stemming-quality tables, and a language-specific interpretation of the edit-cost and dictionary-knowledge experiment.
+
+The experimental sections do not merely repeat the cross-language macro values. They publish each language's five-split 10%–90% knowledge curve, exact command-equivalence census, selected edit costs, command-count effect, within-language factor associations, evidence coverage, and bounded conclusion. Non-baseline settings are exploratory candidates until independently validated.
+
+!!! info "Two knowledge curves, two questions"
+    The dictionary-family curve tests transfer to withheld lexical families under the fixed
+    baseline edit costs. The edit-cost curve compares alternative normalized costs across its own
+    frozen matrix. Both use 10%–90% labels, but their samples and protocols are independent; use
+    each page's evidence map and methodology link before comparing endpoints.
 
 ## Reference Pages
 
@@ -10,6 +18,9 @@ This section splits Radixor stemmer benchmark results by language. Each of the 2
 | [Corpora](../reference/corpora.md) | Dictionary sizes and changed-token timing workloads. |
 | [Environment and reports](../reference/environment.md) | Hardware, JVM, JMH settings, report files, and badge policy. |
 | [Dictionary-family generalization](../generalization.md) | Separate all-language evaluation of Java transformations on families withheld from model training. |
+| [Generalization methodology](../reference/generalization-methodology.md) | Frozen family splits, unseen-surface leakage control, aggregation, and claim boundaries. |
+| [Edit-cost sensitivity](../edit-cost-sensitivity.md) | Cross-language findings and an index linking directly to every language's evidence and conclusion. |
+| [Edit-cost methodology](../reference/edit-cost-methodology.md) | Frozen cost grid, exact command equality, selection rule, association coverage, and limitations. |
 | [English dictionary coverage](../reference/english-coverage.md) | Quality/speed operating curve for contracted Radixor tries built from 100% down to 10% of English dictionary rows. |
 | [Candidate evaluation](../reference/candidates.md) | Included and skipped stemmer candidates. |
 
@@ -42,6 +53,6 @@ This section splits Radixor stemmer benchmark results by language. Each of the 2
 
 - Speed benchmarks process only changed dictionary tokens where the surface form differs from the expected root.
 - Accuracy benchmarks process the complete dictionary and report `All exact`, `Changed exact`, and `Root preserved`.
-- Runtime and exact-root agreement measure different properties. Light, minimal, possessive, and other rule-based filters intentionally have different transformation scopes, so compare every speed row with the adjacent quality table. The [English coverage benchmark](../reference/english-coverage.md) shows the quality/speed operating curve; the [multilingual generalization benchmark](../generalization.md) separately tests transformations on withheld families.
+- Runtime and exact-root agreement measure different properties. Light, minimal, possessive, and other rule-based filters intentionally have different transformation scopes, so compare every speed row with the adjacent quality table. The [English coverage benchmark](../reference/english-coverage.md) shows the quality/speed operating curve; the [multilingual generalization benchmark](../generalization.md) separately tests transformations on withheld families; each language page states what its measured knowledge curve and edit-cost sensitivity do and do not justify concluding.
 - Results are comparable only within the same language and benchmark family.
 - The historical Porter badge is retired; no JMH badge JSON is generated.

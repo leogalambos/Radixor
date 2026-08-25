@@ -3,8 +3,8 @@ set -euo pipefail
 
 report_date="${1:-$(date +%F)}"
 release_identity="${2:-}"
-if [[ ! "${release_identity}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-    printf 'Usage: %s <report-date> <release-version>\n' "$0" >&2
+if [[ -z "${release_identity}" || "${release_identity}" == *[[:space:]]* || "${release_identity}" == *","* ]]; then
+    printf 'Usage: %s <report-date> <source-identity>\n' "$0" >&2
     exit 2
 fi
 project_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"

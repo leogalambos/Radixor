@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import csv
 import hashlib
+import re
 import statistics
 from collections import defaultdict
 from pathlib import Path
@@ -33,15 +34,25 @@ LANGUAGES = {
     "US_UK": "English",
     "YI": "Yiddish",
 }
+LANGUAGE_PAGES = {
+    "CS_CZ": "czech.md", "DA_DK": "danish.md", "DE_DE": "german.md",
+    "ES_ES": "spanish.md", "FA_IR": "persian.md", "FI_FI": "finnish.md",
+    "FR_FR": "french.md", "HE_IL": "hebrew.md", "HU_HU": "hungarian.md",
+    "IT_IT": "italian.md", "NB_NO": "norwegian-bokmal.md", "NL_NL": "dutch.md",
+    "NN_NO": "norwegian-nynorsk.md", "PL_PL": "polish.md",
+    "PT_PT": "portuguese.md", "RU_RU": "russian.md", "SV_SE": "swedish.md",
+    "UK_UA": "ukrainian.md", "US_UK": "english.md", "YI": "yiddish.md",
+}
 PERCENTS = tuple(range(100, 0, -10))
 EXPECTED_PROTOCOL = "radixor-generalization-v1"
-EXPECTED_JAVA_VERSION = "4.2.0"
 EXPECTED_SEEDS = {
     "2654435761", "2611923443488327891", "7046029254386353131",
     "11400714819323198485", "15111065706836454659",
 }
 COUNT_SCOPES = ("whole", "withheld", "unseen")
 COUNT_FAMILIES = ("", "changed_", "root_")
+LANGUAGE_SECTION_START = "<!-- DICTIONARY-GENERALIZATION:START -->"
+LANGUAGE_SECTION_END = "<!-- DICTIONARY-GENERALIZATION:END -->"
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -105,8 +116,8 @@ def read_and_validate(source: Path, documentation_root: Path) -> list[dict[str, 
     protocols = {row["protocol_version"] for row in rows}
     versions = {row["radixor_java_version"] for row in rows}
     seeds = {row["seed"] for row in rows}
-    if protocols != {EXPECTED_PROTOCOL} or versions != {EXPECTED_JAVA_VERSION}:
-        raise ValueError("Unexpected split protocol or Radixor/Java version.")
+    if protocols != {EXPECTED_PROTOCOL} or len(versions) != 1 or not next(iter(versions)).strip():
+        raise ValueError("Unexpected split protocol or inconsistent Radixor/Java identity.")
     if seeds != EXPECTED_SEEDS:
         raise ValueError("The report does not use the five predeclared split seeds.")
     if len({row["source_revision"] for row in rows}) != 1 \
@@ -228,8 +239,115 @@ def percent(value: float | None) -> str:
     return "n/a" if value is None else f"{value:.2f}%"
 
 
+def median_ratio(rows: list[dict[str, str]], prefix: str) -> float | None:
+    """Returns the median percentage for one language/coverage slice."""
+    measured = [value for value in (ratio(row, prefix) for row in rows) if value is not None]
+    return statistics.median(measured) if measured else None
+
+
+def replace_language_section(document: str, section: str) -> str:
+    """Replaces one generated language conclusion or inserts it before cost analysis."""
+    block = f"{LANGUAGE_SECTION_START}\n\n{section.rstrip()}\n\n{LANGUAGE_SECTION_END}"
+    start_count = document.count(LANGUAGE_SECTION_START)
+    end_count = document.count(LANGUAGE_SECTION_END)
+    if start_count == 1 and end_count == 1:
+        return re.sub(
+            re.escape(LANGUAGE_SECTION_START) + r".*?" + re.escape(LANGUAGE_SECTION_END),
+            block,
+            document,
+            count=1,
+            flags=re.S,
+        )
+    if start_count != 0 or end_count != 0:
+        raise ValueError("A language page contains incomplete or duplicate generalization markers.")
+    anchors = ("<!-- EDIT-COST-GENERALIZATION:START -->", "<!-- STEMMING-QUALITY:START -->")
+    anchor = next((candidate for candidate in anchors if document.count(candidate) == 1), None)
+    if anchor is None:
+        raise ValueError("A language page has no unique experimental-section insertion anchor.")
+    return document.replace(anchor, f"{block}\n\n{anchor}", 1)
+
+
+def render_language_conclusion(language: str, rows: list[dict[str, str]]) -> str:
+    """Renders the independent baseline-generalization evidence for one language."""
+    by_percent = {
+        coverage: [row for row in rows if int(row["requested_percent"]) == coverage]
+        for coverage in range(10, 100, 10)
+    }
+    if any(len(scenarios) != len(EXPECTED_SEEDS) for scenarios in by_percent.values()):
+        raise ValueError(f"Incomplete language conclusion matrix for {language}.")
+    first = by_percent[10]
+    last = by_percent[90]
+    first_changed = median_ratio(first, "unseen_changed")
+    last_changed = median_ratio(last, "unseen_changed")
+    first_all = median_ratio(first, "unseen")
+    last_all = median_ratio(last, "unseen")
+    first_root = median_ratio(first, "unseen_root")
+    last_root = median_ratio(last, "unseen_root")
+    if None in (first_changed, last_changed, first_all, last_all, first_root, last_root):
+        raise ValueError(f"Undefined endpoint generalization metric for {language}.")
+    provenance = rows[0]
+    lines = [
+        "## Dictionary-Family Generalization Conclusion", "",
+        f"This is the language-specific conclusion from the independent `{EXPECTED_PROTOCOL}` baseline",
+        "experiment. It is intentionally separate from the wider edit-cost protocol below; values from",
+        "the two frozen snapshots are not substituted for one another.", "",
+        "### Evidence", "",
+        f"Model `{provenance['model_id']}` version `{provenance['model_version']}` is evaluated over five",
+        "predeclared nested splits. Unseen metrics remove withheld occurrences whose normalized surface",
+        "also appeared in training. Parentheses show the observed split minimum–maximum.", "",
+        "| Training rows | Median unseen occurrences | Unseen all exact | Unseen changed exact | Unseen root preserved |",
+        "| ---: | ---: | ---: | ---: | ---: |",
+    ]
+    for coverage, scenarios in by_percent.items():
+        lines.append(
+            f"| {coverage}% | {int(statistics.median(int(row['unseen_total']) for row in scenarios)):,} | "
+            f"{median_range([ratio(row, 'unseen') for row in scenarios])} | "
+            f"{median_range([ratio(row, 'unseen_changed') for row in scenarios])} | "
+            f"{median_range([ratio(row, 'unseen_root') for row in scenarios])} |"
+        )
+    changed_gain = float(last_changed) - float(first_changed)
+    all_gain = float(last_all) - float(first_all)
+    root_gain = float(last_root) - float(first_root)
+    lines.extend([
+        "", "### Generalization conclusion", "",
+        f"- Median exactness on genuinely unseen changed forms moves from **{float(first_changed):.3f}%**",
+        f"  at 10% training knowledge to **{float(last_changed):.3f}%** at 90%, a measured",
+        f"  **{changed_gain:+.3f} percentage-point** change for this dictionary.",
+        f"- Over the same endpoints, unseen all-form exactness changes by **{all_gain:+.3f} pp** and",
+        f"  preservation of unseen already-root forms changes by **{root_gain:+.3f} pp**. These separate",
+        "  outcomes show whether the changed-form result coexists with preservation behavior.",
+        "- The evidence establishes within-resource transfer across withheld dictionary families. It",
+        "  does not estimate unrelated domains, misspellings, arbitrary compounds, or external corpora.",
+        "", "The complete ten-level table and split ranges remain in the",
+        "[independent generalization report](../generalization.md); raw counters and provenance are in",
+        "[`dictionary-generalization.csv`](../data/dictionary-generalization.csv). The",
+        "[frozen methodology](../reference/generalization-methodology.md) defines family-level",
+        "splitting, unseen-surface leakage control, aggregation, and the limits of the claim.",
+    ])
+    return "\n".join(lines)
+
+
 def render(rows: list[dict[str, str]], checksum: str) -> str:
     first = rows[0]
+    endpoints: dict[str, tuple[float, float]] = {}
+    for language in LANGUAGES:
+        low_rows = [row for row in rows
+                    if row["language"] == language and int(row["requested_percent"]) == 10]
+        high_rows = [row for row in rows
+                     if row["language"] == language and int(row["requested_percent"]) == 90]
+        low = median_ratio(low_rows, "unseen_changed")
+        high = median_ratio(high_rows, "unseen_changed")
+        if low is None or high is None:
+            raise ValueError(f"Undefined generalization endpoint for {language}.")
+        endpoints[language] = (low, high)
+    lowest_at_ten = min(endpoints, key=lambda language: endpoints[language][0])
+    highest_at_ten = max(endpoints, key=lambda language: endpoints[language][0])
+    lowest_at_ninety = min(endpoints, key=lambda language: endpoints[language][1])
+    highest_at_ninety = max(endpoints, key=lambda language: endpoints[language][1])
+    largest_gain = max(
+        endpoints,
+        key=lambda language: endpoints[language][1] - endpoints[language][0],
+    )
     lines = [
         "# Dictionary-Family Generalization",
         "",
@@ -266,11 +384,17 @@ def render(rows: list[dict[str, str]], checksum: str) -> str:
         ))
     lines += [
         "",
-        "The range across languages is material. Rich, regular resources such as Portuguese,",
-        "Hungarian, Italian, Spanish and Finnish transfer strongly even at low coverage; very",
-        "small resources and some scripts do not. Persian has only 69 dictionary rows, while",
-        "Yiddish has 802, so their low-coverage results are evidence of insufficient training",
-        "data rather than a universal unknown-word guarantee.",
+        "The language range is material and is therefore not replaced by the macro mean. At 10%",
+        f"knowledge, median unseen changed-form exactness ranges from **{endpoints[lowest_at_ten][0]:.3f}%**",
+        f"for {LANGUAGES[lowest_at_ten]} to **{endpoints[highest_at_ten][0]:.3f}%** for",
+        f"{LANGUAGES[highest_at_ten]}. At 90%, it ranges from **{endpoints[lowest_at_ninety][1]:.3f}%**",
+        f"for {LANGUAGES[lowest_at_ninety]} to **{endpoints[highest_at_ninety][1]:.3f}%** for",
+        f"{LANGUAGES[highest_at_ninety]}. The largest 10%–90% change is",
+        f"**{endpoints[largest_gain][1] - endpoints[largest_gain][0]:+.3f} pp** for",
+        f"{LANGUAGES[largest_gain]}. These are descriptive within-resource results, not a causal",
+        "ranking of language, script, dictionary size, or regularity.",
+        "Every language's evidence-derived endpoint conclusion is also published on its separate",
+        "[language benchmark page](languages/index.md), rather than inferred from this macro mean.",
         "",
         "## Per-Language Curves",
         "",
@@ -314,7 +438,7 @@ def render(rows: list[dict[str, str]], checksum: str) -> str:
         "",
         f"- Radixor/Java: `{first['radixor_java_version']}`",
         f"- Core source revision: `{first['source_revision']}`",
-        f"- Release identity: `{first['source_state']}`",
+        f"- Source state: `{first['source_state']}`",
         f"- Generalization generator SHA-256: `{first['generator_sha256']}`",
         "- Measured-source manifest: [`dictionary-generalization-sources.sha256`](data/dictionary-generalization-sources.sha256)",
         f"- Split protocol: `{first['protocol_version']}`",
@@ -340,8 +464,19 @@ def main() -> None:
     published_csv = data_directory / "dictionary-generalization.csv"
     published_checksum = data_directory / "dictionary-generalization.sha256"
     checksum_text = f"{checksum}  dictionary-generalization.csv\n"
+    language_documents: dict[Path, str] = {}
+    for language, page_name in LANGUAGE_PAGES.items():
+        page = arguments.documentation_root / "benchmarks/languages" / page_name
+        if not page.is_file():
+            raise ValueError(f"Missing language benchmark page: {page}")
+        language_rows = [row for row in rows if row["language"] == language]
+        section = render_language_conclusion(language, language_rows)
+        language_documents[page] = replace_language_section(
+            page.read_text(encoding="utf-8"), section)
     if arguments.mode == "update":
         target.write_text(expected, encoding="utf-8")
+        for page, content in language_documents.items():
+            page.write_text(content, encoding="utf-8")
         data_directory.mkdir(parents=True, exist_ok=True)
         published_csv.write_bytes(arguments.source.read_bytes())
         published_checksum.write_text(checksum_text, encoding="utf-8")
@@ -349,6 +484,9 @@ def main() -> None:
         return
     if target.read_text(encoding="utf-8") != expected:
         raise SystemExit(f"Generated generalization documentation is stale: {target}")
+    for page, content in language_documents.items():
+        if page.read_text(encoding="utf-8") != content:
+            raise SystemExit(f"Generated language generalization conclusion is stale: {page}")
     if published_checksum.read_text(encoding="utf-8") != checksum_text:
         raise SystemExit("The checked-in generalization checksum is stale.")
     print(f"Verified {target} from {len(rows)} validated scenarios.")

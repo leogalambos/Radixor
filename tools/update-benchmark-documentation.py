@@ -99,6 +99,21 @@ class JmhData:
     auxiliary: dict[Key, dict[str, float]]
 
 
+@dataclass(frozen=True)
+class Publication:
+    """Writes generated documentation or rejects a stale checked-in snapshot."""
+
+    mode: str
+
+    def write(self, path: Path, content: str) -> None:
+        current = path.read_text(encoding="utf-8") if path.is_file() else None
+        if current == content:
+            return
+        if self.mode == "verify":
+            raise SystemExit(f"Generated benchmark documentation is stale: {path}")
+        path.write_text(content, encoding="utf-8")
+
+
 def parse_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--docs-root", type=Path, default=Path("docs"))
@@ -108,6 +123,9 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument("--speed", type=Path, required=True)
     parser.add_argument("--coverage-accuracy", type=Path, required=True)
     parser.add_argument("--coverage-speed", type=Path, required=True)
+    parser.add_argument("--date", required=True)
+    parser.add_argument("--release-version", required=True)
+    parser.add_argument("--mode", choices=("update", "verify"), default="update")
     return parser.parse_args()
 
 
@@ -453,11 +471,55 @@ def update_language_pages(
     corpora: dict[str, dict[str, object]],
     accuracy_data: JmhData,
     speed_data: JmhData,
+    publication: Publication,
+    date: str,
+    release_version: str,
 ) -> None:
     directory = docs_root / "benchmarks" / "languages"
     for file_name, language in LANGUAGES.items():
         path = directory / file_name
         text = path.read_text(encoding="utf-8")
+        identity = (
+            "All speed values are environment-specific and were measured on the hardware and JVM "
+            "listed in the [benchmark overview](../index.md). The command distribution, exact-root "
+            f"accuracy, and speed tables belong to the published {date} Radixor/Java "
+            f"`{release_version}` snapshot. Speed benchmark operations process changed dictionary "
+            "tokens only. Accuracy uses the complete Radixor dictionary for the language."
+        )
+        text, count = re.subn(
+            r"All speed values are environment-specific.*?Accuracy uses the complete Radixor "
+            r"dictionary for the language\.",
+            identity,
+            text,
+            count=1,
+            flags=re.DOTALL,
+        )
+        if count != 1:
+            raise ValueError(f"No benchmark identity paragraph found in {path}.")
+        evidence = (
+            "<!-- BENCHMARK-EVIDENCE-MAP:START -->\n"
+            "!!! info \"How to read this page\"\n"
+            "    Start with the [corpus](#dictionary-corpus) and "
+            "[patch-command distribution](#radixor-patch-command-distribution), then compare "
+            "[exact-root agreement](#accuracy) with [runtime](#speed). The "
+            "[dictionary-family experiment](#dictionary-family-generalization-conclusion), "
+            "[edit-cost experiment](#edit-costs-and-dictionary-knowledge-generalization), and "
+            "[pairwise linguistic evaluation](#stemming-quality) answer separate questions. "
+            "Their 10–90% curves use independent frozen protocols and must not be substituted "
+            "for one another.\n"
+            "<!-- BENCHMARK-EVIDENCE-MAP:END -->"
+        )
+        if "<!-- BENCHMARK-EVIDENCE-MAP:START -->" in text:
+            text = re.sub(
+                r"<!-- BENCHMARK-EVIDENCE-MAP:START -->.*?"
+                r"<!-- BENCHMARK-EVIDENCE-MAP:END -->",
+                evidence,
+                text,
+                count=1,
+                flags=re.DOTALL,
+            )
+        else:
+            text = text.replace(identity + "\n\n", identity + "\n\n" + evidence + "\n\n", 1)
         text = re.sub(
             r'Radixor must not be read as simply "slower".*?speed rows must be read together with the accuracy table above them\.',
             "Runtime and exact-root agreement measure different properties. Light, minimal, possessive, and other rule-based filters intentionally have different transformation scopes, so a lower runtime can coexist with lower dictionary-root agreement. Read the speed and accuracy tables together. The Radixor rows in this refresh use the contracted compiled patch trie: compilation collapses uniform patch-command subtrees into accepting leaves, reducing hot lookup depth while preserving the preferred stemming result measured by the accuracy pass. The [EnglishRadixorDictionaryCoverageBenchmark](../reference/english-coverage.md) shows the resulting quality/speed envelope explicitly.",
@@ -483,11 +545,48 @@ def update_language_pages(
         text = update_speed_table(
             text, speed_data, int(corpora[language]["timing"]), language
         )
-        path.write_text(text, encoding="utf-8")
+        if language == "US_UK":
+            keys = [
+                key
+                for key, row in speed_data.primary.items()
+                if key.method == "radixorUsUkProfiPreferredStem" and row["Unit"] == "ns/op"
+            ]
+            if len(keys) != 1:
+                raise ValueError("Expected one English Radixor main-suite speed row.")
+            main_ns = (
+                float(speed_data.primary[keys[0]]["Score"])
+                / int(corpora[language]["timing"])
+            )
+            comparison = (
+                "<!-- ENGLISH-SPEED-SUITES:START -->\n"
+                "!!! note \"Separate English speed suites\"\n"
+                f"    The `{main_ns:.1f} ns/token` Radixor value below is from the multilingual "
+                "same-language comparison suite. The [coverage experiment](../reference/english-coverage.md) "
+                "reports its own full-knowledge point from a separate benchmark method and run. "
+                "Treat both as suite-specific estimates with their published uncertainty, not as "
+                "interchangeable values.\n"
+                "<!-- ENGLISH-SPEED-SUITES:END -->"
+            )
+            if "<!-- ENGLISH-SPEED-SUITES:START -->" in text:
+                text = re.sub(
+                    r"<!-- ENGLISH-SPEED-SUITES:START -->.*?"
+                    r"<!-- ENGLISH-SPEED-SUITES:END -->",
+                    comparison,
+                    text,
+                    count=1,
+                    flags=re.DOTALL,
+                )
+            else:
+                speed_start = text.index("## Speed")
+                table_start = text.index("| Stemmer |", speed_start)
+                text = text[:table_start] + comparison + "\n\n" + text[table_start:]
+        publication.write(path, text)
 
 
 def update_corpora_reference(
-    docs_root: Path, corpora: dict[str, dict[str, object]]
+    docs_root: Path,
+    corpora: dict[str, dict[str, object]],
+    publication: Publication,
 ) -> None:
     path = docs_root / "benchmarks" / "reference" / "corpora.md"
     text = path.read_text(encoding="utf-8")
@@ -515,12 +614,12 @@ def update_corpora_reference(
             f"{format_integer(int(entry['changed']))} | {format_integer(int(entry['timing']))} |"
         )
     replacement = "\n".join(lines)
-    path.write_text(
-        text[:table_start] + replacement + text[table_end:], encoding="utf-8"
-    )
+    publication.write(path, text[:table_start] + replacement + text[table_end:])
 
 
-def coverage_rows(accuracy_data: JmhData, speed_data: JmhData) -> list[str]:
+def coverage_rows(
+    accuracy_data: JmhData, speed_data: JmhData, timing_tokens: int
+) -> list[str]:
     lines = [
         "| Used rows | Actual row ratio | All exact | Changed exact | Root preserved | Speed ms/op | Error ms | ns/token |",
         "| ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
@@ -552,7 +651,7 @@ def coverage_rows(accuracy_data: JmhData, speed_data: JmhData) -> list[str]:
         error = float(speed_data.primary[speed_key]["Score Error (99.9%)"])
         lines.append(
             f"| {percent}% | {actual:.3f}% | {values[0]:.3f}% | {values[1]:.3f}% | {values[2]:.3f}% | "
-            f"{speed / 1_000_000.0:.3f} | {error / 1_000_000.0:.3f} | {speed / 210_500:.1f} |"
+            f"{speed / 1_000_000.0:.3f} | {error / 1_000_000.0:.3f} | {speed / timing_tokens:.1f} |"
         )
     return lines
 
@@ -568,15 +667,55 @@ def update_coverage(
     readme: Path,
     accuracy_data: JmhData,
     speed_data: JmhData,
+    timing_tokens: int,
+    total_tokens: int,
+    publication: Publication,
+    main_english_ns: float,
 ) -> None:
-    lines = coverage_rows(accuracy_data, speed_data)
+    lines = coverage_rows(accuracy_data, speed_data, timing_tokens)
     full = [cell.strip() for cell in lines[2].split("|")[1:-1]]
     reduced = [cell.strip() for cell in lines[-1].split("|")[1:-1]]
     reference = docs_root / "benchmarks" / "reference" / "english-coverage.md"
-    reference.write_text(
-        replace_coverage_table(reference.read_text(encoding="utf-8"), lines),
-        encoding="utf-8",
+    reference_text = replace_coverage_table(
+        reference.read_text(encoding="utf-8"), lines
     )
+    reference_text = re.sub(
+        r"`Speed ms/op` divided by [\d,]+ changed English tokens\.",
+        f"`Speed ms/op` divided by {format_integer(timing_tokens)} changed English tokens.",
+        reference_text,
+        count=1,
+    )
+    reference_text = re.sub(
+        r"the speed workload processes [\d,]+ changed token/root pairs.*?"
+        r"complete [\d,]+-token dictionary\.",
+        f"the speed workload processes {format_integer(timing_tokens)} changed token/root pairs "
+        "where the dictionary token differs from the expected root, and the quality workload "
+        f"evaluates the complete {format_integer(total_tokens)}-token dictionary.",
+        reference_text,
+        count=1,
+        flags=re.DOTALL,
+    )
+    comparison = (
+        "<!-- ENGLISH-SPEED-SUITES:START -->\n"
+        "!!! note \"Separate English speed suites\"\n"
+        f"    The full-knowledge `{full[7]} ns/token` point on this page belongs to the coverage "
+        "suite. The [English language comparison](../languages/english.md#speed) reports "
+        f"`{main_english_ns:.1f} ns/token` from a separate JMH method and run. Their uncertainty "
+        "intervals overlap; neither point estimate should replace the other.\n"
+        "<!-- ENGLISH-SPEED-SUITES:END -->"
+    )
+    if "<!-- ENGLISH-SPEED-SUITES:START -->" in reference_text:
+        reference_text = re.sub(
+            r"<!-- ENGLISH-SPEED-SUITES:START -->.*?<!-- ENGLISH-SPEED-SUITES:END -->",
+            comparison,
+            reference_text,
+            count=1,
+            flags=re.DOTALL,
+        )
+    else:
+        table_start = reference_text.index("| Used rows |")
+        reference_text = reference_text[:table_start] + comparison + "\n\n" + reference_text[table_start:]
+    publication.write(reference, reference_text)
     readme_text = replace_coverage_table(readme.read_text(encoding="utf-8"), lines)
     readme_text = re.sub(
         r"The contracted trie result is materially stronger than the older uncontracted profile: "
@@ -591,7 +730,7 @@ def update_coverage(
         count=1,
         flags=re.DOTALL,
     )
-    readme.write_text(readme_text, encoding="utf-8")
+    publication.write(readme, readme_text)
 
     index = docs_root / "benchmarks" / "index.md"
     index_text = index.read_text(encoding="utf-8")
@@ -607,13 +746,12 @@ def update_coverage(
         "quality/speed envelope: the amount and quality of dictionary knowledge affect stemming precision,\n"
         "while contracted tries reduce lookup cost in uniform regions of the compiled graph.\n\n"
     )
-    index.write_text(
-        index_text[:key_start] + key_section + index_text[key_end:], encoding="utf-8"
-    )
+    publication.write(index, index_text[:key_start] + key_section + index_text[key_end:])
 
 
 def main() -> None:
     arguments = parse_arguments()
+    publication = Publication(arguments.mode)
     corpora = read_corpora(arguments.corpus)
     accuracy_data = read_jmh(arguments.accuracy)
     speed_data = read_jmh(arguments.speed)
@@ -624,14 +762,39 @@ def main() -> None:
         raise ValueError(
             "A published report contains the excluded PolishPolimorf benchmark."
         )
-    update_language_pages(arguments.docs_root, corpora, accuracy_data, speed_data)
-    update_corpora_reference(arguments.docs_root, corpora)
+    english_speed_keys = [
+        key
+        for key, row in speed_data.primary.items()
+        if key.method == "radixorUsUkProfiPreferredStem" and row["Unit"] == "ns/op"
+    ]
+    if len(english_speed_keys) != 1:
+        raise ValueError("Expected one English Radixor main-suite speed row.")
+    main_english_ns = (
+        float(speed_data.primary[english_speed_keys[0]]["Score"])
+        / int(corpora["US_UK"]["timing"])
+    )
+    update_language_pages(
+        arguments.docs_root,
+        corpora,
+        accuracy_data,
+        speed_data,
+        publication,
+        arguments.date,
+        arguments.release_version,
+    )
+    update_corpora_reference(arguments.docs_root, corpora, publication)
     update_coverage(
         arguments.docs_root,
         arguments.readme,
         coverage_accuracy_data,
         coverage_speed_data,
+        int(corpora["US_UK"]["timing"]),
+        int(corpora["US_UK"]["total"]),
+        publication,
+        main_english_ns,
     )
+    verb = "Verified" if arguments.mode == "verify" else "Updated"
+    print(f"{verb} Java benchmark documentation for {arguments.release_version} ({arguments.date}).")
 
 
 if __name__ == "__main__":

@@ -42,10 +42,10 @@ def pythonBenchmarkEngines = providers.gradleProperty('pythonBenchmarkEngines')
 def pythonBenchmarkEnginePackages = [
         'radixor'           : [],
         'radixor-c'         : [],
-        'PyStemmer'         : ['PyStemmer'],
-        'snowballstemmer-pure': ['snowballstemmer'],
-        'nltk-porter'       : ['nltk'],
-        'cistem'            : ['nltk'],
+        'PyStemmer'         : ['PyStemmer==3.1.0'],
+        'snowballstemmer-pure': ['snowballstemmer==3.1.1'],
+        'nltk-porter'       : ['nltk==3.10.3'],
+        'cistem'            : ['nltk==3.10.3'],
 ]
 
 def pythonBenchmarkRuntimeVenvDirectory = layout.buildDirectory.dir('python/runtime/benchmark-envs')

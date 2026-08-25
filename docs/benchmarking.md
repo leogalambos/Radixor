@@ -4,7 +4,7 @@ Radixor contains internal trie microbenchmarks, a separate stemmer comparison su
 
 Every current default Radixor benchmark scenario uses the model ID declared by its `Language.defaultModelId()`. The root JMH runtime configuration depends directly on all default model projects plus optional `pl-pl-polimorf`; no benchmark-pack project or artifact exists. These dependencies are benchmark-only and never enter the root published POM. A PoliMorf comparison must be labeled with model ID `pl-pl-polimorf`, while the default Polish row remains `pl-pl-unimorph`.
 
-The optional model now has a verified complete compiled loading path. It is not included in the 2026-08-23 corpus, accuracy, speed, coverage, or stemming-quality measurements. Any future full PoliMorf benchmark must provision its documented startup heap independently and record the exact model artifact version and checksum.
+The optional model now has a verified complete compiled loading path. It is not included in the 2026-08-25 corpus, accuracy, speed, coverage, or stemming-quality measurements. Any future full PoliMorf benchmark must provision its documented startup heap independently and record the exact model artifact version and checksum.
 
 This page is the entry point for benchmark interpretation. Detailed tables and long reference material are split into focused subpages so that important points do not get buried.
 
@@ -22,6 +22,7 @@ This page is the entry point for benchmark interpretation. Detailed tables and l
 - Speed benchmarks process changed dictionary tokens where the surface form differs from the expected root. Accuracy benchmarks process the complete dictionary.
 - Accuracy tables use deterministic auxiliary counters from a single non-timed JMH evaluation, while Radixor counters are independently cross-checked by the default-model corpus report. Runtime scores from accuracy methods are not interpreted.
 - The historical Porter performance badge is retired. Benchmark reporting now uses speed and quality tables rather than a single Porter ratio.
+- Edit-cost effects are not assumed to transfer between languages. The 234,000-observation logical matrix collapses exact full-dictionary command sequences before execution, and every language page publishes its own knowledge curve, selected-cost effect, association coverage, and conclusion. A non-baseline selection remains an externally unvalidated candidate.
 
 The nine Java runtime minima are Danish, Dutch, English, Hungarian, Norwegian
 Nynorsk, Persian, Polish, Ukrainian, and Yiddish. Czech, Finnish, French, German,
@@ -42,9 +43,11 @@ the per-language tables retain JMH uncertainty and are the authoritative source.
 | [Benchmark environment and reports](benchmarks/reference/environment.md) | Hardware, OS, JVM, JMH settings, report files, and current badge/report policy. |
 | [Dictionary-family generalization](benchmarks/generalization.md) | Five-split, all-language evaluation of transformations applied to families withheld from Java model training. |
 | [Generalization methodology](benchmarks/reference/generalization-methodology.md) | Frozen sampling protocol, unseen-form leakage control, metrics, raw counters, and limitations. |
+| [Edit-cost sensitivity](benchmarks/edit-cost-sensitivity.md) | Normalized edit-cost choices, exact command-equivalence classes, trie structure, and held-out-family quality. |
+| [Edit-cost methodology](benchmarks/reference/edit-cost-methodology.md) | Frozen cost grid, full-dictionary equivalence proof, stratified associations, recommendation rule, and limitations. |
 | [English dictionary coverage benchmark](benchmarks/reference/english-coverage.md) | The quality/speed operating curve for contracted Radixor tries built from 100% down to 10% of English dictionary rows. |
 | [Candidate evaluation](benchmarks/reference/candidates.md) | Included benchmark families and evaluated candidates that were skipped. |
-| [Language benchmark pages](benchmarks/languages/index.md) | Per-language accuracy tables, speed tables, and implementation notes. |
+| [Language benchmark pages](benchmarks/languages/index.md) | Per-language accuracy, speed, generalization, edit-cost evidence, factor analysis, and conclusions. |
 
 ## How To Read Results
 
@@ -60,6 +63,11 @@ forms from withheld dictionary families across five frozen splits. The separate
 [English dictionary coverage benchmark](benchmarks/reference/english-coverage.md)
 retains the original whole-dictionary quality/speed operating curve. Together
 they distinguish transfer evidence from the model-size/runtime trade-off.
+
+The [edit-cost experiment](benchmarks/edit-cost-sensitivity.md) then tests 234 normalized
+relative-cost settings at every knowledge level. Its macro report identifies cross-language
+structure; the linked language sections state the evidence-derived conclusion separately for each
+dictionary and expose when a correlation lacks complete 45-stratum support.
 
 ## Current Result Locations
 

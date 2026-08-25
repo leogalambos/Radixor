@@ -74,7 +74,9 @@ When a dictionary is loaded through `StemmerPatchTrieLoader`, the loader process
 
 1. the first column becomes the canonical stem,
 2. every following token is treated as a variant,
-3. each variant is converted into a patch command that transforms the variant into the stem,
+3. each variant is converted into a
+   [patch command](why-radixor-is-different.md#what-a-patch-command-looks-like)
+   that transforms the variant into the stem,
 4. if `storeOriginal` is enabled, the stem itself is also inserted using the canonical no-op patch command.
 
 This means the textual dictionary is not used directly at runtime. Instead, it is transformed into patch-command data and compiled into a reduced read-only trie.

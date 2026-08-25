@@ -47,6 +47,83 @@ flowchart TD
 The dictionary is important because it supplies the linguistic evidence. It does
 **not** define a closed runtime vocabulary.
 
+## The 2001 patch-command formulation
+
+The patch-command method used by the Egothor/Radixor lineage is documented in
+Leo Galambos's 2001 publication:
+
+> Leo Galambos, “Lemmatizer for Document Information Retrieval Systems in
+> JAVA,” *SOFSEM 2001: Theory and Practice of Informatics*, Lecture Notes in
+> Computer Science 2234, pp. 243–252, 2001.
+> [doi:10.1007/3-540-45627-9_21](https://doi.org/10.1007/3-540-45627-9_21)
+
+The paper formulates a general patch command, or **P-command**, as a sequence of
+partial edit commands derived from a minimum-cost path between a word form and
+its stem. It covers removal, insertion, replacement, and leaving matching text
+unchanged; gives the commands a compact serialized representation; applies them
+from the end of the word to reflect predominantly suffixal morphology; and uses
+the resulting transformations as values in a trie. It is the historical method
+reference for the patch-command representation in this implementation lineage.
+Current Radixor extends the implementation with configurable weighted edit
+costs and traversal, compiled commands, reduction, persistence, and
+deterministic multi-result semantics.
+
+## What a patch command looks like
+
+A serialized patch command is a compact sequence of two-character
+instructions. The first character is an opcode; the second is either a literal
+character or a compact count. For counted instructions, `a` means one, `b`
+means two, `c` means three, and so on.
+
+| Instruction | Argument | Meaning at the current traversal position |
+|---|---|---|
+| `D<count>` | Encoded count | Delete source characters. |
+| `I<char>` | Literal character | Insert the character into the result. |
+| `R<char>` | Literal character | Replace the source character with the argument. |
+| `-<count>` | Encoded count | Keep matching source characters unchanged and advance. |
+| `Na` | Canonical fixed argument | Make no change; this is Radixor's serialized no-operation command. |
+
+The serialized opcodes are related to, but not identical with, the `D/I/R/M`
+cost notation used by the benchmarks. In a label such as `D2I1R1M0`, `M` is the
+cost of a matching dynamic-programming transition. When such a match must be
+represented inside a serialized command, it is emitted as `-<count>`; `Na`
+instead denotes a complete no-operation command. See the
+[edit-cost methodology](benchmarks/reference/edit-cost-methodology.md)
+for the benchmark notation.
+
+The historical and default traversal runs from right to left. Consider the
+dictionary evidence:
+
+```text
+running -> run
+```
+
+Its patch command is:
+
+```text
+Dd
+```
+
+`D` means delete and `d` encodes four characters. Applied from the right, the
+instruction removes `g`, `n`, `i`, and `n`, leaving `run`. No instruction is
+needed for the unchanged prefix, so the representation stays compact. More
+complex commands concatenate instruction pairs, for example combining skips,
+replacements, deletions, and insertions in their execution order.
+
+For example, a command containing several instruction pairs is:
+
+```text
+feet -> foot    -aRoRo
+```
+
+From right to left, `-a` keeps the final `t`; the two `Ro` instructions replace
+the preceding two `e` characters with `o`. The unchanged initial `f` needs no
+serialized instruction.
+
+The text command is the portable learned value stored by the trie-building
+process. At runtime, Radixor compiles it into an immutable specialized command
+object rather than interpreting the serialized text repeatedly.
+
 ## What happens to an unseen word?
 
 The compiled trie selects transformation behaviour rather than storing a full
@@ -61,6 +138,13 @@ forms.
 Generalization is not a promise that every arbitrary unknown token has a useful
 stem. No practical stemmer can make that guarantee. The important property is
 that Radixor is **not limited to exact dictionary membership**.
+
+The measured boundary is published rather than implied: the independent
+[20-language dictionary-family experiment](benchmarks/generalization.md) evaluates five frozen
+splits at every 10% knowledge step, while the
+[edit-cost experiment](benchmarks/edit-cost-sensitivity.md) tests how relative command costs and
+trie structure interact with that transfer. Because the results differ by dictionary, every
+[language page](benchmarks/languages/index.md) contains its own evidence and bounded conclusions.
 
 For the implementation details, see [Architecture](architecture.md).
 

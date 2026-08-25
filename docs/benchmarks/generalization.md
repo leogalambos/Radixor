@@ -25,20 +25,26 @@ measure because it excludes words whose expected root is already the input token
 | ---: | ---: | ---: | ---: |
 | 100% | n/a | n/a | n/a |
 | 90% | 74.21% | 69.07% | 94.66% |
-| 80% | 73.76% | 68.54% | 94.24% |
+| 80% | 73.77% | 68.54% | 94.24% |
 | 70% | 73.53% | 68.20% | 93.83% |
 | 60% | 72.87% | 67.55% | 93.50% |
 | 50% | 72.31% | 66.80% | 93.17% |
 | 40% | 71.60% | 65.97% | 92.67% |
 | 30% | 70.51% | 64.72% | 92.14% |
 | 20% | 69.19% | 63.13% | 91.55% |
-| 10% | 66.96% | 60.50% | 90.80% |
+| 10% | 66.96% | 60.49% | 90.80% |
 
-The range across languages is material. Rich, regular resources such as Portuguese,
-Hungarian, Italian, Spanish and Finnish transfer strongly even at low coverage; very
-small resources and some scripts do not. Persian has only 69 dictionary rows, while
-Yiddish has 802, so their low-coverage results are evidence of insufficient training
-data rather than a universal unknown-word guarantee.
+The language range is material and is therefore not replaced by the macro mean. At 10%
+knowledge, median unseen changed-form exactness ranges from **10.423%**
+for Hebrew to **90.053%** for
+Portuguese. At 90%, it ranges from **15.493%**
+for Persian to **94.412%** for
+Portuguese. The largest 10%–90% change is
+**+19.147 pp** for
+Norwegian Nynorsk. These are descriptive within-resource results, not a causal
+ranking of language, script, dictionary size, or regularity.
+Every language's evidence-derived endpoint conclusion is also published on its separate
+[language benchmark page](languages/index.md), rather than inferred from this macro mean.
 
 ## Per-Language Curves
 
@@ -408,21 +414,21 @@ evidence. At 100% there is no held-out set, so unseen metrics are `n/a`.
 </details>
 
 <details markdown="block">
-<summary><strong>English</strong> — <code>us-uk-default</code> 1.0.0</summary>
+<summary><strong>English</strong> — <code>us-uk-default</code> 1.0.1</summary>
 <div markdown="1">
 
 | Training | Selected / total rows | Median unseen occurrences | Overlap excluded | Unseen all exact | Unseen changed exact | Unseen root preserved | Whole all exact |
 | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| 100% | 396,939 / 396,939 | 0 | 0 | n/a | n/a | n/a | 97.478% |
-| 90% | 357,245 / 396,939 | 96,669 | 3,944 | 94.687% (94.620–94.833) | 78.855% (78.658–79.377) | 98.752% (98.660–98.774) | 97.055% (97.047–97.061) |
-| 80% | 317,551 / 396,939 | 193,867 | 7,072 | 94.583% (94.503–94.610) | 78.787% (78.522–78.959) | 98.591% (98.583–98.651) | 96.629% (96.627–96.642) |
-| 70% | 277,857 / 396,939 | 291,950 | 9,364 | 94.403% (94.284–94.425) | 78.504% (77.939–78.529) | 98.454% (98.420–98.494) | 96.195% (96.177–96.203) |
-| 60% | 238,163 / 396,939 | 390,876 | 10,914 | 94.146% (94.130–94.222) | 78.028% (77.810–78.270) | 98.305% (98.265–98.317) | 95.735% (95.724–95.759) |
-| 50% | 198,470 / 396,939 | 490,651 | 11,549 | 93.923% (93.893–93.995) | 77.663% (77.425–77.783) | 98.127% (98.087–98.184) | 95.255% (95.232–95.291) |
-| 40% | 158,776 / 396,939 | 591,471 | 11,405 | 93.704% (93.685–93.716) | 77.397% (77.203–77.459) | 97.941% (97.914–97.946) | 94.757% (94.731–94.787) |
-| 30% | 119,082 / 396,939 | 692,903 | 10,319 | 93.446% (93.425–93.467) | 76.954% (76.788–77.019) | 97.729% (97.716–97.746) | 94.232% (94.195–94.256) |
-| 20% | 79,388 / 396,939 | 795,289 | 8,404 | 93.168% (93.110–93.217) | 76.641% (76.310–76.730) | 97.520% (97.455–97.540) | 93.645% (93.618–93.708) |
-| 10% | 39,694 / 396,939 | 898,575 | 5,565 | 92.815% (92.774–92.848) | 76.133% (75.502–76.392) | 97.185% (97.159–97.294) | 92.980% (92.960–93.033) |
+| 100% | 396,939 / 396,939 | 0 | 0 | n/a | n/a | n/a | 97.668% |
+| 90% | 357,245 / 396,939 | 96,702 | 3,746 | 94.680% (94.609–94.847) | 78.854% (78.538–79.603) | 98.744% (98.642–98.790) | 97.241% (97.237–97.256) |
+| 80% | 317,551 / 396,939 | 193,781 | 6,659 | 94.608% (94.514–94.637) | 78.795% (78.580–79.033) | 98.592% (98.577–98.658) | 96.818% (96.816–96.831) |
+| 70% | 277,857 / 396,939 | 291,831 | 8,726 | 94.425% (94.290–94.438) | 78.505% (77.971–78.614) | 98.454% (98.436–98.500) | 96.386% (96.367–96.394) |
+| 60% | 238,163 / 396,939 | 390,750 | 10,090 | 94.178% (94.121–94.242) | 77.976% (77.824–78.311) | 98.314% (98.268–98.319) | 95.919% (95.916–95.953) |
+| 50% | 198,470 / 396,939 | 490,475 | 10,590 | 93.934% (93.888–94.011) | 77.643% (77.410–77.726) | 98.133% (98.089–98.192) | 95.434% (95.421–95.484) |
+| 40% | 158,776 / 396,939 | 591,318 | 10,198 | 93.699% (93.682–93.712) | 77.308% (77.149–77.479) | 97.940% (97.912–97.948) | 94.946% (94.916–94.960) |
+| 30% | 119,082 / 396,939 | 692,940 | 8,930 | 93.440% (93.409–93.459) | 76.944% (76.715–76.961) | 97.741% (97.718–97.755) | 94.413% (94.372–94.433) |
+| 20% | 79,388 / 396,939 | 795,287 | 6,816 | 93.155% (93.122–93.220) | 76.608% (76.306–76.669) | 97.509% (97.464–97.541) | 93.824% (93.807–93.898) |
+| 10% | 39,694 / 396,939 | 898,572 | 3,741 | 92.805% (92.757–92.843) | 76.010% (75.505–76.378) | 97.184% (97.156–97.293) | 93.157% (93.123–93.211) |
 
 </div>
 </details>
@@ -449,15 +455,15 @@ evidence. At 100% there is no held-out set, so unseen metrics are `n/a`.
 
 ## Provenance
 
-- Radixor/Java: `4.2.0`
-- Core source revision: `31e3b9d31379060cd75a3219381e09218f8a2ef6`
-- Release identity: `4.2.0`
+- Radixor/Java: `4.2.0-6-g84e57fb`
+- Core source revision: `84e57fb27ae40913569e826858a8ebb07cf2ea01`
+- Source state: `dirty`
 - Generalization generator SHA-256: `126964f216a48d2164d136a490698301111aae7f050209ced21caf73f8c01fb8`
 - Measured-source manifest: [`dictionary-generalization-sources.sha256`](data/dictionary-generalization-sources.sha256)
 - Split protocol: `radixor-generalization-v1`
 - Splits per coverage level: 5
 - Authoritative raw counters: [`dictionary-generalization.csv`](data/dictionary-generalization.csv)
-- CSV SHA-256: `564baec7ee48379b49173dfa5cef5eb518be7c7cc1d9bb3927703f67f6b7f6bc`
+- CSV SHA-256: `e6479840b9307ae03bd0873e55f397811e975125d621a8b8716d4c1a166b3ff2`
 - Model artifact IDs, independent versions, and SHA-256 values are recorded on every raw row.
 - Runtime speed is intentionally excluded: speed does not establish generalization. The
   [English coverage deep dive](reference/english-coverage.md) retains its separately measured

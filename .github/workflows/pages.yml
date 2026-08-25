@@ -257,6 +257,12 @@ jobs:
 
           Radixor publishes durable CI artifacts to GitHub Pages on every qualifying run of \`.github/workflows/pages.yml\`.
 
+          These are rolling, representative CI results. They are separate from the frozen all-language
+          scientific snapshots and conclusions under [Benchmark Results](benchmarks/index.md), whose
+          exact checked-in inputs and verification commands are documented on the
+          [reproducibility page](benchmarks/reference/reproducibility.md). See
+          [Quality and Operations](quality-and-operations.md) for the project-wide verification policy.
+
           ## Primary report entry points
 
           - [Latest build summary](https://leogalambos.github.io/Radixor/builds/latest/)
@@ -279,6 +285,7 @@ jobs:
           ## Historical runs
 
           - [Browse historical build reports](https://leogalambos.github.io/Radixor/builds/)
+          - [Historical-build route in this documentation](builds.md)
           EOF
 
           # Retain only the 10 most recent numbered builds to stay within

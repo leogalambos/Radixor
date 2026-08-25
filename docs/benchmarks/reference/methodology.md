@@ -2,7 +2,7 @@
 
 The stemmer comparison suite measures Radixor and Java stemmers on the same language and deterministic Radixor model dictionary-derived data. Published Radixor rows in this refresh use contracted compiled patch tries, where uniform preferred-command subtrees are collapsed into accepting leaves before the trie is frozen for lookup. For each language, the registered default model resource stores the expected root as the first tab-separated field on a line and its surface forms on the same line. Every single-token field on that line can therefore be paired with the same expected root.
 
-Published speed results come only from the exact method selection retained in `published-speed-benchmarks-2026-08-23.txt`. Internal `FrequencyTrie*` microbenchmarks, quality methods, the CISTEM gold-standard experiment, and the optional `PolishPolimorfStemmerComparisonBenchmark` are not part of those results. The Snowball 3.1.0 matrix includes direct Czech, Persian, and Polish workloads; all published Java comparators were measured in the same refresh.
+Published speed results come only from the exact method selection retained in `published-speed-benchmarks-2026-08-25.txt`. Internal `FrequencyTrie*` microbenchmarks, quality methods, the CISTEM gold-standard experiment, and the optional `PolishPolimorfStemmerComparisonBenchmark` are not part of those results. The Snowball 3.1.0 matrix includes direct Czech, Persian, and Polish workloads; all published Java comparators were measured in the same refresh.
 
 ## Benchmark Passes
 
@@ -39,10 +39,14 @@ Trie metadata records the language writing direction for inspection and intercha
 
 ## Quality Metric
 
-The quality pass reports exact-root agreement against the expected root from the default-model dictionary line. External-stemmer counters are written to:
+The quality pass reports exact-root agreement against the expected root from the default-model dictionary line. External-stemmer counters are written locally to:
 
-- `build/reports/jmh/stemmer-accuracy-2026-08-23.csv`
-- `build/reports/jmh/stemmer-accuracy-2026-08-23.txt`
+- `build/reports/jmh/stemmer-accuracy-2026-08-25.csv`
+- `build/reports/jmh/stemmer-accuracy-2026-08-25.txt`
+
+The tables in this documentation are verified against the checked-in
+[dated accuracy CSV](../data/java-stemmer-accuracy-2026-08-25.csv), not against the mutable local
+report directory.
 
 Accuracy is computed from standard JMH secondary rows:
 

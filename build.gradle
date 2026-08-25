@@ -1001,11 +1001,14 @@ tasks.register('dictionaryGeneralization', JavaExec) {
     dependsOn(tasks.named('testClasses'))
     classpath = sourceSets.test.runtimeClasspath
     mainClass = 'org.egothor.stemmer.benchmark.generalization.DictionaryGeneralizationApplication'
+    final String dictionaryGeneralizationSourceState = providers.exec {
+        commandLine 'git', 'status', '--porcelain'
+    }.standardOutput.asText.get().trim().isEmpty() ? 'clean' : 'dirty'
     args layout.buildDirectory.file('reports/generalization/dictionary-generalization.csv')
             .get().asFile.absolutePath,
             dictionaryGeneralizationReleaseVersion.get(),
             providers.exec { commandLine 'git', 'rev-parse', 'HEAD' }.standardOutput.asText.get().trim(),
-            dictionaryGeneralizationReleaseVersion.get(),
+            dictionaryGeneralizationSourceState,
             layout.projectDirectory.file('src/test/java/org/egothor/stemmer/benchmark/generalization/DictionaryGeneralizationApplication.java').asFile.absolutePath
     maxHeapSize = '8g'
 }
@@ -1020,7 +1023,9 @@ tasks.register('editCostSensitivity', JavaExec) {
         commandLine 'git', 'status', '--porcelain'
     }.standardOutput.asText.get().trim().isEmpty() ? 'clean' : 'dirty'
     final List<Object> editCostArgs = [
-            layout.buildDirectory.file('reports/generalization/edit-cost-sensitivity.csv').get().asFile.absolutePath,
+            providers.gradleProperty('editCostOutput')
+                    .orElse(layout.buildDirectory.file('reports/generalization/edit-cost-sensitivity.csv')
+                            .map { it.asFile.absolutePath }).get(),
             dictionaryGeneralizationReleaseVersion.get(),
             providers.exec { commandLine 'git', 'rev-parse', 'HEAD' }.standardOutput.asText.get().trim(),
             editCostSourceState,
@@ -1031,8 +1036,29 @@ tasks.register('editCostSensitivity', JavaExec) {
         editCostArgs.add(project.hasProperty('editCostSeed') ? project.property('editCostSeed') : 'all')
     }
     if (hasLanguage) { editCostArgs.add(project.property('editCostLanguage').toString().toUpperCase(java.util.Locale.ROOT)) }
+    if (project.hasProperty('editCostConfig')) {
+        if (!hasLanguage) {
+            editCostArgs.add('ALL')
+        }
+        editCostArgs.add(project.property('editCostConfig').toString().toUpperCase(java.util.Locale.ROOT))
+    }
     args editCostArgs
     maxHeapSize = '8g'
+}
+
+tasks.register('editCostSensitivityPreflight', JavaExec) {
+    group = 'verification'
+    description = 'Orders dictionaries and counts exact edit-cost equivalence classes without building scenario tries.'
+    dependsOn(tasks.named('testClasses'))
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'org.egothor.stemmer.benchmark.generalization.EditCostSensitivityApplication'
+    args layout.buildDirectory.file('reports/generalization/edit-cost-preflight.csv').get().asFile.absolutePath,
+            dictionaryGeneralizationReleaseVersion.get(),
+            providers.exec { commandLine 'git', 'rev-parse', 'HEAD' }.standardOutput.asText.get().trim(),
+            'preflight',
+            layout.projectDirectory.file('src/test/java/org/egothor/stemmer/benchmark/generalization/EditCostSensitivityApplication.java').asFile.absolutePath,
+            'all', 'all', 'PREFLIGHT'
+    maxHeapSize = '4g'
 }
 
 tasks.register('patchCommandDump', JavaExec) {
@@ -1061,6 +1087,61 @@ tasks.register('verifyDictionaryGeneralizationDocumentation', Exec) {
     commandLine 'python3', layout.projectDirectory.file('tools/update-generalization-documentation.py').asFile,
             layout.projectDirectory.file('docs/benchmarks/data/dictionary-generalization.csv').asFile,
             layout.projectDirectory.dir('docs').asFile, 'verify'
+}
+
+tasks.register('publishEditCostSensitivityDocumentation', Exec) {
+    group = 'documentation'
+    description = 'Publishes the validated edit-cost sensitivity experiment and derived analysis.'
+    dependsOn(tasks.named('editCostSensitivity'))
+    commandLine 'python3', layout.projectDirectory.file('tools/update-edit-cost-documentation.py').asFile,
+            layout.buildDirectory.file('reports/generalization/edit-cost-sensitivity.csv').get().asFile,
+            layout.projectDirectory.dir('docs').asFile, 'update'
+}
+
+tasks.register('verifyEditCostSensitivityDocumentation', Exec) {
+    group = 'verification'
+    description = 'Verifies the complete checked-in edit-cost experiment, analysis, and documentation.'
+    commandLine 'python3', layout.projectDirectory.file('tools/update-edit-cost-documentation.py').asFile,
+            layout.projectDirectory.file('docs/benchmarks/data/edit-cost-sensitivity.csv.gz').asFile,
+            layout.projectDirectory.dir('docs').asFile, 'verify'
+}
+
+tasks.register('verifyPublishedPerformanceSnapshotChecksums', Exec) {
+    group = 'verification'
+    description = 'Verifies the byte identity of checked-in Java and Python performance snapshots.'
+    workingDir layout.projectDirectory.dir('docs/benchmarks/data').asFile
+    commandLine 'sha256sum', '--check', 'performance-snapshots.sha256'
+}
+
+tasks.register('verifyPublishedJavaBenchmarkDocumentation', Exec) {
+    group = 'verification'
+    description = 'Verifies Java benchmark documentation against the checked-in 2026-08-25 reports.'
+    dependsOn(tasks.named('verifyPublishedPerformanceSnapshotChecksums'))
+    commandLine 'python3', layout.projectDirectory.file('tools/update-benchmark-documentation.py').asFile,
+            '--docs-root', layout.projectDirectory.dir('docs').asFile,
+            '--readme', layout.projectDirectory.file('README.md').asFile,
+            '--corpus', layout.projectDirectory.file('docs/benchmarks/data/java-benchmark-corpora-2026-08-25.csv').asFile,
+            '--accuracy', layout.projectDirectory.file('docs/benchmarks/data/java-stemmer-accuracy-2026-08-25.csv').asFile,
+            '--speed', layout.projectDirectory.file('docs/benchmarks/data/java-stemmer-speed-2026-08-25.csv').asFile,
+            '--coverage-accuracy', layout.projectDirectory.file('docs/benchmarks/data/java-english-coverage-accuracy-2026-08-25.csv').asFile,
+            '--coverage-speed', layout.projectDirectory.file('docs/benchmarks/data/java-english-coverage-speed-2026-08-25.csv').asFile,
+            '--date', '2026-08-25',
+            '--release-version', '4.2.0-6-g84e57fb',
+            '--mode', 'verify'
+}
+
+tasks.register('verifyPublishedPythonBenchmarkDocumentation', Exec) {
+    group = 'verification'
+    description = 'Verifies Python benchmark documentation against the checked-in 2026-08-25 reports.'
+    dependsOn(tasks.named('verifyPublishedPerformanceSnapshotChecksums'))
+    commandLine 'python3', layout.projectDirectory.file('tools/update-python-benchmark-documentation.py').asFile,
+            '--csv', layout.projectDirectory.file('docs/benchmarks/data/python-all-languages-batch-2026-08-25.csv').asFile,
+            '--json', layout.projectDirectory.file('docs/benchmarks/data/python-all-languages-batch-2026-08-25.json').asFile,
+            '--date', '2026-08-25',
+            '--release-version', '4.2.1',
+            '--base-commit', '84e57fb',
+            '--docs-root', layout.projectDirectory.dir('docs').asFile,
+            '--mode', 'verify'
 }
 
 tasks.register('writeJmhRuntimeClasspath') {
@@ -1122,6 +1203,9 @@ tasks.register('verifyStemmingQualityDocumentation', JavaExec) {
 tasks.named('check') {
     dependsOn(tasks.named('verifyStemmingQualityDocumentation'))
     dependsOn(tasks.named('verifyDictionaryGeneralizationDocumentation'))
+    dependsOn(tasks.named('verifyEditCostSensitivityDocumentation'))
+    dependsOn(tasks.named('verifyPublishedJavaBenchmarkDocumentation'))
+    dependsOn(tasks.named('verifyPublishedPythonBenchmarkDocumentation'))
 }
 
 tasks.register('verifyStemmingQualitySourceSets') {

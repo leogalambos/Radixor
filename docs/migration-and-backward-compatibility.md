@@ -146,7 +146,10 @@ The catalog artifacts are POM-only: `radixor-models-standard` carries runtime de
 
 Model format compatibility is descriptor-level and does not alter migrated bytes. Version 1 is `radixor-dictionary-tsv-gzip`. Model versions come from each module's `model-version.txt` or the matching explicit release property; catalog version comes from `models/catalog-version.txt`; only core uses Git-derived `release@` versioning.
 
-The model catalog used by the published documentation is generated under `build/mkdocs-source/`. Neither generated Markdown nor rendered MkDocs output belongs in Git.
+`publishModelCatalogDocumentation` updates the reviewed, checked-in
+`docs/stemmer-model-catalog.md`. Documentation staging independently regenerates the same catalog
+under `build/mkdocs-source/`, and verification fails unless both copies are byte-identical. The
+rendered MkDocs site remains build output and does not belong in Git.
 
 The remainder of this page describes the earlier migration from repeated serialized patch-command application to compiled patch commands.
 
