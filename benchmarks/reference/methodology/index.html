@@ -587,6 +587,55 @@
   
   
   
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model Behavior and Generalization
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Model Behavior and Generalization
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
     <li class="md-nav__item">
       <a href="../../generalization/" class="md-nav__link">
         
@@ -604,6 +653,70 @@
   
 
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../edit-cost-sensitivity/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Edit-Cost Sensitivity
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../english-coverage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    English Coverage and Speed
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -1515,6 +1628,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../edit-cost-methodology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Edit-Cost Protocol
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../tested-stemmers/" class="md-nav__link">
         
   
@@ -1607,34 +1748,6 @@
     
   
     Environment and Reports
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../english-coverage/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    English Coverage and Speed
   
 
     
@@ -3281,7 +3394,7 @@
 
 <h1 id="benchmark-methodology">Benchmark Methodology</h1>
 <p>The stemmer comparison suite measures Radixor and Java stemmers on the same language and deterministic Radixor model dictionary-derived data. Published Radixor rows in this refresh use contracted compiled patch tries, where uniform preferred-command subtrees are collapsed into accepting leaves before the trie is frozen for lookup. For each language, the registered default model resource stores the expected root as the first tab-separated field on a line and its surface forms on the same line. Every single-token field on that line can therefore be paired with the same expected root.</p>
-<p>Published speed results come only from the exact method selection retained in <code>published-speed-benchmarks-2026-08-23.txt</code>. Internal <code>FrequencyTrie*</code> microbenchmarks, quality methods, the CISTEM gold-standard experiment, and the optional <code>PolishPolimorfStemmerComparisonBenchmark</code> are not part of those results. The Snowball 3.1.0 matrix includes direct Czech, Persian, and Polish workloads; all published Java comparators were measured in the same refresh.</p>
+<p>Published speed results come only from the exact method selection retained in <code>published-speed-benchmarks-2026-08-25.txt</code>. Internal <code>FrequencyTrie*</code> microbenchmarks, quality methods, the CISTEM gold-standard experiment, and the optional <code>PolishPolimorfStemmerComparisonBenchmark</code> are not part of those results. The Snowball 3.1.0 matrix includes direct Czech, Persian, and Polish workloads; all published Java comparators were measured in the same refresh.</p>
 <h2 id="benchmark-passes">Benchmark Passes</h2>
 <p>There are two distinct benchmark passes:</p>
 <ul>
@@ -3302,11 +3415,14 @@
 <p>Lucene TokenFilter paths include required normalization in the measured pipeline. Examples include lower-case normalization for filters requiring lower-case input, German normalization before German light/minimal stemming, and Persian decimal, Arabic, and Persian normalization before Persian stemming. No ASCII folding is applied to Czech or Polish paths, because those Lucene stemmers are diacritic-aware or dictionary/table-backed for those languages. TokenFilter throughput methods materialize each emitted <code>CharTermAttribute</code> as a <code>String</code> before passing it to the JMH <code>Blackhole</code>, so output consumption is easier to inspect and closer to the direct stemmer methods.</p>
 <p>Trie metadata records the language writing direction for inspection and interchange. Natural-language suffix models apply their learned patches from the end of the stored Unicode string, independently of whether the script is displayed left-to-right or right-to-left.</p>
 <h2 id="quality-metric">Quality Metric</h2>
-<p>The quality pass reports exact-root agreement against the expected root from the default-model dictionary line. External-stemmer counters are written to:</p>
+<p>The quality pass reports exact-root agreement against the expected root from the default-model dictionary line. External-stemmer counters are written locally to:</p>
 <ul>
-<li><code>build/reports/jmh/stemmer-accuracy-2026-08-23.csv</code></li>
-<li><code>build/reports/jmh/stemmer-accuracy-2026-08-23.txt</code></li>
+<li><code>build/reports/jmh/stemmer-accuracy-2026-08-25.csv</code></li>
+<li><code>build/reports/jmh/stemmer-accuracy-2026-08-25.txt</code></li>
 </ul>
+<p>The tables in this documentation are verified against the checked-in
+<a href="../../data/java-stemmer-accuracy-2026-08-25.csv">dated accuracy CSV</a>, not against the mutable local
+report directory.</p>
 <p>Accuracy is computed from standard JMH secondary rows:</p>
 <div class="highlight"><pre><span></span><code>allExactPercent = correctMatches / evaluatedTokens * 100
 changedExactPercent = changedCorrectMatches / changedEvaluatedTokens * 100

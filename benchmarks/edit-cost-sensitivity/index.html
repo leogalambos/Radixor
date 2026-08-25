@@ -1,0 +1,5295 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Learned transformation stemming with interoperable Java, Python, and Python-C runtimes">
+      
+      
+      
+        <link rel="canonical" href="https://leogalambos.github.io/Radixor/benchmarks/edit-cost-sensitivity/">
+      
+      
+        <link rel="prev" href="../generalization/">
+      
+      
+        <link rel="next" href="../reference/english-coverage/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/radixor-logo.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Edit-Cost Sensitivity - Radixor</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/extra.css">
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/landing-v2.css">
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/radixor-docs-safety.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="white" data-md-color-accent="blue">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#edit-cost-sensitivity-and-generalization" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Radixor" class="md-header__button md-logo" aria-label="Radixor" data-md-component="logo">
+      
+  <img src="../../assets/images/radixor-logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Radixor
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Edit-Cost Sensitivity
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="white" data-md-color-accent="blue"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/leogalambos/Radixor" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    leogalambos/Radixor
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Radixor" class="md-nav__button md-logo" aria-label="Radixor" data-md-component="logo">
+      
+  <img src="../../assets/images/radixor-logo.png" alt="logo">
+
+    </a>
+    Radixor
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/leogalambos/Radixor" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    leogalambos/Radixor
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Get Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Choose a Runtime
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../why-radixor-is-different/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Why Radixor Is Different
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../fast-track/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Java in 5 Minutes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python/fast-track/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python in 5 Minutes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python-c/quick-start/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python-C in 5 Minutes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Evaluate Radixor
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Evaluate Radixor
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Results Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../benchmarking/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How to Read the Evidence
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model Behavior and Generalization
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Model Behavior and Generalization
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../generalization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Multilingual Generalization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Edit-Cost Sensitivity
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Edit-Cost Sensitivity
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#campaign-identity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Campaign identity
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-findings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key findings
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dictionary-sensitivity-census" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dictionary sensitivity census
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Dictionary sensitivity census">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dictionary-level-associations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dictionary-level associations
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#language-specific-observed-optima" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Language-specific observed optima
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Language-specific observed optima">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#smallest-full-dictionary-patch-command-vocabulary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Smallest full-dictionary patch-command vocabulary
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#best-observed-pairwise-generalization-quality-on-unseen-forms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Best observed pairwise generalization quality on unseen forms
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#predeclared-recommendation-rule" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Predeclared recommendation rule
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#per-language-conclusions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Per-language conclusions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#generalization-across-knowledge-levels" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Generalization across knowledge levels
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dictionary-properties-and-selected-costs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dictionary properties and selected costs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#associations-across-cost-configurations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Associations across cost configurations
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Associations across cost configurations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#quality-associations-are-heterogeneous" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quality associations are heterogeneous
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smallest-observed-association-envelopes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Smallest observed association envelopes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#interpretation-boundaries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interpretation boundaries
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/english-coverage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    English Coverage and Speed
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python/performance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python Runtime Performance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_5" id="__nav_3_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Language Comparisons
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Language Comparisons
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../languages/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../languages/czech/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Czech
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../languages/danish/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Danish
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../languages/dutch/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dutch
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../languages/english/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    English
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../languages/finnish/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Finnish
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../languages/french/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    French
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../languages/german/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    German
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../languages/hebrew/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hebrew
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../languages/hungarian/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hungarian
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../languages/italian/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Italian
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../languages/norwegian-bokmal/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Norwegian Bokmal
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../languages/norwegian-nynorsk/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Norwegian Nynorsk
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../languages/persian/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Persian
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../languages/polish/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Polish
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../languages/portuguese/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Portuguese
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../languages/russian/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Russian
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../languages/spanish/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Spanish
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../languages/swedish/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Swedish
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../languages/ukrainian/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ukrainian
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../languages/yiddish/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Yiddish
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_6" id="__nav_3_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Methods and Reproduction
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Methods and Reproduction
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/methodology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Comparison Methodology
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/linguistic-quality/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Linguistic Quality
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/generalization-methodology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Generalization Protocol
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/edit-cost-methodology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Edit-Cost Protocol
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/tested-stemmers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tested Stemmers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/reproducibility/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reproducibility and Raw Data
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/corpora/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Corpora
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/environment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Environment and Reports
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/candidates/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Candidate Evaluation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Integrate
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Integrate
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_1" id="__nav_4_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Java
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Java
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../quick-start/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../integration-deep-dive/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Integration Deep Dive
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programmatic-usage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../model-selection-and-loading/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model Selection and Loading
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programmatic-loading-and-building/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Loading and Building Stemmers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programmatic-querying-and-ambiguity/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Querying and Ambiguity
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programmatic-extending-and-persistence/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Extending and Persistence
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../migration-and-backward-compatibility/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Migration Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cli-compilation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Compilation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_2" id="__nav_4_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python Runtimes
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Python Runtimes
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Choose a Runtime
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python/fast-track/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python in 5 Minutes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_2_3" id="__nav_4_2_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python (PyO3)
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Python (PyO3)
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python/quick-start/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation and Builds
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python/usage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Usage and API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python/model-compilation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dictionary Compilation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_2_4" id="__nav_4_2_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python-C
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Python-C
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python-c/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python-c/quick-start/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python-C in 5 Minutes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python-c/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation and Builds
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python-c/usage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Usage and API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_3" id="__nav_4_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Models and Dictionaries
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Models and Dictionaries
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../stemmer-models/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../stemmer-model-catalog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Published Model Catalog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../built-in-languages/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Built-in Languages
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dictionary-format/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dictionary Format
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing-dictionaries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing Dictionaries
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Engineering Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Engineering Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../technology-lineage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Technology and Lineage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture-and-reduction/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Detail
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reduction-semantics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reduction Semantics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../lookup-edge-optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lookup Edge Optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data-formats/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Formats
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compatibility-and-guarantees/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compatibility and Guarantees
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Operate and Contribute
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Operate and Contribute
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../trust-security-and-support/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Trust, Security and Support
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../quality-and-operations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quality and Operations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../stemming-quality/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stemming Quality
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reports/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Published Reports
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../builds/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Historical Builds
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../test-taxonomy-and-filtering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Test Taxonomy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#campaign-identity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Campaign identity
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-findings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key findings
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dictionary-sensitivity-census" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dictionary sensitivity census
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Dictionary sensitivity census">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dictionary-level-associations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dictionary-level associations
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#language-specific-observed-optima" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Language-specific observed optima
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Language-specific observed optima">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#smallest-full-dictionary-patch-command-vocabulary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Smallest full-dictionary patch-command vocabulary
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#best-observed-pairwise-generalization-quality-on-unseen-forms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Best observed pairwise generalization quality on unseen forms
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#predeclared-recommendation-rule" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Predeclared recommendation rule
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#per-language-conclusions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Per-language conclusions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#generalization-across-knowledge-levels" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Generalization across knowledge levels
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dictionary-properties-and-selected-costs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dictionary properties and selected costs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#associations-across-cost-configurations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Associations across cost configurations
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Associations across cost configurations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#quality-associations-are-heterogeneous" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quality associations are heterogeneous
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smallest-observed-association-envelopes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Smallest observed association envelopes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#interpretation-boundaries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interpretation boundaries
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="edit-cost-sensitivity-and-generalization">Edit-Cost Sensitivity and Generalization</h1>
+<p>This experiment evaluates the normalized 234-point delete/insert/replace/match cost grid
+against deterministic 10%–100% dictionary-knowledge curves for five frozen splits and all
+20 default models. Its primary generalization outcome is exact stemming of changed forms
+whose normalized surface was absent from training. Pairwise F0.5, over-stemming, and
+under-stemming are independent guards against a superficially good exact-root result.</p>
+<p>A cost label uses <code>D&lt;delete&gt;I&lt;insert&gt;R&lt;replace&gt;M&lt;match&gt;</code>. <code>D</code>, <code>I</code>, and <code>R</code> are the
+relative costs of deleting a source character, inserting a target character, and replacing
+a source character. <code>M</code> is the cost of keeping an equal source/target character unchanged
+(the match or skip step). Thus <code>D2I5R3M0</code> means costs 2, 5, 3, and 0 respectively; these
+numbers are edit-path costs, not counts of generated or retained commands.</p>
+<h2 id="campaign-identity">Campaign identity</h2>
+<ul>
+<li>Protocol: <code>radixor-cost-sensitivity-v4</code></li>
+<li>Source identity: <code>4.2.0-6-g84e57fb</code></li>
+<li>Git revision: <code>84e57fb27ae40913569e826858a8ebb07cf2ea01</code> (dirty)</li>
+<li>Generator SHA-256: <code>fc6aec8f08c3596a33e7f167ababfd2e583aed0671869bc4a208d75191ccc1df</code></li>
+<li>Analysis script SHA-256: <code>347af5fd023bd1794dd41e891d8b4a80598d2928839a01a96ae47154102dd21f</code></li>
+<li>Raw CSV SHA-256: <code>13ec2dfe0af799c3cf6a4cf9948903a02497f2e7de540627a507ba2950d7f738</code></li>
+<li>Exact classes across languages: 334</li>
+<li>Physically measured scenarios: 16,700</li>
+<li>Expanded logical observations: 234,000</li>
+</ul>
+<p>The baseline median unseen changed-form exactness across language, seed, and 10%–90%
+knowledge observations is <strong>69.478%</strong>. This macro-style statement gives each
+scenario equal weight; it is not a token-weighted production estimate.</p>
+<h2 id="key-findings">Key findings</h2>
+<ul>
+<li>The 4,680 language × normalized-cost combinations collapse to 334 exact dictionary-specific command classes, a <strong>14.01×</strong> reduction. The range is 5 classes for Danish through 44 for German.</li>
+<li>Baseline macro unseen changed-form exactness rises from <strong>62.256%</strong> at 10% knowledge to <strong>70.881%</strong> at 90%, a <strong>+8.625 pp</strong> gain.</li>
+<li>The predeclared language-specific selections reduce median command count for <strong>17/20</strong> dictionaries. Across the macro knowledge curve the reduction is 5.01%–6.11% while the largest absolute exactness change is 0.003 pp. The largest language-level median reduction is 26.64% for French.</li>
+<li>Retained-command ratio has a stable positive association with trie nodes and value
+  references, so it is a useful structural-size proxy. No cost or representation predictor
+  keeps one association sign across the central 95% of strata for any unseen-form quality
+  outcome; quality effects are language- and knowledge-dependent.</li>
+<li>Exact-class count is more associated with baseline command vocabulary (Spearman +0.510) than with raw dictionary rows (+0.260). This supports command-aware, not merely size-based, resource classification.</li>
+</ul>
+<h2 id="dictionary-sensitivity-census">Dictionary sensitivity census</h2>
+<p>Common positive scaling has already been removed from the 234-point normalized grid. The
+remaining points collapse only when their generated command is identical for every
+full-dictionary pair, verified command by command after fingerprint bucketing. More classes
+therefore mean that the dictionary exposes more cost-dependent encoder decisions; this is
+sensitivity, not automatically better quality.</p>
+<table>
+<thead>
+<tr>
+<th>Language</th>
+<th style="text-align: right;">Rows</th>
+<th style="text-align: right;">Mean family size</th>
+<th style="text-align: right;">Changed forms</th>
+<th style="text-align: right;">Baseline commands</th>
+<th style="text-align: right;">Exact classes</th>
+<th style="text-align: right;">Grid reduction</th>
+<th style="text-align: right;">Largest class</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Danish</td>
+<td style="text-align: right;">4,179</td>
+<td style="text-align: right;">7.72</td>
+<td style="text-align: right;">74.09%</td>
+<td style="text-align: right;">138</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">46.80×</td>
+<td style="text-align: right;">110</td>
+</tr>
+<tr>
+<td>Yiddish</td>
+<td style="text-align: right;">802</td>
+<td style="text-align: right;">5.36</td>
+<td style="text-align: right;">64.56%</td>
+<td style="text-align: right;">202</td>
+<td style="text-align: right;">21</td>
+<td style="text-align: right;">11.14×</td>
+<td style="text-align: right;">54</td>
+</tr>
+<tr>
+<td>Ukrainian</td>
+<td style="text-align: right;">1,493</td>
+<td style="text-align: right;">10.54</td>
+<td style="text-align: right;">81.03%</td>
+<td style="text-align: right;">286</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">33.43×</td>
+<td style="text-align: right;">76</td>
+</tr>
+<tr>
+<td>Norwegian Nynorsk</td>
+<td style="text-align: right;">4,688</td>
+<td style="text-align: right;">4.19</td>
+<td style="text-align: right;">69.01%</td>
+<td style="text-align: right;">299</td>
+<td style="text-align: right;">11</td>
+<td style="text-align: right;">21.27×</td>
+<td style="text-align: right;">77</td>
+</tr>
+<tr>
+<td>Norwegian Bokmål</td>
+<td style="text-align: right;">17,929</td>
+<td style="text-align: right;">5.06</td>
+<td style="text-align: right;">63.22%</td>
+<td style="text-align: right;">325</td>
+<td style="text-align: right;">14</td>
+<td style="text-align: right;">16.71×</td>
+<td style="text-align: right;">54</td>
+</tr>
+<tr>
+<td>Swedish</td>
+<td style="text-align: right;">12,371</td>
+<td style="text-align: right;">8.93</td>
+<td style="text-align: right;">77.61%</td>
+<td style="text-align: right;">332</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">23.40×</td>
+<td style="text-align: right;">59</td>
+</tr>
+<tr>
+<td>English</td>
+<td style="text-align: right;">396,939</td>
+<td style="text-align: right;">2.53</td>
+<td style="text-align: right;">20.80%</td>
+<td style="text-align: right;">337</td>
+<td style="text-align: right;">15</td>
+<td style="text-align: right;">15.60×</td>
+<td style="text-align: right;">54</td>
+</tr>
+<tr>
+<td>Portuguese</td>
+<td style="text-align: right;">4,001</td>
+<td style="text-align: right;">53.86</td>
+<td style="text-align: right;">96.29%</td>
+<td style="text-align: right;">369</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">26.00×</td>
+<td style="text-align: right;">77</td>
+</tr>
+<tr>
+<td>Hungarian</td>
+<td style="text-align: right;">19,406</td>
+<td style="text-align: right;">48.22</td>
+<td style="text-align: right;">95.86%</td>
+<td style="text-align: right;">462</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">19.50×</td>
+<td style="text-align: right;">54</td>
+</tr>
+<tr>
+<td>Czech</td>
+<td style="text-align: right;">5,113</td>
+<td style="text-align: right;">11.07</td>
+<td style="text-align: right;">82.25%</td>
+<td style="text-align: right;">537</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">19.50×</td>
+<td style="text-align: right;">54</td>
+</tr>
+<tr>
+<td>Dutch</td>
+<td style="text-align: right;">4,992</td>
+<td style="text-align: right;">6.30</td>
+<td style="text-align: right;">68.28%</td>
+<td style="text-align: right;">538</td>
+<td style="text-align: right;">27</td>
+<td style="text-align: right;">8.67×</td>
+<td style="text-align: right;">54</td>
+</tr>
+<tr>
+<td>Persian</td>
+<td style="text-align: right;">69</td>
+<td style="text-align: right;">54.64</td>
+<td style="text-align: right;">96.34%</td>
+<td style="text-align: right;">704</td>
+<td style="text-align: right;">18</td>
+<td style="text-align: right;">13.00×</td>
+<td style="text-align: right;">54</td>
+</tr>
+<tr>
+<td>Italian</td>
+<td style="text-align: right;">10,009</td>
+<td style="text-align: right;">33.72</td>
+<td style="text-align: right;">94.07%</td>
+<td style="text-align: right;">750</td>
+<td style="text-align: right;">19</td>
+<td style="text-align: right;">12.32×</td>
+<td style="text-align: right;">54</td>
+</tr>
+<tr>
+<td>Polish</td>
+<td style="text-align: right;">9,990</td>
+<td style="text-align: right;">13.24</td>
+<td style="text-align: right;">84.92%</td>
+<td style="text-align: right;">846</td>
+<td style="text-align: right;">19</td>
+<td style="text-align: right;">12.32×</td>
+<td style="text-align: right;">54</td>
+</tr>
+<tr>
+<td>Spanish</td>
+<td style="text-align: right;">65,059</td>
+<td style="text-align: right;">14.24</td>
+<td style="text-align: right;">87.03%</td>
+<td style="text-align: right;">1,496</td>
+<td style="text-align: right;">18</td>
+<td style="text-align: right;">13.00×</td>
+<td style="text-align: right;">54</td>
+</tr>
+<tr>
+<td>Russian</td>
+<td style="text-align: right;">37,410</td>
+<td style="text-align: right;">21.55</td>
+<td style="text-align: right;">90.72%</td>
+<td style="text-align: right;">1,840</td>
+<td style="text-align: right;">21</td>
+<td style="text-align: right;">11.14×</td>
+<td style="text-align: right;">54</td>
+</tr>
+<tr>
+<td>Finnish</td>
+<td style="text-align: right;">57,027</td>
+<td style="text-align: right;">32.71</td>
+<td style="text-align: right;">94.07%</td>
+<td style="text-align: right;">2,683</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">33.43×</td>
+<td style="text-align: right;">110</td>
+</tr>
+<tr>
+<td>French</td>
+<td style="text-align: right;">59,240</td>
+<td style="text-align: right;">8.00</td>
+<td style="text-align: right;">77.19%</td>
+<td style="text-align: right;">2,730</td>
+<td style="text-align: right;">32</td>
+<td style="text-align: right;">7.31×</td>
+<td style="text-align: right;">54</td>
+</tr>
+<tr>
+<td>Hebrew</td>
+<td style="text-align: right;">2,358</td>
+<td style="text-align: right;">25.90</td>
+<td style="text-align: right;">92.28%</td>
+<td style="text-align: right;">4,150</td>
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">18.00×</td>
+<td style="text-align: right;">59</td>
+</tr>
+<tr>
+<td>German</td>
+<td style="text-align: right;">54,092</td>
+<td style="text-align: right;">6.16</td>
+<td style="text-align: right;">72.82%</td>
+<td style="text-align: right;">6,986</td>
+<td style="text-align: right;">44</td>
+<td style="text-align: right;">5.32×</td>
+<td style="text-align: right;">54</td>
+</tr>
+</tbody>
+</table>
+<h3 id="dictionary-level-associations">Dictionary-level associations</h3>
+<p>The following across-language coefficients describe whether dictionaries with a
+given property expose more distinct cost-dependent command sequences. There are only
+20 language observations, so these are exploratory effect descriptions,
+not causal estimates or evidence that unlisted properties are irrelevant.</p>
+<table>
+<thead>
+<tr>
+<th>Dictionary property</th>
+<th>Outcome</th>
+<th style="text-align: right;">Spearman ρ</th>
+<th style="text-align: right;">Pearson r</th>
+<th style="text-align: right;">Languages</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>dictionary_rows</code></td>
+<td><code>exact_equivalence_classes</code></td>
+<td style="text-align: right;">+0.260</td>
+<td style="text-align: right;">+0.072</td>
+<td style="text-align: right;">20</td>
+</tr>
+<tr>
+<td><code>dictionary_forms</code></td>
+<td><code>exact_equivalence_classes</code></td>
+<td style="text-align: right;">+0.088</td>
+<td style="text-align: right;">-0.063</td>
+<td style="text-align: right;">20</td>
+</tr>
+<tr>
+<td><code>mean_family_size</code></td>
+<td><code>exact_equivalence_classes</code></td>
+<td style="text-align: right;">-0.176</td>
+<td style="text-align: right;">-0.241</td>
+<td style="text-align: right;">20</td>
+</tr>
+<tr>
+<td><code>changed_form_share</code></td>
+<td><code>exact_equivalence_classes</code></td>
+<td style="text-align: right;">-0.231</td>
+<td style="text-align: right;">-0.132</td>
+<td style="text-align: right;">20</td>
+</tr>
+<tr>
+<td><code>baseline_patch_commands</code></td>
+<td><code>exact_equivalence_classes</code></td>
+<td style="text-align: right;">+0.510</td>
+<td style="text-align: right;">+0.639</td>
+<td style="text-align: right;">20</td>
+</tr>
+</tbody>
+</table>
+<h2 id="language-specific-observed-optima">Language-specific observed optima</h2>
+<p>Here, <em>optimal</em> always means optimal for the stated objective inside the measured normalized
+234-point grid. It does not mean that the same setting is optimal for an unmeasured corpus,
+a different dictionary, or a cost ratio outside the grid.</p>
+<h3 id="smallest-full-dictionary-patch-command-vocabulary">Smallest full-dictionary patch-command vocabulary</h3>
+<p>This table minimizes the number of distinct patch commands retained by the compiled trie at
+100% dictionary knowledge. All five seeds compile the same complete dictionary and must produce
+the same count. When several cost configurations reach that minimum, the displayed representative
+is chosen by higher median unseen F0.5 over the 10%–90% observations, then lower median over- and
+under-stemming; <code>Tied minima</code> records how many grid configurations reach the same minimum count.
+The exactness delta and F0.5 columns describe the displayed representative on partial-knowledge
+generalization observations and expose the quality consequence of pursuing structural size alone.</p>
+<table>
+<thead>
+<tr>
+<th>Language</th>
+<th>Minimum-command costs</th>
+<th style="text-align: right;">Commands</th>
+<th style="text-align: right;">Baseline</th>
+<th style="text-align: right;">Reduction</th>
+<th style="text-align: right;">Unseen exact Δ</th>
+<th style="text-align: right;">Unseen F0.5</th>
+<th style="text-align: right;">Tied minima</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Czech</td>
+<td><code>D1I1R1M1</code></td>
+<td style="text-align: right;">509</td>
+<td style="text-align: right;">537</td>
+<td style="text-align: right;">5.21%</td>
+<td style="text-align: right;">+0.000 pp</td>
+<td style="text-align: right;">0.927175</td>
+<td style="text-align: right;">25</td>
+</tr>
+<tr>
+<td>Danish</td>
+<td><code>D1I1R2M0</code></td>
+<td style="text-align: right;">123</td>
+<td style="text-align: right;">138</td>
+<td style="text-align: right;">10.87%</td>
+<td style="text-align: right;">+0.000 pp</td>
+<td style="text-align: right;">0.878150</td>
+<td style="text-align: right;">54</td>
+</tr>
+<tr>
+<td>German</td>
+<td><code>D2I5R3M0</code></td>
+<td style="text-align: right;">6,784</td>
+<td style="text-align: right;">6,986</td>
+<td style="text-align: right;">2.89%</td>
+<td style="text-align: right;">+0.000 pp</td>
+<td style="text-align: right;">0.825677</td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr>
+<td>Spanish</td>
+<td><code>D1I1R1M1</code></td>
+<td style="text-align: right;">1,283</td>
+<td style="text-align: right;">1,496</td>
+<td style="text-align: right;">14.24%</td>
+<td style="text-align: right;">+0.000 pp</td>
+<td style="text-align: right;">0.962789</td>
+<td style="text-align: right;">25</td>
+</tr>
+<tr>
+<td>Persian</td>
+<td><code>D1I5R3M1</code></td>
+<td style="text-align: right;">660</td>
+<td style="text-align: right;">704</td>
+<td style="text-align: right;">6.25%</td>
+<td style="text-align: right;">+0.000 pp</td>
+<td style="text-align: right;">0.117096</td>
+<td style="text-align: right;">15</td>
+</tr>
+<tr>
+<td>Finnish</td>
+<td><code>D1I1R1M1</code></td>
+<td style="text-align: right;">2,033</td>
+<td style="text-align: right;">2,683</td>
+<td style="text-align: right;">24.23%</td>
+<td style="text-align: right;">+0.005 pp</td>
+<td style="text-align: right;">0.945461</td>
+<td style="text-align: right;">25</td>
+</tr>
+<tr>
+<td>French</td>
+<td><code>D1I1R1M1</code></td>
+<td style="text-align: right;">2,073</td>
+<td style="text-align: right;">2,730</td>
+<td style="text-align: right;">24.07%</td>
+<td style="text-align: right;">+0.000 pp</td>
+<td style="text-align: right;">0.915559</td>
+<td style="text-align: right;">25</td>
+</tr>
+<tr>
+<td>Hebrew</td>
+<td><code>D2I3R3M0</code></td>
+<td style="text-align: right;">4,023</td>
+<td style="text-align: right;">4,150</td>
+<td style="text-align: right;">3.06%</td>
+<td style="text-align: right;">+0.022 pp</td>
+<td style="text-align: right;">0.287004</td>
+<td style="text-align: right;">8</td>
+</tr>
+<tr>
+<td>Hungarian</td>
+<td><code>D1I1R2M0</code></td>
+<td style="text-align: right;">411</td>
+<td style="text-align: right;">462</td>
+<td style="text-align: right;">11.04%</td>
+<td style="text-align: right;">+0.000 pp</td>
+<td style="text-align: right;">0.970327</td>
+<td style="text-align: right;">54</td>
+</tr>
+<tr>
+<td>Italian</td>
+<td><code>D1I1R1M1</code></td>
+<td style="text-align: right;">594</td>
+<td style="text-align: right;">750</td>
+<td style="text-align: right;">20.80%</td>
+<td style="text-align: right;">+0.000 pp</td>
+<td style="text-align: right;">0.971928</td>
+<td style="text-align: right;">25</td>
+</tr>
+<tr>
+<td>Norwegian Bokmål</td>
+<td><code>D1I1R2M0</code></td>
+<td style="text-align: right;">313</td>
+<td style="text-align: right;">325</td>
+<td style="text-align: right;">3.69%</td>
+<td style="text-align: right;">-0.004 pp</td>
+<td style="text-align: right;">0.872959</td>
+<td style="text-align: right;">54</td>
+</tr>
+<tr>
+<td>Dutch</td>
+<td><code>D1I2R2M0</code></td>
+<td style="text-align: right;">502</td>
+<td style="text-align: right;">538</td>
+<td style="text-align: right;">6.69%</td>
+<td style="text-align: right;">+0.005 pp</td>
+<td style="text-align: right;">0.840309</td>
+<td style="text-align: right;">28</td>
+</tr>
+<tr>
+<td>Norwegian Nynorsk</td>
+<td><code>D1I3R3M0</code></td>
+<td style="text-align: right;">299</td>
+<td style="text-align: right;">299</td>
+<td style="text-align: right;">0.00%</td>
+<td style="text-align: right;">+0.000 pp</td>
+<td style="text-align: right;">0.874458</td>
+<td style="text-align: right;">45</td>
+</tr>
+<tr>
+<td>Polish</td>
+<td><code>D1I1R1M1</code></td>
+<td style="text-align: right;">791</td>
+<td style="text-align: right;">846</td>
+<td style="text-align: right;">6.50%</td>
+<td style="text-align: right;">+0.000 pp</td>
+<td style="text-align: right;">0.893496</td>
+<td style="text-align: right;">25</td>
+</tr>
+<tr>
+<td>Portuguese</td>
+<td><code>D1I1R1M1</code></td>
+<td style="text-align: right;">305</td>
+<td style="text-align: right;">369</td>
+<td style="text-align: right;">17.34%</td>
+<td style="text-align: right;">+0.000 pp</td>
+<td style="text-align: right;">0.975633</td>
+<td style="text-align: right;">25</td>
+</tr>
+<tr>
+<td>Russian</td>
+<td><code>D1I1R1M0</code></td>
+<td style="text-align: right;">1,840</td>
+<td style="text-align: right;">1,840</td>
+<td style="text-align: right;">0.00%</td>
+<td style="text-align: right;">+0.000 pp</td>
+<td style="text-align: right;">0.946441</td>
+<td style="text-align: right;">9</td>
+</tr>
+<tr>
+<td>Swedish</td>
+<td><code>D1I1R1M1</code></td>
+<td style="text-align: right;">317</td>
+<td style="text-align: right;">332</td>
+<td style="text-align: right;">4.52%</td>
+<td style="text-align: right;">+0.000 pp</td>
+<td style="text-align: right;">0.906986</td>
+<td style="text-align: right;">25</td>
+</tr>
+<tr>
+<td>Ukrainian</td>
+<td><code>D1I1R1M1</code></td>
+<td style="text-align: right;">272</td>
+<td style="text-align: right;">286</td>
+<td style="text-align: right;">4.90%</td>
+<td style="text-align: right;">+0.000 pp</td>
+<td style="text-align: right;">0.833220</td>
+<td style="text-align: right;">25</td>
+</tr>
+<tr>
+<td>English</td>
+<td><code>D1I1R1M0</code></td>
+<td style="text-align: right;">337</td>
+<td style="text-align: right;">337</td>
+<td style="text-align: right;">0.00%</td>
+<td style="text-align: right;">+0.000 pp</td>
+<td style="text-align: right;">0.896140</td>
+<td style="text-align: right;">45</td>
+</tr>
+<tr>
+<td>Yiddish</td>
+<td><code>D1I1R2M0</code></td>
+<td style="text-align: right;">201</td>
+<td style="text-align: right;">202</td>
+<td style="text-align: right;">0.50%</td>
+<td style="text-align: right;">+0.000 pp</td>
+<td style="text-align: right;">0.771991</td>
+<td style="text-align: right;">90</td>
+</tr>
+</tbody>
+</table>
+<p>Machine-readable values: <a href="../data/edit-cost-minimum-commands.csv">minimum-command configurations</a>.</p>
+<h3 id="best-observed-pairwise-generalization-quality-on-unseen-forms">Best observed pairwise generalization quality on unseen forms</h3>
+<div class="admonition important">
+<p class="admonition-title">This is not full-model production quality</p>
+<p><code>Unseen-family OI</code> and <code>Unseen-family UI</code> are medians over 45 deliberately difficult
+generalization scenarios: five frozen splits at each 10%–90% dictionary-knowledge level.
+Evaluation includes only forms from withheld dictionary families whose normalized surface
+never appeared in training. The values therefore measure how a partial trie connects
+previously unseen members of previously unseen families; they do not describe a model built
+from the complete dictionary.</p>
+</div>
+<p>Under-stemming is pairwise: <code>UI = FN / (TP + FN)</code>, where every gold-related pair of forms is
+one positive relation. One incorrectly separated form can break several relations inside its
+family, so unseen-family UI is neither a per-form error rate nor the complement of exact-root
+accuracy. At 100% knowledge no withheld unseen-family population remains. The <code>Full-model UI</code>
+column therefore supplies a separate reference measured over the complete dictionary with the
+displayed cost configuration; it is the relevant column for judging full-model behavior.</p>
+<p>Only configurations classified <code>VIABLE</code> in every partial-knowledge language × seed observation
+are eligible. A candidate must not increase either median unseen-family OI or median unseen-family
+UI relative to <code>D1I1R1M0</code>. Among those candidates, the table maximizes median unseen F0.5; ties
+prefer lower OI, then lower UI, and finally the production baseline. Lower OI/UI values are
+better; higher F0.5 is better. Deltas are against the baseline and retain six decimals because
+several measured effects are small.</p>
+<p>A non-baseline configuration is selected for <strong>7/20</strong> dictionaries. This establishes that edit costs can alter
+measured stemming quality for particular dictionaries, but the magnitude and direction remain
+dictionary-dependent. Selection and reporting use the same matrix, so these are exploratory
+observed optima rather than externally validated production defaults.</p>
+<table>
+<thead>
+<tr>
+<th>Language</th>
+<th>Quality costs</th>
+<th style="text-align: right;">Median unseen-family OI (10%–90%)</th>
+<th style="text-align: right;">Δ OI</th>
+<th style="text-align: right;">Median unseen-family UI (10%–90%)</th>
+<th style="text-align: right;">Δ UI</th>
+<th style="text-align: right;">Full-model UI (100%)</th>
+<th style="text-align: right;">Unseen F0.5</th>
+<th style="text-align: right;">Δ F0.5</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Czech</td>
+<td><code>D1I1R1M0</code></td>
+<td style="text-align: right;">0.000017%</td>
+<td style="text-align: right;">+0.000000 pp</td>
+<td style="text-align: right;">28.122302%</td>
+<td style="text-align: right;">+0.000000 pp</td>
+<td style="text-align: right;">0.566807%</td>
+<td style="text-align: right;">0.927175</td>
+<td style="text-align: right;">+0.000000</td>
+</tr>
+<tr>
+<td>Danish</td>
+<td><code>D1I1R1M0</code></td>
+<td style="text-align: right;">0.000061%</td>
+<td style="text-align: right;">+0.000000 pp</td>
+<td style="text-align: right;">40.837995%</td>
+<td style="text-align: right;">+0.000000 pp</td>
+<td style="text-align: right;">0.703039%</td>
+<td style="text-align: right;">0.878150</td>
+<td style="text-align: right;">+0.000000</td>
+</tr>
+<tr>
+<td>German</td>
+<td><code>D1I5R3M1</code></td>
+<td style="text-align: right;">0.000063%</td>
+<td style="text-align: right;">-0.000000 pp</td>
+<td style="text-align: right;">49.497381%</td>
+<td style="text-align: right;">-0.001356 pp</td>
+<td style="text-align: right;">12.031009%</td>
+<td style="text-align: right;">0.825677</td>
+<td style="text-align: right;">+0.000019</td>
+</tr>
+<tr>
+<td>Spanish</td>
+<td><code>D1I1R1M0</code></td>
+<td style="text-align: right;">0.000008%</td>
+<td style="text-align: right;">+0.000000 pp</td>
+<td style="text-align: right;">16.101530%</td>
+<td style="text-align: right;">+0.000000 pp</td>
+<td style="text-align: right;">2.110205%</td>
+<td style="text-align: right;">0.962789</td>
+<td style="text-align: right;">+0.000000</td>
+</tr>
+<tr>
+<td>Persian</td>
+<td><code>D1I1R1M0</code></td>
+<td style="text-align: right;">0.000000%</td>
+<td style="text-align: right;">+0.000000 pp</td>
+<td style="text-align: right;">97.415054%</td>
+<td style="text-align: right;">+0.000000 pp</td>
+<td style="text-align: right;">4.877973%</td>
+<td style="text-align: right;">0.117096</td>
+<td style="text-align: right;">+0.000000</td>
+</tr>
+<tr>
+<td>Finnish</td>
+<td><code>D1I2R1M0</code></td>
+<td style="text-align: right;">0.000001%</td>
+<td style="text-align: right;">+0.000000 pp</td>
+<td style="text-align: right;">22.310391%</td>
+<td style="text-align: right;">-0.000007 pp</td>
+<td style="text-align: right;">2.355085%</td>
+<td style="text-align: right;">0.945434</td>
+<td style="text-align: right;">+0.000000</td>
+</tr>
+<tr>
+<td>French</td>
+<td><code>D1I1R1M0</code></td>
+<td style="text-align: right;">0.000011%</td>
+<td style="text-align: right;">+0.000000 pp</td>
+<td style="text-align: right;">31.351496%</td>
+<td style="text-align: right;">+0.000000 pp</td>
+<td style="text-align: right;">8.248915%</td>
+<td style="text-align: right;">0.915559</td>
+<td style="text-align: right;">+0.000000</td>
+</tr>
+<tr>
+<td>Hebrew</td>
+<td><code>D1I2R2M0</code></td>
+<td style="text-align: right;">0.000079%</td>
+<td style="text-align: right;">-0.000012 pp</td>
+<td style="text-align: right;">92.512100%</td>
+<td style="text-align: right;">-0.042585 pp</td>
+<td style="text-align: right;">2.749465%</td>
+<td style="text-align: right;">0.287004</td>
+<td style="text-align: right;">+0.001308</td>
+</tr>
+<tr>
+<td>Hungarian</td>
+<td><code>D1I1R1M1</code></td>
+<td style="text-align: right;">0.000010%</td>
+<td style="text-align: right;">+0.000000 pp</td>
+<td style="text-align: right;">12.955456%</td>
+<td style="text-align: right;">-0.000055 pp</td>
+<td style="text-align: right;">0.736116%</td>
+<td style="text-align: right;">0.970327</td>
+<td style="text-align: right;">+0.000000</td>
+</tr>
+<tr>
+<td>Italian</td>
+<td><code>D1I1R1M0</code></td>
+<td style="text-align: right;">0.000001%</td>
+<td style="text-align: right;">+0.000000 pp</td>
+<td style="text-align: right;">12.613898%</td>
+<td style="text-align: right;">+0.000000 pp</td>
+<td style="text-align: right;">0.669175%</td>
+<td style="text-align: right;">0.971928</td>
+<td style="text-align: right;">+0.000000</td>
+</tr>
+<tr>
+<td>Norwegian Bokmål</td>
+<td><code>D1I1R1M0</code></td>
+<td style="text-align: right;">0.000024%</td>
+<td style="text-align: right;">+0.000000 pp</td>
+<td style="text-align: right;">41.628315%</td>
+<td style="text-align: right;">+0.000000 pp</td>
+<td style="text-align: right;">4.749500%</td>
+<td style="text-align: right;">0.872959</td>
+<td style="text-align: right;">+0.000000</td>
+</tr>
+<tr>
+<td>Dutch</td>
+<td><code>D1I1R2M0</code></td>
+<td style="text-align: right;">0.000027%</td>
+<td style="text-align: right;">+0.000000 pp</td>
+<td style="text-align: right;">48.375349%</td>
+<td style="text-align: right;">-0.015697 pp</td>
+<td style="text-align: right;">2.129575%</td>
+<td style="text-align: right;">0.840309</td>
+<td style="text-align: right;">+0.000084</td>
+</tr>
+<tr>
+<td>Norwegian Nynorsk</td>
+<td><code>D1I1R2M0</code></td>
+<td style="text-align: right;">0.000096%</td>
+<td style="text-align: right;">-0.000001 pp</td>
+<td style="text-align: right;">41.218142%</td>
+<td style="text-align: right;">+0.000000 pp</td>
+<td style="text-align: right;">9.675485%</td>
+<td style="text-align: right;">0.874458</td>
+<td style="text-align: right;">+0.000000</td>
+</tr>
+<tr>
+<td>Polish</td>
+<td><code>D1I1R1M0</code></td>
+<td style="text-align: right;">0.000010%</td>
+<td style="text-align: right;">+0.000000 pp</td>
+<td style="text-align: right;">37.062231%</td>
+<td style="text-align: right;">+0.000000 pp</td>
+<td style="text-align: right;">1.730587%</td>
+<td style="text-align: right;">0.893496</td>
+<td style="text-align: right;">+0.000000</td>
+</tr>
+<tr>
+<td>Portuguese</td>
+<td><code>D1I1R1M0</code></td>
+<td style="text-align: right;">0.000008%</td>
+<td style="text-align: right;">+0.000000 pp</td>
+<td style="text-align: right;">11.069494%</td>
+<td style="text-align: right;">+0.000000 pp</td>
+<td style="text-align: right;">0.291615%</td>
+<td style="text-align: right;">0.975633</td>
+<td style="text-align: right;">+0.000000</td>
+</tr>
+<tr>
+<td>Russian</td>
+<td><code>D1I1R1M0</code></td>
+<td style="text-align: right;">0.000018%</td>
+<td style="text-align: right;">+0.000000 pp</td>
+<td style="text-align: right;">21.536426%</td>
+<td style="text-align: right;">+0.000000 pp</td>
+<td style="text-align: right;">1.957425%</td>
+<td style="text-align: right;">0.946441</td>
+<td style="text-align: right;">+0.000000</td>
+</tr>
+<tr>
+<td>Swedish</td>
+<td><code>D1I1R1M0</code></td>
+<td style="text-align: right;">0.000034%</td>
+<td style="text-align: right;">+0.000000 pp</td>
+<td style="text-align: right;">33.331485%</td>
+<td style="text-align: right;">+0.000000 pp</td>
+<td style="text-align: right;">4.476263%</td>
+<td style="text-align: right;">0.906986</td>
+<td style="text-align: right;">+0.000000</td>
+</tr>
+<tr>
+<td>Ukrainian</td>
+<td><code>D1I1R1M0</code></td>
+<td style="text-align: right;">0.000037%</td>
+<td style="text-align: right;">+0.000000 pp</td>
+<td style="text-align: right;">49.894697%</td>
+<td style="text-align: right;">+0.000000 pp</td>
+<td style="text-align: right;">0.836852%</td>
+<td style="text-align: right;">0.833220</td>
+<td style="text-align: right;">+0.000000</td>
+</tr>
+<tr>
+<td>English</td>
+<td><code>D1I1R1M0</code></td>
+<td style="text-align: right;">0.000001%</td>
+<td style="text-align: right;">+0.000000 pp</td>
+<td style="text-align: right;">35.620602%</td>
+<td style="text-align: right;">+0.000000 pp</td>
+<td style="text-align: right;">4.615189%</td>
+<td style="text-align: right;">0.896140</td>
+<td style="text-align: right;">+0.000000</td>
+</tr>
+<tr>
+<td>Yiddish</td>
+<td><code>D1I1R2M0</code></td>
+<td style="text-align: right;">0.000045%</td>
+<td style="text-align: right;">-0.000014 pp</td>
+<td style="text-align: right;">59.609698%</td>
+<td style="text-align: right;">+0.000000 pp</td>
+<td style="text-align: right;">2.184236%</td>
+<td style="text-align: right;">0.771991</td>
+<td style="text-align: right;">+0.000000</td>
+</tr>
+</tbody>
+</table>
+<p>Machine-readable values: <a href="../data/edit-cost-quality-optima.csv">quality configurations</a>.</p>
+<h2 id="predeclared-recommendation-rule">Predeclared recommendation rule</h2>
+<p>For each language, configurations classified <code>VIABLE</code> at every partial-knowledge observation
+are retained. The rule finds the best median unseen changed-form exactness, admits settings within
+0.25 percentage points, then minimizes the median retained-command
+ratio; remaining ties prefer unseen F0.5 and exactness. This is an exploratory operating-point
+selection, not an external-test estimate.</p>
+<table>
+<thead>
+<tr>
+<th>Language</th>
+<th>Recommended costs</th>
+<th style="text-align: right;">Unseen changed exact</th>
+<th style="text-align: right;">Δ vs baseline</th>
+<th style="text-align: right;">Unseen F0.5</th>
+<th style="text-align: right;">Command ratio</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Czech</td>
+<td><code>D10I10R1M1</code></td>
+<td style="text-align: right;">70.455%</td>
+<td style="text-align: right;">+0.000 pp</td>
+<td style="text-align: right;">0.9272</td>
+<td style="text-align: right;">0.942×</td>
+</tr>
+<tr>
+<td>Danish</td>
+<td><code>D1I1R10M0</code></td>
+<td style="text-align: right;">64.067%</td>
+<td style="text-align: right;">+0.000 pp</td>
+<td style="text-align: right;">0.8781</td>
+<td style="text-align: right;">0.895×</td>
+</tr>
+<tr>
+<td>German</td>
+<td><code>D2I5R3M0</code></td>
+<td style="text-align: right;">55.374%</td>
+<td style="text-align: right;">+0.000 pp</td>
+<td style="text-align: right;">0.8257</td>
+<td style="text-align: right;">0.971×</td>
+</tr>
+<tr>
+<td>Spanish</td>
+<td><code>D10I10R1M1</code></td>
+<td style="text-align: right;">87.056%</td>
+<td style="text-align: right;">+0.000 pp</td>
+<td style="text-align: right;">0.9628</td>
+<td style="text-align: right;">0.820×</td>
+</tr>
+<tr>
+<td>Persian</td>
+<td><code>D10I10R1M1</code></td>
+<td style="text-align: right;">14.906%</td>
+<td style="text-align: right;">-0.031 pp</td>
+<td style="text-align: right;">0.1165</td>
+<td style="text-align: right;">0.917×</td>
+</tr>
+<tr>
+<td>Finnish</td>
+<td><code>D10I10R1M1</code></td>
+<td style="text-align: right;">84.143%</td>
+<td style="text-align: right;">+0.005 pp</td>
+<td style="text-align: right;">0.9455</td>
+<td style="text-align: right;">0.736×</td>
+</tr>
+<tr>
+<td>French</td>
+<td><code>D10I10R1M1</code></td>
+<td style="text-align: right;">76.846%</td>
+<td style="text-align: right;">+0.000 pp</td>
+<td style="text-align: right;">0.9156</td>
+<td style="text-align: right;">0.734×</td>
+</tr>
+<tr>
+<td>Hebrew</td>
+<td><code>D10I5R10M1</code></td>
+<td style="text-align: right;">14.245%</td>
+<td style="text-align: right;">+0.022 pp</td>
+<td style="text-align: right;">0.2870</td>
+<td style="text-align: right;">0.975×</td>
+</tr>
+<tr>
+<td>Hungarian</td>
+<td><code>D1I1R10M0</code></td>
+<td style="text-align: right;">90.699%</td>
+<td style="text-align: right;">+0.000 pp</td>
+<td style="text-align: right;">0.9703</td>
+<td style="text-align: right;">0.888×</td>
+</tr>
+<tr>
+<td>Italian</td>
+<td><code>D10I10R1M1</code></td>
+<td style="text-align: right;">91.567%</td>
+<td style="text-align: right;">+0.000 pp</td>
+<td style="text-align: right;">0.9719</td>
+<td style="text-align: right;">0.806×</td>
+</tr>
+<tr>
+<td>Norwegian Bokmål</td>
+<td><code>D1I1R10M0</code></td>
+<td style="text-align: right;">67.144%</td>
+<td style="text-align: right;">-0.004 pp</td>
+<td style="text-align: right;">0.8730</td>
+<td style="text-align: right;">0.965×</td>
+</tr>
+<tr>
+<td>Dutch</td>
+<td><code>D10I1R10M0</code></td>
+<td style="text-align: right;">63.882%</td>
+<td style="text-align: right;">+0.005 pp</td>
+<td style="text-align: right;">0.8403</td>
+<td style="text-align: right;">0.961×</td>
+</tr>
+<tr>
+<td>Norwegian Nynorsk</td>
+<td><code>D1I1R1M0</code></td>
+<td style="text-align: right;">63.758%</td>
+<td style="text-align: right;">+0.000 pp</td>
+<td style="text-align: right;">0.8745</td>
+<td style="text-align: right;">1.000×</td>
+</tr>
+<tr>
+<td>Polish</td>
+<td><code>D10I10R1M1</code></td>
+<td style="text-align: right;">67.725%</td>
+<td style="text-align: right;">+0.000 pp</td>
+<td style="text-align: right;">0.8935</td>
+<td style="text-align: right;">0.941×</td>
+</tr>
+<tr>
+<td>Portuguese</td>
+<td><code>D10I10R1M1</code></td>
+<td style="text-align: right;">93.092%</td>
+<td style="text-align: right;">+0.000 pp</td>
+<td style="text-align: right;">0.9756</td>
+<td style="text-align: right;">0.812×</td>
+</tr>
+<tr>
+<td>Russian</td>
+<td><code>D10I10R1M1</code></td>
+<td style="text-align: right;">79.655%</td>
+<td style="text-align: right;">-0.004 pp</td>
+<td style="text-align: right;">0.9464</td>
+<td style="text-align: right;">0.970×</td>
+</tr>
+<tr>
+<td>Swedish</td>
+<td><code>D10I10R1M1</code></td>
+<td style="text-align: right;">75.990%</td>
+<td style="text-align: right;">+0.000 pp</td>
+<td style="text-align: right;">0.9070</td>
+<td style="text-align: right;">0.953×</td>
+</tr>
+<tr>
+<td>Ukrainian</td>
+<td><code>D10I10R1M1</code></td>
+<td style="text-align: right;">52.642%</td>
+<td style="text-align: right;">+0.000 pp</td>
+<td style="text-align: right;">0.8332</td>
+<td style="text-align: right;">0.943×</td>
+</tr>
+<tr>
+<td>English</td>
+<td><code>D1I1R1M0</code></td>
+<td style="text-align: right;">77.779%</td>
+<td style="text-align: right;">+0.000 pp</td>
+<td style="text-align: right;">0.8961</td>
+<td style="text-align: right;">1.000×</td>
+</tr>
+<tr>
+<td>Yiddish</td>
+<td><code>D1I1R1M0</code></td>
+<td style="text-align: right;">45.515%</td>
+<td style="text-align: right;">+0.000 pp</td>
+<td style="text-align: right;">0.7720</td>
+<td style="text-align: right;">1.000×</td>
+</tr>
+</tbody>
+</table>
+<h2 id="per-language-conclusions">Per-language conclusions</h2>
+<p>The macro result is not substituted for language evidence. Each language page now
+publishes its five-split knowledge curve, dictionary-specific exact cost classes,
+within-language association coverage, and a bounded conclusion. The compact index
+below exposes the main measured differences; follow the link for the supporting rows
+and interpretation limits.</p>
+<table>
+<thead>
+<tr>
+<th>Language</th>
+<th style="text-align: right;">Baseline exact at 10%</th>
+<th style="text-align: right;">Baseline exact at 90%</th>
+<th style="text-align: right;">Knowledge effect</th>
+<th>Selected costs</th>
+<th style="text-align: right;">Median command change</th>
+<th>Conclusion</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Czech</td>
+<td style="text-align: right;">64.331%</td>
+<td style="text-align: right;">70.970%</td>
+<td style="text-align: right;">+6.639 pp</td>
+<td><code>D10I10R1M1</code></td>
+<td style="text-align: right;">-5.83%</td>
+<td><a href="../languages/czech/#edit-cost-conclusion">Evidence and conclusion</a></td>
+</tr>
+<tr>
+<td>Danish</td>
+<td style="text-align: right;">51.619%</td>
+<td style="text-align: right;">68.000%</td>
+<td style="text-align: right;">+16.381 pp</td>
+<td><code>D1I1R10M0</code></td>
+<td style="text-align: right;">-10.47%</td>
+<td><a href="../languages/danish/#edit-cost-conclusion">Evidence and conclusion</a></td>
+</tr>
+<tr>
+<td>German</td>
+<td style="text-align: right;">48.338%</td>
+<td style="text-align: right;">58.463%</td>
+<td style="text-align: right;">+10.125 pp</td>
+<td><code>D2I5R3M0</code></td>
+<td style="text-align: right;">-2.94%</td>
+<td><a href="../languages/german/#edit-cost-conclusion">Evidence and conclusion</a></td>
+</tr>
+<tr>
+<td>Spanish</td>
+<td style="text-align: right;">80.556%</td>
+<td style="text-align: right;">89.280%</td>
+<td style="text-align: right;">+8.725 pp</td>
+<td><code>D10I10R1M1</code></td>
+<td style="text-align: right;">-18.02%</td>
+<td><a href="../languages/spanish/#edit-cost-conclusion">Evidence and conclusion</a></td>
+</tr>
+<tr>
+<td>Persian</td>
+<td style="text-align: right;">14.864%</td>
+<td style="text-align: right;">16.975%</td>
+<td style="text-align: right;">+2.112 pp</td>
+<td><code>D10I10R1M1</code></td>
+<td style="text-align: right;">-8.31%</td>
+<td><a href="../languages/persian/#edit-cost-conclusion">Evidence and conclusion</a></td>
+</tr>
+<tr>
+<td>Finnish</td>
+<td style="text-align: right;">78.695%</td>
+<td style="text-align: right;">85.707%</td>
+<td style="text-align: right;">+7.012 pp</td>
+<td><code>D10I10R1M1</code></td>
+<td style="text-align: right;">-26.37%</td>
+<td><a href="../languages/finnish/#edit-cost-conclusion">Evidence and conclusion</a></td>
+</tr>
+<tr>
+<td>French</td>
+<td style="text-align: right;">69.937%</td>
+<td style="text-align: right;">80.058%</td>
+<td style="text-align: right;">+10.121 pp</td>
+<td><code>D10I10R1M1</code></td>
+<td style="text-align: right;">-26.64%</td>
+<td><a href="../languages/french/#edit-cost-conclusion">Evidence and conclusion</a></td>
+</tr>
+<tr>
+<td>Hebrew</td>
+<td style="text-align: right;">10.977%</td>
+<td style="text-align: right;">15.910%</td>
+<td style="text-align: right;">+4.933 pp</td>
+<td><code>D10I5R10M1</code></td>
+<td style="text-align: right;">-2.48%</td>
+<td><a href="../languages/hebrew/#edit-cost-conclusion">Evidence and conclusion</a></td>
+</tr>
+<tr>
+<td>Hungarian</td>
+<td style="text-align: right;">86.780%</td>
+<td style="text-align: right;">91.867%</td>
+<td style="text-align: right;">+5.087 pp</td>
+<td><code>D1I1R10M0</code></td>
+<td style="text-align: right;">-11.17%</td>
+<td><a href="../languages/hungarian/#edit-cost-conclusion">Evidence and conclusion</a></td>
+</tr>
+<tr>
+<td>Italian</td>
+<td style="text-align: right;">85.934%</td>
+<td style="text-align: right;">93.330%</td>
+<td style="text-align: right;">+7.397 pp</td>
+<td><code>D10I10R1M1</code></td>
+<td style="text-align: right;">-19.44%</td>
+<td><a href="../languages/italian/#edit-cost-conclusion">Evidence and conclusion</a></td>
+</tr>
+<tr>
+<td>Norwegian Bokmål</td>
+<td style="text-align: right;">58.507%</td>
+<td style="text-align: right;">70.574%</td>
+<td style="text-align: right;">+12.068 pp</td>
+<td><code>D1I1R10M0</code></td>
+<td style="text-align: right;">-3.54%</td>
+<td><a href="../languages/norwegian-bokmal/#edit-cost-conclusion">Evidence and conclusion</a></td>
+</tr>
+<tr>
+<td>Dutch</td>
+<td style="text-align: right;">55.658%</td>
+<td style="text-align: right;">68.281%</td>
+<td style="text-align: right;">+12.623 pp</td>
+<td><code>D10I1R10M0</code></td>
+<td style="text-align: right;">-3.86%</td>
+<td><a href="../languages/dutch/#edit-cost-conclusion">Evidence and conclusion</a></td>
+</tr>
+<tr>
+<td>Norwegian Nynorsk</td>
+<td style="text-align: right;">50.756%</td>
+<td style="text-align: right;">69.473%</td>
+<td style="text-align: right;">+18.717 pp</td>
+<td><code>D1I1R1M0</code></td>
+<td style="text-align: right;">+0.00%</td>
+<td><a href="../languages/norwegian-nynorsk/#edit-cost-conclusion">Evidence and conclusion</a></td>
+</tr>
+<tr>
+<td>Polish</td>
+<td style="text-align: right;">61.850%</td>
+<td style="text-align: right;">70.138%</td>
+<td style="text-align: right;">+8.288 pp</td>
+<td><code>D10I10R1M1</code></td>
+<td style="text-align: right;">-5.88%</td>
+<td><a href="../languages/polish/#edit-cost-conclusion">Evidence and conclusion</a></td>
+</tr>
+<tr>
+<td>Portuguese</td>
+<td style="text-align: right;">89.204%</td>
+<td style="text-align: right;">94.378%</td>
+<td style="text-align: right;">+5.174 pp</td>
+<td><code>D10I10R1M1</code></td>
+<td style="text-align: right;">-18.75%</td>
+<td><a href="../languages/portuguese/#edit-cost-conclusion">Evidence and conclusion</a></td>
+</tr>
+<tr>
+<td>Russian</td>
+<td style="text-align: right;">74.976%</td>
+<td style="text-align: right;">81.082%</td>
+<td style="text-align: right;">+6.106 pp</td>
+<td><code>D10I10R1M1</code></td>
+<td style="text-align: right;">-3.04%</td>
+<td><a href="../languages/russian/#edit-cost-conclusion">Evidence and conclusion</a></td>
+</tr>
+<tr>
+<td>Swedish</td>
+<td style="text-align: right;">67.345%</td>
+<td style="text-align: right;">79.922%</td>
+<td style="text-align: right;">+12.577 pp</td>
+<td><code>D10I10R1M1</code></td>
+<td style="text-align: right;">-4.72%</td>
+<td><a href="../languages/swedish/#edit-cost-conclusion">Evidence and conclusion</a></td>
+</tr>
+<tr>
+<td>Ukrainian</td>
+<td style="text-align: right;">43.396%</td>
+<td style="text-align: right;">56.474%</td>
+<td style="text-align: right;">+13.078 pp</td>
+<td><code>D10I10R1M1</code></td>
+<td style="text-align: right;">-5.67%</td>
+<td><a href="../languages/ukrainian/#edit-cost-conclusion">Evidence and conclusion</a></td>
+</tr>
+<tr>
+<td>English</td>
+<td style="text-align: right;">75.824%</td>
+<td style="text-align: right;">79.131%</td>
+<td style="text-align: right;">+3.308 pp</td>
+<td><code>D1I1R1M0</code></td>
+<td style="text-align: right;">+0.00%</td>
+<td><a href="../languages/english/#edit-cost-conclusion">Evidence and conclusion</a></td>
+</tr>
+<tr>
+<td>Yiddish</td>
+<td style="text-align: right;">38.579%</td>
+<td style="text-align: right;">50.000%</td>
+<td style="text-align: right;">+11.421 pp</td>
+<td><code>D1I1R1M0</code></td>
+<td style="text-align: right;">+0.00%</td>
+<td><a href="../languages/yiddish/#edit-cost-conclusion">Evidence and conclusion</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="generalization-across-knowledge-levels">Generalization across knowledge levels</h2>
+<p>Each cell is the median across 20 languages × five frozen splits at the stated
+knowledge level. The recommended curve applies each language's independently selected
+setting; it is not a single global configuration. Percentages remain macro summaries
+rather than token-weighted production estimates.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">Knowledge</th>
+<th style="text-align: right;">Baseline unseen changed exact</th>
+<th style="text-align: right;">Recommended</th>
+<th style="text-align: right;">Δ</th>
+<th style="text-align: right;">Baseline F0.5</th>
+<th style="text-align: right;">Recommended F0.5</th>
+<th style="text-align: right;">Baseline commands</th>
+<th style="text-align: right;">Recommended commands</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">10%</td>
+<td style="text-align: right;">62.256%</td>
+<td style="text-align: right;">62.256%</td>
+<td style="text-align: right;">+0.000 pp</td>
+<td style="text-align: right;">0.8638</td>
+<td style="text-align: right;">0.8638</td>
+<td style="text-align: right;">1.000×</td>
+<td style="text-align: right;">0.939×</td>
+</tr>
+<tr>
+<td style="text-align: right;">20%</td>
+<td style="text-align: right;">65.946%</td>
+<td style="text-align: right;">65.946%</td>
+<td style="text-align: right;">+0.000 pp</td>
+<td style="text-align: right;">0.8833</td>
+<td style="text-align: right;">0.8833</td>
+<td style="text-align: right;">1.000×</td>
+<td style="text-align: right;">0.939×</td>
+</tr>
+<tr>
+<td style="text-align: right;">30%</td>
+<td style="text-align: right;">67.259%</td>
+<td style="text-align: right;">67.259%</td>
+<td style="text-align: right;">+0.000 pp</td>
+<td style="text-align: right;">0.8881</td>
+<td style="text-align: right;">0.8881</td>
+<td style="text-align: right;">1.000×</td>
+<td style="text-align: right;">0.946×</td>
+</tr>
+<tr>
+<td style="text-align: right;">40%</td>
+<td style="text-align: right;">68.376%</td>
+<td style="text-align: right;">68.376%</td>
+<td style="text-align: right;">+0.000 pp</td>
+<td style="text-align: right;">0.8927</td>
+<td style="text-align: right;">0.8927</td>
+<td style="text-align: right;">1.000×</td>
+<td style="text-align: right;">0.948×</td>
+</tr>
+<tr>
+<td style="text-align: right;">50%</td>
+<td style="text-align: right;">69.309%</td>
+<td style="text-align: right;">69.309%</td>
+<td style="text-align: right;">+0.000 pp</td>
+<td style="text-align: right;">0.8961</td>
+<td style="text-align: right;">0.8961</td>
+<td style="text-align: right;">1.000×</td>
+<td style="text-align: right;">0.947×</td>
+</tr>
+<tr>
+<td style="text-align: right;">60%</td>
+<td style="text-align: right;">70.014%</td>
+<td style="text-align: right;">70.014%</td>
+<td style="text-align: right;">+0.000 pp</td>
+<td style="text-align: right;">0.8984</td>
+<td style="text-align: right;">0.8984</td>
+<td style="text-align: right;">1.000×</td>
+<td style="text-align: right;">0.941×</td>
+</tr>
+<tr>
+<td style="text-align: right;">70%</td>
+<td style="text-align: right;">70.186%</td>
+<td style="text-align: right;">70.183%</td>
+<td style="text-align: right;">-0.003 pp</td>
+<td style="text-align: right;">0.9021</td>
+<td style="text-align: right;">0.9021</td>
+<td style="text-align: right;">1.000×</td>
+<td style="text-align: right;">0.942×</td>
+</tr>
+<tr>
+<td style="text-align: right;">80%</td>
+<td style="text-align: right;">70.691%</td>
+<td style="text-align: right;">70.691%</td>
+<td style="text-align: right;">+0.000 pp</td>
+<td style="text-align: right;">0.9058</td>
+<td style="text-align: right;">0.9058</td>
+<td style="text-align: right;">1.000×</td>
+<td style="text-align: right;">0.948×</td>
+</tr>
+<tr>
+<td style="text-align: right;">90%</td>
+<td style="text-align: right;">70.881%</td>
+<td style="text-align: right;">70.881%</td>
+<td style="text-align: right;">+0.000 pp</td>
+<td style="text-align: right;">0.9066</td>
+<td style="text-align: right;">0.9066</td>
+<td style="text-align: right;">1.000×</td>
+<td style="text-align: right;">0.950×</td>
+</tr>
+</tbody>
+</table>
+<h2 id="dictionary-properties-and-selected-costs">Dictionary properties and selected costs</h2>
+<p>These across-language coefficients connect dictionary descriptors to the exploratory
+language-specific selections above. With 20 dictionaries and selection on the same
+data, they generate hypotheses about dictionary types; they do not establish a portable
+cost-selection rule for an unseen resource. Predictor and selected-outcome labels are
+defined in the <a href="../reference/edit-cost-methodology/#predictor-and-outcome-glossary">methodology glossary</a>.</p>
+<table>
+<thead>
+<tr>
+<th>Dictionary property</th>
+<th>Selected outcome</th>
+<th style="text-align: right;">Spearman ρ</th>
+<th style="text-align: right;">Pearson r</th>
+<th style="text-align: right;">Languages</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>mean_family_size</code></td>
+<td><code>recommended_match_cost</code></td>
+<td style="text-align: right;">+0.673</td>
+<td style="text-align: right;">+0.393</td>
+<td style="text-align: right;">20</td>
+</tr>
+<tr>
+<td><code>changed_form_share</code></td>
+<td><code>recommended_match_cost</code></td>
+<td style="text-align: right;">+0.673</td>
+<td style="text-align: right;">+0.620</td>
+<td style="text-align: right;">20</td>
+</tr>
+<tr>
+<td><code>mean_family_size</code></td>
+<td><code>recommended_command_ratio</code></td>
+<td style="text-align: right;">-0.636</td>
+<td style="text-align: right;">-0.434</td>
+<td style="text-align: right;">20</td>
+</tr>
+<tr>
+<td><code>changed_form_share</code></td>
+<td><code>recommended_insert_cost</code></td>
+<td style="text-align: right;">+0.623</td>
+<td style="text-align: right;">+0.590</td>
+<td style="text-align: right;">20</td>
+</tr>
+<tr>
+<td><code>changed_form_share</code></td>
+<td><code>recommended_command_ratio</code></td>
+<td style="text-align: right;">-0.616</td>
+<td style="text-align: right;">-0.487</td>
+<td style="text-align: right;">20</td>
+</tr>
+<tr>
+<td><code>mean_family_size</code></td>
+<td><code>recommended_insert_cost</code></td>
+<td style="text-align: right;">+0.615</td>
+<td style="text-align: right;">+0.352</td>
+<td style="text-align: right;">20</td>
+</tr>
+<tr>
+<td><code>mean_family_size</code></td>
+<td><code>recommended_delete_cost</code></td>
+<td style="text-align: right;">+0.598</td>
+<td style="text-align: right;">+0.321</td>
+<td style="text-align: right;">20</td>
+</tr>
+<tr>
+<td><code>changed_form_share</code></td>
+<td><code>recommended_delete_cost</code></td>
+<td style="text-align: right;">+0.566</td>
+<td style="text-align: right;">+0.575</td>
+<td style="text-align: right;">20</td>
+</tr>
+</tbody>
+</table>
+<h2 id="associations-across-cost-configurations">Associations across cost configurations</h2>
+<p>Correlations are calculated separately inside every language × seed × knowledge stratum;
+the table reports the median and central 95% empirical interval of those within-stratum
+coefficients. This avoids allowing language size or knowledge level to manufacture a pooled
+association. The interval is descriptive, not an independence-adjusted confidence interval.
+Every predictor and outcome label is defined in the <a href="../reference/edit-cost-methodology/#predictor-and-outcome-glossary">methodology glossary</a>.
+Only the following pairs keep the same sign throughout that central interval.</p>
+<table>
+<thead>
+<tr>
+<th>Predictor</th>
+<th>Outcome</th>
+<th style="text-align: right;">Median Spearman ρ</th>
+<th style="text-align: right;">Central 95%</th>
+<th style="text-align: right;">Median Pearson r</th>
+<th style="text-align: right;">Strata</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>patch_command_ratio</code></td>
+<td><code>value_references</code></td>
+<td style="text-align: right;">+0.988</td>
+<td style="text-align: right;">+0.263…+1.000</td>
+<td style="text-align: right;">+0.995</td>
+<td style="text-align: right;">900</td>
+</tr>
+<tr>
+<td><code>patch_command_ratio</code></td>
+<td><code>trie_nodes</code></td>
+<td style="text-align: right;">+0.953</td>
+<td style="text-align: right;">+0.187…+1.000</td>
+<td style="text-align: right;">+0.970</td>
+<td style="text-align: right;">900</td>
+</tr>
+<tr>
+<td><code>edit_cost_imbalance</code></td>
+<td><code>logical_leaf_paths</code></td>
+<td style="text-align: right;">+0.177</td>
+<td style="text-align: right;">+0.079…+0.293</td>
+<td style="text-align: right;">+0.137</td>
+<td style="text-align: right;">540</td>
+</tr>
+</tbody>
+</table>
+<h3 id="quality-associations-are-heterogeneous">Quality associations are heterogeneous</h3>
+<p>No cost or representation predictor keeps one Spearman sign across the central 95%
+of strata for any unseen-form quality outcome. The largest absolute median for each
+outcome is shown below to make that heterogeneity visible; it must not be interpreted
+as a global effect that transfers between languages or knowledge levels.</p>
+<table>
+<thead>
+<tr>
+<th>Predictor</th>
+<th>Outcome</th>
+<th style="text-align: right;">Median Spearman ρ</th>
+<th style="text-align: right;">Central 95%</th>
+<th style="text-align: right;">Median Pearson r</th>
+<th style="text-align: right;">Strata</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>logical_leaf_paths</code></td>
+<td><code>unseen_changed_exact</code></td>
+<td style="text-align: right;">-1.000</td>
+<td style="text-align: right;">-1.000…+0.126</td>
+<td style="text-align: right;">-1.000</td>
+<td style="text-align: right;">502</td>
+</tr>
+<tr>
+<td><code>logical_leaf_paths</code></td>
+<td><code>unseen_f05</code></td>
+<td style="text-align: right;">-0.956</td>
+<td style="text-align: right;">-1.000…+0.331</td>
+<td style="text-align: right;">-1.000</td>
+<td style="text-align: right;">517</td>
+</tr>
+<tr>
+<td><code>replace_to_delete_insert</code></td>
+<td><code>unseen_over_percent</code></td>
+<td style="text-align: right;">-0.766</td>
+<td style="text-align: right;">-0.947…+0.712</td>
+<td style="text-align: right;">-0.570</td>
+<td style="text-align: right;">325</td>
+</tr>
+<tr>
+<td><code>logical_leaf_paths</code></td>
+<td><code>unseen_under_percent</code></td>
+<td style="text-align: right;">+1.000</td>
+<td style="text-align: right;">-0.158…+1.000</td>
+<td style="text-align: right;">+1.000</td>
+<td style="text-align: right;">517</td>
+</tr>
+</tbody>
+</table>
+<h3 id="smallest-observed-association-envelopes">Smallest observed association envelopes</h3>
+<p>These pairs have the smallest central-interval envelope in the measured matrix.
+They are candidates for practical insensitivity, not proof of independence; an interval
+that spans substantial positive and negative values instead indicates heterogeneity.</p>
+<table>
+<thead>
+<tr>
+<th>Predictor</th>
+<th>Outcome</th>
+<th style="text-align: right;">Median Spearman ρ</th>
+<th style="text-align: right;">Central 95%</th>
+<th style="text-align: right;">Median Pearson r</th>
+<th style="text-align: right;">Strata</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>delete_to_insert_ratio</code></td>
+<td><code>unseen_changed_exact</code></td>
+<td style="text-align: right;">+0.000</td>
+<td style="text-align: right;">+0.000…+0.000</td>
+<td style="text-align: right;">+0.121</td>
+<td style="text-align: right;">535</td>
+</tr>
+<tr>
+<td><code>delete_to_insert_ratio</code></td>
+<td><code>unseen_f05</code></td>
+<td style="text-align: right;">+0.000</td>
+<td style="text-align: right;">+0.000…+0.000</td>
+<td style="text-align: right;">+0.118</td>
+<td style="text-align: right;">625</td>
+</tr>
+<tr>
+<td><code>delete_to_insert_ratio</code></td>
+<td><code>unseen_over_percent</code></td>
+<td style="text-align: right;">+0.000</td>
+<td style="text-align: right;">+0.000…+0.000</td>
+<td style="text-align: right;">+0.051</td>
+<td style="text-align: right;">325</td>
+</tr>
+<tr>
+<td><code>delete_to_insert_ratio</code></td>
+<td><code>unseen_under_percent</code></td>
+<td style="text-align: right;">+0.000</td>
+<td style="text-align: right;">+0.000…+0.000</td>
+<td style="text-align: right;">-0.121</td>
+<td style="text-align: right;">602</td>
+</tr>
+<tr>
+<td><code>delete_to_insert_ratio</code></td>
+<td><code>patch_command_ratio</code></td>
+<td style="text-align: right;">+0.000</td>
+<td style="text-align: right;">+0.000…+0.000</td>
+<td style="text-align: right;">+0.006</td>
+<td style="text-align: right;">900</td>
+</tr>
+<tr>
+<td><code>delete_to_insert_ratio</code></td>
+<td><code>trie_nodes</code></td>
+<td style="text-align: right;">+0.000</td>
+<td style="text-align: right;">+0.000…+0.000</td>
+<td style="text-align: right;">+0.007</td>
+<td style="text-align: right;">900</td>
+</tr>
+<tr>
+<td><code>delete_to_insert_ratio</code></td>
+<td><code>trie_edges</code></td>
+<td style="text-align: right;">+0.000</td>
+<td style="text-align: right;">+0.000…+0.000</td>
+<td style="text-align: right;">-0.001</td>
+<td style="text-align: right;">797</td>
+</tr>
+<tr>
+<td><code>delete_to_insert_ratio</code></td>
+<td><code>average_path_length</code></td>
+<td style="text-align: right;">+0.000</td>
+<td style="text-align: right;">+0.000…+0.000</td>
+<td style="text-align: right;">-0.051</td>
+<td style="text-align: right;">540</td>
+</tr>
+</tbody>
+</table>
+<h2 id="interpretation-boundaries">Interpretation boundaries</h2>
+<p>The experiment establishes sensitivity and within-resource generalization, not causality
+or performance on unrelated domains. A weak median correlation is not described as proof
+of no relationship: heterogeneous signs, nonlinear effects, and repeated splits remain
+possible. Recommendations therefore remain language-specific until validated on an external
+dictionary or corpus. See the <a href="../reference/edit-cost-methodology/">full protocol</a> and
+<a href="../reference/reproducibility/">raw-data instructions</a>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      © 2026 Egothor · Radixor software is BSD-3-Clause licensed.
+    </div>
+  
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.sections", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="https://unpkg.com/mermaid@11/dist/mermaid.min.js"></script>
+      
+        <script src="../../assets/javascripts/mermaid.js"></script>
+      
+    
+  </body>
+</html>

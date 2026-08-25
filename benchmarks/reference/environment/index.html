@@ -16,7 +16,7 @@
         <link rel="prev" href="../corpora/">
       
       
-        <link rel="next" href="../english-coverage/">
+        <link rel="next" href="../candidates/">
       
       
         
@@ -587,6 +587,55 @@
   
   
   
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model Behavior and Generalization
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Model Behavior and Generalization
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
     <li class="md-nav__item">
       <a href="../../generalization/" class="md-nav__link">
         
@@ -604,6 +653,70 @@
   
 
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../edit-cost-sensitivity/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Edit-Cost Sensitivity
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../english-coverage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    English Coverage and Speed
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -1424,6 +1537,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../edit-cost-methodology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Edit-Cost Protocol
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../tested-stemmers/" class="md-nav__link">
         
   
@@ -1579,6 +1720,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#edit-cost-sensitivity-run" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Edit-Cost Sensitivity Run
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#java-accuracy-and-performance-run" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1637,34 +1789,6 @@
   
 </nav>
       
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../english-coverage/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    English Coverage and Speed
-  
-
-    
-  </span>
-  
-  
-
-      </a>
     </li>
   
 
@@ -3249,6 +3373,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#edit-cost-sensitivity-run" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Edit-Cost Sensitivity Run
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#java-accuracy-and-performance-run" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3339,15 +3474,15 @@ counters. It was nevertheless generated on the same identified workstation:</p>
 <tbody>
 <tr>
 <td>Evaluation date</td>
-<td>2026-08-23 (Europe/Prague)</td>
+<td>2026-08-25 (Europe/Prague)</td>
 </tr>
 <tr>
 <td>Command</td>
-<td><code>./gradlew -PdictionaryGeneralizationReleaseVersion=4.2.0 dictionaryGeneralization</code></td>
+<td><code>./gradlew --no-daemon -PdictionaryGeneralizationReleaseVersion=4.2.0-6-g84e57fb dictionaryGeneralization</code></td>
 </tr>
 <tr>
-<td>Radixor/Java algorithm version</td>
-<td>4.2.0</td>
+<td>Radixor/Java source identity</td>
+<td><code>4.2.0-6-g84e57fb</code></td>
 </tr>
 <tr>
 <td>Report</td>
@@ -3379,7 +3514,7 @@ counters. It was nevertheless generated on the same identified workstation:</p>
 </tr>
 <tr>
 <td>CPU</td>
-<td>AMD Ryzen 5 7600, 6 physical / 12 logical CPUs</td>
+<td>AMD Ryzen 5 8600G, 6 physical / 12 logical CPUs</td>
 </tr>
 <tr>
 <td>Architecture</td>
@@ -3398,7 +3533,60 @@ counters. It was nevertheless generated on the same identified workstation:</p>
 <p>The CPU was configured with the <code>performance</code> governor, but that fact is not
 used to support any generalization claim. The new report deliberately excludes
 speed; the Java timing environment below remains the provenance for the
-published 2026-08-23 JMH tables.</p>
+published 2026-08-25 JMH tables.</p>
+<h2 id="edit-cost-sensitivity-run">Edit-Cost Sensitivity Run</h2>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Evaluation date</td>
+<td>2026-08-25 (Europe/Prague)</td>
+</tr>
+<tr>
+<td>Command</td>
+<td><code>./gradlew --no-daemon -PdictionaryGeneralizationReleaseVersion=4.2.0-6-g84e57fb editCostSensitivity</code></td>
+</tr>
+<tr>
+<td>Radixor/Java source identity</td>
+<td><code>4.2.0-6-g84e57fb</code></td>
+</tr>
+<tr>
+<td>Report</td>
+<td><code>build/reports/generalization/edit-cost-sensitivity.csv</code></td>
+</tr>
+<tr>
+<td>Published raw snapshot</td>
+<td><code>docs/benchmarks/data/edit-cost-sensitivity.csv.gz</code></td>
+</tr>
+<tr>
+<td>Physical / logical observations</td>
+<td>16,700 representatives / 234,000 expanded grid points</td>
+</tr>
+<tr>
+<td>Matrix</td>
+<td>20 default models × 234 normalized cost points × 10 knowledge levels × 5 frozen splits</td>
+</tr>
+<tr>
+<td>Runtime</td>
+<td>5 h 35 min 13 s</td>
+</tr>
+<tr>
+<td>Maximum resident set</td>
+<td>approximately 9.0 GiB; swap remained unused</td>
+</tr>
+<tr>
+<td>Protocol</td>
+<td><code>radixor-cost-sensitivity-v4</code>; exact full-dictionary command equality</td>
+</tr>
+</tbody>
+</table>
+<p>The edit-cost report publishes deterministic structure and quality counters, not timing scores.
+Elapsed time and memory describe the cost of reproducing the experiment and are not stemmer outcomes.</p>
 <h2 id="java-accuracy-and-performance-run">Java Accuracy and Performance Run</h2>
 <table>
 <thead>
@@ -3410,7 +3598,7 @@ published 2026-08-23 JMH tables.</p>
 <tbody>
 <tr>
 <td>Benchmark date</td>
-<td>2026-08-23 (Europe/Prague)</td>
+<td>2026-08-25 (Europe/Prague)</td>
 </tr>
 <tr>
 <td>Corpus command</td>
@@ -3418,7 +3606,7 @@ published 2026-08-23 JMH tables.</p>
 </tr>
 <tr>
 <td>Exact-root accuracy command</td>
-<td><code>tools/run-published-accuracy-benchmarks.sh 2026-08-23</code>; all four <code>*BenchmarkQuality</code> classes are selected and timing scores are discarded</td>
+<td><code>tools/run-published-accuracy-benchmarks.sh 2026-08-25</code>; all four <code>*BenchmarkQuality</code> classes are selected and timing scores are discarded</td>
 </tr>
 <tr>
 <td>Stemming-quality command</td>
@@ -3426,11 +3614,11 @@ published 2026-08-23 JMH tables.</p>
 </tr>
 <tr>
 <td>Published speed command</td>
-<td><code>tools/run-published-speed-benchmarks.sh 2026-08-23 4.2.0</code></td>
+<td><code>tools/run-published-speed-benchmarks.sh 2026-08-25 4.2.0-6-g84e57fb</code></td>
 </tr>
 <tr>
 <td>Published speed run interval</td>
-<td>2026-08-23 09:22:29 to 11:15:28 Europe/Prague (1 h 52 min 59 s, including idle intervals and both JMH suites)</td>
+<td>2026-08-25 14:33:15 to 16:27:55 Europe/Prague (1 h 54 min 40 s, including idle intervals and both JMH suites)</td>
 </tr>
 <tr>
 <td>Stabilization intervals</td>
@@ -3442,19 +3630,19 @@ published 2026-08-23 JMH tables.</p>
 </tr>
 <tr>
 <td>Exact-root reports</td>
-<td><code>build/reports/jmh/stemmer-accuracy-2026-08-23.csv</code> and <code>.txt</code></td>
+<td><code>build/reports/jmh/stemmer-accuracy-2026-08-25.csv</code> and <code>.txt</code></td>
 </tr>
 <tr>
 <td>Speed reports</td>
-<td><code>build/reports/jmh/stemmer-speed-2026-08-23.csv</code> and <code>.txt</code></td>
+<td><code>build/reports/jmh/stemmer-speed-2026-08-25.csv</code> and <code>.txt</code></td>
 </tr>
 <tr>
 <td>English coverage accuracy reports</td>
-<td><code>build/reports/jmh/english-coverage-accuracy-2026-08-23.csv</code> and <code>.txt</code></td>
+<td><code>build/reports/jmh/english-coverage-accuracy-2026-08-25.csv</code> and <code>.txt</code></td>
 </tr>
 <tr>
 <td>English coverage speed reports</td>
-<td><code>build/reports/jmh/english-coverage-speed-2026-08-23.csv</code> and <code>.txt</code></td>
+<td><code>build/reports/jmh/english-coverage-speed-2026-08-25.csv</code> and <code>.txt</code></td>
 </tr>
 <tr>
 <td>Stemming-quality reports</td>
@@ -3462,11 +3650,11 @@ published 2026-08-23 JMH tables.</p>
 </tr>
 <tr>
 <td>Environment report</td>
-<td><code>build/reports/jmh/performance-environment-2026-08-23.txt</code></td>
+<td><code>build/reports/jmh/performance-environment-2026-08-25.txt</code></td>
 </tr>
 <tr>
 <td>Selected speed methods</td>
-<td><code>build/reports/jmh/published-speed-benchmarks-2026-08-23.txt</code></td>
+<td><code>build/reports/jmh/published-speed-benchmarks-2026-08-25.txt</code></td>
 </tr>
 <tr>
 <td>Comparison scope</td>
@@ -3478,11 +3666,11 @@ published 2026-08-23 JMH tables.</p>
 </tr>
 <tr>
 <td>Core base commit</td>
-<td><code>31e3b9d31379060cd75a3219381e09218f8a2ef6</code></td>
+<td><code>84e57fb27ae40913569e826858a8ebb07cf2ea01</code></td>
 </tr>
 <tr>
 <td>Release identity</td>
-<td>Radixor/Java <code>4.2.0</code>; exact measured tracked changes and untracked-source checksums are retained as <code>measured-source-2026-08-23.patch</code> and <code>measured-untracked-2026-08-23.sha256</code></td>
+<td>Radixor/Java <code>4.2.0-6-g84e57fb</code>; exact measured tracked changes and untracked-source checksums are retained as <code>measured-source-2026-08-25.patch</code> and <code>measured-untracked-2026-08-25.sha256</code></td>
 </tr>
 <tr>
 <td>JMH version</td>
@@ -3522,7 +3710,7 @@ published 2026-08-23 JMH tables.</p>
 </tr>
 <tr>
 <td>Observed relative uncertainty</td>
-<td>Main speed matrix: maximum 13.871%, with 14 of 105 rows above 10% and none above 20%; coverage-speed curve: maximum 22.028%, with 6 of 10 rows above 10% and 1 above 20%</td>
+<td>Main speed matrix: maximum 15.542%, with 18 of 105 rows above 10% and none above 20%; coverage-speed curve: maximum 24.542%, with 7 of 10 rows above 10% and 1 above 20%</td>
 </tr>
 <tr>
 <td>Deterministic measurements</td>
@@ -3554,7 +3742,7 @@ published 2026-08-23 JMH tables.</p>
 </tr>
 <tr>
 <td>CPU</td>
-<td>AMD Ryzen 5 7600 6-Core Processor</td>
+<td>AMD Ryzen 5 8600G w/ Radeon 760M Graphics</td>
 </tr>
 <tr>
 <td>Physical / logical CPUs</td>
@@ -3574,11 +3762,11 @@ published 2026-08-23 JMH tables.</p>
 </tr>
 <tr>
 <td>Pre-run idle state</td>
-<td>Load average 0.15 / 0.13 / 0.10 after the 30 s idle interval; CPU Tctl 53.8 degrees Celsius; swap unused</td>
+<td>Load average 0.32 / 0.56 / 1.14 after the 30 s idle interval; CPU Tctl 42.8 degrees Celsius; swap unused</td>
 </tr>
 <tr>
 <td>End-of-run state</td>
-<td>Load average 1.50 / 1.49 / 1.50; CPU Tctl 78.1 degrees Celsius</td>
+<td>Load average 1.17 / 1.21 / 1.27; CPU Tctl 68.9 degrees Celsius</td>
 </tr>
 <tr>
 <td>Power and idle policy</td>
@@ -3600,24 +3788,28 @@ published 2026-08-23 JMH tables.</p>
 <p>Generated local report files for this benchmark update:</p>
 <ul>
 <li><code>build/reports/generalization/dictionary-generalization.csv</code></li>
+<li><code>build/reports/generalization/edit-cost-sensitivity.csv</code></li>
 <li><code>build/reports/jmh/benchmark-corpora.csv</code></li>
-<li><code>build/reports/jmh/stemmer-accuracy-2026-08-23.csv</code></li>
-<li><code>build/reports/jmh/stemmer-accuracy-2026-08-23.txt</code></li>
-<li><code>build/reports/jmh/stemmer-speed-2026-08-23.csv</code></li>
-<li><code>build/reports/jmh/stemmer-speed-2026-08-23.txt</code></li>
-<li><code>build/reports/jmh/english-coverage-accuracy-2026-08-23.csv</code></li>
-<li><code>build/reports/jmh/english-coverage-accuracy-2026-08-23.txt</code></li>
-<li><code>build/reports/jmh/english-coverage-speed-2026-08-23.csv</code></li>
-<li><code>build/reports/jmh/english-coverage-speed-2026-08-23.txt</code></li>
-<li><code>build/reports/jmh/performance-environment-2026-08-23.txt</code></li>
+<li><code>build/reports/jmh/stemmer-accuracy-2026-08-25.csv</code></li>
+<li><code>build/reports/jmh/stemmer-accuracy-2026-08-25.txt</code></li>
+<li><code>build/reports/jmh/stemmer-speed-2026-08-25.csv</code></li>
+<li><code>build/reports/jmh/stemmer-speed-2026-08-25.txt</code></li>
+<li><code>build/reports/jmh/english-coverage-accuracy-2026-08-25.csv</code></li>
+<li><code>build/reports/jmh/english-coverage-accuracy-2026-08-25.txt</code></li>
+<li><code>build/reports/jmh/english-coverage-speed-2026-08-25.csv</code></li>
+<li><code>build/reports/jmh/english-coverage-speed-2026-08-25.txt</code></li>
+<li><code>build/reports/jmh/performance-environment-2026-08-25.txt</code></li>
 <li><code>build/reports/stemming-quality/stemming-quality.csv</code></li>
 <li><code>build/reports/stemming-quality/stemming-quality.md</code></li>
 <li><code>build/reports/stemming-quality/metric-correlations-pearson.csv</code></li>
 <li><code>build/reports/stemming-quality/metric-correlations-spearman.csv</code></li>
 </ul>
-<p>The versioned documentation snapshots under <code>docs/benchmarks/data/</code> preserve
-the complete stemming-quality matrix and all 1,000 generalization scenarios.
-Machine-specific JMH reports remain build artifacts.</p>
+<p>The versioned documentation snapshots under <code>docs/benchmarks/data/</code> preserve the complete
+stemming-quality matrix, all 1,000 generalization scenarios, the compressed edit-cost raw matrix
+plus derived analyses, and the dated CSV inputs for the published Java and Python performance
+tables. The Python provenance JSON records its environment and run parameters. Detailed JMH TXT
+logs and machine-state reports remain local build artifacts. The complete versioned input list and
+checksums are published on the <a href="../reproducibility/#published-performance-snapshots">reproducibility page</a>.</p>
 <h2 id="published-metrics">Published Metrics</h2>
 <p>The historical English Radixor versus Porter performance badge is retired. <code>tools/generate-pages-badges.py</code> produces only coverage and mutation badge endpoint JSON files. Benchmark interpretation uses both speed and quality because a narrow or aggressive stemmer can be fast while disagreeing with the dictionary root much more often than Radixor.</p>
 

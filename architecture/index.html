@@ -585,6 +585,55 @@
   
   
   
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model Behavior and Generalization
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Model Behavior and Generalization
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
     <li class="md-nav__item">
       <a href="../benchmarks/generalization/" class="md-nav__link">
         
@@ -602,6 +651,70 @@
   
 
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/edit-cost-sensitivity/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Edit-Cost Sensitivity
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/reference/english-coverage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    English Coverage and Speed
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -1420,6 +1533,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../benchmarks/reference/edit-cost-methodology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Edit-Cost Protocol
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../benchmarks/reference/tested-stemmers/" class="md-nav__link">
         
   
@@ -1512,34 +1653,6 @@
     
   
     Environment and Reports
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../benchmarks/reference/english-coverage/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    English Coverage and Speed
   
 
     
@@ -3920,7 +4033,7 @@
 </tr>
 <tr>
 <td>Documentation staging</td>
-<td>Maintained <code>docs/</code> plus generated catalog under <code>build/mkdocs-source/</code></td>
+<td>Reviewed <code>docs/</code>, including the checked-in generated catalog; staging independently regenerates a byte-identical catalog under <code>build/mkdocs-source/</code></td>
 </tr>
 <tr>
 <td>Release workflows</td>
@@ -4040,7 +4153,9 @@ its separately packaged BSD-2-Clause license.</p>
 </table>
 <p>License inclusion, strict metadata paths, resource presence, SHA-256 verification, unsupported-format rejection, and duplicate-ID rejection form the model integrity boundary. These checks detect packaging mistakes and corruption; model data remains non-executable dictionary input.</p>
 <h2 id="the-central-idea">The central idea</h2>
-<p>Radixor does not store final stems directly as a large flat lookup table. Instead, it stores <strong>patch commands</strong> that describe how a word form should be transformed into a canonical stem.</p>
+<p>Radixor does not store final stems directly as a large flat lookup table. Instead, it stores
+<a href="../why-radixor-is-different/#what-a-patch-command-looks-like"><strong>patch commands</strong></a> that describe how
+a word form should be transformed into a canonical stem.</p>
 <p>For example, if a dictionary states that <code>running</code> should reduce to <code>run</code>, the final runtime artifact does not need to store a full redundant <code>running -&gt; run</code> output string entry in the simplest possible form. It can store a compact transformation command that expresses how to turn the source form into the target form.</p>
 <p>That matters because many words share similar transformation patterns. Once those mappings are organized in a trie and compiled into a canonical structure, the result is much smaller and more reusable than a naive direct-output table.</p>
 <h2 id="trie-construction-flow">Trie construction flow</h2>

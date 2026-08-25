@@ -432,6 +432,28 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#the-2001-patch-command-formulation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The 2001 patch-command formulation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-a-patch-command-looks-like" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What a patch command looks like
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#what-happens-to-an-unseen-word" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -750,6 +772,55 @@
   
   
   
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model Behavior and Generalization
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Model Behavior and Generalization
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
     <li class="md-nav__item">
       <a href="../benchmarks/generalization/" class="md-nav__link">
         
@@ -767,6 +838,70 @@
   
 
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/edit-cost-sensitivity/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Edit-Cost Sensitivity
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/reference/english-coverage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    English Coverage and Speed
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -1585,6 +1720,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../benchmarks/reference/edit-cost-methodology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Edit-Cost Protocol
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../benchmarks/reference/tested-stemmers/" class="md-nav__link">
         
   
@@ -1677,34 +1840,6 @@
     
   
     Environment and Reports
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../benchmarks/reference/english-coverage/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    English Coverage and Speed
   
 
     
@@ -3297,6 +3432,28 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#the-2001-patch-command-formulation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The 2001 patch-command formulation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-a-patch-command-looks-like" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What a patch command looks like
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#what-happens-to-an-unseen-word" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3453,6 +3610,94 @@ runtime structure.</p>
     mutable --&gt; reduction --&gt; compiled --&gt; runtime</code></pre>
 <p>The dictionary is important because it supplies the linguistic evidence. It does
 <strong>not</strong> define a closed runtime vocabulary.</p>
+<h2 id="the-2001-patch-command-formulation">The 2001 patch-command formulation</h2>
+<p>The patch-command method used by the Egothor/Radixor lineage is documented in
+Leo Galambos's 2001 publication:</p>
+<blockquote>
+<p>Leo Galambos, “Lemmatizer for Document Information Retrieval Systems in
+JAVA,” <em>SOFSEM 2001: Theory and Practice of Informatics</em>, Lecture Notes in
+Computer Science 2234, pp. 243–252, 2001.
+<a href="https://doi.org/10.1007/3-540-45627-9_21">doi:10.1007/3-540-45627-9_21</a></p>
+</blockquote>
+<p>The paper formulates a general patch command, or <strong>P-command</strong>, as a sequence of
+partial edit commands derived from a minimum-cost path between a word form and
+its stem. It covers removal, insertion, replacement, and leaving matching text
+unchanged; gives the commands a compact serialized representation; applies them
+from the end of the word to reflect predominantly suffixal morphology; and uses
+the resulting transformations as values in a trie. It is the historical method
+reference for the patch-command representation in this implementation lineage.
+Current Radixor extends the implementation with configurable weighted edit
+costs and traversal, compiled commands, reduction, persistence, and
+deterministic multi-result semantics.</p>
+<h2 id="what-a-patch-command-looks-like">What a patch command looks like</h2>
+<p>A serialized patch command is a compact sequence of two-character
+instructions. The first character is an opcode; the second is either a literal
+character or a compact count. For counted instructions, <code>a</code> means one, <code>b</code>
+means two, <code>c</code> means three, and so on.</p>
+<table>
+<thead>
+<tr>
+<th>Instruction</th>
+<th>Argument</th>
+<th>Meaning at the current traversal position</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>D&lt;count&gt;</code></td>
+<td>Encoded count</td>
+<td>Delete source characters.</td>
+</tr>
+<tr>
+<td><code>I&lt;char&gt;</code></td>
+<td>Literal character</td>
+<td>Insert the character into the result.</td>
+</tr>
+<tr>
+<td><code>R&lt;char&gt;</code></td>
+<td>Literal character</td>
+<td>Replace the source character with the argument.</td>
+</tr>
+<tr>
+<td><code>-&lt;count&gt;</code></td>
+<td>Encoded count</td>
+<td>Keep matching source characters unchanged and advance.</td>
+</tr>
+<tr>
+<td><code>Na</code></td>
+<td>Canonical fixed argument</td>
+<td>Make no change; this is Radixor's serialized no-operation command.</td>
+</tr>
+</tbody>
+</table>
+<p>The serialized opcodes are related to, but not identical with, the <code>D/I/R/M</code>
+cost notation used by the benchmarks. In a label such as <code>D2I1R1M0</code>, <code>M</code> is the
+cost of a matching dynamic-programming transition. When such a match must be
+represented inside a serialized command, it is emitted as <code>-&lt;count&gt;</code>; <code>Na</code>
+instead denotes a complete no-operation command. See the
+<a href="../benchmarks/reference/edit-cost-methodology/">edit-cost methodology</a>
+for the benchmark notation.</p>
+<p>The historical and default traversal runs from right to left. Consider the
+dictionary evidence:</p>
+<div class="highlight"><pre><span></span><code>running -&gt; run
+</code></pre></div>
+<p>Its patch command is:</p>
+<div class="highlight"><pre><span></span><code>Dd
+</code></pre></div>
+<p><code>D</code> means delete and <code>d</code> encodes four characters. Applied from the right, the
+instruction removes <code>g</code>, <code>n</code>, <code>i</code>, and <code>n</code>, leaving <code>run</code>. No instruction is
+needed for the unchanged prefix, so the representation stays compact. More
+complex commands concatenate instruction pairs, for example combining skips,
+replacements, deletions, and insertions in their execution order.</p>
+<p>For example, a command containing several instruction pairs is:</p>
+<div class="highlight"><pre><span></span><code>feet -&gt; foot    -aRoRo
+</code></pre></div>
+<p>From right to left, <code>-a</code> keeps the final <code>t</code>; the two <code>Ro</code> instructions replace
+the preceding two <code>e</code> characters with <code>o</code>. The unchanged initial <code>f</code> needs no
+serialized instruction.</p>
+<p>The text command is the portable learned value stored by the trie-building
+process. At runtime, Radixor compiles it into an immutable specialized command
+object rather than interpreting the serialized text repeatedly.</p>
 <h2 id="what-happens-to-an-unseen-word">What happens to an unseen word?</h2>
 <p>The compiled trie selects transformation behaviour rather than storing a full
 lemma string for every possible input.</p>
@@ -3464,6 +3709,12 @@ forms.</p>
 <p>Generalization is not a promise that every arbitrary unknown token has a useful
 stem. No practical stemmer can make that guarantee. The important property is
 that Radixor is <strong>not limited to exact dictionary membership</strong>.</p>
+<p>The measured boundary is published rather than implied: the independent
+<a href="../benchmarks/generalization/">20-language dictionary-family experiment</a> evaluates five frozen
+splits at every 10% knowledge step, while the
+<a href="../benchmarks/edit-cost-sensitivity/">edit-cost experiment</a> tests how relative command costs and
+trie structure interact with that transfer. Because the results differ by dictionary, every
+<a href="../benchmarks/languages/">language page</a> contains its own evidence and bounded conclusions.</p>
 <p>For the implementation details, see <a href="../architecture/">Architecture</a>.</p>
 <h2 id="why-patch-commands-matter">Why patch commands matter</h2>
 <p>Patch commands encode <em>how to transform</em> a word rather than merely <em>which string

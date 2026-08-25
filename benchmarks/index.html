@@ -778,6 +778,55 @@
   
   
   
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model Behavior and Generalization
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Model Behavior and Generalization
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
     <li class="md-nav__item">
       <a href="generalization/" class="md-nav__link">
         
@@ -795,6 +844,70 @@
   
 
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="edit-cost-sensitivity/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Edit-Cost Sensitivity
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/english-coverage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    English Coverage and Speed
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -1613,6 +1726,34 @@
   
   
     <li class="md-nav__item">
+      <a href="reference/edit-cost-methodology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Edit-Cost Protocol
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="reference/tested-stemmers/" class="md-nav__link">
         
   
@@ -1705,34 +1846,6 @@
     
   
     Environment and Reports
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="reference/english-coverage/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    English Coverage and Speed
   
 
     
@@ -3479,11 +3592,11 @@
 
 <h1 id="benchmark-results">Benchmark Results</h1>
 <p>This section contains the published Radixor benchmark reference set. It is intentionally split into
-two layers:</p>
+three layers:</p>
 <ul>
 <li><strong>benchmark reference pages</strong>, which explain methodology, corpora, environment, candidate
   selection, multilingual generalization, and the English coverage-speed deep dive;</li>
-<li><strong>language result pages</strong>, which contain the actual same-language accuracy and throughput tables.</li>
+<li><strong>language result pages</strong>, which contain the actual same-language accuracy and throughput tables;</li>
 <li><strong>pairwise quality pages and generated sections</strong>, which publish over-stemming, under-stemming,
   candidate-policy, classification, and partition measurements from one checked result snapshot.</li>
 </ul>
@@ -3543,6 +3656,14 @@ the preferred result measured by the accuracy pass.</p>
 <td>Frozen nested splits, unseen-surface leakage control, formulas, reproduction, and limitations.</td>
 </tr>
 <tr>
+<td><a href="edit-cost-sensitivity/">Edit-cost sensitivity</a></td>
+<td>Language-specific edit-cost recommendations, exact command-equivalence classes, trie structure, and generalization associations.</td>
+</tr>
+<tr>
+<td><a href="reference/edit-cost-methodology/">Edit-cost methodology</a></td>
+<td>Normalized cost grid, exact equivalence verification, frozen splits, outcomes, analysis rules, and reproduction.</td>
+</tr>
+<tr>
 <td><a href="reference/english-coverage/">English dictionary coverage</a></td>
 <td>Quality/speed operating curve for contracted Radixor tries built from 100% down to 10% of English dictionary rows.</td>
 </tr>
@@ -3561,19 +3682,20 @@ the preferred result measured by the accuracy pass.</p>
 <li>throughput metrics,</li>
 <li>pairwise linguistic-quality metrics showing whether same-group forms share a stem and forms with
   no shared dictionary-group membership remain separated,</li>
+<li>a language-specific edit-cost and dictionary-knowledge evidence table, factor analysis, and conclusion,</li>
 <li>interpretation notes for the compared stemmers.</li>
 </ul>
 <p>Open <a href="languages/">Language Benchmark Pages</a> for the complete language list.</p>
 <h2 id="key-published-result">Key Published Result</h2>
 <p>The English dictionary coverage benchmark shows the current contracted-trie operating curve. With
-the full English dictionary, Radixor reaches <code>97.478%</code> all-token exactness and <code>97.197%</code>
-changed-token exactness at <code>87.2 ns/token</code>. Even with a deterministic 10% dictionary slice, it
-keeps <code>92.868%</code> all-token exactness and <code>76.516%</code> changed-token exactness at <code>51.8 ns/token</code>.</p>
+the full English dictionary, Radixor reaches <code>97.668%</code> all-token exactness and <code>98.110%</code>
+changed-token exactness at <code>97.9 ns/token</code>. Even with a deterministic 10% dictionary slice, it
+keeps <code>93.057%</code> all-token exactness and <code>77.327%</code> changed-token exactness at <code>68.9 ns/token</code>.</p>
 <p>Those figures should not be reduced to a single speed badge. The professional interpretation is a
 quality/speed envelope: the amount and quality of dictionary knowledge affect stemming precision,
 while contracted tries reduce lookup cost in uniform regions of the compiled graph.</p>
 <h2 id="quality-versus-performance">Quality versus performance</h2>
-<p>Each language page keeps exact-root accuracy, JMH latency, and pairwise linguistic-quality results in separate tables. No undocumented scalar combines them. The 2026-08-23 language tables are generated from the current corpus/command report, exact-root and speed JMH reports, and pairwise-quality snapshot produced for this refresh. The Snowball 3.1.0 matrix includes direct Czech, Persian, and Polish stemmers; all published Java stemmers were measured in the same run. Readers should inspect the quality and speed dimensions side by side; no cross-language Pareto ranking is inferred from workloads with different dictionaries and token counts.</p>
+<p>Each language page keeps exact-root accuracy, JMH latency, and pairwise linguistic-quality results in separate tables. No undocumented scalar combines them. The 2026-08-25 language tables are generated from the current corpus/command report, exact-root and speed JMH reports, and pairwise-quality snapshot produced for this refresh. The Snowball 3.1.0 matrix includes direct Czech, Persian, and Polish stemmers; all published Java stemmers were measured in the same run. Readers should inspect the quality and speed dimensions side by side; no cross-language Pareto ranking is inferred from workloads with different dictionaries and token counts.</p>
 <h3 id="new-snowball-310-rows">New Snowball 3.1.0 rows</h3>
 <table>
 <thead>
@@ -3701,9 +3823,9 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 <td>English (<code>US_UK</code>)</td>
 <td>ALL_WORDS</td>
 <td>Radixor</td>
-<td style="text-align: right;">0.965537</td>
+<td style="text-align: right;">0.976120</td>
 <td>ENGLISH LUCENE PORTER COPIED</td>
-<td style="text-align: right;">0.010741250</td>
+<td style="text-align: right;">0.010985401</td>
 <td>no</td>
 <td style="text-align: right;">11</td>
 </tr>
@@ -3711,9 +3833,9 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 <td>English (<code>US_UK</code>)</td>
 <td>LOWERCASE_GROUPS_ONLY</td>
 <td>Radixor</td>
-<td style="text-align: right;">0.966202</td>
+<td style="text-align: right;">0.976863</td>
 <td>ENGLISH LUCENE PORTER COPIED</td>
-<td style="text-align: right;">0.011138557</td>
+<td style="text-align: right;">0.011393230</td>
 <td>no</td>
 <td style="text-align: right;">11</td>
 </tr>
@@ -5488,27 +5610,27 @@ while contracted tries reduce lookup cost in uniform regions of the compiled gra
 <tr>
 <td>ALL_WORDS</td>
 <td style="text-align: right;">20</td>
-<td style="text-align: right;">0.980696</td>
-<td style="text-align: right;">0.987977</td>
+<td style="text-align: right;">0.981225</td>
+<td style="text-align: right;">0.988003</td>
 <td style="text-align: right;">0.999988</td>
-<td style="text-align: right;">0.975953</td>
-<td style="text-align: right;">0.987824</td>
+<td style="text-align: right;">0.976005</td>
+<td style="text-align: right;">0.987851</td>
 </tr>
 <tr>
 <td>LOWERCASE_GROUPS_ONLY</td>
 <td style="text-align: right;">20</td>
-<td style="text-align: right;">0.983862</td>
-<td style="text-align: right;">0.989614</td>
+<td style="text-align: right;">0.984395</td>
+<td style="text-align: right;">0.989641</td>
 <td style="text-align: right;">0.999992</td>
-<td style="text-align: right;">0.979228</td>
-<td style="text-align: right;">0.989501</td>
+<td style="text-align: right;">0.979282</td>
+<td style="text-align: right;">0.989529</td>
 </tr>
 </tbody>
 </table>
 <h3 id="reproducible-data">Reproducible data</h3>
 <ul>
 <li><a href="data/stemming-quality.csv">Machine-readable quality snapshot</a></li>
-<li>SHA-256: <code>f15f8e653022e0333955b8b82f42944aa1c5a14a5ce54e628bb1a9c9aed42132</code></li>
+<li>SHA-256: <code>85763189eab4d0fbb047c2d5d3554c66abf9732182bd0d8fd758d7aef680e66f</code></li>
 <li><a href="reference/linguistic-quality/">Linguistic quality methodology</a></li>
 <li><a href="reference/tested-stemmers/">Tested stemmer inventory</a></li>
 <li><a href="reference/reproducibility/">Reproducibility and raw data</a></li>

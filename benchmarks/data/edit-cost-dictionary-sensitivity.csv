@@ -1,0 +1,6 @@
+predictor,outcome,languages,spearman,pearson
+dictionary_rows,exact_equivalence_classes,20,0.259887,0.072496
+dictionary_forms,exact_equivalence_classes,20,0.088136,-0.062917
+mean_family_size,exact_equivalence_classes,20,-0.175518,-0.241071
+changed_form_share,exact_equivalence_classes,20,-0.230509,-0.132421
+baseline_patch_commands,exact_equivalence_classes,20,0.509982,0.638747

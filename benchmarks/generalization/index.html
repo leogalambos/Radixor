@@ -16,7 +16,7 @@
         <link rel="prev" href="../../benchmarking/">
       
       
-        <link rel="next" href="../../python/performance/">
+        <link rel="next" href="../edit-cost-sensitivity/">
       
       
         
@@ -589,6 +589,57 @@
   
   
   
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model Behavior and Generalization
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Model Behavior and Generalization
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
     <li class="md-nav__item md-nav__item--active">
       
       <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
@@ -683,6 +734,70 @@
     </ul>
   
 </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../edit-cost-sensitivity/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Edit-Cost Sensitivity
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/english-coverage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    English Coverage and Speed
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
       
     </li>
   
@@ -1502,6 +1617,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../reference/edit-cost-methodology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Edit-Cost Protocol
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../reference/tested-stemmers/" class="md-nav__link">
         
   
@@ -1594,34 +1737,6 @@
     
   
     Environment and Reports
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../reference/english-coverage/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    English Coverage and Speed
   
 
     
@@ -3296,7 +3411,7 @@ measure because it excludes words whose expected root is already the input token
 </tr>
 <tr>
 <td style="text-align: right;">80%</td>
-<td style="text-align: right;">73.76%</td>
+<td style="text-align: right;">73.77%</td>
 <td style="text-align: right;">68.54%</td>
 <td style="text-align: right;">94.24%</td>
 </tr>
@@ -3339,16 +3454,22 @@ measure because it excludes words whose expected root is already the input token
 <tr>
 <td style="text-align: right;">10%</td>
 <td style="text-align: right;">66.96%</td>
-<td style="text-align: right;">60.50%</td>
+<td style="text-align: right;">60.49%</td>
 <td style="text-align: right;">90.80%</td>
 </tr>
 </tbody>
 </table>
-<p>The range across languages is material. Rich, regular resources such as Portuguese,
-Hungarian, Italian, Spanish and Finnish transfer strongly even at low coverage; very
-small resources and some scripts do not. Persian has only 69 dictionary rows, while
-Yiddish has 802, so their low-coverage results are evidence of insufficient training
-data rather than a universal unknown-word guarantee.</p>
+<p>The language range is material and is therefore not replaced by the macro mean. At 10%
+knowledge, median unseen changed-form exactness ranges from <strong>10.423%</strong>
+for Hebrew to <strong>90.053%</strong> for
+Portuguese. At 90%, it ranges from <strong>15.493%</strong>
+for Persian to <strong>94.412%</strong> for
+Portuguese. The largest 10%–90% change is
+<strong>+19.147 pp</strong> for
+Norwegian Nynorsk. These are descriptive within-resource results, not a causal
+ranking of language, script, dictionary size, or regularity.
+Every language's evidence-derived endpoint conclusion is also published on its separate
+<a href="../languages/">language benchmark page</a>, rather than inferred from this macro mean.</p>
 <h2 id="per-language-curves">Per-Language Curves</h2>
 <p>Values are the median across five frozen splits. Parentheses show the minimum–maximum
 split range. <code>Whole all exact</code> retains comparability with the earlier English coverage
@@ -5533,7 +5654,7 @@ evidence. At 100% there is no held-out set, so unseen metrics are <code>n/a</cod
 </div>
 </details>
 <details>
-<summary><strong>English</strong> — <code>us-uk-default</code> 1.0.0</summary>
+<summary><strong>English</strong> — <code>us-uk-default</code> 1.0.1</summary>
 <div>
 <table>
 <thead>
@@ -5557,97 +5678,97 @@ evidence. At 100% there is no held-out set, so unseen metrics are <code>n/a</cod
 <td style="text-align: right;">n/a</td>
 <td style="text-align: right;">n/a</td>
 <td style="text-align: right;">n/a</td>
-<td style="text-align: right;">97.478%</td>
+<td style="text-align: right;">97.668%</td>
 </tr>
 <tr>
 <td style="text-align: right;">90%</td>
 <td style="text-align: right;">357,245 / 396,939</td>
-<td style="text-align: right;">96,669</td>
-<td style="text-align: right;">3,944</td>
-<td style="text-align: right;">94.687% (94.620–94.833)</td>
-<td style="text-align: right;">78.855% (78.658–79.377)</td>
-<td style="text-align: right;">98.752% (98.660–98.774)</td>
-<td style="text-align: right;">97.055% (97.047–97.061)</td>
+<td style="text-align: right;">96,702</td>
+<td style="text-align: right;">3,746</td>
+<td style="text-align: right;">94.680% (94.609–94.847)</td>
+<td style="text-align: right;">78.854% (78.538–79.603)</td>
+<td style="text-align: right;">98.744% (98.642–98.790)</td>
+<td style="text-align: right;">97.241% (97.237–97.256)</td>
 </tr>
 <tr>
 <td style="text-align: right;">80%</td>
 <td style="text-align: right;">317,551 / 396,939</td>
-<td style="text-align: right;">193,867</td>
-<td style="text-align: right;">7,072</td>
-<td style="text-align: right;">94.583% (94.503–94.610)</td>
-<td style="text-align: right;">78.787% (78.522–78.959)</td>
-<td style="text-align: right;">98.591% (98.583–98.651)</td>
-<td style="text-align: right;">96.629% (96.627–96.642)</td>
+<td style="text-align: right;">193,781</td>
+<td style="text-align: right;">6,659</td>
+<td style="text-align: right;">94.608% (94.514–94.637)</td>
+<td style="text-align: right;">78.795% (78.580–79.033)</td>
+<td style="text-align: right;">98.592% (98.577–98.658)</td>
+<td style="text-align: right;">96.818% (96.816–96.831)</td>
 </tr>
 <tr>
 <td style="text-align: right;">70%</td>
 <td style="text-align: right;">277,857 / 396,939</td>
-<td style="text-align: right;">291,950</td>
-<td style="text-align: right;">9,364</td>
-<td style="text-align: right;">94.403% (94.284–94.425)</td>
-<td style="text-align: right;">78.504% (77.939–78.529)</td>
-<td style="text-align: right;">98.454% (98.420–98.494)</td>
-<td style="text-align: right;">96.195% (96.177–96.203)</td>
+<td style="text-align: right;">291,831</td>
+<td style="text-align: right;">8,726</td>
+<td style="text-align: right;">94.425% (94.290–94.438)</td>
+<td style="text-align: right;">78.505% (77.971–78.614)</td>
+<td style="text-align: right;">98.454% (98.436–98.500)</td>
+<td style="text-align: right;">96.386% (96.367–96.394)</td>
 </tr>
 <tr>
 <td style="text-align: right;">60%</td>
 <td style="text-align: right;">238,163 / 396,939</td>
-<td style="text-align: right;">390,876</td>
-<td style="text-align: right;">10,914</td>
-<td style="text-align: right;">94.146% (94.130–94.222)</td>
-<td style="text-align: right;">78.028% (77.810–78.270)</td>
-<td style="text-align: right;">98.305% (98.265–98.317)</td>
-<td style="text-align: right;">95.735% (95.724–95.759)</td>
+<td style="text-align: right;">390,750</td>
+<td style="text-align: right;">10,090</td>
+<td style="text-align: right;">94.178% (94.121–94.242)</td>
+<td style="text-align: right;">77.976% (77.824–78.311)</td>
+<td style="text-align: right;">98.314% (98.268–98.319)</td>
+<td style="text-align: right;">95.919% (95.916–95.953)</td>
 </tr>
 <tr>
 <td style="text-align: right;">50%</td>
 <td style="text-align: right;">198,470 / 396,939</td>
-<td style="text-align: right;">490,651</td>
-<td style="text-align: right;">11,549</td>
-<td style="text-align: right;">93.923% (93.893–93.995)</td>
-<td style="text-align: right;">77.663% (77.425–77.783)</td>
-<td style="text-align: right;">98.127% (98.087–98.184)</td>
-<td style="text-align: right;">95.255% (95.232–95.291)</td>
+<td style="text-align: right;">490,475</td>
+<td style="text-align: right;">10,590</td>
+<td style="text-align: right;">93.934% (93.888–94.011)</td>
+<td style="text-align: right;">77.643% (77.410–77.726)</td>
+<td style="text-align: right;">98.133% (98.089–98.192)</td>
+<td style="text-align: right;">95.434% (95.421–95.484)</td>
 </tr>
 <tr>
 <td style="text-align: right;">40%</td>
 <td style="text-align: right;">158,776 / 396,939</td>
-<td style="text-align: right;">591,471</td>
-<td style="text-align: right;">11,405</td>
-<td style="text-align: right;">93.704% (93.685–93.716)</td>
-<td style="text-align: right;">77.397% (77.203–77.459)</td>
-<td style="text-align: right;">97.941% (97.914–97.946)</td>
-<td style="text-align: right;">94.757% (94.731–94.787)</td>
+<td style="text-align: right;">591,318</td>
+<td style="text-align: right;">10,198</td>
+<td style="text-align: right;">93.699% (93.682–93.712)</td>
+<td style="text-align: right;">77.308% (77.149–77.479)</td>
+<td style="text-align: right;">97.940% (97.912–97.948)</td>
+<td style="text-align: right;">94.946% (94.916–94.960)</td>
 </tr>
 <tr>
 <td style="text-align: right;">30%</td>
 <td style="text-align: right;">119,082 / 396,939</td>
-<td style="text-align: right;">692,903</td>
-<td style="text-align: right;">10,319</td>
-<td style="text-align: right;">93.446% (93.425–93.467)</td>
-<td style="text-align: right;">76.954% (76.788–77.019)</td>
-<td style="text-align: right;">97.729% (97.716–97.746)</td>
-<td style="text-align: right;">94.232% (94.195–94.256)</td>
+<td style="text-align: right;">692,940</td>
+<td style="text-align: right;">8,930</td>
+<td style="text-align: right;">93.440% (93.409–93.459)</td>
+<td style="text-align: right;">76.944% (76.715–76.961)</td>
+<td style="text-align: right;">97.741% (97.718–97.755)</td>
+<td style="text-align: right;">94.413% (94.372–94.433)</td>
 </tr>
 <tr>
 <td style="text-align: right;">20%</td>
 <td style="text-align: right;">79,388 / 396,939</td>
-<td style="text-align: right;">795,289</td>
-<td style="text-align: right;">8,404</td>
-<td style="text-align: right;">93.168% (93.110–93.217)</td>
-<td style="text-align: right;">76.641% (76.310–76.730)</td>
-<td style="text-align: right;">97.520% (97.455–97.540)</td>
-<td style="text-align: right;">93.645% (93.618–93.708)</td>
+<td style="text-align: right;">795,287</td>
+<td style="text-align: right;">6,816</td>
+<td style="text-align: right;">93.155% (93.122–93.220)</td>
+<td style="text-align: right;">76.608% (76.306–76.669)</td>
+<td style="text-align: right;">97.509% (97.464–97.541)</td>
+<td style="text-align: right;">93.824% (93.807–93.898)</td>
 </tr>
 <tr>
 <td style="text-align: right;">10%</td>
 <td style="text-align: right;">39,694 / 396,939</td>
-<td style="text-align: right;">898,575</td>
-<td style="text-align: right;">5,565</td>
-<td style="text-align: right;">92.815% (92.774–92.848)</td>
-<td style="text-align: right;">76.133% (75.502–76.392)</td>
-<td style="text-align: right;">97.185% (97.159–97.294)</td>
-<td style="text-align: right;">92.980% (92.960–93.033)</td>
+<td style="text-align: right;">898,572</td>
+<td style="text-align: right;">3,741</td>
+<td style="text-align: right;">92.805% (92.757–92.843)</td>
+<td style="text-align: right;">76.010% (75.505–76.378)</td>
+<td style="text-align: right;">97.184% (97.156–97.293)</td>
+<td style="text-align: right;">93.157% (93.123–93.211)</td>
 </tr>
 </tbody>
 </table>
@@ -5776,15 +5897,15 @@ evidence. At 100% there is no held-out set, so unseen metrics are <code>n/a</cod
 </details>
 <h2 id="provenance">Provenance</h2>
 <ul>
-<li>Radixor/Java: <code>4.2.0</code></li>
-<li>Core source revision: <code>31e3b9d31379060cd75a3219381e09218f8a2ef6</code></li>
-<li>Release identity: <code>4.2.0</code></li>
+<li>Radixor/Java: <code>4.2.0-6-g84e57fb</code></li>
+<li>Core source revision: <code>84e57fb27ae40913569e826858a8ebb07cf2ea01</code></li>
+<li>Source state: <code>dirty</code></li>
 <li>Generalization generator SHA-256: <code>126964f216a48d2164d136a490698301111aae7f050209ced21caf73f8c01fb8</code></li>
 <li>Measured-source manifest: <a href="../data/dictionary-generalization-sources.sha256"><code>dictionary-generalization-sources.sha256</code></a></li>
 <li>Split protocol: <code>radixor-generalization-v1</code></li>
 <li>Splits per coverage level: 5</li>
 <li>Authoritative raw counters: <a href="../data/dictionary-generalization.csv"><code>dictionary-generalization.csv</code></a></li>
-<li>CSV SHA-256: <code>564baec7ee48379b49173dfa5cef5eb518be7c7cc1d9bb3927703f67f6b7f6bc</code></li>
+<li>CSV SHA-256: <code>e6479840b9307ae03bd0873e55f397811e975125d621a8b8716d4c1a166b3ff2</code></li>
 <li>Model artifact IDs, independent versions, and SHA-256 values are recorded on every raw row.</li>
 <li>Runtime speed is intentionally excluded: speed does not establish generalization. The
   <a href="../reference/english-coverage/">English coverage deep dive</a> retains its separately measured

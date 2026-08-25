@@ -678,6 +678,55 @@
   
   
   
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model Behavior and Generalization
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Model Behavior and Generalization
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
     <li class="md-nav__item">
       <a href="../benchmarks/generalization/" class="md-nav__link">
         
@@ -695,6 +744,70 @@
   
 
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/edit-cost-sensitivity/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Edit-Cost Sensitivity
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/reference/english-coverage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    English Coverage and Speed
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -1513,6 +1626,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../benchmarks/reference/edit-cost-methodology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Edit-Cost Protocol
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../benchmarks/reference/tested-stemmers/" class="md-nav__link">
         
   
@@ -1605,34 +1746,6 @@
     
   
     Environment and Reports
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../benchmarks/reference/english-coverage/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    English Coverage and Speed
   
 
     
@@ -3280,7 +3393,7 @@
 <h1 id="benchmarking">Benchmarking</h1>
 <p>Radixor contains internal trie microbenchmarks, a separate stemmer comparison suite, and a dictionary coverage benchmark for Radixor itself. The current default-model publication uses the same-language speed and exact-root methods selected by the command recorded on the <a href="../benchmarks/reference/environment/">environment page</a>. Internal <code>FrequencyTrie*</code> microbenchmarks, the optional <code>PolishPolimorfStemmerComparisonBenchmark</code>, and the separate German CISTEM gold-standard experiment are not part of these language tables.</p>
 <p>Every current default Radixor benchmark scenario uses the model ID declared by its <code>Language.defaultModelId()</code>. The root JMH runtime configuration depends directly on all default model projects plus optional <code>pl-pl-polimorf</code>; no benchmark-pack project or artifact exists. These dependencies are benchmark-only and never enter the root published POM. A PoliMorf comparison must be labeled with model ID <code>pl-pl-polimorf</code>, while the default Polish row remains <code>pl-pl-unimorph</code>.</p>
-<p>The optional model now has a verified complete compiled loading path. It is not included in the 2026-08-23 corpus, accuracy, speed, coverage, or stemming-quality measurements. Any future full PoliMorf benchmark must provision its documented startup heap independently and record the exact model artifact version and checksum.</p>
+<p>The optional model now has a verified complete compiled loading path. It is not included in the 2026-08-25 corpus, accuracy, speed, coverage, or stemming-quality measurements. Any future full PoliMorf benchmark must provision its documented startup heap independently and record the exact model artifact version and checksum.</p>
 <p>This page is the entry point for benchmark interpretation. Detailed tables and long reference material are split into focused subpages so that important points do not get buried.</p>
 <h2 id="key-takeaways">Key Takeaways</h2>
 <ul>
@@ -3296,6 +3409,7 @@
 <li>Speed benchmarks process changed dictionary tokens where the surface form differs from the expected root. Accuracy benchmarks process the complete dictionary.</li>
 <li>Accuracy tables use deterministic auxiliary counters from a single non-timed JMH evaluation, while Radixor counters are independently cross-checked by the default-model corpus report. Runtime scores from accuracy methods are not interpreted.</li>
 <li>The historical Porter performance badge is retired. Benchmark reporting now uses speed and quality tables rather than a single Porter ratio.</li>
+<li>Edit-cost effects are not assumed to transfer between languages. The 234,000-observation logical matrix collapses exact full-dictionary command sequences before execution, and every language page publishes its own knowledge curve, selected-cost effect, association coverage, and conclusion. A non-baseline selection remains an externally unvalidated candidate.</li>
 </ul>
 <p>The nine Java runtime minima are Danish, Dutch, English, Hungarian, Norwegian
 Nynorsk, Persian, Polish, Ukrainian, and Yiddish. Czech, Finnish, French, German,
@@ -3345,6 +3459,14 @@ the per-language tables retain JMH uncertainty and are the authoritative source.
 <td>Frozen sampling protocol, unseen-form leakage control, metrics, raw counters, and limitations.</td>
 </tr>
 <tr>
+<td><a href="../benchmarks/edit-cost-sensitivity/">Edit-cost sensitivity</a></td>
+<td>Normalized edit-cost choices, exact command-equivalence classes, trie structure, and held-out-family quality.</td>
+</tr>
+<tr>
+<td><a href="../benchmarks/reference/edit-cost-methodology/">Edit-cost methodology</a></td>
+<td>Frozen cost grid, full-dictionary equivalence proof, stratified associations, recommendation rule, and limitations.</td>
+</tr>
+<tr>
 <td><a href="../benchmarks/reference/english-coverage/">English dictionary coverage benchmark</a></td>
 <td>The quality/speed operating curve for contracted Radixor tries built from 100% down to 10% of English dictionary rows.</td>
 </tr>
@@ -3354,7 +3476,7 @@ the per-language tables retain JMH uncertainty and are the authoritative source.
 </tr>
 <tr>
 <td><a href="../benchmarks/languages/">Language benchmark pages</a></td>
-<td>Per-language accuracy tables, speed tables, and implementation notes.</td>
+<td>Per-language accuracy, speed, generalization, edit-cost evidence, factor analysis, and conclusions.</td>
 </tr>
 </tbody>
 </table>
@@ -3369,6 +3491,10 @@ forms from withheld dictionary families across five frozen splits. The separate
 <a href="../benchmarks/reference/english-coverage/">English dictionary coverage benchmark</a>
 retains the original whole-dictionary quality/speed operating curve. Together
 they distinguish transfer evidence from the model-size/runtime trade-off.</p>
+<p>The <a href="../benchmarks/edit-cost-sensitivity/">edit-cost experiment</a> then tests 234 normalized
+relative-cost settings at every knowledge level. Its macro report identifies cross-language
+structure; the linked language sections state the evidence-derived conclusion separately for each
+dictionary and expose when a correlation lacks complete 45-stratum support.</p>
 <h2 id="current-result-locations">Current Result Locations</h2>
 <p>The current measured language results are published in <a href="../benchmarks/languages/">Language Benchmark Pages</a>. Generated local report files for this benchmark update are listed in <a href="../benchmarks/reference/environment/">Benchmark environment and reports</a>.</p>
 <p>JMH TXT and CSV reports are still published as benchmark artifacts. They are no longer converted into a Shields endpoint benchmark badge.

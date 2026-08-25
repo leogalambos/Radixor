@@ -13,7 +13,7 @@
         <link rel="canonical" href="https://leogalambos.github.io/Radixor/python/performance/">
       
       
-        <link rel="prev" href="../../benchmarks/generalization/">
+        <link rel="prev" href="../../benchmarks/reference/english-coverage/">
       
       
         <link rel="next" href="../../benchmarks/languages/">
@@ -587,6 +587,55 @@
   
   
   
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model Behavior and Generalization
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Model Behavior and Generalization
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
     <li class="md-nav__item">
       <a href="../../benchmarks/generalization/" class="md-nav__link">
         
@@ -604,6 +653,70 @@
   
 
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../benchmarks/edit-cost-sensitivity/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Edit-Cost Sensitivity
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../benchmarks/reference/english-coverage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    English Coverage and Speed
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -1552,6 +1665,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../benchmarks/reference/edit-cost-methodology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Edit-Cost Protocol
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../benchmarks/reference/tested-stemmers/" class="md-nav__link">
         
   
@@ -1644,34 +1785,6 @@
     
   
     Environment and Reports
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../benchmarks/reference/english-coverage/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    English Coverage and Speed
   
 
     
@@ -3362,7 +3475,7 @@ is made fair. The scripts are in the repository (<code>python/benchmarks/</code>
 can reproduce the numbers.</p>
 <p><code>radixor-c</code> belongs in this same benchmark rather than in a separate table,
 because both packages expose the same workload and models. The published run
-measures both native runtimes from version 4.2.0: <code>radixor</code> through Rust/PyO3
+measures both native runtimes from version 4.2.1: <code>radixor</code> through Rust/PyO3
 and <code>radixor-c</code> through the CPython C API.</p>
 <p>The matching patch number in this run does not couple their release streams.
 Radixor runtimes share project-wide major and minor versions, while each
@@ -3370,13 +3483,11 @@ runtime advances its patch version independently for local fixes and
 improvements.</p>
 <div class="admonition info">
 <p class="admonition-title">Published single-machine measurement</p>
-<p>These results were regenerated on 2026-08-23 on the current benchmark
-workstation: AMD Ryzen 5 7600 6-Core Processor (6 cores / 12 threads),
-Fedora Linux 44 with kernel <code>7.1.8-200.fc44.x86_64</code>, CPython 3.14.7,
-Rust 1.97.1, GCC 16.2.1, and locally built release-mode wheels for both
-Radixor 4.2.0 Python runtimes. All logical CPUs used the <code>performance</code>
-governor and <code>performance</code> energy preference. Absolute timings remain
-machine-specific; compare ratios only within this run.</p>
+<p>These results were regenerated on 2026-08-25 on <code>AMD Ryzen 5 8600G w/ Radeon 760M Graphics</code> with 12 logical CPUs available,
+<code>Linux-7.1.8-200.fc44.x86_64-x86_64-with-glibc2.43</code>, and CPython 3.14.7. Both Radixor 4.2.1 native
+runtimes were built locally in release mode. The recorded CPU governor was <code>performance</code>
+and the energy preference was <code>performance</code>. Absolute timings remain machine-specific;
+compare ratios only within this run.</p>
 </div>
 <h2 id="what-is-measured">What is measured</h2>
 <ul>
@@ -3430,19 +3541,19 @@ where it <strong>cannot</strong> be neutralized the effect is described.</p>
 <tbody>
 <tr>
 <td>CPU</td>
-<td>AMD Ryzen 5 7600 6-Core Processor</td>
+<td>AMD Ryzen 5 8600G w/ Radeon 760M Graphics</td>
 </tr>
 <tr>
 <td>CPU topology</td>
-<td>6 physical cores / 12 logical CPUs</td>
+<td>12 logical CPUs in the recorded affinity; physical topology not recorded by the harness</td>
 </tr>
 <tr>
 <td>OS</td>
-<td>Fedora Linux 44, kernel <code>7.1.8-200.fc44.x86_64</code>, glibc 2.43</td>
+<td><code>Linux-7.1.8-200.fc44.x86_64-x86_64-with-glibc2.43</code></td>
 </tr>
 <tr>
 <td>CPU policy</td>
-<td><code>amd-pstate-epp</code> active; <code>performance</code> governor and energy preference on all 12 logical CPUs; boost enabled</td>
+<td><code>amd-pstate-epp</code>; <code>performance</code> governor; <code>performance</code> energy preference</td>
 </tr>
 <tr>
 <td>Python</td>
@@ -3450,19 +3561,19 @@ where it <strong>cannot</strong> be neutralized the effect is described.</p>
 </tr>
 <tr>
 <td>Python (PyO3)</td>
-<td>Radixor 4.2.0, locally built release-mode ABI3 wheel, cache disabled</td>
+<td>Radixor 4.2.1, locally built release-mode ABI3 wheel, cache disabled</td>
 </tr>
 <tr>
 <td>Python-C</td>
-<td>Radixor 4.2.0, locally built CPython 3.14 C-extension wheel, cache disabled</td>
+<td>Radixor 4.2.1, locally built CPython 3.14 C-extension wheel, cache disabled</td>
 </tr>
 <tr>
 <td>Native toolchains</td>
-<td>Rust 1.97.1; GCC 16.2.1</td>
+<td>Not part of the timed runtime report; wheels were built locally in release mode</td>
 </tr>
 <tr>
 <td>Source identity</td>
-<td>Radixor 4.2.0 release source based on Git commit <code>31e3b9d</code>; the Java benchmark provenance retains the exact measured source patch and untracked-source checksums</td>
+<td>Radixor 4.2.1 release source based on Git commit <code>84e57fb</code>; the Java benchmark provenance retains the exact measured source patch and untracked-source checksums</td>
 </tr>
 <tr>
 <td>PyStemmer</td>
@@ -3486,14 +3597,14 @@ where it <strong>cannot</strong> be neutralized the effect is described.</p>
 </tr>
 <tr>
 <td>Timing</td>
-<td>median of 3 calibrated ~250 ms samples after a warm-up of at least 3 complete-corpus passes and 500 ms</td>
+<td>median of 3 calibrated ~250 ms samples after at least 3 complete-corpus warm-ups and 500 ms</td>
 </tr>
 </tbody>
 </table>
-<p>The checkout represents the 4.2.0 Python runtimes. The repository's local
+<p>The checkout represents the 4.2.1 Python runtimes. The repository's local
 benchmark build deliberately leaves wheel metadata at its <code>0.0.0</code> packaging
 placeholder, which is why the raw report records <code>engine_version=0.0.0</code> even
-though the measured source version is 4.2.0.</p>
+though the measured source version is 4.2.1.</p>
 <p>The authoritative command was:</p>
 <div class="highlight"><pre><span></span><code>./gradlew<span class="w"> </span>pythonBenchmarkAllLanguagesBatch<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-PpythonBenchmarkEngines<span class="o">=</span>radixor,radixor-c,PyStemmer,snowballstemmer-pure,cistem,nltk-porter<span class="w"> </span><span class="se">\</span>
@@ -3531,80 +3642,80 @@ for the broad comparison than an isolated near-tie.</p>
 <tbody>
 <tr>
 <td>Czech (<code>cs</code>)</td>
-<td style="text-align: right;">105.2</td>
-<td style="text-align: right;"><strong>95.5</strong></td>
-<td style="text-align: right;">147.7</td>
+<td style="text-align: right;">108.6</td>
+<td style="text-align: right;"><strong>97.7</strong></td>
+<td style="text-align: right;">154.3</td>
 <td style="text-align: right;">—</td>
-<td style="text-align: right;">3385.8</td>
+<td style="text-align: right;">3185.0</td>
 <td style="text-align: right;">—</td>
 </tr>
 <tr>
 <td>Danish (<code>da</code>)</td>
-<td style="text-align: right;"><strong>76.3</strong></td>
-<td style="text-align: right;">84.6</td>
-<td style="text-align: right;">171.5</td>
+<td style="text-align: right;"><strong>82.4</strong></td>
+<td style="text-align: right;">85.5</td>
+<td style="text-align: right;">176.7</td>
 <td style="text-align: right;">—</td>
-<td style="text-align: right;">5991.8</td>
+<td style="text-align: right;">5677.0</td>
 <td style="text-align: right;">—</td>
 </tr>
 <tr>
 <td>German (<code>de</code>)</td>
-<td style="text-align: right;"><strong>118.4</strong></td>
-<td style="text-align: right;">134.7</td>
-<td style="text-align: right;">428.8</td>
-<td style="text-align: right;">2305.5</td>
-<td style="text-align: right;">23667.1</td>
+<td style="text-align: right;"><strong>120.5</strong></td>
+<td style="text-align: right;">135.0</td>
+<td style="text-align: right;">442.1</td>
+<td style="text-align: right;">2287.7</td>
+<td style="text-align: right;">21308.5</td>
 <td style="text-align: right;">—</td>
 </tr>
 <tr>
 <td>English (<code>en</code>)</td>
-<td style="text-align: right;">91.2</td>
-<td style="text-align: right;"><strong>90.3</strong></td>
-<td style="text-align: right;">228.3</td>
+<td style="text-align: right;">94.6</td>
+<td style="text-align: right;"><strong>91.6</strong></td>
+<td style="text-align: right;">233.4</td>
 <td style="text-align: right;">—</td>
-<td style="text-align: right;">12724.9</td>
-<td style="text-align: right;">5307.5</td>
+<td style="text-align: right;">12644.0</td>
+<td style="text-align: right;">5666.9</td>
 </tr>
 <tr>
 <td>Spanish (<code>es</code>)</td>
-<td style="text-align: right;">91.4</td>
-<td style="text-align: right;"><strong>84.9</strong></td>
-<td style="text-align: right;">194.9</td>
+<td style="text-align: right;">96.6</td>
+<td style="text-align: right;"><strong>87.5</strong></td>
+<td style="text-align: right;">201.1</td>
 <td style="text-align: right;">—</td>
-<td style="text-align: right;">13100.4</td>
+<td style="text-align: right;">13115.4</td>
 <td style="text-align: right;">—</td>
 </tr>
 <tr>
 <td>Persian (<code>fa</code>)</td>
-<td style="text-align: right;">109.6</td>
-<td style="text-align: right;"><strong>95.1</strong></td>
-<td style="text-align: right;">325.3</td>
+<td style="text-align: right;">112.3</td>
+<td style="text-align: right;"><strong>97.5</strong></td>
+<td style="text-align: right;">329.0</td>
 <td style="text-align: right;">—</td>
-<td style="text-align: right;">20884.6</td>
+<td style="text-align: right;">21819.8</td>
 <td style="text-align: right;">—</td>
 </tr>
 <tr>
 <td>Finnish (<code>fi</code>)</td>
-<td style="text-align: right;">136.0</td>
-<td style="text-align: right;"><strong>115.2</strong></td>
-<td style="text-align: right;">177.5</td>
+<td style="text-align: right;">137.6</td>
+<td style="text-align: right;"><strong>118.3</strong></td>
+<td style="text-align: right;">179.1</td>
 <td style="text-align: right;">—</td>
-<td style="text-align: right;">7951.3</td>
+<td style="text-align: right;">8000.8</td>
 <td style="text-align: right;">—</td>
 </tr>
 <tr>
 <td>French (<code>fr</code>)</td>
-<td style="text-align: right;">127.5</td>
-<td style="text-align: right;"><strong>122.3</strong></td>
-<td style="text-align: right;">324.0</td>
+<td style="text-align: right;">133.5</td>
+<td style="text-align: right;"><strong>124.1</strong></td>
+<td style="text-align: right;">330.3</td>
 <td style="text-align: right;">—</td>
-<td style="text-align: right;">24327.4</td>
+<td style="text-align: right;">23448.1</td>
 <td style="text-align: right;">—</td>
 </tr>
 <tr>
 <td>Hebrew (<code>he</code>)</td>
-<td style="text-align: right;">131.5</td>
-<td style="text-align: right;"><strong>124.6</strong></td>
+<td style="text-align: right;"><strong>136.8</strong></td>
+<td style="text-align: right;">142.0</td>
 <td style="text-align: right;">—</td>
 <td style="text-align: right;">—</td>
 <td style="text-align: right;">—</td>
@@ -3612,89 +3723,89 @@ for the broad comparison than an isolated near-tie.</p>
 </tr>
 <tr>
 <td>Hungarian (<code>hu</code>)</td>
-<td style="text-align: right;"><strong>87.8</strong></td>
-<td style="text-align: right;">89.5</td>
-<td style="text-align: right;">166.4</td>
+<td style="text-align: right;"><strong>91.2</strong></td>
+<td style="text-align: right;">92.0</td>
+<td style="text-align: right;">164.5</td>
 <td style="text-align: right;">—</td>
-<td style="text-align: right;">9059.7</td>
+<td style="text-align: right;">9144.7</td>
 <td style="text-align: right;">—</td>
 </tr>
 <tr>
 <td>Italian (<code>it</code>)</td>
-<td style="text-align: right;">97.0</td>
-<td style="text-align: right;"><strong>77.7</strong></td>
-<td style="text-align: right;">339.4</td>
+<td style="text-align: right;">103.0</td>
+<td style="text-align: right;"><strong>79.8</strong></td>
+<td style="text-align: right;">347.4</td>
 <td style="text-align: right;">—</td>
-<td style="text-align: right;">23162.9</td>
+<td style="text-align: right;">22847.0</td>
 <td style="text-align: right;">—</td>
 </tr>
 <tr>
 <td>Norwegian Bokmål (<code>nb</code>)</td>
-<td style="text-align: right;"><strong>80.6</strong></td>
-<td style="text-align: right;">86.7</td>
-<td style="text-align: right;">145.1</td>
+<td style="text-align: right;"><strong>83.0</strong></td>
+<td style="text-align: right;">88.3</td>
+<td style="text-align: right;">148.3</td>
 <td style="text-align: right;">—</td>
-<td style="text-align: right;">5169.2</td>
+<td style="text-align: right;">4945.1</td>
 <td style="text-align: right;">—</td>
 </tr>
 <tr>
 <td>Dutch (<code>nl</code>)</td>
-<td style="text-align: right;">83.4</td>
-<td style="text-align: right;"><strong>77.9</strong></td>
-<td style="text-align: right;">240.4</td>
+<td style="text-align: right;">89.3</td>
+<td style="text-align: right;"><strong>80.1</strong></td>
+<td style="text-align: right;">240.8</td>
 <td style="text-align: right;">—</td>
-<td style="text-align: right;">11800.1</td>
+<td style="text-align: right;">11852.8</td>
 <td style="text-align: right;">—</td>
 </tr>
 <tr>
 <td>Norwegian Nynorsk (<code>nn</code>)</td>
-<td style="text-align: right;"><strong>68.9</strong></td>
-<td style="text-align: right;">74.3</td>
-<td style="text-align: right;">141.3</td>
+<td style="text-align: right;"><strong>72.1</strong></td>
+<td style="text-align: right;">76.7</td>
+<td style="text-align: right;">145.1</td>
 <td style="text-align: right;">—</td>
-<td style="text-align: right;">4969.1</td>
+<td style="text-align: right;">4814.1</td>
 <td style="text-align: right;">—</td>
 </tr>
 <tr>
 <td>Polish (<code>pl</code>)</td>
-<td style="text-align: right;"><strong>84.2</strong></td>
-<td style="text-align: right;">84.8</td>
-<td style="text-align: right;">131.2</td>
+<td style="text-align: right;">89.0</td>
+<td style="text-align: right;"><strong>87.3</strong></td>
+<td style="text-align: right;">130.5</td>
 <td style="text-align: right;">—</td>
-<td style="text-align: right;">3667.3</td>
+<td style="text-align: right;">3632.7</td>
 <td style="text-align: right;">—</td>
 </tr>
 <tr>
 <td>Portuguese (<code>pt</code>)</td>
-<td style="text-align: right;">73.4</td>
-<td style="text-align: right;"><strong>67.3</strong></td>
-<td style="text-align: right;">180.4</td>
+<td style="text-align: right;">77.4</td>
+<td style="text-align: right;"><strong>68.3</strong></td>
+<td style="text-align: right;">183.1</td>
 <td style="text-align: right;">—</td>
-<td style="text-align: right;">14282.9</td>
+<td style="text-align: right;">13864.8</td>
 <td style="text-align: right;">—</td>
 </tr>
 <tr>
 <td>Russian (<code>ru</code>)</td>
-<td style="text-align: right;"><strong>143.7</strong></td>
-<td style="text-align: right;">144.6</td>
-<td style="text-align: right;">257.7</td>
+<td style="text-align: right;"><strong>146.0</strong></td>
+<td style="text-align: right;">147.9</td>
+<td style="text-align: right;">263.4</td>
 <td style="text-align: right;">—</td>
-<td style="text-align: right;">10633.2</td>
+<td style="text-align: right;">10372.7</td>
 <td style="text-align: right;">—</td>
 </tr>
 <tr>
 <td>Swedish (<code>sv</code>)</td>
-<td style="text-align: right;"><strong>84.1</strong></td>
-<td style="text-align: right;">92.4</td>
-<td style="text-align: right;">132.6</td>
+<td style="text-align: right;"><strong>86.9</strong></td>
+<td style="text-align: right;">93.1</td>
+<td style="text-align: right;">130.2</td>
 <td style="text-align: right;">—</td>
-<td style="text-align: right;">3800.7</td>
+<td style="text-align: right;">3681.2</td>
 <td style="text-align: right;">—</td>
 </tr>
 <tr>
 <td>Ukrainian (<code>uk</code>)</td>
-<td style="text-align: right;"><strong>98.8</strong></td>
-<td style="text-align: right;">106.0</td>
+<td style="text-align: right;"><strong>103.8</strong></td>
+<td style="text-align: right;">110.3</td>
 <td style="text-align: right;">—</td>
 <td style="text-align: right;">—</td>
 <td style="text-align: right;">—</td>
@@ -3702,24 +3813,24 @@ for the broad comparison than an isolated near-tie.</p>
 </tr>
 <tr>
 <td>Yiddish (<code>yi</code>)</td>
-<td style="text-align: right;"><strong>91.5</strong></td>
-<td style="text-align: right;">95.9</td>
-<td style="text-align: right;">419.0</td>
+<td style="text-align: right;"><strong>95.7</strong></td>
+<td style="text-align: right;">98.8</td>
+<td style="text-align: right;">432.6</td>
 <td style="text-align: right;">—</td>
-<td style="text-align: right;">21410.5</td>
+<td style="text-align: right;">21625.9</td>
 <td style="text-align: right;">—</td>
 </tr>
 </tbody>
 </table>
 <p>Both Radixor runtimes recorded lower median processing time in <strong>18 / 18</strong>
 direct PyStemmer comparisons. At <code>N=100</code>,
-Python (PyO3) achieved a <strong>2.25×</strong> geometric-mean speedup, with a largest direct
-advantage of <strong>4.58×</strong> for Yiddish and throughput of <strong>6.96–14.52 million
-words/s</strong> across its 20 languages. Python-C achieved a <strong>2.29×</strong> geometric-mean
-speedup, with a largest direct advantage of <strong>4.37×</strong> for Yiddish and throughput
-of <strong>6.92–14.85 million words/s</strong>. Python-C was faster than PyO3 in 10 languages
+Python (PyO3) achieved a <strong>2.19×</strong> geometric-mean speedup, with a largest direct
+advantage of <strong>4.52×</strong> for Yiddish and throughput of <strong>6.85–13.87 million
+words/s</strong> across its 20 languages. Python-C achieved a <strong>2.28×</strong> geometric-mean
+speedup, with a largest direct advantage of <strong>4.38×</strong> for Yiddish and throughput
+of <strong>6.76–14.63 million words/s</strong>. Python-C was faster than PyO3 in 10 languages
 and PyO3 was faster in 10; Python-C's geometric-mean advantage over PyO3 was
-<strong>1.02×</strong>, so workload and language remain more useful selection criteria than
+<strong>1.03×</strong>, so workload and language remain more useful selection criteria than
 a universal ranking.</p>
 <h3 id="cistem-comparison-for-german">CISTEM comparison for German</h3>
 <p>The German row also provides a direct comparison with CISTEM:</p>
@@ -3736,26 +3847,26 @@ a universal ranking.</p>
 <tr>
 <td><strong>Python (PyO3)</strong></td>
 <td>Rust trie</td>
-<td><strong>118.4 ns/word</strong></td>
+<td><strong>120.5 ns/word</strong></td>
 <td>—</td>
 </tr>
 <tr>
 <td>Python-C</td>
 <td>CPython C trie</td>
-<td>134.7 ns/word</td>
-<td>1.14× slower</td>
+<td>135.0 ns/word</td>
+<td>1.12× slower</td>
 </tr>
 <tr>
 <td>PyStemmer (de)</td>
 <td>Snowball C</td>
-<td>428.8 ns/word</td>
-<td>3.62× slower</td>
+<td>442.1 ns/word</td>
+<td>3.67× slower</td>
 </tr>
 <tr>
 <td><strong>CISTEM</strong></td>
 <td>pure Python (<code>nltk</code>)</td>
-<td><strong>2,305.5 ns/word</strong></td>
-<td><strong>19.48× slower</strong></td>
+<td><strong>2,287.7 ns/word</strong></td>
+<td><strong>18.98× slower</strong></td>
 </tr>
 </tbody>
 </table>
@@ -3765,7 +3876,7 @@ measures only <code>N=100</code> and does not claim a CISTEM scaling curve acros
 sizes. CISTEM is a compact ~40-rule German heuristic with no dictionary — a
 different design point that trades coverage for simplicity. Because CISTEM's
 unavoidable normalization work modestly biases the measurement in Radixor's
-favour (point 2 above), the 19.48× result is not a perfectly
+favour (point 2 above), the 18.98× result is not a perfectly
 normalization-matched ratio.</p>
 <p>The all-language Gradle task does not measure stage-level profiling or cached
 lookup performance. This page therefore does not mix such figures from an older

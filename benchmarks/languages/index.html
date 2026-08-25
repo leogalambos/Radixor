@@ -587,6 +587,55 @@
   
   
   
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model Behavior and Generalization
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Model Behavior and Generalization
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
     <li class="md-nav__item">
       <a href="../generalization/" class="md-nav__link">
         
@@ -604,6 +653,70 @@
   
 
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../edit-cost-sensitivity/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Edit-Cost Sensitivity
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/english-coverage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    English Coverage and Speed
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -1504,6 +1617,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../reference/edit-cost-methodology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Edit-Cost Protocol
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../reference/tested-stemmers/" class="md-nav__link">
         
   
@@ -1596,34 +1737,6 @@
     
   
     Environment and Reports
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../reference/english-coverage/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    English Coverage and Speed
   
 
     
@@ -3258,7 +3371,15 @@
 
 
 <h1 id="language-benchmark-pages">Language Benchmark Pages</h1>
-<p>This section splits Radixor stemmer benchmark results by language. Each of the 20 registered default models has one language page containing the refreshed corpus, patch-command distribution, exact-root accuracy, runtime performance, and pairwise stemming-quality tables for both dictionary-processing modes.</p>
+<p>This section splits Radixor stemmer benchmark results by language. Each of the 20 registered default models has one language page containing the refreshed corpus, patch-command distribution, exact-root accuracy, runtime performance, pairwise stemming-quality tables, and a language-specific interpretation of the edit-cost and dictionary-knowledge experiment.</p>
+<p>The experimental sections do not merely repeat the cross-language macro values. They publish each language's five-split 10%–90% knowledge curve, exact command-equivalence census, selected edit costs, command-count effect, within-language factor associations, evidence coverage, and bounded conclusion. Non-baseline settings are exploratory candidates until independently validated.</p>
+<div class="admonition info">
+<p class="admonition-title">Two knowledge curves, two questions</p>
+<p>The dictionary-family curve tests transfer to withheld lexical families under the fixed
+baseline edit costs. The edit-cost curve compares alternative normalized costs across its own
+frozen matrix. Both use 10%–90% labels, but their samples and protocols are independent; use
+each page's evidence map and methodology link before comparing endpoints.</p>
+</div>
 <h2 id="reference-pages">Reference Pages</h2>
 <table>
 <thead>
@@ -3283,6 +3404,18 @@
 <tr>
 <td><a href="../generalization/">Dictionary-family generalization</a></td>
 <td>Separate all-language evaluation of Java transformations on families withheld from model training.</td>
+</tr>
+<tr>
+<td><a href="../reference/generalization-methodology/">Generalization methodology</a></td>
+<td>Frozen family splits, unseen-surface leakage control, aggregation, and claim boundaries.</td>
+</tr>
+<tr>
+<td><a href="../edit-cost-sensitivity/">Edit-cost sensitivity</a></td>
+<td>Cross-language findings and an index linking directly to every language's evidence and conclusion.</td>
+</tr>
+<tr>
+<td><a href="../reference/edit-cost-methodology/">Edit-cost methodology</a></td>
+<td>Frozen cost grid, exact command equality, selection rule, association coverage, and limitations.</td>
 </tr>
 <tr>
 <td><a href="../reference/english-coverage/">English dictionary coverage</a></td>
@@ -3410,7 +3543,7 @@
 <ul>
 <li>Speed benchmarks process only changed dictionary tokens where the surface form differs from the expected root.</li>
 <li>Accuracy benchmarks process the complete dictionary and report <code>All exact</code>, <code>Changed exact</code>, and <code>Root preserved</code>.</li>
-<li>Runtime and exact-root agreement measure different properties. Light, minimal, possessive, and other rule-based filters intentionally have different transformation scopes, so compare every speed row with the adjacent quality table. The <a href="../reference/english-coverage/">English coverage benchmark</a> shows the quality/speed operating curve; the <a href="../generalization/">multilingual generalization benchmark</a> separately tests transformations on withheld families.</li>
+<li>Runtime and exact-root agreement measure different properties. Light, minimal, possessive, and other rule-based filters intentionally have different transformation scopes, so compare every speed row with the adjacent quality table. The <a href="../reference/english-coverage/">English coverage benchmark</a> shows the quality/speed operating curve; the <a href="../generalization/">multilingual generalization benchmark</a> separately tests transformations on withheld families; each language page states what its measured knowledge curve and edit-cost sensitivity do and do not justify concluding.</li>
 <li>Results are comparable only within the same language and benchmark family.</li>
 <li>The historical Porter badge is retired; no JMH badge JSON is generated.</li>
 </ul>

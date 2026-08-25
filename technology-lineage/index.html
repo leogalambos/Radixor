@@ -585,6 +585,55 @@
   
   
   
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model Behavior and Generalization
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Model Behavior and Generalization
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
     <li class="md-nav__item">
       <a href="../benchmarks/generalization/" class="md-nav__link">
         
@@ -602,6 +651,70 @@
   
 
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/edit-cost-sensitivity/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Edit-Cost Sensitivity
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/reference/english-coverage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    English Coverage and Speed
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -1420,6 +1533,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../benchmarks/reference/edit-cost-methodology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Edit-Cost Protocol
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../benchmarks/reference/tested-stemmers/" class="md-nav__link">
         
   
@@ -1512,34 +1653,6 @@
     
   
     Environment and Reports
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../benchmarks/reference/english-coverage/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    English Coverage and Speed
   
 
     
@@ -3371,10 +3484,12 @@ predates several implementations with which it is now compared.</p>
 <p>The useful way to describe that history is not as a list of project names, but
 as a set of <strong>algorithmic lineages and runtime models</strong>.</p>
 <h2 id="the-egothor-lineage">The Egothor lineage</h2>
-<p>The transformation-based approach behind Radixor was described by Leo Galambos
-in <em>Lemmatizer for Document Information Retrieval Systems in JAVA</em> (SOFSEM
-2001). The Egothor implementation developed the patch-command/trie approach used
-to compile word-form transformations into a compact stemming structure.</p>
+<p>The general P-command method used by this lineage was published by Leo Galambos
+in <a href="https://doi.org/10.1007/3-540-45627-9_21"><em>Lemmatizer for Document Information Retrieval Systems in JAVA</em></a>
+(SOFSEM 2001). The paper derives compact partial edit commands from a
+minimum-cost transformation between a word form and its stem and organizes the
+resulting commands in a trie. Egothor implemented this patch-command/trie method
+as a compact stemming structure.</p>
 <p>Radixor is a modern implementation of that lineage. It is not a binary or source
 repackaging of the old project: the current implementation has a new runtime
 representation, compiled patch commands, deterministic multi-result semantics,
@@ -3469,14 +3584,14 @@ than learned from lexical evidence.</p>
 <p>At <code>N=100</code>, the current Python batch benchmark shows that rule-based
 generalization does not require accepting a runtime advantage over Radixor:</p>
 <ul>
-<li>each Radixor 4.2.0 Python runtime records lower median processing time than
+<li>each Radixor 4.2.1 Python runtime records lower median processing time than
   PyStemmer 3.1.0 in all <strong>18 / 18</strong> direct language comparisons;</li>
-<li>Python (PyO3) has a <strong>2.25×</strong> geometric-mean speedup and a largest measured
-  direct advantage of <strong>4.58×</strong> (Yiddish);</li>
-<li>Python-C has a <strong>2.29×</strong> geometric-mean speedup and a largest measured direct
-  advantage of <strong>4.37×</strong> (Yiddish);</li>
-<li>Python (PyO3) spans <strong>6.96–14.52 million words/s</strong>, while Python-C spans
-  <strong>6.92–14.85 million words/s</strong>, across all 20 languages at batch size <code>N=100</code>.</li>
+<li>Python (PyO3) has a <strong>2.19×</strong> geometric-mean speedup and a largest measured
+  direct advantage of <strong>4.52×</strong> (Yiddish);</li>
+<li>Python-C has a <strong>2.28×</strong> geometric-mean speedup and a largest measured direct
+  advantage of <strong>4.38×</strong> (Yiddish);</li>
+<li>Python (PyO3) spans <strong>6.85–13.87 million words/s</strong>, while Python-C spans
+  <strong>6.76–14.63 million words/s</strong>, across all 20 languages at batch size <code>N=100</code>.</li>
 </ul>
 <p>Those are performance results. The newly integrated official Snowball 3.1.0 Java
 quality comparators also make the linguistic trade-off visible for the three
@@ -3531,7 +3646,7 @@ while still sacrificing substantial recall.</p>
 primary-output quality result is <strong>0.984838</strong> balanced accuracy for Radixor
 versus <strong>0.740279</strong> for the Snowball Finnish Lucene path, with under-stemming
 <strong>3.032474%</strong> versus <strong>51.944179%</strong>. At <code>N=100</code> in the current Python batch run,
-Python (PyO3) is <strong>1.31×</strong> faster and Python-C is <strong>1.54×</strong> faster than
+Python (PyO3) is <strong>1.30×</strong> faster and Python-C is <strong>1.51×</strong> faster than
 PyStemmer's Finnish implementation.</p>
 <p>See the <a href="../benchmarks/languages/finnish/">Finnish benchmark</a>, the
 <a href="../benchmarks/languages/czech/">Czech benchmark</a>, the
@@ -3622,10 +3737,17 @@ project is poorly designed. Different systems were built for different goals:</p
 <p>The benchmark pages remain the authority for each language and comparator. The
 purpose of this page is to make the <strong>technology categories</strong> explicit so readers
 do not have to infer them from implementation names.</p>
+<p>The current edit-cost experiment also rules out presenting one cost setting or one
+generalization slope as universally optimal. Across 20 dictionaries, the normalized grid produces
+dictionary-specific exact command classes and the quality associations vary with language,
+knowledge level, and split. The <a href="../benchmarks/edit-cost-sensitivity/">cross-language analysis</a>
+therefore links to separate evidence and conclusions on every
+<a href="../benchmarks/languages/">language benchmark page</a>; selected non-baseline costs remain
+external-validation candidates.</p>
 <h2 id="historical-references">Historical references</h2>
 <ul>
-<li>Leo Galambos, <em>Lemmatizer for Document Information Retrieval Systems in JAVA</em>
-  (SOFSEM 2001)</li>
+<li><a href="https://doi.org/10.1007/3-540-45627-9_21">Leo Galambos, <em>Lemmatizer for Document Information Retrieval Systems in JAVA</em>
+  (SOFSEM 2001)</a></li>
 <li><a href="https://lucene.apache.org/core/9_9_1/analysis/stempel/org/apache/lucene/analysis/stempel/StempelStemmer.html">Lucene StempelStemmer documentation</a></li>
 <li><a href="https://lucene.apache.org/core/10_3_2/analysis/morfologik/org/apache/lucene/analysis/morfologik/package-summary.html">Lucene Morfologik package documentation</a></li>
 <li><a href="../architecture/">Architecture</a></li>
