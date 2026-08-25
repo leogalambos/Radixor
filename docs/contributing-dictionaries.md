@@ -2,6 +2,10 @@
 
 High-quality dictionaries are one of the most valuable ways to improve **Radixor**.
 
+The repository's [filtered candidate models](filtered-models.md) demonstrate
+how an alternative can remain a complete, locally buildable model while it is
+reviewed and measured before any default-model replacement or publication.
+
 The project already publishes practical model dictionaries for common use, but long-term quality and language reach depend heavily on lexical-resource quality. Contributions may provide well-prepared model inputs for existing or additional languages.
 
 This document explains what makes a dictionary contribution useful, how to structure it, and how to prepare it so that it integrates cleanly with the project.

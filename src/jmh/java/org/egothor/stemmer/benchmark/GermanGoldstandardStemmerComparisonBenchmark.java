@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -66,6 +67,7 @@ import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.infra.Blackhole;
 
+import org.egothor.stemmer.CompiledPatchCommand;
 import org.egothor.stemmer.FrequencyTrie;
 import org.egothor.stemmer.ReductionMode;
 import org.egothor.stemmer.StemmerPatchTrieLoader;
@@ -85,6 +87,10 @@ import org.egothor.stemmer.StemmerPatchTrieLoader;
 @Measurement(iterations = 5, time = 1, timeUnit = java.util.concurrent.TimeUnit.SECONDS)
 @Fork(1)
 public class GermanGoldstandardStemmerComparisonBenchmark {
+
+    /** Optional filesystem dictionary used for the Radixor candidate. */
+    private static final String RADIXOR_DICTIONARY_PROPERTY =
+            "radixor.benchmark.germanDictionary";
 
     /**
      * Shared German benchmark state for one dataset and one candidate.
@@ -485,15 +491,26 @@ public class GermanGoldstandardStemmerComparisonBenchmark {
     }
 
     /**
-     * Creates a direct Radixor evaluator using the contracted dictionary trie.
+     * Creates a direct Radixor evaluator using the configured dictionary trie.
+     *
+     * <p>The {@value #RADIXOR_DICTIONARY_PROPERTY} system property may identify
+     * an experimental dictionary file. When absent, the benchmark uses the
+     * registered German model. This override keeps experimental comparisons
+     * isolated from published model registration.</p>
      *
      * @return direct Radixor stemmer
      * @throws IOException if the trie cannot be loaded
      */
     private static Stemmer createGermanRadixorStemmer() throws IOException {
-        return new RadixorBenchmarkStemmer(StemmerPatchTrieLoader.loadCompiled(
-                StemmerPatchTrieLoader.Language.DE_DE, true,
-                ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS))::stem;
+        final String dictionary = System.getProperty(RADIXOR_DICTIONARY_PROPERTY);
+        final FrequencyTrie<CompiledPatchCommand> trie =
+                dictionary == null || dictionary.isBlank()
+                        ? StemmerPatchTrieLoader.loadCompiled(
+                                StemmerPatchTrieLoader.Language.DE_DE, true,
+                                ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS)
+                        : StemmerPatchTrieLoader.loadCompiled(Path.of(dictionary), true,
+                                ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS);
+        return new RadixorBenchmarkStemmer(trie)::stem;
     }
 
     /**

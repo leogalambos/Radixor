@@ -1,0 +1,23 @@
+plugins {
+    id 'org.egothor.radixor.model'
+}
+
+radixorModel {
+    modelId = 'pl-pl-unimorph-filtered'
+    language = 'PL_PL'
+    displayName = 'Polish UniMorph filtered candidate model'
+    defaultModel = false
+    sourceName = 'UniMorph via pl-pl-unimorph'
+    sourceVersion = 'not-recorded-in-legacy-import'
+    sourceRevision = 'not-recorded-in-legacy-import'
+    sourceProject = 'UniMorph'
+    sourceRepository = 'https://github.com/unimorph/pol'
+    sourceDataset = 'Checked-in pl-pl-unimorph model derived from the UniMorph Polish dataset (`pol`)'
+    sourceRevisionStatus = 'not-recorded-in-legacy-import'
+    sourceLicense = 'CC-BY-SA-3.0'
+    sourceLicenseUri = 'https://creativecommons.org/licenses/by-sa/3.0/'
+    sourceAttribution = 'UniMorph; SGJP authors Marcin Woliński, Zygmunt Saloni, Robert Wołosz, Włodzimierz Gruszczyński, Danuta Skowrońska, and Zbigniew Bronk; Witold Kieraś (conversion); Wiktionary contributors'
+    sourceVerificationDate = '2026-07-22'
+    transformationsSummary = 'Radixor internal-evidence sanitation of pl-pl-unimorph followed by removal of strongly dominated stem assignments and deterministic GZip packaging; no external vocabulary was used'
+    noticeFileName = 'NOTICE-model-data.txt'
+}

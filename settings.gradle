@@ -15,6 +15,14 @@ modelTopology.stringPropertyNames().toList().sort().each { String modelId ->
     include(":models:${modelId}")
 }
 
+Properties alternativeModelTopology = new Properties()
+file('models/alternative-model-projects.properties').withInputStream { InputStream input ->
+    alternativeModelTopology.load(input)
+}
+alternativeModelTopology.stringPropertyNames().toList().sort().each { String modelId ->
+    include(":models:${modelId}")
+}
+
 dependencyResolutionManagement {
     repositoriesMode = RepositoriesMode.FAIL_ON_PROJECT_REPOS
     repositories {

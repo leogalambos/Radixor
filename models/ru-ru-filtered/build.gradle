@@ -1,0 +1,23 @@
+plugins {
+    id 'org.egothor.radixor.model'
+}
+
+radixorModel {
+    modelId = 'ru-ru-filtered'
+    language = 'RU_RU'
+    displayName = 'Russian filtered candidate model'
+    defaultModel = false
+    sourceName = 'UniMorph via ru-ru-default'
+    sourceVersion = 'not-recorded-in-legacy-import'
+    sourceRevision = 'not-recorded-in-legacy-import'
+    sourceProject = 'UniMorph'
+    sourceRepository = 'https://github.com/unimorph/rus'
+    sourceDataset = 'Checked-in ru-ru-default model derived from the UniMorph Russian dataset (`rus`)'
+    sourceRevisionStatus = 'not-recorded-in-legacy-import'
+    sourceLicense = 'CC-BY-SA-3.0'
+    sourceLicenseUri = 'https://creativecommons.org/licenses/by-sa/3.0/'
+    sourceAttribution = 'UniMorph and Wikipedia contributors'
+    sourceVerificationDate = '2026-07-22'
+    transformationsSummary = 'Radixor internal-evidence sanitation of ru-ru-default followed by removal of strongly dominated stem assignments and deterministic GZip packaging; no external vocabulary was used'
+    noticeFileName = 'NOTICE-model-data.txt'
+}

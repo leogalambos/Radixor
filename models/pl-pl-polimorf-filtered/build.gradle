@@ -1,0 +1,23 @@
+plugins {
+    id 'org.egothor.radixor.model'
+}
+
+radixorModel {
+    modelId = 'pl-pl-polimorf-filtered'
+    language = 'PL_PL'
+    displayName = 'Polish PoliMorf filtered candidate model'
+    defaultModel = false
+    sourceName = 'PoliMorf 2.1 via pl-pl-polimorf'
+    sourceVersion = '2.1'
+    sourceRevision = '6e63b53'
+    sourceProject = 'Morfologik'
+    sourceRepository = 'https://github.com/morfologik/morfologik-stemming'
+    sourceDataset = 'Checked-in pl-pl-polimorf model derived from PoliMorf 2.1 in org.carrot2:morfologik-polish:2.1.9'
+    sourceRevisionStatus = 'recorded'
+    sourceLicense = 'BSD-2-Clause'
+    sourceLicenseUri = 'https://spdx.org/licenses/BSD-2-Clause.html'
+    sourceAttribution = 'Copyright (c) 2016, Marcin Miłkowski'
+    sourceVerificationDate = '2026-07-22'
+    transformationsSummary = 'Radixor internal-evidence sanitation of pl-pl-polimorf followed by removal of strongly dominated stem assignments and deterministic GZip packaging; no external vocabulary was used'
+    licenseFileName = 'LICENSE-BSD-2-Clause.txt'
+}

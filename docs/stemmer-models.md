@@ -142,6 +142,12 @@ The Maven dependency BOM is not a software bill of materials. The root `cycloned
 
 `models/build/` is an ignored Gradle output directory for the implicit lifecycle parent `:models`, not a source module. CycloneDX direct tasks exposed on subprojects by the root plugin are disabled, so the supported build does not write an SBOM there. Aggregate model reports are owned by the root project under `build/reports/models/`; individual model reports and publication files stay under `models/<model-id>/build/`.
 
+Filtered alternatives under `models/*-filtered` are complete, locally buildable
+candidate modules, but are excluded from the published topology, catalog, BOM,
+standard pack, and Python packages. Their construction, measured results, local
+loading procedure, and promotion boundary are documented on the
+[Filtered Candidate Models](filtered-models.md) page.
+
 ## Create or update a model module
 
 1. Choose a stable lowercase model ID matching the module directory.

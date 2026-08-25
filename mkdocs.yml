@@ -127,6 +127,7 @@ nav:
      - Models and Dictionaries:
         - Model Overview: stemmer-models.md
         - Published Model Catalog: stemmer-model-catalog.md
+        - Filtered Candidate Models: filtered-models.md
         - Built-in Languages: built-in-languages.md
         - Dictionary Format: dictionary-format.md
         - Contributing Dictionaries: contributing-dictionaries.md

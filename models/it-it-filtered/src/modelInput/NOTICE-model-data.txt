@@ -1,0 +1,42 @@
+Radixor model-data notice
+
+Radixor-derived model data
+
+Copyright (C) 2026, Leo Galambos.
+
+Copyright and, where applicable, database rights are claimed in the
+Radixor-specific selection, verification, cleaning, normalization,
+filtering, reformatting, metadata preparation, and packaging of this model,
+to the extent protected by applicable law.
+
+The underlying morphological data remains attributed to UniMorph and
+the upstream contributors identified in this notice.
+
+This derived model data, including Radixor's protectable contributions,
+is distributed under Creative Commons Attribution-ShareAlike 3.0
+Unported.
+
+Model ID: it-it-filtered
+Radixor language: IT_IT
+Source model: it-it-default
+Source project: UniMorph
+Official repository: https://github.com/unimorph/ita
+Upstream dataset: UniMorph Italian morphological dataset (`ita`)
+Attribution: UniMorph and Wikipedia contributors
+License:
+Creative Commons Attribution-ShareAlike 3.0 Unported
+Canonical license URI: https://creativecommons.org/licenses/by-sa/3.0/
+Source revision: not-recorded-in-legacy-import
+Revision status: not-recorded-in-legacy-import
+
+The exact UniMorph commit used for the original Radixor import was not recorded.
+The checked-in it-it-default model is therefore the immutable input to this
+candidate; no external vocabulary or newer UniMorph checkout was consulted.
+
+Radixor modifications: Objective source artifacts and Unicode format controls
+were sanitized. Strongly internally dominated stem assignments were removed
+only when the same surface forms supplied substantially closer stem evidence
+inside the checked-in dictionary. The result was deterministically repackaged.
+
+Neither UniMorph nor any upstream contributor endorses Radixor.
+Upstream information verified: 2026-07-22

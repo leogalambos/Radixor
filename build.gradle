@@ -114,6 +114,26 @@ def defaultModelProjects() {
     }.sort().collect { String modelId -> project(":models:${modelId}") }
 }
 
+def alternativeModelProjects() {
+    Properties topology = new Properties()
+    rootProject.file('models/alternative-model-projects.properties').withInputStream { InputStream input ->
+        topology.load(input)
+    }
+    return topology.stringPropertyNames().toList().sort().collect { String modelId ->
+        project(":models:${modelId}")
+    }
+}
+
+alternativeModelProjects().each { Project modelProject ->
+    modelProject.tasks.configureEach { Task candidateTask ->
+        if (candidateTask.name.startsWith('publish')
+                || candidateTask.name in ['createModelCentralChecksums', 'packageModelReleaseCandidate',
+                        'signModelPublication', 'validateModelRelease']) {
+            candidateTask.enabled = false
+        }
+    }
+}
+
 tasks.named('projects') {
     actions.clear()
     doLast {
@@ -1070,6 +1090,39 @@ tasks.register('patchCommandDump', JavaExec) {
     final String lang = project.hasProperty('patchDumpLanguage') ? project.property('patchDumpLanguage').toString().toUpperCase(java.util.Locale.ROOT) : 'US_UK'
     args layout.buildDirectory.file("reports/generalization/patch-commands-${lang.toLowerCase(java.util.Locale.ROOT)}.tsv").get().asFile.absolutePath, lang
     maxHeapSize = '2g'
+}
+
+tasks.register('dictionaryMeaningAudit', JavaExec) {
+    group = 'verification'
+    description = 'Audits dictionaries with more than 500 baseline commands and regenerates filtered candidate inputs.'
+    dependsOn(tasks.named('testClasses'))
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'org.egothor.stemmer.benchmark.generalization.DictionaryMeaningAuditApplication'
+    final String outputDirectory = providers.gradleProperty('dictionaryMeaningAuditOutput')
+            .orElse(layout.buildDirectory.dir('reports/generalization/dictionary-meaning-audit')
+                    .map { it.asFile.absolutePath }).get()
+    args outputDirectory,
+            "CS_CZ|cs-cz-default|537|${layout.projectDirectory.file('models/cs-cz-default/src/modelInput/stemmer.gz').asFile.absolutePath}|${layout.projectDirectory.file('models/cs-cz-filtered/src/modelInput/stemmer.gz').asFile.absolutePath}",
+            "NL_NL|nl-nl-default|538|${layout.projectDirectory.file('models/nl-nl-default/src/modelInput/stemmer.gz').asFile.absolutePath}|-",
+            "FA_IR|fa-ir-default|704|${layout.projectDirectory.file('models/fa-ir-default/src/modelInput/stemmer.gz').asFile.absolutePath}|-",
+            "IT_IT|it-it-default|750|${layout.projectDirectory.file('models/it-it-default/src/modelInput/stemmer.gz').asFile.absolutePath}|${layout.projectDirectory.file('models/it-it-filtered/src/modelInput/stemmer.gz').asFile.absolutePath}",
+            "PL_PL|pl-pl-unimorph|846|${layout.projectDirectory.file('models/pl-pl-unimorph/src/modelInput/stemmer.gz').asFile.absolutePath}|${layout.projectDirectory.file('models/pl-pl-unimorph-filtered/src/modelInput/stemmer.gz').asFile.absolutePath}",
+            "ES_ES|es-es-default|1496|${layout.projectDirectory.file('models/es-es-default/src/modelInput/stemmer.gz').asFile.absolutePath}|${layout.projectDirectory.file('models/es-es-filtered/src/modelInput/stemmer.gz').asFile.absolutePath}",
+            "RU_RU|ru-ru-default|1840|${layout.projectDirectory.file('models/ru-ru-default/src/modelInput/stemmer.gz').asFile.absolutePath}|${layout.projectDirectory.file('models/ru-ru-filtered/src/modelInput/stemmer.gz').asFile.absolutePath}",
+            "FI_FI|fi-fi-default|2683|${layout.projectDirectory.file('models/fi-fi-default/src/modelInput/stemmer.gz').asFile.absolutePath}|${layout.projectDirectory.file('models/fi-fi-filtered/src/modelInput/stemmer.gz').asFile.absolutePath}",
+            "FR_FR|fr-fr-default|2730|${layout.projectDirectory.file('models/fr-fr-default/src/modelInput/stemmer.gz').asFile.absolutePath}|${layout.projectDirectory.file('models/fr-fr-filtered/src/modelInput/stemmer.gz').asFile.absolutePath}",
+            "HE_IL|he-il-default|4150|${layout.projectDirectory.file('models/he-il-default/src/modelInput/stemmer.gz').asFile.absolutePath}|${layout.projectDirectory.file('models/he-il-filtered/src/modelInput/stemmer.gz').asFile.absolutePath}",
+            "PL_PL|pl-pl-polimorf|5249|${layout.projectDirectory.file('models/pl-pl-polimorf/src/modelInput/stemmer.gz').asFile.absolutePath}|${layout.projectDirectory.file('models/pl-pl-polimorf-filtered/src/modelInput/stemmer.gz').asFile.absolutePath}",
+            "DE_DE|de-de-default|6986|${layout.projectDirectory.file('models/de-de-default/src/modelInput/stemmer.gz').asFile.absolutePath}|${layout.projectDirectory.file('models/de-de-filtered/src/modelInput/stemmer.gz').asFile.absolutePath}"
+    maxHeapSize = '8g'
+}
+
+tasks.register('checkFilteredModels') {
+    group = 'verification'
+    description = 'Builds and validates every locally available filtered candidate model.'
+    dependsOn(alternativeModelProjects().collect { Project modelProject ->
+        modelProject.tasks.named('check')
+    })
 }
 
 tasks.register('publishDictionaryGeneralizationDocumentation', Exec) {
