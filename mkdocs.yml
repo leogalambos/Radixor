@@ -60,6 +60,7 @@ nav:
      - Python-C in 5 Minutes: python-c/quick-start.md
 
   - Evaluate Radixor:
+     - Scientific Results: scientific-results.md
      - Results Overview: benchmarks/index.md
      - How to Read the Evidence: benchmarking.md
      - Model Behavior and Generalization:
