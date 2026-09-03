@@ -31,7 +31,7 @@ The sequence is intentional. Papers 1--6 establish empirical properties and meas
 
 ### *Does a Lexicon-Trained Stemmer Generalize? A 20-Language Study of Held-Out Lexical Families*
 
-[ResearchGate](https://www.researchgate.net/search/publication?q=Does%20a%20Lexicon-Trained%20Stemmer%20Generalize%3F%20A%2020-Language%20Study%20of%20Held-Out%20Lexical%20Families){ .md-button }
+[ResearchGate](https://doi.org/10.13140/RG.2.2.34383.85921){ .md-button }
 [Generalization evidence](benchmarks/generalization.md){ .md-button }
 [Protocol](benchmarks/reference/generalization-methodology.md){ .md-button }
 
@@ -49,7 +49,7 @@ The sequence is intentional. Papers 1--6 establish empirical properties and meas
 
 ### *Edit Costs as Structural Hyperparameters in Dictionary-Induced Stemming: A Multilingual Sensitivity Study*
 
-[ResearchGate](https://www.researchgate.net/search/publication?q=Edit%20Costs%20as%20Structural%20Hyperparameters%20in%20Dictionary-Induced%20Stemming%3A%20A%20Multilingual%20Sensitivity%20Study){ .md-button }
+[ResearchGate](https://doi.org/10.13140/RG.2.2.12573.47845){ .md-button }
 [Edit-cost results](benchmarks/edit-cost-sensitivity.md){ .md-button }
 [Protocol](benchmarks/reference/edit-cost-methodology.md){ .md-button }
 
@@ -67,7 +67,7 @@ The sequence is intentional. Papers 1--6 establish empirical properties and meas
 
 ### *Classifying Multilingual Stemmers by Pareto Strata: Error Regimes in Pairwise Lexical Conflation*
 
-[ResearchGate](https://www.researchgate.net/search/publication?q=Classifying%20Multilingual%20Stemmers%20by%20Pareto%20Strata%3A%20Error%20Regimes%20in%20Pairwise%20Lexical%20Conflation){ .md-button }
+[ResearchGate](https://doi.org/10.13140/RG.2.2.25995.25126){ .md-button }
 [Benchmark results](benchmarks/index.md){ .md-button }
 [Linguistic-quality method](benchmarks/reference/linguistic-quality.md){ .md-button }
 
@@ -85,7 +85,7 @@ The sequence is intentional. Papers 1--6 establish empirical properties and meas
 
 ### *The Stemming Policy Is Data: Adapting a Lexicon-Trained Stemmer to Alternative Conflation Objectives*
 
-[ResearchGate](https://www.researchgate.net/search/publication?q=The%20Stemming%20Policy%20Is%20Data%3A%20Adapting%20a%20Lexicon-Trained%20Stemmer%20to%20Alternative%20Conflation%20Objectives){ .md-button }
+[ResearchGate](https://doi.org/10.13140/RG.2.2.23898.09926){ .md-button }
 [Reproduction harness](https://github.com/leogalambos/Radixor/tree/main/experiments/policy-transfer){ .md-button }
 
 **Research question.** If two gold resources encode different conflation policies over the same language, can the same Radixor architecture learn the policy difference rather than imposing one hard-coded definition of stemming?
@@ -102,7 +102,7 @@ The sequence is intentional. Papers 1--6 establish empirical properties and meas
 
 ### *Runtime Efficiency of Lexicon-Trained Stemming: Compiled Structure and a Speed–Reference-Agreement Envelope in Radixor*
 
-[ResearchGate](https://www.researchgate.net/search/publication?q=Runtime%20Efficiency%20of%20Lexicon-Trained%20Stemming%3A%20Compiled%20Structure%20and%20a%20Speed-Reference-Agreement%20Envelope%20in%20Radixor){ .md-button }
+[ResearchGate](https://doi.org/10.13140/RG.2.2.27332.18569){ .md-button }
 [Benchmarking framework](benchmarking.md){ .md-button }
 [Published benchmark results](benchmarks/index.md){ .md-button }
 
@@ -120,7 +120,7 @@ The sequence is intentional. Papers 1--6 establish empirical properties and meas
 
 ### *Lexical Resource Consistency and Learned Transformation Vocabulary in Multilingual Stemming*
 
-[ResearchGate](https://www.researchgate.net/search/publication?q=Lexical%20Resource%20Consistency%20and%20Learned%20Transformation%20Vocabulary%20in%20Multilingual%20Stemming){ .md-button }
+[ResearchGate](https://doi.org/10.13140/RG.2.2.34043.07203){ .md-button }
 [Filtered candidate models](filtered-models.md){ .md-button }
 
 **Research question.** When internally inspectable resource inconsistencies are removed conservatively, how does that evidence propagate into the transformation vocabulary learned by the compiler?
@@ -137,7 +137,7 @@ The sequence is intentional. Papers 1--6 establish empirical properties and meas
 
 ### *Compiling Learned Lexical Transformations: Semantic Canonicalization and Accepting-Leaf Generalization in Patch-Command Tries*
 
-[ResearchGate](https://www.researchgate.net/search/publication?q=Compiling%20Learned%20Lexical%20Transformations%3A%20Semantic%20Canonicalization%20and%20Accepting-Leaf%20Generalization%20in%20Patch-Command%20Tries){ .md-button }
+[ResearchGate](https://doi.org/10.13140/RG.2.2.12232.69128){ .md-button }
 [Architecture and reduction](architecture-and-reduction.md){ .md-button }
 [Reduction semantics](reduction-semantics.md){ .md-button }
 
