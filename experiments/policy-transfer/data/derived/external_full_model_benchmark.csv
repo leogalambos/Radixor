@@ -1,0 +1,5 @@
+gold,system,tp,fp,fn,precision,recall,f1,model_source,benchmark_scope,radixor_commit
+GS1,REGISTERED_RADIXOR,179879,3638,137562,0.980176,0.566653,0.718140,UniMorph de-de-default (lemma-grouped),complete public CISTEM gold standard,0c3b13f485a9ad0b460c0931e4497ea95bed66a1
+GS1,CISTEM,192893,26500,124548,0.879212,0.607650,0.718632,fixed CISTEM rules,complete public CISTEM gold standard,0c3b13f485a9ad0b460c0931e4497ea95bed66a1
+GS2,REGISTERED_RADIXOR,266098,20724,43969,0.927746,0.858195,0.891616,UniMorph de-de-default (lemma-grouped),complete public CISTEM gold standard,0c3b13f485a9ad0b460c0931e4497ea95bed66a1
+GS2,CISTEM,286002,83103,24065,0.774853,0.922388,0.842208,fixed CISTEM rules,complete public CISTEM gold standard,0c3b13f485a9ad0b460c0931e4497ea95bed66a1

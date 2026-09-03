@@ -1,0 +1,35 @@
+PYTHON ?= python3
+
+.PHONY: smoke fetch-inputs experiment full-information baseline sensitivities verify verify-models analyze full clean
+
+smoke:
+	$(PYTHON) scripts/smoke_test.py
+
+fetch-inputs:
+	$(PYTHON) scripts/fetch_cistem_gold.py --output-dir data/external
+
+experiment:
+	$(PYTHON) scripts/policy_transfer_experiment.py --project .
+
+full-information:
+	$(PYTHON) scripts/evaluate_full_information_ceiling.py --project .
+
+baseline:
+	$(PYTHON) scripts/evaluate_cistem_baseline.py --project .
+
+sensitivities:
+	$(PYTHON) scripts/analyze_post_review_sensitivities.py
+
+verify:
+	$(PYTHON) scripts/verify_experiment.py
+
+verify-models:
+	$(PYTHON) scripts/verify_model_artifacts.py
+
+analyze:
+	$(PYTHON) scripts/analyze_policy_structure.py --project .
+
+full: fetch-inputs experiment full-information baseline sensitivities verify verify-models analyze
+
+clean:
+	rm -rf build data/external
