@@ -7,8 +7,6 @@ Together, the papers characterize Radixor as a **lexicon-trained transformation 
 !!! note "Publication and evidence status"
     The articles linked below are author-released research manuscripts on ResearchGate. ResearchGate availability is not a claim of journal or conference peer-review status. The project documentation and repository provide the current implementation, benchmark data, protocols, and reproduction material; each manuscript freezes the evidence identity used by its own analyses.
 
-    The newly uploaded ResearchGate records are not yet exposed through stable public publication URLs in web indexing. Until those identifiers become discoverable, each **ResearchGate** link below performs an exact-title search on ResearchGate rather than inventing a publication identifier.
-
 [Leo Galambos on ResearchGate](https://www.researchgate.net/profile/Leo-Galambos){ .md-button }
 
 ## The research program at a glance
@@ -27,7 +25,7 @@ The sequence is intentional. Papers 1--6 establish empirical properties and meas
 
 ---
 
-## Radixor 1 — Generalization beyond the training lexicon
+## Topic 1 — Generalization beyond the training lexicon
 
 ### *Does a Lexicon-Trained Stemmer Generalize? A 20-Language Study of Held-Out Lexical Families*
 
@@ -45,7 +43,7 @@ The sequence is intentional. Papers 1--6 establish empirical properties and meas
 
 ---
 
-## Radixor 2 — Edit costs as model-structure controls
+## Topic 2 — Edit costs as model-structure controls
 
 ### *Edit Costs as Structural Hyperparameters in Dictionary-Induced Stemming: A Multilingual Sensitivity Study*
 
@@ -63,7 +61,7 @@ The sequence is intentional. Papers 1--6 establish empirical properties and meas
 
 ---
 
-## Radixor 3 — Multi-objective stemmer comparison
+## Topic 3 — Multi-objective stemmer comparison
 
 ### *Classifying Multilingual Stemmers by Pareto Strata: Error Regimes in Pairwise Lexical Conflation*
 
@@ -81,7 +79,7 @@ The sequence is intentional. Papers 1--6 establish empirical properties and meas
 
 ---
 
-## Radixor 4 — The stemming policy is learned from data
+## Topic 4 — The stemming policy is learned from data
 
 ### *The Stemming Policy Is Data: Adapting a Lexicon-Trained Stemmer to Alternative Conflation Objectives*
 
@@ -98,7 +96,7 @@ The sequence is intentional. Papers 1--6 establish empirical properties and meas
 
 ---
 
-## Radixor 5 — Compiled structure and runtime efficiency
+## Topic 5 — Compiled structure and runtime efficiency
 
 ### *Runtime Efficiency of Lexicon-Trained Stemming: Compiled Structure and a Speed–Reference-Agreement Envelope in Radixor*
 
@@ -116,7 +114,7 @@ The sequence is intentional. Papers 1--6 establish empirical properties and meas
 
 ---
 
-## Radixor 6 — Lexical-resource consistency and transformation vocabulary
+## Topic 6 — Lexical-resource consistency and transformation vocabulary
 
 ### *Lexical Resource Consistency and Learned Transformation Vocabulary in Multilingual Stemming*
 
@@ -133,7 +131,7 @@ The sequence is intentional. Papers 1--6 establish empirical properties and meas
 
 ---
 
-## Radixor 7 — Formal semantics of the compiler
+## Topic 7 — Formal semantics of the compiler
 
 ### *Compiling Learned Lexical Transformations: Semantic Canonicalization and Accepting-Leaf Generalization in Patch-Command Tries*
 
