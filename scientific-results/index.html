@@ -1,0 +1,4003 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Learned transformation stemming with interoperable Java, Python, and Python-C runtimes">
+      
+      
+      
+        <link rel="canonical" href="https://leogalambos.github.io/Radixor/scientific-results/">
+      
+      
+        <link rel="prev" href="../python-c/quick-start/">
+      
+      
+        <link rel="next" href="../benchmarks/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/radixor-logo.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Scientific Results - Radixor</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/extra.css">
+    
+      <link rel="stylesheet" href="../assets/stylesheets/landing-v2.css">
+    
+      <link rel="stylesheet" href="../assets/stylesheets/radixor-docs-safety.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="white" data-md-color-accent="blue">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#scientific-results-and-publications" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Radixor" class="md-header__button md-logo" aria-label="Radixor" data-md-component="logo">
+      
+  <img src="../assets/images/radixor-logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Radixor
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Scientific Results
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="white" data-md-color-accent="blue"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/leogalambos/Radixor" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    leogalambos/Radixor
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Radixor" class="md-nav__button md-logo" aria-label="Radixor" data-md-component="logo">
+      
+  <img src="../assets/images/radixor-logo.png" alt="logo">
+
+    </a>
+    Radixor
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/leogalambos/Radixor" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    leogalambos/Radixor
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Get Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Choose a Runtime
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../why-radixor-is-different/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Why Radixor Is Different
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../fast-track/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Java in 5 Minutes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../python/fast-track/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python in 5 Minutes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../python-c/quick-start/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python-C in 5 Minutes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Evaluate Radixor
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Evaluate Radixor
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Scientific Results
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Scientific Results
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#the-research-program-at-a-glance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The research program at a glance
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#radixor-1-generalization-beyond-the-training-lexicon" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Radixor 1 — Generalization beyond the training lexicon
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Radixor 1 — Generalization beyond the training lexicon">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#does-a-lexicon-trained-stemmer-generalize-a-20-language-study-of-held-out-lexical-families" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Does a Lexicon-Trained Stemmer Generalize? A 20-Language Study of Held-Out Lexical Families
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#radixor-2-edit-costs-as-model-structure-controls" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Radixor 2 — Edit costs as model-structure controls
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Radixor 2 — Edit costs as model-structure controls">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#edit-costs-as-structural-hyperparameters-in-dictionary-induced-stemming-a-multilingual-sensitivity-study" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Edit Costs as Structural Hyperparameters in Dictionary-Induced Stemming: A Multilingual Sensitivity Study
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#radixor-3-multi-objective-stemmer-comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Radixor 3 — Multi-objective stemmer comparison
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Radixor 3 — Multi-objective stemmer comparison">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#classifying-multilingual-stemmers-by-pareto-strata-error-regimes-in-pairwise-lexical-conflation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Classifying Multilingual Stemmers by Pareto Strata: Error Regimes in Pairwise Lexical Conflation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#radixor-4-the-stemming-policy-is-learned-from-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Radixor 4 — The stemming policy is learned from data
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Radixor 4 — The stemming policy is learned from data">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-stemming-policy-is-data-adapting-a-lexicon-trained-stemmer-to-alternative-conflation-objectives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Stemming Policy Is Data: Adapting a Lexicon-Trained Stemmer to Alternative Conflation Objectives
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#radixor-5-compiled-structure-and-runtime-efficiency" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Radixor 5 — Compiled structure and runtime efficiency
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Radixor 5 — Compiled structure and runtime efficiency">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#runtime-efficiency-of-lexicon-trained-stemming-compiled-structure-and-a-speedreference-agreement-envelope-in-radixor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Runtime Efficiency of Lexicon-Trained Stemming: Compiled Structure and a Speed–Reference-Agreement Envelope in Radixor
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#radixor-6-lexical-resource-consistency-and-transformation-vocabulary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Radixor 6 — Lexical-resource consistency and transformation vocabulary
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Radixor 6 — Lexical-resource consistency and transformation vocabulary">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#lexical-resource-consistency-and-learned-transformation-vocabulary-in-multilingual-stemming" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lexical Resource Consistency and Learned Transformation Vocabulary in Multilingual Stemming
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#radixor-7-formal-semantics-of-the-compiler" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Radixor 7 — Formal semantics of the compiler
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Radixor 7 — Formal semantics of the compiler">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#compiling-learned-lexical-transformations-semantic-canonicalization-and-accepting-leaf-generalization-in-patch-command-tries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Compiling Learned Lexical Transformations: Semantic Canonicalization and Accepting-Leaf Generalization in Patch-Command Tries
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-to-read-and-cite-the-series" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How to read and cite the series
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Results Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarking/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How to Read the Evidence
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_4" id="__nav_3_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model Behavior and Generalization
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Model Behavior and Generalization
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/generalization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Multilingual Generalization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/edit-cost-sensitivity/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Edit-Cost Sensitivity
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/reference/english-coverage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    English Coverage and Speed
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../python/performance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python Runtime Performance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_6" id="__nav_3_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Language Comparisons
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Language Comparisons
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/languages/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/languages/czech/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Czech
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/languages/danish/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Danish
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/languages/dutch/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dutch
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/languages/english/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    English
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/languages/finnish/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Finnish
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/languages/french/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    French
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/languages/german/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    German
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/languages/hebrew/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hebrew
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/languages/hungarian/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hungarian
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/languages/italian/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Italian
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/languages/norwegian-bokmal/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Norwegian Bokmal
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/languages/norwegian-nynorsk/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Norwegian Nynorsk
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/languages/persian/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Persian
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/languages/polish/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Polish
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/languages/portuguese/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Portuguese
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/languages/russian/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Russian
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/languages/spanish/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Spanish
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/languages/swedish/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Swedish
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/languages/ukrainian/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ukrainian
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/languages/yiddish/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Yiddish
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_7" id="__nav_3_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Methods and Reproduction
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Methods and Reproduction
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/reference/methodology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Comparison Methodology
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/reference/linguistic-quality/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Linguistic Quality
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/reference/generalization-methodology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Generalization Protocol
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/reference/edit-cost-methodology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Edit-Cost Protocol
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/reference/tested-stemmers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tested Stemmers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/reference/reproducibility/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reproducibility and Raw Data
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/reference/corpora/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Corpora
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/reference/environment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Environment and Reports
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/reference/candidates/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Candidate Evaluation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Integrate
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Integrate
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_1" id="__nav_4_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Java
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Java
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quick-start/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../integration-deep-dive/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Integration Deep Dive
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../programmatic-usage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../model-selection-and-loading/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model Selection and Loading
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../programmatic-loading-and-building/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Loading and Building Stemmers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../programmatic-querying-and-ambiguity/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Querying and Ambiguity
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../programmatic-extending-and-persistence/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Extending and Persistence
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../migration-and-backward-compatibility/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Migration Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli-compilation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Compilation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_2" id="__nav_4_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python Runtimes
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Python Runtimes
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../python/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Choose a Runtime
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../python/fast-track/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python in 5 Minutes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_2_3" id="__nav_4_2_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python (PyO3)
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Python (PyO3)
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../python/quick-start/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../python/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation and Builds
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../python/usage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Usage and API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../python/model-compilation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dictionary Compilation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_2_4" id="__nav_4_2_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python-C
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Python-C
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../python-c/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../python-c/quick-start/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python-C in 5 Minutes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../python-c/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation and Builds
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../python-c/usage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Usage and API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_3" id="__nav_4_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Models and Dictionaries
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Models and Dictionaries
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../stemmer-models/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../stemmer-model-catalog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Published Model Catalog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../filtered-models/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Filtered Candidate Models
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../built-in-languages/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Built-in Languages
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dictionary-format/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dictionary Format
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing-dictionaries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing Dictionaries
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Engineering Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Engineering Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../technology-lineage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Technology and Lineage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture-and-reduction/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Detail
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reduction-semantics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reduction Semantics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lookup-edge-optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lookup Edge Optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../data-formats/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Formats
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../compatibility-and-guarantees/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compatibility and Guarantees
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Operate and Contribute
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Operate and Contribute
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../trust-security-and-support/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Trust, Security and Support
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quality-and-operations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quality and Operations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../stemming-quality/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stemming Quality
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reports/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Published Reports
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../builds/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Historical Builds
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../test-taxonomy-and-filtering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Test Taxonomy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#the-research-program-at-a-glance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The research program at a glance
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#radixor-1-generalization-beyond-the-training-lexicon" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Radixor 1 — Generalization beyond the training lexicon
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Radixor 1 — Generalization beyond the training lexicon">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#does-a-lexicon-trained-stemmer-generalize-a-20-language-study-of-held-out-lexical-families" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Does a Lexicon-Trained Stemmer Generalize? A 20-Language Study of Held-Out Lexical Families
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#radixor-2-edit-costs-as-model-structure-controls" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Radixor 2 — Edit costs as model-structure controls
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Radixor 2 — Edit costs as model-structure controls">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#edit-costs-as-structural-hyperparameters-in-dictionary-induced-stemming-a-multilingual-sensitivity-study" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Edit Costs as Structural Hyperparameters in Dictionary-Induced Stemming: A Multilingual Sensitivity Study
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#radixor-3-multi-objective-stemmer-comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Radixor 3 — Multi-objective stemmer comparison
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Radixor 3 — Multi-objective stemmer comparison">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#classifying-multilingual-stemmers-by-pareto-strata-error-regimes-in-pairwise-lexical-conflation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Classifying Multilingual Stemmers by Pareto Strata: Error Regimes in Pairwise Lexical Conflation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#radixor-4-the-stemming-policy-is-learned-from-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Radixor 4 — The stemming policy is learned from data
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Radixor 4 — The stemming policy is learned from data">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-stemming-policy-is-data-adapting-a-lexicon-trained-stemmer-to-alternative-conflation-objectives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Stemming Policy Is Data: Adapting a Lexicon-Trained Stemmer to Alternative Conflation Objectives
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#radixor-5-compiled-structure-and-runtime-efficiency" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Radixor 5 — Compiled structure and runtime efficiency
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Radixor 5 — Compiled structure and runtime efficiency">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#runtime-efficiency-of-lexicon-trained-stemming-compiled-structure-and-a-speedreference-agreement-envelope-in-radixor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Runtime Efficiency of Lexicon-Trained Stemming: Compiled Structure and a Speed–Reference-Agreement Envelope in Radixor
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#radixor-6-lexical-resource-consistency-and-transformation-vocabulary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Radixor 6 — Lexical-resource consistency and transformation vocabulary
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Radixor 6 — Lexical-resource consistency and transformation vocabulary">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#lexical-resource-consistency-and-learned-transformation-vocabulary-in-multilingual-stemming" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lexical Resource Consistency and Learned Transformation Vocabulary in Multilingual Stemming
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#radixor-7-formal-semantics-of-the-compiler" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Radixor 7 — Formal semantics of the compiler
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Radixor 7 — Formal semantics of the compiler">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#compiling-learned-lexical-transformations-semantic-canonicalization-and-accepting-leaf-generalization-in-patch-command-tries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Compiling Learned Lexical Transformations: Semantic Canonicalization and Accepting-Leaf Generalization in Patch-Command Tries
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-to-read-and-cite-the-series" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How to read and cite the series
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="scientific-results-and-publications">Scientific Results and Publications</h1>
+<p>Radixor is developed as both production software and a reproducible research program. The seven-paper Radixor series separates questions that are often mixed together in stemmer evaluation: generalization beyond training forms, hyperparameter sensitivity, multi-objective error trade-offs, learned conflation policy, runtime structure, lexical-resource consistency, and compiler semantics.</p>
+<p>Together, the papers characterize Radixor as a <strong>lexicon-trained transformation system rather than a dictionary lookup engine</strong>: lexical resources provide training evidence, the compiler induces executable patch commands and trie structure, and runtime behavior can extend beyond explicitly listed forms. Each paper establishes a deliberately narrower part of that statement and publishes its own evidence boundary.</p>
+<div class="admonition note">
+<p class="admonition-title">Publication and evidence status</p>
+<p>The articles linked below are author-released research manuscripts on ResearchGate. ResearchGate availability is not a claim of journal or conference peer-review status. The project documentation and repository provide the current implementation, benchmark data, protocols, and reproduction material; each manuscript freezes the evidence identity used by its own analyses.</p>
+<p>The newly uploaded ResearchGate records are not yet exposed through stable public publication URLs in web indexing. Until those identifiers become discoverable, each <strong>ResearchGate</strong> link below performs an exact-title search on ResearchGate rather than inventing a publication identifier.</p>
+</div>
+<p><a class="md-button" href="https://www.researchgate.net/profile/Leo-Galambos">Leo Galambos on ResearchGate</a></p>
+<h2 id="the-research-program-at-a-glance">The research program at a glance</h2>
+<table>
+<thead>
+<tr>
+<th>Research question</th>
+<th>Principal contribution</th>
+<th style="text-align: right;">Paper</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Does a lexicon-trained stemmer transform genuinely unseen lexical families?</td>
+<td>Controlled multilingual evidence of within-resource, out-of-training-family transformation transfer</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr>
+<td>Are edit costs merely implementation constants?</td>
+<td>Multilingual evidence that edit costs act as structural hyperparameters and that nominal settings can collapse to identical induced behavior</td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr>
+<td>How should under- and over-conflation trade-offs be compared?</td>
+<td>Recursive Pareto strata and error-regime classification in the pairwise lexical-conflation error space</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td>Can the same architecture learn a different stemming objective from different reference policy?</td>
+<td>Controlled German evidence of policy-conditioned relational generalization</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr>
+<td>Does lexicon size imply dictionary-like online cost?</td>
+<td>Runtime evidence relating execution cost more closely to compiled structure than to raw training size</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td>Can internal resource-consistency evidence simplify the learned transformation vocabulary?</td>
+<td>A multilingual audit connecting resource-local filtering to distinct patch-command vocabulary</td>
+<td style="text-align: right;">6</td>
+</tr>
+<tr>
+<td>What exactly is preserved or generalized by trie reduction?</td>
+<td>Formal semantics for mode-specific canonicalization and accepting-leaf contraction</td>
+<td style="text-align: right;">7</td>
+</tr>
+</tbody>
+</table>
+<p>The sequence is intentional. Papers 1--6 establish empirical properties and measurement boundaries from different directions; Paper 7 isolates the formal compiler semantics that explain what the reduced patch-command trie preserves and what accepting leaves are allowed to generalize.</p>
+<hr />
+<h2 id="radixor-1-generalization-beyond-the-training-lexicon">Radixor 1 — Generalization beyond the training lexicon</h2>
+<h3 id="does-a-lexicon-trained-stemmer-generalize-a-20-language-study-of-held-out-lexical-families"><em>Does a Lexicon-Trained Stemmer Generalize? A 20-Language Study of Held-Out Lexical Families</em></h3>
+<p><a class="md-button" href="https://www.researchgate.net/search/publication?q=Does%20a%20Lexicon-Trained%20Stemmer%20Generalize%3F%20A%2020-Language%20Study%20of%20Held-Out%20Lexical%20Families">ResearchGate</a>
+<a class="md-button" href="../benchmarks/generalization/">Generalization evidence</a>
+<a class="md-button" href="../benchmarks/reference/generalization-methodology/">Protocol</a></p>
+<p><strong>Research question.</strong> Does Radixor merely reproduce mappings seen during training, or does the induced transformation mechanism transfer to lexical families that were withheld from model construction?</p>
+<p><strong>Principal result.</strong> The study evaluates 20 UniMorph-derived language resources under complete lexical-family holdout, ten training-family coverage levels, and five deterministic seeded rankings: <strong>1,000 build/evaluation scenarios</strong>, of which 900 contain a non-empty held-out population. It establishes <strong>within-resource, out-of-training-family transformation transfer with exact parser-normalized surface-overlap control</strong>.</p>
+<p><strong>Interpretation boundary.</strong> The coverage sweep is descriptive, not a fixed-test causal learning curve: each coverage level has a different held-out complement. The paper does not claim arbitrary out-of-domain accuracy, contextual lemmatization, universal derivational competence, or equivalence between exact canonical-target recovery and downstream retrieval effectiveness.</p>
+<p><strong>Why it matters.</strong> This is the empirical foundation for calling Radixor <em>lexicon-trained but not lexicon-bound</em>. The learned object is an executable transformation relation, not a closed list of admissible runtime tokens.</p>
+<hr />
+<h2 id="radixor-2-edit-costs-as-model-structure-controls">Radixor 2 — Edit costs as model-structure controls</h2>
+<h3 id="edit-costs-as-structural-hyperparameters-in-dictionary-induced-stemming-a-multilingual-sensitivity-study"><em>Edit Costs as Structural Hyperparameters in Dictionary-Induced Stemming: A Multilingual Sensitivity Study</em></h3>
+<p><a class="md-button" href="https://www.researchgate.net/search/publication?q=Edit%20Costs%20as%20Structural%20Hyperparameters%20in%20Dictionary-Induced%20Stemming%3A%20A%20Multilingual%20Sensitivity%20Study">ResearchGate</a>
+<a class="md-button" href="../benchmarks/edit-cost-sensitivity/">Edit-cost results</a>
+<a class="md-button" href="../benchmarks/reference/edit-cost-methodology/">Protocol</a></p>
+<p><strong>Research question.</strong> How strongly do insertion, deletion, replacement, and related edit costs alter the command vocabulary and linguistic behavior learned from the same lexical evidence?</p>
+<p><strong>Principal result.</strong> The frozen campaign contains <strong>16,700 physical model builds</strong> representing <strong>234,000 logical observations</strong> over the sampled 234-point cost grid. Exact equivalence analysis reduces those nominal settings to <strong>334 distinct induced behaviors</strong> across the audited resources.</p>
+<p><strong>Interpretation boundary.</strong> Exact command-sequence equivalence, subset invariance, campaign reduction, and representation counts are deterministic results. Correlations, bootstrap summaries, guarded optima, and same-matrix operating points are descriptive analyses rather than population inference over languages.</p>
+<p><strong>Why it matters.</strong> Radixor's training objective is tunable at the level where lexical mappings become executable transformations.</p>
+<hr />
+<h2 id="radixor-3-multi-objective-stemmer-comparison">Radixor 3 — Multi-objective stemmer comparison</h2>
+<h3 id="classifying-multilingual-stemmers-by-pareto-strata-error-regimes-in-pairwise-lexical-conflation"><em>Classifying Multilingual Stemmers by Pareto Strata: Error Regimes in Pairwise Lexical Conflation</em></h3>
+<p><a class="md-button" href="https://www.researchgate.net/search/publication?q=Classifying%20Multilingual%20Stemmers%20by%20Pareto%20Strata%3A%20Error%20Regimes%20in%20Pairwise%20Lexical%20Conflation">ResearchGate</a>
+<a class="md-button" href="../benchmarks/">Benchmark results</a>
+<a class="md-button" href="../benchmarks/reference/linguistic-quality/">Linguistic-quality method</a></p>
+<p><strong>Research question.</strong> A scalar score can hide whether a stemmer fails mainly through under-conflation or over-conflation. What does the comparison look like when those error dimensions are treated explicitly?</p>
+<p><strong>Principal result.</strong> The paper classifies deterministic systems in a two-objective under-/over-conflation error space using candidate-set-relative recursive Pareto strata. It distinguishes aggregate <strong>error-vector equivalence</strong> from output equivalence; identifies recall, specificity, supported-compromise, and unsupported-efficient regimes; derives exact support intervals for the raw pair cost <code>C_rho = rho * FN + FP</code>; and follows constrained multi-output trajectories. The frozen analysis maps <strong>190 deterministic implementation rows to 174 aggregate error vectors</strong>.</p>
+<p><strong>Interpretation boundary.</strong> Pareto depth and regime are conditional on the language, reference resource, processing mode, implementation version, output policy, and candidate set.</p>
+<p><strong>Why it matters.</strong> The paper makes the quality comparison auditable without forcing every application into one arbitrary scalar preference between false splits and false merges.</p>
+<hr />
+<h2 id="radixor-4-the-stemming-policy-is-learned-from-data">Radixor 4 — The stemming policy is learned from data</h2>
+<h3 id="the-stemming-policy-is-data-adapting-a-lexicon-trained-stemmer-to-alternative-conflation-objectives"><em>The Stemming Policy Is Data: Adapting a Lexicon-Trained Stemmer to Alternative Conflation Objectives</em></h3>
+<p><a class="md-button" href="https://www.researchgate.net/search/publication?q=The%20Stemming%20Policy%20Is%20Data%3A%20Adapting%20a%20Lexicon-Trained%20Stemmer%20to%20Alternative%20Conflation%20Objectives">ResearchGate</a>
+<a class="md-button" href="https://github.com/leogalambos/Radixor/tree/main/experiments/policy-transfer">Reproduction harness</a></p>
+<p><strong>Research question.</strong> If two gold resources encode different conflation policies over the same language, can the same Radixor architecture learn the policy difference rather than imposing one hard-coded definition of stemming?</p>
+<p><strong>Principal result.</strong> Using the two public German CISTEM/CELEX-derived policy resources, an independent clean replay regenerated all <strong>30 persisted cross-fit models</strong> with matching model-file SHA-256 identities. The central result is deliberately narrow: <strong>sparse but directionally robust policy-conditioned relational generalization</strong> along one nested aggressive-to-conservative German policy axis. Pair-micro switch coverage is about <strong>0.61%</strong> for the primary medoid encoding.</p>
+<p><strong>Interpretation boundary.</strong> The result is a controlled one-language policy study, not evidence that every conceivable conflation objective is learnable.</p>
+<p><strong>Why it matters.</strong> A material part of the stemming policy can reside in the lexical training relation and be changed without replacing the runtime architecture.</p>
+<hr />
+<h2 id="radixor-5-compiled-structure-and-runtime-efficiency">Radixor 5 — Compiled structure and runtime efficiency</h2>
+<h3 id="runtime-efficiency-of-lexicon-trained-stemming-compiled-structure-and-a-speedreference-agreement-envelope-in-radixor"><em>Runtime Efficiency of Lexicon-Trained Stemming: Compiled Structure and a Speed–Reference-Agreement Envelope in Radixor</em></h3>
+<p><a class="md-button" href="https://www.researchgate.net/search/publication?q=Runtime%20Efficiency%20of%20Lexicon-Trained%20Stemming%3A%20Compiled%20Structure%20and%20a%20Speed-Reference-Agreement%20Envelope%20in%20Radixor">ResearchGate</a>
+<a class="md-button" href="../benchmarking/">Benchmarking framework</a>
+<a class="md-button" href="../benchmarks/">Published benchmark results</a></p>
+<p><strong>Research question.</strong> Does training from a large lexicon imply dictionary-like online cost, or is runtime governed more directly by the compact structure compiled from that lexicon?</p>
+<p><strong>Principal result.</strong> On the frozen Java workstation and dictionary-derived timing workload, canonical Radixor execution spans <strong>42.8--150.6 ns per occurrence</strong>, with an unweighted 20-resource median of <strong>67.8 ns</strong>. Across 18 direct Snowball comparisons, the unweighted median Snowball/Radixor ratio is <strong>2.33×</strong> under the primary closest-available same-harness policy and <strong>2.57×</strong> under the canonical policy; a cross-policy invariant yields <strong>17 stable Radixor advantages and one Finnish parity case</strong>. Internal-node count has Spearman <code>rho = 0.931</code> with canonical runtime, compared with <code>rho = 0.723</code> for training rows.</p>
+<p><strong>Interpretation boundary.</strong> The workload is dictionary-derived, not natural production traffic or an OOV corpus. The paper does not claim universal fastest-stemmer status or causal per-node cost.</p>
+<p><strong>Why it matters.</strong> Lexical training size and runtime state are separate layers; compiled structure is the more informative description of the online execution problem.</p>
+<hr />
+<h2 id="radixor-6-lexical-resource-consistency-and-transformation-vocabulary">Radixor 6 — Lexical-resource consistency and transformation vocabulary</h2>
+<h3 id="lexical-resource-consistency-and-learned-transformation-vocabulary-in-multilingual-stemming"><em>Lexical Resource Consistency and Learned Transformation Vocabulary in Multilingual Stemming</em></h3>
+<p><a class="md-button" href="https://www.researchgate.net/search/publication?q=Lexical%20Resource%20Consistency%20and%20Learned%20Transformation%20Vocabulary%20in%20Multilingual%20Stemming">ResearchGate</a>
+<a class="md-button" href="../filtered-models/">Filtered candidate models</a></p>
+<p><strong>Research question.</strong> When internally inspectable resource inconsistencies are removed conservatively, how does that evidence propagate into the transformation vocabulary learned by the compiler?</p>
+<p><strong>Principal result.</strong> Twelve high-command resource configurations are audited. Ten non-destructive candidate resources are materialized; Dutch and Persian are explicit <strong>no-safe-change</strong> outcomes. Among the nine candidates using the homogeneous grouped rule, eight reduce distinct patch-command vocabulary, with the summed vocabulary changing from <strong>20,281 to 19,842 (-2.165%)</strong> and a median per-resource reduction of <strong>1.334%</strong>. German is reported separately: <strong>6,986 to 5,313 commands (-23.948%)</strong>.</p>
+<p><strong>Interpretation boundary.</strong> Command-count reduction is not evidence of trie-node, runtime, memory, or downstream retrieval improvement, and the filtering predicate is not a semantic oracle for linguistic correctness.</p>
+<p><strong>Why it matters.</strong> The paper connects data quality to the learned executable vocabulary while showing precisely where that connection stops.</p>
+<hr />
+<h2 id="radixor-7-formal-semantics-of-the-compiler">Radixor 7 — Formal semantics of the compiler</h2>
+<h3 id="compiling-learned-lexical-transformations-semantic-canonicalization-and-accepting-leaf-generalization-in-patch-command-tries"><em>Compiling Learned Lexical Transformations: Semantic Canonicalization and Accepting-Leaf Generalization in Patch-Command Tries</em></h3>
+<p><a class="md-button" href="https://www.researchgate.net/search/publication?q=Compiling%20Learned%20Lexical%20Transformations%3A%20Semantic%20Canonicalization%20and%20Accepting-Leaf%20Generalization%20in%20Patch-Command%20Tries">ResearchGate</a>
+<a class="md-button" href="../architecture-and-reduction/">Architecture and reduction</a>
+<a class="md-button" href="../reduction-semantics/">Reduction semantics</a></p>
+<p><strong>Research question.</strong> What does Radixor's trie compiler preserve when it shares subtrees, and what exactly changes when a locally uniform region becomes an accepting leaf?</p>
+<p><strong>Principal result.</strong> The formal analysis separates two mathematically different compiler transformations:</p>
+<ol>
+<li><strong>mode-specific semantic subtree canonicalization</strong>, which shares recursively equivalent decision subgraphs while preserving the selected reduction-mode observable; and</li>
+<li><strong>uniform accepting-leaf contraction</strong>, which preserves the existing singleton value semantics of a locally uniform region while extending that value decision to additional continuations.</li>
+</ol>
+<p>For stemming, accepting leaves generalize <strong>command selection</strong>, not a constant stem. If <code>C(w)</code> selects a patch command and <code>Exec(c, w)</code> executes it, runtime output is <code>H(w) = Exec(C(w), w)</code>.</p>
+<p>The paper proves soundness/congruence of the computable reduction signature for all public reduction modes, aggregation stability, completeness for productive ranked and unordered nodes in the contraction-free exact-trie phase, relative state minimality for that canonicalization-only quotient, quotient acyclicity, finite termination/decidability under the stated assumptions, and a value-semantic domain-extension theorem for uniform contraction. It also records that repeated recursive signature hashing admits quadratic work on a degenerate chain.</p>
+<p><strong>Interpretation boundary.</strong> The theorem is about compiler semantics, not the linguistic correctness of newly covered forms. It does not claim global minimality of the production contraction-enabled graph, minimum bytes or runtime, or arbitrary-input exact equivalence after accepting-leaf contraction.</p>
+<p><strong>Why it matters.</strong> Structural sharing and behavioral extension are distinct operations, and suffix-conditioned command selection is not the same claim as discovering linguistic morpheme rules.</p>
+<hr />
+<h2 id="how-to-read-and-cite-the-series">How to read and cite the series</h2>
+<p>The seven papers are cumulative in <strong>scope</strong>, not cumulative in the sense that a later result silently broadens an earlier claim. For scientific use:</p>
+<ul>
+<li>cite the individual paper for the frozen experiment, theorem, or analysis it reports;</li>
+<li>use the current documentation for present software behavior, API contracts, model catalogs, and continuously maintained benchmark pages;</li>
+<li>preserve each paper's stated population, reference-resource, metric, and implementation boundaries when quoting numerical results; and</li>
+<li>treat reproducibility artifacts, source identities, checksums, and explicit negative claims as part of the result rather than as supplementary marketing material.</li>
+</ul>
+<p>The resulting research program is intentionally modular: <strong>empirical linguistics, multi-objective evaluation, systems performance, data quality, and compiler correctness are tested separately and connected only where the evidence supports the connection.</strong></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      © 2026 Egothor · Radixor software is BSD-3-Clause licensed.
+    </div>
+  
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.sections", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="https://unpkg.com/mermaid@11/dist/mermaid.min.js"></script>
+      
+        <script src="../assets/javascripts/mermaid.js"></script>
+      
+    
+  </body>
+</html>
