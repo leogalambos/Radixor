@@ -48,7 +48,7 @@
 #![allow(dead_code)]
 
 use std::cell::RefCell;
-use std::collections::{BTreeMap, HashMap};
+use std::collections::{BTreeMap, HashMap, HashSet};
 use std::rc::Rc;
 use std::sync::Arc;
 
@@ -105,29 +105,178 @@ impl OrderedCounts {
             self.entries.push((value.to_string(), count));
         }
     }
+
+    /// Replaces all local values with the single `value` (count 1). Used by the
+    /// customization `set`, so an added rule is the authoritative (sole, hence
+    /// dominant) value at its node rather than one frequency-weighted vote.
+    fn set_single(&mut self, value: &str) {
+        self.entries.clear();
+        self.index.clear();
+        self.index.insert(value.to_string(), 0);
+        self.entries.push((value.to_string(), 1));
+    }
+
+    /// Makes `value` the dominant (highest-count) local value, keeping any other
+    /// values as lower-ranked alternatives. Its count is set to one more than the
+    /// highest count among the other values, so a scalar stem returns it.
+    fn set_dominant(&mut self, value: &str) {
+        let max_other = self
+            .entries
+            .iter()
+            .filter(|(v, _)| v != value)
+            .map(|(_, c)| *c)
+            .max()
+            .unwrap_or(0);
+        let target = max_other + 1;
+        if let Some(&position) = self.index.get(value) {
+            self.entries[position].1 = target;
+        } else {
+            let position = self.entries.len();
+            self.index.insert(value.to_string(), position);
+            self.entries.push((value.to_string(), target));
+        }
+    }
+
+    /// Stores `value` (count 1) only when there is currently no local value.
+    fn put_if_empty(&mut self, value: &str) -> bool {
+        if self.entries.is_empty() {
+            self.add(value, 1);
+            true
+        } else {
+            false
+        }
+    }
+
+    /// Removes a single `value`, keeping the rest. No-op when absent.
+    fn remove_value(&mut self, value: &str) -> bool {
+        if self.index.remove(value).is_none() {
+            return false;
+        }
+        self.entries.retain(|(v, _)| v != value);
+        // Rebuild the position index after the removal.
+        self.index.clear();
+        for (position, (v, _)) in self.entries.iter().enumerate() {
+            self.index.insert(v.clone(), position);
+        }
+        true
+    }
+
+    /// Removes every local value.
+    fn clear(&mut self) -> bool {
+        if self.entries.is_empty() {
+            return false;
+        }
+        self.entries.clear();
+        self.index.clear();
+        true
+    }
 }
 
 // MutableNode (org.egothor.stemmer.trie.MutableNode)
 
 /// Mutable build-time node: children indexed by transition character plus the
 /// local terminal value counts stored exactly at this node.
-struct MutableNode {
+///
+/// `accepts` marks a node that was a contracted accepting leaf in a source
+/// compiled trie (see [`mutable_from_parsed`]). It is always `false` for nodes
+/// created by the normal dictionary build; it is only set when a builder is
+/// reconstructed from an existing compiled trie, so that reduction preserves
+/// the "accepts remaining input" generalization the original trie had.
+pub(crate) struct MutableNode {
     children: BTreeMap<u16, MutableNode>,
     value_counts: OrderedCounts,
+    accepts: bool,
+    /// Parsed node id represented by this expanded mutable path. Multiple paths
+    /// can carry the same id because the compiled representation is a DAG whose
+    /// local counts have already been aggregated.
+    source_id: Option<usize>,
+    /// Whether a customization changed this reconstructed node's local state.
+    /// Modified instances receive an identity suffix in their reduction
+    /// signature, creating a copy-on-write boundary from unchanged DAG peers.
+    modified: bool,
+}
+
+/// Return the existing node addressed by the logical `key` without modifying
+/// the trie.
+fn find_logical<'a>(root: &'a MutableNode, key: &[u16], backward: bool) -> Option<&'a MutableNode> {
+    let length = key.len();
+    let mut current = root;
+    for offset in 0..length {
+        let logical_index = if backward {
+            length - 1 - offset
+        } else {
+            offset
+        };
+        current = current.children.get(&key[logical_index])?;
+    }
+    Some(current)
+}
+
+/// Validate an update whose count arithmetic could overflow. Validation occurs
+/// before either half of a word/stem pair is changed, keeping `add_pair` atomic
+/// with respect to frequency-overflow failures.
+fn validate_put(
+    root: &MutableNode,
+    key: &[u16],
+    value: &str,
+    mode: AddMode,
+    backward: bool,
+) -> Result<(), &'static str> {
+    let Some(node) = find_logical(root, key, backward) else {
+        return Ok(());
+    };
+    match mode {
+        AddMode::Accumulate(count) => {
+            if let Some(&position) = node.value_counts.index.get(value) {
+                node.value_counts.entries[position]
+                    .1
+                    .checked_add(count)
+                    .ok_or("frequency count exceeds the signed 32-bit format limit")?;
+            }
+        }
+        AddMode::Dominant => {
+            if node
+                .value_counts
+                .entries
+                .iter()
+                .any(|(candidate, count)| candidate != value && *count == i32::MAX)
+            {
+                return Err(
+                    "cannot make the rule dominant because another rule already has the maximum frequency",
+                );
+            }
+        }
+        AddMode::IfAbsent | AddMode::Replace => {}
+    }
+    Ok(())
 }
 
 impl MutableNode {
-    fn new() -> Self {
+    pub(crate) fn new() -> Self {
         MutableNode {
             children: BTreeMap::new(),
             value_counts: OrderedCounts::new(),
+            accepts: false,
+            source_id: None,
+            modified: false,
+        }
+    }
+
+    /// Marks a local update only for a node expanded from a compiled DAG.
+    fn mark_modified(&mut self) {
+        if self.source_id.is_some() {
+            self.modified = true;
         }
     }
 }
 
-/// Stores a value at the node addressed by `key`, incrementing its local
-/// frequency by one. Mirrors `FrequencyTrie.Builder.put`.
-fn put(root: &mut MutableNode, key: &[u16], value: &str, backward: bool) {
+/// Navigate to (creating as needed) the node addressed by the logical `key`,
+/// consuming characters in `WordTraversalDirection` order.
+fn navigate_logical<'a>(
+    root: &'a mut MutableNode,
+    key: &[u16],
+    backward: bool,
+) -> &'a mut MutableNode {
     let length = key.len();
     let mut current = root;
     for offset in 0..length {
@@ -143,7 +292,191 @@ fn put(root: &mut MutableNode, key: &[u16], value: &str, backward: bool) {
             .entry(edge)
             .or_insert_with(MutableNode::new);
     }
-    current.value_counts.add(value, 1);
+    current
+}
+
+/// Stores a value at the node addressed by `key`, incrementing its local
+/// frequency by one. Mirrors `FrequencyTrie.Builder.put`.
+fn put(root: &mut MutableNode, key: &[u16], value: &str, backward: bool) {
+    let node = navigate_logical(root, key, backward);
+    node.mark_modified();
+    node.value_counts.add(value, 1);
+}
+
+/// Stores a value at the node addressed by the logical `key`, adding `count` to
+/// its local frequency. Used when reconstructing a builder from an existing
+/// compiled trie, which carries exact per-value counts.
+pub(crate) fn put_with_count(
+    root: &mut MutableNode,
+    key: &[u16],
+    value: &str,
+    count: i32,
+    backward: bool,
+) {
+    let node = navigate_logical(root, key, backward);
+    node.mark_modified();
+    node.value_counts.add(value, count);
+}
+
+/// Replaces the local values at the node addressed by the logical `key` with the
+/// single `value`, so the value is the authoritative (dominant) result there.
+fn put_replace(root: &mut MutableNode, key: &[u16], value: &str, backward: bool) {
+    let node = navigate_logical(root, key, backward);
+    node.mark_modified();
+    node.value_counts.set_single(value);
+}
+
+/// Makes `value` the dominant value at the node addressed by the logical `key`,
+/// keeping any existing values as lower-ranked alternatives.
+fn put_dominant(root: &mut MutableNode, key: &[u16], value: &str, backward: bool) {
+    let node = navigate_logical(root, key, backward);
+    node.mark_modified();
+    node.value_counts.set_dominant(value);
+}
+
+/// Stores `value` at the node addressed by the logical `key` only when that node
+/// has no local value yet.
+fn put_if_absent(root: &mut MutableNode, key: &[u16], value: &str, backward: bool) {
+    let node = navigate_logical(root, key, backward);
+    if node.value_counts.put_if_empty(value) {
+        node.mark_modified();
+    }
+}
+
+/// Navigates to the node addressed by the logical `key` without creating missing
+/// nodes; returns `None` when the path does not exist.
+fn navigate_existing<'a>(
+    root: &'a mut MutableNode,
+    key: &[u16],
+    backward: bool,
+) -> Option<&'a mut MutableNode> {
+    let length = key.len();
+    let mut current = root;
+    for offset in 0..length {
+        let logical_index = if backward {
+            length - 1 - offset
+        } else {
+            offset
+        };
+        let edge = key[logical_index];
+        current = current.children.get_mut(&edge)?;
+    }
+    Some(current)
+}
+
+/// Removes every local value at the node addressed by the logical `key`. No-op
+/// when the path does not exist; the trie structure is not pruned.
+fn remove_key(root: &mut MutableNode, key: &[u16], backward: bool) {
+    if let Some(node) = navigate_existing(root, key, backward) {
+        if node.value_counts.clear() {
+            node.mark_modified();
+            node.accepts = false;
+        }
+    }
+}
+
+/// Removes a single `value` at the node addressed by the logical `key`, keeping
+/// the rest. No-op when the key or value is absent.
+fn remove_key_value(root: &mut MutableNode, key: &[u16], value: &str, backward: bool) {
+    if let Some(node) = navigate_existing(root, key, backward) {
+        if node.value_counts.remove_value(value) {
+            node.mark_modified();
+            if node.value_counts.is_empty() {
+                node.accepts = false;
+            }
+        }
+    }
+}
+
+/// Value-update policy for the customization word-level operations.
+#[derive(Clone, Copy)]
+pub(crate) enum AddMode {
+    /// Make the added rule dominant, keeping other values (default).
+    Dominant,
+    /// Accumulate the given frequency for the added rule.
+    Accumulate(i32),
+    /// Store the added rule only when the node has no value yet.
+    IfAbsent,
+    /// Replace all values at the node with the added rule.
+    Replace,
+}
+
+/// Applies one word/stem put at `key` under the selected [`AddMode`].
+fn apply_put(root: &mut MutableNode, key: &[u16], value: &str, mode: AddMode, backward: bool) {
+    match mode {
+        AddMode::Dominant => put_dominant(root, key, value, backward),
+        AddMode::Accumulate(count) => put_with_count(root, key, value, count, backward),
+        AddMode::IfAbsent => put_if_absent(root, key, value, backward),
+        AddMode::Replace => put_replace(root, key, value, backward),
+    }
+}
+
+/// Adds a single word -> stem pair to the mutable builder, exactly as the
+/// dictionary build treats one `(stem, variant)` occurrence:
+///
+///   * when `store_original`, the stem maps to the NOOP patch so it recognises
+///     itself,
+///   * when the word differs from the stem, the word maps to the minimal patch
+///     command that rewrites it to the stem.
+///
+/// Adds a word -> stem rule under the selected [`AddMode`]. The default
+/// `Dominant` mode makes the rule the dominant value at the word's (and stem's)
+/// node while keeping any alternatives; `Replace` discards them; `Accumulate`
+/// adds a raw frequency; `IfAbsent` stores only where no value exists yet. A
+/// shallower contracted generalization still short-circuits the rule under
+/// `LookupMode::First`; `LookupMode::Last` descends to the specific node.
+pub(crate) fn add_pair(
+    root: &mut MutableNode,
+    word: &str,
+    stem: &str,
+    mode: AddMode,
+    backward: bool,
+    store_original: bool,
+) -> Result<(), &'static str> {
+    let stem16: Vec<u16> = stem.encode_utf16().collect();
+    let word16: Vec<u16> = if word == stem {
+        Vec::new()
+    } else {
+        word.encode_utf16().collect()
+    };
+    let patch = if word == stem {
+        String::new()
+    } else {
+        encode_patch(&word16, &stem16, backward)
+    };
+
+    if store_original {
+        validate_put(root, &stem16, NOOP_PATCH, mode, backward)?;
+    }
+    if word != stem {
+        validate_put(root, &word16, &patch, mode, backward)?;
+    }
+
+    if store_original {
+        apply_put(root, &stem16, NOOP_PATCH, mode, backward);
+    }
+    if word != stem {
+        apply_put(root, &word16, &patch, mode, backward);
+    }
+    Ok(())
+}
+
+/// Removes every rule stored at the word's own node. No-op when the word has no
+/// explicit node (for example when it resolves only through a shorter contracted
+/// generalization); to suppress such a word, add an overriding rule and read with
+/// `LookupMode::Last` instead.
+pub(crate) fn remove_word(root: &mut MutableNode, word: &str, backward: bool) {
+    let word16: Vec<u16> = word.encode_utf16().collect();
+    remove_key(root, &word16, backward);
+}
+
+/// Removes the specific `word -> stem` rule at the word's node, keeping any
+/// other values there. No-op when the rule is absent.
+pub(crate) fn remove_word_stem(root: &mut MutableNode, word: &str, stem: &str, backward: bool) {
+    let word16: Vec<u16> = word.encode_utf16().collect();
+    let stem16: Vec<u16> = stem.encode_utf16().collect();
+    let patch = encode_patch(&word16, &stem16, backward);
+    remove_key_value(root, &word16, &patch, backward);
 }
 
 // ReducedNode (org.egothor.stemmer.trie.ReducedNode)
@@ -161,6 +494,9 @@ struct ReducedNode {
     children: BTreeMap<u16, Rc<RefCell<ReducedNode>>>,
     /// Whether this node is a contracted accepting leaf.
     accepts: bool,
+    /// Compiled source node ids whose already-aggregated counts are represented
+    /// in `local_counts`. This is reduction-only provenance and is not frozen.
+    contributed_source_ids: HashSet<usize>,
 }
 
 impl ReducedNode {
@@ -407,30 +743,52 @@ fn reduce(
     let mut local_counts = node.value_counts.clone();
     let mut accepts_remaining_input = false;
 
-    // contractUniformSubtrees is always true for the production configuration.
-    if let Some(contracted) = contract_uniform_subtree(&local_counts, &reduced_children) {
+    if node.accepts {
+        // Node reconstructed from a compiled trie's contracted accepting leaf.
+        // Its accepting semantics are preserved verbatim: a genuine contracted
+        // leaf has no children, so re-deriving contraction here would be a
+        // no-op, but honoring the flag keeps the "accepts remaining input"
+        // generalization even when the exact source paths were not replayed.
+        accepts_remaining_input = true;
+    } else if let Some(contracted) = contract_uniform_subtree(&local_counts, &reduced_children) {
+        // contractUniformSubtrees is always true for the production configuration.
         local_counts = contracted;
         reduced_children = BTreeMap::new();
         accepts_remaining_input = true;
     }
 
     let summary = LocalValueSummary::of(&local_counts);
-    let signature = compute_signature(&summary, &reduced_children, accepts_remaining_input);
+    let mut signature = compute_signature(&summary, &reduced_children, accepts_remaining_input);
+    if node.modified {
+        // The mutable tree is not changed while reducing, so the node address is
+        // a stable per-build identity token. It prevents a modified expansion of
+        // one compiled DAG node from merging back into an unchanged peer.
+        signature.push('M');
+        signature.push_str(&(node as *const MutableNode as usize).to_string());
+    }
 
     if let Some(canonical) = context.get(&signature).cloned() {
         {
             let mut canonical_mut = canonical.borrow_mut();
-            canonical_mut.merge_local_counts(&local_counts);
+            let contributes_counts = match node.source_id {
+                Some(source_id) => canonical_mut.contributed_source_ids.insert(source_id),
+                None => true,
+            };
+            if contributes_counts {
+                canonical_mut.merge_local_counts(&local_counts);
+            }
             canonical_mut.merge_children(&reduced_children);
         }
         return canonical;
     }
 
+    let contributed_source_ids = node.source_id.into_iter().collect();
     let canonical = Rc::new(RefCell::new(ReducedNode {
         signature: signature.clone(),
         local_counts,
         children: reduced_children,
         accepts: accepts_remaining_input,
+        contributed_source_ids,
     }));
     context.insert(signature, Rc::clone(&canonical));
     canonical
@@ -620,13 +978,12 @@ pub(crate) fn metadata_for(backward: bool, lowercase: bool) -> TrieMetadata {
     }
 }
 
-/// Build the reduced+frozen trie arrays from dictionary entries (shared by the
-/// in-memory builder and the compiler).
-pub(crate) fn build_frozen(
+/// Build a mutable trie from dictionary entries, without reducing or freezing.
+pub(crate) fn mutable_from_entries(
     entries: &[DictEntry],
     backward: bool,
     store_original: bool,
-) -> FrozenTrie {
+) -> MutableNode {
     let mut root = MutableNode::new();
     for entry in entries {
         let stem16: Vec<u16> = entry.stem.encode_utf16().collect();
@@ -641,9 +998,90 @@ pub(crate) fn build_frozen(
             }
         }
     }
+    root
+}
+
+/// Reduce (bottom-up subtree merging) and freeze a mutable trie into flat CSR
+/// arrays. Shared by the dictionary compiler and the mutable `TrieBuilder`.
+pub(crate) fn reduce_and_freeze(root: &MutableNode, backward: bool) -> FrozenTrie {
     let mut context: HashMap<String, Rc<RefCell<ReducedNode>>> = HashMap::new();
-    let reduced_root = reduce(&root, &mut context);
+    let reduced_root = reduce(root, &mut context);
     freeze(&reduced_root, backward)
+}
+
+/// Build the reduced+frozen trie arrays from dictionary entries (shared by the
+/// in-memory builder and the compiler).
+pub(crate) fn build_frozen(
+    entries: &[DictEntry],
+    backward: bool,
+    store_original: bool,
+) -> FrozenTrie {
+    let root = mutable_from_entries(entries, backward, store_original);
+    reduce_and_freeze(&root, backward)
+}
+
+/// Reconstruct a mutable builder from a parsed compiled trie ("unlock" the
+/// immutable structure), the Python-side analogue of Java
+/// `FrequencyTrieBuilders.copyOf`.
+///
+/// The compiled trie is a DAG (reduction shares equivalent subtrees). Like the
+/// Java walk, this expands it back into a tree of mutable nodes, replaying each
+/// node's local (value, count) pairs at its logical key and preserving the
+/// `acceptsRemainingInput` flag of contracted leaves. A subsequent
+/// [`reduce_and_freeze`] re-establishes the shared, contracted form.
+pub(crate) fn mutable_from_parsed(parsed: &crate::serial::ParsedV7) -> MutableNode {
+    let mut root = MutableNode::new();
+    let mut path: Vec<u16> = Vec::new();
+    let mut stack: Vec<(usize, usize)> = Vec::new();
+    copy_parsed_values(parsed, 0, &path, &mut root);
+    stack.push((0, parsed.edge_start[0] as usize));
+
+    while let Some((node, next_edge)) = stack.last_mut() {
+        let edge_end = parsed.edge_start[*node + 1] as usize;
+        if *next_edge == edge_end {
+            stack.pop();
+            if !stack.is_empty() {
+                path.pop();
+            }
+            continue;
+        }
+
+        let edge = *next_edge;
+        *next_edge += 1;
+        let child = parsed.edge_targets[edge] as usize;
+        path.push(parsed.edge_labels[edge]);
+        copy_parsed_values(parsed, child, &path, &mut root);
+        stack.push((child, parsed.edge_start[child] as usize));
+    }
+    root
+}
+
+/// Copies one parsed node's local state to the mutable node at `path`.
+fn copy_parsed_values(
+    parsed: &crate::serial::ParsedV7,
+    node: usize,
+    path: &[u16],
+    root: &mut MutableNode,
+) {
+    let mut current: &mut MutableNode = root;
+    for &edge in path {
+        current = current
+            .children
+            .entry(edge)
+            .or_insert_with(MutableNode::new);
+    }
+    if parsed.accepts[node] {
+        current.accepts = true;
+    }
+    let value_start = parsed.value_start[node] as usize;
+    let value_end = parsed.value_start[node + 1] as usize;
+    for value_index in value_start..value_end {
+        let value = &parsed.value_strings[parsed.value_str_ids[value_index] as usize];
+        current
+            .value_counts
+            .add(value, parsed.value_counts[value_index]);
+    }
+    current.source_id = Some(node);
 }
 
 /// Convert serialized/build-order patch strings into compact runtime patch ids.
@@ -676,7 +1114,7 @@ fn compact_runtime_values(
 }
 
 /// Convert the frozen build representation into the compact runtime trie.
-fn frozen_into_trie(frozen: FrozenTrie, metadata: TrieMetadata) -> FrequencyTrie {
+pub(crate) fn frozen_into_trie(frozen: FrozenTrie, metadata: TrieMetadata) -> FrequencyTrie {
     let backward = matches!(metadata.traversal, TraversalDirection::Backward);
     let (value_ids, patches) = compact_runtime_values(&frozen.value_strings, backward);
 

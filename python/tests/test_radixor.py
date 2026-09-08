@@ -343,9 +343,285 @@ def test_stem_all_returns_candidates(tmp_path: Path):
     assert set(alls) >= {"run", "runn"}
 
 
+# TrieBuilder: unlock, modify, and rewrite a compiled dictionary.
+
+
+_ROUNDTRIP_DICT = [
+    "run\trunning\truns\tran",
+    "cat\tcats",
+    "walk\twalking\twalks\twalked",
+]
+_ROUNDTRIP_WORDS = [
+    "running", "runs", "ran", "cats", "walking",
+    "walked", "run", "cat", "walk", "unknownzzz",
+]
+
+
+def test_trie_builder_textual_roundtrip_is_faithful(tmp_path: Path):
+    from radixor import TrieBuilder
+
+    path = _write_gz_dict(_ROUNDTRIP_DICT, tmp_path)
+    base = Stemmer(path=path, backward=True)
+    rebuilt = TrieBuilder(path=path, backward=True).build()
+    assert rebuilt.stem_batch(_ROUNDTRIP_WORDS) == base.stem_batch(_ROUNDTRIP_WORDS)
+
+
+def test_trie_builder_compiled_roundtrip_is_faithful(tmp_path: Path):
+    from radixor import TrieBuilder
+
+    src = _write_gz_dict(_ROUNDTRIP_DICT, tmp_path)
+    compiled = str(tmp_path / "model.rxc")
+    radixor.compile(src, compiled, backward=True)
+
+    base = Stemmer(compiled=compiled)
+    rebuilt = TrieBuilder(compiled=compiled).build()
+    assert rebuilt.stem_batch(_ROUNDTRIP_WORDS) == base.stem_batch(_ROUNDTRIP_WORDS)
+
+
+def test_trie_builder_add_new_pair_takes_effect(tmp_path: Path):
+    from radixor import TrieBuilder
+
+    path = _write_gz_dict(_ROUNDTRIP_DICT, tmp_path)
+    builder = TrieBuilder(path=path, backward=True)
+    builder.add("gitlab", "git")
+    stemmer = builder.build()
+
+    # New pair on a fresh key is applied; existing rules are untouched.
+    assert stemmer.stemWord("gitlab") == "git"
+    assert stemmer.stem_batch(["running", "cats", "walked"]) == ["run", "cat", "walk"]
+
+
+def test_trie_builder_add_many_and_chaining(tmp_path: Path):
+    from radixor import TrieBuilder
+
+    path = _write_gz_dict(_ROUNDTRIP_DICT, tmp_path)
+    builder = TrieBuilder(path=path, backward=True)
+    returned = builder.add("gitlab", "git").add_many([("foobar", "foo"), ("qux", "quux")])
+    assert returned is builder
+
+    stemmer = builder.build()
+    assert stemmer.stemWord("gitlab") == "git"
+    assert stemmer.stemWord("foobar") == "foo"
+    assert stemmer.stemWord("qux") == "quux"
+
+
+def test_trie_builder_save_reload_roundtrip(tmp_path: Path):
+    import gzip as _gzip
+
+    from radixor import TrieBuilder
+
+    path = _write_gz_dict(_ROUNDTRIP_DICT, tmp_path)
+    out = str(tmp_path / "custom.rxc")
+    TrieBuilder(path=path, backward=True).add("gitlab", "git").save(out)
+
+    # The written artifact is a gzip-wrapped Java-interoperable EGTR v7 stream.
+    with _gzip.open(out, "rb") as fh:
+        assert fh.read(4) == b"EGTR"
+
+    reloaded = Stemmer(compiled=out)
+    assert reloaded.stemWord("gitlab") == "git"
+    assert reloaded.stem_batch(["running", "cats", "walked"]) == ["run", "cat", "walk"]
+
+
+def test_trie_builder_to_bytes_from_bytes_roundtrip(tmp_path: Path):
+    from radixor import TrieBuilder
+
+    path = _write_gz_dict(_ROUNDTRIP_DICT, tmp_path)
+    data = TrieBuilder(path=path, backward=True).add("gitlab", "git").to_bytes()
+    assert data[:2] == b"\x1f\x8b"  # gzip framing
+
+    rebuilt = TrieBuilder.from_bytes(data).build()
+    assert rebuilt.stemWord("gitlab") == "git"
+    assert rebuilt.stem_batch(["running", "cats", "walked"]) == ["run", "cat", "walk"]
+
+
+def test_stemmer_to_builder_reopens_source(tmp_path: Path):
+    path = _write_gz_dict(_ROUNDTRIP_DICT, tmp_path)
+    stemmer = Stemmer(path=path, backward=True)
+    custom = stemmer.to_builder().add("gitlab", "git").build()
+    assert custom.stemWord("gitlab") == "git"
+    assert custom.stem("running") == "run"
+
+
+def test_trie_builder_build_returns_configurable_stemmer(tmp_path: Path):
+    from radixor import TrieBuilder
+
+    path = _write_gz_dict(_ROUNDTRIP_DICT, tmp_path)
+    stemmer = TrieBuilder(path=path, backward=True).build(cache_size=5)
+    assert stemmer.maxCacheSize == 5
+    # Resizing the cache rebuilds the core from the same builder.
+    stemmer.maxCacheSize = 0
+    assert stemmer.maxCacheSize == 0
+    assert stemmer.stem("running") == "run"
+
+
+def test_trie_builder_build_is_an_immutable_snapshot(tmp_path: Path):
+    from radixor import TrieBuilder
+
+    path = _write_gz_dict(_ROUNDTRIP_DICT, tmp_path)
+    builder = TrieBuilder(path=path, backward=True)
+    stemmer = builder.add("gitlab", "git").build(cache_size=5, lookup="last")
+
+    builder.set("gitlab", "lab")
+    stemmer.maxCacheSize = 0
+
+    assert stemmer.stemWord("gitlab") == "git"
+    assert builder.build(lookup="last").stemWord("gitlab") == "lab"
+
+
+def test_lookup_last_makes_shadowed_pair_effective():
+    # The standard English model has a robust "-s" generalization that shadows a
+    # custom "kubernetes -> kube" pair added through it. (A tiny synthetic dict
+    # cannot reproduce this: adding a long branch breaks the uniform-subtree
+    # contraction that forms the accepting leaf in the first place.)
+    builder = Stemmer("en").to_builder()
+    builder.add("kubernetes", "kube")
+
+    first = builder.build(lookup="first")
+    last = builder.build(lookup="last")
+
+    # 'first' follows the shallow -s generalization; 'last' honors the specific pair.
+    assert first.stemWord("kubernetes") == "kubernete"
+    assert last.stemWord("kubernetes") == "kube"
+    # Generalization and existing rules stay intact under 'last'.
+    assert last.stem_batch(["dogs", "cats", "running", "walked"]) == [
+        "dog", "cat", "run", "walk",
+    ]
+
+
+def test_lookup_all_collects_candidates_most_specific_first():
+    builder = Stemmer("en").to_builder()
+    builder.add("kubernetes", "kube")
+    stemmer = builder.build(lookup="all")
+
+    candidates = stemmer.stem_all("kubernetes")
+    # Most specific (the custom pair) first, general -s rule after it.
+    assert candidates[0] == "kube"
+    assert "kubernete" in candidates
+    assert candidates.index("kube") < candidates.index("kubernete")
+
+
+def test_lookup_first_and_last_agree_on_standard_model():
+    first = Stemmer("en", lookup="first")
+    last = Stemmer("en", lookup="last")
+    words = ["running", "walked", "cats", "organized", "flies", "happiness", "studies"]
+    # Standard compiled models have childless contracted leaves, so the two
+    # policies are indistinguishable there — existing benchmarks are unaffected.
+    assert first.stem_batch(words) == last.stem_batch(words)
+
+
+def test_invalid_lookup_mode_rejected(tmp_path: Path):
+    path = _write_gz_dict(["cat\tcats"], tmp_path)
+    with pytest.raises(ValueError):
+        Stemmer(path=path, lookup="bogus")
+
+
 # Installed standard-model smoke test.
 
 
 def test_installed_english_compiled_model():
     s = Stemmer("en")
     assert s.stem_batch(["running", "walked", "cats"]) == ["run", "walk", "cat"]
+
+
+def test_trie_builder_unlocks_installed_english_model():
+    from radixor import TrieBuilder
+
+    base = Stemmer("en")
+    words = ["running", "walked", "cats", "organized", "happiness", "flies"]
+    # Unlocking and recompiling the standard compiled model is faithful.
+    rebuilt = base.to_builder().build()
+    assert rebuilt.stem_batch(words) == base.stem_batch(words)
+
+
+# TrieBuilder value-update operations.
+
+
+def test_add_default_dominant_protects_overstemmed_word():
+    # The English model over-stems "windows" -> "window" via the -s rule.
+    # add() defaults to making the rule dominant, so under "last" it wins while
+    # the alternative stays visible in stem_all("all").
+    builder = Stemmer("en").to_builder().add("windows", "windows")
+    assert builder.build(lookup="last").stemWord("windows") == "windows"
+    assert builder.build(lookup="all").stem_all("windows") == ["windows", "window"]
+    # Other -s words are unaffected.
+    assert builder.build(lookup="last").stem_batch(["cats", "dogs", "running"]) == [
+        "cat", "dog", "run",
+    ]
+
+
+def test_add_count_is_raw_weight():
+    low = Stemmer("en").to_builder()
+    low.add("windows", "windows", count=1)     # weight 1 loses to the existing rule
+    high = Stemmer("en").to_builder()
+    high.add("windows", "windows", count=5)     # weight 5 out-ranks it
+    assert low.build(lookup="last").stemWord("windows") == "window"
+    assert high.build(lookup="last").stemWord("windows") == "windows"
+
+
+def test_add_only_if_absent_never_overrides():
+    builder = Stemmer("en").to_builder()
+    builder.add("windows", "windows", only_if_absent=True)   # "windows" has a rule -> untouched
+    builder.add("zzgadget", "gadget", only_if_absent=True)    # fresh word -> stored
+    stemmer = builder.build(lookup="last")
+    assert stemmer.stemWord("windows") == "window"
+    assert stemmer.stemWord("zzgadget") == "gadget"
+
+
+def test_set_replaces_alternatives():
+    builder = Stemmer("en").to_builder().set("windows", "windows")
+    assert builder.build(lookup="last").stemWord("windows") == "windows"
+    # set() discards the prior candidate, unlike add().
+    assert builder.build(lookup="all").stem_all("windows") == ["windows"]
+
+
+def test_remove_drops_a_custom_rule():
+    builder = Stemmer("en").to_builder().add("gitlab", "git")
+    assert builder.build(lookup="last").stemWord("gitlab") == "git"
+    builder.remove("gitlab")
+    assert builder.build(lookup="last").stemWord("gitlab") == "gitlab"
+
+
+def test_add_rejects_non_positive_count():
+    with pytest.raises(ValueError):
+        Stemmer("en").to_builder().add("a", "b", count=0)
+
+
+def test_add_rejects_frequency_overflow():
+    builder = Stemmer("en").to_builder()
+    builder.add("zzoverflow", "overflow", count=2_147_483_647)
+    with pytest.raises(OverflowError):
+        builder.add("zzoverflow", "overflow", count=1)
+
+
+def test_remove_can_delete_contracted_generalization(tmp_path: Path):
+    source = _write_gz_dict(
+        [
+            "s\tas\tbs\tcs\tds\tes\tfs",
+            "qq\tax\tbx\tcx\tdx\tex\tfx",
+        ],
+        tmp_path,
+    )
+    compiled = str(tmp_path / "contracted.rxc")
+    radixor.compile(source, compiled, store_original=False)
+
+    builder = radixor.TrieBuilder(path=compiled, store_original=False)
+    builder.remove("s")
+    stemmer = builder.build(lookup="first")
+
+    assert stemmer.stemWord("zs") == "zs"
+    assert stemmer.stemWord("zx") == "qq"
+
+
+def test_update_operations_are_chainable():
+    from radixor import TrieBuilder
+
+    builder = Stemmer("en").to_builder()
+    returned = (
+        builder.add("gitlab", "git")
+        .set("windows", "windows")
+        .add_many([("foo", "bar")])
+        .remove("gitlab")
+    )
+    assert returned is builder
+    assert isinstance(builder, TrieBuilder)

@@ -27,6 +27,10 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+// PyO3's procedural macros emit required Python-error conversions that Clippy
+// sees only after expansion and reports as same-type conversions.
+#![allow(clippy::useless_conversion)]
+
 mod builder;
 mod dict;
 mod encoder;
@@ -35,6 +39,7 @@ mod serial;
 mod trie;
 
 use flate2::read::GzDecoder;
+use patch::PatchCommand;
 use pyo3::ffi;
 use pyo3::prelude::*;
 use pyo3::pybacked::PyBackedStr;
@@ -43,8 +48,25 @@ use std::collections::HashMap;
 use std::fs;
 use std::io::Read;
 use std::sync::{Arc, Mutex};
-use patch::PatchCommand;
-use trie::FrequencyTrie;
+use trie::{FrequencyTrie, LookupMode, TraversalDirection, TrieMetadata};
+
+/// Parse the get/getAll selection policy name into a [`LookupMode`].
+fn parse_lookup_mode(name: &str) -> PyResult<LookupMode> {
+    match name {
+        "first" => Ok(LookupMode::First),
+        "last" => Ok(LookupMode::Last),
+        "all" => Ok(LookupMode::All),
+        other => Err(pyo3::exceptions::PyValueError::new_err(format!(
+            "invalid lookup mode {other:?}; expected 'first', 'last', or 'all'"
+        ))),
+    }
+}
+
+/// Convert a builder count-arithmetic failure to the corresponding Python
+/// exception without exposing internal trie state.
+fn count_overflow(message: &'static str) -> PyErr {
+    pyo3::exceptions::PyOverflowError::new_err(message)
+}
 
 /// Decompress a gzip byte image, or return the bytes unchanged when they are
 /// not gzip-framed (so plain-text dictionaries also work).
@@ -81,6 +103,21 @@ struct StemmerCore {
 }
 
 impl StemmerCore {
+    /// Wrap a runtime trie in a stemmer core with an optional bounded result
+    /// cache. Shared by the constructor and by `TrieBuilder.build`.
+    fn from_trie(trie: FrequencyTrie, cache_size: usize) -> Self {
+        let cache = if cache_size > 0 {
+            Some(Mutex::new(HashMap::new()))
+        } else {
+            None
+        };
+        StemmerCore {
+            trie: Arc::new(trie),
+            cache,
+            cache_cap: cache_size,
+        }
+    }
+
     #[inline]
     fn preserve_legacy_mismatch(word: &str) -> bool {
         word.eq_ignore_ascii_case("unknown") || word.eq_ignore_ascii_case("cars")
@@ -175,9 +212,7 @@ impl StemmerCore {
             false
         };
 
-        let computed: Py<PyAny> = match self.stem_uncached_str(
-            py, word, key_buf, u16_buf, u8_buf,
-        ) {
+        let computed: Py<PyAny> = match self.stem_uncached_str(py, word, key_buf, u16_buf, u8_buf) {
             Some(stem) => stem.into_any().unbind(),
             None => py.None(),
         };
@@ -249,10 +284,10 @@ impl StemmerCore {
             // SAFETY: list_ptr is a valid PyListObject; i is in [0, n); item_ptr
             // is a freshly-owned reference that we are handing off to the list.
             // SAFETY: list_ptr valid, i in [0,n), item_ptr is an owned reference that
-// PyList_SetItem steals.  Slots were NULL-initialised by PyList_New so the
-// Py_XDECREF on the displaced item is a no-op.
-let _ret = unsafe { ffi::PyList_SetItem(list_ptr, i as ffi::Py_ssize_t, item_ptr) };
-debug_assert_eq!(_ret, 0, "PyList_SetItem out of bounds");
+            // PyList_SetItem steals.  Slots were NULL-initialised by PyList_New so the
+            // Py_XDECREF on the displaced item is a no-op.
+            let _ret = unsafe { ffi::PyList_SetItem(list_ptr, i as ffi::Py_ssize_t, item_ptr) };
+            debug_assert_eq!(_ret, 0, "PyList_SetItem out of bounds");
         }
 
         // SAFETY: list_ptr is a valid PyListObject with all n slots filled.
@@ -296,10 +331,10 @@ debug_assert_eq!(_ret, 0, "PyList_SetItem out of bounds");
                 unreachable!()
             };
             // SAFETY: list_ptr valid, i in [0,n), item_ptr is an owned reference that
-// PyList_SetItem steals.  Slots were NULL-initialised by PyList_New so the
-// Py_XDECREF on the displaced item is a no-op.
-let _ret = unsafe { ffi::PyList_SetItem(list_ptr, i as ffi::Py_ssize_t, item_ptr) };
-debug_assert_eq!(_ret, 0, "PyList_SetItem out of bounds");
+            // PyList_SetItem steals.  Slots were NULL-initialised by PyList_New so the
+            // Py_XDECREF on the displaced item is a no-op.
+            let _ret = unsafe { ffi::PyList_SetItem(list_ptr, i as ffi::Py_ssize_t, item_ptr) };
+            debug_assert_eq!(_ret, 0, "PyList_SetItem out of bounds");
         }
 
         Ok(unsafe { Py::<PyList>::from_owned_ptr(py, list_ptr) }.into_bound(py))
@@ -337,10 +372,10 @@ debug_assert_eq!(_ret, 0, "PyList_SetItem out of bounds");
                 obj.into_ptr()
             };
             // SAFETY: list_ptr valid, i in [0,n), item_ptr is an owned reference that
-// PyList_SetItem steals.  Slots were NULL-initialised by PyList_New so the
-// Py_XDECREF on the displaced item is a no-op.
-let _ret = unsafe { ffi::PyList_SetItem(list_ptr, i as ffi::Py_ssize_t, item_ptr) };
-debug_assert_eq!(_ret, 0, "PyList_SetItem out of bounds");
+            // PyList_SetItem steals.  Slots were NULL-initialised by PyList_New so the
+            // Py_XDECREF on the displaced item is a no-op.
+            let _ret = unsafe { ffi::PyList_SetItem(list_ptr, i as ffi::Py_ssize_t, item_ptr) };
+            debug_assert_eq!(_ret, 0, "PyList_SetItem out of bounds");
         }
 
         Ok(unsafe { Py::<PyList>::from_owned_ptr(py, list_ptr) }.into_bound(py))
@@ -400,7 +435,11 @@ debug_assert_eq!(_ret, 0, "PyList_SetItem out of bounds");
                     ))
                 };
                 match self.stem_uncached_str_with_mode(
-                    py, key, &mut key_buf, &mut u16_buf, &mut u8_buf,
+                    py,
+                    key,
+                    &mut key_buf,
+                    &mut u16_buf,
+                    &mut u8_buf,
                     source_slice_fast_path,
                 ) {
                     Some(stem) => stem.into_any().unbind().into_ptr(),
@@ -411,8 +450,7 @@ debug_assert_eq!(_ret, 0, "PyList_SetItem out of bounds");
             // SAFETY: out_ptr valid, i in [0,n), item_out_ptr is an owned
             // reference that PyList_SetItem steals.  Null-init slots make the
             // XDECREF on the displaced slot a no-op.
-            let _ret =
-                unsafe { ffi::PyList_SetItem(out_ptr, i as ffi::Py_ssize_t, item_out_ptr) };
+            let _ret = unsafe { ffi::PyList_SetItem(out_ptr, i as ffi::Py_ssize_t, item_out_ptr) };
             debug_assert_eq!(_ret, 0, "PyList_SetItem out of bounds");
         }
 
@@ -488,13 +526,14 @@ debug_assert_eq!(_ret, 0, "PyList_SetItem out of bounds");
                 &mut Vec::new(),
                 &mut String::new(),
             );
-            if preserve_original
-                && (obj.bind(py).is_none() || Self::preserve_legacy_mismatch(text))
+            if preserve_original && (obj.bind(py).is_none() || Self::preserve_legacy_mismatch(text))
             {
                 return Ok(word.to_object(py));
             }
             let stemmed = obj.bind(py).downcast::<PyString>()?.to_cow()?;
-            return Ok(PyBytes::new_bound(py, stemmed.as_bytes()).into_any().unbind());
+            return Ok(PyBytes::new_bound(py, stemmed.as_bytes())
+                .into_any()
+                .unbind());
         }
 
         Err(pyo3::exceptions::PyTypeError::new_err(
@@ -517,8 +556,7 @@ debug_assert_eq!(_ret, 0, "PyList_SetItem out of bounds");
             let word = word?;
             let obj = if let Ok(text) = word.downcast::<PyString>() {
                 let text = text.to_cow()?;
-                let stemmed =
-                    self.stem_cached(py, &text, &mut key_buf, &mut u16_buf, &mut u8_buf);
+                let stemmed = self.stem_cached(py, &text, &mut key_buf, &mut u16_buf, &mut u8_buf);
                 if fallback_to_original
                     && (stemmed.bind(py).is_none() || Self::preserve_legacy_mismatch(&text))
                 {
@@ -535,7 +573,9 @@ debug_assert_eq!(_ret, 0, "PyList_SetItem out of bounds");
                     bytes.to_object(py)
                 } else {
                     let stemmed_str = stemmed.bind(py).downcast::<PyString>()?.to_cow()?;
-                    PyBytes::new_bound(py, stemmed_str.as_bytes()).into_any().unbind()
+                    PyBytes::new_bound(py, stemmed_str.as_bytes())
+                        .into_any()
+                        .unbind()
                 }
             } else {
                 return Err(pyo3::exceptions::PyTypeError::new_err(
@@ -593,14 +633,16 @@ impl StemmerCore {
     /// * `store_original` — map each canonical stem to the no-op patch so the
     ///   stem itself is recognised. Ignored for compiled input.
     #[new]
-    #[pyo3(signature = (path, backward=true, store_original=true, lowercase=true, cache_size=10_000))]
+    #[pyo3(signature = (path, backward=true, store_original=true, lowercase=true, lookup="first", cache_size=10_000))]
     fn new(
         path: &str,
         backward: bool,
         store_original: bool,
         lowercase: bool,
+        lookup: &str,
         cache_size: usize,
     ) -> PyResult<Self> {
+        let lookup_mode = parse_lookup_mode(lookup)?;
         let raw =
             fs::read(path).map_err(|e| pyo3::exceptions::PyIOError::new_err(e.to_string()))?;
         let decompressed = decompress_or_raw(&raw);
@@ -622,19 +664,8 @@ impl StemmerCore {
         // model must honor the caller's explicit runtime choice just like the
         // textual-model path does.
         trie.set_lowercase(lowercase);
-
-        let cache = if cache_size > 0 {
-            // Keep PyStemmer's default entry limit without charging every
-            // Stemmer instance for 10,000 buckets before its first lookup.
-            Some(Mutex::new(HashMap::new()))
-        } else {
-            None
-        };
-        Ok(StemmerCore {
-            trie: Arc::new(trie),
-            cache,
-            cache_cap: cache_size,
-        })
+        trie.set_lookup_mode(lookup_mode);
+        Ok(StemmerCore::from_trie(trie, cache_size))
     }
 
     fn stem(&self, py: Python<'_>, word: &str) -> Py<PyAny> {
@@ -652,7 +683,7 @@ impl StemmerCore {
     #[pyo3(name = "stemWord")]
     fn stem_word<'py>(&self, py: Python<'py>, word: Py<PyAny>) -> PyResult<Py<PyAny>> {
         let word = word.bind(py);
-        self.stem_word_obj(py, &word, true)
+        self.stem_word_obj(py, word, true)
     }
 
     fn stem_batch<'py>(
@@ -678,10 +709,10 @@ impl StemmerCore {
     #[pyo3(name = "stemWords")]
     fn stem_words<'py>(&self, py: Python<'py>, words: Py<PyAny>) -> PyResult<Bound<'py, PyList>> {
         let words = words.bind(py);
-        if let Some(str_words) = self.try_stem_words_str_sequence(&words) {
+        if let Some(str_words) = self.try_stem_words_str_sequence(words) {
             return self.stem_batch_impl(py, &str_words, true);
         }
-        self.stem_words_generic(py, &words, true)
+        self.stem_words_generic(py, words, true)
     }
 
     fn stem_all(&self, word: &str) -> Vec<String> {
@@ -821,7 +852,12 @@ impl StemmerCore {
         for key in &words {
             let key: &str = key.as_ref();
             if let Some(stem) = self.stem_uncached_str_with_mode(
-                py, key, &mut key_buf, &mut u16_buf, &mut u8_buf, source_slice_fast_path,
+                py,
+                key,
+                &mut key_buf,
+                &mut u16_buf,
+                &mut u8_buf,
+                source_slice_fast_path,
             ) {
                 list.append(stem)?;
             } else {
@@ -881,11 +917,8 @@ impl StemmerCore {
                     if direct_output_enabled {
                         if patch.source_slice_utf8(word, key_buf.len()).is_some() {
                             direct_slice_hits += 1;
-                        } else if patch.apply_simple_utf8_into(
-                            word,
-                            key_buf.len(),
-                            &mut direct_buf,
-                        ) {
+                        } else if patch.apply_simple_utf8_into(word, key_buf.len(), &mut direct_buf)
+                        {
                             direct_buffer_hits += 1;
                         }
                     }
@@ -914,10 +947,7 @@ impl StemmerCore {
     /// The returned list is sorted by descending frequency and then by
     /// signature so benchmark reports can identify profitable future compound
     /// specializations without instrumenting the production hot path.
-    fn _backward_compound_patterns_batch(
-        &self,
-        words: Vec<PyBackedStr>,
-    ) -> Vec<(String, u64)> {
+    fn _backward_compound_patterns_batch(&self, words: Vec<PyBackedStr>) -> Vec<(String, u64)> {
         let mut patterns: HashMap<String, u64> = HashMap::new();
         let mut key_buf: Vec<u16> = Vec::new();
 
@@ -933,12 +963,239 @@ impl StemmerCore {
 
         let mut result: Vec<(String, u64)> = patterns.into_iter().collect();
         result.sort_unstable_by(|left, right| {
-            right
-                .1
-                .cmp(&left.1)
-                .then_with(|| left.0.cmp(&right.0))
+            right.1.cmp(&left.1).then_with(|| left.0.cmp(&right.0))
         });
         result
+    }
+}
+
+/// Mutable, modifiable trie builder — the Python-side way to "unlock" an
+/// immutable compiled trie, add custom word -> stem pairs, and materialize a
+/// new stemmer or a new compiled dictionary file.
+///
+/// Construct it from an existing model (a compiled `.rxc` v7 trie or a textual
+/// source dictionary); the compiled path faithfully reconstructs the reduced
+/// trie, including its contracted "accepts remaining input" leaves. This is the
+/// Python analogue of the Java `FrequencyTrieBuilders.copyOf` reconstruction,
+/// followed by recompilation.
+#[pyclass(module = "radixor._radixor")]
+struct TrieBuilder {
+    root: builder::MutableNode,
+    /// Metadata persisted when the builder is written back out (v7). For a
+    /// compiled source this is the source's metadata; for a textual source it
+    /// is derived from `backward` / `lowercase`.
+    metadata: TrieMetadata,
+    /// Whether `add` also maps each stem to the NOOP patch (self-recognition).
+    store_original: bool,
+    /// Runtime lookup lowercasing applied to tries produced by `build`.
+    lowercase: bool,
+}
+
+impl TrieBuilder {
+    #[inline]
+    fn backward(&self) -> bool {
+        matches!(self.metadata.traversal, TraversalDirection::Backward)
+    }
+
+    /// Resolve the `add` value-update policy from the Python arguments.
+    /// `only_if_absent` takes precedence over `count`.
+    fn resolve_add_mode(count: Option<i32>, only_if_absent: bool) -> PyResult<builder::AddMode> {
+        if only_if_absent {
+            return Ok(builder::AddMode::IfAbsent);
+        }
+        match count {
+            None => Ok(builder::AddMode::Dominant),
+            Some(c) if c >= 1 => Ok(builder::AddMode::Accumulate(c)),
+            Some(c) => Err(pyo3::exceptions::PyValueError::new_err(format!(
+                "count must be at least 1, got {c}"
+            ))),
+        }
+    }
+
+    /// Reconstruct a builder from raw model bytes, auto-detecting a compiled v7
+    /// trie versus a textual (optionally gzipped) TSV dictionary.
+    fn from_bytes_impl(
+        data: &[u8],
+        backward: bool,
+        store_original: bool,
+        lowercase: bool,
+    ) -> PyResult<Self> {
+        let decompressed = decompress_or_raw(data);
+        if serial::is_v7_stream(&decompressed) {
+            let parsed = serial::read_stream_raw(&decompressed)
+                .map_err(|e| pyo3::exceptions::PyValueError::new_err(e.to_string()))?;
+            let metadata = parsed.metadata.clone();
+            let root = builder::mutable_from_parsed(&parsed);
+            Ok(TrieBuilder {
+                root,
+                metadata,
+                store_original,
+                lowercase,
+            })
+        } else {
+            let text = String::from_utf8_lossy(&decompressed);
+            let entries = dict::parse_text(&text, true);
+            let root = builder::mutable_from_entries(&entries, backward, store_original);
+            let metadata = builder::metadata_for(backward, lowercase);
+            Ok(TrieBuilder {
+                root,
+                metadata,
+                store_original,
+                lowercase,
+            })
+        }
+    }
+}
+
+#[pymethods]
+impl TrieBuilder {
+    /// Open an existing model as a modifiable builder.
+    ///
+    /// * `path` — a compiled `.rxc` v7 trie (its persisted direction/case is
+    ///   honored and `backward` is ignored) OR a gzipped/plain TSV source
+    ///   dictionary. The format is auto-detected.
+    /// * `backward` — traversal direction for a textual source (default
+    ///   BACKWARD); ignored for compiled input.
+    /// * `store_original` — whether later `add` calls also register each stem
+    ///   as self-recognising (NOOP patch).
+    /// * `lowercase` — runtime lookup lowercasing for tries produced by
+    ///   `build`.
+    #[new]
+    #[pyo3(signature = (path, backward=None, store_original=true, lowercase=true))]
+    fn new(
+        path: &str,
+        backward: Option<bool>,
+        store_original: bool,
+        lowercase: bool,
+    ) -> PyResult<Self> {
+        let raw =
+            fs::read(path).map_err(|e| pyo3::exceptions::PyIOError::new_err(e.to_string()))?;
+        Self::from_bytes_impl(&raw, backward.unwrap_or(true), store_original, lowercase)
+    }
+
+    /// Reconstruct a builder directly from in-memory model bytes (compiled v7
+    /// image or textual TSV, optionally gzipped).
+    #[staticmethod]
+    #[pyo3(signature = (data, backward=None, store_original=true, lowercase=true))]
+    fn from_bytes(
+        data: &[u8],
+        backward: Option<bool>,
+        store_original: bool,
+        lowercase: bool,
+    ) -> PyResult<Self> {
+        Self::from_bytes_impl(data, backward.unwrap_or(true), store_original, lowercase)
+    }
+
+    /// Add one custom `word -> stem` rule to the builder.
+    ///
+    /// The word is mapped to the minimal patch command that rewrites it to the
+    /// stem; when `store_original` is set the stem also maps to itself.
+    ///
+    /// By default (`count=None`, `only_if_absent=False`) the rule is made the
+    /// **dominant** value at the word's node, keeping any prior values as
+    /// alternatives. Pass `count=N` to instead add a raw frequency `N` (which may
+    /// or may not dominate an existing rule), or `only_if_absent=True` to store
+    /// the rule only where the word has no value yet. `only_if_absent` takes
+    /// precedence over `count`.
+    ///
+    /// A shallower contracted generalization still short-circuits the rule under
+    /// `lookup="first"`; use `lookup="last"` so the specific rule wins.
+    #[pyo3(signature = (word, stem, count=None, only_if_absent=false))]
+    fn add(
+        &mut self,
+        word: &str,
+        stem: &str,
+        count: Option<i32>,
+        only_if_absent: bool,
+    ) -> PyResult<()> {
+        let mode = Self::resolve_add_mode(count, only_if_absent)?;
+        let backward = self.backward();
+        let store_original = self.store_original;
+        builder::add_pair(&mut self.root, word, stem, mode, backward, store_original)
+            .map_err(count_overflow)?;
+        Ok(())
+    }
+
+    /// Add many `(word, stem)` rules in one call, each as a dominant rule.
+    #[pyo3(signature = (pairs, count=None, only_if_absent=false))]
+    fn add_many(
+        &mut self,
+        pairs: Vec<(String, String)>,
+        count: Option<i32>,
+        only_if_absent: bool,
+    ) -> PyResult<()> {
+        let mode = Self::resolve_add_mode(count, only_if_absent)?;
+        let backward = self.backward();
+        let store_original = self.store_original;
+        for (word, stem) in &pairs {
+            builder::add_pair(&mut self.root, word, stem, mode, backward, store_original)
+                .map_err(count_overflow)?;
+        }
+        Ok(())
+    }
+
+    /// Replace any existing rule for `word` with `word -> stem` (the sole, hence
+    /// dominant, value at the word's node). Prior alternatives are discarded.
+    fn set(&mut self, word: &str, stem: &str) -> PyResult<()> {
+        let backward = self.backward();
+        let store_original = self.store_original;
+        builder::add_pair(
+            &mut self.root,
+            word,
+            stem,
+            builder::AddMode::Replace,
+            backward,
+            store_original,
+        )
+        .map_err(count_overflow)?;
+        Ok(())
+    }
+
+    /// Remove a custom rule from the word's own node.
+    ///
+    /// With `stem=None` every rule stored at the word's node is removed; with
+    /// `stem` given only that specific `word -> stem` rule is removed. This
+    /// targets the word's exact node only: a word that resolves through a shorter
+    /// contracted generalization has no value there, so removing it is a no-op —
+    /// override it with `set()` / `add()` and read with `lookup="last"` instead.
+    #[pyo3(signature = (word, stem=None))]
+    fn remove(&mut self, word: &str, stem: Option<&str>) {
+        let backward = self.backward();
+        match stem {
+            Some(stem) => builder::remove_word_stem(&mut self.root, word, stem, backward),
+            None => builder::remove_word(&mut self.root, word, backward),
+        }
+    }
+
+    /// Reduce and freeze the current builder into a usable in-memory stemmer.
+    #[pyo3(signature = (cache_size=10_000, lookup="first"))]
+    fn build(&self, cache_size: usize, lookup: &str) -> PyResult<StemmerCore> {
+        let lookup_mode = parse_lookup_mode(lookup)?;
+        let frozen = builder::reduce_and_freeze(&self.root, self.backward());
+        let mut trie = builder::frozen_into_trie(frozen, self.metadata.clone());
+        trie.set_lowercase(self.lowercase);
+        trie.set_lookup_mode(lookup_mode);
+        Ok(StemmerCore::from_trie(trie, cache_size))
+    }
+
+    /// Serialize the current builder to a Java-interoperable compiled trie
+    /// image (gzip-wrapped v7 stream) and return it as bytes.
+    fn to_bytes<'py>(&self, py: Python<'py>) -> PyResult<Bound<'py, PyBytes>> {
+        let frozen = builder::reduce_and_freeze(&self.root, self.backward());
+        let bytes = serial::write_v7(&frozen, &self.metadata)
+            .map_err(|e| pyo3::exceptions::PyValueError::new_err(e.to_string()))?;
+        Ok(PyBytes::new_bound(py, &bytes))
+    }
+
+    /// Serialize the current builder and write it to `out_path` (conventionally
+    /// `*.rxc`) as a new custom compiled dictionary.
+    fn save(&self, out_path: &str) -> PyResult<()> {
+        let frozen = builder::reduce_and_freeze(&self.root, self.backward());
+        let bytes = serial::write_v7(&frozen, &self.metadata)
+            .map_err(|e| pyo3::exceptions::PyValueError::new_err(e.to_string()))?;
+        fs::write(out_path, bytes)
+            .map_err(|e| pyo3::exceptions::PyIOError::new_err(e.to_string()))?;
+        Ok(())
     }
 }
 
@@ -979,6 +1236,7 @@ fn compile(
 #[pymodule]
 fn _radixor(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<StemmerCore>()?;
+    m.add_class::<TrieBuilder>()?;
     m.add_function(wrap_pyfunction!(compile, m)?)?;
     Ok(())
 }

@@ -40,6 +40,13 @@ import java.util.Map;
  * The maps exposed by the accessors are the internal backing state of the
  * canonical reduced node. They are returned directly for efficiency and are
  * intended only for closely related trie-reduction infrastructure.
+ * </p>
+ *
+ * <p>
+ * Instances are mutable only during one builder compilation and are confined to
+ * its reduction context. They are converted to immutable {@link CompiledNode}
+ * instances before becoming observable to lookup callers.
+ * </p>
  *
  * @param <V> value type
  */
@@ -144,6 +151,8 @@ public final class ReducedNode<V> {
      * Merges additional local counts into this node.
      *
      * @param additionalCounts additional local counts
+     * @throws ArithmeticException if an aggregated count exceeds
+     *                             {@link Integer#MAX_VALUE}
      */
     public void mergeLocalCounts(final Map<V, Integer> additionalCounts) {
         for (Map.Entry<V, Integer> entry : additionalCounts.entrySet()) {
@@ -151,7 +160,7 @@ public final class ReducedNode<V> {
             if (previous == null) {
                 this.localCounts.put(entry.getKey(), entry.getValue());
             } else {
-                this.localCounts.put(entry.getKey(), previous + entry.getValue());
+                this.localCounts.put(entry.getKey(), Math.addExact(previous, entry.getValue()));
             }
         }
     }

@@ -50,6 +50,29 @@ pub enum DiacriticMode {
     Remove,
 }
 
+/// Which patch command(s) to select along a key's trie path.
+///
+/// The trie may hold applicable commands at several depths: shallow contracted
+/// accepting nodes (generalizations that accept remaining input) and a deep
+/// terminal (the exact, most-specific match). This policy chooses among them.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum LookupMode {
+    /// Java-faithful default: the FIRST (shallowest) accepting node on the path
+    /// wins and short-circuits descent. Standard compiled models are validated
+    /// against this behavior.
+    First,
+    /// The LAST (deepest, most-specific) match closest to the input wins.
+    /// Descent continues past accepting nodes when a deeper edge exists; the
+    /// deepest accepting ancestor is used only as a fallback when the specific
+    /// path dead-ends.
+    Last,
+    /// Collect ALL applicable commands along the path (every accepting node plus
+    /// the exact terminal). Affects `stem_all` (which returns every candidate,
+    /// most-specific first); scalar `stem` selects the most-specific one, like
+    /// [`LookupMode::Last`].
+    All,
+}
+
 #[derive(Debug, Clone)]
 pub struct TrieMetadata {
     pub traversal: TraversalDirection,
@@ -92,6 +115,13 @@ pub struct FrequencyTrie {
     dense_base: Vec<u16>,
     dense_targets: Vec<u32>,
     pub metadata: TrieMetadata,
+    // Which command(s) along a key path the get/getAll operations select. The
+    // default `First` is Java-faithful. `First` and `Last` agree for the
+    // standard compiled models (their contracted accepting leaves have no
+    // children); the policies diverge only where a node both accepts and has
+    // children — e.g. a custom pair added through a contracted leaf via
+    // `TrieBuilder`.
+    lookup_mode: LookupMode,
 }
 
 impl FrequencyTrie {
@@ -134,7 +164,13 @@ impl FrequencyTrie {
             dense_base,
             dense_targets,
             metadata,
+            lookup_mode: LookupMode::First,
         }
+    }
+
+    /// Set the get/getAll command-selection policy (see [`LookupMode`]).
+    pub fn set_lookup_mode(&mut self, mode: LookupMode) {
+        self.lookup_mode = mode;
     }
 
     /// Override runtime case processing without modifying the persisted trie.
@@ -253,9 +289,20 @@ impl FrequencyTrie {
         }
     }
 
-    /// Walk the trie for `key`, returning the accepting/terminal node id.
+    /// Walk the trie for `key`, returning the single node whose value the scalar
+    /// stem uses. `First` returns the shallowest accepting node; `Last`/`All`
+    /// return the deepest (most-specific) applicable node.
     #[inline]
     fn find_node(&self, key: &[u16]) -> Option<usize> {
+        match self.lookup_mode {
+            LookupMode::First => self.find_node_first(key),
+            LookupMode::Last | LookupMode::All => self.find_node_last(key),
+        }
+    }
+
+    /// Java-faithful walk: the shallowest accepting node short-circuits descent.
+    #[inline]
+    fn find_node_first(&self, key: &[u16]) -> Option<usize> {
         let mut node = 0usize;
         match self.metadata.traversal {
             TraversalDirection::Backward => {
@@ -276,6 +323,115 @@ impl FrequencyTrie {
             }
         }
         Some(node)
+    }
+
+    /// Most-specific walk: descend as far as the input allows, preferring the
+    /// deepest match. Accepting nodes are remembered as a fallback and used only
+    /// when descent dead-ends or the exact terminal carries no value.
+    #[inline]
+    fn find_node_last(&self, key: &[u16]) -> Option<usize> {
+        let mut node = 0usize;
+        let mut fallback: Option<usize> = if unsafe { *self.accepts.get_unchecked(0) } {
+            Some(0)
+        } else {
+            None
+        };
+        match self.metadata.traversal {
+            TraversalDirection::Backward => {
+                for &label in key.iter().rev() {
+                    match self.child(node, label) {
+                        Some(child) => {
+                            node = child;
+                            if unsafe { *self.accepts.get_unchecked(node) } {
+                                fallback = Some(node);
+                            }
+                        }
+                        None => return fallback,
+                    }
+                }
+            }
+            TraversalDirection::Forward => {
+                for &label in key.iter() {
+                    match self.child(node, label) {
+                        Some(child) => {
+                            node = child;
+                            if unsafe { *self.accepts.get_unchecked(node) } {
+                                fallback = Some(node);
+                            }
+                        }
+                        None => return fallback,
+                    }
+                }
+            }
+        }
+        // Whole key consumed: prefer the exact (most-specific) node when it
+        // carries a value, else fall back to the deepest accepting ancestor.
+        if unsafe { *self.preferred_patch_ids.get_unchecked(node) } != u32::MAX {
+            Some(node)
+        } else {
+            fallback
+        }
+    }
+
+    /// Collect every node whose value applies to `key`, most-specific first:
+    /// the exact terminal (when the key is fully consumed) followed by each
+    /// accepting ancestor from deepest to shallowest. Root-ward (least specific)
+    /// nodes therefore land at the end. Used by `stem_all` in `All` mode.
+    fn collect_path_nodes(&self, key: &[u16]) -> Vec<usize> {
+        // Gather accepting nodes shallow-to-deep along the descent.
+        let mut accepting: Vec<usize> = Vec::new();
+        if unsafe { *self.accepts.get_unchecked(0) } {
+            accepting.push(0);
+        }
+        let mut node = 0usize;
+        let mut fully_consumed = true;
+        match self.metadata.traversal {
+            TraversalDirection::Backward => {
+                for &label in key.iter().rev() {
+                    match self.child(node, label) {
+                        Some(child) => {
+                            node = child;
+                            if unsafe { *self.accepts.get_unchecked(node) } {
+                                accepting.push(node);
+                            }
+                        }
+                        None => {
+                            fully_consumed = false;
+                            break;
+                        }
+                    }
+                }
+            }
+            TraversalDirection::Forward => {
+                for &label in key.iter() {
+                    match self.child(node, label) {
+                        Some(child) => {
+                            node = child;
+                            if unsafe { *self.accepts.get_unchecked(node) } {
+                                accepting.push(node);
+                            }
+                        }
+                        None => {
+                            fully_consumed = false;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        let mut ordered: Vec<usize> = Vec::with_capacity(accepting.len() + 1);
+        // Exact terminal (most specific) first, unless it is already the
+        // deepest accepting node just recorded.
+        if fully_consumed
+            && accepting.last() != Some(&node)
+            && unsafe { *self.preferred_patch_ids.get_unchecked(node) } != u32::MAX
+        {
+            ordered.push(node);
+        }
+        // Then accepting ancestors from deepest to shallowest.
+        ordered.extend(accepting.into_iter().rev());
+        ordered
     }
 
     /// Return the dominant patch for `node` through the precomputed compact
@@ -353,24 +509,48 @@ impl FrequencyTrie {
         )
     }
 
-    /// Return all stems in frequency order.
+    /// Append node `node`'s stems (each stored patch applied to `key`) to `out`.
+    #[inline]
+    fn extend_node_stems(&self, node: usize, key: &[u16], out: &mut Vec<String>) {
+        let start = self.value_start[node] as usize;
+        let end = self.value_start[node + 1] as usize;
+        out.extend(self.value_ids[start..end].iter().map(|&patch_id| {
+            String::from_utf16_lossy(&self.patches[patch_id as usize].apply(key))
+        }));
+    }
+
+    /// Return all stems for `word`.
+    ///
+    /// In `First`/`Last` mode this is the selected node's stored stems in
+    /// frequency order. In `All` mode it is every applicable candidate along the
+    /// key path — most-specific (deepest) first, least-specific (root-ward)
+    /// last — de-duplicated by result.
     pub fn stem_all(&self, word: &str) -> Vec<String> {
         let mut key_u16: Vec<u16> = Vec::new();
         self.encode_key(word, &mut key_u16);
-        match self.find_node(&key_u16) {
-            None => Vec::new(),
-            Some(node) => {
-                let start = self.value_start[node] as usize;
-                let end = self.value_start[node + 1] as usize;
-                self.value_ids[start..end]
-                    .iter()
-                    .map(|&patch_id| {
-                        let patch = &self.patches[patch_id as usize];
-                        String::from_utf16_lossy(&patch.apply(&key_u16))
-                    })
-                    .collect()
+        let mut out: Vec<String> = Vec::new();
+        match self.lookup_mode {
+            LookupMode::All => {
+                for node in self.collect_path_nodes(&key_u16) {
+                    let start = self.value_start[node] as usize;
+                    let end = self.value_start[node + 1] as usize;
+                    for &patch_id in &self.value_ids[start..end] {
+                        let stem = String::from_utf16_lossy(
+                            &self.patches[patch_id as usize].apply(&key_u16),
+                        );
+                        if !out.contains(&stem) {
+                            out.push(stem);
+                        }
+                    }
+                }
+            }
+            _ => {
+                if let Some(node) = self.find_node(&key_u16) {
+                    self.extend_node_stems(node, &key_u16, &mut out);
+                }
             }
         }
+        out
     }
 }
 

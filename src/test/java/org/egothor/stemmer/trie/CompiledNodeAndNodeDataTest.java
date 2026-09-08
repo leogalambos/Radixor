@@ -30,6 +30,7 @@
  ******************************************************************************/
 package org.egothor.stemmer.trie;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -152,6 +153,32 @@ class CompiledNodeAndNodeDataTest {
     }
 
     /**
+     * Verifies the element-level invariants required by compiled lookup: children
+     * and values are present, edge labels are strictly ascending, and occurrence
+     * counts are positive.
+     */
+    @Test
+    @DisplayName("CompiledNode rejects invalid edge and value elements")
+    void compiledNodeShouldRejectInvalidElements() {
+        final CompiledNode<String>[] missingChild = children(1);
+        final CompiledNode<String>[] orderedChildren = children(2);
+        orderedChildren[0] = leaf();
+        orderedChildren[1] = leaf();
+
+        assertAll(
+                () -> assertThrows(NullPointerException.class,
+                        () -> new CompiledNode<String>(new char[] { 'a' }, missingChild, new String[0])),
+                () -> assertThrows(IllegalArgumentException.class,
+                        () -> new CompiledNode<String>(new char[] { 'b', 'a' }, orderedChildren, new String[0])),
+                () -> assertThrows(NullPointerException.class,
+                        () -> new CompiledNode<String>(new char[0], noChildren(), new String[] { null },
+                                new int[] { 1 })),
+                () -> assertThrows(IllegalArgumentException.class,
+                        () -> new CompiledNode<String>(new char[0], noChildren(), new String[] { "value" },
+                                new int[] { 0 })));
+    }
+
+    /**
      * Verifies that {@link CompiledNode} continues to expose the documented backing
      * arrays directly.
      */
@@ -160,6 +187,7 @@ class CompiledNodeAndNodeDataTest {
     void compiledNodeAccessorsShouldExposeDocumentedBackingArrays() {
         final char[] edgeLabels = new char[] { 'a' };
         final CompiledNode<String>[] children = children(1);
+        children[0] = leaf();
         final String[] orderedValues = new String[] { "stem" };
         final int[] orderedCounts = new int[] { 5 };
         final CompiledNode<String> node = new CompiledNode<>(edgeLabels, children, orderedValues, orderedCounts);

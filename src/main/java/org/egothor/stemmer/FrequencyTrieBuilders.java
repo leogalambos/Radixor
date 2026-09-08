@@ -281,7 +281,16 @@ public final class FrequencyTrieBuilders {
         return result;
     }
 
-    /** Adds one structural quantity with an explicit overflow failure. */
+    /**
+     * Adds two structural quantities and converts numeric overflow into a
+     * diagnostic state failure.
+     *
+     * @param left  accumulated quantity
+     * @param right non-negative quantity to add
+     * @param label safe diagnostic name of the statistic being calculated
+     * @return exact sum of {@code left} and {@code right}
+     * @throws IllegalStateException if the sum exceeds the {@code long} range
+     */
     private static long checkedAdd(final long left, final long right, final String label) {
         try {
             return Math.addExact(left, right);
@@ -290,7 +299,14 @@ public final class FrequencyTrieBuilders {
         }
     }
 
-    /** Mutable counters confined to one statistics traversal. */
+    /**
+     * Mutable structural counters confined to one statistics traversal.
+     *
+     * <p>
+     * Instances never escape {@link #computeStatistics(FrequencyTrie)} and are
+     * therefore neither shared nor required to be thread-safe.
+     * </p>
+     */
     private static final class StructuralCounters {
         private long internalNodes;
         private long leafNodes;
@@ -301,7 +317,13 @@ public final class FrequencyTrieBuilders {
         private long denseTableSlots;
     }
 
-    /** Memoized logical-path summary relative to one compiled node. */
+    /**
+     * Immutable memoized logical-path summary relative to one compiled node.
+     *
+     * @param leafPathCount number of logical paths ending at leaves
+     * @param totalLeafDepth sum of the relative depths of those paths
+     * @param longestPath maximum relative path depth
+     */
     private record PathSummary(long leafPathCount, long totalLeafDepth, long longestPath) { }
 
     /**
@@ -320,6 +342,13 @@ public final class FrequencyTrieBuilders {
         for (int valueIndex = 0; valueIndex < node.orderedValues().length; valueIndex++) {
             builder.put(logicalKey, node.orderedValues()[valueIndex], node.orderedCounts()[valueIndex]);
         }
+        // Preserve the "accepts remaining input" generalization of a contracted
+        // leaf: its original member paths were collapsed away and cannot be
+        // replayed, so reduction alone would not re-derive the accepting flag.
+        if (node.acceptsRemainingInput()) {
+            builder.markAcceptsRemainingInput(logicalKey);
+        }
+        builder.recordCompiledSource(logicalKey, node);
 
         for (int childIndex = 0; childIndex < node.edgeLabels().length; childIndex++) {
             keyBuilder.append(node.edgeLabels()[childIndex]);

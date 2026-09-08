@@ -30,13 +30,29 @@
  ******************************************************************************/
 package org.egothor.stemmer.trie;
 
+import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 import org.egothor.stemmer.ReductionSettings;
 
 /**
- * Reduction context used while canonicalizing mutable nodes.
+ * Mutable state confined to one bottom-up trie-reduction pass.
+ *
+ * <p>
+ * The context owns the canonical-node table for the configured semantic
+ * reduction mode. It also tracks provenance when a compiled DAG has been expanded
+ * into mutable logical paths, ensuring that already-aggregated counts are not
+ * multiplied during recompilation.
+ * </p>
+ *
+ * <p>
+ * Instances are not thread-safe and must not be reused across concurrent or
+ * sequential builder compilations.
+ * </p>
  *
  * @param <V> value type
  */
@@ -53,46 +69,87 @@ public final class ReductionContext<V> {
     private final Map<ReductionSignature<V>, ReducedNode<V>> canonicalNodes;
 
     /**
-     * Creates a new context.
+     * Source compiled-node identities already represented by each canonical node.
+     */
+    private final Map<ReducedNode<V>, Set<Object>> contributedCompiledSources;
+
+    /**
+     * Creates an empty reduction context for one compilation.
      *
-     * @param settings settings
+     * @param settings immutable reduction settings governing canonical equality
+     * @throws NullPointerException if {@code settings} is {@code null}
      */
     public ReductionContext(final ReductionSettings settings) {
-        this.settings = settings;
+        this.settings = Objects.requireNonNull(settings, "settings");
         this.canonicalNodes = new LinkedHashMap<>();
+        this.contributedCompiledSources = new IdentityHashMap<>();
     }
 
     /**
-     * Looks up a canonical node.
+     * Looks up the canonical node previously registered for {@code signature}.
      *
-     * @param signature signature
+     * @param signature semantic subtree signature
      * @return canonical node, or {@code null} if absent
+     * @throws NullPointerException if {@code signature} is {@code null}
      */
     public ReducedNode<V> lookup(final ReductionSignature<V> signature) {
-        return this.canonicalNodes.get(signature);
+        return this.canonicalNodes.get(Objects.requireNonNull(signature, "signature"));
     }
 
     /**
-     * Registers a canonical node.
+     * Registers a canonical node for {@code signature}, replacing any previous
+     * association. Normal bottom-up reduction registers each signature once; the
+     * replacement behavior keeps this context usable by controlled reconstruction
+     * and test infrastructure.
      *
-     * @param signature signature
-     * @param node      node
+     * @param signature semantic subtree signature
+     * @param node      canonical reduced node
+     * @throws NullPointerException if either argument is {@code null}
      */
     public void register(final ReductionSignature<V> signature, final ReducedNode<V> node) {
+        Objects.requireNonNull(signature, "signature");
+        Objects.requireNonNull(node, "node");
         this.canonicalNodes.put(signature, node);
     }
 
     /**
-     * Returns the settings.
+     * Records that one canonical node now includes the counts of a source compiled
+     * DAG node.
      *
-     * @return settings
+     * <p>
+     * Reconstruction expands a shared compiled node at every logical path. Its
+     * counts are already aggregated, so only the first expanded occurrence merged
+     * into a given canonical node may contribute them again. Both map levels use
+     * identity semantics because compiled and reduced nodes are graph vertices,
+     * not value objects.
+     * </p>
+     *
+     * @param canonical     canonical node receiving the contribution
+     * @param sourceIdentity identity of the source compiled node
+     * @return {@code true} if this is the first contribution of that source to the
+     *         canonical node; {@code false} if its counts are already represented
+     * @throws NullPointerException if either argument is {@code null}
+     */
+    public boolean recordCompiledSourceContribution(final ReducedNode<V> canonical, final Object sourceIdentity) {
+        Objects.requireNonNull(canonical, "canonical");
+        Objects.requireNonNull(sourceIdentity, "sourceIdentity");
+        final Set<Object> sources = this.contributedCompiledSources.computeIfAbsent(canonical,
+                ignored -> Collections.newSetFromMap(new IdentityHashMap<>()));
+        return sources.add(sourceIdentity);
+    }
+
+    /**
+     * Returns the immutable settings governing this reduction pass.
+     *
+     * @return non-null reduction settings
      */
     public ReductionSettings settings() {
         return this.settings;
     }
 
     /**
-     * Returns the number of canonical nodes.
+     * Returns the number of distinct semantic subtree signatures registered so
+     * far.
      *
      * @return canonical node count
      */

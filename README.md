@@ -396,6 +396,14 @@ transformations, and Leo Galambos's limited contribution notice carried by each 
 PoliMorf model data retains its separate BSD-2-Clause license. There is no project-wide CC license
 directory because the root artifact contains no model data.
 
+Maintained software sources and executable build scripts carry the canonical Radixor
+BSD-3-Clause header in the comment syntax appropriate to their language. A BSD-3-Clause header on
+`models/*/build.gradle` governs only that build script; it does not relicense the associated model
+input or generated dictionary. Model data remains governed by its module's `sourceLicense`,
+packaged notice, and provenance metadata. Generated Gradle wrappers retain their upstream
+Apache-2.0 notice, while data, documentation, manifests, and other non-executable metadata need not
+duplicate a software-source header.
+
 ```groovy
 dependencies {
     implementation 'org.egothor:radixor:<latest-java-version>'

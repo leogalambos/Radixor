@@ -585,7 +585,7 @@ fn apply_backward_into(
                 if position < 0 || position > current_len || position > del_end_excl {
                     return fill_with_source(out, source);
                 }
-                let deleted = (del_end_excl.min(current_len) - position) as i32;
+                let deleted = del_end_excl.min(current_len) - position;
                 if src_end < deleted {
                     return fill_with_source(out, source);
                 }

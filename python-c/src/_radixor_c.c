@@ -1,5 +1,36 @@
+/*******************************************************************************
+ * Copyright (C) 2026, Leo Galambos
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * 3. Neither the name of the copyright holder nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ ******************************************************************************/
+
 /*
- * _radixor_c.c — CPython C extension for the Radixor stemmer.
+ * CPython C extension for the Radixor stemmer.
  *
  * Loads pre-compiled Radixor v7 trie files (.rxc, gzip-framed).
  * TSV→trie compilation stays in the 'radixor' (Rust/PyO3) package.
@@ -7,8 +38,6 @@
  * The list-specialized batch path uses borrowed input references and transfers
  * each result reference directly into the output list. This avoids temporary
  * sequence objects and reference-count churn in the per-word loop.
- *
- * Copyright (C) 2026, Leo Galambos. BSD-3-Clause.
  */
 
 #define PY_SSIZE_T_CLEAN
@@ -81,7 +110,16 @@ typedef struct {
     int backward;
     int lowercase;
     int source_slice_ok; /* !lowercase && !remove_diacritics */
+    /* get/getAll command-selection policy (see LOOKUP_*). */
+    int lookup_mode;
 } RadixorTrie;
+
+/* Command-selection policy: shallowest accepting wins (default, Java-faithful). */
+#define LOOKUP_FIRST 0
+/* Deepest, most-specific match wins; accepting ancestors are a fallback. */
+#define LOOKUP_LAST 1
+/* Collect all applicable commands along the path (affects stem_all). */
+#define LOOKUP_ALL 2
 
 typedef struct {
     PyObject_HEAD RadixorTrie *trie;
@@ -165,7 +203,7 @@ static Py_ssize_t utf16_to_utf8(const uint16_t *u, Py_ssize_t n, char *dst)
         uint16_t hi = u[i];
         if (hi >= 0xD800u && hi <= 0xDBFFu && i + 1 < n) {
             uint16_t lo = u[i + 1];
-            if (lo >= 0xDC00u && lo <= 0xDFFFFu) {
+            if (lo >= 0xDC00u && lo <= 0xDFFFu) {
                 cp = 0x10000u + ((uint32_t)(hi - 0xD800u) << 10) + (lo - 0xDC00u);
                 i++;
             } else
@@ -239,7 +277,7 @@ static int ensure_u8_cap(StemmerCoreObject *self, Py_ssize_t need)
 
 /* Patch parsing. */
 
-static const Patch PATCH_PRESERVE_SINGLETON = {PATCH_PRESERVE, {{0}}};
+static const Patch PATCH_PRESERVE_SINGLETON = {PATCH_PRESERVE, {.count = 0}};
 
 static int decode_count(uint16_t arg, uint32_t *out)
 {
@@ -900,6 +938,74 @@ static uint32_t find_node(const RadixorTrie *t, const uint16_t *key, Py_ssize_t 
     return node;
 }
 
+/* Locate the deepest (most specific) node for key[0..key_len), falling back to
+   the deepest accepting ancestor when descent dead-ends or the exact terminal
+   stores no value. Returns node id, or UINT32_MAX when nothing applies. */
+static uint32_t find_node_last(const RadixorTrie *t, const uint16_t *key, Py_ssize_t key_len)
+{
+    uint32_t node = 0;
+    uint32_t fallback = t->accepts[0] ? 0 : UINT32_MAX;
+    for (Py_ssize_t step = 0; step < key_len; step++) {
+        Py_ssize_t index = t->backward ? key_len - 1 - step : step;
+        uint32_t next = child_of(t, node, key[index]);
+        if (next == UINT32_MAX)
+            return fallback;
+        node = next;
+        if (t->accepts[node])
+            fallback = node;
+    }
+    if (t->value_start[node + 1] > t->value_start[node])
+        return node;
+    return fallback;
+}
+
+/* Resolve the single node a scalar lookup addresses, honoring the lookup mode. */
+static uint32_t find_node_resolved(const RadixorTrie *t, const uint16_t *key, Py_ssize_t key_len)
+{
+    return t->lookup_mode == LOOKUP_FIRST ? find_node(t, key, key_len)
+                                          : find_node_last(t, key, key_len);
+}
+
+/* Collect applicable nodes along the key path, most specific first (exact
+   terminal, then accepting ancestors deepest-to-shallowest). Writes up to
+   key_len + 1 node ids to out and returns the count. */
+static Py_ssize_t collect_path_nodes(const RadixorTrie *t, const uint16_t *key, Py_ssize_t key_len,
+                                     uint32_t *out)
+{
+    uint32_t node = 0;
+    Py_ssize_t n_acc = 0;
+    if (t->accepts[0])
+        out[n_acc++] = 0;
+    int fully_consumed = 1;
+    for (Py_ssize_t step = 0; step < key_len; step++) {
+        Py_ssize_t index = t->backward ? key_len - 1 - step : step;
+        uint32_t next = child_of(t, node, key[index]);
+        if (next == UINT32_MAX) {
+            fully_consumed = 0;
+            break;
+        }
+        node = next;
+        if (t->accepts[node])
+            out[n_acc++] = node;
+    }
+
+    /* Reverse accepting ancestors into deepest-to-shallowest order. */
+    for (Py_ssize_t left = 0, right = n_acc - 1; left < right; left++, right--) {
+        uint32_t swap = out[left];
+        out[left] = out[right];
+        out[right] = swap;
+    }
+
+    /* Prepend an exact terminal unless it is already the deepest accepting node. */
+    if (fully_consumed && (n_acc == 0 || out[0] != node) &&
+        t->value_start[node + 1] > t->value_start[node]) {
+        memmove(out + 1, out, (size_t)n_acc * sizeof(uint32_t));
+        out[0] = node;
+        return n_acc + 1;
+    }
+    return n_acc;
+}
+
 /* Stemming operations. */
 
 /* Stem one Python str word (no cache). Returns a new Python str ref, or Py_None (new ref).
@@ -922,7 +1028,7 @@ static PyObject *stem_str(StemmerCoreObject *self, PyObject *word_obj)
     if (key_len < 0)
         return NULL;
 
-    uint32_t node = find_node(t, self->key_buf, key_len);
+    uint32_t node = find_node_resolved(t, self->key_buf, key_len);
     if (node == UINT32_MAX)
         Py_RETURN_NONE;
     uint32_t pid = t->preferred_ids[node];
@@ -1391,6 +1497,7 @@ static RadixorTrie *trie_load_stream(const unsigned char *data, Py_ssize_t data_
     t->backward = backward;
     t->lowercase = lowercase;
     t->source_slice_ok = !lowercase && !remove_diacritics;
+    t->lookup_mode = LOOKUP_FIRST;
 
     if (!build_dense(t)) {
         trie_free(t);
@@ -1469,14 +1576,29 @@ static void StemmerCore_dealloc(StemmerCoreObject *self)
 
 static PyObject *StemmerCore_new(PyTypeObject *type, PyObject *args, PyObject *kwargs)
 {
-    static char *kwlist[] = {"path", "backward", "store_original", "lowercase", "cache_size", NULL};
+    static char *kwlist[] = {"path",       "backward", "store_original",
+                             "lowercase",  "cache_size", "lookup", NULL};
     const char *path;
     int backward = 1, store_original = 1, lowercase = 1;
     Py_ssize_t cache_size = 10000;
+    const char *lookup = "first";
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "s|iiip", kwlist, &path, &backward,
-                                     &store_original, &lowercase, &cache_size))
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "s|iiinz", kwlist, &path, &backward,
+                                     &store_original, &lowercase, &cache_size, &lookup))
         return NULL;
+
+    int lookup_mode;
+    if (!lookup || strcmp(lookup, "first") == 0) {
+        lookup_mode = LOOKUP_FIRST;
+    } else if (strcmp(lookup, "last") == 0) {
+        lookup_mode = LOOKUP_LAST;
+    } else if (strcmp(lookup, "all") == 0) {
+        lookup_mode = LOOKUP_ALL;
+    } else {
+        PyErr_Format(PyExc_ValueError,
+                     "invalid lookup mode '%s'; expected 'first', 'last', or 'all'", lookup);
+        return NULL;
+    }
 
     StemmerCoreObject *self = (StemmerCoreObject *)type->tp_alloc(type, 0);
     if (!self)
@@ -1487,6 +1609,7 @@ static PyObject *StemmerCore_new(PyTypeObject *type, PyObject *args, PyObject *k
         Py_DECREF(self);
         return NULL;
     }
+    self->trie->lookup_mode = lookup_mode;
 
     /* Direction and original-value handling are encoded in the model. */
     (void)backward;
@@ -1697,6 +1820,45 @@ static PyObject *StemmerCore_stemWords(StemmerCoreObject *self, PyObject *words)
     return out;
 }
 
+/* Append node's stems (each stored patch applied to the encoded key) to result.
+   When dedup is set, results already present are skipped. Returns 0, or -1 on
+   error (with a Python exception set). */
+static int emit_node_stems(StemmerCoreObject *self, const RadixorTrie *t, uint32_t node,
+                           Py_ssize_t key_len, PyObject *result, int dedup)
+{
+    uint32_t vs = t->value_start[node], ve = t->value_start[node + 1];
+    for (uint32_t vi = vs; vi < ve; vi++) {
+        uint32_t pid = t->value_ids[vi];
+        const Patch *p = &t->patches[pid];
+        if (!ensure_u16_cap(self, (key_len + 4) * 2))
+            return -1;
+        Py_ssize_t out_len = apply_into(p, self->key_buf, key_len, self->u16_buf);
+        if (!ensure_u8_cap(self, out_len * 4 + 4))
+            return -1;
+        Py_ssize_t utf8_out = utf16_to_utf8(self->u16_buf, out_len, self->u8_buf);
+        PyObject *s = PyUnicode_FromStringAndSize(self->u8_buf, utf8_out);
+        if (!s)
+            return -1;
+        if (dedup) {
+            int present = PySequence_Contains(result, s);
+            if (present < 0) {
+                Py_DECREF(s);
+                return -1;
+            }
+            if (present) {
+                Py_DECREF(s);
+                continue;
+            }
+        }
+        if (PyList_Append(result, s) < 0) {
+            Py_DECREF(s);
+            return -1;
+        }
+        Py_DECREF(s);
+    }
+    return 0;
+}
+
 /* stem_all(word: str) → list[str] */
 static PyObject *StemmerCore_stem_all(StemmerCoreObject *self, PyObject *word_obj)
 {
@@ -1714,35 +1876,36 @@ static PyObject *StemmerCore_stem_all(StemmerCoreObject *self, PyObject *word_ob
     if (key_len < 0)
         return NULL;
 
-    uint32_t node = find_node(t, self->key_buf, key_len);
     PyObject *result = PyList_New(0);
     if (!result)
         return NULL;
+
+    /* ALL mode: gather every applicable command along the path, most specific
+       first, de-duplicated by result. */
+    if (t->lookup_mode == LOOKUP_ALL) {
+        uint32_t *path = (uint32_t *)PyMem_Malloc((size_t)(key_len + 1) * sizeof(uint32_t));
+        if (!path) {
+            Py_DECREF(result);
+            return PyErr_NoMemory();
+        }
+        Py_ssize_t count = collect_path_nodes(t, self->key_buf, key_len, path);
+        for (Py_ssize_t i = 0; i < count; i++) {
+            if (emit_node_stems(self, t, path[i], key_len, result, 1) < 0) {
+                PyMem_Free(path);
+                Py_DECREF(result);
+                return NULL;
+            }
+        }
+        PyMem_Free(path);
+        return result;
+    }
+
+    uint32_t node = find_node_resolved(t, self->key_buf, key_len);
     if (node == UINT32_MAX)
         return result;
-
-    uint32_t vs = t->value_start[node], ve = t->value_start[node + 1];
-    for (uint32_t vi = vs; vi < ve; vi++) {
-        uint32_t pid = t->value_ids[vi];
-        const Patch *p = &t->patches[pid];
-        Py_ssize_t need = (key_len + 4) * 2;
-        if (!ensure_u16_cap(self, need)) {
-            Py_DECREF(result);
-            return NULL;
-        }
-        Py_ssize_t out_len = apply_into(p, self->key_buf, key_len, self->u16_buf);
-        if (!ensure_u8_cap(self, out_len * 4 + 4)) {
-            Py_DECREF(result);
-            return NULL;
-        }
-        Py_ssize_t utf8_out = utf16_to_utf8(self->u16_buf, out_len, self->u8_buf);
-        PyObject *s = PyUnicode_FromStringAndSize(self->u8_buf, utf8_out);
-        if (!s || PyList_Append(result, s) < 0) {
-            Py_XDECREF(s);
-            Py_DECREF(result);
-            return NULL;
-        }
-        Py_DECREF(s);
+    if (emit_node_stems(self, t, node, key_len, result, 0) < 0) {
+        Py_DECREF(result);
+        return NULL;
     }
     return result;
 }
@@ -1775,6 +1938,7 @@ static PyObject *StemmerCore_stem_all_batch(StemmerCoreObject *self, PyObject *w
 
 static PyObject *StemmerCore_optimization_tag(StemmerCoreObject *self, PyObject *Py_UNUSED(ignored))
 {
+    (void)self;
     return PyUnicode_FromString("c-extension-v1");
 }
 
@@ -1799,7 +1963,17 @@ static PyTypeObject StemmerCoreType = {
 
 /* Module initialization. */
 
-static PyModuleDef _radixor_c_module = {PyModuleDef_HEAD_INIT, "_radixor_c", NULL, -1, NULL};
+static PyModuleDef _radixor_c_module = {
+    .m_base = PyModuleDef_HEAD_INIT,
+    .m_name = "_radixor_c",
+    .m_doc = NULL,
+    .m_size = -1,
+    .m_methods = NULL,
+    .m_slots = NULL,
+    .m_traverse = NULL,
+    .m_clear = NULL,
+    .m_free = NULL,
+};
 
 PyMODINIT_FUNC PyInit__radixor_c(void)
 {

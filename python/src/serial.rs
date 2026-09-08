@@ -43,7 +43,7 @@
 // The outer gzip framing (headers/mtime) is not byte-identical across Java and
 // Rust, but the INNER stream is, and both directions gunzip+parse each other.
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::io::{self, Read, Write};
 
 use flate2::read::GzDecoder;
@@ -193,14 +193,18 @@ impl<'a> Reader<'a> {
     }
 
     fn take(&mut self, n: usize) -> io::Result<&'a [u8]> {
-        if self.pos + n > self.data.len() {
-            return Err(io::Error::new(
-                io::ErrorKind::UnexpectedEof,
-                "unexpected end of trie stream",
-            ));
-        }
-        let slice = &self.data[self.pos..self.pos + n];
-        self.pos += n;
+        let end = self
+            .pos
+            .checked_add(n)
+            .filter(|end| *end <= self.data.len())
+            .ok_or_else(|| {
+                io::Error::new(
+                    io::ErrorKind::UnexpectedEof,
+                    "unexpected end of trie stream",
+                )
+            })?;
+        let slice = &self.data[self.pos..end];
+        self.pos = end;
         Ok(slice)
     }
 
@@ -238,7 +242,10 @@ fn decode_java_utf(bytes: &[u8]) -> io::Result<String> {
                 return Err(malformed());
             }
             let b1 = bytes[i + 1];
-            units.push((((b as u16 & 0x1F) << 6) | (b1 as u16 & 0x3F)) as u16);
+            if b1 & 0xC0 != 0x80 {
+                return Err(malformed());
+            }
+            units.push(((b as u16 & 0x1F) << 6) | (b1 as u16 & 0x3F));
             i += 2;
         } else if b & 0xF0 == 0xE0 {
             if i + 2 >= bytes.len() {
@@ -246,6 +253,9 @@ fn decode_java_utf(bytes: &[u8]) -> io::Result<String> {
             }
             let b1 = bytes[i + 1];
             let b2 = bytes[i + 2];
+            if b1 & 0xC0 != 0x80 || b2 & 0xC0 != 0x80 {
+                return Err(malformed());
+            }
             units.push(((b as u16 & 0x0F) << 12) | ((b1 as u16 & 0x3F) << 6) | (b2 as u16 & 0x3F));
             i += 3;
         } else {
@@ -357,8 +367,27 @@ pub(crate) fn is_v7_stream(decompressed: &[u8]) -> bool {
         ]) == STREAM_MAGIC
 }
 
-/// Parse the inner (uncompressed) v7 stream into a runtime trie.
-pub(crate) fn read_stream(data: &[u8]) -> io::Result<FrequencyTrie> {
+/// Structural decode of a v7 stream, preserving the value dictionary strings and
+/// per-value frequencies. This is the faithful, loss-free view of the compiled
+/// trie used to reconstruct a mutable builder ("unlock" the immutable trie);
+/// the runtime [`read_stream`] discards counts and pre-parses patch commands.
+pub(crate) struct ParsedV7 {
+    pub accepts: Vec<bool>,
+    pub edge_start: Vec<u32>,
+    pub edge_labels: Vec<u16>,
+    pub edge_targets: Vec<u32>,
+    pub value_start: Vec<u32>,
+    /// Per value-reference: index into `value_strings`.
+    pub value_str_ids: Vec<u32>,
+    /// Per value-reference: stored frequency, parallel to `value_str_ids`.
+    pub value_counts: Vec<i32>,
+    /// Distinct patch-command strings, in stream (value-id) order.
+    pub value_strings: Vec<String>,
+    pub metadata: TrieMetadata,
+}
+
+/// Parse the inner (uncompressed) v7 stream, keeping counts and value strings.
+pub(crate) fn read_stream_raw(data: &[u8]) -> io::Result<ParsedV7> {
     let mut r = Reader::new(data);
     if r.i32()? != STREAM_MAGIC {
         return Err(io::Error::new(
@@ -373,7 +402,14 @@ pub(crate) fn read_stream(data: &[u8]) -> io::Result<FrequencyTrie> {
             format!("unsupported trie stream version {version} (expected {STREAM_VERSION})"),
         ));
     }
-    let node_count = r.i32()? as usize;
+    let node_count_raw = r.i32()?;
+    if node_count_raw < 1 || node_count_raw as usize > data.len() {
+        return Err(io::Error::new(
+            io::ErrorKind::InvalidData,
+            "node count must be positive and fit within the stream",
+        ));
+    }
+    let node_count = node_count_raw as usize;
     let root_id = r.i32()?;
     if root_id != 0 {
         return Err(io::Error::new(
@@ -382,13 +418,18 @@ pub(crate) fn read_stream(data: &[u8]) -> io::Result<FrequencyTrie> {
         ));
     }
     let metadata = parse_metadata(&r.java_utf()?);
-    let backward = matches!(metadata.traversal, TraversalDirection::Backward);
 
-    let value_table_len = r.i32()? as usize;
-    let mut patches: Vec<PatchCommand> = Vec::with_capacity(value_table_len);
+    let value_table_len_raw = r.i32()?;
+    if value_table_len_raw < 0 || value_table_len_raw as usize > data.len() / 2 {
+        return Err(io::Error::new(
+            io::ErrorKind::InvalidData,
+            "value-table count is negative or exceeds the stream bounds",
+        ));
+    }
+    let value_table_len = value_table_len_raw as usize;
+    let mut value_strings: Vec<String> = Vec::with_capacity(value_table_len);
     for _ in 0..value_table_len {
-        let patch = r.java_utf()?;
-        patches.push(PatchCommand::parse(&patch, backward));
+        value_strings.push(r.java_utf()?);
     }
 
     let mut edge_start: Vec<u32> = Vec::with_capacity(node_count + 1);
@@ -396,50 +437,187 @@ pub(crate) fn read_stream(data: &[u8]) -> io::Result<FrequencyTrie> {
     let mut edge_targets: Vec<u32> = Vec::new();
     let mut accepts: Vec<bool> = Vec::with_capacity(node_count);
     let mut value_start: Vec<u32> = Vec::with_capacity(node_count + 1);
-    let mut value_ids: Vec<u32> = Vec::new();
+    let mut value_str_ids: Vec<u32> = Vec::new();
+    let mut value_counts: Vec<i32> = Vec::new();
     edge_start.push(0);
     value_start.push(0);
 
-    for _ in 0..node_count {
-        accepts.push(r.u8()? != 0);
-        let edge_count = r.i32()? as usize;
+    for node in 0..node_count {
+        let accepts_byte = r.u8()?;
+        if accepts_byte > 1 {
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidData,
+                format!("invalid accepting flag {accepts_byte} at node {node}"),
+            ));
+        }
+        accepts.push(accepts_byte != 0);
+        let edge_count_raw = r.i32()?;
+        if edge_count_raw < 0 || edge_count_raw as usize > (data.len() - r.pos) / 6 {
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidData,
+                format!("invalid edge count {edge_count_raw} at node {node}"),
+            ));
+        }
+        let edge_count = edge_count_raw as usize;
+        let mut previous_label: Option<u16> = None;
         for _ in 0..edge_count {
             let label = r.u16()?;
-            let child = r.i32()? as u32;
+            if previous_label.is_some_and(|previous| previous >= label) {
+                return Err(io::Error::new(
+                    io::ErrorKind::InvalidData,
+                    format!("edge labels are not strictly ascending at node {node}"),
+                ));
+            }
+            previous_label = Some(label);
+            let child_raw = r.i32()?;
+            if child_raw < 0 || child_raw as usize >= node_count {
+                return Err(io::Error::new(
+                    io::ErrorKind::InvalidData,
+                    format!("child node id {child_raw} is out of range at node {node}"),
+                ));
+            }
             edge_labels.push(label);
-            edge_targets.push(child);
+            edge_targets.push(child_raw as u32);
         }
         edge_start.push(edge_labels.len() as u32);
 
-        let value_count = r.i32()? as usize;
+        let value_count_raw = r.i32()?;
+        if value_count_raw < 0 || value_count_raw as usize > (data.len() - r.pos) / 8 {
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidData,
+                format!("invalid value count {value_count_raw} at node {node}"),
+            ));
+        }
+        let value_count = value_count_raw as usize;
+        if accepts_byte != 0 && value_count == 0 {
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidData,
+                format!("accepting node {node} has no value"),
+            ));
+        }
+        let mut seen_value_ids: HashSet<usize> = HashSet::with_capacity(value_count);
         for _ in 0..value_count {
-            let value_id = r.i32()? as usize;
-            let _count = r.i32()?; // frequency: not used at runtime
-            if value_id >= patches.len() {
+            let value_id_raw = r.i32()?;
+            let count = r.i32()?;
+            if value_id_raw < 0 || value_id_raw as usize >= value_strings.len() {
                 return Err(io::Error::new(
                     io::ErrorKind::InvalidData,
-                    "value id out of range",
+                    format!("value id {value_id_raw} is out of range at node {node}"),
                 ));
             }
-            value_ids.push(value_id as u32);
+            if count < 1 {
+                return Err(io::Error::new(
+                    io::ErrorKind::InvalidData,
+                    format!("value count {count} must be positive at node {node}"),
+                ));
+            }
+            let value_id = value_id_raw as usize;
+            if !seen_value_ids.insert(value_id) {
+                return Err(io::Error::new(
+                    io::ErrorKind::InvalidData,
+                    format!("duplicate value id {value_id} at node {node}"),
+                ));
+            }
+            value_str_ids.push(value_id as u32);
+            value_counts.push(count);
         }
-        value_start.push(value_ids.len() as u32);
+        value_start.push(value_str_ids.len() as u32);
     }
 
-    let (dense_start, dense_base, dense_targets) =
-        build_dense(&edge_start, &edge_labels, &edge_targets);
+    validate_node_graph(node_count, &edge_start, &edge_targets)?;
 
-    Ok(FrequencyTrie::new(
+    Ok(ParsedV7 {
+        accepts,
         edge_start,
         edge_labels,
         edge_targets,
-        accepts,
         value_start,
+        value_str_ids,
+        value_counts,
+        value_strings,
+        metadata,
+    })
+}
+
+/// Verify that every serialized node is reachable from root node zero and that
+/// the edge graph is acyclic. The iterative walk avoids recursion on hostile
+/// inputs with extreme depth.
+fn validate_node_graph(
+    node_count: usize,
+    edge_start: &[u32],
+    edge_targets: &[u32],
+) -> io::Result<()> {
+    let mut state: Vec<u8> = vec![0; node_count];
+    let mut stack: Vec<(usize, usize)> = Vec::new();
+    state[0] = 1;
+    stack.push((0, edge_start[0] as usize));
+
+    while let Some((node, next_edge)) = stack.last_mut() {
+        let edge_end = edge_start[*node + 1] as usize;
+        if *next_edge == edge_end {
+            state[*node] = 2;
+            stack.pop();
+            continue;
+        }
+
+        let child = edge_targets[*next_edge] as usize;
+        *next_edge += 1;
+        match state[child] {
+            0 => {
+                state[child] = 1;
+                stack.push((child, edge_start[child] as usize));
+            }
+            1 => {
+                return Err(io::Error::new(
+                    io::ErrorKind::InvalidData,
+                    format!("cycle detected through node {child}"),
+                ));
+            }
+            _ => {}
+        }
+    }
+
+    if state.contains(&0) {
+        return Err(io::Error::new(
+            io::ErrorKind::InvalidData,
+            "compiled trie contains an unreachable node",
+        ));
+    }
+    Ok(())
+}
+
+/// Parse the inner (uncompressed) v7 stream into a runtime trie.
+pub(crate) fn read_stream(data: &[u8]) -> io::Result<FrequencyTrie> {
+    let parsed = read_stream_raw(data)?;
+    let backward = matches!(parsed.metadata.traversal, TraversalDirection::Backward);
+
+    // The value dictionary order is the runtime patch-id order: patches[i] is
+    // the compiled form of value_strings[i], so value_str_ids double as value
+    // ids into the patch table.
+    let patches: Vec<PatchCommand> = parsed
+        .value_strings
+        .iter()
+        .map(|s| PatchCommand::parse(s, backward))
+        .collect();
+    let value_ids = parsed.value_str_ids;
+
+    let (dense_start, dense_base, dense_targets) = build_dense(
+        &parsed.edge_start,
+        &parsed.edge_labels,
+        &parsed.edge_targets,
+    );
+
+    Ok(FrequencyTrie::new(
+        parsed.edge_start,
+        parsed.edge_labels,
+        parsed.edge_targets,
+        parsed.accepts,
+        parsed.value_start,
         value_ids,
         patches,
         dense_start,
         dense_base,
         dense_targets,
-        metadata,
+        parsed.metadata,
     ))
 }

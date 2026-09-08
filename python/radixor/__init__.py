@@ -53,6 +53,7 @@ from pathlib import Path
 from typing import Any, Iterable, Iterator, Optional, overload
 
 from radixor._radixor import StemmerCore
+from radixor._radixor import TrieBuilder as _TrieBuilder
 from radixor._radixor import compile as _compile
 
 _PYSTEMMER_MODEL_MAP: tuple[tuple[str, bool, tuple[str, ...], tuple[str, ...]], ...] = (
@@ -292,6 +293,16 @@ class Stemmer:
         When ``True`` (default) lookups lowercase the input word. Set to
         ``False`` when you guarantee the input is already lowercased (skips the
         per-lookup normalization; the model's keys are always lowercase).
+    lookup:
+        Command-selection policy for the get/getAll operations along a key's
+        trie path. ``"first"`` (default) is the Java-faithful behavior: the
+        shallowest accepting (most general) rule wins. ``"last"`` prefers the
+        most-specific match closest to the input — descent continues past
+        generalizations when a deeper edge exists (needed for custom
+        :class:`TrieBuilder` pairs added through an existing rule to take
+        effect). ``"all"`` makes :meth:`stem_all` return every candidate along
+        the path, most-specific first. For the standard models ``"first"`` and
+        ``"last"`` agree (their contracted rules have no deeper edges).
     cache_size:
         Maximum entries in the bounded result cache (default ``10_000``,
         matching PyStemmer). Set to ``0`` to disable caching. Cached results are
@@ -311,6 +322,7 @@ class Stemmer:
         backward: Optional[bool] = None,
         store_original: bool = True,
         lowercase: bool = True,
+        lookup: str = "first",
         cache_size: int = 10_000,
     ) -> None:
         source = path if path is not None else compiled
@@ -347,21 +359,55 @@ class Stemmer:
         self._backward = is_backward
         self._store_original = store_original
         self._lowercase = lowercase
+        self._lookup = lookup
         self._cache_size = cache_size
         self._source_path = model_path
         self._model_id = None if source is not None else model_id
+        self._core_factory = None
         self._core = self._create_core(cache_size)
 
+    @classmethod
+    def _from_core_factory(
+        cls,
+        factory: "Any",
+        *,
+        backward: bool,
+        store_original: bool,
+        lowercase: bool,
+        lookup: str,
+        cache_size: int,
+    ) -> "Stemmer":
+        """Build a Stemmer around a core produced by *factory* (a callable that
+        takes a cache size and returns a :class:`StemmerCore`).
+
+        Used by :class:`TrieBuilder` so a stemmer materialised from a modified
+        trie shares all the normal APIs, and can still rebuild its core when the
+        cache size changes.
+        """
+        self = cls.__new__(cls)
+        self._backward = backward
+        self._store_original = store_original
+        self._lowercase = lowercase
+        self._cache_size = cache_size
+        self._source_path = None
+        self._model_id = None
+        self._lookup = lookup
+        self._core_factory = factory
+        self._core = factory(cache_size)
+        return self
+
     def _create_core(self, cache_size: int) -> StemmerCore:
+        if self._core_factory is not None:
+            return self._core_factory(cache_size)
         if self._source_path is not None:
             return StemmerCore(
                 self._source_path, self._backward, self._store_original,
-                self._lowercase, cache_size
+                self._lowercase, self._lookup, cache_size
             )
         with _standard_model_path(self._model_id or "") as model_path:
             return StemmerCore(
                 str(model_path), self._backward, self._store_original,
-                self._lowercase, cache_size
+                self._lowercase, self._lookup, cache_size
             )
 
     @staticmethod
@@ -432,6 +478,232 @@ class Stemmer:
         """Return all stems for each word in *words* as a list of lists."""
         return self._core.stem_all_batch(words)
 
+    def to_builder(self) -> "TrieBuilder":
+        """Open this stemmer's model as a modifiable :class:`TrieBuilder`.
+
+        The builder is reconstructed from the same source (compiled ``.rxc`` or
+        textual dictionary) this stemmer was loaded from, so you can add custom
+        word→stem pairs and materialise a new stemmer or compiled dictionary.
+        A stemmer created from raw bytes with no retained source cannot be
+        reopened this way.
+        """
+        if self._source_path is not None:
+            return TrieBuilder(
+                path=self._source_path,
+                backward=self._backward,
+                store_original=self._store_original,
+                lowercase=self._lowercase,
+            )
+        if self._model_id is not None:
+            return TrieBuilder(
+                self._model_id,
+                store_original=self._store_original,
+                lowercase=self._lowercase,
+            )
+        raise ValueError(
+            "This stemmer has no retained source to reopen as a TrieBuilder."
+        )
+
+
+class TrieBuilder:
+    """Modifiable stemmer dictionary — the Python way to "unlock" an immutable
+    compiled trie, add custom ``word → stem`` pairs, and materialise a new
+    stemmer or a new compiled dictionary file.
+
+    This is the Python analogue of the Java ``FrequencyTrieBuilders.copyOf``
+    reconstruction followed by recompilation. Reconstructing from a compiled
+    ``.rxc`` v7 model faithfully preserves the reduced trie (including its
+    contracted "accepts remaining input" leaves), so an unmodified round-trip
+    preserves observable lookup results, candidate order, and aggregate counts.
+
+    Example::
+
+        from radixor import TrieBuilder
+
+        builder = TrieBuilder("en")           # default English model
+        builder.add("kubernetes", "kube")
+        builder.add("kuberneting", "kube")
+
+        stemmer = builder.build(lookup="last")  # make the specific rule win
+        assert stemmer.stemWord("kubernetes") == "kube"
+
+        builder.save("custom-en.rxc")         # persist as a custom dictionary
+
+    Parameters mirror :class:`Stemmer`. ``add`` respects the ``store_original``
+    and traversal direction captured here; adding pairs on fresh keys is the
+    reliable case (a key that runs through an existing contracted accepting leaf
+    keeps that leaf's generalization).
+
+    Builders are mutable and are not safe for concurrent mutation. Each
+    :meth:`build` call captures an immutable snapshot; subsequent updates do not
+    change a stemmer that was already built.
+    """
+
+    def __init__(
+        self,
+        language: Optional[str] = None,
+        *,
+        path: Optional[str] = None,
+        compiled: Optional[str] = None,
+        backward: Optional[bool] = None,
+        store_original: bool = True,
+        lowercase: bool = True,
+    ) -> None:
+        source = path if path is not None else compiled
+        self._backward = True if backward is None else backward
+        self._store_original = store_original
+        self._lowercase = lowercase
+
+        if source is not None:
+            self._core_builder = _TrieBuilder(
+                source, self._backward, store_original, lowercase
+            )
+        elif language is not None:
+            if language in _LANGUAGE_ALIASES:
+                model_id = _LANGUAGE_ALIASES[language]
+            elif language in _SUPPORTED_PYSTEMMER_MODEL_IDS:
+                model_id = language
+            elif "-" in language and _MODEL_ID.fullmatch(language) is not None:
+                model_id = language
+            elif ".." in language or "/" in language or "\\" in language:
+                raise ValueError(
+                    f"Invalid Radixor model ID {language!r}; expected lowercase letters, "
+                    "digits, and hyphens."
+                )
+            else:
+                raise KeyError(language)
+            with _standard_model_path(model_id) as model_path:
+                self._core_builder = _TrieBuilder(
+                    str(model_path), self._backward, store_original, lowercase
+                )
+        else:
+            raise ValueError("Provide 'language', 'path', or 'compiled'.")
+
+    @classmethod
+    def from_bytes(
+        cls,
+        data: bytes,
+        *,
+        backward: Optional[bool] = None,
+        store_original: bool = True,
+        lowercase: bool = True,
+    ) -> "TrieBuilder":
+        """Reconstruct a builder from an in-memory model image (a compiled v7
+        trie or a textual TSV dictionary, optionally gzipped)."""
+        self = cls.__new__(cls)
+        self._backward = True if backward is None else backward
+        self._store_original = store_original
+        self._lowercase = lowercase
+        self._core_builder = _TrieBuilder.from_bytes(
+            data, self._backward, store_original, lowercase
+        )
+        return self
+
+    def add(
+        self,
+        word: str,
+        stem: str,
+        *,
+        count: Optional[int] = None,
+        only_if_absent: bool = False,
+    ) -> "TrieBuilder":
+        """Add one custom ``word → stem`` rule. Returns ``self`` for chaining.
+
+        By default the rule is made the **dominant** value at the word's node,
+        keeping any prior values as lower-ranked alternatives (visible via
+        :meth:`Stemmer.stem_all` under ``lookup="all"``). Pass ``count=N`` to add
+        a raw frequency ``N`` instead (which may or may not out-rank an existing
+        rule), or ``only_if_absent=True`` to store the rule only where the word
+        has no value yet. ``only_if_absent`` takes precedence over ``count``.
+
+        A shallower built-in generalization still short-circuits the rule under
+        ``lookup="first"``; build the stemmer with ``lookup="last"`` so the
+        specific rule wins (see :meth:`build`).
+        """
+        self._core_builder.add(word, stem, count, only_if_absent)
+        return self
+
+    def add_many(
+        self,
+        pairs: Iterable[tuple[str, str]],
+        *,
+        count: Optional[int] = None,
+        only_if_absent: bool = False,
+    ) -> "TrieBuilder":
+        """Add many ``(word, stem)`` rules. Returns ``self`` for chaining.
+
+        ``count`` and ``only_if_absent`` apply to every pair, with the same
+        meaning as :meth:`add`.
+        """
+        self._core_builder.add_many(list(pairs), count, only_if_absent)
+        return self
+
+    def set(self, word: str, stem: str) -> "TrieBuilder":
+        """Replace any existing rule for ``word`` with ``word → stem`` (the sole,
+        hence dominant, value at the word's node). Prior alternatives are
+        discarded. Returns ``self`` for chaining."""
+        self._core_builder.set(word, stem)
+        return self
+
+    def remove(self, word: str, stem: Optional[str] = None) -> "TrieBuilder":
+        """Remove a custom rule from the word's own node. Returns ``self``.
+
+        With no ``stem`` every rule stored at the word's node is removed; with
+        ``stem`` given only that specific ``word → stem`` rule is removed.
+
+        This targets the word's **exact** node only. A word that stems solely
+        through a shorter built-in generalization has no value at its own node,
+        so removing it does nothing — override it with :meth:`set` (or
+        :meth:`add`) and read with ``lookup="last"`` instead.
+        """
+        self._core_builder.remove(word, stem)
+        return self
+
+    def build(self, cache_size: int = 10_000, lookup: str = "first") -> Stemmer:
+        """Reduce and freeze the current builder into a usable :class:`Stemmer`.
+
+        ``lookup`` selects the get/getAll command-selection policy of the
+        resulting stemmer (see :class:`Stemmer`): ``"first"`` (default,
+        Java-faithful), ``"last"`` (most-specific match wins — needed for custom
+        pairs added through an existing generalization to take effect), or
+        ``"all"`` (``stem_all`` returns every candidate along the path).
+        The returned stemmer is an immutable snapshot of the builder at this
+        call; later builder updates are not visible to it.
+        """
+        # Freeze the builder at this call boundary. The Stemmer wrapper may
+        # recreate its native core when maxCacheSize changes; rebuilding from a
+        # byte snapshot prevents later builder mutations from leaking into that
+        # already-materialised stemmer.
+        snapshot = self.to_bytes()
+        backward = self._backward
+        store_original = self._store_original
+        lowercase = self._lowercase
+
+        def build_core(cache: int) -> StemmerCore:
+            core_builder = _TrieBuilder.from_bytes(
+                snapshot, backward, store_original, lowercase
+            )
+            return core_builder.build(cache, lookup)
+
+        return Stemmer._from_core_factory(
+            build_core,
+            backward=backward,
+            store_original=store_original,
+            lowercase=lowercase,
+            lookup=lookup,
+            cache_size=cache_size,
+        )
+
+    def to_bytes(self) -> bytes:
+        """Serialise to a Java-interoperable compiled trie image (gzip v7)."""
+        return self._core_builder.to_bytes()
+
+    def save(self, out_path: str) -> None:
+        """Write the current builder to *out_path* as a compiled dictionary
+        (conventionally ``*.rxc``), byte-compatible with the Radixor Java
+        ``StemmerPatchTrieBinaryIO`` v7 inner stream."""
+        self._core_builder.save(out_path)
+
 
 def compile(
     source: str,
@@ -468,4 +740,4 @@ def compile(
     _compile(source, out_path, backward, store_original, lowercase)
 
 
-__all__ = ["Stemmer", "algorithms", "compile", "version"]
+__all__ = ["Stemmer", "TrieBuilder", "algorithms", "compile", "version"]

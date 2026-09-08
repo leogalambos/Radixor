@@ -189,6 +189,30 @@ s = Stemmer(path="custom.gz", backward=True, store_original=True)
 stem is recognised. See [Dictionary Format](../dictionary-format.md) for the
 authoritative specification shared with the Java project.
 
+## Adding your own rules
+
+To adapt a model to brand names, trademarks, or domain vocabulary — for example
+so `Windows` is not stemmed to `window` — open it as a `TrieBuilder`, add
+`word → stem` rules, and build a new stemmer:
+
+```python
+from radixor import Stemmer
+
+builder = Stemmer("en").to_builder()
+builder.add("windows", "windows")          # protect a brand from over-stemming
+builder.add("kubernetes", "kube")          # add domain vocabulary
+
+stemmer = builder.build(lookup="last")     # 'last' lets specific rules win
+stemmer.stemWord("windows")                # 'windows'
+stemmer.stemWord("kubernetes")             # 'kube'
+```
+
+The `lookup` policy is what makes a specific rule override a general one; the
+default `"first"` keeps the legacy behavior. See
+[Customizing a Dictionary](customization.md) for the full set of update
+operations (`add`, `set`, `remove`, weights, gap-fill), the `first`/`last`/`all`
+lookup modes, and persistence.
+
 ## Thread-safety
 
 A `Stemmer` is safe to share across threads. The bounded cache is guarded
@@ -198,7 +222,7 @@ internally; the compiled trie is immutable after construction.
 
 | Call | Returns | Notes |
 |---|---|---|
-| `Stemmer(language=None, maxCacheSize: int | None = None, *, path=..., compiled=..., backward, store_original, lowercase, cache_size=10_000)` | stemmer | PyStemmer-compatible positional cache argument via `maxCacheSize`; if set, `cache_size` is ignored; `cache_size=0` disables caching (`maxCacheSize` remains supported as alias) |
+| `Stemmer(language=None, maxCacheSize: int | None = None, *, path=..., compiled=..., backward, store_original, lowercase, lookup="first", cache_size=10_000)` | stemmer | PyStemmer-compatible positional cache argument via `maxCacheSize`; if set, `cache_size` is ignored; `cache_size=0` disables caching (`maxCacheSize` remains supported as alias). `lookup` is `"first"` (default), `"last"`, or `"all"` — see [Customizing a Dictionary](customization.md) |
 | `stem(word)` | `str \| None` | dominant stem |
 | `stem_batch(words)` | `list[str \| None]` | **preferred** for many words |
 | `stemWord(word)` | `str \| bytes` | PyStemmer-compatible; returns an unmatched word unchanged |

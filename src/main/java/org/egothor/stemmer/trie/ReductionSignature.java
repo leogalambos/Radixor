@@ -61,16 +61,28 @@ public final class ReductionSignature<V> {
     private final boolean acceptsRemainingInput;
 
     /**
-     * Creates a signature.
+     * Optional identity token separating a modified reconstructed node from its
+     * unchanged compiled-source peers.
+     */
+    private final Object mergeDiscriminator;
+
+    /**
+     * Creates an immutable signature from an already-normalized local descriptor
+     * and sorted child descriptors.
      *
-     * @param localDescriptor  local descriptor
-     * @param childDescriptors child descriptors
+     * @param localDescriptor       semantic descriptor of node-local values
+     * @param childDescriptors      immutable child-edge descriptors
+     * @param acceptsRemainingInput whether the node accepts an unmatched input
+     *                              remainder
+     * @param mergeDiscriminator    optional copy-on-write identity token, or
+     *                              {@code null}
      */
     private ReductionSignature(final Object localDescriptor, final List<ChildDescriptor<V>> childDescriptors,
-            final boolean acceptsRemainingInput) {
+            final boolean acceptsRemainingInput, final Object mergeDiscriminator) {
         this.localDescriptor = localDescriptor;
         this.childDescriptors = childDescriptors;
         this.acceptsRemainingInput = acceptsRemainingInput;
+        this.mergeDiscriminator = mergeDiscriminator;
     }
 
     /**
@@ -83,10 +95,39 @@ public final class ReductionSignature<V> {
      *                              input
      * @param <V>          value type
      * @return subtree signature
+     * @throws NullPointerException if {@code localSummary}, {@code children}, or
+     *                              {@code settings} is {@code null}
      */
     public static <V> ReductionSignature<V> create(final LocalValueSummary<V> localSummary,
             final Map<Character, ReducedNode<V>> children, final ReductionSettings settings,
             final boolean acceptsRemainingInput) {
+        return create(localSummary, children, settings, acceptsRemainingInput, null);
+    }
+
+    /**
+     * Creates a subtree signature with an optional copy-on-write merge boundary.
+     *
+     * <p>
+     * A non-null discriminator is compared by its normal object identity (the
+     * reconstruction code supplies a fresh plain {@link Object}) and therefore
+     * prevents a locally modified expanded DAG node from being merged with an
+     * unchanged peer. Descendant discriminators propagate naturally through child
+     * descriptors.
+     * </p>
+     *
+     * @param localSummary          local value summary
+     * @param children              reduced children
+     * @param settings              reduction settings
+     * @param acceptsRemainingInput whether this node accepts any remaining input
+     * @param mergeDiscriminator    unique copy-on-write token, or {@code null}
+     * @param <V>                   value type
+     * @return subtree signature
+     * @throws NullPointerException if {@code localSummary}, {@code children}, or
+     *                              {@code settings} is {@code null}
+     */
+    public static <V> ReductionSignature<V> create(final LocalValueSummary<V> localSummary,
+            final Map<Character, ReducedNode<V>> children, final ReductionSettings settings,
+            final boolean acceptsRemainingInput, final Object mergeDiscriminator) {
         final Object localDescriptor = switch (settings.reductionMode()) {
             case MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS ->
                 RankedLocalDescriptor.of(localSummary.orderedValues());
@@ -111,7 +152,7 @@ public final class ReductionSignature<V> {
         }
 
         return new ReductionSignature<>(localDescriptor, Collections.unmodifiableList(childDescriptors),
-                acceptsRemainingInput);
+                acceptsRemainingInput, mergeDiscriminator);
     }
 
     /**
@@ -131,7 +172,8 @@ public final class ReductionSignature<V> {
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.localDescriptor, this.childDescriptors, this.acceptsRemainingInput);
+        return Objects.hash(this.localDescriptor, this.childDescriptors, this.acceptsRemainingInput,
+                this.mergeDiscriminator);
     }
 
     @Override
@@ -145,6 +187,7 @@ public final class ReductionSignature<V> {
         final ReductionSignature<?> that = (ReductionSignature<?>) other;
         return Objects.equals(this.localDescriptor, that.localDescriptor)
                 && Objects.equals(this.childDescriptors, that.childDescriptors)
-                && this.acceptsRemainingInput == that.acceptsRemainingInput;
+                && this.acceptsRemainingInput == that.acceptsRemainingInput
+                && Objects.equals(this.mergeDiscriminator, that.mergeDiscriminator);
     }
 }

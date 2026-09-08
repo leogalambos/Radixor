@@ -35,6 +35,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.CharBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -87,6 +88,14 @@ import org.egothor.stemmer.trie.ReductionSignature;
  * Values may be stored at any trie node, including internal nodes and leaf
  * nodes. Therefore, reduction and canonicalization always operate on both the
  * node-local terminal values and the structure of all descendant edges.
+ * </p>
+ *
+ * <p>
+ * Instances are immutable and safe for concurrent lookup. A
+ * {@linkplain #withLookupMode(LookupMode) lookup-mode view} shares the same
+ * compiled node graph and changes only which applicable node or nodes a read
+ * selects. Returned arrays and collections are caller-owned or immutable.
+ * </p>
  *
  * @param <V> value type
  */
@@ -153,6 +162,18 @@ public final class FrequencyTrie<V> {
      * {@link #getAll(String)}.
      */
     private final V[] emptyValues;
+
+    /**
+     * Read-time command-selection policy for the {@code get} / {@code getAll}
+     * family. Never persisted; defaults to {@link LookupMode#FIRST}.
+     */
+    private final LookupMode lookupMode;
+
+    /**
+     * Cached {@code true} when {@link #lookupTraversalDirection} consumes keys
+     * from the end (BACKWARD), used by the {@code LAST}/{@code ALL} traversals.
+     */
+    private final boolean backwardLookup;
 
     /**
      * Binary format magic header.
@@ -294,6 +315,66 @@ public final class FrequencyTrie<V> {
         this.lowercasesLookupKeys = metadata.caseProcessingMode() == CaseProcessingMode.LOWERCASE_WITH_LOCALE_ROOT;
         this.removeDiacritics = metadata.diacriticProcessingMode() == DiacriticProcessingMode.REMOVE;
         this.emptyValues = arrayFactory.apply(0);
+        this.lookupMode = LookupMode.FIRST;
+        this.backwardLookup = this.lookupTraversalDirection == WordTraversalDirection.BACKWARD;
+    }
+
+    /**
+     * Creates a lookup-policy view over an existing compiled trie, sharing its
+     * immutable compiled structure and metadata.
+     *
+     * @param source original trie
+     * @param mode   lookup policy for the new view
+     */
+    private FrequencyTrie(final FrequencyTrie<V> source, final LookupMode mode) {
+        this.root = source.root;
+        this.metadata = source.metadata;
+        this.lookupTraversalDirection = source.lookupTraversalDirection;
+        this.lowercasesLookupKeys = source.lowercasesLookupKeys;
+        this.removeDiacritics = source.removeDiacritics;
+        this.emptyValues = source.emptyValues;
+        this.lookupMode = mode;
+        this.backwardLookup = source.backwardLookup;
+    }
+
+    /**
+     * Returns the read-time command-selection policy of this trie.
+     *
+     * <p>
+     * The operation is constant-time and performs no allocation.
+     * </p>
+     *
+     * @return current lookup mode
+     */
+    public LookupMode lookupMode() {
+        return this.lookupMode;
+    }
+
+    /**
+     * Returns a view of this trie that selects commands according to {@code mode}.
+     *
+     * <p>
+     * The returned instance shares this trie's immutable compiled structure, so
+     * the operation is cheap and thread-safe. The policy is a read-time concern
+     * and is never persisted (see {@link LookupMode}). Returns {@code this} when
+     * the mode is unchanged.
+     * </p>
+     *
+     * @apiNote Serializing this view writes the shared trie structure and metadata,
+     *          but not {@code mode}. A subsequently loaded trie therefore starts in
+     *          {@link LookupMode#FIRST}.
+     *
+     * @param mode command-selection policy
+     * @return a trie view applying {@code mode}; returns this instance when the
+     *         requested mode is already active
+     * @throws NullPointerException if {@code mode} is {@code null}
+     */
+    public FrequencyTrie<V> withLookupMode(final LookupMode mode) {
+        Objects.requireNonNull(mode, "mode");
+        if (mode == this.lookupMode) {
+            return this;
+        }
+        return new FrequencyTrie<>(this, mode);
     }
 
     /**
@@ -312,8 +393,8 @@ public final class FrequencyTrie<V> {
     }
 
     /**
-     * Returns the most frequent value stored at the node addressed by the supplied
-     * key.
+     * Returns the preferred value selected for the supplied key under this trie's
+     * {@linkplain #lookupMode() lookup mode}.
      *
      * <p>
      * If multiple values have the same local frequency, the returned value is
@@ -324,7 +405,10 @@ public final class FrequencyTrie<V> {
      * <p>
      * The supplied key is normalized according to persisted
      * {@link TrieMetadata#caseProcessingMode()} before traversal.
-     * 
+     * In {@link LookupMode#ALL}, this scalar operation uses the same
+     * most-specific selection as {@link LookupMode#LAST}.
+     * </p>
+     *
      * @param key key to resolve
      * @return most frequent value, or {@code null} if the key does not exist or no
      *         value is stored at the addressed node
@@ -332,7 +416,10 @@ public final class FrequencyTrie<V> {
      */
     public V get(final String key) {
         Objects.requireNonNull(key, ARG_KEY);
-        final CompiledNode<V> node = findNode(normalizeLookupKey(key));
+        final String normalized = normalizeLookupKey(key);
+        final CompiledNode<V> node = this.lookupMode == LookupMode.FIRST
+                ? findNode(normalized)
+                : TrieLookup.findLast(this.root, this.backwardLookup, normalized);
         if (node == null) {
             return null;
         }
@@ -361,7 +448,9 @@ public final class FrequencyTrie<V> {
      */
     public V getNormalized(final CharSequence key) {
         Objects.requireNonNull(key, ARG_KEY);
-        final CompiledNode<V> node = findNode(key);
+        final CompiledNode<V> node = this.lookupMode == LookupMode.FIRST
+                ? findNode(key)
+                : TrieLookup.findLast(this.root, this.backwardLookup, key);
         if (node == null) {
             return null;
         }
@@ -389,7 +478,9 @@ public final class FrequencyTrie<V> {
      */
     public V getNormalizedString(final String key) {
         Objects.requireNonNull(key, ARG_KEY);
-        final CompiledNode<V> node = findNode(key);
+        final CompiledNode<V> node = this.lookupMode == LookupMode.FIRST
+                ? findNode(key)
+                : TrieLookup.findLast(this.root, this.backwardLookup, key);
         if (node == null) {
             return null;
         }
@@ -401,8 +492,8 @@ public final class FrequencyTrie<V> {
     }
 
     /**
-     * Returns all values stored at the node addressed by the supplied key, ordered
-     * by descending frequency.
+     * Returns the values selected for the supplied key under this trie's
+     * {@linkplain #lookupMode() lookup mode}.
      *
      * <p>
      * If multiple values have the same local frequency, the ordering is
@@ -412,10 +503,16 @@ public final class FrequencyTrie<V> {
      *
      * <p>
      * The returned array is a defensive copy.
+     * Under {@link LookupMode#ALL}, values from all applicable nodes are ordered
+     * from the most-specific node to the least-specific accepting ancestor,
+     * retain each node's local frequency order, and are de-duplicated by
+     * {@link Object#equals(Object)}. Other modes return one selected node's values.
+     * </p>
      *
      * <p>
      * The supplied key is normalized according to persisted
      * {@link TrieMetadata#caseProcessingMode()} before traversal.
+     * </p>
      *
      * @param key key to resolve
      * @return all values stored at the addressed node, ordered by descending
@@ -426,7 +523,14 @@ public final class FrequencyTrie<V> {
     @SuppressWarnings("PMD.MethodReturnsInternalArray")
     public V[] getAll(final String key) {
         Objects.requireNonNull(key, ARG_KEY);
-        final CompiledNode<V> node = findNode(normalizeLookupKey(key));
+        final String normalized = normalizeLookupKey(key);
+        if (this.lookupMode == LookupMode.ALL) {
+            return TrieLookup.collectAllValues(
+                    TrieLookup.collectPath(this.root, this.backwardLookup, normalized), this.emptyValues);
+        }
+        final CompiledNode<V> node = this.lookupMode == LookupMode.FIRST
+                ? findNode(normalized)
+                : TrieLookup.findLast(this.root, this.backwardLookup, normalized);
         if (node == null) {
             return this.emptyValues;
         }
@@ -438,9 +542,8 @@ public final class FrequencyTrie<V> {
     }
 
     /**
-     * Returns all values stored at the node addressed by the supplied key together
-     * with their occurrence counts, ordered by the same rules as
-     * {@link #getAll(String)}.
+     * Returns the selected values and their occurrence counts, ordered by the same
+     * rules as {@link #getAll(String)}.
      *
      * <p>
      * The returned list is aligned with the arrays returned by
@@ -453,6 +556,9 @@ public final class FrequencyTrie<V> {
      * In reduction modes that merge semantically equivalent subtrees, the returned
      * counts may be aggregated across multiple original build-time nodes that were
      * reduced into the same canonical compiled node.
+     * Under {@link LookupMode#ALL}, a value occurring at multiple applicable nodes
+     * appears once with the count from its most-specific occurrence.
+     * </p>
      *
      * @param key key to resolve
      * @return immutable ordered list of value-count entries; returns an empty list
@@ -461,7 +567,14 @@ public final class FrequencyTrie<V> {
      */
     public List<ValueCount<V>> getEntries(final String key) {
         Objects.requireNonNull(key, ARG_KEY);
-        final CompiledNode<V> node = findNode(normalizeLookupKey(key));
+        final String normalized = normalizeLookupKey(key);
+        if (this.lookupMode == LookupMode.ALL) {
+            return TrieLookup.collectAllEntries(
+                    TrieLookup.collectPath(this.root, this.backwardLookup, normalized));
+        }
+        final CompiledNode<V> node = this.lookupMode == LookupMode.FIRST
+                ? findNode(normalized)
+                : TrieLookup.findLast(this.root, this.backwardLookup, normalized);
         if (node == null) {
             return List.of();
         }
@@ -516,7 +629,15 @@ public final class FrequencyTrie<V> {
         if (maxResults == 0) {
             return 0;
         }
-        return visitNode(findNode(key, offset, length), sink, maxResults);
+        if (this.lookupMode == LookupMode.ALL) {
+            return TrieLookup.visitNodes(
+                    TrieLookup.collectPath(this.root, this.backwardLookup, CharBuffer.wrap(key, offset, length)),
+                    sink, maxResults);
+        }
+        final CompiledNode<V> node = this.lookupMode == LookupMode.FIRST
+                ? findNode(key, offset, length)
+                : TrieLookup.findLast(this.root, this.backwardLookup, key, offset, length);
+        return visitNode(node, sink, maxResults);
     }
 
     /**
@@ -539,7 +660,14 @@ public final class FrequencyTrie<V> {
         if (maxResults == 0) {
             return 0;
         }
-        return visitNode(findNode(key), sink, maxResults);
+        if (this.lookupMode == LookupMode.ALL) {
+            return TrieLookup.visitNodes(
+                    TrieLookup.collectPath(this.root, this.backwardLookup, key), sink, maxResults);
+        }
+        final CompiledNode<V> node = this.lookupMode == LookupMode.FIRST
+                ? findNode(key)
+                : TrieLookup.findLast(this.root, this.backwardLookup, key);
+        return visitNode(node, sink, maxResults);
     }
 
     /**
@@ -594,7 +722,14 @@ public final class FrequencyTrie<V> {
             return 0;
         }
         final CharSequence normalized = normalizeLookupKey(key);
-        return visitNode(findNode(normalized), sink, maxResults);
+        if (this.lookupMode == LookupMode.ALL) {
+            return TrieLookup.visitNodes(
+                    TrieLookup.collectPath(this.root, this.backwardLookup, normalized), sink, maxResults);
+        }
+        final CompiledNode<V> node = this.lookupMode == LookupMode.FIRST
+                ? findNode(normalized)
+                : TrieLookup.findLast(this.root, this.backwardLookup, normalized);
+        return visitNode(node, sink, maxResults);
     }
 
     /**
@@ -1259,9 +1394,11 @@ public final class FrequencyTrie<V> {
                 if (valueCount < 0) {
                     throw new IOException("Negative value count at node " + nodeIndex + ": " + valueCount);
                 }
-                if (acceptsRemainingInputByNode[nodeIndex] && edgeCount != 0) {
-                    throw new IOException("Accepting node " + nodeIndex + " cannot have child edges.");
-                }
+                // An accepting node may also carry child edges: under LookupMode.FIRST
+                // the accept short-circuits descent (children are inert), while
+                // LookupMode.LAST/ALL follow the deeper edges. Such nodes arise when a
+                // custom pair is added through a contracted generalization (see
+                // FrequencyTrieBuilders / the Python TrieBuilder).
                 if (acceptsRemainingInputByNode[nodeIndex] && valueCount == 0) {
                     throw new IOException("Accepting node " + nodeIndex + " must store at least one value.");
                 }
@@ -1540,6 +1677,13 @@ public final class FrequencyTrie<V> {
      * {@link #build()}, which performs bottom-up subtree reduction and converts the
      * structure to a compact immutable representation optimized for read
      * operations.
+     * </p>
+     *
+     * <p>
+     * A builder is mutable and not thread-safe. Callers must externally serialize
+     * all access. Each call to {@link #build()} creates an immutable snapshot;
+     * subsequent builder updates do not affect previously built tries.
+     * </p>
      *
      * @param <V> value type
      */
@@ -1589,6 +1733,18 @@ public final class FrequencyTrie<V> {
          * Mutable root node.
          */
         private final MutableNode<V> root;
+
+        /**
+         * Source compiled-node identity for each mutable node expanded by
+         * {@link FrequencyTrieBuilders#copyOf}.
+         */
+        private final Map<MutableNode<V>, Object> compiledSources;
+
+        /**
+         * Unique reduction discriminator for each locally modified reconstructed
+         * node.
+         */
+        private final Map<MutableNode<V>, Object> mergeDiscriminators;
 
         /**
          * Creates a new builder with the provided settings.
@@ -1671,6 +1827,7 @@ public final class FrequencyTrie<V> {
          *                                increasing materialization memory in nodes
          *                                whose edge label span is within the limit.
          * @throws NullPointerException if any argument is {@code null}
+         * @throws IllegalArgumentException if {@code maxExpandedIndex} is negative
          */
         public Builder(final IntFunction<V[]> arrayFactory, final ReductionSettings reductionSettings,
                 final WordTraversalDirection traversalDirection, final CaseProcessingMode caseProcessingMode,
@@ -1685,6 +1842,8 @@ public final class FrequencyTrie<V> {
             }
             this.maxExpandedIndex = maxExpandedIndex;
             this.root = new MutableNode<>();
+            this.compiledSources = new IdentityHashMap<>();
+            this.mergeDiscriminators = new IdentityHashMap<>();
         }
 
         /**
@@ -1739,6 +1898,8 @@ public final class FrequencyTrie<V> {
          * Builds a compiled read-only trie.
          *
          * @return compiled trie
+         * @throws ArithmeticException if reduction would aggregate a local value
+         *                             count beyond {@link Integer#MAX_VALUE}
          */
         public FrequencyTrie<V> build() {
             if (LOGGER.isLoggable(Level.FINE)) {
@@ -1782,6 +1943,8 @@ public final class FrequencyTrie<V> {
          * @throws NullPointerException     if {@code key} or {@code value} is
          *                                  {@code null}
          * @throws IllegalArgumentException if {@code count} is less than {@code 1}
+         * @throws ArithmeticException      if the accumulated count would exceed
+         *                                  {@link Integer#MAX_VALUE}
          */
         public Builder<V> put(final String key, final V value, final int count) {
             Objects.requireNonNull(key, ARG_KEY);
@@ -1791,8 +1954,192 @@ public final class FrequencyTrie<V> {
                 throw new IllegalArgumentException("count must be at least 1.");
             }
 
-            final String normalizedKey = normalizeDictionaryKey(key);
+            final MutableNode<V> current = navigateToNode(normalizeDictionaryKey(key));
+            final Integer previous = current.valueCounts().get(value);
+            final int updatedCount = previous == null ? count : Math.addExact(previous, count);
+            markModified(current);
+            current.valueCounts().put(value, updatedCount);
+            return this;
+        }
 
+        /**
+         * Makes {@code value} the dominant (highest-frequency) local value at the node
+         * addressed by {@code key}, keeping any other values as lower-ranked
+         * alternatives.
+         *
+         * <p>
+         * The value's count is set to one more than the highest count among the other
+         * values at that node, so {@link FrequencyTrie#get(String)} returns it while
+         * {@link FrequencyTrie#getAll(String)} still lists the alternatives. Use this
+         * to override a rule for one key without discarding the prior candidates.
+         *
+         * <p>
+         * This differs from {@link #put(String, Object, int)}, which adds a raw
+         * frequency that may or may not dominate, and from {@link #set(String, Object)},
+         * which discards the other values entirely.
+         *
+         * @param key   key
+         * @param value value to make dominant
+         * @return this builder
+         * @throws NullPointerException if {@code key} or {@code value} is {@code null}
+         * @throws ArithmeticException  if another value already has a count of
+         *                              {@link Integer#MAX_VALUE}
+         */
+        public Builder<V> putDominant(final String key, final V value) {
+            Objects.requireNonNull(key, ARG_KEY);
+            Objects.requireNonNull(value, "value");
+
+            final MutableNode<V> node = navigateToNode(normalizeDictionaryKey(key));
+            final Map<V, Integer> counts = node.valueCounts();
+            int maxOther = 0;
+            for (final Map.Entry<V, Integer> entry : counts.entrySet()) {
+                if (!entry.getKey().equals(value)) {
+                    maxOther = Math.max(maxOther, entry.getValue());
+                }
+            }
+            if (maxOther == Integer.MAX_VALUE) {
+                throw new ArithmeticException(
+                        "Cannot make value dominant because another value already has Integer.MAX_VALUE count.");
+            }
+            markModified(node);
+            counts.put(value, maxOther + 1);
+            return this;
+        }
+
+        /**
+         * Replaces every local value at the node addressed by {@code key} with the
+         * single {@code value} (count 1), making it the sole and therefore dominant
+         * value there. Any prior values at that node are discarded.
+         *
+         * <p>
+         * This differs from {@link #put(String, Object, int)} (which accumulates) and
+         * {@link #putDominant(String, Object)} (which dominates but keeps the
+         * alternatives).
+         *
+         * @param key   key
+         * @param value replacement value
+         * @return this builder
+         * @throws NullPointerException if {@code key} or {@code value} is {@code null}
+         */
+        public Builder<V> set(final String key, final V value) {
+            Objects.requireNonNull(key, ARG_KEY);
+            Objects.requireNonNull(value, "value");
+
+            final MutableNode<V> node = navigateToNode(normalizeDictionaryKey(key));
+            markModified(node);
+            final Map<V, Integer> counts = node.valueCounts();
+            counts.clear();
+            counts.put(value, 1);
+            return this;
+        }
+
+        /**
+         * Stores {@code value} (count 1) at the node addressed by {@code key} only when
+         * that node currently has no local value; otherwise the builder is unchanged.
+         * Use this to fill gaps without overwriting curated entries.
+         *
+         * @param key   key
+         * @param value value to store when absent
+         * @return this builder
+         * @throws NullPointerException if {@code key} or {@code value} is {@code null}
+         */
+        public Builder<V> putIfAbsent(final String key, final V value) {
+            Objects.requireNonNull(key, ARG_KEY);
+            Objects.requireNonNull(value, "value");
+
+            final MutableNode<V> node = navigateToNode(normalizeDictionaryKey(key));
+            final Map<V, Integer> counts = node.valueCounts();
+            if (counts.isEmpty()) {
+                markModified(node);
+                counts.put(value, 1);
+            }
+            return this;
+        }
+
+        /**
+         * Removes every local value at the node addressed by {@code key}. The node
+         * structure is retained but stores no value, so {@link FrequencyTrie#get(String)}
+         * returns {@code null} for that exact key. A key whose path does not exist is a
+         * no-op; the trie structure is not pruned.
+         *
+         * <p>
+         * <strong>This targets the exact node for {@code key} only.</strong> A key that
+         * resolves through a shorter contracted generalization does not have a value at
+         * its own full-length node — reduction may have collapsed its rule into a higher
+         * suffix node — so removing the full key does not change how it resolves. To
+         * suppress or re-map such a key, add a specific rule instead
+         * ({@link #set(String, Object)} or {@link #putDominant(String, Object)}) and read
+         * with {@link LookupMode#LAST}, or remove the shorter generalization key (which
+         * affects every key it covers).
+         *
+         * @param key key whose local values are removed
+         * @return this builder
+         * @throws NullPointerException if {@code key} is {@code null}
+         */
+        public Builder<V> remove(final String key) {
+            Objects.requireNonNull(key, ARG_KEY);
+
+            final MutableNode<V> node = findMutableNode(normalizeDictionaryKey(key));
+            if (node != null && !node.valueCounts().isEmpty()) {
+                markModified(node);
+                node.valueCounts().clear();
+                node.clearAcceptsRemainingInput();
+            }
+            return this;
+        }
+
+        /**
+         * Removes a single {@code value} from the node addressed by {@code key},
+         * keeping any other values there. A missing key or value is a no-op.
+         *
+         * @param key   key
+         * @param value value to remove
+         * @return this builder
+         * @throws NullPointerException if {@code key} or {@code value} is {@code null}
+         */
+        public Builder<V> remove(final String key, final V value) {
+            Objects.requireNonNull(key, ARG_KEY);
+            Objects.requireNonNull(value, "value");
+
+            final MutableNode<V> node = findMutableNode(normalizeDictionaryKey(key));
+            if (node != null && node.valueCounts().containsKey(value)) {
+                markModified(node);
+                node.valueCounts().remove(value);
+                if (node.valueCounts().isEmpty()) {
+                    node.clearAcceptsRemainingInput();
+                }
+            }
+            return this;
+        }
+
+        /**
+         * Navigates to the mutable node addressed by an already-normalized key without
+         * creating missing nodes.
+         *
+         * @param normalizedKey already-normalized key
+         * @return addressed node, or {@code null} if the path does not exist
+         */
+        private MutableNode<V> findMutableNode(final String normalizedKey) {
+            MutableNode<V> current = this.root;
+            for (int traversalOffset = 0; traversalOffset < normalizedKey.length(); traversalOffset++) {
+                final Character edge = normalizedKey
+                        .charAt(this.traversalDirection.logicalIndex(normalizedKey.length(), traversalOffset));
+                current = current.children().get(edge);
+                if (current == null) {
+                    return null;
+                }
+            }
+            return current;
+        }
+
+        /**
+         * Navigates to (creating as needed) the mutable node addressed by an
+         * already-normalized key, consuming characters in traversal-direction order.
+         *
+         * @param normalizedKey already-normalized dictionary key
+         * @return addressed mutable node
+         */
+        private MutableNode<V> navigateToNode(final String normalizedKey) {
             MutableNode<V> current = this.root;
             for (int traversalOffset = 0; traversalOffset < normalizedKey.length(); traversalOffset++) {
                 final Character edge = normalizedKey
@@ -1804,14 +2151,74 @@ public final class FrequencyTrie<V> {
                 }
                 current = child;
             }
+            return current;
+        }
 
-            final Integer previous = current.valueCounts().get(value);
-            if (previous == null) {
-                current.valueCounts().put(value, count);
-            } else {
-                current.valueCounts().put(value, previous + count);
+        /**
+         * Marks the node addressed by {@code key} as accepting any remaining input,
+         * so reduction preserves a compiled trie's contracted generalization. The
+         * node can later acquire children when a more-specific override is added.
+         * Used by {@link FrequencyTrieBuilders#copyOf} when reconstructing a writable
+         * builder from a compiled trie.
+         *
+         * @param key logical key of the accepting node
+         * @return this builder
+         * @throws NullPointerException if {@code key} is {@code null}
+         */
+        /* default */ Builder<V> markAcceptsRemainingInput(final String key) {
+            Objects.requireNonNull(key, ARG_KEY);
+            navigateToNode(normalizeDictionaryKey(key)).markAcceptsRemainingInput();
+            return this;
+        }
+
+        /**
+         * Associates the mutable node at {@code key} with its source compiled DAG
+         * node.
+         *
+         * <p>
+         * The association prevents already-aggregated counts from being multiplied
+         * when shared compiled nodes are expanded to logical paths and then reduced
+         * again. This reconstruction-only operation must be invoked after copying
+         * the source node's values and accepting state.
+         * </p>
+         *
+         * @param key            logical key of the expanded node
+         * @param sourceIdentity non-null source compiled-node identity
+         * @return this builder
+         * @throws NullPointerException if either argument is {@code null}
+         * @throws IllegalStateException if the addressed mutable node was already
+         *                               associated with a different compiled node
+         */
+        /* default */ Builder<V> recordCompiledSource(final String key, final Object sourceIdentity) {
+            Objects.requireNonNull(key, ARG_KEY);
+            Objects.requireNonNull(sourceIdentity, "sourceIdentity");
+            final MutableNode<V> node = navigateToNode(normalizeDictionaryKey(key));
+            final Object previous = this.compiledSources.putIfAbsent(node, sourceIdentity);
+            if (previous != null && previous != sourceIdentity) { // NOPMD - graph identity is intentional
+                throw new IllegalStateException(
+                        "Mutable node is already associated with another compiled source node.");
             }
             return this;
+        }
+
+        /**
+         * Establishes a copy-on-write reduction boundary after a reconstructed
+         * node's local state changes.
+         *
+         * <p>
+         * Nodes created by ordinary insertion need no discriminator and continue to
+         * use the configured semantic subtree reduction. For a reconstructed node,
+         * the first successful update installs one stable identity token so it can
+         * no longer merge back into unchanged logical paths expanded from the same
+         * compiled DAG node.
+         * </p>
+         *
+         * @param node successfully modified mutable node
+         */
+        private void markModified(final MutableNode<V> node) {
+            if (this.compiledSources.containsKey(node)) {
+                this.mergeDiscriminators.computeIfAbsent(node, ignored -> new Object());
+            }
         }
 
         /**
@@ -1892,7 +2299,13 @@ public final class FrequencyTrie<V> {
 
             Map<V, Integer> localCounts = copyCounts(source.valueCounts());
             boolean acceptsRemainingInput = false;
-            if (context.settings().contractUniformSubtrees()) {
+            if (source.acceptsRemainingInput()) {
+                // Preserved from a compiled trie's contracted accepting leaf (see
+                // FrequencyTrieBuilders.copyOf). The generalization is kept verbatim;
+                // any child edges added afterwards are retained so LookupMode.LAST/ALL
+                // can follow a more specific override under the same accepting node.
+                acceptsRemainingInput = true;
+            } else if (context.settings().contractUniformSubtrees()) {
                 final Map<V, Integer> contractedCounts = contractUniformSubtree(localCounts, reducedChildren);
                 if (!contractedCounts.isEmpty()) {
                     localCounts = contractedCounts;
@@ -1903,16 +2316,23 @@ public final class FrequencyTrie<V> {
 
             final LocalValueSummary<V> localSummary = LocalValueSummary.of(localCounts, this.arrayFactory);
             final ReductionSignature<V> signature = ReductionSignature.create(localSummary, reducedChildren,
-                    context.settings(), acceptsRemainingInput);
+                    context.settings(), acceptsRemainingInput, this.mergeDiscriminators.get(source));
+            final Object compiledSource = this.compiledSources.get(source);
 
             ReducedNode<V> canonical = context.lookup(signature);
             if (canonical == null) {
                 canonical = new ReducedNode<>(signature, localCounts, reducedChildren, acceptsRemainingInput);
                 context.register(signature, canonical);
+                if (compiledSource != null) {
+                    context.recordCompiledSourceContribution(canonical, compiledSource);
+                }
                 return canonical;
             }
 
-            canonical.mergeLocalCounts(localCounts);
+            if (compiledSource == null
+                    || context.recordCompiledSourceContribution(canonical, compiledSource)) {
+                canonical.mergeLocalCounts(localCounts);
+            }
             canonical.mergeChildren(reducedChildren);
 
             return canonical;

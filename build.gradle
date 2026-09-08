@@ -1,3 +1,34 @@
+/*******************************************************************************
+ * Copyright (C) 2026, Leo Galambos
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * 3. Neither the name of the copyright holder nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ ******************************************************************************/
+
 plugins {
     id 'org.egothor.radixor.build-support'
     id 'java'
@@ -213,6 +244,12 @@ tasks.withType(Test).configureEach {
      */
     minHeapSize = '1g'
     maxHeapSize = '4g'
+
+    /*
+     * Gradle's instrumentation and the explicit Mockito agent require native
+     * access and disable class-data sharing in forked test JVMs on Java 25.
+     */
+    jvmArgs '--enable-native-access=ALL-UNNAMED', '-Xshare:off'
 
     reports {
         junitXml.required = true
@@ -552,6 +589,126 @@ tasks.register('verifyJavaLicenseHeaders') {
     }
 }
 
+tasks.register('verifySoftwareLicenseHeaders') {
+    group = 'verification'
+    description = 'Verifies canonical BSD-3-Clause headers on maintained non-Java software sources.'
+    dependsOn(tasks.named('verifyJavaLicenseHeaders'))
+    inputs.files(
+            layout.projectDirectory.file('gradle/java-license-header.txt'),
+            layout.projectDirectory.file('gradle/hash-license-header.txt'),
+            layout.projectDirectory.file('gradle/slash-license-header.txt'),
+            layout.projectDirectory.file('gradle/html-license-header.txt'),
+            layout.projectDirectory.file('gradle/jinja-license-header.txt'))
+    inputs.files(
+            fileTree('.') { include '*.gradle' },
+            fileTree('build-logic') { include '*.gradle', 'src/**/*.groovy' },
+            fileTree('gradle') { include '*.gradle' },
+            fileTree('models') { include '*/build.gradle' },
+            fileTree('python-c/src') { include '**/*.c', '**/*.h' },
+            fileTree('docs/assets') { include '**/*.css', '**/*.js' },
+            fileTree('experiments') { include '**/*.java' },
+            fileTree('python') {
+                include '**/*.py'
+                exclude '**/build/**', '**/__pycache__/**', '**/*.egg-info/**'
+            },
+            fileTree('python-c') {
+                include '**/*.py'
+                exclude '**/build/**', '**/__pycache__/**', '**/*.egg-info/**'
+            },
+            fileTree('tools') { include '**/*.py', '**/*.sh'; exclude '**/__pycache__/**' },
+            fileTree('experiments') { include '**/*.py'; exclude '**/__pycache__/**' },
+            fileTree('python/src') { include '**/*.rs' },
+            files('docs/overrides/landing.html', 'src/main/javadoc/overview.html'))
+    outputs.file(layout.buildDirectory.file('reports/license/software-license-headers.txt'))
+    doLast {
+        String blockHeader = layout.projectDirectory.file('gradle/java-license-header.txt')
+                .asFile.getText('UTF-8')
+        String hashHeader = layout.projectDirectory.file('gradle/hash-license-header.txt')
+                .asFile.getText('UTF-8')
+        String slashHeader = layout.projectDirectory.file('gradle/slash-license-header.txt')
+                .asFile.getText('UTF-8')
+        String htmlHeader = layout.projectDirectory.file('gradle/html-license-header.txt')
+                .asFile.getText('UTF-8')
+        String jinjaHeader = layout.projectDirectory.file('gradle/jinja-license-header.txt')
+                .asFile.getText('UTF-8')
+        List<String> classifications = []
+        List<String> failures = []
+
+        def verifyPrefix = { Collection<File> sourceFiles, String expectedHeader, String classification ->
+            sourceFiles.toList().sort { File left, File right ->
+                relativePath(left) <=> relativePath(right)
+            }.each { File sourceFile ->
+                String relative = relativePath(sourceFile)
+                if (sourceFile.getText('UTF-8').startsWith(expectedHeader)) {
+                    classifications.add("${classification} ${relative}")
+                } else {
+                    failures.add("${relative}: does not begin with ${classification}")
+                }
+            }
+        }
+        def verifyHashPrefix = { Collection<File> sourceFiles ->
+            sourceFiles.toList().sort { File left, File right ->
+                relativePath(left) <=> relativePath(right)
+            }.each { File sourceFile ->
+                String relative = relativePath(sourceFile)
+                String content = sourceFile.getText('UTF-8')
+                int headerOffset = content.startsWith('#!') ? content.indexOf('\n') + 1 : 0
+                if (headerOffset >= 0 && content.startsWith(hashHeader, headerOffset)) {
+                    classifications.add("RADIXOR_HASH_HEADER ${relative}")
+                } else {
+                    failures.add("${relative}: does not begin with the canonical hash-comment header")
+                }
+            }
+        }
+
+        List<File> blockSources = files(
+                fileTree('.') { include '*.gradle' },
+                fileTree('build-logic') { include '*.gradle', 'src/**/*.groovy' },
+                fileTree('gradle') { include '*.gradle' },
+                fileTree('models') { include '*/build.gradle' },
+                fileTree('python-c/src') { include '**/*.c', '**/*.h' },
+                fileTree('docs/assets') { include '**/*.css', '**/*.js' },
+                fileTree('experiments') { include '**/*.java' })
+                .files.toList()
+        List<File> hashSources = files(
+                fileTree('python') {
+                    include '**/*.py'
+                    exclude '**/build/**', '**/__pycache__/**', '**/*.egg-info/**'
+                },
+                fileTree('python-c') {
+                    include '**/*.py'
+                    exclude '**/build/**', '**/__pycache__/**', '**/*.egg-info/**'
+                },
+                fileTree('tools') { include '**/*.py', '**/*.sh'; exclude '**/__pycache__/**' },
+                fileTree('experiments') { include '**/*.py'; exclude '**/__pycache__/**' })
+                .files.toList()
+        List<File> slashSources = fileTree('python/src') { include '**/*.rs' }
+                .files.toList()
+        List<File> htmlSources = files('src/main/javadoc/overview.html').files.toList()
+        List<File> jinjaSources = files('docs/overrides/landing.html').files.toList()
+
+        verifyPrefix(blockSources, blockHeader, 'RADIXOR_BLOCK_HEADER')
+        verifyHashPrefix(hashSources)
+        verifyPrefix(slashSources, slashHeader, 'RADIXOR_SLASH_HEADER')
+        verifyPrefix(htmlSources, htmlHeader, 'RADIXOR_HTML_HEADER')
+        verifyPrefix(jinjaSources, jinjaHeader, 'RADIXOR_JINJA_HEADER')
+
+        /*
+         * Model dictionaries and derived model resources are intentionally not
+         * software inputs here. Their distinct licenses and provenance are
+         * enforced by validateModelInput and verifyModelDescriptor.
+         */
+        File report = layout.buildDirectory.file('reports/license/software-license-headers.txt')
+                .get().asFile
+        report.parentFile.mkdirs()
+        report.setText(classifications.join('\n') + '\n', 'UTF-8')
+        if (!failures.isEmpty()) {
+            throw new GradleException('Maintained software license verification failed: '
+                    + failures.sort().join(', '))
+        }
+    }
+}
+
 tasks.register('verifyAllDefaultModels') {
     group = 'verification'
     description = 'Verifies that every language default model project is configured.'
@@ -698,7 +855,7 @@ tasks.named('check') {
     dependsOn(tasks.named('verifyCoreJarExcludesModels'))
     dependsOn(tasks.named('verifyAllDefaultModels'))
     dependsOn(tasks.named('verifyJmhModelClasspath'))
-    dependsOn(tasks.named('verifyJavaLicenseHeaders'))
+    dependsOn(tasks.named('verifySoftwareLicenseHeaders'))
 }
 
 def modelCatalogText = providers.provider {

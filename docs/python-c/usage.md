@@ -42,6 +42,27 @@ Stemmer("english", 50_000)
 Use `lowercase=False` only when inputs have already been normalized. Stemmer
 instances are safe to share between Python threads.
 
+## Lookup policy for customized models
+
+Radixor-C cannot modify a trie, but it can serve a customized `.rxc` produced by
+Java or the PyO3 `TrieBuilder`. Select how rules along one trie path are resolved
+with `lookup=`:
+
+| Value | Selection |
+|---|---|
+| `"first"` (default) | stop at the shallowest accepting generalization; preserves historical behavior |
+| `"last"` | prefer the deepest exact rule, using the generalization as fallback |
+| `"all"` | make `stem_all` return candidates from deepest to shallowest; scalar calls behave like `"last"` |
+
+```python
+custom = Stemmer(compiled="custom-en.rxc", lookup="last")
+custom.stemWord("kubernetes")
+```
+
+The mode is a runtime policy and is not stored in the compiled model. See
+[Customizing a Dictionary](../python/customization.md) for the trie shape and a
+visual explanation.
+
 ## Scope boundary
 
 Radixor-C does not expose `radixor.compile(...)`, textual dictionary loading,

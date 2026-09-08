@@ -1,3 +1,34 @@
+###############################################################################
+# Copyright (C) 2026, Leo Galambos
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# 1. Redistributions of source code must retain the above copyright notice,
+#    this list of conditions and the following disclaimer.
+#
+# 2. Redistributions in binary form must reproduce the above copyright notice,
+#    this list of conditions and the following disclaimer in the documentation
+#    and/or other materials provided with the distribution.
+#
+# 3. Neither the name of the copyright holder nor the names of its contributors
+#    may be used to endorse or promote products derived from this software
+#    without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+###############################################################################
+
 """Python API for the C-backed Radixor stemmer.
 
 Drop-in replacement for ``radixor`` with identical public interface.
@@ -187,7 +218,10 @@ def _standard_model_path(model_id: str) -> Iterator[Path]:
 class Stemmer:
     """Thread-safe Radixor stemmer backed by the C extension.
 
-    Identical interface to ``radixor.Stemmer``.
+    Identical stemming interface to ``radixor.Stemmer``. ``lookup`` selects
+    ``"first"`` (legacy/general rule), ``"last"`` (most-specific rule), or
+    ``"all"`` (all applicable candidates from :meth:`stem_all`). The policy is
+    fixed for the lifetime of this immutable stemmer instance.
     """
 
     def __init__(
@@ -200,6 +234,7 @@ class Stemmer:
         backward: Optional[bool] = None,
         store_original: bool = True,
         lowercase: bool = True,
+        lookup: str = "first",
         cache_size: int = 10_000,
     ) -> None:
         source = path if path is not None else compiled
@@ -235,6 +270,7 @@ class Stemmer:
         self._backward = is_backward
         self._store_original = store_original
         self._lowercase = lowercase
+        self._lookup = lookup
         self._cache_size = cache_size
         self._source_path = model_path
         self._model_id = model_id_val
@@ -248,6 +284,7 @@ class Stemmer:
                 self._store_original,
                 self._lowercase,
                 cache_size,
+                self._lookup,
             )
         with _standard_model_path(self._model_id or "") as model_path:
             return StemmerCore(
@@ -256,6 +293,7 @@ class Stemmer:
                 self._store_original,
                 self._lowercase,
                 cache_size,
+                self._lookup,
             )
 
     @staticmethod

@@ -40,6 +40,13 @@ import java.util.Map;
  * The maps exposed by the accessors are the internal mutable backing state of
  * the node. They are returned directly for efficiency and are intended only for
  * closely related trie-building infrastructure.
+ * </p>
+ *
+ * <p>
+ * Instances are mutable and not thread-safe. The owning builder is responsible
+ * for confinement and for ensuring that the exposed maps are not retained after
+ * compilation.
+ * </p>
  *
  * @param <V> value type
  */
@@ -56,11 +63,49 @@ public final class MutableNode<V> {
     private final Map<V, Integer> valueCounts;
 
     /**
+     * Whether this node was a contracted accepting leaf in a source compiled
+     * trie. Set only when a builder is reconstructed from a compiled trie (see
+     * {@code FrequencyTrieBuilders.copyOf}); it is preserved through reduction so
+     * the "accepts remaining input" generalization survives a round-trip even
+     * when the original member paths were contracted away and cannot be replayed.
+     */
+    private boolean acceptsRemainingInput;
+
+    /**
      * Creates an empty node.
      */
     public MutableNode() {
         this.children = new LinkedHashMap<>();
         this.valueCounts = new LinkedHashMap<>();
+    }
+
+    /**
+     * Returns whether this node is marked as accepting remaining input.
+     *
+     * @return {@code true} when this node accepts any remaining lookup input
+     */
+    public boolean acceptsRemainingInput() {
+        return this.acceptsRemainingInput;
+    }
+
+    /**
+     * Marks this node as accepting remaining input.
+     */
+    public void markAcceptsRemainingInput() {
+        this.acceptsRemainingInput = true;
+    }
+
+    /**
+     * Clears the accepting-remaining-input marker.
+     *
+     * <p>
+     * This transition is required when the last local value is removed: an
+     * accepting node without a value cannot resolve a lookup and is rejected by
+     * the compiled-node invariant.
+     * </p>
+     */
+    public void clearAcceptsRemainingInput() {
+        this.acceptsRemainingInput = false;
     }
 
     /**
@@ -88,4 +133,5 @@ public final class MutableNode<V> {
     public Map<V, Integer> valueCounts() {
         return this.valueCounts;
     }
+
 }

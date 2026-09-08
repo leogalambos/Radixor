@@ -231,6 +231,29 @@ s = Stemmer(path="my_prefix_dictionary.gz", backward=False)  # prefix-oriented
 
 The dictionary is compiled to a patch-command trie in Rust at construction time.
 
+## Customizing a dictionary
+
+Open an existing model as a `TrieBuilder`, add your own `word → stem` rules (for
+brand names, trademarks, or domain vocabulary), and build a new stemmer — for
+example so `Windows` is not stemmed to `window`:
+
+```python
+from radixor import Stemmer
+
+builder = Stemmer("en").to_builder()
+builder.add("windows", "windows")           # protect a brand from over-stemming
+builder.add("kubernetes", "kube")           # add domain vocabulary
+
+stemmer = builder.build(lookup="last")      # 'last' lets specific rules win
+stemmer.stemWord("windows")                 # 'windows'
+stemmer.stemWord("kubernetes")              # 'kube'
+
+builder.save("custom-en.rxc")               # persist as a compiled dictionary
+```
+
+`add`, `set`, `remove`, and the `first`/`last`/`all` lookup modes are documented
+in [Customizing a Dictionary](https://leogalambos.github.io/Radixor/python/customization/).
+
 ## Building from source
 
 ```bash

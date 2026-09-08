@@ -120,6 +120,7 @@ nav:
            - Installation and Builds: python/installation.md
            - Usage and API: python/usage.md
            - Dictionary Compilation: python/model-compilation.md
+           - Customizing Dictionaries: python/customization.md
         - Python-C:
            - Overview: python-c/index.md
            - Quick Start: python-c/quick-start.md

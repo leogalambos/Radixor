@@ -34,14 +34,22 @@ import java.util.Arrays;
 import java.util.Objects;
 
 /**
- * Immutable compiled trie node optimized for read access.
+ * Logically immutable compiled trie node optimized for read access.
  *
  * <p>
  * The returned arrays are the internal backing storage of the compiled node.
  * They are exposed for efficient access by closely related trie infrastructure
- * and therefore must never be modified by callers. The node itself is still
- * immutable from the public API perspective because construction wires these
- * arrays once and all lookup operations thereafter treat them as read-only.
+ * and therefore must never be modified by callers. Construction transfers
+ * read-only ownership of the supplied arrays to this node; retaining and
+ * changing an array after construction violates the API contract.
+ * </p>
+ *
+ * <p>
+ * Subject to that ownership contract, instances are immutable and safe for
+ * concurrent reads. An accepting node may have child edges: legacy first-match
+ * lookup stops at that node, while most-specific lookup may continue into its
+ * children.
+ * </p>
  *
  * @param <V> value type
  */
@@ -102,9 +110,18 @@ public final class CompiledNode<V> {
      * Creates one validated compiled node using {@link #DEFAULT_MAX_EXPANDED_INDEX}
      * for dense lookup sizing.
      *
-     * @throws NullPointerException     if any array argument is {@code null}
+     * @param edgeLabels    strictly ascending transition labels; retained directly
+     * @param children      child nodes aligned with {@code edgeLabels}; retained
+     *                      directly
+     * @param orderedValues values in deterministic preference order; retained
+     *                      directly
+     * @param orderedCounts positive occurrence counts aligned with
+     *                      {@code orderedValues}; retained directly
+     * @throws NullPointerException     if an array, child, or value is {@code null}
      * @throws IllegalArgumentException if the edge-related arrays or value-related
-     *                                  arrays do not have matching lengths
+     *                                  arrays do not have matching lengths, labels
+     *                                  are not strictly ascending, or a count is not
+     *                                  positive
      */
     public CompiledNode(final char[] edgeLabels, final CompiledNode<V>[] children, final V[] orderedValues,
             final int... orderedCounts) {
@@ -114,14 +131,23 @@ public final class CompiledNode<V> {
     /**
      * Creates one validated compiled node.
      *
+     * @param edgeLabels      strictly ascending transition labels; retained directly
+     * @param children        child nodes aligned with {@code edgeLabels}; retained
+     *                        directly
+     * @param orderedValues   values in deterministic preference order; retained
+     *                        directly
      * @param maxExpandedIndex upper bound for the dense lookup interval size; zero
      *                         disables dense lookup. Larger values improve
      *                         direct-index likelihood while increasing dense table
      *                         memory in compact-label nodes.
-     * @throws NullPointerException     if any array argument is {@code null}
+     * @param orderedCounts   positive occurrence counts aligned with
+     *                        {@code orderedValues}; retained directly
+     * @throws NullPointerException     if an array, child, or value is {@code null}
      * @throws IllegalArgumentException if the edge-related arrays or value-related
      *                                  arrays do not have matching lengths or the
-     *                                  dense interval size is negative
+     *                                  dense interval size is negative; if labels are
+     *                                  not strictly ascending; or if a count is not
+     *                                  positive
      */
     public CompiledNode(final char[] edgeLabels, final CompiledNode<V>[] children, final V[] orderedValues,
             final int maxExpandedIndex, final int... orderedCounts) {
@@ -131,14 +157,23 @@ public final class CompiledNode<V> {
     /**
      * Creates one validated compiled node.
      *
+     * @param edgeLabels            strictly ascending transition labels; retained
+     *                              directly
+     * @param children              child nodes aligned with {@code edgeLabels};
+     *                              retained directly
+     * @param orderedValues         values in deterministic preference order;
+     *                              retained directly
      * @param acceptsRemainingInput whether this node accepts any remaining lookup
      *                              input
      * @param maxExpandedIndex      upper bound for the dense lookup interval size
-     * @throws NullPointerException     if any array argument is {@code null}
+     * @param orderedCounts         positive occurrence counts aligned with
+     *                              {@code orderedValues}; retained directly
+     * @throws NullPointerException     if an array, child, or value is {@code null}
      * @throws IllegalArgumentException if the edge-related arrays or value-related
      *                                  arrays do not have matching lengths, the
-     *                                  dense interval size is negative, or an
-     *                                  accepting node has children
+     *                                  dense interval size is negative, labels are
+     *                                  not strictly ascending, a count is not
+     *                                  positive, or an accepting node stores no value
      */
     public CompiledNode(final char[] edgeLabels, final CompiledNode<V>[] children, final V[] orderedValues,
             final boolean acceptsRemainingInput, final int maxExpandedIndex, final int... orderedCounts) {
@@ -157,9 +192,12 @@ public final class CompiledNode<V> {
         if (orderedValues.length != orderedCounts.length) {
             throw new IllegalArgumentException("orderedValues and orderedCounts must have the same length.");
         }
-        if (acceptsRemainingInput && edgeLabels.length != 0) {
-            throw new IllegalArgumentException("Accepting nodes cannot have child edges.");
-        }
+        validateEdges(edgeLabels, children);
+        validateValues(orderedValues, orderedCounts);
+        // An accepting node may also carry child edges: LookupMode.FIRST short-circuits
+        // at the accept (children inert), while LookupMode.LAST/ALL follow the deeper
+        // edges. Such nodes arise when a custom pair is added through a contracted
+        // generalization.
         if (acceptsRemainingInput && orderedValues.length == 0) {
             throw new IllegalArgumentException("Accepting nodes must store at least one value.");
         }
@@ -194,6 +232,43 @@ public final class CompiledNode<V> {
 
         this.denseChildren = dense;
         this.denseEdgeMin = minEdge;
+    }
+
+    /**
+     * Validates the sparse edge arrays before they become compiled-node backing
+     * storage.
+     *
+     * @param edgeLabels transition labels, in the order used for lookup
+     * @param children   child references aligned with {@code edgeLabels}
+     * @throws NullPointerException     if a child reference is {@code null}
+     * @throws IllegalArgumentException if labels are not strictly ascending
+     */
+    @SuppressWarnings("PMD.UseVarargs")
+    private static void validateEdges(final char[] edgeLabels, final Object[] children) {
+        for (int edgeIndex = 0; edgeIndex < edgeLabels.length; edgeIndex++) {
+            Objects.requireNonNull(children[edgeIndex], "children[" + edgeIndex + "]");
+            if (edgeIndex > 0 && edgeLabels[edgeIndex - 1] >= edgeLabels[edgeIndex]) {
+                throw new IllegalArgumentException("edgeLabels must be strictly ascending.");
+            }
+        }
+    }
+
+    /**
+     * Validates node-local values and their aligned occurrence counts.
+     *
+     * @param orderedValues values in deterministic lookup order
+     * @param orderedCounts occurrence counts aligned with {@code orderedValues}
+     * @throws NullPointerException     if a stored value is {@code null}
+     * @throws IllegalArgumentException if an occurrence count is not positive
+     */
+    @SuppressWarnings("PMD.UseVarargs")
+    private static void validateValues(final Object[] orderedValues, final int[] orderedCounts) {
+        for (int valueIndex = 0; valueIndex < orderedValues.length; valueIndex++) {
+            Objects.requireNonNull(orderedValues[valueIndex], "orderedValues[" + valueIndex + "]");
+            if (orderedCounts[valueIndex] < 1) { // NOPMD
+                throw new IllegalArgumentException("orderedCounts must contain only positive values.");
+            }
+        }
     }
 
     /**

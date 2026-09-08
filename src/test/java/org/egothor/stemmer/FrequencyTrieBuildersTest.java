@@ -35,6 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.lang.reflect.Constructor;
@@ -253,6 +254,99 @@ class FrequencyTrieBuildersTest {
     }
 
     /**
+     * Contraction-enabled reduction settings that collapse uniform subtrees into
+     * accepting leaves (the production-style generalization).
+     */
+    private static final ReductionSettings CONTRACTING_SETTINGS = ReductionSettings.withUniformSubtreeContraction(
+            ReductionSettings.withDefaults(ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_DOMINANT_GET_RESULTS));
+
+    private static FrequencyTrie<String> contractedSuffixTrie() {
+        final FrequencyTrie.Builder<String> builder = new FrequencyTrie.Builder<String>(ARRAY_FACTORY,
+                CONTRACTING_SETTINGS);
+        // Two suffix families with distinct values keep the root non-uniform, so
+        // contraction stops at the per-suffix nodes ("-s" -> accepting X, "-x" ->
+        // accepting Y) instead of collapsing the whole trie into a root that
+        // accepts everything.
+        for (final String key : new String[] { "as", "bs", "cs", "ds", "es", "fs" }) {
+            builder.put(key, "X", 3);
+        }
+        for (final String key : new String[] { "ax", "bx", "cx", "dx", "ex", "fx" }) {
+            builder.put(key, "Y", 3);
+        }
+        return builder.build();
+    }
+
+    /**
+     * Verifies that a contracted accepting generalization survives a copyOf
+     * round-trip. The original member paths are collapsed away in the compiled
+     * form, so reduction cannot re-derive the accepting flag; copyOf must
+     * preserve it explicitly.
+     */
+    @Test
+    @DisplayName("should preserve contracted accepting generalization across copyOf")
+    void shouldPreserveAcceptingGeneralizationOnCopyOf() {
+        final FrequencyTrie<String> base = contractedSuffixTrie();
+        assertAll(
+                () -> assertEquals("X", base.get("zs"), "precondition: -s generalizes to unseen words"),
+                () -> assertEquals("Y", base.get("zx"), "precondition: -x generalizes to unseen words"),
+                () -> assertEquals(null, base.get("zz"), "precondition: root is not accepting (non-degenerate)"));
+
+        final FrequencyTrie<String> reconstructed = FrequencyTrieBuilders
+                .copyOf(base, ARRAY_FACTORY, CONTRACTING_SETTINGS).build();
+
+        assertAll(
+                () -> assertEquals("X", reconstructed.get("zs"), "generalization survives the round-trip"),
+                () -> assertEquals("X", reconstructed.get("as"), "an original member still matches"),
+                () -> assertEquals("Y", reconstructed.get("zx"), "the second family survives too"),
+                () -> assertEquals(null, reconstructed.get("zz"), "root remains non-accepting"));
+    }
+
+    /**
+     * Verifies that a specific pair added through a contracted accepting node
+     * yields an accepting node with child edges: LookupMode.FIRST keeps the
+     * generalization while LookupMode.LAST honors the deeper override.
+     */
+    @Test
+    @DisplayName("should support a specific override added through a contracted accepting node")
+    void shouldSupportSpecificOverrideThroughAcceptingNode() {
+        final FrequencyTrie.Builder<String> reconstructed = FrequencyTrieBuilders.copyOf(contractedSuffixTrie(),
+                ARRAY_FACTORY, CONTRACTING_SETTINGS);
+        // "kubernetes" ends in 's', so its BACKWARD path runs through the contracted
+        // "-s" accepting node, giving that node a child branch.
+        reconstructed.put("kubernetes", "SPECIFIC", 1);
+        final FrequencyTrie<String> modified = reconstructed.build();
+
+        assertAll(
+                () -> assertEquals("X", modified.get("kubernetes"),
+                        "FIRST: the shallow generalization short-circuits"),
+                () -> assertEquals("SPECIFIC", modified.withLookupMode(LookupMode.LAST).get("kubernetes"),
+                        "LAST: the deeper specific override wins"),
+                () -> assertEquals("X", modified.withLookupMode(LookupMode.LAST).get("dogs"),
+                        "LAST: other -s words still generalize via fallback"),
+                () -> assertArrayEquals(new String[] { "SPECIFIC", "X" },
+                        modified.withLookupMode(LookupMode.ALL).getAll("kubernetes"),
+                        "ALL: most specific first, generalization last"));
+    }
+
+    /**
+     * Verifies that deleting a contracted generalization also clears its accepting
+     * marker. An accepting node without a local value is invalid and must never be
+     * emitted by the rebuilt trie.
+     */
+    @Test
+    @DisplayName("should remove a contracted accepting generalization")
+    void shouldRemoveContractedAcceptingGeneralization() {
+        final FrequencyTrie<String> modified = FrequencyTrieBuilders
+                .copyOf(contractedSuffixTrie(), ARRAY_FACTORY, CONTRACTING_SETTINGS)
+                .remove("s")
+                .build();
+
+        assertAll(
+                () -> assertNull(modified.get("zs"), "the removed -s generalization no longer resolves"),
+                () -> assertEquals("Y", modified.get("zx"), "the unrelated -x generalization remains intact"));
+    }
+
+    /**
      * Verifies that reconstruction also works when only the reduction mode is
      * supplied and the helper internally derives default reduction settings.
      */
@@ -322,7 +416,62 @@ class FrequencyTrieBuildersTest {
                 () -> assertEquals(1.5d, statistics.averageLeafDepth(), "Path depths one and two average to 1.5."));
     }
 
-    /** Creates a typed compiled-node array for manually assembled DAG fixtures. */
+    /**
+     * Verifies that reconstruction treats a shared compiled node's local counts as
+     * an already-aggregated contribution instead of replaying them once for every
+     * incoming logical path.
+     *
+     * <p>
+     * The second half also verifies copy-on-write behavior: modifying one expanded
+     * path must separate that path from its unchanged peer even though ranked
+     * reduction would otherwise consider both local value lists equivalent. A
+     * rejected overflowing update must not create that boundary or otherwise alter
+     * the builder.
+     * </p>
+     */
+    @Test
+    @DisplayName("should preserve aggregated counts of shared compiled nodes")
+    void shouldPreserveAggregatedCountsOfSharedCompiledNodes() {
+        final CompiledNode<String> sharedLeaf = new CompiledNode<>(new char[0], nodes(),
+                new String[] { "patch" }, false, CompiledNode.DEFAULT_MAX_EXPANDED_INDEX, 5);
+        final CompiledNode<String> root = new CompiledNode<>(new char[] { 'a', 'b' },
+                nodes(sharedLeaf, sharedLeaf), new String[0], false, CompiledNode.DEFAULT_MAX_EXPANDED_INDEX);
+        final TrieMetadata metadata = TrieMetadata.current(FrequencyTrie.currentFormatVersion(),
+                WordTraversalDirection.FORWARD, RANKED_SETTINGS);
+        final FrequencyTrie<String> source = FrequencyTrie.fromCompiled(String[]::new, root, metadata);
+
+        final FrequencyTrie<String> reconstructed = FrequencyTrieBuilders
+                .copyOf(source, ARRAY_FACTORY, RANKED_SETTINGS)
+                .build();
+        final FrequencyTrie<String> modified = FrequencyTrieBuilders
+                .copyOf(source, ARRAY_FACTORY, RANKED_SETTINGS)
+                .put("a", "patch")
+                .build();
+        final FrequencyTrie.Builder<String> failedUpdate = FrequencyTrieBuilders
+                .copyOf(source, ARRAY_FACTORY, RANKED_SETTINGS);
+        assertThrows(ArithmeticException.class, () -> failedUpdate.put("a", "patch", Integer.MAX_VALUE));
+        final FrequencyTrie<String> afterFailedUpdate = failedUpdate.build();
+
+        assertAll(
+                () -> assertIterableEquals(List.of(new ValueCount<String>("patch", 5)),
+                        reconstructed.getEntries("a"), "The first path must retain the compiled aggregate."),
+                () -> assertIterableEquals(List.of(new ValueCount<String>("patch", 5)),
+                        reconstructed.getEntries("b"), "A shared peer must not multiply the aggregate."),
+                () -> assertIterableEquals(List.of(new ValueCount<String>("patch", 6)), modified.getEntries("a"),
+                        "The changed path must receive its local increment."),
+                () -> assertIterableEquals(List.of(new ValueCount<String>("patch", 5)), modified.getEntries("b"),
+                        "The unchanged shared path must retain the source aggregate."),
+                () -> assertEquals(1L, FrequencyTrieBuilders.computeStatistics(afterFailedUpdate).leafNodeCount(),
+                        "A rejected update must not install a copy-on-write boundary."));
+    }
+
+    /**
+     * Creates a generic compiled-node array for manually assembled DAG fixtures.
+     *
+     * @param nodes nodes to expose through the fixture array
+     * @param <V>   stored value type
+     * @return the supplied varargs array
+     */
     @SafeVarargs
     private static <V> CompiledNode<V>[] nodes(final CompiledNode<V>... nodes) {
         return nodes;

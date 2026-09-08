@@ -56,6 +56,34 @@ trie.getAllNormalized(token, 0, token.length, (patch, count, rank) -> {
 
 `getAllNormalized(...)` bypasses `caseProcessingMode` and `diacriticProcessingMode`; callers are responsible for supplying canonical input. `maxResults == 0` visits nothing, negative values are rejected, and a sink returning `false` stops iteration after the current callback.
 
+## Selecting commands along the path: lookup mode
+
+A key's path can pass through several value-bearing nodes: shallow contracted accepting nodes (suffix generalizations that accept any remaining input) and, when the key is fully consumed, a deep exact terminal. `LookupMode` decides which of these the `get` / `getAll` family selects. `FrequencyTrie.withLookupMode(LookupMode)` returns a lightweight view over the same immutable compiled structure; the policy is a read-time concern and is never persisted, so one trie can be queried under any mode.
+
+- `LookupMode.FIRST` (default) — the shallowest accepting node short-circuits descent. This is the historical behavior; the bundled models are validated against it.
+- `LookupMode.LAST` — the deepest, most specific match wins, with the deepest accepting ancestor as a fallback when descent dead-ends. Use this so a specific rule added beneath a suffix generalization takes effect.
+- `LookupMode.ALL` — `getAll` returns every applicable command along the path, most specific first; scalar `get` returns the most specific one.
+
+```mermaid
+flowchart LR
+    root((root)) -->|s| general["accepting -s node<br/>general command"]
+    general -->|e ... k| exact["exact kubernetes node<br/>specific command"]
+    first["FIRST"] -. stops at .-> general
+    last["LAST"] -. descends to .-> exact
+    all["ALL"] -. emits first .-> exact
+    all -. then .-> general
+```
+
+```java
+import org.egothor.stemmer.CompiledPatchCommand;
+import org.egothor.stemmer.LookupMode;
+
+final CompiledPatchCommand specific = trie.withLookupMode(LookupMode.LAST).get("kubernetes");
+final CompiledPatchCommand[] candidates = trie.withLookupMode(LookupMode.ALL).getAll("kubernetes");
+```
+
+For the bundled models, `FIRST` and `LAST` return identical results everywhere except where a specific rule sits beneath a generalization — their contracted rules have no deeper branch — so switching modes does not change ordinary stemming or the benchmarks. Adding such specific rules is covered in [Extending and Persisting Compiled Tries](programmatic-extending-and-persistence.md).
+
 ## Apply compiled patch commands
 
 A patch command is not the final stem. It must be applied to the original input token. Runtime code should use `CompiledPatchCommand`, which parses the stored patch-command representation once during setup and then applies the concrete immutable command repeatedly.
