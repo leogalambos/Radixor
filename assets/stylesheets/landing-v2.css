@@ -1,3 +1,34 @@
+/*******************************************************************************
+ * Copyright (C) 2026, Leo Galambos
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * 3. Neither the name of the copyright holder nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ ******************************************************************************/
+
 
 :root{--rx2-navy:#0b1537;--rx2-text:#172554;--rx2-muted:#53627b;--rx2-line:#dce6f2;--rx2-purple:#6544ef;--rx2-blue:#1769ef;--rx2-cyan:#0a97cb;--rx2-teal:#0aa98f;--rx2-green:#079868;--rx2-red:#ef2f35;--rx2-shadow:0 12px 30px rgba(33,64,112,.085);--rx2-max:1050px}
 .rx2-header{height:66px;background:#fff;border-bottom:1px solid #e2eaf3;position:relative;z-index:20}.rx2-header-inner{height:100%;width:min(var(--rx2-max),calc(100% - 42px));margin:auto;display:flex;align-items:center}.rx2-brand{display:flex;align-items:center;gap:10px;color:#11182e;text-decoration:none;font:850 1.23rem/1 system-ui,-apple-system,"Segoe UI",sans-serif;letter-spacing:.12em}.rx2-brand img{width:38px;height:38px}.rx2-nav{margin-left:auto;display:flex;gap:30px;align-items:center}.rx2-nav a{font:650 .74rem/1 system-ui,-apple-system,"Segoe UI",sans-serif;color:#11182e;text-decoration:none}.rx2-nav a:hover{color:#1769ef}.rx2-menu{display:none;margin-left:auto;width:38px;height:38px;border:1px solid var(--rx2-line);border-radius:10px;background:#fff;color:#172554}

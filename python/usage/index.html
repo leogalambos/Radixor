@@ -2469,6 +2469,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#adding-your-own-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Adding your own rules
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#thread-safety" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2514,6 +2525,34 @@
     
   
     Dictionary Compilation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../customization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Customizing Dictionaries
   
 
     
@@ -3541,6 +3580,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#adding-your-own-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Adding your own rules
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#thread-safety" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3750,6 +3800,25 @@ cat cats
 <p><code>store_original=True</code> (default) maps each stem to itself (a no-op patch) so the
 stem is recognised. See <a href="../../dictionary-format/">Dictionary Format</a> for the
 authoritative specification shared with the Java project.</p>
+<h2 id="adding-your-own-rules">Adding your own rules</h2>
+<p>To adapt a model to brand names, trademarks, or domain vocabulary — for example
+so <code>Windows</code> is not stemmed to <code>window</code> — open it as a <code>TrieBuilder</code>, add
+<code>word → stem</code> rules, and build a new stemmer:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">radixor</span><span class="w"> </span><span class="kn">import</span> <span class="n">Stemmer</span>
+
+<span class="n">builder</span> <span class="o">=</span> <span class="n">Stemmer</span><span class="p">(</span><span class="s2">"en"</span><span class="p">)</span><span class="o">.</span><span class="n">to_builder</span><span class="p">()</span>
+<span class="n">builder</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">"windows"</span><span class="p">,</span> <span class="s2">"windows"</span><span class="p">)</span>          <span class="c1"># protect a brand from over-stemming</span>
+<span class="n">builder</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">"kubernetes"</span><span class="p">,</span> <span class="s2">"kube"</span><span class="p">)</span>          <span class="c1"># add domain vocabulary</span>
+
+<span class="n">stemmer</span> <span class="o">=</span> <span class="n">builder</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">lookup</span><span class="o">=</span><span class="s2">"last"</span><span class="p">)</span>     <span class="c1"># 'last' lets specific rules win</span>
+<span class="n">stemmer</span><span class="o">.</span><span class="n">stemWord</span><span class="p">(</span><span class="s2">"windows"</span><span class="p">)</span>                <span class="c1"># 'windows'</span>
+<span class="n">stemmer</span><span class="o">.</span><span class="n">stemWord</span><span class="p">(</span><span class="s2">"kubernetes"</span><span class="p">)</span>             <span class="c1"># 'kube'</span>
+</code></pre></div>
+<p>The <code>lookup</code> policy is what makes a specific rule override a general one; the
+default <code>"first"</code> keeps the legacy behavior. See
+<a href="../customization/">Customizing a Dictionary</a> for the full set of update
+operations (<code>add</code>, <code>set</code>, <code>remove</code>, weights, gap-fill), the <code>first</code>/<code>last</code>/<code>all</code>
+lookup modes, and persistence.</p>
 <h2 id="thread-safety">Thread-safety</h2>
 <p>A <code>Stemmer</code> is safe to share across threads. The bounded cache is guarded
 internally; the compiled trie is immutable after construction.</p>
@@ -3764,9 +3833,9 @@ internally; the compiled trie is immutable after construction.</p>
 </thead>
 <tbody>
 <tr>
-<td><code>Stemmer(language=None, maxCacheSize: int | None = None, *, path=..., compiled=..., backward, store_original, lowercase, cache_size=10_000)</code></td>
+<td><code>Stemmer(language=None, maxCacheSize: int | None = None, *, path=..., compiled=..., backward, store_original, lowercase, lookup="first", cache_size=10_000)</code></td>
 <td>stemmer</td>
-<td>PyStemmer-compatible positional cache argument via <code>maxCacheSize</code>; if set, <code>cache_size</code> is ignored; <code>cache_size=0</code> disables caching (<code>maxCacheSize</code> remains supported as alias)</td>
+<td>PyStemmer-compatible positional cache argument via <code>maxCacheSize</code>; if set, <code>cache_size</code> is ignored; <code>cache_size=0</code> disables caching (<code>maxCacheSize</code> remains supported as alias). <code>lookup</code> is <code>"first"</code> (default), <code>"last"</code>, or <code>"all"</code> — see <a href="../customization/">Customizing a Dictionary</a></td>
 </tr>
 <tr>
 <td><code>stem(word)</code></td>

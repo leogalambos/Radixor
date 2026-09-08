@@ -1,3 +1,34 @@
+{#
+  Copyright (C) 2026, Leo Galambos
+  All rights reserved.
+
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
+
+  1. Redistributions of source code must retain the above copyright notice,
+     this list of conditions and the following disclaimer.
+
+  2. Redistributions in binary form must reproduce the above copyright notice,
+     this list of conditions and the following disclaimer in the documentation
+     and/or other materials provided with the distribution.
+
+  3. Neither the name of the copyright holder nor the names of its contributors
+     may be used to endorse or promote products derived from this software
+     without specific prior written permission.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+  ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+  LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+  INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+  POSSIBILITY OF SUCH DAMAGE.
+#}
+
 {% extends "base.html" %}
 {% block extrahead %}{{ super() }}<meta name="theme-color" content="#ffffff"><meta property="og:title" content="Radixor — High-quality multilingual stemming"><meta property="og:description" content="A flagship Java stemmer and two native Python runtimes over shared compiled patch-command tries."><meta property="og:type" content="website"><meta property="og:url" content="https://leogalambos.github.io/Radixor/"><meta property="og:image" content="https://leogalambos.github.io/Radixor/assets/images/radixor-logo.png"><meta name="twitter:card" content="summary"><meta name="twitter:title" content="Radixor — High-quality multilingual stemming"><meta name="twitter:description" content="Measured multilingual quality and runtime performance for Java and Python."><script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareSourceCode","name":"Radixor","description":"Dictionary-trained multilingual stemming for Java and Python","codeRepository":"https://github.com/leogalambos/Radixor","license":"https://opensource.org/license/bsd-3-clause","programmingLanguage":["Java","Python","Rust","C"]}</script>{% endblock %}
 {% block header %}<header class="rx2-header"><div class="rx2-header-inner"><a class="rx2-brand" href="{{ base_url }}/"><img src="{{ base_url }}/assets/images/radixor-logo.png" alt=""><span>RADIXOR</span></a><button class="rx2-menu" type="button" aria-label="Toggle menu" aria-expanded="false">☰</button><nav class="rx2-nav"><a href="{{ base_url }}/benchmarks/">Benchmarks</a><a href="{{ base_url }}/why-radixor-is-different/">Why Radixor</a><a href="{{ base_url }}/python/fast-track/">Python</a><a href="{{ base_url }}/fast-track/">Java</a><a href="{{ base_url }}/stemmer-models/">Models</a><a href="{{ base_url }}/getting-started/">Documentation</a><a href="https://github.com/leogalambos/Radixor">GitHub ↗</a></nav></div></header>{% endblock %}

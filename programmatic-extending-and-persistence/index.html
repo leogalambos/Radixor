@@ -2088,6 +2088,45 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#choosing-how-an-added-rule-wins" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Choosing how an added rule wins
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Choosing how an added rule wins">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#update-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Update methods
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reading-with-the-specific-rule" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reading with the specific rule
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#persist-and-deploy-compiled-tries" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2457,6 +2496,34 @@
     
   
     Dictionary Compilation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../python/customization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Customizing Dictionaries
   
 
     
@@ -3407,6 +3474,45 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#choosing-how-an-added-rule-wins" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Choosing how an added rule wins
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Choosing how an added rule wins">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#update-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Update methods
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reading-with-the-specific-rule" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reading with the specific rule
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#persist-and-deploy-compiled-tries" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3472,9 +3578,12 @@
 
 <h1 id="extending-and-persisting-compiled-tries">Extending and Persisting Compiled Tries</h1>
 <p>This document explains how compiled Radixor tries can be reopened, extended
-with domain vocabulary, rebuilt, and stored for deployment. This is currently
-a Java capability. The resulting <a href="../data-formats/">compiled Radixor model</a> can
-be loaded by Java, Python (PyO3), and Python-C.</p>
+with domain vocabulary, rebuilt, and stored for deployment. The Java API is
+described here; the Python (PyO3) runtime offers the equivalent through
+<code>radixor.TrieBuilder</code> (see
+<a href="../python/customization/">Customizing a Dictionary</a>). The resulting
+<a href="../data-formats/">compiled Radixor model</a> can be loaded by Java, Python (PyO3),
+and Python-C.</p>
 <h2 id="reopen-and-extend-a-compiled-trie">Reopen and extend a compiled trie</h2>
 <p><code>FrequencyTrieBuilders.copyOf(...)</code> reconstructs a mutable builder from a compiled trie. The reconstructed builder preserves the key-local value counts of the compiled trie as currently stored, making it suitable for subsequent modification and recompilation. Reconstruction is performed from the compiled state, not from the original unreduced insertion history.</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">java.io.IOException</span><span class="p">;</span>
@@ -3482,6 +3591,7 @@ be loaded by Java, Python (PyO3), and Python-C.</p>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">org.egothor.stemmer.FrequencyTrie</span><span class="p">;</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">org.egothor.stemmer.FrequencyTrieBuilders</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.egothor.stemmer.CompiledPatchCommand</span><span class="p">;</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">org.egothor.stemmer.PatchCommandEncoder</span><span class="p">;</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">org.egothor.stemmer.ReductionMode</span><span class="p">;</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">org.egothor.stemmer.ReductionSettings</span><span class="p">;</span>
@@ -3507,16 +3617,18 @@ be loaded by Java, Python (PyO3), and Python-C.</p>
 
 <span class="w">        </span><span class="kd">final</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">word</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"microservices"</span><span class="p">;</span>
 <span class="w">        </span><span class="kd">final</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">stem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"microservice"</span><span class="p">;</span>
-<span class="w">        </span><span class="kd">final</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">patch</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PatchCommandEncoder</span><span class="p">.</span><span class="na">builder</span><span class="p">().</span><span class="na">build</span><span class="p">().</span><span class="na">encode</span><span class="p">(</span><span class="n">word</span><span class="p">,</span><span class="w"> </span><span class="n">stem</span><span class="p">);</span>
-<span class="w">        </span><span class="n">builder</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="n">word</span><span class="p">,</span><span class="w"> </span><span class="n">patch</span><span class="p">);</span>
+<span class="w">        </span><span class="kd">final</span><span class="w"> </span><span class="n">PatchCommandEncoder</span><span class="w"> </span><span class="n">encoder</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PatchCommandEncoder</span><span class="p">.</span><span class="na">builder</span><span class="p">()</span>
+<span class="w">                </span><span class="p">.</span><span class="na">traversalDirection</span><span class="p">(</span><span class="n">compiledTrie</span><span class="p">.</span><span class="na">traversalDirection</span><span class="p">())</span>
+<span class="w">                </span><span class="p">.</span><span class="na">build</span><span class="p">();</span>
+<span class="w">        </span><span class="kd">final</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">patch</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">encoder</span><span class="p">.</span><span class="na">encode</span><span class="p">(</span><span class="n">word</span><span class="p">,</span><span class="w"> </span><span class="n">stem</span><span class="p">);</span>
+<span class="w">        </span><span class="n">builder</span><span class="p">.</span><span class="na">putDominant</span><span class="p">(</span><span class="n">word</span><span class="p">,</span><span class="w"> </span><span class="n">patch</span><span class="p">);</span>
 
 <span class="w">        </span><span class="kd">final</span><span class="w"> </span><span class="n">FrequencyTrie</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">updatedTrie</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">builder</span><span class="p">.</span><span class="na">build</span><span class="p">();</span>
 
 <span class="w">        </span><span class="kd">final</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">storedPatch</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">updatedTrie</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">word</span><span class="p">);</span>
-<span class="w">        </span><span class="kd">final</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">actualStem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PatchCommandEncoder</span><span class="p">.</span><span class="na">apply</span><span class="p">(</span>
-<span class="w">                </span><span class="n">word</span><span class="p">,</span>
-<span class="w">                </span><span class="n">storedPatch</span><span class="p">,</span>
-<span class="w">                </span><span class="n">updatedTrie</span><span class="p">.</span><span class="na">traversalDirection</span><span class="p">());</span>
+<span class="w">        </span><span class="kd">final</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">actualStem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CompiledPatchCommand</span>
+<span class="w">                </span><span class="p">.</span><span class="na">compile</span><span class="p">(</span><span class="n">storedPatch</span><span class="p">,</span><span class="w"> </span><span class="n">updatedTrie</span><span class="p">.</span><span class="na">traversalDirection</span><span class="p">())</span>
+<span class="w">                </span><span class="p">.</span><span class="na">apply</span><span class="p">(</span><span class="n">word</span><span class="p">);</span>
 <span class="w">        </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="n">word</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">" -&gt; "</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">actualStem</span><span class="p">);</span>
 
 <span class="w">        </span><span class="n">StemmerPatchTrieBinaryIO</span><span class="p">.</span><span class="na">write</span><span class="p">(</span>
@@ -3538,6 +3650,88 @@ not copy a patch string from another word: generate it with
 <code>PatchCommandEncoder</code> so offsets and traversal direction remain correct. Add
 the canonical stem as a no-op relationship too when the custom vocabulary must
 recognize it as an input in its own right.</p>
+<p>The compiled representation is a directed acyclic graph (DAG): semantically
+equivalent subtrees may share one physical node, whose frequencies have already
+been aggregated. Reconstruction retains that provenance. Consequently, an
+unmodified rebuild counts a shared node once instead of multiplying its counts
+by the number of incoming logical paths. Modifying one expanded path creates a
+copy-on-write reduction boundary, so its new values and frequencies cannot leak
+into unchanged paths that previously shared the node. The original unreduced
+per-path insertion history is not recoverable; the compiled aggregate is the
+authoritative starting state.</p>
+<h2 id="choosing-how-an-added-rule-wins">Choosing how an added rule wins</h2>
+<p>A compiled model generalizes suffixes: the English model contracts the <code>-s</code>
+plural into one rule that strips a trailing <code>s</code> from any word, so a rule added
+for one specific word can be shadowed by that generalization. Two things control
+whether your rule takes effect — the update method you use on the builder, and
+the lookup mode you read with. <code>copyOf</code> reconstructs the contracted
+generalizations faithfully, so an unmodified round-trip reproduces the original
+stemmer and your additions do not weaken the model's coverage of other words.</p>
+<h3 id="update-methods">Update methods</h3>
+<p><code>put(key, value, count)</code> accumulates a frequency. Because the returned stem is
+the highest-frequency value at a node, a word that already has a rule can
+out-rank a single added occurrence. The additional update methods make the
+intent explicit; all return the builder for chaining.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Effect at the key's node</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>put(key, value, count)</code></td>
+<td>accumulate a raw frequency</td>
+</tr>
+<tr>
+<td><code>putDominant(key, value)</code></td>
+<td>make <code>value</code> the dominant result, keeping other values as lower-ranked alternatives</td>
+</tr>
+<tr>
+<td><code>set(key, value)</code></td>
+<td>replace every value at the node with <code>value</code></td>
+</tr>
+<tr>
+<td><code>putIfAbsent(key, value)</code></td>
+<td>store <code>value</code> only when the node has no value yet</td>
+</tr>
+<tr>
+<td><code>remove(key)</code></td>
+<td>delete every value at the exact node</td>
+</tr>
+<tr>
+<td><code>remove(key, value)</code></td>
+<td>delete one value, keeping the rest</td>
+</tr>
+</tbody>
+</table>
+<p><code>putDominant</code> is the usual choice for overriding one rule while keeping the prior
+candidate visible in <code>getAll</code>; <code>set</code> discards the alternatives entirely.</p>
+<h3 id="reading-with-the-specific-rule">Reading with the specific rule</h3>
+<p>An added rule sits at the word's own deep node, beneath the shallow
+generalization. Under the default <code>LookupMode.FIRST</code> the generalization
+short-circuits and the added rule is not seen; read with <code>LookupMode.LAST</code> so the
+specific rule wins (see
+<a href="../programmatic-querying-and-ambiguity/">Querying and Ambiguity Handling</a>).</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">org.egothor.stemmer.LookupMode</span><span class="p">;</span>
+
+<span class="kd">final</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">word</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"windows"</span><span class="p">;</span>
+<span class="kd">final</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">patch</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PatchCommandEncoder</span><span class="p">.</span><span class="na">builder</span><span class="p">()</span>
+<span class="w">        </span><span class="p">.</span><span class="na">traversalDirection</span><span class="p">(</span><span class="n">compiledTrie</span><span class="p">.</span><span class="na">traversalDirection</span><span class="p">())</span>
+<span class="w">        </span><span class="p">.</span><span class="na">build</span><span class="p">()</span>
+<span class="w">        </span><span class="p">.</span><span class="na">encode</span><span class="p">(</span><span class="n">word</span><span class="p">,</span><span class="w"> </span><span class="n">word</span><span class="p">);</span><span class="w"> </span><span class="c1">// identity</span>
+<span class="n">builder</span><span class="p">.</span><span class="na">putDominant</span><span class="p">(</span><span class="n">word</span><span class="p">,</span><span class="w"> </span><span class="n">patch</span><span class="p">);</span>
+
+<span class="kd">final</span><span class="w"> </span><span class="n">FrequencyTrie</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">updated</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">builder</span><span class="p">.</span><span class="na">build</span><span class="p">();</span>
+<span class="kd">final</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">stored</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">updated</span><span class="p">.</span><span class="na">withLookupMode</span><span class="p">(</span><span class="n">LookupMode</span><span class="p">.</span><span class="na">LAST</span><span class="p">).</span><span class="na">get</span><span class="p">(</span><span class="n">word</span><span class="p">);</span>
+<span class="c1">// 'stored' is the identity rule, so the word is not rewritten by the -s generalization.</span>
+</code></pre></div>
+<p><code>remove(key)</code> targets the word's exact node. A word that stems only through a
+shorter contracted generalization has no value of its own to delete, so removing
+the full word is a no-op — override it with <code>set</code> or <code>putDominant</code> and read with
+<code>LookupMode.LAST</code> instead, or remove the shorter suffix key, which affects every
+word it covers.</p>
 <h2 id="persist-and-deploy-compiled-tries">Persist and deploy compiled tries</h2>
 <p><code>StemmerPatchTrieBinaryIO</code> reads and writes patch-command tries as GZip-compressed binary files. <code>StemmerPatchTrieLoader</code> exposes convenience methods around the same persistence functionality.</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">java.io.IOException</span><span class="p">;</span>

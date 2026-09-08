@@ -2368,6 +2368,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python/customization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Customizing Dictionaries
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -2593,6 +2621,17 @@
     <span class="md-ellipsis">
       
         Stemming calls
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lookup-policy-for-customized-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lookup policy for customized models
       
     </span>
   </a>
@@ -3398,6 +3437,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#lookup-policy-for-customized-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lookup policy for customized models
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#scope-boundary" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3491,6 +3541,38 @@ disable it or use the PyStemmer-compatible <code>maxCacheSize</code> name.</p>
 </code></pre></div>
 <p>Use <code>lowercase=False</code> only when inputs have already been normalized. Stemmer
 instances are safe to share between Python threads.</p>
+<h2 id="lookup-policy-for-customized-models">Lookup policy for customized models</h2>
+<p>Radixor-C cannot modify a trie, but it can serve a customized <code>.rxc</code> produced by
+Java or the PyO3 <code>TrieBuilder</code>. Select how rules along one trie path are resolved
+with <code>lookup=</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Value</th>
+<th>Selection</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>"first"</code> (default)</td>
+<td>stop at the shallowest accepting generalization; preserves historical behavior</td>
+</tr>
+<tr>
+<td><code>"last"</code></td>
+<td>prefer the deepest exact rule, using the generalization as fallback</td>
+</tr>
+<tr>
+<td><code>"all"</code></td>
+<td>make <code>stem_all</code> return candidates from deepest to shallowest; scalar calls behave like <code>"last"</code></td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><span class="n">custom</span> <span class="o">=</span> <span class="n">Stemmer</span><span class="p">(</span><span class="n">compiled</span><span class="o">=</span><span class="s2">"custom-en.rxc"</span><span class="p">,</span> <span class="n">lookup</span><span class="o">=</span><span class="s2">"last"</span><span class="p">)</span>
+<span class="n">custom</span><span class="o">.</span><span class="n">stemWord</span><span class="p">(</span><span class="s2">"kubernetes"</span><span class="p">)</span>
+</code></pre></div>
+<p>The mode is a runtime policy and is not stored in the compiled model. See
+<a href="../../python/customization/">Customizing a Dictionary</a> for the trie shape and a
+visual explanation.</p>
 <h2 id="scope-boundary">Scope boundary</h2>
 <p>Radixor-C does not expose <code>radixor.compile(...)</code>, textual dictionary loading,
 or trie modification. Compile or extend models outside the serving process and

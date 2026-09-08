@@ -2110,6 +2110,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#selecting-commands-along-the-path-lookup-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Selecting commands along the path: lookup mode
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#apply-compiled-patch-commands" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2546,6 +2557,34 @@
     
   
     Dictionary Compilation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../python/customization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Customizing Dictionaries
   
 
     
@@ -3546,6 +3585,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#selecting-commands-along-the-path-lookup-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Selecting commands along the path: lookup mode
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#apply-compiled-patch-commands" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3683,6 +3733,27 @@
 <span class="p">},</span><span class="w"> </span><span class="mi">8</span><span class="p">);</span>
 </code></pre></div>
 <p><code>getAllNormalized(...)</code> bypasses <code>caseProcessingMode</code> and <code>diacriticProcessingMode</code>; callers are responsible for supplying canonical input. <code>maxResults == 0</code> visits nothing, negative values are rejected, and a sink returning <code>false</code> stops iteration after the current callback.</p>
+<h2 id="selecting-commands-along-the-path-lookup-mode">Selecting commands along the path: lookup mode</h2>
+<p>A key's path can pass through several value-bearing nodes: shallow contracted accepting nodes (suffix generalizations that accept any remaining input) and, when the key is fully consumed, a deep exact terminal. <code>LookupMode</code> decides which of these the <code>get</code> / <code>getAll</code> family selects. <code>FrequencyTrie.withLookupMode(LookupMode)</code> returns a lightweight view over the same immutable compiled structure; the policy is a read-time concern and is never persisted, so one trie can be queried under any mode.</p>
+<ul>
+<li><code>LookupMode.FIRST</code> (default) — the shallowest accepting node short-circuits descent. This is the historical behavior; the bundled models are validated against it.</li>
+<li><code>LookupMode.LAST</code> — the deepest, most specific match wins, with the deepest accepting ancestor as a fallback when descent dead-ends. Use this so a specific rule added beneath a suffix generalization takes effect.</li>
+<li><code>LookupMode.ALL</code> — <code>getAll</code> returns every applicable command along the path, most specific first; scalar <code>get</code> returns the most specific one.</li>
+</ul>
+<pre class="mermaid"><code>flowchart LR
+    root((root)) --&gt;|s| general["accepting -s node&lt;br/&gt;general command"]
+    general --&gt;|e ... k| exact["exact kubernetes node&lt;br/&gt;specific command"]
+    first["FIRST"] -. stops at .-&gt; general
+    last["LAST"] -. descends to .-&gt; exact
+    all["ALL"] -. emits first .-&gt; exact
+    all -. then .-&gt; general</code></pre>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">org.egothor.stemmer.CompiledPatchCommand</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.egothor.stemmer.LookupMode</span><span class="p">;</span>
+
+<span class="kd">final</span><span class="w"> </span><span class="n">CompiledPatchCommand</span><span class="w"> </span><span class="n">specific</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">trie</span><span class="p">.</span><span class="na">withLookupMode</span><span class="p">(</span><span class="n">LookupMode</span><span class="p">.</span><span class="na">LAST</span><span class="p">).</span><span class="na">get</span><span class="p">(</span><span class="s">"kubernetes"</span><span class="p">);</span>
+<span class="kd">final</span><span class="w"> </span><span class="n">CompiledPatchCommand</span><span class="o">[]</span><span class="w"> </span><span class="n">candidates</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">trie</span><span class="p">.</span><span class="na">withLookupMode</span><span class="p">(</span><span class="n">LookupMode</span><span class="p">.</span><span class="na">ALL</span><span class="p">).</span><span class="na">getAll</span><span class="p">(</span><span class="s">"kubernetes"</span><span class="p">);</span>
+</code></pre></div>
+<p>For the bundled models, <code>FIRST</code> and <code>LAST</code> return identical results everywhere except where a specific rule sits beneath a generalization — their contracted rules have no deeper branch — so switching modes does not change ordinary stemming or the benchmarks. Adding such specific rules is covered in <a href="../programmatic-extending-and-persistence/">Extending and Persisting Compiled Tries</a>.</p>
 <h2 id="apply-compiled-patch-commands">Apply compiled patch commands</h2>
 <p>A patch command is not the final stem. It must be applied to the original input token. Runtime code should use <code>CompiledPatchCommand</code>, which parses the stored patch-command representation once during setup and then applies the concrete immutable command repeatedly.</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">org.egothor.stemmer.CompiledPatchCommand</span><span class="p">;</span>
