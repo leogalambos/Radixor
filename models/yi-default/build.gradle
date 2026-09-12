@@ -38,6 +38,7 @@ radixorModel {
     language = 'YI'
     displayName = 'Yiddish default model'
     defaultModel = true
+    rightToLeft = true
     sourceName = 'UniMorph'
     sourceVersion = 'not-recorded-in-legacy-import'
     sourceRevision = 'not-recorded-in-legacy-import'

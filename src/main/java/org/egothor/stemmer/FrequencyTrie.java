@@ -1685,6 +1685,35 @@ public final class FrequencyTrie<V> {
      * subsequent builder updates do not affect previously built tries.
      * </p>
      *
+     * <p>
+     * Update operations compose in invocation order. For example, the following
+     * sequence starts with two candidates, promotes one without losing the other,
+     * removes the former candidate, and then replaces the remaining value:
+     * </p>
+     *
+     * <pre>{@code
+     * FrequencyTrie.Builder<String> builder =
+     *         new FrequencyTrie.Builder<>(String[]::new,
+     *                 ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS);
+     * builder.put("token", "legacy", 3)
+     *         .put("token", "alternate")
+     *         .putDominant("token", "alternate")
+     *         .remove("token", "legacy")
+     *         .set("token", "curated");
+     *
+     * FrequencyTrie<String> snapshot = builder.build();
+     * // snapshot.get("token") returns "curated" and getAll contains no alternatives.
+     * }</pre>
+     *
+     * <p>
+     * {@link #putIfAbsent(String, Object)} is a no-op while a node has any local
+     * value. {@link #remove(String)} and {@link #remove(String, Object)} are no-ops
+     * for missing targets. An empty key is valid and addresses the root node. When
+     * modifying a reconstructed contracted trie, exact-node removal does not remove
+     * a shorter generalization; add a specific rule and use {@link LookupMode#LAST}
+     * when the more-specific rule must win.
+     * </p>
+     *
      * @param <V> value type
      */
     public static final class Builder<V> {

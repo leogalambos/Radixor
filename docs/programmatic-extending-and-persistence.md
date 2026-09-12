@@ -118,6 +118,90 @@ intent explicit; all return the builder for chaining.
 `putDominant` is the usual choice for overriding one rule while keeping the prior
 candidate visible in `getAll`; `set` discards the alternatives entirely.
 
+### Concrete before-and-after example
+
+The following generic trie uses readable values so the local frequency and
+replacement semantics are visible. A stemmer builder stores encoded patch
+commands instead, but the six update methods behave identically.
+
+```java
+import org.egothor.stemmer.FrequencyTrie;
+import org.egothor.stemmer.ReductionMode;
+
+final FrequencyTrie.Builder<String> builder =
+        new FrequencyTrie.Builder<>(String[]::new,
+                ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS);
+
+builder.put("token", "legacy", 3)
+        .put("token", "alternate");
+final FrequencyTrie<String> initial = builder.build();
+// initial.getEntries("token") ==
+//     [ValueCount[value=legacy, count=3], ValueCount[value=alternate, count=1]]
+
+builder.put("token", "alternate");
+final FrequencyTrie<String> accumulated = builder.build();
+// "legacy" still wins 3 to 2: put accumulates; it does not promise dominance.
+
+builder.putDominant("token", "alternate");
+final FrequencyTrie<String> promoted = builder.build();
+// "alternate" now wins 4 to 3, while "legacy" remains in getAll("token").
+
+builder.remove("token", "legacy");
+final FrequencyTrie<String> oneCandidate = builder.build();
+// Only "alternate" remains, with its count of 4.
+
+builder.set("token", "curated")
+        .putIfAbsent("token", "ignored");
+final FrequencyTrie<String> replaced = builder.build();
+// set discarded every old value and stored "curated" with count 1;
+// putIfAbsent then did nothing because that node was not empty.
+
+builder.remove("missing")                 // missing key: no-op
+        .remove("token", "not-present")  // missing value: no-op
+        .remove("token")                  // exact node becomes empty
+        .putIfAbsent("token", "fallback");
+final FrequencyTrie<String> refilled = builder.build();
+// refilled.get("token") returns "fallback".
+
+// Every earlier build is an immutable snapshot. Later builder changes did not
+// alter initial, accumulated, promoted, oneCandidate, or replaced.
+```
+
+The resulting states are:
+
+| Operation | Values at exact node `token`, in lookup order |
+| --- | --- |
+| `put("legacy", 3)` then `put("alternate")` | `legacy:3`, `alternate:1` |
+| another `put("alternate")` | `legacy:3`, `alternate:2` |
+| `putDominant("alternate")` | `alternate:4`, `legacy:3` |
+| `remove("legacy")` | `alternate:4` |
+| `set("curated")` then `putIfAbsent("ignored")` | `curated:1` |
+| `remove(key)` then `putIfAbsent("fallback")` | `fallback:1` |
+
+The table abbreviates the Java calls by omitting the repeated `"token"` key.
+Counts belong to one exact trie node. Removing a value does not decrement it;
+it removes that candidate completely. `set` always resets the replacement
+count to one. `putDominant` sets its value to one more than the highest other
+count, so calling it again can change the count only when another candidate has
+become equally or more frequent.
+
+### Composition and edge cases
+
+- Calls are immediately applied to the mutable builder and therefore compose
+  left to right. There is no implicit transaction or rollback.
+- `build()` creates a read-only snapshot and leaves the builder usable. A later
+  edit never mutates an earlier snapshot.
+- `null` keys and values are rejected. `put(..., count)` requires a positive
+  count and fails on integer overflow.
+- The empty string is a valid key and addresses the root node; it is not treated
+  as a missing key.
+- Keys are normalized according to the builder metadata. Updates and lookups
+  must therefore use compatible case and diacritic policies.
+- `remove(key)` removes values only from the exact node. It does not prune the
+  path and does not remove a shorter rule that happens to match the same input.
+- `remove(key, value)` preserves every other candidate and its count. Missing
+  keys or values are deliberate no-ops, which makes idempotent cleanup safe.
+
 ### Reading with the specific rule
 
 An added rule sits at the word's own deep node, beneath the shallow

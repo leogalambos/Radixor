@@ -11,7 +11,9 @@ This document explains the structural architecture of **Radixor**: what data is 
 | `StemmerModelRegistry` | Deterministic index/descriptor discovery and selection by model ID or language default |
 | `StemmerModelDescriptor` | Immutable public view of validated runtime identity, format, resource, checksum, and source URL |
 | Model convention plugin | Validates inputs and generates the resource namespace, descriptor, index, license, and publication |
-| Standard aggregate | POM-only transitive runtime dependencies for one default per language |
+| Standard aggregate | POM-only transitive runtime dependencies for 31 standard models |
+| Extended aggregate | POM-only transitive runtime dependencies for the other 113 active models |
+| Filtered aggregate | POM-only opt-in dependencies for 10 non-default alternatives |
 | Verification classpaths | Direct individual-model dependencies for tests, quality evaluation, and JMH, including optional PoliMorf |
 | Models BOM | POM-only recommended individual model versions in Maven dependency management |
 | Documentation staging | Reviewed `docs/`, including the checked-in generated catalog; staging independently regenerates a byte-identical catalog under `build/mkdocs-source/` |
@@ -23,7 +25,7 @@ Read [Model Selection and Loading](model-selection-and-loading.md) for executabl
 
 The Python distribution is a separate native implementation rather than a JVM
 wrapper. The `radixor` wheel contains the Rust/PyO3 runtime but no language
-data. Its mandatory `radixor-models-standard` dependency supplies 20 validated,
+data. Its mandatory `radixor-models-standard` dependency supplies 31 validated,
 precompiled, GZip-compressed version 7 `.rxc` tries. It does not use Java model
 JARs, `ServiceLoader`, descriptors, or the Java registry.
 
@@ -77,7 +79,27 @@ No equality relationship is implied between these values.
 
 ## Build topology and generated output
 
-`models/model-projects.properties` is the single Gradle-readable topology list for the 21 individual model projects and their default or optional aggregate role. Per-model build scripts and generated descriptors remain authoritative for language, resource, provenance, checksum, and model-specific metadata. `settings.gradle`, root verification classpaths, the standard POM, and BOM constraints all derive membership from the topology list.
+`models/model-projects.properties` is the single Gradle-readable topology list
+for the 144 active model projects. Topology roles control registry/default
+semantics, not aggregate membership. The separate
+`models/standard-model-projects.properties` selects 31 language defaults for
+the Java and Python standard aggregates; the other 113 active models form the
+Java extended aggregate. Per-model build
+scripts and generated descriptors remain authoritative for language, writing
+direction, resource, provenance, checksum, and model-specific metadata.
+
+Filtered alternatives belong only to
+`models/alternative-model-projects.properties`: all 10 are individually
+published and available through a separate opt-in filtered aggregate, but never
+enter the active registry, JMH defaults, standard/extended aggregates, or Python.
+Sources whose selected files lack
+file-applicable redistribution evidence are instead listed in
+`models/model-quarantine.properties` and stored privately under the ignored
+`models.prohibited/` directory. They never enter either topology, normal Gradle
+configuration, a runtime registry, BOM, catalog, package, or release. A closed
+benchmark wrapper can temporarily stage the exact checksum-bound quarantine set
+for documentation-only measurement; it disables every task except the minimum
+compile/resource/JAR prerequisites and restores the private state on exit.
 
 Gradle implicitly creates the lifecycle parent `:models` because child paths are nested. It has no build script, applied project plugin, Maven coordinate, publication, or archive. The root CycloneDX plugin exposes direct-task instances to subprojects internally; every subproject instance is disabled, so only root `:cyclonedxDirectBom` can generate an SBOM. The ignored path `models/build/` is generated output, not a module, and the supported build does not write reports there. Root aggregate reports, including `verifyJmhModelClasspath`, belong under `build/reports/models/`; each individual model retains its own outputs under `models/<model-id>/build/`.
 
@@ -89,8 +111,9 @@ The `org.egothor.radixor.model` convention plugin treats `src/modelInput` as imm
 
 For UniMorph models, the convention validates and packages one model-specific attribution,
 licensing, provenance, and contribution notice. Source and packaged notice bytes must match. The
-notice identifies CC BY-SA 3.0 through its canonical URI; no project-wide CC license directory or
-duplicated full legal text is used. Descriptors distinguish exact revisions from the explicit
+notice identifies its audited license through the canonical URI; no project-wide model-data
+license is used. The LGPLLR Khaling artifact also packages the complete canonical license text and
+legible dictionary form. Descriptors distinguish exact revisions from the explicit
 legacy-import sentinel. UniMorph supplies morphological data; runtime patch commands and tries are
 constructed by Radixor. The Java software remains BSD-3-Clause, while PoliMorf data remains under
 its separately packaged BSD-2-Clause license.
@@ -101,7 +124,7 @@ its separately packaged BSD-2-Clause license.
 |---|---|
 | `release@<core-version>` | Root `org.egothor:radixor` artifacts only; never model JARs |
 | `model/<model-id>@<model-version>` | Exactly one matching model; never core, catalog, or other models |
-| `models-catalog@<catalog-version>` | BOM and standard aggregate only; never model bytes |
+| `models-catalog@<catalog-version>` | BOM plus standard, extended, and filtered aggregates; never model bytes |
 
 License inclusion, strict metadata paths, resource presence, SHA-256 verification, unsupported-format rejection, and duplicate-ID rejection form the model integrity boundary. These checks detect packaging mistakes and corruption; model data remains non-executable dictionary input.
 

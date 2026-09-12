@@ -48,6 +48,7 @@ public final class StemmerModelDescriptor implements Comparable<StemmerModelDesc
     private final String displayName;
     private final String resource;
     private final boolean defaultModel;
+    private final boolean rightToLeft;
     private final String format;
     private final int formatVersion;
     private final String sha256;
@@ -57,13 +58,15 @@ public final class StemmerModelDescriptor implements Comparable<StemmerModelDesc
     /** Creates a validated immutable descriptor. */
     StemmerModelDescriptor(final String id, final String version, final StemmerPatchTrieLoader.Language language,
             final String displayName, final String resource, final boolean defaultModel, final String format,
-            final int formatVersion, final String sha256, final URL source, final ClassLoader classLoader) {
+            final int formatVersion, final String sha256, final boolean rightToLeft, final URL source,
+            final ClassLoader classLoader) {
         this.id = Objects.requireNonNull(id, "id");
         this.version = Objects.requireNonNull(version, "version");
         this.language = Objects.requireNonNull(language, "language");
         this.displayName = Objects.requireNonNull(displayName, "displayName");
         this.resource = Objects.requireNonNull(resource, "resource");
         this.defaultModel = defaultModel;
+        this.rightToLeft = rightToLeft;
         this.format = Objects.requireNonNull(format, "format");
         this.formatVersion = formatVersion;
         this.sha256 = Objects.requireNonNull(sha256, "sha256");
@@ -88,6 +91,15 @@ public final class StemmerModelDescriptor implements Comparable<StemmerModelDesc
      * mapping.
      */
     public boolean isDefaultModel() { return this.defaultModel; }
+    /**
+     * Returns whether the model language is conventionally written right-to-left.
+     *
+     * <p>This presentation metadata does not affect dictionary parsing or trie
+     * traversal.</p>
+     *
+     * @return {@code true} for a right-to-left language; {@code false} otherwise
+     */
+    public boolean isRightToLeft() { return this.rightToLeft; }
     /** Returns the dictionary format identifier. */
     public String format() { return this.format; }
     /** Returns the dictionary format version. */

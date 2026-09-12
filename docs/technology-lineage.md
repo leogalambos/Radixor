@@ -128,14 +128,15 @@ than learned from lexical evidence.
 At `N=100`, the current Python batch benchmark shows that rule-based
 generalization does not require accepting a runtime advantage over Radixor:
 
-- each Radixor 4.2.1 Python runtime records lower median processing time than
-  PyStemmer 3.1.0 in all **18 / 18** direct language comparisons;
-- Python (PyO3) has a **2.19×** geometric-mean speedup and a largest measured
-  direct advantage of **4.52×** (Yiddish);
-- Python-C has a **2.28×** geometric-mean speedup and a largest measured direct
-  advantage of **4.38×** (Yiddish);
-- Python (PyO3) spans **6.85–13.87 million words/s**, while Python-C spans
-  **6.76–14.63 million words/s**, across all 20 languages at batch size `N=100`.
+- Radixor 4.4.0 Python (PyO3) records lower median processing time than
+  PyStemmer 3.1.0 in **29 / 29** direct language comparisons;
+- Python-C records lower median processing time in **29 / 29** comparisons;
+- Python (PyO3) has a **2.165×** geometric-mean speedup and a largest measured
+  direct advantage of **4.45×** (Yiddish);
+- Python-C has a **2.278×** geometric-mean speedup and a largest measured direct
+  advantage of **4.42×** (Yiddish);
+- Python (PyO3) spans **6.29–15.68 million words/s**, while Python-C spans
+  **6.44–17.81 million words/s**, across all 31 standard languages at batch size `N=100`.
 
 Those are performance results. The newly integrated official Snowball 3.1.0 Java
 quality comparators also make the linguistic trade-off visible for the three
@@ -164,7 +165,7 @@ Finnish remains another useful illustration. The published `ALL_WORDS`
 primary-output quality result is **0.984838** balanced accuracy for Radixor
 versus **0.740279** for the Snowball Finnish Lucene path, with under-stemming
 **3.032474%** versus **51.944179%**. At `N=100` in the current Python batch run,
-Python (PyO3) is **1.30×** faster and Python-C is **1.51×** faster than
+Python (PyO3) is **1.26×** faster and Python-C is **1.49×** faster than
 PyStemmer's Finnish implementation.
 
 See the [Finnish benchmark](benchmarks/languages/finnish.md), the

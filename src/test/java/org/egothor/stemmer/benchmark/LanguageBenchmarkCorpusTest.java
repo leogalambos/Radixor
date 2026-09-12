@@ -34,13 +34,20 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.zip.GZIPOutputStream;
 
 import org.egothor.stemmer.StemmerPatchTrieLoader;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 /**
  * Tests dictionary-derived benchmark corpus construction.
@@ -54,6 +61,10 @@ final class LanguageBenchmarkCorpusTest {
      * Fully qualified corpus helper class name.
      */
     private static final String CORPUS_CLASS = "org.egothor.stemmer.benchmark.LanguageBenchmarkCorpus";
+
+    /** Temporary dictionary fixture directory. */
+    @TempDir
+    Path temporaryDirectory;
 
     /**
      * Verifies large resources use the full dictionary-derived token sequence.
@@ -127,6 +138,37 @@ final class LanguageBenchmarkCorpusTest {
     }
 
     /**
+     * Verifies root-only dictionaries remain benchmarkable with an explicitly
+     * identified root-preservation workload.
+     *
+     * @throws Exception if reflection or resource loading fails
+     */
+    @Test
+    @DisplayName("should fall back to root-only timing for root-only models")
+    void shouldFallBackToRootOnlyTimingForRootOnlyModels() throws Exception {
+        final Path dictionary = temporaryDirectory.resolve("root-only.txt.gz");
+        writeGzipDictionary(dictionary, "Alpha\nB\u00e9ta\n");
+
+        final Object timing = invokeCorpus("createTimingCorpus", dictionary);
+        final Method corpusMethod = timing.getClass().getDeclaredMethod("corpus");
+        corpusMethod.setAccessible(true);
+        final Object corpus = corpusMethod.invoke(timing);
+        final Method basisMethod = timing.getClass().getDeclaredMethod("basis");
+        basisMethod.setAccessible(true);
+        final String[] corpusTokens = tokens(corpus);
+        final String[] corpusExpectedRoots = expectedRoots(corpus);
+
+        assertEquals("ROOT_ONLY_TOKENS", basisMethod.invoke(timing).toString());
+        assertEquals(minimumTimingTokenCount(), corpusTokens.length);
+        assertEquals(corpusTokens.length, corpusExpectedRoots.length);
+        assertEquals("alpha", corpusTokens[0]);
+        assertEquals("b\u00e9ta", corpusTokens[1]);
+        for (int index = 0; index < corpusTokens.length; index++) {
+            assertEquals(corpusTokens[index], corpusExpectedRoots[index]);
+        }
+    }
+
+    /**
      * Verifies benchmark corpora are generated once per language and reused from
      * memory.
      *
@@ -161,6 +203,34 @@ final class LanguageBenchmarkCorpusTest {
         final Method method = type.getDeclaredMethod(methodName, StemmerPatchTrieLoader.Language.class);
         method.setAccessible(true);
         return method.invoke(null, language);
+    }
+
+    /**
+     * Invokes an exact-model corpus factory.
+     *
+     * @param methodName factory method name
+     * @param dictionary compressed dictionary path
+     * @return corpus or timing-workload record
+     * @throws Exception if reflection or resource loading fails
+     */
+    private Object invokeCorpus(final String methodName, final Path dictionary) throws Exception {
+        final Class<?> type = corpusType();
+        final Method method = type.getDeclaredMethod(methodName, Path.class);
+        method.setAccessible(true);
+        return method.invoke(null, dictionary);
+    }
+
+    /**
+     * Writes a compressed UTF-8 dictionary fixture.
+     *
+     * @param dictionary destination path
+     * @param content dictionary content
+     * @throws IOException if the fixture cannot be written
+     */
+    private void writeGzipDictionary(final Path dictionary, final String content) throws IOException {
+        try (OutputStream output = new GZIPOutputStream(Files.newOutputStream(dictionary))) {
+            output.write(content.getBytes(StandardCharsets.UTF_8));
+        }
     }
 
     /**

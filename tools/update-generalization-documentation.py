@@ -84,6 +84,7 @@ COUNT_SCOPES = ("whole", "withheld", "unseen")
 COUNT_FAMILIES = ("", "changed_", "root_")
 LANGUAGE_SECTION_START = "<!-- DICTIONARY-GENERALIZATION:START -->"
 LANGUAGE_SECTION_END = "<!-- DICTIONARY-GENERALIZATION:END -->"
+PROHIBITED_SECTION_START = "<!-- PROHIBITED-BENCHMARK-MODELS:START -->"
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -91,40 +92,52 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument("source", type=Path)
     parser.add_argument("documentation_root", type=Path)
     parser.add_argument("mode", choices=("update", "verify"))
+    parser.add_argument("--corpus", type=Path, required=True)
+    parser.add_argument("--snapshot-name", required=True)
     return parser.parse_args()
 
 
-def read_model_catalog(path: Path) -> dict[str, tuple[str, str, str]]:
-    models: dict[str, tuple[str, str, str]] = {}
-    for line in path.read_text(encoding="utf-8").splitlines():
-        if not line.startswith("|"):
-            continue
-        cells = [cell.strip().strip("`") for cell in line.split("|")[1:-1]]
-        if len(cells) == 14 and cells[2] == "true":
-            models[cells[1]] = (cells[0], cells[4], cells[12])
-    if set(models) != set(LANGUAGES):
-        raise ValueError("The checked-in model catalog does not define the expected 20 defaults.")
-    return models
+def read_language_pages(path: Path) -> tuple[dict[str, str], dict[str, str]]:
+    """Read all authoritative language display names and page files."""
+
+    languages: dict[str, str] = {}
+    pages: dict[str, str] = {}
+    pattern = re.compile(r"^\| ([^|]+) \| `([^`]+)` \|.*\| \[[^]]+\]\(([^)]+\.md)\) \|$")
+    index = path.read_text(encoding="utf-8")
+    if index.count(PROHIBITED_SECTION_START) > 1:
+        raise ValueError("Language index contains duplicate prohibited-model sections.")
+    public_index = index.split(PROHIBITED_SECTION_START, maxsplit=1)[0]
+    for line in public_index.splitlines():
+        match = pattern.match(line)
+        if match:
+            languages[match.group(2)] = match.group(1)
+            pages[match.group(2)] = match.group(3)
+    if not languages or len(languages) != len(pages):
+        raise ValueError("Language index must define unique default-language pages.")
+    return languages, pages
 
 
 def read_corpus_catalog(path: Path) -> dict[str, tuple[str, str, str, int, int, int, int]]:
     corpora: dict[str, tuple[str, str, str, int, int, int, int]] = {}
-    for line in path.read_text(encoding="utf-8").splitlines():
-        if not line.startswith("|"):
-            continue
-        cells = [cell.strip().strip("`") for cell in line.split("|")[1:-1]]
-        if len(cells) == 9 and cells[3] in LANGUAGES:
-            corpora[cells[3]] = (
-                cells[0], cells[1], cells[2], int(cells[4].replace(",", "")),
-                int(cells[5].replace(",", "")), int(cells[6].replace(",", "")),
-                int(cells[7].replace(",", "")),
+    with path.open(newline="", encoding="utf-8") as source:
+        for row in csv.DictReader(source):
+            if row["Model ID"] == "pl-pl-polimorf":
+                continue
+            language = row["Language"]
+            value = (
+                row["Model ID"], row["Model version"], row["Model SHA-256"],
+                int(row["Dictionary rows"]), int(row["Total tokens"]),
+                int(row["Already-root tokens"]), int(row["Changed tokens"]),
             )
+            previous = corpora.setdefault(language, value)
+            if previous != value:
+                raise ValueError(f"Corpus language has conflicting model counters: {language}")
     if set(corpora) != set(LANGUAGES):
-        raise ValueError("The checked-in corpus table does not define the expected 20 defaults.")
+        raise ValueError("The current corpus catalog does not define every active default.")
     return corpora
 
 
-def read_and_validate(source: Path, documentation_root: Path) -> list[dict[str, str]]:
+def read_and_validate(source: Path, corpus_path: Path) -> list[dict[str, str]]:
     with source.open(encoding="utf-8", newline="") as handle:
         rows = list(csv.DictReader(handle))
     if not rows:
@@ -145,22 +158,15 @@ def read_and_validate(source: Path, documentation_root: Path) -> list[dict[str, 
         raise ValueError(f"Missing required columns: {sorted(missing)}")
 
     protocols = {row["protocol_version"] for row in rows}
-    versions = {row["radixor_java_version"] for row in rows}
     seeds = {row["seed"] for row in rows}
-    if protocols != {EXPECTED_PROTOCOL} or len(versions) != 1 or not next(iter(versions)).strip():
-        raise ValueError("Unexpected split protocol or inconsistent Radixor/Java identity.")
+    if protocols != {EXPECTED_PROTOCOL} or any(not row["radixor_java_version"].strip() for row in rows):
+        raise ValueError("Unexpected split protocol or missing Radixor/Java identity.")
     if seeds != EXPECTED_SEEDS:
         raise ValueError("The report does not use the five predeclared split seeds.")
-    if len({row["source_revision"] for row in rows}) != 1 \
-            or len({row["source_state"] for row in rows}) != 1 \
-            or len({row["generator_sha256"] for row in rows}) != 1:
-        raise ValueError("Source revision, state, and generator digest must be invariant.")
-    first = rows[0]
-    if len(first["source_revision"]) != 40 or len(first["generator_sha256"]) != 64 \
-            or not first["source_state"].strip():
+    if any(len(row["source_revision"]) != 40 or len(row["generator_sha256"]) != 64
+           or not row["source_state"].strip() for row in rows):
         raise ValueError("Source provenance is incomplete.")
-    models = read_model_catalog(documentation_root / "stemmer-model-catalog.md")
-    corpora = read_corpus_catalog(documentation_root / "benchmarks/reference/corpora.md")
+    corpora = read_corpus_catalog(corpus_path)
     keys: set[tuple[str, str, int]] = set()
     by_language: dict[str, list[dict[str, str]]] = defaultdict(list)
     for row in rows:
@@ -174,7 +180,7 @@ def read_and_validate(source: Path, documentation_root: Path) -> list[dict[str, 
         if language not in LANGUAGES or percent not in PERCENTS:
             raise ValueError(f"Unexpected language or percentage: {key}")
         model = (row["model_id"], row["model_version"], row["model_sha256"])
-        if model != models[language] or model != corpora[language][:3]:
+        if model != corpora[language][:3]:
             raise ValueError(f"Scenario does not use the published default model: {key}")
         total_rows = int(row["total_rows"])
         selected_rows = int(row["selected_rows"])
@@ -214,7 +220,7 @@ def read_and_validate(source: Path, documentation_root: Path) -> list[dict[str, 
             raise ValueError(f"The 100% scenario must have no held-out observations: {key}")
 
     if set(by_language) != set(LANGUAGES):
-        raise ValueError("The report does not contain exactly the 20 default languages.")
+        raise ValueError("The report does not contain exactly the active default languages.")
     expected_per_language = len(seeds) * len(PERCENTS)
     for language, language_rows in by_language.items():
         if len(language_rows) != expected_per_language:
@@ -222,6 +228,10 @@ def read_and_validate(source: Path, documentation_root: Path) -> list[dict[str, 
         if len({(row["model_id"], row["model_version"], row["model_sha256"])
                 for row in language_rows}) != 1:
             raise ValueError(f"Model provenance changes within {language}.")
+        if len({tuple(row[name] for name in (
+                "radixor_java_version", "source_revision", "source_state", "generator_sha256"))
+                for row in language_rows}) != 1:
+            raise ValueError(f"Measurement provenance changes within {language}.")
         corpus = corpora[language]
         denominators = {(int(row["total_rows"]), int(row["whole_total"]),
                          int(row["whole_root_total"]), int(row["whole_changed_total"]))
@@ -234,6 +244,17 @@ def read_and_validate(source: Path, documentation_root: Path) -> list[dict[str, 
                          for row in full_rows}
         if len(full_counters) != 1:
             raise ValueError(f"Full-coverage counters differ across splits: {language}")
+    provenance_languages: dict[tuple[str, str, str, str], set[str]] = defaultdict(set)
+    for row in rows:
+        provenance_languages[tuple(row[name] for name in (
+            "radixor_java_version", "source_revision", "source_state", "generator_sha256"
+        ))].add(row["language"])
+    continuation_count = len(LANGUAGES) - 20
+    provenance_sizes = sorted(len(languages) for languages in provenance_languages.values())
+    if provenance_sizes not in ([20, continuation_count], [1, 20, continuation_count - 1]):
+        raise ValueError("Active report must preserve the 20-language archive and the active standalone continuation, allowing a separately measured Arabic repair.")
+    if provenance_sizes == [1, 20, continuation_count - 1] and {"AR"} not in provenance_languages.values():
+        raise ValueError("Only Arabic may have separate repair provenance in the active report.")
     return rows
 
 
@@ -314,8 +335,6 @@ def render_language_conclusion(language: str, rows: list[dict[str, str]]) -> str
     last_all = median_ratio(last, "unseen")
     first_root = median_ratio(first, "unseen_root")
     last_root = median_ratio(last, "unseen_root")
-    if None in (first_changed, last_changed, first_all, last_all, first_root, last_root):
-        raise ValueError(f"Undefined endpoint generalization metric for {language}.")
     provenance = rows[0]
     lines = [
         "## Dictionary-Family Generalization Conclusion", "",
@@ -336,30 +355,30 @@ def render_language_conclusion(language: str, rows: list[dict[str, str]]) -> str
             f"{median_range([ratio(row, 'unseen_changed') for row in scenarios])} | "
             f"{median_range([ratio(row, 'unseen_root') for row in scenarios])} |"
         )
-    changed_gain = float(last_changed) - float(first_changed)
-    all_gain = float(last_all) - float(first_all)
-    root_gain = float(last_root) - float(first_root)
+    def endpoint_statement(label: str, low: float | None, high: float | None) -> str:
+        if low is None or high is None:
+            return f"- {label} is **n/a** at one or both endpoints because the corresponding evaluated population is empty."
+        return (f"- {label} moves from **{low:.3f}%** at 10% training knowledge to "
+                f"**{high:.3f}%** at 90%, a measured **{high - low:+.3f} percentage-point** change.")
     lines.extend([
         "", "### Generalization conclusion", "",
-        f"- Median exactness on genuinely unseen changed forms moves from **{float(first_changed):.3f}%**",
-        f"  at 10% training knowledge to **{float(last_changed):.3f}%** at 90%, a measured",
-        f"  **{changed_gain:+.3f} percentage-point** change for this dictionary.",
-        f"- Over the same endpoints, unseen all-form exactness changes by **{all_gain:+.3f} pp** and",
-        f"  preservation of unseen already-root forms changes by **{root_gain:+.3f} pp**. These separate",
-        "  outcomes show whether the changed-form result coexists with preservation behavior.",
+        endpoint_statement("Median exactness on genuinely unseen changed forms", first_changed, last_changed),
+        endpoint_statement("Unseen all-form exactness", first_all, last_all),
+        endpoint_statement("Preservation of unseen already-root forms", first_root, last_root),
         "- The evidence establishes within-resource transfer across withheld dictionary families. It",
         "  does not estimate unrelated domains, misspellings, arbitrary compounds, or external corpora.",
         "", "The complete ten-level table and split ranges remain in the",
         "[independent generalization report](../generalization.md); raw counters and provenance are in",
-        "[`dictionary-generalization.csv`](../data/dictionary-generalization.csv). The",
+        "[active machine-readable snapshot](../data/dictionary-generalization-2026-09-11.csv). The",
         "[frozen methodology](../reference/generalization-methodology.md) defines family-level",
         "splitting, unseen-surface leakage control, aggregation, and the limits of the claim.",
     ])
     return "\n".join(lines)
 
 
-def render(rows: list[dict[str, str]], checksum: str) -> str:
+def render(rows: list[dict[str, str]], checksum: str, snapshot_name: str) -> str:
     first = rows[0]
+    source_manifest_name = snapshot_name.removesuffix(".csv") + "-sources.txt"
     endpoints: dict[str, tuple[float, float]] = {}
     for language in LANGUAGES:
         low_rows = [row for row in rows
@@ -368,9 +387,10 @@ def render(rows: list[dict[str, str]], checksum: str) -> str:
                      if row["language"] == language and int(row["requested_percent"]) == 90]
         low = median_ratio(low_rows, "unseen_changed")
         high = median_ratio(high_rows, "unseen_changed")
-        if low is None or high is None:
-            raise ValueError(f"Undefined generalization endpoint for {language}.")
-        endpoints[language] = (low, high)
+        if low is not None and high is not None:
+            endpoints[language] = (low, high)
+    if not endpoints:
+        raise ValueError("No language has two defined generalization endpoints.")
     lowest_at_ten = min(endpoints, key=lambda language: endpoints[language][0])
     highest_at_ten = max(endpoints, key=lambda language: endpoints[language][0])
     lowest_at_ninety = min(endpoints, key=lambda language: endpoints[language][1])
@@ -386,7 +406,7 @@ def render(rows: list[dict[str, str]], checksum: str) -> str:
         "word-to-root answer list. This experiment measures how those transformations transfer",
         "to dictionary families that were not used to build the Java trie.",
         "",
-        "For every one of the 20 default models, complete dictionary rows are placed in a",
+        f"For every one of the {len(LANGUAGES)} default models, complete dictionary rows are placed in a",
         "frozen pseudorandom order. Exact-size, nested prefixes retain 10% through 100% of",
         "the rows for training. Five predeclared splits are evaluated against the complete",
         "dictionary; the primary `Unseen` columns exclude a held-out occurrence whenever its",
@@ -399,7 +419,7 @@ def render(rows: list[dict[str, str]], checksum: str) -> str:
         "",
         "## All-Language Summary",
         "",
-        "Each cell is the language-macro mean of 20 per-language split medians, so large",
+        "Each cell is the language-macro mean across languages with a defined denominator, so large",
         "dictionaries do not dominate small ones. Changed-form exactness is the most demanding",
         "measure because it excludes words whose expected root is already the input token.",
         "",
@@ -467,14 +487,12 @@ def render(rows: list[dict[str, str]], checksum: str) -> str:
     lines += [
         "## Provenance",
         "",
-        f"- Radixor/Java: `{first['radixor_java_version']}`",
-        f"- Core source revision: `{first['source_revision']}`",
-        f"- Source state: `{first['source_state']}`",
-        f"- Generalization generator SHA-256: `{first['generator_sha256']}`",
-        "- Measured-source manifest: [`dictionary-generalization-sources.sha256`](data/dictionary-generalization-sources.sha256)",
+        f"- Measurement provenance is recorded per row. The active snapshot deliberately combines the frozen 20-language archive with the separately measured {len(LANGUAGES) - 20}-language continuation.",
+        "- Historical 20-language source manifest: [`dictionary-generalization-sources.sha256`](data/dictionary-generalization-sources.sha256)",
+        f"- Continuation source manifest: [`{source_manifest_name}`](data/{source_manifest_name})",
         f"- Split protocol: `{first['protocol_version']}`",
         "- Splits per coverage level: 5",
-        "- Authoritative raw counters: [`dictionary-generalization.csv`](data/dictionary-generalization.csv)",
+        f"- Authoritative raw counters: [`{snapshot_name}`](data/{snapshot_name})",
         f"- CSV SHA-256: `{checksum}`",
         "- Model artifact IDs, independent versions, and SHA-256 values are recorded on every raw row.",
         "- Runtime speed is intentionally excluded: speed does not establish generalization. The",
@@ -486,15 +504,35 @@ def render(rows: list[dict[str, str]], checksum: str) -> str:
 
 
 def main() -> None:
+    global LANGUAGES
+    global LANGUAGE_PAGES
+
     arguments = parse_arguments()
-    rows = read_and_validate(arguments.source, arguments.documentation_root)
+    if not re.fullmatch(r"dictionary-generalization-[0-9]{4}-[0-9]{2}-[0-9]{2}\.csv", arguments.snapshot_name):
+        raise ValueError("Active generalization snapshot must use a dated file name.")
+    manifest = arguments.documentation_root / "benchmarks/data/active-snapshots.properties"
+    active_entries = manifest.read_text(encoding="utf-8").splitlines()
+    if f"generalization={arguments.snapshot_name}" not in active_entries:
+        raise ValueError("Active snapshot manifest does not select the supplied generalization snapshot.")
+    if arguments.source.resolve() != (manifest.parent / arguments.snapshot_name).resolve():
+        raise ValueError("Supplied generalization CSV is not the active snapshot file.")
+    if f"corpus={arguments.corpus.name}" not in active_entries \
+            or arguments.corpus.resolve() != (manifest.parent / arguments.corpus.name).resolve():
+        raise ValueError("Supplied corpus CSV is not the active performance corpus.")
+    expected_sources = arguments.snapshot_name.removesuffix(".csv") + "-sources.txt"
+    if f"generalization_sources={expected_sources}" not in active_entries:
+        raise ValueError("Active snapshot manifest does not select the supplied generalization source manifest.")
+    LANGUAGES, LANGUAGE_PAGES = read_language_pages(
+        arguments.documentation_root / "benchmarks/languages/index.md"
+    )
+    rows = read_and_validate(arguments.source, arguments.corpus)
     checksum = hashlib.sha256(arguments.source.read_bytes()).hexdigest()
-    expected = render(rows, checksum)
+    expected = render(rows, checksum, arguments.snapshot_name)
     target = arguments.documentation_root / "benchmarks/generalization.md"
     data_directory = arguments.documentation_root / "benchmarks/data"
-    published_csv = data_directory / "dictionary-generalization.csv"
-    published_checksum = data_directory / "dictionary-generalization.sha256"
-    checksum_text = f"{checksum}  dictionary-generalization.csv\n"
+    published_csv = data_directory / arguments.snapshot_name
+    published_checksum = data_directory / arguments.snapshot_name.replace(".csv", ".sha256")
+    checksum_text = f"{checksum}  {arguments.snapshot_name}\n"
     language_documents: dict[Path, str] = {}
     for language, page_name in LANGUAGE_PAGES.items():
         page = arguments.documentation_root / "benchmarks/languages" / page_name

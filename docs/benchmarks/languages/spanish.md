@@ -1,8 +1,12 @@
-# Spanish Stemmer Benchmarks
+# Spanish Stemmer Benchmarks <span class="dictionary-rating" role="img" aria-label="Relative dictionary size 5 of 5; 849,661 distinct usable word forms" title="Relative dictionary size 5 of 5; 849,661 distinct usable word forms">★★★★★</span>
 
 This page reports same-language stemming benchmarks for Spanish. Accuracy is listed first because speed without root agreement is not enough to interpret stemmer quality.
 
-All speed values are environment-specific and were measured on the hardware and JVM listed in the [benchmark overview](../index.md). The command distribution, exact-root accuracy, and speed tables belong to the published 2026-08-25 Radixor/Java `4.2.0-6-g84e57fb` snapshot. Speed benchmark operations process changed dictionary tokens only. Accuracy uses the complete Radixor dictionary for the language.
+<!-- DICTIONARY-SIZE-RATING:START -->
+Dictionary size: <span class="dictionary-rating" role="img" aria-label="Relative dictionary size 5 of 5; 849,661 distinct usable word forms" title="Relative dictionary size 5 of 5; 849,661 distinct usable word forms">★★★★★</span>. The exact count is **849,661 distinct usable word forms** after parser-compatible filtering and exact, case-preserved deduplication. Stars rank dictionary size relative to all benchmarked dictionaries in five nearly equal groups; they do **not** measure linguistic quality or benchmark accuracy.
+<!-- DICTIONARY-SIZE-RATING:END -->
+
+All speed values are environment-specific and were measured on the hardware and JVM listed in the [benchmark overview](../index.md). The command distribution, exact-root accuracy, and speed tables belong to the published 2026-09-11 Radixor/Java `4.4.0` snapshot. Speed benchmark operations process changed tokens. Accuracy uses the complete Radixor dictionary for the language.
 
 <!-- BENCHMARK-EVIDENCE-MAP:START -->
 !!! info "How to read this page"
@@ -13,9 +17,9 @@ Runtime and exact-root agreement measure different properties. Light, minimal, p
 
 ## Dictionary Corpus
 
-| Model ID | Model version | Language | Dictionary rows | Complete quality tokens | Already-root tokens | Changed tokens | JMH timing tokens |
-| --- | --- | --- | ---: | ---: | ---: | ---: | ---: |
-| `es-es-default` | `1.0.0` | `ES_ES` | 65,059 | 926,393 | 120,121 | 806,272 | 806,272 |
+| Model ID | Model version | Language | Dictionary rows | Distinct usable forms | Complete quality tokens | Already-root tokens | Changed tokens | Timing workload | JMH timing tokens |
+| --- | --- | --- | ---: | ---: | ---: | ---: | ---: | --- | ---: |
+| `es-es-default` | `1.0.0` | `ES_ES` | 65,059 | 849,661 | 926,393 | 120,121 | 806,272 | changed tokens | 806,272 |
 
 ## Radixor Patch Command Distribution
 
@@ -41,21 +45,21 @@ Accuracy is computed from JMH auxiliary counters in the current report. The coun
 | Lucene SpanishPluralStemFilter | 15.140% | 5.802% | 77.820% | Plural-focused suffix reducer; narrow baseline. |
 | Lucene SpanishLightStemFilter | 9.577% | 7.088% | 26.279% | Light suffix stemmer; intentionally narrower than Radixor's dictionary-trained transformation model. |
 | Lucene SnowballFilter | 4.889% | 4.287% | 8.932% | Lucene TokenFilter integration path around the Snowball algorithm. |
-| Official Snowball direct | 4.889% | 4.287% | 8.930% | Official Snowball generated Java stemmer; rule-based suffix algorithm. |
+| Official Snowball direct (Java) | 4.889% | 4.287% | 8.930% | Official Snowball generated Java stemmer; rule-based suffix algorithm. |
 
 ## Speed
 
-Speed uses JMH average time, 5 warmup iterations, 7 measurement iterations, 3 independent forks, and 1 thread. Relative factor is computed against the single Radixor row on this language page. Values below 1.000 are faster than that Radixor baseline; values above 1.000 are slower.
+Speed uses JMH average time, 3 warmup iterations, 5 measurement iterations, 3 independent forks, and 1 thread. Relative factor is computed against the single Radixor row on this language page. Values below 1.000 are faster than that Radixor baseline; values above 1.000 are slower.
 
 | Stemmer | Benchmark method | Score ms/op | Error ms | ns/token | Relative vs Radixor | Note |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
-| Radixor | `spanishRadixor` | 70.807 | 1.533 | 87.8 | 1.000 | Radixor dictionary-trained patch-command stemmer. |
-| Lucene HunspellStemFilter | `luceneHunspellStemFilter` | 1983.491 | 40.315 | 2460.1 | 28.013 | Benchmark-only Spanish Hunspell dictionary compared via Lucene HunspellStemFilter. |
-| Lucene SpanishMinimalStemFilter | `spanishLuceneSpanishMinimalStemFilter` | 39.667 | 1.296 | 49.2 | 0.560 | Minimal Spanish suffix reducer; narrow baseline. |
-| Lucene SpanishLightStemFilter | `spanishLuceneSpanishLightStemFilter` | 42.394 | 1.768 | 52.6 | 0.599 | Light Spanish suffix stemmer. |
-| Lucene SpanishPluralStemFilter | `spanishLuceneSpanishPluralStemFilter` | 93.092 | 4.240 | 115.5 | 1.315 | Plural-oriented Spanish suffix reducer. |
-| Official Snowball direct | `snowballDirect[SPANISH]` | 180.797 | 8.287 | 224.2 | 2.553 | Official Snowball generated Java stemmer; direct API. |
-| Lucene SnowballFilter | `luceneSnowballFilter[SPANISH]` | 201.614 | 17.917 | 250.1 | 2.847 | Lucene TokenFilter path around Snowball; includes TokenStream overhead. |
+| Radixor | `radixor[es-es-default]` | 85.685 | 15.183 | 106.3 | 1.000 | Radixor dictionary-trained patch-command stemmer. |
+| Lucene HunspellStemFilter | `luceneHunspellStemFilter` | 2033.994 | 124.268 | 2522.7 | 23.738 | Benchmark-only Spanish Hunspell dictionary compared via Lucene HunspellStemFilter. |
+| Lucene SpanishMinimalStemFilter | `spanishLuceneSpanishMinimalStemFilter` | 40.636 | 2.188 | 50.4 | 0.474 | Minimal Spanish suffix reducer; narrow baseline. |
+| Lucene SpanishLightStemFilter | `spanishLuceneSpanishLightStemFilter` | 43.418 | 2.735 | 53.9 | 0.507 | Light Spanish suffix stemmer. |
+| Lucene SpanishPluralStemFilter | `spanishLuceneSpanishPluralStemFilter` | 93.087 | 6.142 | 115.5 | 1.086 | Plural-oriented Spanish suffix reducer. |
+| Official Snowball direct (Java) | `snowballDirect[SPANISH]` | 185.383 | 13.427 | 229.9 | 2.164 | Official Snowball generated Java stemmer; direct API. |
+| Lucene SnowballFilter | `luceneSnowballFilter[SPANISH]` | 217.481 | 19.863 | 269.7 | 2.538 | Lucene TokenFilter path around Snowball; includes TokenStream overhead. |
 
 ## Interpretation Notes
 
@@ -93,18 +97,15 @@ also appeared in training. Parentheses show the observed split minimum–maximum
 
 ### Generalization conclusion
 
-- Median exactness on genuinely unseen changed forms moves from **80.995%**
-  at 10% training knowledge to **89.176%** at 90%, a measured
-  **+8.181 percentage-point** change for this dictionary.
-- Over the same endpoints, unseen all-form exactness changes by **+7.735 pp** and
-  preservation of unseen already-root forms changes by **+5.348 pp**. These separate
-  outcomes show whether the changed-form result coexists with preservation behavior.
+- Median exactness on genuinely unseen changed forms moves from **80.995%** at 10% training knowledge to **89.176%** at 90%, a measured **+8.181 percentage-point** change.
+- Unseen all-form exactness moves from **82.066%** at 10% training knowledge to **89.801%** at 90%, a measured **+7.735 percentage-point** change.
+- Preservation of unseen already-root forms moves from **89.364%** at 10% training knowledge to **94.711%** at 90%, a measured **+5.348 percentage-point** change.
 - The evidence establishes within-resource transfer across withheld dictionary families. It
   does not estimate unrelated domains, misspellings, arbitrary compounds, or external corpora.
 
 The complete ten-level table and split ranges remain in the
 [independent generalization report](../generalization.md); raw counters and provenance are in
-[`dictionary-generalization.csv`](../data/dictionary-generalization.csv). The
+[active machine-readable snapshot](../data/dictionary-generalization-2026-09-11.csv). The
 [frozen methodology](../reference/generalization-methodology.md) defines family-level
 splitting, unseen-surface leakage control, aggregation, and the limits of the claim.
 
@@ -197,7 +198,7 @@ The complete evidence is available in the [raw logical matrix](../data/edit-cost
 
 Runtime performance and linguistic grouping quality are independent dimensions. This section evaluates language `ES_ES` using the complete validated stemming-quality result matrix. Every distinct surface form is one evaluated item and can belong to several dictionary groups. Two forms are a positive pair when their group-membership sets intersect and a negative pair when those sets are disjoint. A pair shared through several groups is counted once. Exact equality with a predetermined lemma is not required.
 
-`ALL_WORDS` includes every valid group and its original forms. `LOWERCASE_GROUPS_ONLY` excludes an entire group when any Unicode code point is uppercase or titlecase; retained words are not lowercased or otherwise rewritten. This isolates case-handling effects without changing retained inputs. [Download the complete machine-readable result snapshot](../data/stemming-quality.csv).
+`ALL_WORDS` includes every valid group and its original forms. `LOWERCASE_GROUPS_ONLY` excludes an entire group when any Unicode code point is uppercase or titlecase; retained words are not lowercased or otherwise rewritten. This isolates case-handling effects without changing retained inputs. [Download the complete machine-readable result snapshot](../data/stemming-quality-2026-09-11.csv).
 
 ### Evaluation Scope and Key Findings
 
@@ -490,8 +491,8 @@ Standard ARI, homogeneity, completeness, V-measure, and NMI are not calculated: 
 
 ### Provenance
 
-- Authoritative source: `docs/benchmarks/data/stemming-quality.csv`
-- Source SHA-256: `85763189eab4d0fbb047c2d5d3554c66abf9732182bd0d8fd758d7aef680e66f`
+- Authoritative source: `docs/benchmarks/data/stemming-quality-2026-09-11.csv`
+- Source SHA-256: `24bddfeed06a60bb3eeed58e1bfc93aed46c1d32e7bebd293aec2dacfddfef5b`
 - Evaluation command: `./gradlew stemmingQuality --no-daemon`
 - Dictionary language: `ES_ES`
 - Processing modes: `ALL_WORDS`, `LOWERCASE_GROUPS_ONLY`

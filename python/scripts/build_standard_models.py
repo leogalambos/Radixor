@@ -32,7 +32,9 @@
 
 """Regenerate the pure-Python standard model package deterministically.
 
-The canonical build topology selects ``default`` models. Source dictionaries
+The standard-membership authority selects 31 active language defaults. Other
+active and filtered models remain Java-only and are deliberately excluded from
+this aggregate. Source dictionaries
 are compiler inputs only and are never copied into either Python distribution.
 Run this script with a built Radixor extension importable by the selected
 Python interpreter.
@@ -55,6 +57,7 @@ PYTHON_ROOT = REPOSITORY / "python"
 BUILD_ROOT = REPOSITORY / "build"
 SOURCE_PROJECT = PYTHON_ROOT / "models-standard"
 TOPOLOGY = REPOSITORY / "models" / "model-projects.properties"
+STANDARD_MEMBERSHIP = REPOSITORY / "models" / "standard-model-projects.properties"
 CATALOG_VERSION = REPOSITORY / "models" / "catalog-version.txt"
 EXPECTED_FORMAT = {"compression": "gzip", "magic": "EGTR", "version": 7}
 VERSION = re.compile(r"(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\Z")
@@ -90,15 +93,28 @@ def _default_models() -> list[str]:
         if not line or line.startswith("#"):
             continue
         model_id, separator, membership = line.partition("=")
-        if not separator or not model_id or membership not in {"default", "optional"}:
+        if not separator or not model_id or membership not in {
+            "default",
+            "standalone",
+            "optional",
+        }:
             raise ValueError(f"Invalid model topology line: {raw_line!r}")
         entries[model_id] = membership
-    model_ids = sorted(
-        model_id for model_id, membership in entries.items() if membership == "default"
-    )
-    if len(model_ids) != 20 or "pl-pl-polimorf" in model_ids:
+    standard: dict[str, str] = {}
+    for raw_line in STANDARD_MEMBERSHIP.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#"):
+            continue
+        model_id, separator, membership = line.partition("=")
+        if not separator or not model_id or membership != "true":
+            raise ValueError(f"Invalid standard membership line: {raw_line!r}")
+        if model_id in standard:
+            raise ValueError(f"Duplicate standard model ID: {model_id}")
+        standard[model_id] = membership
+    model_ids = sorted(standard)
+    if len(model_ids) != 31 or not set(model_ids).issubset(entries):
         raise ValueError(
-            "Standard Python catalog must contain 20 defaults and exclude pl-pl-polimorf"
+            "Standard Python catalog must contain 31 active language defaults"
         )
     return model_ids
 
@@ -198,6 +214,7 @@ def _model_manifest(
         "file": f"models/{model_id}.rxc",
         "id": model_id,
         "notice": f"notices/{model_id}/{notice.name}",
+        "notice_sha256": _sha256(notice_destination),
         "provenance": {
             "attribution": metadata["sourceAttribution"],
             "dataset": metadata["sourceDataset"],
@@ -278,7 +295,7 @@ def main() -> int:
         "format": EXPECTED_FORMAT,
         "models": models,
         "schema_version": 1,
-        "topology": "models/model-projects.properties",
+        "topology": "models/standard-model-projects.properties",
     }
     manifest_path = package_root / "manifest.json"
     with manifest_path.open("w", encoding="utf-8", newline="\n") as stream:

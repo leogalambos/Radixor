@@ -1,0 +1,50 @@
+Radixor model-data notice
+
+Radixor-derived model data
+
+Copyright (C) 2026, Leo Galambos.
+
+Copyright and, where applicable, database rights are claimed in the
+Radixor-specific selection, verification, cleaning, normalization,
+grouping, deduplication, filtering, reformatting, metadata preparation,
+and packaging of this model, to the extent protected by applicable law.
+
+The underlying morphological data remains attributed to UniMorph and
+the upstream contributors identified in this notice.
+
+This derived model data, including Radixor's protectable contributions,
+is distributed under Creative Commons Attribution-ShareAlike 3.0.
+
+Model ID: sjo-default
+Source project: UniMorph
+Official repository: https://github.com/unimorph/sjo
+Selected upstream data:
+- sjo [lemma-form-features], SHA-256 9d85520a153d0b159747634dab75388e9e784e32c019aa771fe9bc3e6cbcc49a
+Source origin: Not stated in pinned repository evidence
+Attribution: UniMorph; Elena Klyachko
+License:
+Creative Commons Attribution-ShareAlike 3.0 Unported
+
+Canonical license URI: https://creativecommons.org/licenses/by-sa/3.0/
+Source revision: cd7ff346bffe85c134167eec0130e282acb6442e
+Revision status: recorded
+Repository evidence paths: README.md:evidence-00-README.md
+Repository evidence SHA-256: evidence-00-README.md:24effd6c0eeb78ae6f798ec4a9e70222eba4fcb3f33f0cc28d49481417f6254d
+Import policy: radixor-unimorph-import-v1
+Projection semantics: Each declared three-column source directly projects lemma and surface form.
+Conflict semantics: All valid lemma-form assignments are retained. Surface ambiguity is reported explicitly and is never resolved by dropping or overwriting an assignment.
+Import rows: source=3054; accepted=3054; rejected=0
+Rejection reasons: none
+Per-source import audit:
+- sjo: source=3054; accepted=3054; rejected=0; added-groups=1892; added-distinct-surfaces=3151; added-source-pairs=2751; added-output-forms=3197; added-changed-pairs=1305; intrinsic-ambiguous-surfaces=40; rejection-reasons=none
+Surface conflict audit: cross-source-assignments=0; cross-source-surfaces=0; intrinsic-ambiguous-surfaces=40
+Audited excluded upstream files:
+- none
+Generated dictionary: groups=1892; forms=3197
+Deterministic GZip SHA-256: ca640317c3b84c98e3d296fe6f2dba266181087135475d1320ba2980c66cb3fc
+
+Radixor modifications: Strict UTF-8 validation, NFC normalization, lowercase conversion, structural unsafe-character rejection, grouping by lemma, exact deduplication, deterministic ordering, and reproducible GZip packaging.
+
+Neither UniMorph nor any upstream contributor endorses Radixor.
+
+Upstream information verified: 2026-09-11

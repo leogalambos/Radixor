@@ -1,8 +1,8 @@
 # Finnish filtered candidate
 
-`fi-fi-filtered` is a locally buildable alternative to `fi-fi-default`. It is
-not published, registered as a default, or included in the model catalog, BOM,
-standard pack, or Python model packages.
+`fi-fi-filtered` is a published opt-in alternative to `fi-fi-default`. It is
+available individually and through `radixor-models-filtered`, but is not a
+registered default or part of the standard, extended, or Python packages.
 
 The checked-in `fi-fi-default` dictionary is the only lexical input. The audit
 removes three strongly internally dominated stem assignments without consulting

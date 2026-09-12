@@ -135,6 +135,39 @@ def modelProjects() {
     }
 }
 
+def quarantinedModelIds() {
+    Properties quarantine = new Properties()
+    rootProject.file('models/model-quarantine.properties').withInputStream { InputStream input ->
+        quarantine.load(input)
+    }
+    return quarantine.stringPropertyNames().toList().sort()
+}
+
+def prohibitedBenchmarkEnabled() {
+    return providers.gradleProperty('radixorInternalProhibitedBenchmark')
+            .map { String value -> value == 'true' }
+            .getOrElse(false)
+}
+
+def prohibitedModelProjects() {
+    if (!prohibitedBenchmarkEnabled()) {
+        return []
+    }
+    return quarantinedModelIds().collect { String modelId -> project(":models:${modelId}") }
+}
+
+tasks.register('verifyModelQuarantine', Exec) {
+    group = 'verification'
+    description = 'Verifies prohibited model sources, hashes, ignore rules, and topology isolation.'
+    inputs.files(rootProject.file('models/model-projects.properties'),
+            rootProject.file('models/alternative-model-projects.properties'),
+            rootProject.file('models/model-quarantine.properties'),
+            rootProject.file('models/prohibited-model-sources.sha256'),
+            rootProject.file('.gitignore'),
+            rootProject.file('tools/prohibited-model-lifecycle.py'))
+    commandLine 'python3', rootProject.file('tools/prohibited-model-lifecycle.py'), 'verify-normal'
+}
+
 def defaultModelProjects() {
     Properties topology = new Properties()
     rootProject.file('models/model-projects.properties').withInputStream { InputStream input ->
@@ -142,6 +175,26 @@ def defaultModelProjects() {
     }
     return topology.stringPropertyNames().findAll { String modelId ->
         topology.getProperty(modelId) == 'default'
+    }.sort().collect { String modelId -> project(":models:${modelId}") }
+}
+
+def languageDefaultModelProjects() {
+    Properties topology = new Properties()
+    rootProject.file('models/model-projects.properties').withInputStream { InputStream input ->
+        topology.load(input)
+    }
+    return topology.stringPropertyNames().findAll { String modelId ->
+        topology.getProperty(modelId) in ['default', 'standalone']
+    }.sort().collect { String modelId -> project(":models:${modelId}") }
+}
+
+def standaloneModelProjects() {
+    Properties topology = new Properties()
+    rootProject.file('models/model-projects.properties').withInputStream { InputStream input ->
+        topology.load(input)
+    }
+    return topology.stringPropertyNames().findAll { String modelId ->
+        topology.getProperty(modelId) == 'standalone'
     }.sort().collect { String modelId -> project(":models:${modelId}") }
 }
 
@@ -155,11 +208,36 @@ def alternativeModelProjects() {
     }
 }
 
-alternativeModelProjects().each { Project modelProject ->
+def standardModelProjects() {
+    Properties membership = new Properties()
+    rootProject.file('models/standard-model-projects.properties').withInputStream { InputStream input ->
+        membership.load(input)
+    }
+    return membership.stringPropertyNames().toList().sort().collect { String modelId ->
+        project(":models:${modelId}")
+    }
+}
+
+def extendedModelProjects() {
+    final Set<String> standardIds = standardModelProjects().collect { Project modelProject ->
+        modelProject.name
+    } as Set<String>
+    return modelProjects().findAll { Project modelProject -> !standardIds.contains(modelProject.name) }
+}
+
+def distributableModelProjects() {
+    return (modelProjects() + alternativeModelProjects()).sort { Project left, Project right ->
+        left.name <=> right.name
+    }
+}
+
+prohibitedModelProjects().each { Project modelProject ->
+    final Set<String> permittedTasks = [
+            'compileJava', 'processResources', 'classes', 'jar',
+            'validateModelInput', 'prepareModelResources'
+    ] as Set<String>
     modelProject.tasks.configureEach { Task candidateTask ->
-        if (candidateTask.name.startsWith('publish')
-                || candidateTask.name in ['createModelCentralChecksums', 'packageModelReleaseCandidate',
-                        'signModelPublication', 'validateModelRelease']) {
+        if (!permittedTasks.contains(candidateTask.name)) {
             candidateTask.enabled = false
         }
     }
@@ -712,15 +790,15 @@ tasks.register('verifySoftwareLicenseHeaders') {
 tasks.register('verifyAllDefaultModels') {
     group = 'verification'
     description = 'Verifies that every language default model project is configured.'
-    dependsOn(defaultModelProjects().collect { Project modelProject ->
+    dependsOn(languageDefaultModelProjects().collect { Project modelProject ->
         modelProject.path + ':verifyModelDescriptor'
     })
 }
 
 tasks.register('verifyAllModels') {
     group = 'verification'
-    description = 'Runs complete validation and artifact verification for every independently versioned model module.'
-    dependsOn(modelProjects().collect { Project modelProject -> modelProject.tasks.named('check') })
+    description = 'Runs complete validation and artifact verification for every distributable model module.'
+    dependsOn(distributableModelProjects().collect { Project modelProject -> modelProject.tasks.named('check') })
 }
 
 tasks.register('verifyJmhModelClasspath') {
@@ -758,7 +836,7 @@ tasks.register('verifyJmhModelClasspath') {
 tasks.named('prepareModelConsumerTestRepository') {
     coreVersion = version.toString()
     catalogVersion = project(':models:standard').version.toString()
-    modelVersions = modelProjects().collectEntries { Project modelProject ->
+    modelVersions = distributableModelProjects().collectEntries { Project modelProject ->
         final String modelVersion = providers.gradleProperty('modelReleaseVersion')
                 .orElse(providers.fileContents(modelProject.layout.projectDirectory.file('model-version.txt'))
                         .asText.map(String::trim))
@@ -767,13 +845,17 @@ tasks.named('prepareModelConsumerTestRepository') {
     }
     corePom = layout.file(tasks.named('generatePomFileForMavenJavaPublication').map { it.destination })
     coreJar = tasks.named('jar', Jar).flatMap { it.archiveFile }
-    modelPoms.from(modelProjects().collect { Project modelProject ->
+    modelPoms.from(distributableModelProjects().collect { Project modelProject ->
         modelProject.tasks.named('generatePomFileForModelPublication').map { it.destination }
     })
-    modelJars.from(modelProjects().collect { Project modelProject ->
+    modelJars.from(distributableModelProjects().collect { Project modelProject ->
         modelProject.tasks.named('jar', Jar).flatMap { it.archiveFile }
     })
     standardPom = layout.file(project(':models:standard').tasks.named('generatePomFileForStandardPublication')
+            .map { it.destination })
+    extendedPom = layout.file(project(':models:extended').tasks.named('generatePomFileForExtendedPublication')
+            .map { it.destination })
+    filteredPom = layout.file(project(':models:filtered').tasks.named('generatePomFileForFilteredPublication')
             .map { it.destination })
     bomPom = layout.file(project(':models:bom').tasks.named('generatePomFileForBomPublication')
             .map { it.destination })
@@ -796,13 +878,23 @@ gradle.projectsEvaluated {
     project(':models:bom').tasks.named('publishBomPublicationToCatalogStagingRepository') {
         dependsOn(cleanModelCatalogStaging)
     }
+    project(':models:extended').tasks.named('publishExtendedPublicationToCatalogStagingRepository') {
+        dependsOn(cleanModelCatalogStaging)
+    }
+    project(':models:filtered').tasks.named('publishFilteredPublicationToCatalogStagingRepository') {
+        dependsOn(cleanModelCatalogStaging)
+    }
 }
 
 def prepareModelCatalogReleaseCandidate = tasks.named('prepareModelCatalogReleaseCandidate') {
     dependsOn(project(':models:standard').tasks.named('check'))
     dependsOn(project(':models:bom').tasks.named('check'))
+    dependsOn(project(':models:extended').tasks.named('check'))
+    dependsOn(project(':models:filtered').tasks.named('check'))
     dependsOn(':models:standard:publishStandardPublicationToCatalogStagingRepository')
     dependsOn(':models:bom:publishBomPublicationToCatalogStagingRepository')
+    dependsOn(':models:extended:publishExtendedPublicationToCatalogStagingRepository')
+    dependsOn(':models:filtered:publishFilteredPublicationToCatalogStagingRepository')
     rawRepositoryDirectory = rawModelCatalogRepository
     preparedBundleDirectory = preparedModelCatalogBundleInput
     catalogVersion = project(':models:standard').version.toString()
@@ -828,7 +920,7 @@ def modelCatalogCentralBundle = tasks.register('modelCatalogCentralBundle', Zip)
     }
 }
 
-def publishedModelVersions = modelProjects().collectEntries { Project modelProject ->
+def publishedModelVersions = distributableModelProjects().collectEntries { Project modelProject ->
     [(modelProject.name): modelProject.file('model-version.txt').getText('UTF-8').trim()]
 }
 
@@ -837,8 +929,10 @@ tasks.named('verifyModelCatalogReleaseCandidate') {
     reportFile = layout.buildDirectory.file('reports/models/catalog-release-candidate.txt')
     catalogVersion = project(':models:standard').version.toString()
     modelVersions = publishedModelVersions
-    defaultModelIds = defaultModelProjects().collect { Project modelProject -> modelProject.name }
-    allModelIds = modelProjects().collect { Project modelProject -> modelProject.name }
+    standardModelIds = standardModelProjects().collect { Project modelProject -> modelProject.name }
+    extendedModelIds = extendedModelProjects().collect { Project modelProject -> modelProject.name }
+    filteredModelIds = alternativeModelProjects().collect { Project modelProject -> modelProject.name }
+    allModelIds = distributableModelProjects().collect { Project modelProject -> modelProject.name }
 }
 
 tasks.register('verifyArtifactSizes') {
@@ -859,19 +953,22 @@ tasks.named('check') {
 }
 
 def modelCatalogText = providers.provider {
+    final Set<String> standardIds = standardModelProjects().collect { Project modelProject -> modelProject.name } as Set<String>
+    final Set<String> filteredIds = alternativeModelProjects().collect { Project modelProject -> modelProject.name } as Set<String>
     StringBuilder output = new StringBuilder()
-    output.append('| Model ID | Language | Default | Coordinates | Version | Source | Repository | Source version | Revision | Revision status | License | Attribution | SHA-256 | Bytes |\n')
-    output.append('|---|---|---:|---|---:|---|---|---|---|---|---|---|---|---:|\n')
-    modelProjects().each { Project modelProject ->
+    output.append('| Model ID | Package | Language | Default | Coordinates | Version | Source | Repository | Source version | Revision | Revision status | License | Attribution | SHA-256 | Bytes |\n')
+    output.append('|---|---|---|---:|---|---:|---|---|---|---|---|---|---|---|---:|\n')
+    distributableModelProjects().each { Project modelProject ->
         String script = modelProject.file('build.gradle').getText('UTF-8')
         def value = { String key ->
-            def matcher = script =~ /(?m)^\s*${key}\s*=\s*(?:'([^']+)'|([^\s]+))\s*$/
+            java.util.regex.Matcher matcher = script =~ /(?m)^\s*${key}\s*=\s*(?:'([^']+)'|([^\s]+))\s*$/
             if (!matcher.find()) return 'unavailable'
             return matcher.group(1) != null ? matcher.group(1) : matcher.group(2)
         }
         File input = modelProject.file('src/modelInput/stemmer.gz')
         String checksum = java.security.MessageDigest.getInstance('SHA-256').digest(input.bytes).encodeHex().toString()
         output.append('| ').append(modelProject.name)
+                .append(' | ').append(filteredIds.contains(modelProject.name) ? 'filtered' : standardIds.contains(modelProject.name) ? 'standard' : 'extended')
                 .append(' | ').append(value('language'))
                 .append(' | ').append(value('defaultModel'))
                 .append(' | org.egothor:radixor-model-').append(modelProject.name)
@@ -889,7 +986,7 @@ def modelCatalogText = providers.provider {
     return output.toString()
 }
 
-def modelCatalogDocumentationInputs = files(modelProjects().collectMany { Project modelProject ->
+def modelCatalogDocumentationInputs = files(distributableModelProjects().collectMany { Project modelProject ->
     [
             modelProject.file('build.gradle'),
             modelProject.file('model-version.txt'),
@@ -959,7 +1056,7 @@ tasks.register('verifyModelCatalogDocumentation') {
             throw new GradleException(
                     'The checked-in model catalog is stale; run ./gradlew publishModelCatalogDocumentation.')
         }
-        List<String> identifiers = modelProjects().collect { Project modelProject -> modelProject.name }
+        List<String> identifiers = distributableModelProjects().collect { Project modelProject -> modelProject.name }
         if (identifiers != identifiers.sort()) {
             throw new GradleException('Published model projects are not in deterministic model-ID order.')
         }
@@ -1160,7 +1257,7 @@ tasks.register('stemmingQuality', JavaExec) {
 
 tasks.register('benchmarkCorpusReport', JavaExec) {
     group = 'verification'
-    description = 'Reports corpus and preferred patch-command counts for every default model.'
+    description = 'Reports corpus, distinct usable forms, and patch-command counts for all user-facing models.'
     dependsOn(tasks.named('jmhClasses'))
     classpath = files(sourceSets.jmh.runtimeClasspath, configurations.stemmingQualityJmhRuntime)
     mainClass = 'org.egothor.stemmer.benchmark.BenchmarkCorpusReportApplication'
@@ -1187,6 +1284,68 @@ tasks.register('dictionaryGeneralization', JavaExec) {
             providers.exec { commandLine 'git', 'rev-parse', 'HEAD' }.standardOutput.asText.get().trim(),
             dictionaryGeneralizationSourceState,
             layout.projectDirectory.file('src/test/java/org/egothor/stemmer/benchmark/generalization/DictionaryGeneralizationApplication.java').asFile.absolutePath
+    maxHeapSize = '8g'
+}
+
+tasks.register('writeStandaloneGeneralizationSelection') {
+    group = 'verification'
+    description = 'Writes the exact topology-derived standalone generalization selector.'
+    final Provider<RegularFile> selector = layout.buildDirectory.file('reports/generalization/standalone-default-models.txt')
+    outputs.file(selector)
+    doLast {
+        final List<String> modelIds = standaloneModelProjects().collect { Project modelProject -> modelProject.name }
+        if (modelIds.isEmpty()) {
+            throw new GradleException('The active topology contains no standalone default models.')
+        }
+        final File output = selector.get().asFile
+        output.parentFile.mkdirs()
+        output.setText(modelIds.join(System.lineSeparator()) + System.lineSeparator(), 'UTF-8')
+    }
+}
+
+tasks.register('dictionaryGeneralizationStandalone', JavaExec) {
+    group = 'verification'
+    description = 'Evaluates only the topology-derived standalone language defaults for snapshot continuation.'
+    dependsOn(tasks.named('testClasses'))
+    dependsOn(tasks.named('writeStandaloneGeneralizationSelection'))
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'org.egothor.stemmer.benchmark.generalization.DictionaryGeneralizationApplication'
+    outputs.file(layout.buildDirectory.file('reports/generalization/dictionary-generalization-standalone-2026-09-11.csv'))
+    final String dictionaryGeneralizationSourceState = providers.exec {
+        commandLine 'git', 'status', '--porcelain'
+    }.standardOutput.asText.get().trim().isEmpty() ? 'clean' : 'dirty'
+    args layout.buildDirectory.file('reports/generalization/dictionary-generalization-standalone-2026-09-11.csv')
+            .get().asFile.absolutePath,
+            dictionaryGeneralizationReleaseVersion.get(),
+            providers.exec { commandLine 'git', 'rev-parse', 'HEAD' }.standardOutput.asText.get().trim(),
+            dictionaryGeneralizationSourceState,
+            layout.projectDirectory.file('src/test/java/org/egothor/stemmer/benchmark/generalization/DictionaryGeneralizationApplication.java').asFile.absolutePath,
+            layout.buildDirectory.file('reports/generalization/standalone-default-models.txt').get().asFile.absolutePath
+    maxHeapSize = '8g'
+}
+
+tasks.register('dictionaryGeneralizationExactModel', JavaExec) {
+    group = 'verification'
+    description = 'Evaluates one exact authoritative default for targeted snapshot repair.'
+    dependsOn(tasks.named('testClasses'))
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'org.egothor.stemmer.benchmark.generalization.DictionaryGeneralizationApplication'
+    final String exactModel = providers.gradleProperty('dictionaryGeneralizationModel').getOrElse('')
+    final String dictionaryGeneralizationSourceState = providers.exec {
+        commandLine 'git', 'status', '--porcelain'
+    }.standardOutput.asText.get().trim().isEmpty() ? 'clean' : 'dirty'
+    args layout.buildDirectory.file('reports/generalization/dictionary-generalization-exact-model.csv')
+            .get().asFile.absolutePath,
+            dictionaryGeneralizationReleaseVersion.get(),
+            providers.exec { commandLine 'git', 'rev-parse', 'HEAD' }.standardOutput.asText.get().trim(),
+            dictionaryGeneralizationSourceState,
+            layout.projectDirectory.file('src/test/java/org/egothor/stemmer/benchmark/generalization/DictionaryGeneralizationApplication.java').asFile.absolutePath,
+            '--exact-model', exactModel
+    doFirst {
+        if (exactModel.isBlank()) {
+            throw new GradleException('Set -PdictionaryGeneralizationModel to one exact default model ID.')
+        }
+    }
     maxHeapSize = '8g'
 }
 
@@ -1285,18 +1444,35 @@ tasks.register('checkFilteredModels') {
 tasks.register('publishDictionaryGeneralizationDocumentation', Exec) {
     group = 'documentation'
     description = 'Publishes the validated multilingual dictionary-generalization report.'
-    dependsOn(tasks.named('dictionaryGeneralization'))
+    dependsOn('mergeDictionaryGeneralizationSnapshots')
     commandLine 'python3', layout.projectDirectory.file('tools/update-generalization-documentation.py').asFile,
-            layout.buildDirectory.file('reports/generalization/dictionary-generalization.csv').get().asFile,
-            layout.projectDirectory.dir('docs').asFile, 'update'
+            layout.projectDirectory.file('docs/benchmarks/data/dictionary-generalization-2026-09-11.csv').asFile,
+            layout.projectDirectory.dir('docs').asFile, 'update',
+            '--corpus', layout.projectDirectory.file('docs/benchmarks/data/java-benchmark-corpora-2026-09-11.csv').asFile,
+            '--snapshot-name', 'dictionary-generalization-2026-09-11.csv'
+}
+
+tasks.register('mergeDictionaryGeneralizationSnapshots', Exec) {
+    group = 'documentation'
+    description = 'Merges the immutable 20-model archive with the active standalone continuation.'
+    dependsOn(tasks.named('dictionaryGeneralizationStandalone'))
+    commandLine 'python3', layout.projectDirectory.file('tools/merge-generalization-snapshots.py').asFile,
+            '--archive', layout.projectDirectory.file('docs/benchmarks/data/dictionary-generalization.csv').asFile,
+            '--continuation', layout.buildDirectory.file('reports/generalization/dictionary-generalization-standalone-2026-09-11.csv').get().asFile,
+            '--corpus', layout.projectDirectory.file('docs/benchmarks/data/java-benchmark-corpora-2026-09-11.csv').asFile,
+            '--topology', layout.projectDirectory.file('models/model-projects.properties').asFile,
+            '--output', layout.projectDirectory.file('docs/benchmarks/data/dictionary-generalization-2026-09-11.csv').asFile,
+            '--manifest', layout.projectDirectory.file('docs/benchmarks/data/active-snapshots.properties').asFile
 }
 
 tasks.register('verifyDictionaryGeneralizationDocumentation', Exec) {
     group = 'verification'
     description = 'Verifies the rendered generalization page and checked-in raw counters.'
     commandLine 'python3', layout.projectDirectory.file('tools/update-generalization-documentation.py').asFile,
-            layout.projectDirectory.file('docs/benchmarks/data/dictionary-generalization.csv').asFile,
-            layout.projectDirectory.dir('docs').asFile, 'verify'
+            layout.projectDirectory.file('docs/benchmarks/data/dictionary-generalization-2026-09-11.csv').asFile,
+            layout.projectDirectory.dir('docs').asFile, 'verify',
+            '--corpus', layout.projectDirectory.file('docs/benchmarks/data/java-benchmark-corpora-2026-09-11.csv').asFile,
+            '--snapshot-name', 'dictionary-generalization-2026-09-11.csv'
 }
 
 tasks.register('publishEditCostSensitivityDocumentation', Exec) {
@@ -1323,33 +1499,45 @@ tasks.register('verifyPublishedPerformanceSnapshotChecksums', Exec) {
     commandLine 'sha256sum', '--check', 'performance-snapshots.sha256'
 }
 
+tasks.register('verifyActiveBenchmarkSnapshots', Exec) {
+    group = 'verification'
+    description = 'Verifies active benchmark pointers, selected checksums, and immutable archives.'
+    commandLine 'python3', layout.projectDirectory.file('tools/verify-active-benchmark-snapshots.py').asFile
+}
+
 tasks.register('verifyPublishedJavaBenchmarkDocumentation', Exec) {
     group = 'verification'
-    description = 'Verifies Java benchmark documentation against the checked-in 2026-08-25 reports.'
+    description = 'Verifies Java benchmark documentation against the active 2026-09-11 reports.'
     dependsOn(tasks.named('verifyPublishedPerformanceSnapshotChecksums'))
     commandLine 'python3', layout.projectDirectory.file('tools/update-benchmark-documentation.py').asFile,
             '--docs-root', layout.projectDirectory.dir('docs').asFile,
             '--readme', layout.projectDirectory.file('README.md').asFile,
-            '--corpus', layout.projectDirectory.file('docs/benchmarks/data/java-benchmark-corpora-2026-08-25.csv').asFile,
-            '--accuracy', layout.projectDirectory.file('docs/benchmarks/data/java-stemmer-accuracy-2026-08-25.csv').asFile,
-            '--speed', layout.projectDirectory.file('docs/benchmarks/data/java-stemmer-speed-2026-08-25.csv').asFile,
-            '--coverage-accuracy', layout.projectDirectory.file('docs/benchmarks/data/java-english-coverage-accuracy-2026-08-25.csv').asFile,
-            '--coverage-speed', layout.projectDirectory.file('docs/benchmarks/data/java-english-coverage-speed-2026-08-25.csv').asFile,
-            '--date', '2026-08-25',
-            '--release-version', '4.2.0-6-g84e57fb',
+            '--corpus', layout.projectDirectory.file('docs/benchmarks/data/java-benchmark-corpora-2026-09-11.csv').asFile,
+            '--accuracy', layout.projectDirectory.file('docs/benchmarks/data/java-stemmer-accuracy-2026-09-11.csv').asFile,
+            '--speed', layout.projectDirectory.file('docs/benchmarks/data/java-stemmer-speed-2026-09-11.csv').asFile,
+            '--coverage-accuracy', layout.projectDirectory.file('docs/benchmarks/data/java-english-coverage-accuracy-2026-09-11.csv').asFile,
+            '--coverage-speed', layout.projectDirectory.file('docs/benchmarks/data/java-english-coverage-speed-2026-09-11.csv').asFile,
+            '--quality', layout.projectDirectory.file('docs/benchmarks/data/stemming-quality-2026-09-11.csv').asFile,
+            '--snowball-catalog', layout.projectDirectory.file('docs/benchmarks/data/snowball-language-cases.csv').asFile,
+            '--date', '2026-09-11',
+            '--release-version', '4.4.0',
             '--mode', 'verify'
 }
 
 tasks.register('verifyPublishedPythonBenchmarkDocumentation', Exec) {
     group = 'verification'
-    description = 'Verifies Python benchmark documentation against the checked-in 2026-08-25 reports.'
+    description = 'Verifies Python benchmark documentation against the active 2026-09-11 reports.'
     dependsOn(tasks.named('verifyPublishedPerformanceSnapshotChecksums'))
+    dependsOn(tasks.named('verifyActiveBenchmarkSnapshots'))
     commandLine 'python3', layout.projectDirectory.file('tools/update-python-benchmark-documentation.py').asFile,
-            '--csv', layout.projectDirectory.file('docs/benchmarks/data/python-all-languages-batch-2026-08-25.csv').asFile,
-            '--json', layout.projectDirectory.file('docs/benchmarks/data/python-all-languages-batch-2026-08-25.json').asFile,
-            '--date', '2026-08-25',
-            '--release-version', '4.2.1',
-            '--base-commit', '84e57fb',
+            '--csv', layout.projectDirectory.file('docs/benchmarks/data/python-all-languages-batch-2026-09-11.csv').asFile,
+            '--json', layout.projectDirectory.file('docs/benchmarks/data/python-all-languages-batch-2026-09-11.json').asFile,
+            '--quality', layout.projectDirectory.file('docs/benchmarks/data/stemming-quality-2026-09-11.csv').asFile,
+            '--geography', layout.projectDirectory.file('docs/benchmarks/data/homepage-language-geography.csv').asFile,
+            '--date', '2026-09-11',
+            '--release-version', '4.4.0',
+            '--model-package-version', '3.0.0',
+            '--base-commit', '14f61be',
             '--docs-root', layout.projectDirectory.dir('docs').asFile,
             '--mode', 'verify'
 }
@@ -1369,14 +1557,61 @@ tasks.register('writeJmhRuntimeClasspath') {
     }
 }
 
+tasks.register('writeProhibitedBenchmarkRuntimeClasspath') {
+    group = 'verification'
+    description = 'Writes the private runtime classpath for the guarded prohibited-model benchmark only.'
+    final List<Project> prohibitedProjects = prohibitedModelProjects()
+    dependsOn(tasks.named('jmhJar'))
+    dependsOn(tasks.named('testClasses'))
+    dependsOn(prohibitedProjects.collect { Project modelProject -> modelProject.tasks.named('jar') })
+    outputs.file(layout.buildDirectory.file('prohibited-model-benchmark/runtime-classpath.txt'))
+    doFirst {
+        if (!prohibitedBenchmarkEnabled()) {
+            throw new GradleException('writeProhibitedBenchmarkRuntimeClasspath requires '
+                    + '-PradixorInternalProhibitedBenchmark=true inside the guarded runner.')
+        }
+    }
+    doLast {
+        final Set<String> prohibitedIds = quarantinedModelIds() as Set<String>
+        final Set<String> activeIds = modelProjects().collect { Project modelProject -> modelProject.name } as Set<String>
+        final Set<String> alternativeIds = alternativeModelProjects()
+                .collect { Project modelProject -> modelProject.name } as Set<String>
+        if (!prohibitedIds.intersect(activeIds + alternativeIds).isEmpty()) {
+            throw new GradleException('Prohibited benchmark projects overlap a public model topology.')
+        }
+        final List<File> prohibitedJars = prohibitedProjects.collect { Project modelProject ->
+            modelProject.tasks.named('jar', Jar).get().archiveFile.get().asFile
+        }
+                .sort { File left, File right -> left.name <=> right.name }
+        prohibitedIds.each { String modelId ->
+            final String prefix = "radixor-model-${modelId}-"
+            if (prohibitedJars.count { File candidate -> candidate.name.startsWith(prefix) } != 1) {
+                throw new GradleException("Private benchmark classpath must contain exactly one JAR for ${modelId}.")
+            }
+        }
+        final File report = layout.buildDirectory.file(
+                'prohibited-model-benchmark/runtime-classpath.txt').get().asFile
+        report.parentFile.mkdirs()
+        final File executable = tasks.named('jmhJar', Jar).get().archiveFile.get().asFile
+        report.setText(executable.absolutePath + File.pathSeparator
+                + sourceSets.test.runtimeClasspath.asPath + File.pathSeparator
+                + sourceSets.jmh.runtimeClasspath.asPath + File.pathSeparator
+                + prohibitedJars.collect { File candidate -> candidate.absolutePath }.join(File.pathSeparator)
+                + System.lineSeparator(), 'UTF-8')
+    }
+}
+
 tasks.register('prepareBenchmarkModelInputs', Sync) {
     group = 'verification'
-    description = 'Prepares default model inputs for JMH and quality evaluation without changing source data.'
+    description = 'Prepares all registered language-default inputs for JMH and quality evaluation without changing source data.'
     into(layout.buildDirectory.dir('generated/benchmark-model-inputs'))
-    defaultModelProjects().each { Project modelProject ->
-        String languageDirectory = modelProject.name == 'pl-pl-unimorph'
-                ? 'pl_pl'
-                : modelProject.name.replace('-default', '').replace('-', '_')
+    languageDefaultModelProjects().each { Project modelProject ->
+        final String modelBuildText = modelProject.file('build.gradle').getText('UTF-8')
+        final java.util.regex.Matcher languageMatcher = modelBuildText =~ /(?m)^\s*language\s*=\s*'([A-Z_]+)'\s*$/
+        if (!languageMatcher.find()) {
+            throw new GradleException("Model ${modelProject.path} does not declare a language.")
+        }
+        final String languageDirectory = languageMatcher.group(1).toLowerCase(java.util.Locale.ROOT)
         from(modelProject.file('src/modelInput/stemmer.gz')) {
             into(languageDirectory)
         }
@@ -1391,7 +1626,8 @@ tasks.register('publishStemmingQualityDocumentation', JavaExec) {
     mainClass = 'org.egothor.stemmer.benchmark.quality.StemmingQualityDocumentationPublisher'
     args layout.buildDirectory.file('reports/stemming-quality/stemming-quality.csv').get().asFile.absolutePath,
             layout.projectDirectory.dir('docs').asFile.absolutePath,
-            'update'
+            'update',
+            'stemming-quality-2026-09-11.csv'
     doFirst {
         if (!file("$buildDir/reports/stemming-quality/stemming-quality.csv").isFile()) {
             throw new GradleException('A complete stemming-quality CSV is required. Run stemmingQuality only when no validated complete report is available.')
@@ -1405,17 +1641,71 @@ tasks.register('verifyStemmingQualityDocumentation', JavaExec) {
     dependsOn(tasks.named('testClasses'))
     classpath = sourceSets.test.runtimeClasspath
     mainClass = 'org.egothor.stemmer.benchmark.quality.StemmingQualityDocumentationPublisher'
-    args layout.projectDirectory.file('docs/benchmarks/data/stemming-quality.csv').asFile.absolutePath,
+    args layout.projectDirectory.file('docs/benchmarks/data/stemming-quality-2026-09-11.csv').asFile.absolutePath,
             layout.projectDirectory.dir('docs').asFile.absolutePath,
+            'verify',
+            'stemming-quality-2026-09-11.csv'
+}
+
+tasks.register('publishActiveStemmingQualityDocumentation', JavaExec) {
+    group = 'documentation'
+    description = 'Publishes the checksum-bound active stemming-quality snapshot on every language page.'
+    dependsOn(tasks.named('testClasses'))
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'org.egothor.stemmer.benchmark.quality.StemmingQualityDocumentationPublisher'
+    args layout.projectDirectory.file('docs/benchmarks/data/stemming-quality-2026-09-11.csv').asFile.absolutePath,
+            layout.projectDirectory.dir('docs').asFile.absolutePath,
+            'update',
+            'stemming-quality-2026-09-11.csv'
+}
+
+tasks.register('publishSnowballLanguageCatalog', JavaExec) {
+    group = 'documentation'
+    description = 'Publishes the documentation Snowball catalog from the Java benchmark authority.'
+    dependsOn(tasks.named('jmhClasses'))
+    classpath = sourceSets.jmh.runtimeClasspath
+    mainClass = 'org.egothor.stemmer.benchmark.SnowballLanguageCatalogApplication'
+    args layout.projectDirectory.file('docs/benchmarks/data/snowball-language-cases.csv').asFile.absolutePath,
+            'update'
+}
+
+tasks.register('verifySnowballLanguageCatalog', JavaExec) {
+    group = 'verification'
+    description = 'Verifies the documentation Snowball catalog against the Java benchmark authority.'
+    dependsOn(tasks.named('jmhClasses'))
+    classpath = sourceSets.jmh.runtimeClasspath
+    mainClass = 'org.egothor.stemmer.benchmark.SnowballLanguageCatalogApplication'
+    args layout.projectDirectory.file('docs/benchmarks/data/snowball-language-cases.csv').asFile.absolutePath,
             'verify'
 }
 
+File prohibitedSnapshotPointer = layout.projectDirectory.file(
+        'docs/benchmarks/data/prohibited-active-snapshots.properties').asFile
+tasks.register('verifyPublishedProhibitedBenchmarkDocumentation', Exec) {
+    group = 'verification'
+    description = 'Verifies active documentation-only prohibited-model snapshots and rendered pages.'
+    doFirst {
+        if (!prohibitedSnapshotPointer.isFile()) {
+            throw new GradleException(
+                    "Missing active prohibited benchmark snapshot pointer: ${prohibitedSnapshotPointer}.")
+        }
+    }
+    commandLine 'python3',
+            layout.projectDirectory.file('tools/update-prohibited-benchmark-documentation.py').asFile,
+            '--docs-root', layout.projectDirectory.dir('docs').asFile,
+            '--active-snapshots', prohibitedSnapshotPointer,
+            '--mode', 'verify'
+}
+
 tasks.named('check') {
+    dependsOn(tasks.named('verifyModelQuarantine'))
+    dependsOn(tasks.named('verifyActiveBenchmarkSnapshots'))
     dependsOn(tasks.named('verifyStemmingQualityDocumentation'))
     dependsOn(tasks.named('verifyDictionaryGeneralizationDocumentation'))
     dependsOn(tasks.named('verifyEditCostSensitivityDocumentation'))
     dependsOn(tasks.named('verifyPublishedJavaBenchmarkDocumentation'))
     dependsOn(tasks.named('verifyPublishedPythonBenchmarkDocumentation'))
+    dependsOn(tasks.named('verifyPublishedProhibitedBenchmarkDocumentation'))
 }
 
 tasks.register('verifyStemmingQualitySourceSets') {

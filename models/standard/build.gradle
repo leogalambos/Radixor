@@ -41,15 +41,21 @@ group = 'org.egothor'
 version = providers.fileContents(rootProject.layout.projectDirectory.file('models/catalog-version.txt'))
         .asText.map(String::trim).get()
 
-Properties modelTopology = new Properties()
-rootProject.file('models/model-projects.properties').withInputStream { InputStream input ->
-    modelTopology.load(input)
+Properties standardMembership = new Properties()
+rootProject.file('models/standard-model-projects.properties').withInputStream { InputStream input ->
+    standardMembership.load(input)
 }
-List<String> defaultModelIds = modelTopology.stringPropertyNames().findAll { String modelId ->
-    modelTopology.getProperty(modelId) == 'default'
-}.sort()
-Map<String, String> defaultModelVersions = defaultModelIds.collectEntries { String modelId ->
+List<String> standardModelIds = standardMembership.stringPropertyNames().toList().sort()
+if (standardModelIds.size() != 31 || standardMembership.values().any { Object value -> value != 'true' }) {
+    throw new GradleException('Standard model authority must contain exactly 31 true-valued model IDs.')
+}
+Map<String, String> standardModelVersions = standardModelIds.collectEntries { String modelId ->
     final Project modelProject = project(":models:${modelId}")
+    final String buildText = modelProject.file('build.gradle').getText('UTF-8')
+    if (!(buildText ==~ /(?s).*defaultModel\s*=\s*true.*/)
+            || !(buildText ==~ /(?s).*sourceLicense\s*=\s*'CC-BY-SA-3\.0'.*/)) {
+        throw new GradleException("Standard model ${modelId} must be a CC-BY-SA-3.0 language default.")
+    }
     final String modelVersion = providers.gradleProperty('modelReleaseVersion')
             .orElse(providers.fileContents(modelProject.layout.projectDirectory.file('model-version.txt'))
                     .asText.map(String::trim))
@@ -63,7 +69,7 @@ publishing {
             artifactId = 'radixor-models-standard'
             pom {
                 name = 'Radixor Standard Stemmer Models'
-                description = 'POM-only runtime aggregate containing one default model for every supported language.'
+                description = 'POM-only runtime aggregate containing the 31 standard model dependencies; each model retains its packaged data license and notice.'
                 packaging = 'pom'
                 url = 'https://github.com/leogalambos/Radixor'
                 licenses {
@@ -88,11 +94,11 @@ publishing {
             }
             pom.withXml {
                 Node dependenciesNode = asNode().appendNode('dependencies')
-                defaultModelIds.each { String modelId ->
+                standardModelIds.each { String modelId ->
                     Node dependencyNode = dependenciesNode.appendNode('dependency')
                     dependencyNode.appendNode('groupId', 'org.egothor')
                     dependencyNode.appendNode('artifactId', "radixor-model-${modelId}")
-                    dependencyNode.appendNode('version', defaultModelVersions.get(modelId))
+                    dependencyNode.appendNode('version', standardModelVersions.get(modelId))
                     dependencyNode.appendNode('scope', 'runtime')
                 }
             }
@@ -117,7 +123,7 @@ signing {
 }
 
 def standardPublicationPom = layout.buildDirectory.file('publications/standard/pom-default.xml')
-def expectedStandardArtifactIds = defaultModelIds.collect { String modelId -> "radixor-model-${modelId}" }
+def expectedStandardArtifactIds = standardModelIds.collect { String modelId -> "radixor-model-${modelId}" }
 def standardHasJarTasks = !tasks.withType(Jar).isEmpty()
 tasks.register('verifyPomOnlyAggregate') {
     group = 'verification'
@@ -135,10 +141,7 @@ tasks.register('verifyPomOnlyAggregate') {
             throw new GradleException('radixor-models-standard must publish Maven packaging pom.')
         }
         if (artifactIds != expectedStandardArtifactIds || dependencies.any { Node dependency -> dependency.scope.text() != 'runtime' }) {
-            throw new GradleException('radixor-models-standard must contain exactly the ordered default model runtime dependencies.')
-        }
-        if (artifactIds.contains('radixor-model-pl-pl-polimorf')) {
-            throw new GradleException('radixor-models-standard must exclude the optional PoliMorf model.')
+            throw new GradleException('radixor-models-standard must contain exactly the ordered standard model runtime dependencies.')
         }
         if (standardHasJarTasks) {
             throw new GradleException('radixor-models-standard must not create binary, sources, or Javadoc JARs.')

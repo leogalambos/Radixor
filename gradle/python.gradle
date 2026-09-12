@@ -563,9 +563,9 @@ tasks.register('pythonBenchmarkAllLanguagesBatch') {
                         'merging_task'      : 'pythonBenchmarkAllLanguagesBatch',
                 ],
                 'parameters' : [
-                        'word_budget'      : pythonBenchmarkWords.get(),
-                        'repeats'          : pythonBenchmarkRepeats.get(),
-                        'warmup'           : pythonBenchmarkWarmup.get(),
+                        'word_budget'      : pythonBenchmarkWords.get().toInteger(),
+                        'repeats'          : pythonBenchmarkRepeats.get().toInteger(),
+                        'warmup'           : pythonBenchmarkWarmup.get().toInteger(),
                         'sizes'            : [100],
                 ],
         ]

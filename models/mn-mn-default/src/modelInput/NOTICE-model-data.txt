@@ -1,0 +1,51 @@
+Radixor model-data notice
+
+Radixor-derived model data
+
+Copyright (C) 2026, Leo Galambos.
+
+Copyright and, where applicable, database rights are claimed in the
+Radixor-specific selection, verification, cleaning, normalization,
+grouping, deduplication, filtering, reformatting, metadata preparation,
+and packaging of this model, to the extent protected by applicable law.
+
+The underlying morphological data remains attributed to UniMorph and
+the upstream contributors identified in this notice.
+
+This derived model data, including Radixor's protectable contributions,
+is distributed under Creative Commons Attribution-ShareAlike 3.0.
+
+Model ID: mn-mn-default
+Source project: UniMorph
+Official repository: https://github.com/unimorph/khk
+Selected upstream data:
+- khk [lemma-form-features], SHA-256 4ff606bbf23b8de81a6f6ec9aedab44136f38c11e45607130a328e1a2d388630
+Source origin: Not stated in pinned repository evidence
+Attribution: UniMorph; Khuyagbaatar Batsuren
+License:
+Creative Commons Attribution-ShareAlike 3.0 Unported
+
+Canonical license URI: https://creativecommons.org/licenses/by-sa/3.0/
+Source revision: c062afd9bf2dc36f54cc8f16efecfd97fc4a6b8c
+Revision status: recorded
+Repository evidence paths: README.md:evidence-00-README.md
+Repository evidence SHA-256: evidence-00-README.md:b6650de1904ff5dc79c2b34dfadc96c25a0d2d3f6e61717616438dc3e5f37ce2
+Import policy: radixor-unimorph-import-v1
+Projection semantics: Each declared three-column source directly projects lemma and surface form.
+Conflict semantics: All valid lemma-form assignments are retained. Surface ambiguity is reported explicitly and is never resolved by dropping or overwriting an assignment.
+Import rows: source=30143; accepted=30143; rejected=0
+Rejection reasons: none
+Per-source import audit:
+- khk: source=30143; accepted=30143; rejected=0; added-groups=2140; added-distinct-surfaces=17231; added-source-pairs=15491; added-output-forms=17593; added-changed-pairs=15453; intrinsic-ambiguous-surfaces=297; rejection-reasons=none
+Surface conflict audit: cross-source-assignments=0; cross-source-surfaces=0; intrinsic-ambiguous-surfaces=297
+Audited excluded upstream files:
+- khk.derivations: derivation — Derivational data is outside the inflectional stem-form model contract.
+- khk.segmentations: khalkha-segmentation — Khalkha segmentation data was excluded after 105 conflicts and unrelated-verb anomalies were found.
+Generated dictionary: groups=2140; forms=17593
+Deterministic GZip SHA-256: e178aca6228449ecc967e6a00e3ee209ba9e1bc4bf43935ff29bb63a49fa18e3
+
+Radixor modifications: Strict UTF-8 validation, NFC normalization, lowercase conversion, structural unsafe-character rejection, grouping by lemma, exact deduplication, deterministic ordering, and reproducible GZip packaging.
+
+Neither UniMorph nor any upstream contributor endorses Radixor.
+
+Upstream information verified: 2026-09-11

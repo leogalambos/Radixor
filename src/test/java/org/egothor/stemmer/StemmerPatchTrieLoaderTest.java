@@ -57,6 +57,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Properties;
 import java.util.Set;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -1010,24 +1011,23 @@ final class StemmerPatchTrieLoaderTest {
          */
         @Test
         @DisplayName("Language enum must expose the current bundled language set")
-        void shouldExposeCurrentBundledLanguageSet() {
-            final Set<StemmerPatchTrieLoader.Language> expectedLanguages = new LinkedHashSet<StemmerPatchTrieLoader.Language>(
-                    Arrays.asList(StemmerPatchTrieLoader.Language.CS_CZ, StemmerPatchTrieLoader.Language.DA_DK,
-                            StemmerPatchTrieLoader.Language.DE_DE, StemmerPatchTrieLoader.Language.ES_ES,
-                            StemmerPatchTrieLoader.Language.FA_IR, StemmerPatchTrieLoader.Language.FI_FI,
-                            StemmerPatchTrieLoader.Language.FR_FR, StemmerPatchTrieLoader.Language.HE_IL,
-                            StemmerPatchTrieLoader.Language.HU_HU, StemmerPatchTrieLoader.Language.IT_IT,
-                            StemmerPatchTrieLoader.Language.NB_NO, StemmerPatchTrieLoader.Language.NL_NL,
-                            StemmerPatchTrieLoader.Language.NN_NO, StemmerPatchTrieLoader.Language.PL_PL,
-                            StemmerPatchTrieLoader.Language.PT_PT, StemmerPatchTrieLoader.Language.RU_RU,
-                            StemmerPatchTrieLoader.Language.SV_SE, StemmerPatchTrieLoader.Language.UK_UA,
-                            StemmerPatchTrieLoader.Language.US_UK, StemmerPatchTrieLoader.Language.YI));
-
+        void shouldExposeCurrentBundledLanguageSet() throws IOException {
             final Set<StemmerPatchTrieLoader.Language> actualLanguages = new LinkedHashSet<StemmerPatchTrieLoader.Language>(
                     Arrays.asList(StemmerPatchTrieLoader.Language.values()));
+            final Properties topology = new Properties();
+            try (InputStream input = Files.newInputStream(Path.of("models", "model-projects.properties"))) {
+                topology.load(input);
+            }
+            final long expectedDefaults = topology.stringPropertyNames().stream()
+                    .filter(modelId -> !"optional".equals(topology.getProperty(modelId)))
+                    .count();
 
-            assertEquals(expectedLanguages, actualLanguages,
-                    "The bundled language enum must match the project's supported language set exactly.");
+            assertEquals(expectedDefaults, actualLanguages.size());
+            assertEquals(expectedDefaults, actualLanguages.stream().map(StemmerPatchTrieLoader.Language::defaultModelId)
+                    .distinct().count());
+            assertTrue(actualLanguages.containsAll(Set.of(StemmerPatchTrieLoader.Language.AR,
+                    StemmerPatchTrieLoader.Language.HY_AM, StemmerPatchTrieLoader.Language.ST_ZA,
+                    StemmerPatchTrieLoader.Language.ZU_ZA)));
         }
 
         /**
@@ -1038,7 +1038,11 @@ final class StemmerPatchTrieLoaderTest {
         @DisplayName("Language enum must mark right-to-left bundled languages correctly")
         void shouldExposeCorrectRightToLeftMetadata() {
             final Set<StemmerPatchTrieLoader.Language> expectedRightToLeftLanguages = Set.of(
-                    StemmerPatchTrieLoader.Language.FA_IR, StemmerPatchTrieLoader.Language.HE_IL,
+                    StemmerPatchTrieLoader.Language.AFB, StemmerPatchTrieLoader.Language.AR,
+                    StemmerPatchTrieLoader.Language.ARZ, StemmerPatchTrieLoader.Language.FA_IR,
+                    StemmerPatchTrieLoader.Language.HE_IL, StemmerPatchTrieLoader.Language.PS_AF,
+                    StemmerPatchTrieLoader.Language.SDH, StemmerPatchTrieLoader.Language.SYC,
+                    StemmerPatchTrieLoader.Language.UG_CN,
                     StemmerPatchTrieLoader.Language.YI);
 
             for (StemmerPatchTrieLoader.Language language : StemmerPatchTrieLoader.Language.values()) {

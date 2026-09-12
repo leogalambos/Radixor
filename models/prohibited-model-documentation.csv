@@ -1,0 +1,24 @@
+Model ID,Language,Language name,Page,Icon,Icon label
+cy-gb-default,CY_GB,Welsh,cy-gb.md,GB,United Kingdom
+eus-default,EUS,Basque,eus.md,globe,Transnational language
+fy-nl-default,FY_NL,West Frisian,fy-nl.md,NL,Netherlands
+gd-gb-default,GD_GB,Scottish Gaelic,gd-gb.md,GB,United Kingdom
+hsb-default,HSB,Upper Sorbian,hsb.md,DE,Germany
+ka-ge-default,KA_GE,Georgian,ka-ge.md,GE,Georgia
+kca-default,KCA,Khanty,kca.md,RU,Russia
+ket-default,KET,Ket,ket.md,RU,Russia
+kmr-default,KMR,Kurmanji Kurdish,kmr.md,globe,Transnational language
+ko-kr-default,KO_KR,Korean,ko-kr.md,KR,South Korea
+oci-default,OCI,Occitan,oci.md,globe,Transnational language
+om-et-default,OM_ET,Oromo,om-et.md,ET,Ethiopia
+sah-default,SAH,Yakut,sah.md,RU,Russia
+san-default,SAN,Sanskrit,san.md,globe,Historical language
+sl-si-default,SL_SI,Slovenian,sl-si.md,SI,Slovenia
+slp-default,SLP,Lamaholot,slp.md,ID,Indonesia
+tat-default,TAT,Tatar,tat.md,RU,Russia
+tg-tj-default,TG_TJ,Tajik,tg-tj.md,TJ,Tajikistan
+tk-tm-default,TK_TM,Turkmen,tk-tm.md,TM,Turkmenistan
+tyv-default,TYV,Tuvan,tyv.md,RU,Russia
+ur-pk-default,UR_PK,Urdu,ur-pk.md,PK,Pakistan
+vec-default,VEC,Venetian,vec.md,IT,Italy
+vot-default,VOT,Votic,vot.md,globe,Historical or transnational language

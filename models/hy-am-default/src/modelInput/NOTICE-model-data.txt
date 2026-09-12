@@ -1,0 +1,52 @@
+Radixor model-data notice
+
+Radixor-derived model data
+
+Copyright (C) 2026, Leo Galambos.
+
+Copyright and, where applicable, database rights are claimed in the
+Radixor-specific selection, verification, cleaning, normalization,
+grouping, deduplication, filtering, reformatting, metadata preparation,
+and packaging of this model, to the extent protected by applicable law.
+
+The underlying morphological data remains attributed to UniMorph and
+the upstream contributors identified in this notice.
+
+This derived model data, including Radixor's protectable contributions,
+is distributed under Creative Commons Attribution-ShareAlike 3.0.
+
+Model ID: hy-am-default
+Source project: UniMorph
+Official repository: https://github.com/unimorph/hye
+Selected upstream data:
+- hye [lemma-form-features], SHA-256 850ca7b5fa06398795edc35daf0e202adab8765946b8920ab3307c3fb22ce091
+- hye.args [lemma-form-features], SHA-256 003b12b42ccf28d4569aee38f8d0db53a45fdf1a79ea1a23d4886479794ab6e5
+Source origin: Not stated in pinned repository evidence
+Attribution: UniMorph
+License:
+Creative Commons Attribution-ShareAlike 3.0 Unported
+
+Canonical license URI: https://creativecommons.org/licenses/by-sa/3.0/
+Source revision: 8d404710b0451dae1576d3aaf77c91e638eff66b
+Revision status: recorded
+Repository evidence paths: README.md:evidence-00-README.md
+Repository evidence SHA-256: evidence-00-README.md:a4e97fa7a9ed8460b093fe5f27337d9b3a27e0a936484ee01528fec2d69f3505
+Import policy: radixor-unimorph-import-v1
+Projection semantics: Each declared three-column source directly projects lemma and surface form.
+Conflict semantics: All valid lemma-form assignments are retained. Surface ambiguity is reported explicitly and is never resolved by dropping or overwriting an assignment.
+Import rows: source=672331; accepted=514914; rejected=157417
+Rejection reasons: form-unicode-whitespace=154857;lemma-unicode-whitespace=2560
+Per-source import audit:
+- hye: source=333870; accepted=255391; rejected=78479; added-groups=6946; added-distinct-surfaces=243870; added-source-pairs=244885; added-output-forms=244886; added-changed-pairs=237940; intrinsic-ambiguous-surfaces=994; rejection-reasons=form-unicode-whitespace=77199;lemma-unicode-whitespace=1280
+- hye.args: source=338461; accepted=259523; rejected=78938; added-groups=44; added-distinct-surfaces=2706; added-source-pairs=2914; added-output-forms=2917; added-changed-pairs=2873; intrinsic-ambiguous-surfaces=1200; rejection-reasons=form-unicode-whitespace=77658;lemma-unicode-whitespace=1280
+Surface conflict audit: cross-source-assignments=205; cross-source-surfaces=202; intrinsic-ambiguous-surfaces=1200
+Audited excluded upstream files:
+- none
+Generated dictionary: groups=6990; forms=247803
+Deterministic GZip SHA-256: 42eea1564db57d86b2f09fec3d6d19104253cd389769b834c823b1684f21a757
+
+Radixor modifications: Strict UTF-8 validation, NFC normalization, lowercase conversion, structural unsafe-character rejection, grouping by lemma, exact deduplication, deterministic ordering, and reproducible GZip packaging.
+
+Neither UniMorph nor any upstream contributor endorses Radixor.
+
+Upstream information verified: 2026-09-11

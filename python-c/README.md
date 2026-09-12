@@ -2,7 +2,7 @@
 
 **radixor-c** is the C-backed Python runtime for
 [Radixor](https://github.com/leogalambos/Radixor), a dictionary-trained
-transformation stemmer supporting 20 languages. Its native engine is implemented
+transformation stemmer supporting 31 standard models. Its native engine is implemented
 directly against the CPython C API to keep the overhead of stemming individual
 words low.
 
@@ -31,7 +31,7 @@ python -m pip install --only-binary=:all: radixor-c
 ```
 
 Published wheels support CPython 3.10–3.14 on Linux, macOS and Windows. The
-installation also resolves `radixor-models-standard`, the shared package of 20
+installation also resolves `radixor-models-standard`, the shared package of 31
 precompiled standard models.
 
 ## Quick start

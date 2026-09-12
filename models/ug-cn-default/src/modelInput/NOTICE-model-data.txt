@@ -1,0 +1,50 @@
+Radixor model-data notice
+
+Radixor-derived model data
+
+Copyright (C) 2026, Leo Galambos.
+
+Copyright and, where applicable, database rights are claimed in the
+Radixor-specific selection, verification, cleaning, normalization,
+grouping, deduplication, filtering, reformatting, metadata preparation,
+and packaging of this model, to the extent protected by applicable law.
+
+The underlying morphological data remains attributed to UniMorph and
+the upstream contributors identified in this notice.
+
+This derived model data, including Radixor's protectable contributions,
+is distributed under Creative Commons Attribution-ShareAlike 3.0.
+
+Model ID: ug-cn-default
+Source project: UniMorph
+Official repository: https://github.com/unimorph/uig
+Selected upstream data:
+- uig [lemma-form-features], SHA-256 9beffd61140fff8e38e62576fe21da71bca1d3338f8fe654d18f9a70c007a3c0
+Source origin: Kadeer, Alim. Uyghur language: 94 Uyghur verbs in common tenses. CreateSpace Independent Publishing Platform.
+Attribution: UniMorph; Eleanor Chodroff
+License:
+Creative Commons Attribution-ShareAlike 3.0 Unported
+
+Canonical license URI: https://creativecommons.org/licenses/by-sa/3.0/
+Source revision: 0786d110b042c9e64599f53a6a0ac80889eb7f31
+Revision status: recorded
+Repository evidence paths: README.md:evidence-00-README.md
+Repository evidence SHA-256: evidence-00-README.md:898311589bc082efab5aedbc62baa402aef9b697153f63db2e6a450b6adb9dfe
+Import policy: radixor-unimorph-import-v1
+Projection semantics: Each declared three-column source directly projects lemma and surface form.
+Conflict semantics: All valid lemma-form assignments are retained. Surface ambiguity is reported explicitly and is never resolved by dropping or overwriting an assignment.
+Import rows: source=8178; accepted=7743; rejected=435
+Rejection reasons: lemma-unicode-whitespace=435
+Per-source import audit:
+- uig: source=8178; accepted=7743; rejected=435; added-groups=85; added-distinct-surfaces=6368; added-source-pairs=6314; added-output-forms=6399; added-changed-pairs=6314; intrinsic-ambiguous-surfaces=31; rejection-reasons=lemma-unicode-whitespace=435
+Surface conflict audit: cross-source-assignments=0; cross-source-surfaces=0; intrinsic-ambiguous-surfaces=31
+Audited excluded upstream files:
+- none
+Generated dictionary: groups=85; forms=6399
+Deterministic GZip SHA-256: 26d181f6d1114ed9ba838608a77d1e7849086e3ad90bc1f2c246e4b4034e63ad
+
+Radixor modifications: Strict UTF-8 validation, NFC normalization, lowercase conversion, structural unsafe-character rejection, grouping by lemma, exact deduplication, deterministic ordering, and reproducible GZip packaging.
+
+Neither UniMorph nor any upstream contributor endorses Radixor.
+
+Upstream information verified: 2026-09-11

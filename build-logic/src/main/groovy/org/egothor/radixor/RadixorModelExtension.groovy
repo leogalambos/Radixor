@@ -50,6 +50,12 @@ abstract class RadixorModelExtension {
     /** Whether this is the documented default for its language. */
     abstract Property<Boolean> getDefaultModel()
 
+    /** Whether source identity and output bytes are governed by the pinned UniMorph manifest. */
+    abstract Property<Boolean> getManifestManaged()
+
+    /** Whether the model language is conventionally written right-to-left. */
+    abstract Property<Boolean> getRightToLeft()
+
     /** Source dictionary name. */
     abstract Property<String> getSourceName()
 
@@ -96,6 +102,8 @@ abstract class RadixorModelExtension {
     @Inject
     RadixorModelExtension(final ObjectFactory objects) {
         defaultModel.convention(false)
+        manifestManaged.convention(false)
+        rightToLeft.convention(false)
         sourceVersion.convention('unavailable')
         sourceLicense.convention('LicenseRef-Radixor-Stemmer-Data')
         licenseFileName.convention('LICENSE-stemmer-data.txt')

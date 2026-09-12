@@ -167,6 +167,9 @@ public class StemmerComparisonBenchmarkQuality {
                 "POLISH_LUCENE_STEMPEL_DIRECT",
                 "POLISH_LUCENE_STEMPEL_FILTER",
                 "POLISH_LUCENE_MORFOLOGIK_FILTER",
+                "POLISH_POLIMORF_RADIXOR",
+                "POLISH_POLIMORF_LUCENE_MORFOLOGIK_FILTER",
+                "POLISH_POLIMORF_SNOWBALL_DIRECT",
                 "PORTUGUESE_RADIXOR",
                 "PORTUGUESE_LUCENE_PORTUGUESE_STEM_FILTER",
                 "PORTUGUESE_LUCENE_PORTUGUESE_LIGHT_STEM_FILTER",
@@ -179,21 +182,37 @@ public class StemmerComparisonBenchmarkQuality {
                 "UKRAINIAN_RADIXOR",
                 "UKRAINIAN_MORFOLOGIK_DIRECT",
                 "UKRAINIAN_LUCENE_MORFOLOGIK_FILTER",
+                "SNOWBALL_ARABIC_DIRECT",
+                "SNOWBALL_ARABIC_LUCENE_FILTER",
+                "SNOWBALL_ARMENIAN_DIRECT",
+                "SNOWBALL_ARMENIAN_LUCENE_FILTER",
+                "SNOWBALL_CATALAN_DIRECT",
+                "SNOWBALL_CATALAN_LUCENE_FILTER",
                 "SNOWBALL_CZECH_DIRECT",
                 "SNOWBALL_DANISH_DIRECT",
                 "SNOWBALL_DANISH_LUCENE_FILTER",
                 "SNOWBALL_DUTCH_DIRECT",
                 "SNOWBALL_DUTCH_LUCENE_FILTER",
+                "SNOWBALL_ESTONIAN_DIRECT",
+                "SNOWBALL_ESTONIAN_LUCENE_FILTER",
                 "SNOWBALL_FINNISH_DIRECT",
                 "SNOWBALL_FINNISH_LUCENE_FILTER",
                 "SNOWBALL_FRENCH_DIRECT",
                 "SNOWBALL_FRENCH_LUCENE_FILTER",
                 "SNOWBALL_GERMAN_DIRECT",
                 "SNOWBALL_GERMAN_LUCENE_FILTER",
+                "SNOWBALL_GREEK_DIRECT",
+                "SNOWBALL_GREEK_LUCENE_FILTER",
                 "SNOWBALL_HUNGARIAN_DIRECT",
                 "SNOWBALL_HUNGARIAN_LUCENE_FILTER",
+                "SNOWBALL_INDONESIAN_DIRECT",
+                "SNOWBALL_INDONESIAN_LUCENE_FILTER",
+                "SNOWBALL_IRISH_DIRECT",
+                "SNOWBALL_IRISH_LUCENE_FILTER",
                 "SNOWBALL_ITALIAN_DIRECT",
                 "SNOWBALL_ITALIAN_LUCENE_FILTER",
+                "SNOWBALL_LITHUANIAN_DIRECT",
+                "SNOWBALL_LITHUANIAN_LUCENE_FILTER",
                 "SNOWBALL_NORWEGIAN_BOKMAL_DIRECT",
                 "SNOWBALL_NORWEGIAN_BOKMAL_LUCENE_FILTER",
                 "SNOWBALL_NORWEGIAN_NYNORSK_DIRECT",
@@ -204,10 +223,15 @@ public class StemmerComparisonBenchmarkQuality {
                 "SNOWBALL_PORTUGUESE_LUCENE_FILTER",
                 "SNOWBALL_RUSSIAN_DIRECT",
                 "SNOWBALL_RUSSIAN_LUCENE_FILTER",
+                "SNOWBALL_ROMANIAN_DIRECT",
+                "SNOWBALL_ROMANIAN_LUCENE_FILTER",
+                "SNOWBALL_SESOTHO_DIRECT",
                 "SNOWBALL_SPANISH_DIRECT",
                 "SNOWBALL_SPANISH_LUCENE_FILTER",
                 "SNOWBALL_SWEDISH_DIRECT",
                 "SNOWBALL_SWEDISH_LUCENE_FILTER",
+                "SNOWBALL_TURKISH_DIRECT",
+                "SNOWBALL_TURKISH_LUCENE_FILTER",
                 "SNOWBALL_YIDDISH_DIRECT",
                 "SNOWBALL_YIDDISH_LUCENE_FILTER"
         })
@@ -231,7 +255,9 @@ public class StemmerComparisonBenchmarkQuality {
         @Setup(Level.Trial)
         public void setUp() throws IOException {
             final QualityCandidate candidate = QualityCandidate.valueOf(this.candidateName);
-            this.corpus = LanguageBenchmarkCorpus.createFullCorpus(candidate.radixorLanguage());
+            this.corpus = candidate.corpusModelId == null
+                    ? LanguageBenchmarkCorpus.createFullCorpus(candidate.radixorLanguage())
+                    : LanguageBenchmarkCorpus.createFullCorpus(candidate.corpusModelId);
             this.evaluator = candidate.createEvaluator();
         }
     }
@@ -356,6 +382,10 @@ public class StemmerComparisonBenchmarkQuality {
         POLISH_LUCENE_STEMPEL_DIRECT(StemmerPatchTrieLoader.Language.PL_PL),
         POLISH_LUCENE_STEMPEL_FILTER(StemmerPatchTrieLoader.Language.PL_PL),
         POLISH_LUCENE_MORFOLOGIK_FILTER(StemmerPatchTrieLoader.Language.PL_PL),
+        POLISH_POLIMORF_RADIXOR(StemmerPatchTrieLoader.Language.PL_PL, "pl-pl-polimorf"),
+        POLISH_POLIMORF_LUCENE_MORFOLOGIK_FILTER(StemmerPatchTrieLoader.Language.PL_PL, "pl-pl-polimorf"),
+        POLISH_POLIMORF_SNOWBALL_DIRECT(StemmerPatchTrieLoader.Language.PL_PL,
+                SnowballLanguageCase.POLISH, "pl-pl-polimorf"),
         PORTUGUESE_RADIXOR(StemmerPatchTrieLoader.Language.PT_PT),
         PORTUGUESE_LUCENE_PORTUGUESE_STEM_FILTER(StemmerPatchTrieLoader.Language.PT_PT),
         PORTUGUESE_LUCENE_PORTUGUESE_LIGHT_STEM_FILTER(StemmerPatchTrieLoader.Language.PT_PT),
@@ -368,21 +398,37 @@ public class StemmerComparisonBenchmarkQuality {
         UKRAINIAN_RADIXOR(StemmerPatchTrieLoader.Language.UK_UA),
         UKRAINIAN_MORFOLOGIK_DIRECT(StemmerPatchTrieLoader.Language.UK_UA),
         UKRAINIAN_LUCENE_MORFOLOGIK_FILTER(StemmerPatchTrieLoader.Language.UK_UA),
+        SNOWBALL_ARABIC_DIRECT(StemmerPatchTrieLoader.Language.AR, SnowballLanguageCase.ARABIC),
+        SNOWBALL_ARABIC_LUCENE_FILTER(StemmerPatchTrieLoader.Language.AR, SnowballLanguageCase.ARABIC),
+        SNOWBALL_ARMENIAN_DIRECT(StemmerPatchTrieLoader.Language.HY_AM, SnowballLanguageCase.ARMENIAN),
+        SNOWBALL_ARMENIAN_LUCENE_FILTER(StemmerPatchTrieLoader.Language.HY_AM, SnowballLanguageCase.ARMENIAN),
+        SNOWBALL_CATALAN_DIRECT(StemmerPatchTrieLoader.Language.CA_ES, SnowballLanguageCase.CATALAN),
+        SNOWBALL_CATALAN_LUCENE_FILTER(StemmerPatchTrieLoader.Language.CA_ES, SnowballLanguageCase.CATALAN),
         SNOWBALL_CZECH_DIRECT(StemmerPatchTrieLoader.Language.CS_CZ, SnowballLanguageCase.CZECH),
         SNOWBALL_DANISH_DIRECT(StemmerPatchTrieLoader.Language.DA_DK, SnowballLanguageCase.DANISH),
         SNOWBALL_DANISH_LUCENE_FILTER(StemmerPatchTrieLoader.Language.DA_DK, SnowballLanguageCase.DANISH),
         SNOWBALL_DUTCH_DIRECT(StemmerPatchTrieLoader.Language.NL_NL, SnowballLanguageCase.DUTCH),
         SNOWBALL_DUTCH_LUCENE_FILTER(StemmerPatchTrieLoader.Language.NL_NL, SnowballLanguageCase.DUTCH),
+        SNOWBALL_ESTONIAN_DIRECT(StemmerPatchTrieLoader.Language.ET_EE, SnowballLanguageCase.ESTONIAN),
+        SNOWBALL_ESTONIAN_LUCENE_FILTER(StemmerPatchTrieLoader.Language.ET_EE, SnowballLanguageCase.ESTONIAN),
         SNOWBALL_FINNISH_DIRECT(StemmerPatchTrieLoader.Language.FI_FI, SnowballLanguageCase.FINNISH),
         SNOWBALL_FINNISH_LUCENE_FILTER(StemmerPatchTrieLoader.Language.FI_FI, SnowballLanguageCase.FINNISH),
         SNOWBALL_FRENCH_DIRECT(StemmerPatchTrieLoader.Language.FR_FR, SnowballLanguageCase.FRENCH),
         SNOWBALL_FRENCH_LUCENE_FILTER(StemmerPatchTrieLoader.Language.FR_FR, SnowballLanguageCase.FRENCH),
         SNOWBALL_GERMAN_DIRECT(StemmerPatchTrieLoader.Language.DE_DE, SnowballLanguageCase.GERMAN),
         SNOWBALL_GERMAN_LUCENE_FILTER(StemmerPatchTrieLoader.Language.DE_DE, SnowballLanguageCase.GERMAN),
+        SNOWBALL_GREEK_DIRECT(StemmerPatchTrieLoader.Language.EL_GR, SnowballLanguageCase.GREEK),
+        SNOWBALL_GREEK_LUCENE_FILTER(StemmerPatchTrieLoader.Language.EL_GR, SnowballLanguageCase.GREEK),
         SNOWBALL_HUNGARIAN_DIRECT(StemmerPatchTrieLoader.Language.HU_HU, SnowballLanguageCase.HUNGARIAN),
         SNOWBALL_HUNGARIAN_LUCENE_FILTER(StemmerPatchTrieLoader.Language.HU_HU, SnowballLanguageCase.HUNGARIAN),
+        SNOWBALL_INDONESIAN_DIRECT(StemmerPatchTrieLoader.Language.ID_ID, SnowballLanguageCase.INDONESIAN),
+        SNOWBALL_INDONESIAN_LUCENE_FILTER(StemmerPatchTrieLoader.Language.ID_ID, SnowballLanguageCase.INDONESIAN),
+        SNOWBALL_IRISH_DIRECT(StemmerPatchTrieLoader.Language.GA_IE, SnowballLanguageCase.IRISH),
+        SNOWBALL_IRISH_LUCENE_FILTER(StemmerPatchTrieLoader.Language.GA_IE, SnowballLanguageCase.IRISH),
         SNOWBALL_ITALIAN_DIRECT(StemmerPatchTrieLoader.Language.IT_IT, SnowballLanguageCase.ITALIAN),
         SNOWBALL_ITALIAN_LUCENE_FILTER(StemmerPatchTrieLoader.Language.IT_IT, SnowballLanguageCase.ITALIAN),
+        SNOWBALL_LITHUANIAN_DIRECT(StemmerPatchTrieLoader.Language.LT_LT, SnowballLanguageCase.LITHUANIAN),
+        SNOWBALL_LITHUANIAN_LUCENE_FILTER(StemmerPatchTrieLoader.Language.LT_LT, SnowballLanguageCase.LITHUANIAN),
         SNOWBALL_NORWEGIAN_BOKMAL_DIRECT(StemmerPatchTrieLoader.Language.NB_NO,
                 SnowballLanguageCase.NORWEGIAN_BOKMAL),
         SNOWBALL_NORWEGIAN_BOKMAL_LUCENE_FILTER(StemmerPatchTrieLoader.Language.NB_NO,
@@ -397,10 +443,15 @@ public class StemmerComparisonBenchmarkQuality {
         SNOWBALL_PORTUGUESE_LUCENE_FILTER(StemmerPatchTrieLoader.Language.PT_PT, SnowballLanguageCase.PORTUGUESE),
         SNOWBALL_RUSSIAN_DIRECT(StemmerPatchTrieLoader.Language.RU_RU, SnowballLanguageCase.RUSSIAN),
         SNOWBALL_RUSSIAN_LUCENE_FILTER(StemmerPatchTrieLoader.Language.RU_RU, SnowballLanguageCase.RUSSIAN),
+        SNOWBALL_ROMANIAN_DIRECT(StemmerPatchTrieLoader.Language.RO_RO, SnowballLanguageCase.ROMANIAN),
+        SNOWBALL_ROMANIAN_LUCENE_FILTER(StemmerPatchTrieLoader.Language.RO_RO, SnowballLanguageCase.ROMANIAN),
+        SNOWBALL_SESOTHO_DIRECT(StemmerPatchTrieLoader.Language.ST_ZA, SnowballLanguageCase.SESOTHO),
         SNOWBALL_SPANISH_DIRECT(StemmerPatchTrieLoader.Language.ES_ES, SnowballLanguageCase.SPANISH),
         SNOWBALL_SPANISH_LUCENE_FILTER(StemmerPatchTrieLoader.Language.ES_ES, SnowballLanguageCase.SPANISH),
         SNOWBALL_SWEDISH_DIRECT(StemmerPatchTrieLoader.Language.SV_SE, SnowballLanguageCase.SWEDISH),
         SNOWBALL_SWEDISH_LUCENE_FILTER(StemmerPatchTrieLoader.Language.SV_SE, SnowballLanguageCase.SWEDISH),
+        SNOWBALL_TURKISH_DIRECT(StemmerPatchTrieLoader.Language.TR_TR, SnowballLanguageCase.TURKISH),
+        SNOWBALL_TURKISH_LUCENE_FILTER(StemmerPatchTrieLoader.Language.TR_TR, SnowballLanguageCase.TURKISH),
         SNOWBALL_YIDDISH_DIRECT(StemmerPatchTrieLoader.Language.YI, SnowballLanguageCase.YIDDISH),
         SNOWBALL_YIDDISH_LUCENE_FILTER(StemmerPatchTrieLoader.Language.YI, SnowballLanguageCase.YIDDISH);
 
@@ -414,13 +465,26 @@ public class StemmerComparisonBenchmarkQuality {
          */
         private final SnowballLanguageCase snowballLanguageCase;
 
+        /** Exact non-default corpus model, or {@code null} for the language default. */
+        private final String corpusModelId;
+
         /**
          * Creates a candidate.
          *
          * @param radixorLanguage Radixor dictionary language
          */
         QualityCandidate(final StemmerPatchTrieLoader.Language radixorLanguage) {
-            this(radixorLanguage, null);
+            this(radixorLanguage, null, null);
+        }
+
+        /**
+         * Creates a candidate evaluated against an exact non-default model.
+         *
+         * @param radixorLanguage Radixor dictionary language
+         * @param corpusModelId exact corpus model identifier
+         */
+        QualityCandidate(final StemmerPatchTrieLoader.Language radixorLanguage, final String corpusModelId) {
+            this(radixorLanguage, null, corpusModelId);
         }
 
         /**
@@ -431,8 +495,21 @@ public class StemmerComparisonBenchmarkQuality {
          */
         QualityCandidate(final StemmerPatchTrieLoader.Language radixorLanguage,
                 final SnowballLanguageCase snowballLanguageCase) {
+            this(radixorLanguage, snowballLanguageCase, null);
+        }
+
+        /**
+         * Creates a Snowball candidate evaluated against an exact model.
+         *
+         * @param radixorLanguage Radixor dictionary language
+         * @param snowballLanguageCase matching Snowball case
+         * @param corpusModelId exact corpus model identifier
+         */
+        QualityCandidate(final StemmerPatchTrieLoader.Language radixorLanguage,
+                final SnowballLanguageCase snowballLanguageCase, final String corpusModelId) {
             this.radixorLanguage = radixorLanguage;
             this.snowballLanguageCase = snowballLanguageCase;
+            this.corpusModelId = corpusModelId;
         }
 
         /**
@@ -453,7 +530,9 @@ public class StemmerComparisonBenchmarkQuality {
         @SuppressWarnings("deprecation") // Lucene retains SpanishMinimalStemFilter only for compatibility benchmarking.
         CandidateStemmer createStemmer() throws IOException {
             if (name().endsWith("_RADIXOR")) {
-                return radixor(createRadixorStemmer(this.radixorLanguage));
+                return this.corpusModelId == null
+                        ? radixor(createRadixorStemmer(this.radixorLanguage))
+                        : createRadixorQualityStemmer(this.corpusModelId);
             }
             if (name().endsWith("_DIRECT") && this.snowballLanguageCase != null) {
                 return direct(this.snowballLanguageCase.createDirectStemmer()::stem);
@@ -515,7 +594,8 @@ public class StemmerComparisonBenchmarkQuality {
                 }
                 case POLISH_LUCENE_STEMPEL_FILTER ->
                     tokenFilter(input -> new StempelFilter(input, new StempelStemmer(PolishAnalyzer.getDefaultTable())));
-                case POLISH_LUCENE_MORFOLOGIK_FILTER -> tokenFilter(MorfologikFilter::new, true);
+                case POLISH_LUCENE_MORFOLOGIK_FILTER, POLISH_POLIMORF_LUCENE_MORFOLOGIK_FILTER ->
+                    tokenFilter(MorfologikFilter::new, true);
                 case PORTUGUESE_LUCENE_PORTUGUESE_STEM_FILTER ->
                     tokenFilter(input -> new PortugueseStemFilter(lowercase(input)));
                 case PORTUGUESE_LUCENE_PORTUGUESE_LIGHT_STEM_FILTER ->

@@ -1,0 +1,45 @@
+Radixor model-data notice
+
+Radixor-derived model data
+
+Copyright (C) 2026, Leo Galambos.
+
+Copyright and, where applicable, database rights are claimed in the
+Radixor-specific selection, verification, cleaning, normalization,
+grouping, deduplication, filtering, reformatting, metadata preparation,
+and packaging of this model, to the extent protected by applicable law.
+
+The underlying morphological data remains attributed to UniMorph and
+the upstream contributors identified in this notice.
+
+This derived model data, including Radixor's protectable contributions,
+is distributed under Creative Commons Attribution-ShareAlike 3.0
+Unported.
+
+Model ID: ar-default
+Radixor language: AR
+Source project: UniMorph
+Official repository: https://github.com/unimorph/ara
+Upstream datasets: `ara_atb` and `ara_new`
+Pinned `ara_atb` SHA-256: 7591a52634b0bbe6b6e28b4f4455d863a0c2580653526d23c04217e5f08b0961
+Pinned `ara_new` SHA-256: 2295e4db73427cf1690f04a7615c6cf64015d3341285e6914a672c177285602c
+Pinned `README.md` SHA-256: 498e3d8e2ec409617e1f35b560eb6119981120d47bf1d66c1ed3d79f0fdd8ab5
+Upstream lexical source: Wiktionary and field data, as documented by the repository
+Attribution: UniMorph; Salam Khalifa and Nizar Habash (CAMeL Lab @ NYU Abu Dhabi)
+License:
+Creative Commons Attribution-ShareAlike 3.0 Unported
+
+The pinned upstream README identifies `ara_atb` as PATB/CalimaStar-derived
+inflection data, `ara_new` as a consistently processed subset of the earlier
+`ara` lemmas, attributes both to Salam Khalifa and Nizar Habash, and applies
+CC BY-SA 3.0 to the repository.
+
+Canonical license URI: https://creativecommons.org/licenses/by-sa/3.0/
+Source revision: e9b7521ab75e3a7da6f996a428031164993e6f19
+Revision status: recorded
+
+Radixor modifications: Verification of both pinned source files, NFC normalization, filtering to Unicode letters, numbers, and combining marks, grouping inflected forms by lemma, exact deduplication, deterministic GZip packaging, and generation of runtime descriptor and checksum metadata. The reproducible import is implemented by `tools/import-unimorph-arabic.py`.
+
+The derived model data is distributed under CC BY-SA 3.0. UniMorph supplies morphological data; Radixor constructs its own patch-command trie at runtime. Neither UniMorph nor any upstream contributor endorses Radixor.
+
+Upstream information verified: 2026-09-10

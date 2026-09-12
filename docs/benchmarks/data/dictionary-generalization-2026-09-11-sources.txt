@@ -1,0 +1,9 @@
+# Source identities for the 2026-09-11 generalization continuation.
+# The CSV rows additionally pin revision 14f61beb106bca21d78f828e2f8e35fb457d3d90,
+# dirty source state, model versions, model SHA-256 values, and generator SHA-256.
+# All 123 continuation languages use the current generator identity below.
+9ec439a4f2bfc3acec4bd34bfed38ee461876941165cffca394cd53ac419edef  src/main/java/org/egothor/stemmer/WordTraversalDirection.java
+514fe025b16159645403c00ddcd20e0185f8f257a08ce541292e171e6a71fd95  src/main/java/org/egothor/stemmer/FrequencyTrie.java
+7f9d4c43dafc77e1cf9cfb7b04156403916b0bd4b54d705cc53be1b971d91b08  src/main/java/org/egothor/stemmer/PatchCommandEncoder.java
+d60869277c88f95fa716a54e96083c8a1e85b10f324d2e6882999319ef8b4708  src/main/java/org/egothor/stemmer/StemmerPatchTrieLoader.java
+02b9c31862c7c5bc373bcd888e33d6ade7a2317fee37b05d966af0e92dbc1023  src/test/java/org/egothor/stemmer/benchmark/generalization/DictionaryGeneralizationApplication.java

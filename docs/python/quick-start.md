@@ -31,7 +31,7 @@ Both indexes provide the same released distributions. See
 [Installation and Builds](installation.md) for provenance and source builds.
 
 The `radixor` wheel contains code. Its required
-`radixor-models-standard` dependency contains 20 precompiled models. The
+`radixor-models-standard` dependency contains 31 precompiled models. The
 standard package excludes textual source dictionaries and optional PoliMorf
 data, which keeps startup on the direct compiled-model path.
 

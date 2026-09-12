@@ -1,8 +1,12 @@
-# Norwegian Nynorsk Stemmer Benchmarks
+# Norwegian Nynorsk Stemmer Benchmarks <span class="dictionary-rating" role="img" aria-label="Relative dictionary size 4 of 5; 16,937 distinct usable word forms" title="Relative dictionary size 4 of 5; 16,937 distinct usable word forms">★★★★☆</span>
 
 This page reports same-language stemming benchmarks for Norwegian Nynorsk. Accuracy is listed first because speed without root agreement is not enough to interpret stemmer quality.
 
-All speed values are environment-specific and were measured on the hardware and JVM listed in the [benchmark overview](../index.md). The command distribution, exact-root accuracy, and speed tables belong to the published 2026-08-25 Radixor/Java `4.2.0-6-g84e57fb` snapshot. Speed benchmark operations process changed dictionary tokens only. Accuracy uses the complete Radixor dictionary for the language.
+<!-- DICTIONARY-SIZE-RATING:START -->
+Dictionary size: <span class="dictionary-rating" role="img" aria-label="Relative dictionary size 4 of 5; 16,937 distinct usable word forms" title="Relative dictionary size 4 of 5; 16,937 distinct usable word forms">★★★★☆</span>. The exact count is **16,937 distinct usable word forms** after parser-compatible filtering and exact, case-preserved deduplication. Stars rank dictionary size relative to all benchmarked dictionaries in five nearly equal groups; they do **not** measure linguistic quality or benchmark accuracy.
+<!-- DICTIONARY-SIZE-RATING:END -->
+
+All speed values are environment-specific and were measured on the hardware and JVM listed in the [benchmark overview](../index.md). The command distribution, exact-root accuracy, and speed tables belong to the published 2026-09-11 Radixor/Java `4.4.0` snapshot. Speed benchmark operations process changed tokens. Accuracy uses the complete Radixor dictionary for the language.
 
 <!-- BENCHMARK-EVIDENCE-MAP:START -->
 !!! info "How to read this page"
@@ -13,9 +17,9 @@ Runtime and exact-root agreement measure different properties. Light, minimal, p
 
 ## Dictionary Corpus
 
-| Model ID | Model version | Language | Dictionary rows | Complete quality tokens | Already-root tokens | Changed tokens | JMH timing tokens |
-| --- | --- | --- | ---: | ---: | ---: | ---: | ---: |
-| `nn-no-default` | `1.0.0` | `NN_NO` | 4,688 | 19,651 | 6,089 | 13,562 | 13,562 |
+| Model ID | Model version | Language | Dictionary rows | Distinct usable forms | Complete quality tokens | Already-root tokens | Changed tokens | Timing workload | JMH timing tokens |
+| --- | --- | --- | ---: | ---: | ---: | ---: | ---: | --- | ---: |
+| `nn-no-default` | `1.0.0` | `NN_NO` | 4,688 | 16,937 | 19,651 | 6,089 | 13,562 | changed tokens | 13,562 |
 
 ## Radixor Patch Command Distribution
 
@@ -36,18 +40,18 @@ Accuracy is computed from JMH auxiliary counters in the current report. The coun
 | Stemmer | All exact | Changed exact | Root preserved | Note |
 | --- | ---: | ---: | ---: | --- |
 | Radixor | 93.089% | 91.395% | 96.863% | Radixor dictionary-trained patch-command stemmer. |
-| Official Snowball direct | 60.974% | 60.212% | 62.670% | Official Snowball generated Java stemmer; rule-based suffix algorithm. |
+| Official Snowball direct (Java) | 60.974% | 60.212% | 62.670% | Official Snowball generated Java stemmer; rule-based suffix algorithm. |
 | Lucene SnowballFilter | 60.918% | 60.146% | 62.638% | Lucene TokenFilter integration path around the Snowball algorithm. |
 
 ## Speed
 
-Speed uses JMH average time, 5 warmup iterations, 7 measurement iterations, 3 independent forks, and 1 thread. Relative factor is computed against the single Radixor row on this language page. Values below 1.000 are faster than that Radixor baseline; values above 1.000 are slower.
+Speed uses JMH average time, 3 warmup iterations, 5 measurement iterations, 3 independent forks, and 1 thread. Relative factor is computed against the single Radixor row on this language page. Values below 1.000 are faster than that Radixor baseline; values above 1.000 are slower.
 
 | Stemmer | Benchmark method | Score ms/op | Error ms | ns/token | Relative vs Radixor | Note |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
-| Radixor | `radixor[NORWEGIAN_NYNORSK]` | 0.596 | 0.083 | 44.0 | 1.000 | Radixor dictionary-trained patch-command stemmer. |
-| Official Snowball direct | `snowballDirect[NORWEGIAN_NYNORSK]` | 1.130 | 0.142 | 83.3 | 1.895 | Official Snowball generated Java stemmer; direct API. |
-| Lucene SnowballFilter | `luceneSnowballFilter[NORWEGIAN_NYNORSK]` | 1.306 | 0.146 | 96.3 | 2.191 | Lucene TokenFilter path around Snowball; includes TokenStream overhead. |
+| Radixor | `radixor[nn-no-default]` | 0.735 | 0.136 | 54.2 | 1.000 | Radixor dictionary-trained patch-command stemmer. |
+| Official Snowball direct (Java) | `snowballDirect[NORWEGIAN_NYNORSK]` | 1.312 | 0.175 | 96.7 | 1.785 | Official Snowball generated Java stemmer; direct API. |
+| Lucene SnowballFilter | `luceneSnowballFilter[NORWEGIAN_NYNORSK]` | 1.551 | 0.248 | 114.4 | 2.111 | Lucene TokenFilter path around Snowball; includes TokenStream overhead. |
 
 ## Interpretation Notes
 
@@ -85,18 +89,15 @@ also appeared in training. Parentheses show the observed split minimum–maximum
 
 ### Generalization conclusion
 
-- Median exactness on genuinely unseen changed forms moves from **51.191%**
-  at 10% training knowledge to **70.338%** at 90%, a measured
-  **+19.147 percentage-point** change for this dictionary.
-- Over the same endpoints, unseen all-form exactness changes by **+15.413 pp** and
-  preservation of unseen already-root forms changes by **+4.683 pp**. These separate
-  outcomes show whether the changed-form result coexists with preservation behavior.
+- Median exactness on genuinely unseen changed forms moves from **51.191%** at 10% training knowledge to **70.338%** at 90%, a measured **+19.147 percentage-point** change.
+- Unseen all-form exactness moves from **63.195%** at 10% training knowledge to **78.608%** at 90%, a measured **+15.413 percentage-point** change.
+- Preservation of unseen already-root forms moves from **90.470%** at 10% training knowledge to **95.153%** at 90%, a measured **+4.683 percentage-point** change.
 - The evidence establishes within-resource transfer across withheld dictionary families. It
   does not estimate unrelated domains, misspellings, arbitrary compounds, or external corpora.
 
 The complete ten-level table and split ranges remain in the
 [independent generalization report](../generalization.md); raw counters and provenance are in
-[`dictionary-generalization.csv`](../data/dictionary-generalization.csv). The
+[active machine-readable snapshot](../data/dictionary-generalization-2026-09-11.csv). The
 [frozen methodology](../reference/generalization-methodology.md) defines family-level
 splitting, unseen-surface leakage control, aggregation, and the limits of the claim.
 
@@ -189,7 +190,7 @@ The complete evidence is available in the [raw logical matrix](../data/edit-cost
 
 Runtime performance and linguistic grouping quality are independent dimensions. This section evaluates language `NN_NO` using the complete validated stemming-quality result matrix. Every distinct surface form is one evaluated item and can belong to several dictionary groups. Two forms are a positive pair when their group-membership sets intersect and a negative pair when those sets are disjoint. A pair shared through several groups is counted once. Exact equality with a predetermined lemma is not required.
 
-`ALL_WORDS` includes every valid group and its original forms. `LOWERCASE_GROUPS_ONLY` excludes an entire group when any Unicode code point is uppercase or titlecase; retained words are not lowercased or otherwise rewritten. This isolates case-handling effects without changing retained inputs. [Download the complete machine-readable result snapshot](../data/stemming-quality.csv).
+`ALL_WORDS` includes every valid group and its original forms. `LOWERCASE_GROUPS_ONLY` excludes an entire group when any Unicode code point is uppercase or titlecase; retained words are not lowercased or otherwise rewritten. This isolates case-handling effects without changing retained inputs. [Download the complete machine-readable result snapshot](../data/stemming-quality-2026-09-11.csv).
 
 ### Evaluation Scope and Key Findings
 
@@ -436,8 +437,8 @@ Standard ARI, homogeneity, completeness, V-measure, and NMI are not calculated: 
 
 ### Provenance
 
-- Authoritative source: `docs/benchmarks/data/stemming-quality.csv`
-- Source SHA-256: `85763189eab4d0fbb047c2d5d3554c66abf9732182bd0d8fd758d7aef680e66f`
+- Authoritative source: `docs/benchmarks/data/stemming-quality-2026-09-11.csv`
+- Source SHA-256: `24bddfeed06a60bb3eeed58e1bfc93aed46c1d32e7bebd293aec2dacfddfef5b`
 - Evaluation command: `./gradlew stemmingQuality --no-daemon`
 - Dictionary language: `NN_NO`
 - Processing modes: `ALL_WORDS`, `LOWERCASE_GROUPS_ONLY`

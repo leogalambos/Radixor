@@ -37,8 +37,10 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.zip.GZIPInputStream;
 
@@ -53,13 +55,13 @@ import org.egothor.stemmer.StemmerPatchTrieLoader;
 
 /**
  * Writes deterministic corpus and preferred patch-command counts for every
- * registered default model.
+ * registered user-facing model.
  *
  * <p>
  * This application performs setup-time analysis only; it does not publish or
- * interpret runtime performance. Optional model variants are excluded by
- * resolving every entry through
- * {@link StemmerModelRegistry#requireDefault(StemmerPatchTrieLoader.Language)}.
+ * interpret runtime performance. Models are selected by exact descriptor ID,
+ * including optional user-facing variants and excluding non-registered
+ * experimental candidates.
  * </p>
  */
 public final class BenchmarkCorpusReportApplication {
@@ -90,30 +92,28 @@ public final class BenchmarkCorpusReportApplication {
         }
 
         final StringBuilder csv = new StringBuilder(16_384);
-        csv.append("Language,Model ID,Model version,Model SHA-256,Dictionary rows,Total tokens,Already-root tokens,Changed tokens,")
-                .append("Speed timing tokens,All exact matches,Changed exact matches,Root preserved matches,")
+        csv.append("Language,Model ID,Model version,Model SHA-256,Dictionary rows,Distinct usable forms,Total tokens,Already-root tokens,Changed tokens,")
+                .append("Speed timing workload,Speed timing tokens,All exact matches,Changed exact matches,Root preserved matches,")
                 .append("Command class,Command count\n");
         final StemmerModelRegistry registry = StemmerModelRegistry.fromContextClassLoader();
-        for (StemmerPatchTrieLoader.Language language : StemmerPatchTrieLoader.Language.values()) {
-            appendLanguage(csv, registry, language);
+        for (StemmerModelDescriptor descriptor : registry.models()) {
+            appendModel(csv, descriptor);
         }
         Files.writeString(output, csv, StandardCharsets.UTF_8);
         System.out.println("Benchmark corpus report: " + output.toAbsolutePath());
     }
 
     /**
-     * Appends all command-class rows for one default model.
+     * Appends all command-class rows for one exact model.
      *
      * @param csv      destination
-     * @param registry discovered model registry
-     * @param language language to analyze
+     * @param descriptor exact registered model descriptor
      * @throws IOException if the model cannot be parsed or loaded
      */
-    private static void appendLanguage(final StringBuilder csv, final StemmerModelRegistry registry,
-            final StemmerPatchTrieLoader.Language language) throws IOException {
-        final StemmerModelDescriptor descriptor = registry.requireDefault(language);
-        final int dictionaryRows = countDictionaryRows(descriptor);
-        final LanguageBenchmarkCorpus.Corpus corpus = LanguageBenchmarkCorpus.createFullCorpus(language);
+    private static void appendModel(final StringBuilder csv, final StemmerModelDescriptor descriptor)
+            throws IOException {
+        final CorpusStatistics statistics = countDictionary(descriptor);
+        final LanguageBenchmarkCorpus.Corpus corpus = LanguageBenchmarkCorpus.createFullCorpus(descriptor.id());
         final String[] tokens = corpus.tokens();
         final String[] expectedRoots = corpus.expectedRoots();
         long alreadyRootTokens = 0;
@@ -123,9 +123,11 @@ public final class BenchmarkCorpusReportApplication {
             }
         }
         final long changedTokens = tokens.length - alreadyRootTokens;
-        final int timingTokens = LanguageBenchmarkCorpus.createChangedCorpus(language).tokens().length;
+        final LanguageBenchmarkCorpus.TimingCorpus timingCorpus =
+                LanguageBenchmarkCorpus.createTimingCorpus(descriptor.id());
+        final int timingTokens = timingCorpus.corpus().tokens().length;
 
-        final FrequencyTrie<CompiledPatchCommand> trie = StemmerPatchTrieLoader.loadCompiled(language, true,
+        final FrequencyTrie<CompiledPatchCommand> trie = StemmerPatchTrieLoader.loadCompiled(descriptor.id(), true,
                 ReductionMode.MERGE_SUBTREES_WITH_EQUIVALENT_RANKED_GET_ALL_RESULTS);
         final RadixorBenchmarkStemmer stemmer = new RadixorBenchmarkStemmer(trie);
         final Map<String, Long> commandCounts = new TreeMap<>();
@@ -149,14 +151,16 @@ public final class BenchmarkCorpusReportApplication {
             }
         }
         for (Map.Entry<String, Long> commandCount : commandCounts.entrySet()) {
-            csv.append(language).append(',')
+            csv.append(descriptor.language()).append(',')
                     .append(descriptor.id()).append(',')
                     .append(descriptor.version()).append(',')
                     .append(descriptor.sha256()).append(',')
-                    .append(dictionaryRows).append(',')
+                    .append(statistics.dictionaryRows()).append(',')
+                    .append(statistics.distinctUsableForms()).append(',')
                     .append(tokens.length).append(',')
                     .append(alreadyRootTokens).append(',')
                     .append(changedTokens).append(',')
+                    .append(timingCorpus.basis().reportValue()).append(',')
                     .append(timingTokens).append(',')
                     .append(allExactMatches).append(',')
                     .append(changedExactMatches).append(',')
@@ -167,13 +171,13 @@ public final class BenchmarkCorpusReportApplication {
     }
 
     /**
-     * Counts valid logical rows in one default dictionary.
+     * Counts valid logical rows and distinct case-preserved usable surface forms.
      *
      * @param descriptor model descriptor
-     * @return parsed dictionary-row count
+     * @return parsed dictionary statistics
      * @throws IOException if the dictionary cannot be opened or parsed
      */
-    private static int countDictionaryRows(final StemmerModelDescriptor descriptor) throws IOException {
+    private static CorpusStatistics countDictionary(final StemmerModelDescriptor descriptor) throws IOException {
         final ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
         final ClassLoader classLoader = contextClassLoader == null
                 ? BenchmarkCorpusReportApplication.class.getClassLoader()
@@ -184,12 +188,28 @@ public final class BenchmarkCorpusReportApplication {
                     + descriptor.resource() + ".");
         }
         final int[] rows = {0};
+        final Set<String> distinctForms = new HashSet<>();
         try (InputStream raw = resource;
                 GZIPInputStream gzip = new GZIPInputStream(raw);
                 BufferedReader reader = new BufferedReader(new InputStreamReader(gzip, StandardCharsets.UTF_8))) {
-            StemmerDictionaryParser.parse(reader, descriptor.resource(), CaseProcessingMode.LOWERCASE_WITH_LOCALE_ROOT,
-                    (stem, variants, lineNumber) -> rows[0] = Math.addExact(rows[0], 1));
+            StemmerDictionaryParser.parse(reader, descriptor.resource(), CaseProcessingMode.AS_IS,
+                    (stem, variants, lineNumber) -> {
+                        rows[0] = Math.addExact(rows[0], 1);
+                        distinctForms.add(stem);
+                        for (String variant : variants) {
+                            distinctForms.add(variant);
+                        }
+                    });
         }
-        return rows[0];
+        return new CorpusStatistics(rows[0], distinctForms.size());
+    }
+
+    /**
+     * Dictionary size statistics computed in one streaming parser pass.
+     *
+     * @param dictionaryRows parsed logical row count
+     * @param distinctUsableForms exact distinct case-preserved form count
+     */
+    private record CorpusStatistics(int dictionaryRows, int distinctUsableForms) {
     }
 }

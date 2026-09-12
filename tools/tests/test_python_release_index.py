@@ -60,13 +60,13 @@ def test_python_c_release_tag() -> None:
 
 def test_standard_model_release_version() -> None:
     result = subprocess.run(
-        ["bash", str(MODEL_VERSION_READER), str(MODEL_VERSION_FILE), "2.0.0"],
+        ["bash", str(MODEL_VERSION_READER), str(MODEL_VERSION_FILE), "3.0.0"],
         check=True,
         capture_output=True,
         text=True,
     )
 
-    assert result.stdout == "2.0.0\n"
+    assert result.stdout == "3.0.0\n"
 
 
 def test_standard_model_release_version_rejects_mismatch() -> None:
@@ -81,7 +81,7 @@ def test_standard_model_release_version_rejects_mismatch() -> None:
 
 
 def test_standard_model_release_version_rejects_invalid_files(tmp_path: Path) -> None:
-    for contents in ("", "2.0.0", "2.0.0\n\n", " 2.0.0\n", "1.0.2\n"):
+    for contents in ("", "3.0.0", "3.0.0\n\n", " 3.0.0\n", "2.0.2\n"):
         version_file = tmp_path / "models-version.txt"
         version_file.write_text(contents, encoding="utf-8")
         result = subprocess.run(

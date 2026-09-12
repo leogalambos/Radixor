@@ -1,7 +1,8 @@
 # Updating Java stemmer models
 
 This maintainer checklist covers the independently versioned Java model JARs,
-the two POM-only Java catalog artifacts (`radixor-models-standard` and
+the four POM-only Java catalog artifacts (`radixor-models-standard`,
+`radixor-models-extended`, `radixor-models-filtered`, and
 `radixor-models-bom`), and the separately packaged precompiled Python models.
 A model, the Java core, the Java model catalog, and the Python standard-model
 distribution have separate version sequences. Never change unrelated
@@ -9,7 +10,7 @@ distribution have separate version sequences. Never change unrelated
 
 In the commands below, replace `<model-id>`, `<model-version>`, and
 `<catalog-version>` with concrete values such as `us-uk-default`, `1.0.1`, and
-`2026.2`.
+`2026.3`.
 
 ## 1. Update one model
 
@@ -89,17 +90,19 @@ Wait for **Model Release** to publish
 `org.egothor:radixor-model-<model-id>:<model-version>` successfully before
 publishing the updated catalog.
 
-## 3. Update the standard metapackage and BOM
+## 3. Update the aggregate metapackages and BOM
 
 The standard metapackage and BOM share a catalog version, but their POM entries
 use each model's own version from its `model-version.txt`:
 
-- `radixor-models-standard` contains every default model as a runtime
-  dependency.
-- `radixor-models-bom` manages every default and optional model version.
+- `radixor-models-standard` contains the reviewed 31-model standard set.
+- `radixor-models-extended` contains the other 113 active models.
+- `radixor-models-filtered` contains the ten opt-in alternatives.
+- `radixor-models-bom` manages all 154 distributable individual model versions.
 
 To release updated catalog metadata, manually increment only
-`models/catalog-version.txt`. Use the next repository catalog version matching
+`models/catalog-version.txt`. Membership comes from the standard, active, and
+alternative property files. Use the next repository catalog version matching
 the `YYYY.N` format. Do not edit `models/standard/build.gradle` or
 `models/bom/build.gradle` merely to update model versions; both projects read
 the per-model version files automatically.
@@ -107,7 +110,8 @@ the per-model version files automatically.
 Build and verify the exact POM-only catalog bundle locally:
 
 ```bash
-./gradlew --no-daemon :models:standard:check :models:bom:check
+./gradlew --no-daemon :models:standard:check :models:extended:check \
+  :models:filtered:check :models:bom:check
 ./gradlew --no-daemon verifyModelCatalogReleaseCandidate
 ```
 
@@ -117,7 +121,7 @@ It also rejects JARs, dictionaries, Gradle module metadata, missing checksums,
 and unexpected publication files in the catalog bundle.
 
 Commit `models/catalog-version.txt` separately or together with the catalog
-release preparation. After the commit is merged into `main`, publish the two
+release preparation. After the commit is merged into `main`, publish the four
 metadata artifacts with:
 
 ```bash
@@ -126,20 +130,18 @@ git tag -a "models-catalog@<catalog-version>" \
 git push origin "models-catalog@<catalog-version>"
 ```
 
-The **Model Catalog Release** workflow publishes only
-`org.egothor:radixor-models-standard:<catalog-version>` and
-`org.egothor:radixor-models-bom:<catalog-version>`. It does not republish any
-individual model JAR.
+The **Model Catalog Release** workflow publishes the standard, extended,
+filtered, and BOM POMs. It does not republish any individual model JAR.
 
 ## 4. Rebuild and publish the precompiled Python models
 
-Every default Java dictionary is also a compiler input for the Python package
-`radixor-models-standard`. The package contains 20 generated `.rxc` files and
-excludes the optional `pl-pl-polimorf` model. A change to any default model
-therefore requires a new Python standard-model distribution.
+The exact 31 IDs in `models/standard-model-projects.properties` are compiler
+inputs for the Python package `radixor-models-standard`. The package excludes
+optional PoliMorf and all extended or filtered models. A change to a standard
+model therefore requires a new Python standard-model distribution.
 
 Manually set `python/models-standard-version.txt` to a new, unpublished stable
-`2.x.y` distribution version. This version belongs to the complete Python
+`3.x.y` distribution version. This version belongs to the complete Python
 model distribution; it is independent of the changed Java model version and
 the Java catalog version and does not have to use the same number. If the file
 already contains the intended unpublished version, do not increment it again.
@@ -202,7 +204,7 @@ Never move a tag that still exists remotely. If any artifact was published, use
 a new version because release artifacts are immutable.
 
 The `radixor` and `radixor-c` runtime distributions depend on
-`radixor-models-standard>=2.0,<3.0`; they do not need a new runtime release for
+`radixor-models-standard>=3.0,<4.0`; they do not need a new runtime release for
 a dictionary-only update. If a coordinated runtime release is planned for
 another reason, publish the Python standard-model distribution first because
 the runtime release workflows test against the exact version recorded in
@@ -227,10 +229,8 @@ consumers cannot resolve yet. Never publish the Python package from a commit
 that does not contain the intended Java model and catalog versions, because
 those identities are embedded in its generated manifest.
 
-The migration from the already published model 1.x line to 2.0.0 is a one-time
-exception to runtime-independent dictionary releases. Existing runtimes require
-`>=1,<2` and hard-code catalog `2026.1`, so 2.0.0 deliberately remains outside
-their dependency range. Publish `radixor-models-standard` 2.0.0 first, then
-release updated `radixor` and `radixor-c` runtimes that require `>=2,<3`. After
-that migration, later 2.x dictionary releases follow the normal five-step
-sequence above without a runtime release.
+The 3.0.0 release is a deliberate compatibility boundary because the standard
+distribution expands from 20 to 31 models. Publish `radixor-models-standard`
+3.0.0 first, then release updated `radixor` and `radixor-c` runtimes that require
+`>=3,<4`. Later 3.x dictionary releases follow the normal sequence above without
+a runtime release when their public runtime contracts are unchanged.

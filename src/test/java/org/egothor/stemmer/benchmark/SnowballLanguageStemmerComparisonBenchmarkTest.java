@@ -31,6 +31,7 @@
 package org.egothor.stemmer.benchmark;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.lang.reflect.Field;
@@ -59,13 +60,15 @@ final class SnowballLanguageStemmerComparisonBenchmarkTest {
         final Set<String> luceneCases = parameterValues(
                 SnowballLanguageStemmerComparisonBenchmark.SharedState.class);
         final Set<String> registeredCases = Arrays.stream(SnowballLanguageCase.values())
+                .filter(languageCase -> languageCase.speedMethod().startsWith("snowballDirect["))
                 .map(Enum::name)
                 .collect(Collectors.toUnmodifiableSet());
 
         assertEquals(registeredCases, directCases);
-        assertEquals(17, directCases.size());
-        assertEquals(14, luceneCases.size());
-        assertEquals(Set.of("CZECH", "PERSIAN", "POLISH"), difference(directCases, luceneCases));
+        assertEquals(28, directCases.size());
+        assertEquals(24, luceneCases.size());
+        assertEquals(Set.of("CZECH", "PERSIAN", "POLISH", "SESOTHO"),
+                difference(directCases, luceneCases));
 
         for (String luceneCase : luceneCases) {
             SnowballLanguageCase.valueOf(luceneCase).luceneSnowballName();
@@ -74,6 +77,19 @@ final class SnowballLanguageStemmerComparisonBenchmarkTest {
             assertThrows(IllegalStateException.class,
                     () -> SnowballLanguageCase.valueOf(directOnlyCase).luceneSnowballName());
         }
+    }
+
+    /** Verifies the machine-readable catalog aggregates every active direct case. */
+    @Test
+    void catalogChartsAndAggregatesAllSupportedDirectCases() {
+        final String catalog = SnowballLanguageCatalogApplication.render();
+
+        assertEquals(30, catalog.lines().count());
+        assertEquals(29, catalog.lines().filter(line -> line.endsWith(",true")).count());
+        assertTrue(catalog.contains("ARABIC,AR,ar-default,Arabic,snowballDirect[ARABIC],"
+                + "SNOWBALL_ARABIC_DIRECT,true,true,true,true"));
+        assertTrue(catalog.contains("ENGLISH,US_UK,us-uk-default,English,snowballEnglishPorter2,"
+                + "ENGLISH_SNOWBALL_PORTER2,true,true,true,true"));
     }
 
     /**

@@ -92,7 +92,7 @@ UniMorph and PoliMorf are not interchangeable quality datasets. They can differ 
 
 Model migration does not erase source obligations. Each migrated UniMorph artifact packages its
 language-specific notice with upstream attribution, Radixor modifications and contribution
-statement, ShareAlike terms, and the canonical CC BY-SA 3.0 URI. The original imports did not
+statement, applicable license terms, and the canonical license URI. The original imports did not
 record exact UniMorph commits, so descriptors use
 `source.revision=not-recorded-in-legacy-import` and disclose that fact. Future model imports must
 record an exact upstream revision and source-archive checksum.
@@ -133,9 +133,23 @@ git tag -a "model/pl-pl-polimorf@<model-version>" -m "Release Polish PoliMorf mo
 git tag -a "models-catalog@<catalog-version>" -m "Release Radixor model catalog <catalog-version>"
 ```
 
-A core tag publishes only the root `org.egothor:radixor` software artifacts, never model JARs. A model tag validates and publishes exactly its matching module, never core, standard, BOM, JMH, or the multilingual quality suite. A catalog tag publishes only BOM and standard aggregate metadata. Local model dry-run:
+A core tag publishes only the root `org.egothor:radixor` software artifacts, never model JARs. A model tag validates and publishes exactly its matching module, never core, aggregates, BOM, JMH, or the multilingual quality suite. A catalog tag publishes only the BOM and the standard, extended, and filtered aggregate metadata. Local model dry-run:
 
-The catalog artifacts are POM-only: `radixor-models-standard` carries runtime dependencies on the 20 defaults, while `radixor-models-bom` carries dependency-management constraints for all 21 individual models. Neither publishes an empty binary, sources, or Javadoc JAR. This Maven BOM is distinct from the root CycloneDX SBOM report under `build/reports/sbom/`.
+The catalog artifacts are POM-only: `radixor-models-standard` carries 31 runtime
+dependencies, `radixor-models-extended` carries the other 113 active models,
+`radixor-models-filtered` carries ten opt-in alternatives, and `radixor-models-bom`
+manages all 154 distributable individual models. None publishes an empty binary,
+sources, or Javadoc JAR. This Maven
+BOM is distinct from the root CycloneDX SBOM report under
+`build/reports/sbom/`.
+
+### Python standard-model 3.0 migration
+
+The Python standard-model distribution 3.0 expands the package from 20 to 31
+compiled models. Upgrade `radixor` and/or `radixor-c` together with
+`radixor-models-standard>=3.0,<4.0`. The compiled v7 format and existing aliases
+remain compatible; the major version changes because installed package contents
+and their provenance manifest changed.
 
 ```bash
 ./tools/parse-model-release-tag.sh "model/pl-pl-polimorf@<model-version>" .

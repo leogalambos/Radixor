@@ -1,0 +1,50 @@
+Radixor model-data notice
+
+Radixor-derived model data
+
+Copyright (C) 2026, Leo Galambos.
+
+Copyright and, where applicable, database rights are claimed in the
+Radixor-specific selection, verification, cleaning, normalization,
+grouping, deduplication, filtering, reformatting, metadata preparation,
+and packaging of this model, to the extent protected by applicable law.
+
+The underlying morphological data remains attributed to UniMorph and
+the upstream contributors identified in this notice.
+
+This derived model data, including Radixor's protectable contributions,
+is distributed under Creative Commons Attribution-ShareAlike 3.0.
+
+Model ID: kod-default
+Source project: UniMorph
+Official repository: https://github.com/unimorph/kod
+Selected upstream data:
+- kod [lemma-form-features], SHA-256 cba29eb89117afa8486e1f88117564fd1956861717ad981768cae8cc4bbe4810
+Source origin: Not stated in pinned repository evidence
+Attribution: UniMorph; Yustinus Ghanggo Ate, Garrett Nicolai
+License:
+Creative Commons Attribution-ShareAlike 3.0 Unported
+
+Canonical license URI: https://creativecommons.org/licenses/by-sa/3.0/
+Source revision: da840ac504da546c7bd84bf330314fe7e481c57d
+Revision status: recorded
+Repository evidence paths: README.md:evidence-00-README.md
+Repository evidence SHA-256: evidence-00-README.md:05f0a9dc18a8c3332f9624dcea46806a0588e6e3d84bc01f223107a6e15e2483
+Import policy: radixor-unimorph-import-v1
+Projection semantics: Each declared three-column source directly projects lemma and surface form.
+Conflict semantics: All valid lemma-form assignments are retained. Surface ambiguity is reported explicitly and is never resolved by dropping or overwriting an assignment.
+Import rows: source=462; accepted=462; rejected=0
+Rejection reasons: none
+Per-source import audit:
+- kod: source=462; accepted=462; rejected=0; added-groups=65; added-distinct-surfaces=524; added-source-pairs=459; added-output-forms=524; added-changed-pairs=459; intrinsic-ambiguous-surfaces=0; rejection-reasons=none
+Surface conflict audit: cross-source-assignments=0; cross-source-surfaces=0; intrinsic-ambiguous-surfaces=0
+Audited excluded upstream files:
+- kod.args: duplicate-args — Duplicate .args projection was audited and excluded; only bel.args, grc.args, and hye.args add an approved compatible projection.
+Generated dictionary: groups=65; forms=524
+Deterministic GZip SHA-256: 38c0562b78e339601d44d91cb4cb510039495710fe162d4797df2b973dcc0196
+
+Radixor modifications: Strict UTF-8 validation, NFC normalization, lowercase conversion, structural unsafe-character rejection, grouping by lemma, exact deduplication, deterministic ordering, and reproducible GZip packaging.
+
+Neither UniMorph nor any upstream contributor endorses Radixor.
+
+Upstream information verified: 2026-09-11

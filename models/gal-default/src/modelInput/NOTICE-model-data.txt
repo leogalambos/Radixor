@@ -1,0 +1,50 @@
+Radixor model-data notice
+
+Radixor-derived model data
+
+Copyright (C) 2026, Leo Galambos.
+
+Copyright and, where applicable, database rights are claimed in the
+Radixor-specific selection, verification, cleaning, normalization,
+grouping, deduplication, filtering, reformatting, metadata preparation,
+and packaging of this model, to the extent protected by applicable law.
+
+The underlying morphological data remains attributed to UniMorph and
+the upstream contributors identified in this notice.
+
+This derived model data, including Radixor's protectable contributions,
+is distributed under Creative Commons Attribution-ShareAlike 3.0.
+
+Model ID: gal-default
+Source project: UniMorph
+Official repository: https://github.com/unimorph/gal
+Selected upstream data:
+- gal [lemma-form-features], SHA-256 93945d193c6bb8ee3370446ba722f04a4c893c20082edd9ca735b677f135b1fc
+Source origin: Wikipedia
+Attribution: UniMorph
+License:
+Creative Commons Attribution-ShareAlike 3.0 Unported
+
+Canonical license URI: https://creativecommons.org/licenses/by-sa/3.0/
+Source revision: 7927b7b3b2379df0870c23fafb6481bda214c572
+Revision status: recorded
+Repository evidence paths: README.md:evidence-00-README.md
+Repository evidence SHA-256: evidence-00-README.md:c04984575298c35460e515344418f2a8b03459827fadec57f86ccfcac806a610
+Import policy: radixor-unimorph-import-v1
+Projection semantics: Each declared three-column source directly projects lemma and surface form.
+Conflict semantics: All valid lemma-form assignments are retained. Surface ambiguity is reported explicitly and is never resolved by dropping or overwriting an assignment.
+Import rows: source=37309; accepted=36801; rejected=508
+Rejection reasons: blank-row=508
+Per-source import audit:
+- gal: source=37309; accepted=36801; rejected=508; added-groups=486; added-distinct-surfaces=25436; added-source-pairs=26186; added-output-forms=26195; added-changed-pairs=25709; intrinsic-ambiguous-surfaces=752; rejection-reasons=blank-row=508
+Surface conflict audit: cross-source-assignments=0; cross-source-surfaces=0; intrinsic-ambiguous-surfaces=752
+Audited excluded upstream files:
+- gal.derivations: derivation — Derivational data is outside the inflectional stem-form model contract.
+Generated dictionary: groups=486; forms=26195
+Deterministic GZip SHA-256: d57ad44d8863d70fb6c28152de8e96b1480ae66b9bacd59a27f7f0e9aa44f566
+
+Radixor modifications: Strict UTF-8 validation, NFC normalization, lowercase conversion, structural unsafe-character rejection, grouping by lemma, exact deduplication, deterministic ordering, and reproducible GZip packaging.
+
+Neither UniMorph nor any upstream contributor endorses Radixor.
+
+Upstream information verified: 2026-09-11

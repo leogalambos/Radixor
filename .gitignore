@@ -130,3 +130,30 @@ htmlcov/
 # tempfile.NamedTemporaryFile-style dictionary scratch files must not survive
 # as repository candidates when a process is interrupted.
 /tmp*.gz
+
+# Privately retained model sources whose redistribution status is unresolved.
+# The exact temporary paths are used only by tools/run-prohibited-model-benchmarks.sh.
+/models.prohibited/
+/models/cy-gb-default/
+/models/eus-default/
+/models/fy-nl-default/
+/models/gd-gb-default/
+/models/hsb-default/
+/models/ka-ge-default/
+/models/kca-default/
+/models/ket-default/
+/models/kmr-default/
+/models/ko-kr-default/
+/models/oci-default/
+/models/om-et-default/
+/models/sah-default/
+/models/san-default/
+/models/sl-si-default/
+/models/slp-default/
+/models/tat-default/
+/models/tg-tj-default/
+/models/tk-tm-default/
+/models/tyv-default/
+/models/ur-pk-default/
+/models/vec-default/
+/models/vot-default/

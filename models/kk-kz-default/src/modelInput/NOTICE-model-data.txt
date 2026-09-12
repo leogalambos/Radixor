@@ -1,0 +1,55 @@
+Radixor model-data notice
+
+Radixor-derived model data
+
+Copyright (C) 2026, Leo Galambos.
+
+Copyright and, where applicable, database rights are claimed in the
+Radixor-specific selection, verification, cleaning, normalization,
+grouping, deduplication, filtering, reformatting, metadata preparation,
+and packaging of this model, to the extent protected by applicable law.
+
+The underlying morphological data remains attributed to UniMorph and
+the upstream contributors identified in this notice.
+
+This derived model data, including Radixor's protectable contributions,
+is distributed under Creative Commons Attribution-ShareAlike 3.0.
+
+Model ID: kk-kz-default
+Source project: UniMorph
+Official repository: https://github.com/unimorph/kaz
+Selected upstream data:
+- kaz [lemma-form-features], SHA-256 2474e66a4a112528c6b2cbeed498a75c87c4de5f36da276143e8fa90aa5a7488
+- kaz.noun.tsv [lemma-form-features], SHA-256 6ba352297a03423fdd21b3a1875d230c0f3c4153d5e33d1e5dcd37980efc0579
+- kaz.sm [lemma-form-features], SHA-256 af873ae1660456bcdf98846e3f82c47d3080a4412c15f5f48e40a8c38366b3b4
+Source origin: Wikipedia
+Attribution: UniMorph
+License:
+Creative Commons Attribution-ShareAlike 3.0 Unported
+
+Canonical license URI: https://creativecommons.org/licenses/by-sa/3.0/
+Source revision: 91885d96011368d91397033f4a8f8b0f9c2b60a0
+Revision status: recorded
+Repository evidence paths: README.md:evidence-00-README.md
+Repository evidence SHA-256: evidence-00-README.md:0bbe23c3ab3997b39804d8186337669779a05ad8136565c32383a2564cb1e99b
+Import policy: radixor-unimorph-import-v1
+Projection semantics: Each declared three-column source directly projects lemma and surface form.
+Conflict semantics: All valid lemma-form assignments are retained. Surface ambiguity is reported explicitly and is never resolved by dropping or overwriting an assignment.
+Import rows: source=40668; accepted=37098; rejected=3570
+Rejection reasons: blank-row=28;form-unicode-whitespace=1608;lemma-unicode-whitespace=1934
+Per-source import audit:
+- kaz: source=385; accepted=357; rejected=28; added-groups=26; added-distinct-surfaces=357; added-source-pairs=357; added-output-forms=357; added-changed-pairs=331; intrinsic-ambiguous-surfaces=0; rejection-reasons=blank-row=28
+- kaz.noun.tsv: source=28347; accepted=28333; rejected=14; added-groups=1624; added-distinct-surfaces=28065; added-source-pairs=28082; added-output-forms=28082; added-changed-pairs=26458; intrinsic-ambiguous-surfaces=17; rejection-reasons=lemma-unicode-whitespace=14
+- kaz.sm: source=11936; accepted=8408; rejected=3528; added-groups=94; added-distinct-surfaces=6801; added-source-pairs=6736; added-output-forms=6830; added-changed-pairs=6736; intrinsic-ambiguous-surfaces=22; rejection-reasons=form-unicode-whitespace=1608;lemma-unicode-whitespace=1920
+Surface conflict audit: cross-source-assignments=7; cross-source-surfaces=7; intrinsic-ambiguous-surfaces=39
+Audited excluded upstream files:
+- kaz.args: duplicate-args — Duplicate .args projection was audited and excluded; only bel.args, grc.args, and hye.args add an approved compatible projection.
+- kaz.derivations: derivation — Derivational data is outside the inflectional stem-form model contract.
+Generated dictionary: groups=1744; forms=35269
+Deterministic GZip SHA-256: 73216ba98bc3e3c240d626fc47f4dc3ff95148ba086c8a9e8d89bd6cfbdc648b
+
+Radixor modifications: Strict UTF-8 validation, NFC normalization, lowercase conversion, structural unsafe-character rejection, grouping by lemma, exact deduplication, deterministic ordering, and reproducible GZip packaging.
+
+Neither UniMorph nor any upstream contributor endorses Radixor.
+
+Upstream information verified: 2026-09-11

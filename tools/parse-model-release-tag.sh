@@ -35,9 +35,27 @@ set -euo pipefail
 tag="${1:-}"
 repository_root="${2:-.}"
 
-if [[ "${tag}" =~ ^model/([a-z]{2}(-[a-z]{2})?-[a-z0-9]+(-[a-z0-9]+)*)@([0-9]+\.[0-9]+\.[0-9]+([+-][0-9A-Za-z.-]+)?)$ ]]; then
+if [[ "${tag}" =~ ^model/([a-z]{2,3}(-[a-z]{2})?-[a-z0-9]+(-[a-z0-9]+)*)@([0-9]+\.[0-9]+\.[0-9]+([+-][0-9A-Za-z.-]+)?)$ ]]; then
     model_id="${BASH_REMATCH[1]}"
     model_version="${BASH_REMATCH[4]}"
+    if [[ ! "${model_version}" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)([+-][0-9A-Za-z.-]+)?$ ]]; then
+        echo "Invalid model version: ${model_version}" >&2
+        exit 2
+    fi
+    active_topology="${repository_root}/models/model-projects.properties"
+    alternative_topology="${repository_root}/models/alternative-model-projects.properties"
+    [[ -f "${active_topology}" ]] || { echo "Missing active model topology: ${active_topology}" >&2; exit 2; }
+    [[ -f "${alternative_topology}" ]] || {
+        echo "Missing alternative model topology: ${alternative_topology}" >&2
+        exit 2
+    }
+    if ! awk -F= -v id="${model_id}" '$1 == id { found = 1 } END { exit !found }' \
+            "${active_topology}" \
+            && ! awk -F= -v id="${model_id}" '$1 == id { found = 1 } END { exit !found }' \
+            "${alternative_topology}"; then
+        echo "Model ID is not distributable: ${model_id}" >&2
+        exit 2
+    fi
     module="${repository_root}/models/${model_id}"
     [[ -d "${module}" ]] || { echo "Unknown model module: models/${model_id}" >&2; exit 2; }
     [[ -f "${module}/model-version.txt" ]] || { echo "Missing model version: models/${model_id}/model-version.txt" >&2; exit 2; }

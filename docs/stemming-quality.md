@@ -6,7 +6,7 @@ JMH adapters, registries, third-party versions, language mappings, and preparati
 
 ## Language and adapter coverage
 
-The authoritative Radixor universe is the validated one-to-one reconciliation of every `StemmerPatchTrieLoader.Language` value with its registered default model descriptor. All 20 current values have exactly one documented default. Optional comparison models, including `pl-pl-polimorf`, are identified separately and never replace default benchmark rows. Third-party combinations come only from explicit JMH adapter metadata.
+The authoritative Radixor universe is the validated one-to-one reconciliation of every `StemmerPatchTrieLoader.Language` value with its registered default model descriptor. All 143 current values have exactly one documented default. Optional comparison models, including `pl-pl-polimorf`, are identified separately and never replace default benchmark rows. Third-party combinations come only from explicit JMH adapter metadata.
 
 Default Polish evaluation is therefore `Radixor` with model `pl-pl-unimorph`. A future PoliMorf evaluation is a distinct `Radixor` / `pl-pl-polimorf` row. Evaluation classpaths receive individual models through direct non-production Gradle dependencies; ordinary applications inherit none of them from the core.
 
@@ -84,4 +84,4 @@ Generated files under `build/reports/stemming-quality/` include `stemming-qualit
 ## Limitations
 
 These measurements evaluate agreement with the available dictionary grouping. They do not capture every semantic, morphological, downstream, or dataset-specific property. `ANY_CANDIDATE` is optimistic and may not be globally realizable. `ALL_CANDIDATES` measures an overlap graph rather than a partition. Language coverage must remain visible in cross-stemmer comparisons. No single published metric establishes universal superiority; multiple metrics and their correlations are provided for transparent scientific assessment.
-The checked-in quality snapshot is regenerated from all 20 current default models. The optional PoliMorf model is not part of it and must not be attributed to the default Polish results. See [Model Selection and Loading](model-selection-and-loading.md) and the generated [model catalog](stemmer-model-catalog.md).
+The checked-in active quality snapshot is regenerated from all 143 current default models. The optional PoliMorf model is not part of it and must not be attributed to the default Polish results. See [Model Selection and Loading](model-selection-and-loading.md) and the generated [model catalog](stemmer-model-catalog.md).

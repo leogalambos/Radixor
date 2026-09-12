@@ -143,7 +143,8 @@ public class PolishPolimorfStemmerComparisonBenchmark {
      * @throws IOException if Lucene token streaming fails
      */
     @Benchmark
-    public void polishLuceneMorfologikFilter(final SharedState sharedState, final LuceneFilterState filterState,
+    public void polishPolimorfLuceneMorfologikFilter(final SharedState sharedState,
+            final LuceneFilterState filterState,
             final Blackhole blackhole) throws IOException {
         filterState.polishMorfologik.run(sharedState.tokens, blackhole);
     }

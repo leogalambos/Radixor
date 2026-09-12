@@ -64,14 +64,17 @@ abstract class VerifyModelCatalogReleaseCandidateTask extends DefaultTask {
 
     @Input abstract Property<String> getCatalogVersion()
     @Input abstract MapProperty<String, String> getModelVersions()
-    @Input abstract ListProperty<String> getDefaultModelIds()
+    @Input abstract ListProperty<String> getStandardModelIds()
+    @Input abstract ListProperty<String> getExtendedModelIds()
+    @Input abstract ListProperty<String> getFilteredModelIds()
     @Input abstract ListProperty<String> getAllModelIds()
 
     /** Performs byte-level archive and semantic POM validation. */
     @TaskAction
     void verify() {
         final List<String> entries = verifyBundle(bundleFile.get().asFile, catalogVersion.get(),
-                modelVersions.get(), defaultModelIds.get(), allModelIds.get())
+                modelVersions.get(), standardModelIds.get(), extendedModelIds.get(),
+                filteredModelIds.get(), allModelIds.get())
         final File report = reportFile.get().asFile
         Files.createDirectories(report.toPath().parent)
         Files.writeString(report.toPath(), "Bundle: ${bundleFile.get().asFile.name}\nBytes: ${bundleFile.get().asFile.length()}\n"
@@ -79,7 +82,8 @@ abstract class VerifyModelCatalogReleaseCandidateTask extends DefaultTask {
     }
 
     static List<String> verifyBundle(final File bundle, final String catalogVersion,
-            final Map<String, String> modelVersions, final List<String> defaultIds, final List<String> allIds) {
+            final Map<String, String> modelVersions, final List<String> standardIds,
+            final List<String> extendedIds, final List<String> filteredIds, final List<String> allIds) {
         if (!bundle.isFile() || bundle.length() == 0L) {
             throw new GradleException("The model catalog Central bundle is missing or empty: ${bundle}.")
         }
@@ -96,14 +100,14 @@ abstract class VerifyModelCatalogReleaseCandidateTask extends DefaultTask {
         final List<String> entries = content.keySet().toList()
         final List<String> poms = entries.findAll { String entry -> entry.endsWith('.pom') }
         final List<String> unsupported = entries.findAll { String entry ->
-            !(entry ==~ 'org/egothor/radixor-models-(?:standard|bom)/[^/]+/'
-                    + 'radixor-models-(?:standard|bom)-[^/]+\\.pom(?:\\.asc)?(?:\\.(?:md5|sha1))?')
+            !(entry ==~ 'org/egothor/radixor-models-(?:standard|extended|filtered|bom)/[^/]+/'
+                    + 'radixor-models-(?:standard|extended|filtered|bom)-[^/]+\\.pom(?:\\.asc)?(?:\\.(?:md5|sha1))?')
         }
         if (!unsupported.isEmpty()) {
             throw new GradleException("The model catalog bundle contains unsupported files: ${unsupported}.")
         }
-        if (poms.size() != 2) {
-            throw new GradleException("The model catalog bundle must contain exactly two POM files; found ${poms.size()}.")
+        if (poms.size() != 4) {
+            throw new GradleException("The model catalog bundle must contain exactly four POM files; found ${poms.size()}.")
         }
         if (entries.any { String entry -> entry.endsWith('.jar') || entry.endsWith('/stemmer.gz')
                 || entry.endsWith('.module') || entry.contains('maven-metadata') || entry.contains('benchmark-pack') }) {
@@ -115,27 +119,46 @@ abstract class VerifyModelCatalogReleaseCandidateTask extends DefaultTask {
         }
 
         final String standardPath = expectedPomPath('standard', catalogVersion)
+        final String extendedPath = expectedPomPath('extended', catalogVersion)
+        final String filteredPath = expectedPomPath('filtered', catalogVersion)
         final String bomPath = expectedPomPath('bom', catalogVersion)
-        if (!content.containsKey(standardPath) || !content.containsKey(bomPath)) {
-            throw new GradleException('The bundle does not contain the expected standard and BOM coordinates.')
+        if (!content.containsKey(standardPath) || !content.containsKey(extendedPath)
+                || !content.containsKey(filteredPath) || !content.containsKey(bomPath)) {
+            throw new GradleException('The bundle does not contain the expected standard, extended, filtered, and BOM coordinates.')
         }
         final Element standard = parsePom(content.get(standardPath))
+        final Element extended = parsePom(content.get(extendedPath))
+        final Element filtered = parsePom(content.get(filteredPath))
         final Element bom = parsePom(content.get(bomPath))
         verifyCoordinates(standard, 'radixor-models-standard', catalogVersion)
+        verifyCoordinates(extended, 'radixor-models-extended', catalogVersion)
+        verifyCoordinates(filtered, 'radixor-models-filtered', catalogVersion)
         verifyCoordinates(bom, 'radixor-models-bom', catalogVersion)
 
         final Map<String, String> standardDependencies = dependencies(standard, false)
+        final Map<String, String> extendedDependencies = dependencies(extended, false)
+        final Map<String, String> filteredDependencies = dependencies(filtered, false)
         final Map<String, String> bomConstraints = dependencies(bom, true)
         final Set<String> expectedVersionIds = allIds as Set<String>
         if (modelVersions.keySet() != expectedVersionIds) {
             throw new GradleException('The catalog verifier requires exactly one recorded version for every model ID.')
         }
-        final Map<String, String> expectedDefaults = expectedDependencies(defaultIds, modelVersions)
+        final Map<String, String> expectedStandard = expectedDependencies(standardIds, modelVersions)
+        final Map<String, String> expectedExtended = expectedDependencies(extendedIds, modelVersions)
+        final Map<String, String> expectedFiltered = expectedDependencies(filteredIds, modelVersions)
         final Map<String, String> expectedAll = expectedDependencies(allIds, modelVersions)
-        if (standardDependencies != expectedDefaults
-                || standardDependencies.containsKey('org.egothor:radixor-model-pl-pl-polimorf')
-                || dependencyScopes(standard).any { String scope -> scope != 'runtime' }) {
-            throw new GradleException('The standard catalog POM must reference every default model at its recorded model version.')
+        final Set<String> standardCoordinates = standardDependencies.keySet()
+        final Set<String> extendedCoordinates = extendedDependencies.keySet()
+        final Set<String> filteredCoordinates = filteredDependencies.keySet()
+        if (!standardCoordinates.intersect(extendedCoordinates + filteredCoordinates).isEmpty()
+                || !extendedCoordinates.intersect(filteredCoordinates).isEmpty()
+                || standardDependencies != expectedStandard
+                || extendedDependencies != expectedExtended
+                || filteredDependencies != expectedFiltered
+                || [standard, extended, filtered].any { Element aggregate ->
+                    dependencyScopes(aggregate).any { String scope -> scope != 'runtime' }
+                }) {
+            throw new GradleException('The catalog aggregate POM partitions are incomplete, overlapping, or use incorrect model versions.')
         }
         if (!dependencies(bom, false).isEmpty()) {
             throw new GradleException('The model BOM must not introduce runtime dependencies.')

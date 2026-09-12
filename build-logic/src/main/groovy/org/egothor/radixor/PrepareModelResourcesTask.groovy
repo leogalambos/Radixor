@@ -56,7 +56,6 @@ abstract class PrepareModelResourcesTask extends DefaultTask {
     @InputFile @PathSensitive(PathSensitivity.RELATIVE) abstract RegularFileProperty getVersionFile()
     @Optional @InputFile @PathSensitive(PathSensitivity.RELATIVE) abstract RegularFileProperty getLicenseFile()
     @Optional @InputFile @PathSensitive(PathSensitivity.RELATIVE) abstract RegularFileProperty getNoticeFile()
-    @Input abstract Property<Boolean> getShareAlike()
     @Input abstract MapProperty<String, String> getDescriptorValues()
     @OutputDirectory abstract DirectoryProperty getGeneratedDirectory()
 
@@ -80,12 +79,13 @@ abstract class PrepareModelResourcesTask extends DefaultTask {
         Files.createDirectories(index.parent)
         Files.writeString(index, "META-INF/radixor/models/${id}.properties\n")
 
-        if (shareAlike.get()) {
+        if (noticeFile.isPresent()) {
             final Path notice = generated.resolve("META-INF/NOTICE/${id}-data.txt")
             Files.createDirectories(notice.parent)
             Files.copy(noticeFile.get().asFile.toPath(), notice, StandardCopyOption.REPLACE_EXISTING)
-        } else {
-            final Path license = generated.resolve('META-INF/LICENSES/PoliMorf-BSD-2-Clause.txt')
+        }
+        if (licenseFile.isPresent()) {
+            final Path license = generated.resolve("META-INF/LICENSES/${licenseFile.get().asFile.name}")
             Files.createDirectories(license.parent)
             Files.copy(licenseFile.get().asFile.toPath(), license, StandardCopyOption.REPLACE_EXISTING)
         }
@@ -102,7 +102,7 @@ model.default=${value['model.default']}
 model.format=radixor-dictionary-tsv-gzip
 model.formatVersion=1
 model.sha256=${checksum}
-model.rightToLeft=${['FA_IR', 'HE_IL', 'YI'].contains(value['model.language'])}
+model.rightToLeft=${value['model.rightToLeft']}
 model.caseProcessing=LOWERCASE_WITH_LOCALE_ROOT
 model.diacriticProcessing=AS_IS
 model.storeOriginal=true

@@ -1,0 +1,2 @@
+"Benchmark","Mode","Threads","Samples","Score","Score Error (99.9%)","Unit","Param: modelId"
+"org.egothor.stemmer.benchmark.ProhibitedModelStemmerBenchmark.snowballDirect","avgt",1,15,1934915.542953,179074.524741,"ns/op",eus-default

@@ -1,8 +1,12 @@
-# Hungarian Stemmer Benchmarks
+# Hungarian Stemmer Benchmarks <span class="dictionary-rating" role="img" aria-label="Relative dictionary size 5 of 5; 910,688 distinct usable word forms" title="Relative dictionary size 5 of 5; 910,688 distinct usable word forms">★★★★★</span>
 
 This page reports same-language stemming benchmarks for Hungarian. Accuracy is listed first because speed without root agreement is not enough to interpret stemmer quality.
 
-All speed values are environment-specific and were measured on the hardware and JVM listed in the [benchmark overview](../index.md). The command distribution, exact-root accuracy, and speed tables belong to the published 2026-08-25 Radixor/Java `4.2.0-6-g84e57fb` snapshot. Speed benchmark operations process changed dictionary tokens only. Accuracy uses the complete Radixor dictionary for the language.
+<!-- DICTIONARY-SIZE-RATING:START -->
+Dictionary size: <span class="dictionary-rating" role="img" aria-label="Relative dictionary size 5 of 5; 910,688 distinct usable word forms" title="Relative dictionary size 5 of 5; 910,688 distinct usable word forms">★★★★★</span>. The exact count is **910,688 distinct usable word forms** after parser-compatible filtering and exact, case-preserved deduplication. Stars rank dictionary size relative to all benchmarked dictionaries in five nearly equal groups; they do **not** measure linguistic quality or benchmark accuracy.
+<!-- DICTIONARY-SIZE-RATING:END -->
+
+All speed values are environment-specific and were measured on the hardware and JVM listed in the [benchmark overview](../index.md). The command distribution, exact-root accuracy, and speed tables belong to the published 2026-09-11 Radixor/Java `4.4.0` snapshot. Speed benchmark operations process changed tokens. Accuracy uses the complete Radixor dictionary for the language.
 
 <!-- BENCHMARK-EVIDENCE-MAP:START -->
 !!! info "How to read this page"
@@ -13,9 +17,9 @@ Runtime and exact-root agreement measure different properties. Light, minimal, p
 
 ## Dictionary Corpus
 
-| Model ID | Model version | Language | Dictionary rows | Complete quality tokens | Already-root tokens | Changed tokens | JMH timing tokens |
-| --- | --- | --- | ---: | ---: | ---: | ---: | ---: |
-| `hu-hu-default` | `1.0.0` | `HU_HU` | 19,406 | 935,713 | 38,775 | 896,938 | 896,938 |
+| Model ID | Model version | Language | Dictionary rows | Distinct usable forms | Complete quality tokens | Already-root tokens | Changed tokens | Timing workload | JMH timing tokens |
+| --- | --- | --- | ---: | ---: | ---: | ---: | ---: | --- | ---: |
+| `hu-hu-default` | `1.0.0` | `HU_HU` | 19,406 | 910,688 | 935,713 | 38,775 | 896,938 | changed tokens | 896,938 |
 
 ## Radixor Patch Command Distribution
 
@@ -37,19 +41,19 @@ Accuracy is computed from JMH auxiliary counters in the current report. The coun
 | --- | ---: | ---: | ---: | --- |
 | Radixor | 99.222% | 99.537% | 91.948% | Radixor dictionary-trained patch-command stemmer. |
 | Lucene SnowballFilter | 66.445% | 66.938% | 55.043% | Lucene TokenFilter integration path around the Snowball algorithm. |
-| Official Snowball direct | 66.445% | 66.938% | 55.043% | Official Snowball generated Java stemmer; rule-based suffix algorithm. |
+| Official Snowball direct (Java) | 66.445% | 66.938% | 55.043% | Official Snowball generated Java stemmer; rule-based suffix algorithm. |
 | Lucene HungarianLightStemFilter | 14.748% | 14.777% | 14.086% | Light suffix stemmer; intentionally narrower than Radixor's dictionary-trained transformation model. |
 
 ## Speed
 
-Speed uses JMH average time, 5 warmup iterations, 7 measurement iterations, 3 independent forks, and 1 thread. Relative factor is computed against the single Radixor row on this language page. Values below 1.000 are faster than that Radixor baseline; values above 1.000 are slower.
+Speed uses JMH average time, 3 warmup iterations, 5 measurement iterations, 3 independent forks, and 1 thread. Relative factor is computed against the single Radixor row on this language page. Values below 1.000 are faster than that Radixor baseline; values above 1.000 are slower.
 
 | Stemmer | Benchmark method | Score ms/op | Error ms | ns/token | Relative vs Radixor | Note |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
-| Radixor | `hungarianRadixor` | 55.040 | 0.877 | 61.4 | 1.000 | Radixor dictionary-trained patch-command stemmer. |
-| Lucene HungarianLightStemFilter | `hungarianLuceneHungarianLightStemFilter` | 88.848 | 3.854 | 99.1 | 1.614 | Light Hungarian suffix stemmer. |
-| Official Snowball direct | `snowballDirect[HUNGARIAN]` | 167.949 | 9.811 | 187.2 | 3.051 | Official Snowball generated Java stemmer; direct API. |
-| Lucene SnowballFilter | `luceneSnowballFilter[HUNGARIAN]` | 186.896 | 11.344 | 208.4 | 3.396 | Lucene TokenFilter path around Snowball; includes TokenStream overhead. |
+| Radixor | `radixor[hu-hu-default]` | 65.883 | 9.107 | 73.5 | 1.000 | Radixor dictionary-trained patch-command stemmer. |
+| Lucene HungarianLightStemFilter | `hungarianLuceneHungarianLightStemFilter` | 92.710 | 6.057 | 103.4 | 1.407 | Light Hungarian suffix stemmer. |
+| Official Snowball direct (Java) | `snowballDirect[HUNGARIAN]` | 173.558 | 15.453 | 193.5 | 2.634 | Official Snowball generated Java stemmer; direct API. |
+| Lucene SnowballFilter | `luceneSnowballFilter[HUNGARIAN]` | 199.175 | 20.436 | 222.1 | 3.023 | Lucene TokenFilter path around Snowball; includes TokenStream overhead. |
 
 ## Interpretation Notes
 
@@ -87,18 +91,15 @@ also appeared in training. Parentheses show the observed split minimum–maximum
 
 ### Generalization conclusion
 
-- Median exactness on genuinely unseen changed forms moves from **86.876%**
-  at 10% training knowledge to **92.203%** at 90%, a measured
-  **+5.327 percentage-point** change for this dictionary.
-- Over the same endpoints, unseen all-form exactness changes by **+5.450 pp** and
-  preservation of unseen already-root forms changes by **+9.360 pp**. These separate
-  outcomes show whether the changed-form result coexists with preservation behavior.
+- Median exactness on genuinely unseen changed forms moves from **86.876%** at 10% training knowledge to **92.203%** at 90%, a measured **+5.327 percentage-point** change.
+- Unseen all-form exactness moves from **86.761%** at 10% training knowledge to **92.212%** at 90%, a measured **+5.450 percentage-point** change.
+- Preservation of unseen already-root forms moves from **84.086%** at 10% training knowledge to **93.446%** at 90%, a measured **+9.360 percentage-point** change.
 - The evidence establishes within-resource transfer across withheld dictionary families. It
   does not estimate unrelated domains, misspellings, arbitrary compounds, or external corpora.
 
 The complete ten-level table and split ranges remain in the
 [independent generalization report](../generalization.md); raw counters and provenance are in
-[`dictionary-generalization.csv`](../data/dictionary-generalization.csv). The
+[active machine-readable snapshot](../data/dictionary-generalization-2026-09-11.csv). The
 [frozen methodology](../reference/generalization-methodology.md) defines family-level
 splitting, unseen-surface leakage control, aggregation, and the limits of the claim.
 
@@ -191,7 +192,7 @@ The complete evidence is available in the [raw logical matrix](../data/edit-cost
 
 Runtime performance and linguistic grouping quality are independent dimensions. This section evaluates language `HU_HU` using the complete validated stemming-quality result matrix. Every distinct surface form is one evaluated item and can belong to several dictionary groups. Two forms are a positive pair when their group-membership sets intersect and a negative pair when those sets are disjoint. A pair shared through several groups is counted once. Exact equality with a predetermined lemma is not required.
 
-`ALL_WORDS` includes every valid group and its original forms. `LOWERCASE_GROUPS_ONLY` excludes an entire group when any Unicode code point is uppercase or titlecase; retained words are not lowercased or otherwise rewritten. This isolates case-handling effects without changing retained inputs. [Download the complete machine-readable result snapshot](../data/stemming-quality.csv).
+`ALL_WORDS` includes every valid group and its original forms. `LOWERCASE_GROUPS_ONLY` excludes an entire group when any Unicode code point is uppercase or titlecase; retained words are not lowercased or otherwise rewritten. This isolates case-handling effects without changing retained inputs. [Download the complete machine-readable result snapshot](../data/stemming-quality-2026-09-11.csv).
 
 ### Evaluation Scope and Key Findings
 
@@ -446,8 +447,8 @@ Standard ARI, homogeneity, completeness, V-measure, and NMI are not calculated: 
 
 ### Provenance
 
-- Authoritative source: `docs/benchmarks/data/stemming-quality.csv`
-- Source SHA-256: `85763189eab4d0fbb047c2d5d3554c66abf9732182bd0d8fd758d7aef680e66f`
+- Authoritative source: `docs/benchmarks/data/stemming-quality-2026-09-11.csv`
+- Source SHA-256: `24bddfeed06a60bb3eeed58e1bfc93aed46c1d32e7bebd293aec2dacfddfef5b`
 - Evaluation command: `./gradlew stemmingQuality --no-daemon`
 - Dictionary language: `HU_HU`
 - Processing modes: `ALL_WORDS`, `LOWERCASE_GROUPS_ONLY`

@@ -1,8 +1,12 @@
-# German Stemmer Benchmarks
+# German Stemmer Benchmarks <span class="dictionary-rating" role="img" aria-label="Relative dictionary size 5 of 5; 277,266 distinct usable word forms" title="Relative dictionary size 5 of 5; 277,266 distinct usable word forms">★★★★★</span>
 
 This page reports same-language stemming benchmarks for German. Accuracy is listed first because speed without root agreement is not enough to interpret stemmer quality.
 
-All speed values are environment-specific and were measured on the hardware and JVM listed in the [benchmark overview](../index.md). The command distribution, exact-root accuracy, and speed tables belong to the published 2026-08-25 Radixor/Java `4.2.0-6-g84e57fb` snapshot. Speed benchmark operations process changed dictionary tokens only. Accuracy uses the complete Radixor dictionary for the language.
+<!-- DICTIONARY-SIZE-RATING:START -->
+Dictionary size: <span class="dictionary-rating" role="img" aria-label="Relative dictionary size 5 of 5; 277,266 distinct usable word forms" title="Relative dictionary size 5 of 5; 277,266 distinct usable word forms">★★★★★</span>. The exact count is **277,266 distinct usable word forms** after parser-compatible filtering and exact, case-preserved deduplication. Stars rank dictionary size relative to all benchmarked dictionaries in five nearly equal groups; they do **not** measure linguistic quality or benchmark accuracy.
+<!-- DICTIONARY-SIZE-RATING:END -->
+
+All speed values are environment-specific and were measured on the hardware and JVM listed in the [benchmark overview](../index.md). The command distribution, exact-root accuracy, and speed tables belong to the published 2026-09-11 Radixor/Java `4.4.0` snapshot. Speed benchmark operations process changed tokens. Accuracy uses the complete Radixor dictionary for the language.
 
 <!-- BENCHMARK-EVIDENCE-MAP:START -->
 !!! info "How to read this page"
@@ -13,9 +17,9 @@ Runtime and exact-root agreement measure different properties. Light, minimal, p
 
 ## Dictionary Corpus
 
-| Model ID | Model version | Language | Dictionary rows | Complete quality tokens | Already-root tokens | Changed tokens | JMH timing tokens |
-| --- | --- | --- | ---: | ---: | ---: | ---: | ---: |
-| `de-de-default` | `1.0.0` | `DE_DE` | 54,092 | 333,036 | 90,535 | 242,501 | 242,501 |
+| Model ID | Model version | Language | Dictionary rows | Distinct usable forms | Complete quality tokens | Already-root tokens | Changed tokens | Timing workload | JMH timing tokens |
+| --- | --- | --- | ---: | ---: | ---: | ---: | ---: | --- | ---: |
+| `de-de-default` | `1.0.0` | `DE_DE` | 54,092 | 277,266 | 333,036 | 90,535 | 242,501 | changed tokens | 242,501 |
 
 ## Radixor Patch Command Distribution
 
@@ -41,23 +45,23 @@ Accuracy is computed from JMH auxiliary counters in the current report. The coun
 | Lucene GermanLightStemFilter | 37.434% | 35.465% | 42.707% | Light suffix stemmer; intentionally narrower than Radixor's lexicon-trained transformation model. |
 | Lucene GermanMinimalStemFilter | 27.640% | 24.951% | 34.844% | Minimal suffix reducer; narrow baseline, not a full stemmer. |
 | Lucene SnowballFilter | 30.956% | 28.853% | 36.589% | Lucene TokenFilter integration path around the Snowball algorithm. |
-| Official Snowball direct | 30.483% | 29.030% | 34.376% | Official Snowball generated Java stemmer; rule-based suffix algorithm. |
+| Official Snowball direct (Java) | 30.483% | 29.030% | 34.376% | Official Snowball generated Java stemmer; rule-based suffix algorithm. |
 | Lucene GermanStemFilter | 21.559% | 19.312% | 27.576% | German Lucene stemming TokenFilter; broader than minimal/light variants. |
 
 ## Speed
 
-Speed uses JMH average time, 5 warmup iterations, 7 measurement iterations, 3 independent forks, and 1 thread. Relative factor is computed against the single Radixor row on this language page. Values below 1.000 are faster than that Radixor baseline; values above 1.000 are slower.
+Speed uses JMH average time, 3 warmup iterations, 5 measurement iterations, 3 independent forks, and 1 thread. Relative factor is computed against the single Radixor row on this language page. Values below 1.000 are faster than that Radixor baseline; values above 1.000 are slower.
 
 | Stemmer | Benchmark method | Score ms/op | Error ms | ns/token | Relative vs Radixor | Note |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
-| Radixor | `germanRadixor` | 36.523 | 1.174 | 150.6 | 1.000 | Radixor dictionary-trained patch-command stemmer. |
-| CISTEM | `germanCistem` | 289.327 | 8.094 | 1193.1 | 7.922 | Benchmark-only CISTEM implementation. |
-| Lucene HunspellStemFilter | `luceneHunspellStemFilter` | 276.775 | 22.204 | 1141.3 | 7.578 | Benchmark-only German Hunspell dictionary compared via Lucene HunspellStemFilter. |
-| Lucene GermanMinimalStemFilter | `germanLuceneGermanMinimalStemFilter` | 22.697 | 0.295 | 93.6 | 0.621 | Minimal German suffix reduction; narrow baseline. |
-| Lucene GermanLightStemFilter | `germanLuceneGermanLightStemFilter` | 23.477 | 0.264 | 96.8 | 0.643 | Light German suffix stemmer; narrower than Radixor's lexicon-trained transformation model. |
-| Lucene GermanStemFilter | `germanLuceneGermanStemFilter` | 67.524 | 0.851 | 278.4 | 1.849 | Older German stemming TokenFilter with normalization requirements. |
-| Lucene SnowballFilter | `luceneSnowballFilter[GERMAN]` | 104.691 | 3.041 | 431.7 | 2.866 | Lucene TokenFilter path around Snowball; includes TokenStream overhead. |
-| Official Snowball direct | `snowballDirect[GERMAN]` | 95.094 | 3.149 | 392.1 | 2.604 | Official Snowball generated Java stemmer; direct API. |
+| Radixor | `radixor[de-de-default]` | 45.882 | 3.967 | 189.2 | 1.000 | Radixor dictionary-trained patch-command stemmer. |
+| CISTEM | `germanCistem` | 296.652 | 6.437 | 1223.3 | 6.465 | Benchmark-only CISTEM implementation. |
+| Lucene HunspellStemFilter | `luceneHunspellStemFilter` | 315.302 | 48.761 | 1300.2 | 6.872 | Benchmark-only German Hunspell dictionary compared via Lucene HunspellStemFilter. |
+| Lucene GermanMinimalStemFilter | `germanLuceneGermanMinimalStemFilter` | 23.069 | 0.390 | 95.1 | 0.503 | Minimal German suffix reduction; narrow baseline. |
+| Lucene GermanLightStemFilter | `germanLuceneGermanLightStemFilter` | 23.770 | 0.569 | 98.0 | 0.518 | Light German suffix stemmer; narrower than Radixor's lexicon-trained transformation model. |
+| Lucene GermanStemFilter | `germanLuceneGermanStemFilter` | 67.521 | 0.982 | 278.4 | 1.472 | Older German stemming TokenFilter with normalization requirements. |
+| Lucene SnowballFilter | `luceneSnowballFilter[GERMAN]` | 105.967 | 4.323 | 437.0 | 2.310 | Lucene TokenFilter path around Snowball; includes TokenStream overhead. |
+| Official Snowball direct (Java) | `snowballDirect[GERMAN]` | 99.438 | 3.835 | 410.1 | 2.167 | Official Snowball generated Java stemmer; direct API. |
 
 ## Interpretation Notes
 
@@ -95,18 +99,15 @@ also appeared in training. Parentheses show the observed split minimum–maximum
 
 ### Generalization conclusion
 
-- Median exactness on genuinely unseen changed forms moves from **49.432%**
-  at 10% training knowledge to **59.108%** at 90%, a measured
-  **+9.676 percentage-point** change for this dictionary.
-- Over the same endpoints, unseen all-form exactness changes by **+8.042 pp** and
-  preservation of unseen already-root forms changes by **+6.967 pp**. These separate
-  outcomes show whether the changed-form result coexists with preservation behavior.
+- Median exactness on genuinely unseen changed forms moves from **49.432%** at 10% training knowledge to **59.108%** at 90%, a measured **+9.676 percentage-point** change.
+- Unseen all-form exactness moves from **59.280%** at 10% training knowledge to **67.322%** at 90%, a measured **+8.042 percentage-point** change.
+- Preservation of unseen already-root forms moves from **86.150%** at 10% training knowledge to **93.117%** at 90%, a measured **+6.967 percentage-point** change.
 - The evidence establishes within-resource transfer across withheld dictionary families. It
   does not estimate unrelated domains, misspellings, arbitrary compounds, or external corpora.
 
 The complete ten-level table and split ranges remain in the
 [independent generalization report](../generalization.md); raw counters and provenance are in
-[`dictionary-generalization.csv`](../data/dictionary-generalization.csv). The
+[active machine-readable snapshot](../data/dictionary-generalization-2026-09-11.csv). The
 [frozen methodology](../reference/generalization-methodology.md) defines family-level
 splitting, unseen-surface leakage control, aggregation, and the limits of the claim.
 
@@ -199,7 +200,7 @@ The complete evidence is available in the [raw logical matrix](../data/edit-cost
 
 Runtime performance and linguistic grouping quality are independent dimensions. This section evaluates language `DE_DE` using the complete validated stemming-quality result matrix. Every distinct surface form is one evaluated item and can belong to several dictionary groups. Two forms are a positive pair when their group-membership sets intersect and a negative pair when those sets are disjoint. A pair shared through several groups is counted once. Exact equality with a predetermined lemma is not required.
 
-`ALL_WORDS` includes every valid group and its original forms. `LOWERCASE_GROUPS_ONLY` excludes an entire group when any Unicode code point is uppercase or titlecase; retained words are not lowercased or otherwise rewritten. This isolates case-handling effects without changing retained inputs. [Download the complete machine-readable result snapshot](../data/stemming-quality.csv).
+`ALL_WORDS` includes every valid group and its original forms. `LOWERCASE_GROUPS_ONLY` excludes an entire group when any Unicode code point is uppercase or titlecase; retained words are not lowercased or otherwise rewritten. This isolates case-handling effects without changing retained inputs. [Download the complete machine-readable result snapshot](../data/stemming-quality-2026-09-11.csv).
 
 ### Evaluation Scope and Key Findings
 
@@ -500,8 +501,8 @@ Standard ARI, homogeneity, completeness, V-measure, and NMI are not calculated: 
 
 ### Provenance
 
-- Authoritative source: `docs/benchmarks/data/stemming-quality.csv`
-- Source SHA-256: `85763189eab4d0fbb047c2d5d3554c66abf9732182bd0d8fd758d7aef680e66f`
+- Authoritative source: `docs/benchmarks/data/stemming-quality-2026-09-11.csv`
+- Source SHA-256: `24bddfeed06a60bb3eeed58e1bfc93aed46c1d32e7bebd293aec2dacfddfef5b`
 - Evaluation command: `./gradlew stemmingQuality --no-daemon`
 - Dictionary language: `DE_DE`
 - Processing modes: `ALL_WORDS`, `LOWERCASE_GROUPS_ONLY`

@@ -58,9 +58,10 @@ import org.openjdk.jmh.infra.Blackhole;
  * that has a matching Snowball Java stemmer.
  *
  * <p>
- * Each benchmark operation processes the same changed-token Radixor
- * dictionary-derived language corpus, repeated only when the changed-token
- * resource contains fewer than 5,000 token fields. The direct Snowball method
+ * Each benchmark operation processes the same Radixor dictionary-derived
+ * timing corpus. Changed tokens are preferred; a root-only model uses its
+ * complete root-preservation corpus. Populations smaller than 5,000 token fields
+ * are repeated deterministically. The direct Snowball method
  * measures the isolated benchmark-only Snowball source. The Lucene
  * SnowballFilter method measures Lucene's TokenStream integration path,
  * including lower-case normalization and token attribute overhead.
@@ -81,9 +82,10 @@ public class SnowballLanguageStemmerComparisonBenchmark {
         /**
          * Language/algorithm case under comparison.
          */
-        @Param({ "DANISH", "DUTCH", "FINNISH", "FRENCH", "GERMAN", "HUNGARIAN", "ITALIAN",
-                "NORWEGIAN_BOKMAL", "NORWEGIAN_NYNORSK", "PORTUGUESE", "RUSSIAN", "SPANISH", "SWEDISH",
-                "YIDDISH" })
+        @Param({ "ARABIC", "ARMENIAN", "CATALAN", "DANISH", "DUTCH", "ESTONIAN", "FINNISH",
+                "FRENCH", "GERMAN", "GREEK", "HUNGARIAN", "INDONESIAN", "IRISH", "ITALIAN", "LITHUANIAN",
+                "NORWEGIAN_BOKMAL", "NORWEGIAN_NYNORSK", "PORTUGUESE", "ROMANIAN", "RUSSIAN", "SPANISH",
+                "SWEDISH", "TURKISH", "YIDDISH" })
         public String languageCaseName;
 
         /**
@@ -92,7 +94,7 @@ public class SnowballLanguageStemmerComparisonBenchmark {
         private SnowballLanguageCase languageCase;
 
         /**
-         * Shared deterministic changed-token dictionary corpus.
+         * Shared deterministic canonical timing corpus.
          */
         private String[] tokens;
 
@@ -120,7 +122,7 @@ public class SnowballLanguageStemmerComparisonBenchmark {
      * Shared corpus state for every official direct Snowball implementation.
      *
      * <p>
-     * Czech, Persian, and Polish are available in the official Snowball 3.1.0
+     * Czech, Persian, Polish, and Sesotho are available in the official Snowball 3.1.0
      * distribution but not through the Lucene SnowballFilter version used by
      * this project. Keeping the direct parameter domain separate prevents JMH
      * from constructing unsupported Lucene workloads.
@@ -132,9 +134,10 @@ public class SnowballLanguageStemmerComparisonBenchmark {
         /**
          * Language/algorithm case under comparison.
          */
-        @Param({ "CZECH", "DANISH", "DUTCH", "FINNISH", "FRENCH", "GERMAN", "HUNGARIAN", "ITALIAN",
-                "NORWEGIAN_BOKMAL", "NORWEGIAN_NYNORSK", "PERSIAN", "POLISH", "PORTUGUESE", "RUSSIAN",
-                "SPANISH", "SWEDISH", "YIDDISH" })
+        @Param({ "ARABIC", "ARMENIAN", "CATALAN", "CZECH", "DANISH", "DUTCH", "ESTONIAN",
+                "FINNISH", "FRENCH", "GERMAN", "GREEK", "HUNGARIAN", "INDONESIAN", "IRISH", "ITALIAN",
+                "LITHUANIAN", "NORWEGIAN_BOKMAL", "NORWEGIAN_NYNORSK", "PERSIAN", "POLISH", "PORTUGUESE",
+                "ROMANIAN", "RUSSIAN", "SESOTHO", "SPANISH", "SWEDISH", "TURKISH", "YIDDISH" })
         public String languageCaseName;
 
         /**
@@ -143,7 +146,7 @@ public class SnowballLanguageStemmerComparisonBenchmark {
         private SnowballLanguageCase languageCase;
 
         /**
-         * Shared deterministic changed-token dictionary corpus.
+         * Shared deterministic canonical timing corpus.
          */
         private String[] tokens;
 

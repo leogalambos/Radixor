@@ -31,14 +31,27 @@
 package org.egothor.stemmer.benchmark.generalization;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.egothor.stemmer.StemmerModelDescriptor;
+import org.egothor.stemmer.StemmerModelRegistry;
+import org.egothor.stemmer.StemmerPatchTrieLoader;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 /** Tests publication-critical model-byte integrity checks. */
 class DictionaryGeneralizationApplicationTest {
+    @TempDir
+    Path temporaryDirectory;
 
     @Test
     void acceptsMatchingResourceDigest() {
@@ -52,5 +65,36 @@ class DictionaryGeneralizationApplicationTest {
         final byte[] content = "radixor".getBytes(StandardCharsets.UTF_8);
         assertThrows(IllegalStateException.class, () -> DictionaryGeneralizationApplication.verifySha256(content,
                 "0000000000000000000000000000000000000000000000000000000000000000", "fixture"));
+    }
+
+    @Test
+    void selectsExactlyTopologyStandaloneDefaults() throws IOException {
+        final List<String> selected = new ArrayList<>();
+        for (String line : Files.readAllLines(Path.of("models/model-projects.properties"), StandardCharsets.UTF_8)) {
+            if (line.endsWith("=standalone")) {
+                selected.add(line.substring(0, line.indexOf('=')));
+            }
+        }
+        final Path selector = this.temporaryDirectory.resolve("standalone.txt");
+        Files.write(selector, selected, StandardCharsets.UTF_8);
+        final StemmerModelRegistry registry = StemmerModelRegistry.fromContextClassLoader();
+        final List<StemmerModelDescriptor> descriptors =
+                DictionaryGeneralizationApplication.selectedStandaloneDescriptors(registry, selector);
+
+        assertEquals(selected.size(), descriptors.size());
+        assertEquals(StemmerPatchTrieLoader.Language.values().length,
+                DictionaryGeneralizationApplication.allDefaultDescriptors(registry).size());
+        assertFalse(descriptors.stream().anyMatch(descriptor -> descriptor.id().equals("pl-pl-polimorf")));
+        assertFalse(descriptors.stream().anyMatch(descriptor -> descriptor.id().equals("us-uk-default")));
+    }
+
+    @Test
+    void selectsOneExactAuthoritativeDefaultAndRejectsOptionalModel() throws IOException {
+        final StemmerModelRegistry registry = StemmerModelRegistry.fromContextClassLoader();
+
+        assertEquals("ar-default",
+                DictionaryGeneralizationApplication.exactDefaultDescriptor(registry, "ar-default").id());
+        assertThrows(IllegalArgumentException.class,
+                () -> DictionaryGeneralizationApplication.exactDefaultDescriptor(registry, "pl-pl-polimorf"));
     }
 }

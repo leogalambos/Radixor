@@ -2,24 +2,33 @@
 
 ## Published quality snapshot
 
-- Machine-readable CSV: [stemming-quality.csv](../data/stemming-quality.csv)
-- SHA-256 record: [stemming-quality.sha256](../data/stemming-quality.sha256)
-- SHA-256: `85763189eab4d0fbb047c2d5d3554c66abf9732182bd0d8fd758d7aef680e66f`
-- Complete scenarios: 314
-- Authoritative language universe: 20 languages
-- Language-page scenarios: 314 across 20 benchmark pages
+- Active machine-readable CSV: [stemming-quality-2026-09-11.csv](../data/stemming-quality-2026-09-11.csv)
+- SHA-256 record: [stemming-quality-2026-09-11.sha256](../data/stemming-quality-2026-09-11.sha256)
+- SHA-256: `24bddfeed06a60bb3eeed58e1bfc93aed46c1d32e7bebd293aec2dacfddfef5b`
+- Complete scenarios: 1,094
+- Authoritative universe: 143 language defaults; optional PoliMorf is explicitly outside this snapshot
+- Historical archive: [stemming-quality.csv](../data/stemming-quality.csv), preserved byte-for-byte with SHA-256 `85763189eab4d0fbb047c2d5d3554c66abf9732182bd0d8fd758d7aef680e66f`
 
-The CSV contains the model ID, independent model version, descriptor SHA-256, raw pair counts, raw over/under numerators and denominators, candidate statistics, and relation metrics. Reserved partition-metric columns remain empty because the gold standard is an overlapping cover. Documentation is regenerated from this file rather than manually transcribed. Publication fails when any row uses a model other than the language's registered default.
+The CSV contains the model ID, independent model version, descriptor SHA-256, raw pair counts, raw over/under numerators and denominators, candidate statistics, and relation metrics. Reserved partition-metric columns remain empty because the gold standard is an overlapping cover. Documentation is regenerated from this file rather than manually transcribed. Publication fails when any row uses a model other than the language's registered default. Empty metric fields with zero denominators render as `n/a`; the raw counts remain published. `ANY_CANDIDATE` is an oracle-bound policy and has no coherent confusion matrix.
+
+The [active snapshot manifest](../data/active-snapshots.properties) selects the complete current
+performance campaign (corpus, exact-root accuracy, speed, both English coverage inputs, and the
+Python CSV/JSON pair),
+quality, generalization, its measured-source manifest, and the comparator catalog. A refresh adds
+dated files and changes the pointers; it never repurposes an archived file name.
 
 ## Published generalization snapshot
 
-- Machine-readable CSV: [dictionary-generalization.csv](../data/dictionary-generalization.csv)
-- SHA-256 record: [dictionary-generalization.sha256](../data/dictionary-generalization.sha256)
-- SHA-256: `e6479840b9307ae03bd0873e55f397811e975125d621a8b8716d4c1a166b3ff2`
-- Measured-source manifest: [dictionary-generalization-sources.sha256](../data/dictionary-generalization-sources.sha256)
-- Complete scenarios: 1,000
-- Matrix: 20 default models × 10 coverage levels × 5 frozen splits
-- Measured source identity: Radixor/Java `4.2.0-6-g84e57fb`
+- Active machine-readable CSV: [dictionary-generalization-2026-09-11.csv](../data/dictionary-generalization-2026-09-11.csv)
+- SHA-256 record: [dictionary-generalization-2026-09-11.sha256](../data/dictionary-generalization-2026-09-11.sha256)
+- SHA-256: `187a9fe7b7bb292ac8d36b43784dc63a6e6e749942e86f20e7cb26364b7ea8d5`
+- Continuation measured-source manifest: [dictionary-generalization-2026-09-11-sources.txt](../data/dictionary-generalization-2026-09-11-sources.txt)
+- Continuation source-manifest checksum: [dictionary-generalization-2026-09-11-sources.sha256](../data/dictionary-generalization-2026-09-11-sources.sha256), SHA-256 `952399251517793ae381b419c7c917e9ea78bfe69b03db37b6be89173f8983fa`
+- Complete scenarios: 7,150
+- Matrix: 143 default models × 10 coverage levels × 5 frozen splits
+- Measured source identities: the archived 20-language Radixor/Java `4.2.0-6-g84e57fb` campaign plus the separately recorded 123-language `4.4.0` continuation
+- Historical archive: [dictionary-generalization.csv](../data/dictionary-generalization.csv), preserved byte-for-byte with SHA-256 `e6479840b9307ae03bd0873e55f397811e975125d621a8b8716d4c1a166b3ff2`
+- Historical measured-source manifest: [dictionary-generalization-sources.sha256](../data/dictionary-generalization-sources.sha256)
 
 This CSV retains integer numerators and denominators for complete-dictionary,
 withheld-row, and unseen-surface scopes. It also records selected and total rows,
@@ -27,10 +36,10 @@ overlap exclusions, split seed, protocol version, and exact model provenance.
 The [generalization methodology](generalization-methodology.md) defines the
 frozen split and the limits of the claim.
 
-The accompanying manifest records the byte identity of the generator and the
-Java implementation files that determine trie construction, traversal, patch
-encoding, and lookup. The base revision and measured source state are retained
-instead of inferring a clean release tag for this experiment.
+The two campaign-specific manifests record the byte identity of the generator and the Java
+implementation files that determine trie construction, traversal, patch encoding, and lookup.
+Every row retains its campaign's base revision and measured source state; the active snapshot does
+not infer a clean release tag for the pre-release continuation.
 
 ## Published edit-cost snapshot
 
@@ -54,13 +63,20 @@ The Java comparison tables, English coverage curve, Python runtime page, landing
 and technology summary are regenerated from the dated inputs below rather than from disposable
 files under `build/reports/`:
 
-- [Java corpus and command report](../data/java-benchmark-corpora-2026-08-25.csv)
-- [Java exact-root report](../data/java-stemmer-accuracy-2026-08-25.csv)
-- [Java speed report](../data/java-stemmer-speed-2026-08-25.csv)
-- [English coverage accuracy report](../data/java-english-coverage-accuracy-2026-08-25.csv)
-- [English coverage speed report](../data/java-english-coverage-speed-2026-08-25.csv)
-- [Python all-language batch CSV](../data/python-all-languages-batch-2026-08-25.csv)
-- [Python all-language provenance JSON](../data/python-all-languages-batch-2026-08-25.json)
+- [Current Java corpus and command report](../data/java-benchmark-corpora-2026-09-11.csv)
+- [Current Java exact-root report](../data/java-stemmer-accuracy-2026-09-11.csv)
+- [Current Java speed report](../data/java-stemmer-speed-2026-09-11.csv)
+- [Current English coverage accuracy report](../data/java-english-coverage-accuracy-2026-09-11.csv)
+- [Current English coverage speed report](../data/java-english-coverage-speed-2026-09-11.csv)
+- [Current Python all-language batch CSV](../data/python-all-languages-batch-2026-09-11.csv)
+- [Current Python all-language provenance JSON](../data/python-all-languages-batch-2026-09-11.json)
+- [Previous Java corpus and command report](../data/java-benchmark-corpora-2026-08-25.csv)
+- [Previous Java exact-root report](../data/java-stemmer-accuracy-2026-08-25.csv)
+- [Previous Java speed report](../data/java-stemmer-speed-2026-08-25.csv)
+- [Previous English coverage accuracy report](../data/java-english-coverage-accuracy-2026-08-25.csv)
+- [Previous English coverage speed report](../data/java-english-coverage-speed-2026-08-25.csv)
+- [Previous Python all-language batch CSV](../data/python-all-languages-batch-2026-08-25.csv)
+- [Previous Python all-language provenance JSON](../data/python-all-languages-batch-2026-08-25.json)
 - [SHA-256 manifest](../data/performance-snapshots.sha256)
 
 The Python JSON retains the measured environment, parameters, and detailed result provenance.
@@ -76,12 +92,14 @@ these checked-in inputs and verifies every checksum in the manifest.
 ./gradlew --no-daemon publishStemmingQualityDocumentation \
     verifyStemmingQualityDocumentation
 ./gradlew --no-daemon \
-    -PdictionaryGeneralizationReleaseVersion=4.2.0-6-g84e57fb \
-    dictionaryGeneralization
+    -PdictionaryGeneralizationReleaseVersion=4.4.0 \
+    dictionaryGeneralizationStandalone
+./gradlew --no-daemon mergeDictionaryGeneralizationSnapshots \
+    publishDictionaryGeneralizationDocumentation
 python3 tools/update-generalization-documentation.py \
-    build/reports/generalization/dictionary-generalization.csv docs update
-python3 tools/update-generalization-documentation.py \
-    docs/benchmarks/data/dictionary-generalization.csv docs verify
+    docs/benchmarks/data/dictionary-generalization-2026-09-11.csv docs update \
+    --corpus docs/benchmarks/data/java-benchmark-corpora-2026-09-10.csv \
+    --snapshot-name dictionary-generalization-2026-09-11.csv
 ./gradlew --no-daemon \
     -PdictionaryGeneralizationReleaseVersion=4.2.0-6-g84e57fb \
     editCostSensitivity
@@ -90,49 +108,66 @@ python3 tools/update-edit-cost-documentation.py \
 python3 tools/update-edit-cost-documentation.py \
     docs/benchmarks/data/edit-cost-sensitivity.csv.gz docs verify
 ./gradlew --no-daemon benchmarkCorpusReport writeJmhRuntimeClasspath
-tools/run-published-accuracy-benchmarks.sh 2026-08-25
-tools/run-published-speed-benchmarks.sh 2026-08-25 4.2.0-6-g84e57fb
+tools/run-published-accuracy-benchmarks.sh 2026-09-11
+tools/run-published-speed-benchmarks.sh 2026-09-11 4.4.0
 ./gradlew --no-daemon pythonBenchmarkAllLanguagesBatch
 cp build/reports/jmh/benchmark-corpora.csv \
-    docs/benchmarks/data/java-benchmark-corpora-2026-08-25.csv
-cp build/reports/jmh/stemmer-accuracy-2026-08-25.csv \
-    docs/benchmarks/data/java-stemmer-accuracy-2026-08-25.csv
-cp build/reports/jmh/stemmer-speed-2026-08-25.csv \
-    docs/benchmarks/data/java-stemmer-speed-2026-08-25.csv
-cp build/reports/jmh/english-coverage-accuracy-2026-08-25.csv \
-    docs/benchmarks/data/java-english-coverage-accuracy-2026-08-25.csv
-cp build/reports/jmh/english-coverage-speed-2026-08-25.csv \
-    docs/benchmarks/data/java-english-coverage-speed-2026-08-25.csv
+    docs/benchmarks/data/java-benchmark-corpora-2026-09-11.csv
+cp build/reports/jmh/stemmer-accuracy-2026-09-11.csv \
+    docs/benchmarks/data/java-stemmer-accuracy-2026-09-11.csv
+cp build/reports/jmh/stemmer-speed-2026-09-11.csv \
+    docs/benchmarks/data/java-stemmer-speed-2026-09-11.csv
+cp build/reports/jmh/english-coverage-accuracy-2026-09-11.csv \
+    docs/benchmarks/data/java-english-coverage-accuracy-2026-09-11.csv
+cp build/reports/jmh/english-coverage-speed-2026-09-11.csv \
+    docs/benchmarks/data/java-english-coverage-speed-2026-09-11.csv
 cp build/reports/python-benchmarks/all-languages-batch.csv \
-    docs/benchmarks/data/python-all-languages-batch-2026-08-25.csv
+    docs/benchmarks/data/python-all-languages-batch-2026-09-11.csv
 cp build/reports/python-benchmarks/all-languages-batch.json \
-    docs/benchmarks/data/python-all-languages-batch-2026-08-25.json
+    docs/benchmarks/data/python-all-languages-batch-2026-09-11.json
 sed -i "s#${PWD}#<repository>#g" \
-    docs/benchmarks/data/python-all-languages-batch-2026-08-25.json
+    docs/benchmarks/data/python-all-languages-batch-2026-09-11.json
 (cd docs/benchmarks/data && sha256sum \
     java-benchmark-corpora-2026-08-25.csv \
     java-stemmer-accuracy-2026-08-25.csv \
     java-stemmer-speed-2026-08-25.csv \
     java-english-coverage-accuracy-2026-08-25.csv \
     java-english-coverage-speed-2026-08-25.csv \
+    java-benchmark-corpora-2026-09-10.csv \
+    java-stemmer-accuracy-2026-09-10.csv \
+    java-stemmer-speed-2026-09-10.csv \
+    java-english-coverage-accuracy-2026-09-10.csv \
+    java-english-coverage-speed-2026-09-10.csv \
+    java-benchmark-corpora-2026-09-11.csv \
+    java-stemmer-accuracy-2026-09-11.csv \
+    java-stemmer-speed-2026-09-11.csv \
+    java-english-coverage-accuracy-2026-09-11.csv \
+    java-english-coverage-speed-2026-09-11.csv \
     python-all-languages-batch-2026-08-25.csv \
     python-all-languages-batch-2026-08-25.json \
+    python-all-languages-batch-2026-09-11.csv \
+    python-all-languages-batch-2026-09-11.json \
     > performance-snapshots.sha256)
 python3 tools/update-benchmark-documentation.py \
-    --corpus docs/benchmarks/data/java-benchmark-corpora-2026-08-25.csv \
-    --accuracy docs/benchmarks/data/java-stemmer-accuracy-2026-08-25.csv \
-    --speed docs/benchmarks/data/java-stemmer-speed-2026-08-25.csv \
-    --coverage-accuracy docs/benchmarks/data/java-english-coverage-accuracy-2026-08-25.csv \
-    --coverage-speed docs/benchmarks/data/java-english-coverage-speed-2026-08-25.csv \
-    --date 2026-08-25 \
-    --release-version 4.2.0-6-g84e57fb \
+    --corpus docs/benchmarks/data/java-benchmark-corpora-2026-09-11.csv \
+    --accuracy docs/benchmarks/data/java-stemmer-accuracy-2026-09-11.csv \
+    --speed docs/benchmarks/data/java-stemmer-speed-2026-09-11.csv \
+    --coverage-accuracy docs/benchmarks/data/java-english-coverage-accuracy-2026-09-11.csv \
+    --coverage-speed docs/benchmarks/data/java-english-coverage-speed-2026-09-11.csv \
+    --quality docs/benchmarks/data/stemming-quality-2026-09-11.csv \
+    --snowball-catalog docs/benchmarks/data/snowball-language-cases.csv \
+    --date 2026-09-11 \
+    --release-version 4.4.0 \
     --mode update
 python3 tools/update-python-benchmark-documentation.py \
-    --csv docs/benchmarks/data/python-all-languages-batch-2026-08-25.csv \
-    --json docs/benchmarks/data/python-all-languages-batch-2026-08-25.json \
-    --date 2026-08-25 \
-    --release-version 4.2.1 \
-    --base-commit 84e57fb \
+    --csv docs/benchmarks/data/python-all-languages-batch-2026-09-11.csv \
+    --json docs/benchmarks/data/python-all-languages-batch-2026-09-11.json \
+    --quality docs/benchmarks/data/stemming-quality-2026-09-11.csv \
+    --geography docs/benchmarks/data/homepage-language-geography.csv \
+    --date 2026-09-11 \
+    --release-version 4.4.0 \
+    --model-package-version 3.0.0 \
+    --base-commit 14f61be \
     --mode update
 ./gradlew --no-daemon verifyPublishedPerformanceSnapshotChecksums \
     verifyPublishedJavaBenchmarkDocumentation \
@@ -157,7 +192,7 @@ the checked-in catalog and must never rewrite it ad hoc.
 
 Audit mode is enabled with `-PstemmingQualityAudit=true`. Language, stemmer, dictionary-mode, output-policy, and ranking filters are documented on the central [stemming-quality page](../../stemming-quality.md). Filtered reports use separate filenames and cannot be accepted as publication sources.
 
-`publishStemmingQualityDocumentation` validates the complete build CSV, copies a versioned documentation snapshot, and replaces only marked generated sections. `verifyStemmingQualityDocumentation` re-renders from the checked-in snapshot and fails on changed values, ordering, missing pages, duplicate keys, arithmetic inconsistencies, policy violations, or stale sections.
+`publishStemmingQualityDocumentation` validates the complete build CSV, copies it to a new dated documentation snapshot, updates the active pointer, and replaces only marked generated sections. It never overwrites the historical `stemming-quality.csv`. `verifyStemmingQualityDocumentation` re-renders from the active checked-in snapshot and fails on changed values, ordering, missing pages, duplicate keys, arithmetic inconsistencies, policy violations, or stale sections.
 
 The staged site under `build/` is disposable output. The canonical model catalog is the reviewed,
 checked-in `docs/stemmer-model-catalog.md`; the staged copy must remain identical to it.
@@ -181,10 +216,11 @@ not recorded for the legacy UniMorph imports; that limitation is disclosed with
 upstream revision and source-archive checksum. This reproducibility limitation does not replace or
 weaken the packaged license and attribution requirements.
 
-Each UniMorph-derived model artifact carries its own notice with the canonical CC BY-SA 3.0 URI,
-upstream attribution, transformations, ShareAlike statement, and Leo Galambos contribution notice.
-The full CC legal text is not duplicated or presented as a root-project license. PoliMorf retains
-its separately packaged BSD-2-Clause license.
+Each UniMorph-derived model artifact carries its own notice with the exact audited license URI,
+upstream attribution, transformations, applicable distribution statement, and Leo Galambos
+contribution notice. Most are CC BY-SA 3.0; CC BY-SA 4.0, CC BY 4.0, and LGPLLR exceptions are
+identified exactly. Khaling additionally packages the canonical LGPLLR text and legible dictionary
+form. PoliMorf retains its separately packaged BSD-2-Clause license.
 
 For a future full PoliMorf measurement, also record the startup heap separately from benchmark parameters. Complete runtime construction is currently verified with a dedicated 6 GiB maximum heap; this limit is neither a retained-trie measurement nor a setting applied to ordinary JMH runs.
 
@@ -196,15 +232,72 @@ The current accuracy, speed, and coverage commands are:
 
 ```bash
 ./gradlew --no-daemon benchmarkCorpusReport writeJmhRuntimeClasspath
-tools/run-published-accuracy-benchmarks.sh 2026-08-25
-tools/run-published-speed-benchmarks.sh 2026-08-25 4.2.0-6-g84e57fb
+tools/run-published-accuracy-benchmarks.sh 2026-09-10
+tools/run-published-speed-benchmarks.sh 2026-09-10 4.4.0
 ```
 
-The speed runner refuses to start unless every CPU uses the `performance` governor, materializes the exact selected benchmark list, rejects quality/Polimorf/gold-standard methods, and requires the Hebrew speed path. It records hardware, JVM, source-state, JAR, classpath, corpus, quality, load, temperature, and governor provenance before running. The accuracy runner evaluates all four exact-root benchmark classes and verifies that every new Snowball 3.1.0 candidate exposes all six accuracy counters. The exact JMH configuration is listed in [Environment and reports](environment.md). Quality and performance reports are separate datasets and are not combined into an undocumented scalar.
+The speed runner refuses to start unless every CPU uses the `performance` governor, materializes the exact selected benchmark list, and rejects quality, gold-standard, and internal microbenchmark methods. It validates that the parameterized Radixor method covers all 144 user-facing model IDs and selects only the approved same-language comparator paths, including the separately identified optional PoliMorf comparator. It records hardware, JVM, source state, executable JAR, the complete runtime-classpath content manifest, corpus, quality, load, temperature, and governor provenance. After the main CSV passes model-coverage validation, the runner also records its SHA-256 before the coverage run. The accuracy runner evaluates the exact-root benchmark suite and verifies the complete counter rows for every selected Snowball 3.1.0 candidate. The exact JMH configuration is listed in [Environment and reports](environment.md). Quality and performance reports are separate datasets and are not combined into an undocumented scalar.
+
+## Prohibited-model documentation benchmark
+
+Prohibited dictionaries are not part of the public benchmark classpath or the
+supported-model campaign above. They can be measured only from a locally
+available, complete `models.prohibited/` store by the closed wrapper:
+
+```bash
+tools/run-prohibited-model-benchmarks.sh prepare 2026-09-11 4.4.0
+tools/run-prohibited-model-benchmarks.sh corpus 2026-09-11 4.4.0
+tools/run-prohibited-model-benchmarks.sh quality 2026-09-11 4.4.0
+tools/run-prohibited-model-benchmarks.sh generalization 2026-09-11 4.4.0
+tools/run-prohibited-model-benchmarks.sh speed 2026-09-11 4.4.0
+tools/run-prohibited-model-benchmarks.sh snowball 2026-09-11 4.4.0
+```
+
+Each invocation takes an exclusive lock, recovers a stale verified stage if
+necessary, checks the closed quarantine ID and source-hash manifests, stages
+the private directories, enables the internal Gradle include property, and
+restores the directories in reverse order while preserving the command exit
+status. Only private compile/resource/JAR prerequisites are enabled. The speed
+speed phases keep the canonical 3 warmup iterations, 5 measured iterations, 3 forks,
+1 thread, and 1-second durations. Reports and runtime/source manifests remain
+under `build/reports/prohibited-models/<date>/`; they never feed release tasks.
+The `snowball` phase derives the exact comparator cohort from the guarded Java
+authority; Snowball 3.1.0 currently contributes Basque, while it has no exact
+Welsh or Slovenian algorithm.
+
+After the base and comparator reports validate, the documentation-only publication command is:
+
+```bash
+python3 tools/update-prohibited-benchmark-documentation.py \
+    --active-corpus docs/benchmarks/data/java-benchmark-corpora-2026-09-11.csv \
+    --corpus build/reports/prohibited-models/2026-09-11/prohibited-benchmark-corpora-2026-09-11.csv \
+    --quality build/reports/prohibited-models/2026-09-11/prohibited-stemming-quality-2026-09-11.csv \
+    --generalization build/reports/prohibited-models/2026-09-11/prohibited-dictionary-generalization-2026-09-11.csv \
+    --speed build/reports/prohibited-models/2026-09-11/prohibited-stemmer-speed-2026-09-11.csv \
+    --provenance build/reports/prohibited-models/2026-09-11/provenance.txt \
+    --source-hashes build/reports/prohibited-models/2026-09-11/prohibited-source-inputs.sha256 \
+    --runtime-classpath build/reports/prohibited-models/2026-09-11/runtime-classpath-content.sha256 \
+    --model-manifest build/reports/prohibited-models/2026-09-11/models.tsv \
+    --comparator-catalog build/reports/prohibited-models/2026-09-11/prohibited-snowball-cases-2026-09-11.tsv \
+    --snowball-accuracy build/reports/prohibited-models/2026-09-11/prohibited-snowball-accuracy-2026-09-11.csv \
+    --snowball-quality build/reports/prohibited-models/2026-09-11/prohibited-snowball-quality-2026-09-11.csv \
+    --snowball-speed build/reports/prohibited-models/2026-09-11/prohibited-snowball-speed-2026-09-11.csv \
+    --snowball-provenance build/reports/prohibited-models/2026-09-11/prohibited-snowball-provenance.txt \
+    --snowball-source-hashes build/reports/prohibited-models/2026-09-11/prohibited-snowball-source-inputs.sha256 \
+    --snowball-runtime-classpath build/reports/prohibited-models/2026-09-11/prohibited-snowball-runtime-classpath-content.sha256 \
+    --date 2026-09-11 --release-version 4.4.0 --mode update
+```
+
+Run the same command with `--mode verify` after reviewing the generated diff.
+The publisher checks provenance and source/classpath hashes, writes a separate
+active pointer and checksum manifest, rebases size tiers across all benchmarked
+dictionaries, and adds the benchmark-only pages under an explicit unavailable
+warning. It does not add coordinates, registry entries, package claims, or
+public model identities.
 
 ## Recorded and unavailable provenance
 
-The performance documentation records its 2026-08-25 environment, JDK, operating system, hardware, base revision, exact measured-source patch, untracked-source checksums, executable JMH JAR checksum, and model descriptor checksums. The quality CSV embeds model identity and checksum in every row; run date, core source state, JVM, OS, and hardware are shared provenance on the environment page.
+The performance documentation records its 2026-09-11 environment, JDK, operating system, hardware, base revision, exact measured-source patch, untracked-source checksums, executable JMH JAR checksum, complete runtime-classpath content manifest, main-report checksum, and model descriptor checksums. The quality CSV embeds model identity and checksum in every row; run date, core source state, JVM, OS, and hardware are shared provenance on the environment page.
 
 Exact immutable upstream revisions were not recorded for every legacy UniMorph import. That limitation remains explicit in model descriptors and cannot be repaired from filesystem timestamps. Dependency versions reproducible from repository configuration include Apache Lucene 10.5.0, Morfologik 2.1.9, the Ukrainian dictionary artifact 4.9.1, and JMH 1.37.
 

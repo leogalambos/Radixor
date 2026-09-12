@@ -1,0 +1,127 @@
+/*******************************************************************************
+ * Copyright (C) 2026, Leo Galambos
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * 3. Neither the name of the copyright holder nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ ******************************************************************************/
+
+import groovy.xml.XmlParser
+
+plugins {
+    id 'base'
+    id 'maven-publish'
+    id 'signing'
+}
+
+group = 'org.egothor'
+version = providers.fileContents(rootProject.layout.projectDirectory.file('models/catalog-version.txt'))
+        .asText.map(String::trim).get()
+
+Properties active = new Properties()
+rootProject.file('models/model-projects.properties').withInputStream { InputStream input -> active.load(input) }
+Properties filteredTopology = new Properties()
+rootProject.file('models/alternative-model-projects.properties').withInputStream { InputStream input -> filteredTopology.load(input) }
+List<String> filteredModelIds = filteredTopology.stringPropertyNames().toList().sort()
+if (filteredModelIds.size() != 10 || !active.stringPropertyNames().intersect(filteredModelIds).isEmpty()) {
+    throw new GradleException('Filtered model authority must contain 10 IDs disjoint from active models.')
+}
+Map<String, String> filteredModelVersions = filteredModelIds.collectEntries { String modelId ->
+    final Project modelProject = project(":models:${modelId}")
+    final String buildText = modelProject.file('build.gradle').getText('UTF-8')
+    if (!(buildText ==~ /(?s).*defaultModel\s*=\s*false.*/)) {
+        throw new GradleException("Filtered model ${modelId} must declare defaultModel=false.")
+    }
+    final String modelVersion = providers.gradleProperty('modelReleaseVersion')
+            .orElse(providers.fileContents(modelProject.layout.projectDirectory.file('model-version.txt'))
+                    .asText.map(String::trim)).get()
+    [(modelId): modelVersion]
+}
+
+publishing {
+    publications {
+        filtered(MavenPublication) {
+            artifactId = 'radixor-models-filtered'
+            pom {
+                name = 'Radixor Filtered Alternative Stemmer Models'
+                description = 'POM-only opt-in runtime aggregate for filtered alternatives; every dependency retains its packaged data license and notice.'
+                packaging = 'pom'
+                url = 'https://github.com/leogalambos/Radixor'
+                licenses {
+                    license {
+                        name = 'BSD-3-Clause'
+                        url = 'https://spdx.org/licenses/BSD-3-Clause.html'
+                        distribution = 'repo'
+                    }
+                }
+            }
+            pom.withXml {
+                Node dependenciesNode = asNode().appendNode('dependencies')
+                filteredModelIds.each { String modelId ->
+                    Node dependencyNode = dependenciesNode.appendNode('dependency')
+                    dependencyNode.appendNode('groupId', 'org.egothor')
+                    dependencyNode.appendNode('artifactId', "radixor-model-${modelId}")
+                    dependencyNode.appendNode('version', filteredModelVersions.get(modelId))
+                    dependencyNode.appendNode('scope', 'runtime')
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            name = 'catalogStaging'
+            url = rootProject.layout.buildDirectory.dir('model-catalog-staging-repository').get().asFile.toURI()
+        }
+    }
+}
+
+String signingKey = providers.environmentVariable('SIGNING_KEY').orNull
+String signingPassword = providers.environmentVariable('SIGNING_PASSWORD').orNull
+signing {
+    required = { providers.environmentVariable('GITHUB_REF_TYPE').orNull == 'tag' }
+    if (signingKey != null && !signingKey.isBlank()) {
+        useInMemoryPgpKeys(signingKey, signingPassword)
+        sign publishing.publications.filtered
+    }
+}
+
+tasks.register('verifyPomOnlyAggregate') {
+    group = 'verification'
+    dependsOn(tasks.named('generatePomFileForFilteredPublication'))
+    doLast {
+        Node pom = new XmlParser().parse(layout.buildDirectory.file('publications/filtered/pom-default.xml').get().asFile)
+        List<Node> dependencies = pom.dependencies.dependency as List<Node>
+        List<String> artifactIds = dependencies.collect { Node dependency -> dependency.artifactId.text() }
+        List<String> expected = filteredModelIds.collect { String modelId -> "radixor-model-${modelId}" }
+        if (pom.packaging.text() != 'pom' || artifactIds != expected
+                || dependencies.any { Node dependency -> dependency.scope.text() != 'runtime' }
+                || !tasks.withType(Jar).isEmpty()) {
+            throw new GradleException('radixor-models-filtered must be a POM-only aggregate of exactly 10 opt-in alternatives.')
+        }
+    }
+}
+
+tasks.named('check') { dependsOn(tasks.named('verifyPomOnlyAggregate')) }

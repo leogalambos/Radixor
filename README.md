@@ -43,7 +43,7 @@ modification will reach Python-C later.
 | Python-C | Fast scalar calls with basic stemming APIs | Load standard or prepared [compiled Radixor models](docs/data-formats.md) |
 
 For Python, one installation provides the native runtime and the separate
-standard package of 20 precompiled models:
+standard package of 31 precompiled models:
 
 From PyPI:
 
@@ -98,7 +98,14 @@ final FrequencyTrie<CompiledPatchCommand> polish =
 
 `Language.PL_PL` selects the documented default `pl-pl-unimorph`. The optional `pl-pl-polimorf` model requires its own runtime artifact and explicit selection; adding it does not change the default. See [Model Selection and Loading](docs/model-selection-and-loading.md) for complete executable examples and [Stemmer Models](docs/stemmer-models.md) for artifact concepts.
 
-`radixor-models-standard` is a POM-only runtime aggregate: it brings the 20 default model JARs transitively but publishes no empty aggregate JAR. `radixor-models-bom` is the separate POM-only Maven dependency BOM for version management; importing it alone adds no model. The root CycloneDX SBOM report is unrelated to that dependency BOM.
+`radixor-models-standard` is a POM-only runtime aggregate of 31 maintained
+language defaults. `radixor-models-extended` supplies the other 113 active
+models, including optional PoliMorf, while `radixor-models-filtered` is a
+separate opt-in aggregate for 10 non-default alternatives. None publishes an
+empty aggregate JAR.
+`radixor-models-bom` is the separate POM-only Maven dependency BOM for version
+management across all 154 distributable model artifacts; importing it alone adds no model.
+The root CycloneDX SBOM report is unrelated to that dependency BOM.
 
 ```java
 final FrequencyTrie<CompiledPatchCommand> polimorf =
@@ -141,16 +148,16 @@ Radixor performance is best read together with stemming quality. The English dic
 
 | Used rows | Actual row ratio | All exact | Changed exact | Root preserved | Speed ms/op | Error ms | ns/token |
 | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| 100% | 100.000% | 97.668% | 98.110% | 97.552% | 20.425 | 3.636 | 97.9 |
-| 90% | 90.000% | 97.239% | 95.821% | 97.612% | 17.779 | 1.827 | 85.3 |
-| 80% | 80.000% | 96.827% | 93.673% | 97.656% | 15.343 | 1.321 | 73.6 |
-| 70% | 70.000% | 96.392% | 91.430% | 97.695% | 16.444 | 2.027 | 78.9 |
-| 60% | 60.000% | 95.935% | 89.244% | 97.693% | 14.330 | 1.350 | 68.7 |
-| 50% | 50.000% | 95.453% | 86.979% | 97.678% | 14.953 | 2.625 | 71.7 |
-| 40% | 40.000% | 94.939% | 84.667% | 97.638% | 12.919 | 1.155 | 62.0 |
-| 30% | 30.000% | 94.398% | 82.443% | 97.538% | 12.166 | 1.305 | 58.3 |
-| 20% | 20.000% | 93.821% | 80.174% | 97.406% | 11.549 | 1.535 | 55.4 |
-| 10% | 10.000% | 93.057% | 77.327% | 97.190% | 14.360 | 3.524 | 68.9 |
+| 100% | 100.000% | 97.668% | 98.110% | 97.552% | 22.344 | 2.858 | 107.1 |
+| 90% | 90.000% | 97.239% | 95.821% | 97.612% | 21.843 | 2.078 | 104.7 |
+| 80% | 80.000% | 96.827% | 93.673% | 97.656% | 20.895 | 1.896 | 100.2 |
+| 70% | 70.000% | 96.392% | 91.430% | 97.695% | 20.598 | 1.265 | 98.8 |
+| 60% | 60.000% | 95.935% | 89.244% | 97.693% | 19.394 | 1.610 | 93.0 |
+| 50% | 50.000% | 95.453% | 86.979% | 97.678% | 18.054 | 1.228 | 86.6 |
+| 40% | 40.000% | 94.939% | 84.667% | 97.638% | 17.279 | 1.803 | 82.9 |
+| 30% | 30.000% | 94.398% | 82.443% | 97.538% | 18.227 | 2.224 | 87.4 |
+| 20% | 20.000% | 93.821% | 80.174% | 97.406% | 16.065 | 2.378 | 77.0 |
+| 10% | 10.000% | 93.057% | 77.327% | 97.190% | 16.297 | 2.881 | 78.1 |
 
 Column meanings:
 
@@ -163,23 +170,23 @@ Column meanings:
 - `Error ms` is the JMH score error converted to milliseconds.
 - `ns/token` is average nanoseconds per changed token in that operation.
 
-The contracted trie result is materially stronger than the older uncontracted profile: full English coverage reaches 97.668% all-token exactness and 98.110% changed-token exactness at 97.9 ns/token, while even a 10% deterministic dictionary slice remains at 93.057% all-token exactness and 77.327% changed-token exactness at 68.9 ns/token. This is why Radixor benchmark results are documented with both speed and quality instead of a single Porter speed badge.
+The contracted trie result is materially stronger than the older uncontracted profile: full English coverage reaches 97.668% all-token exactness and 98.110% changed-token exactness at 107.1 ns/token, while even a 10% deterministic dictionary slice remains at 93.057% all-token exactness and 77.327% changed-token exactness at 78.1 ns/token. This is why Radixor benchmark results are documented with both speed and quality instead of a single Porter speed badge.
 
 The English curve evaluates the complete dictionary, so it intentionally mixes
 trained and withheld rows. The separate
-[20-language dictionary-family generalization report](docs/benchmarks/generalization.md)
+[143-language dictionary-family generalization report](docs/benchmarks/generalization.md)
 isolates held-out rows, removes surface forms duplicated in training, and reports
-five frozen splits at every 10% coverage step. It contains 1,000 raw scenarios
+five frozen splits at every 10% coverage step. It contains 7,150 raw scenarios
 with exact model provenance and makes clear where transfer is strong—and where a
 small resource does not support a broad generalization claim.
 
 The complementary [edit-cost sensitivity experiment](docs/benchmarks/edit-cost-sensitivity.md)
 expands 16,700 physically measured exact command classes into a validated 234,000-observation
-logical matrix. It finds that suitable relative edit costs and their structural effect are
-language-dependent. Each [language benchmark page](docs/benchmarks/languages/index.md) therefore
-publishes its own 10%–90% knowledge curve, command-equivalence evidence, selected-cost effect,
-factor associations, and bounded conclusion; exploratory non-baseline settings are not presented
-as production defaults without external validation.
+logical matrix over the historical 20-language cohort. It finds that suitable relative edit costs
+and their structural effect are language-dependent. Those 20 language pages retain their own
+10%–90% knowledge curve, command-equivalence evidence, selected-cost effect, factor associations,
+and bounded conclusion; no edit-cost result is extrapolated to the new dictionaries, and
+exploratory non-baseline settings are not presented as production defaults without external validation.
 
 For benchmark scope, workload design, environment, commands, report locations, and interpretation guidance, see [Benchmarking](docs/benchmarking.md).
 
@@ -282,7 +289,7 @@ The repository keeps the front page concise and places detailed documentation un
 ### Python
 
 The Python installation installs the native package together with the
-compatible pure-Python `radixor-models-standard` distribution: 20
+compatible pure-Python `radixor-models-standard` distribution: 31
 [compiled Radixor models](docs/data-formats.md), excluding
 the optional PoliMorf model. Python runtime distributions contain no textual
 dictionaries.
@@ -390,9 +397,10 @@ Egothor showed that stemming could be both algorithmic and compact. Stempel prov
 
 The established `org.egothor:radixor` artifact remains the algorithmic core and contains no language-model data. From version 4 onward, applications explicitly add individual `org.egothor:radixor-model-<model-id>` runtime artifacts or the optional metadata-only `org.egothor:radixor-models-standard` aggregate. Polish defaults to `pl-pl-unimorph`; `pl-pl-polimorf` is opt-in. See [Stemmer Models](docs/stemmer-models.md) and [Migration and Backward Compatibility](docs/migration-and-backward-compatibility.md).
 
-Radixor Java software remains licensed under BSD-3-Clause. UniMorph-derived model data is
-distributed under CC BY-SA 3.0, with upstream attribution, the canonical license URI, Radixor
-transformations, and Leo Galambos's limited contribution notice carried by each model artifact.
+Radixor Java software remains licensed under BSD-3-Clause. Each UniMorph-derived model artifact
+declares its audited file-applicable license: primarily CC BY-SA 3.0, with CC BY-SA 4.0, CC BY
+4.0, and LGPLLR exceptions where required upstream. Upstream attribution, the canonical license
+URI, Radixor transformations, and Leo Galambos's limited contribution notice travel with it.
 PoliMorf model data retains its separate BSD-2-Clause license. There is no project-wide CC license
 directory because the root artifact contains no model data.
 

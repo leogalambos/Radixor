@@ -70,26 +70,173 @@ nav:
      - Python Runtime Performance: python/performance.md
      - Language Comparisons:
         - Overview: benchmarks/languages/index.md
+        - Adyghe: benchmarks/languages/ady.md
+        - Afrikaans: benchmarks/languages/af-za.md
+        - Aimele: benchmarks/languages/ail.md
+        - Akan: benchmarks/languages/aka.md
+        - Albanian: benchmarks/languages/sq-al.md
+        - Alsatian: benchmarks/languages/gsw.md
+        - Amharic: benchmarks/languages/am-et.md
+        - Amuzgo: benchmarks/languages/azg.md
+        - Ancient Greek: benchmarks/languages/grc.md
+        - Anglo-Norman: benchmarks/languages/xno.md
+        - Arabic: benchmarks/languages/ar.md
+        - Armenian: benchmarks/languages/hy-am.md
+        - Ashaninka: benchmarks/languages/cni.md
+        - Assamese: benchmarks/languages/as-in.md
+        - Asturian: benchmarks/languages/ast.md
+        - Aymara: benchmarks/languages/aym.md
+        - Azerbaijani: benchmarks/languages/az-az.md
+        - Bashkir: benchmarks/languages/bak.md
+        - Belarusian: benchmarks/languages/be-by.md
+        - Bengali: benchmarks/languages/bn-bd.md
+        - Bininj Kun-wok: benchmarks/languages/gup.md
+        - Braj: benchmarks/languages/bra.md
+        - Breton: benchmarks/languages/bre.md
+        - Bulgarian: benchmarks/languages/bg-bg.md
+        - Catalan: benchmarks/languages/ca-es.md
+        - Cebuano: benchmarks/languages/ceb.md
+        - Chichewa: benchmarks/languages/ny-mw.md
+        - Chichicapan Zapotec: benchmarks/languages/zpv.md
+        - Chukchi: benchmarks/languages/ckt.md
+        - Church Slavonic: benchmarks/languages/chu.md
+        - Classical Armenian: benchmarks/languages/xcl.md
+        - Classical Syriac: benchmarks/languages/syc.md
+        - Congo Swahili: benchmarks/languages/swc.md
+        - Copala Triqui: benchmarks/languages/cpa.md
+        - Cornish: benchmarks/languages/cor.md
+        - Cree: benchmarks/languages/cre.md
+        - Crimean Tatar: benchmarks/languages/crh.md
         - Czech: benchmarks/languages/czech.md
+        - Dakota: benchmarks/languages/dak.md
         - Danish: benchmarks/languages/danish.md
         - Dutch: benchmarks/languages/dutch.md
+        - Eastern Chatino: benchmarks/languages/cly.md
+        - Egyptian Arabic: benchmarks/languages/arz.md
         - English: benchmarks/languages/english.md
+        - Estonian: benchmarks/languages/et-ee.md
+        - Evenki: benchmarks/languages/evn.md
+        - Faroese: benchmarks/languages/fo-fo.md
         - Finnish: benchmarks/languages/finnish.md
         - French: benchmarks/languages/french.md
+        - Friulian: benchmarks/languages/fur.md
+        - Ga: benchmarks/languages/gaa.md
+        - Galolen: benchmarks/languages/gal.md
         - German: benchmarks/languages/german.md
+        - Gothic: benchmarks/languages/got.md
+        - Greek: benchmarks/languages/el-gr.md
+        - Gulf Arabic: benchmarks/languages/afb.md
+        - Haida: benchmarks/languages/hai.md
         - Hebrew: benchmarks/languages/hebrew.md
+        - Hiligaynon: benchmarks/languages/hil.md
+        - Hsilimo: benchmarks/languages/hsi.md
         - Hungarian: benchmarks/languages/hungarian.md
+        - Icelandic: benchmarks/languages/is-is.md
+        - Indonesian: benchmarks/languages/id-id.md
+        - Ingrian: benchmarks/languages/izh.md
+        - Irish: benchmarks/languages/ga-ie.md
         - Italian: benchmarks/languages/italian.md
-        - Norwegian Bokmal: benchmarks/languages/norwegian-bokmal.md
+        - Itelmen: benchmarks/languages/itl.md
+        - Japanese: benchmarks/languages/ja-jp.md
+        - Kabardian: benchmarks/languages/kbd.md
+        - Kalaallisut: benchmarks/languages/kl-gl.md
+        - Kannada: benchmarks/languages/kn-in.md
+        - Karelian: benchmarks/languages/krl.md
+        - Kashubian: benchmarks/languages/csb.md
+        - Kazakh: benchmarks/languages/kk-kz.md
+        - Khakas: benchmarks/languages/kjh.md
+        - Khaling: benchmarks/languages/klr.md
+        - Kodi: benchmarks/languages/kod.md
+        - Kongo: benchmarks/languages/kon.md
+        - Kyrgyz: benchmarks/languages/ky-kg.md
+        - Ladin: benchmarks/languages/lld.md
+        - Latin: benchmarks/languages/la.md
+        - Latvian: benchmarks/languages/lv-lv.md
+        - Lingala: benchmarks/languages/lin.md
+        - Lithuanian: benchmarks/languages/lt-lt.md
+        - Livonian: benchmarks/languages/liv.md
+        - Low German: benchmarks/languages/nds.md
+        - Lower Sorbian: benchmarks/languages/dsb.md
+        - Luganda: benchmarks/languages/lg-ug.md
+        - Macedonian: benchmarks/languages/mk-mk.md
+        - Magahi: benchmarks/languages/mag.md
+        - Malagasy: benchmarks/languages/mg-mg.md
+        - Maltese: benchmarks/languages/mt-mt.md
+        - Manx: benchmarks/languages/gv-im.md
+        - Maori: benchmarks/languages/mi-nz.md
+        - Mapudungun: benchmarks/languages/arn.md
+        - Middle French: benchmarks/languages/frm.md
+        - Middle High German: benchmarks/languages/gmh.md
+        - Middle Low German: benchmarks/languages/gml.md
+        - Mongolian: benchmarks/languages/mn-mn.md
+        - Murrinh-Patha: benchmarks/languages/mwf.md
+        - Navajo: benchmarks/languages/nav.md
+        - Neapolitan: benchmarks/languages/nap.md
+        - North Frisian: benchmarks/languages/frr.md
+        - Northern Sami: benchmarks/languages/sme.md
+        - Norwegian Bokmål: benchmarks/languages/norwegian-bokmal.md
         - Norwegian Nynorsk: benchmarks/languages/norwegian-nynorsk.md
+        - Old English: benchmarks/languages/ang.md
+        - Old French: benchmarks/languages/fro.md
+        - Old High German: benchmarks/languages/goh.md
+        - Old Irish: benchmarks/languages/sga.md
+        - Old Norse: benchmarks/languages/non.md
+        - Old Saxon: benchmarks/languages/osx.md
+        - Oodham: benchmarks/languages/ood.md
+        - Otomi (ote): benchmarks/languages/ote.md
+        - Pashto: benchmarks/languages/ps-af.md
         - Persian: benchmarks/languages/persian.md
         - Polish: benchmarks/languages/polish.md
         - Portuguese: benchmarks/languages/portuguese.md
+        - Quechua: benchmarks/languages/que.md
+        - Romanian: benchmarks/languages/ro-ro.md
         - Russian: benchmarks/languages/russian.md
+        - Seneca: benchmarks/languages/see.md
+        - Serbo-Croatian: benchmarks/languages/hbs.md
+        - Shipibo-Conibo: benchmarks/languages/shp.md
+        - Shona: benchmarks/languages/sn-zw.md
+        - Sotho, Southern: benchmarks/languages/st-za.md
+        - Southern Kurdish: benchmarks/languages/sdh.md
         - Spanish: benchmarks/languages/spanish.md
         - Swedish: benchmarks/languages/swedish.md
+        - Tagalog: benchmarks/languages/tl-ph.md
+        - Turkish: benchmarks/languages/tr-tr.md
         - Ukrainian: benchmarks/languages/ukrainian.md
+        - Uyghur: benchmarks/languages/ug-cn.md
+        - Uzbek: benchmarks/languages/uz-uz.md
+        - Voro: benchmarks/languages/vro.md
+        - Western Highland Chatino: benchmarks/languages/ctp.md
+        - Xibe: benchmarks/languages/sjo.md
+        - Yanesha’: benchmarks/languages/ame.md
         - Yiddish: benchmarks/languages/yiddish.md
+        - Yoloxóchitl Mixtec: benchmarks/languages/xty.md
+        - Zarma: benchmarks/languages/dje.md
+        - Zenzontepec Chatino: benchmarks/languages/czn.md
+        - Zulu: benchmarks/languages/zu-za.md
+        - Benchmark-only prohibited models:
+           - Basque: benchmarks/languages/eus.md
+           - Georgian: benchmarks/languages/ka-ge.md
+           - Ket: benchmarks/languages/ket.md
+           - Khanty: benchmarks/languages/kca.md
+           - Korean: benchmarks/languages/ko-kr.md
+           - Kurmanji Kurdish: benchmarks/languages/kmr.md
+           - Lamaholot: benchmarks/languages/slp.md
+           - Occitan: benchmarks/languages/oci.md
+           - Oromo: benchmarks/languages/om-et.md
+           - Sanskrit: benchmarks/languages/san.md
+           - Scottish Gaelic: benchmarks/languages/gd-gb.md
+           - Slovenian: benchmarks/languages/sl-si.md
+           - Tajik: benchmarks/languages/tg-tj.md
+           - Tatar: benchmarks/languages/tat.md
+           - Turkmen: benchmarks/languages/tk-tm.md
+           - Tuvan: benchmarks/languages/tyv.md
+           - Upper Sorbian: benchmarks/languages/hsb.md
+           - Urdu: benchmarks/languages/ur-pk.md
+           - Venetian: benchmarks/languages/vec.md
+           - Votic: benchmarks/languages/vot.md
+           - Welsh: benchmarks/languages/cy-gb.md
+           - West Frisian: benchmarks/languages/fy-nl.md
+           - Yakut: benchmarks/languages/sah.md
      - Methods and Reproduction:
         - Comparison Methodology: benchmarks/reference/methodology.md
         - Linguistic Quality: benchmarks/reference/linguistic-quality.md

@@ -61,12 +61,12 @@ class ModelDependencyResolutionTest {
     Path temporaryDirectory;
 
     /**
-     * Verifies that the standard aggregate resolves all defaults and excludes optional PoliMorf.
+     * Verifies that the standard aggregate resolves its exact 31-model membership.
      *
      * @throws IOException if the consumer fixture cannot be created or read
      */
     @Test
-    @DisplayName("Standard aggregate resolves twenty defaults and excludes PoliMorf")
+    @DisplayName("Standard aggregate resolves 31 defaults and excludes PoliMorf")
     void standardAggregateResolvesDefaultsOnly() throws IOException {
         Set<String> artifacts = resolve("""
                 implementation 'org.egothor:radixor:%s'
@@ -76,7 +76,42 @@ class ModelDependencyResolutionTest {
         assertTrue(artifacts.contains("radixor"));
         assertTrue(artifacts.contains("radixor-model-pl-pl-unimorph"));
         assertFalse(artifacts.contains("radixor-model-pl-pl-polimorf"));
-        assertEquals(21, artifacts.size(), "The core and twenty default model JARs must resolve.");
+        assertTrue(artifacts.contains("radixor-model-ar-default"));
+        assertEquals(32, artifacts.size(), "The core and 31 standard model JARs must resolve.");
+    }
+
+    /**
+     * Verifies that the extended aggregate contains active non-standard models only.
+     *
+     * @throws IOException if the consumer fixture cannot be created or read
+     */
+    @Test
+    @DisplayName("Extended aggregate resolves 113 active non-standard models")
+    void extendedAggregateExcludesStandardAndFilteredModels() throws IOException {
+        Set<String> artifacts = resolve("runtimeOnly 'org.egothor:radixor-models-extended:"
+                + catalogVersion() + "'");
+
+        assertEquals(113, artifacts.size());
+        assertTrue(artifacts.contains("radixor-model-pl-pl-polimorf"));
+        assertFalse(artifacts.contains("radixor-model-ar-default"));
+        assertFalse(artifacts.contains("radixor-model-cs-cz-filtered"));
+    }
+
+    /**
+     * Verifies that filtered alternatives are available only through their opt-in aggregate.
+     *
+     * @throws IOException if the consumer fixture cannot be created or read
+     */
+    @Test
+    @DisplayName("Filtered aggregate resolves exactly 10 alternative models")
+    void filteredAggregateIsDisjointFromActiveModels() throws IOException {
+        Set<String> artifacts = resolve("runtimeOnly 'org.egothor:radixor-models-filtered:"
+                + catalogVersion() + "'");
+
+        assertEquals(10, artifacts.size());
+        assertTrue(artifacts.contains("radixor-model-cs-cz-filtered"));
+        assertTrue(artifacts.contains("radixor-model-pl-pl-polimorf-filtered"));
+        assertFalse(artifacts.contains("radixor-model-cs-cz-default"));
     }
 
     /**

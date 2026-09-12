@@ -1,0 +1,50 @@
+Radixor model-data notice
+
+Radixor-derived model data
+
+Copyright (C) 2026, Leo Galambos.
+
+Copyright and, where applicable, database rights are claimed in the
+Radixor-specific selection, verification, cleaning, normalization,
+grouping, deduplication, filtering, reformatting, metadata preparation,
+and packaging of this model, to the extent protected by applicable law.
+
+The underlying morphological data remains attributed to UniMorph and
+the upstream contributors identified in this notice.
+
+This derived model data, including Radixor's protectable contributions,
+is distributed under Creative Commons Attribution-ShareAlike 3.0.
+
+Model ID: izh-default
+Source project: UniMorph
+Official repository: https://github.com/unimorph/izh
+Selected upstream data:
+- izh [lemma-form-features], SHA-256 b0d669893b477a4bb468f6da31fc7f30c19e574a98c851380f2e90e0e4c93c03
+Source origin: Wikipedia
+Attribution: UniMorph
+License:
+Creative Commons Attribution-ShareAlike 3.0 Unported
+
+Canonical license URI: https://creativecommons.org/licenses/by-sa/3.0/
+Source revision: be351d32224a63c6611ffda5034d31982fe49814
+Revision status: recorded
+Repository evidence paths: README.md:evidence-00-README.md
+Repository evidence SHA-256: evidence-00-README.md:4b0967299674d60a8f5d76e0bf78be86d219adab69ec44a3e0e5971637eed006
+Import policy: radixor-unimorph-import-v1
+Projection semantics: Each declared three-column source directly projects lemma and surface form.
+Conflict semantics: All valid lemma-form assignments are retained. Surface ambiguity is reported explicitly and is never resolved by dropping or overwriting an assignment.
+Import rows: source=1151; accepted=1099; rejected=52
+Rejection reasons: blank-row=52
+Per-source import audit:
+- izh: source=1151; accepted=1099; rejected=52; added-groups=50; added-distinct-surfaces=1026; added-source-pairs=1026; added-output-forms=1026; added-changed-pairs=976; intrinsic-ambiguous-surfaces=0; rejection-reasons=blank-row=52
+Surface conflict audit: cross-source-assignments=0; cross-source-surfaces=0; intrinsic-ambiguous-surfaces=0
+Audited excluded upstream files:
+- izh.args: duplicate-args — Duplicate .args projection was audited and excluded; only bel.args, grc.args, and hye.args add an approved compatible projection.
+Generated dictionary: groups=50; forms=1026
+Deterministic GZip SHA-256: 294754b0e212cd5045fcced35de8e0016a77cb46732d285e2babef0d1e3c5d84
+
+Radixor modifications: Strict UTF-8 validation, NFC normalization, lowercase conversion, structural unsafe-character rejection, grouping by lemma, exact deduplication, deterministic ordering, and reproducible GZip packaging.
+
+Neither UniMorph nor any upstream contributor endorses Radixor.
+
+Upstream information verified: 2026-09-11

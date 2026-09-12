@@ -2,7 +2,7 @@
 
 This is the shortest path from an empty Python environment to a working
 Radixor stemmer. First choose the native runtime. Both installations resolve
-the separate standard-model package with 20 precompiled language models.
+the separate standard-model package with 31 precompiled language models.
 
 ## 1. Choose and install
 

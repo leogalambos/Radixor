@@ -1,0 +1,50 @@
+Radixor model-data notice
+
+Radixor-derived model data
+
+Copyright (C) 2026, Leo Galambos.
+
+Copyright and, where applicable, database rights are claimed in the
+Radixor-specific selection, verification, cleaning, normalization,
+grouping, deduplication, filtering, reformatting, metadata preparation,
+and packaging of this model, to the extent protected by applicable law.
+
+The underlying morphological data remains attributed to UniMorph and
+the upstream contributors identified in this notice.
+
+This derived model data, including Radixor's protectable contributions,
+is distributed under Creative Commons Attribution-ShareAlike 3.0.
+
+Model ID: see-default
+Source project: UniMorph
+Official repository: https://github.com/unimorph/see
+Selected upstream data:
+- see [lemma-form-features], SHA-256 a364b3e4fe9db61f9b55040afbfe6a6c34d27596bbf8f55369eca704bdecc4c8
+Source origin: Phyllis E. Wms. Bardeau. 2007. *The Seneca Verb: Labeling the Ancient Voice*.
+Attribution: UniMorph; Richard J. Hatcher; Emily Prud'hommeaux; Zoey Liu
+License:
+Creative Commons Attribution-ShareAlike 3.0 Unported
+
+Canonical license URI: https://creativecommons.org/licenses/by-sa/3.0/
+Source revision: 8d182ef3039f9e7c497eaa956086f7a0fb7f361e
+Revision status: recorded
+Repository evidence paths: README.md:evidence-00-README.md
+Repository evidence SHA-256: evidence-00-README.md:6dd4899233df1e0eb08ba99db081cc903ee90fbc15c3a2e6341c3528e04d0e74
+Import policy: radixor-unimorph-import-v1
+Projection semantics: Each declared three-column source directly projects lemma and surface form.
+Conflict semantics: All valid lemma-form assignments are retained. Surface ambiguity is reported explicitly and is never resolved by dropping or overwriting an assignment.
+Import rows: source=5460; accepted=5408; rejected=52
+Rejection reasons: form-unsupported-character=13;lemma-unsupported-character=39
+Per-source import audit:
+- see: source=5460; accepted=5408; rejected=52; added-groups=139; added-distinct-surfaces=5318; added-source-pairs=5195; added-output-forms=5331; added-changed-pairs=5192; intrinsic-ambiguous-surfaces=12; rejection-reasons=form-unsupported-character=13;lemma-unsupported-character=39
+Surface conflict audit: cross-source-assignments=0; cross-source-surfaces=0; intrinsic-ambiguous-surfaces=12
+Audited excluded upstream files:
+- none
+Generated dictionary: groups=139; forms=5331
+Deterministic GZip SHA-256: ba81e101e0c2f5c2ef6762a3bcae3e9af95b79eedc7dd9a2bacc9216ea70ed65
+
+Radixor modifications: Strict UTF-8 validation, NFC normalization, lowercase conversion, structural unsafe-character rejection, grouping by lemma, exact deduplication, deterministic ordering, and reproducible GZip packaging.
+
+Neither UniMorph nor any upstream contributor endorses Radixor.
+
+Upstream information verified: 2026-09-11

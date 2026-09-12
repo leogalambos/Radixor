@@ -1,0 +1,50 @@
+Radixor model-data notice
+
+Radixor-derived model data
+
+Copyright (C) 2026, Leo Galambos.
+
+Copyright and, where applicable, database rights are claimed in the
+Radixor-specific selection, verification, cleaning, normalization,
+grouping, deduplication, filtering, reformatting, metadata preparation,
+and packaging of this model, to the extent protected by applicable law.
+
+The underlying morphological data remains attributed to UniMorph and
+the upstream contributors identified in this notice.
+
+This derived model data, including Radixor's protectable contributions,
+is distributed under Creative Commons Attribution-ShareAlike 3.0.
+
+Model ID: frr-default
+Source project: UniMorph
+Official repository: https://github.com/unimorph/frr
+Selected upstream data:
+- frr [lemma-form-features], SHA-256 da965a38e2a824cc778d2bf98b36c6ea5d42882dc4c86c47c222919bfbe66131
+Source origin: Wikipedia
+Attribution: UniMorph
+License:
+Creative Commons Attribution-ShareAlike 3.0 Unported
+
+Canonical license URI: https://creativecommons.org/licenses/by-sa/3.0/
+Source revision: 7882e34f921ba75a87166a648759764b702b2a26
+Revision status: recorded
+Repository evidence paths: README.md:evidence-00-README.md
+Repository evidence SHA-256: evidence-00-README.md:61d3be50c8aff9cd0a8512aeb75954edf65b3b27e116bb05c23c2b1e119a3d1b
+Import policy: radixor-unimorph-import-v1
+Projection semantics: Each declared three-column source directly projects lemma and surface form.
+Conflict semantics: All valid lemma-form assignments are retained. Surface ambiguity is reported explicitly and is never resolved by dropping or overwriting an assignment.
+Import rows: source=3257; accepted=1267; rejected=1990
+Rejection reasons: blank-row=53;form-unicode-whitespace=1937
+Per-source import audit:
+- frr: source=3257; accepted=1267; rejected=1990; added-groups=51; added-distinct-surfaces=364; added-source-pairs=381; added-output-forms=381; added-changed-pairs=330; intrinsic-ambiguous-surfaces=17; rejection-reasons=blank-row=53;form-unicode-whitespace=1937
+Surface conflict audit: cross-source-assignments=0; cross-source-surfaces=0; intrinsic-ambiguous-surfaces=17
+Audited excluded upstream files:
+- none
+Generated dictionary: groups=51; forms=381
+Deterministic GZip SHA-256: d92dacea73857c8ddef8113c70a0c72eb5b1d1f6796ef1a4b640993aabc544c4
+
+Radixor modifications: Strict UTF-8 validation, NFC normalization, lowercase conversion, structural unsafe-character rejection, grouping by lemma, exact deduplication, deterministic ordering, and reproducible GZip packaging.
+
+Neither UniMorph nor any upstream contributor endorses Radixor.
+
+Upstream information verified: 2026-09-11

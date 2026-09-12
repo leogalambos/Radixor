@@ -1,8 +1,8 @@
 # Spanish filtered candidate
 
-`es-es-filtered` is a locally buildable alternative to `es-es-default`. It is
-not published, registered as a default, or included in the model catalog, BOM,
-standard pack, or Python model packages.
+`es-es-filtered` is a published opt-in alternative to `es-es-default`. It is
+available individually and through `radixor-models-filtered`, but is not a
+registered default or part of the standard, extended, or Python packages.
 
 The checked-in `es-es-default` dictionary is the only lexical input. The audit
 sanitizes objective source artifacts and removes strongly internally dominated

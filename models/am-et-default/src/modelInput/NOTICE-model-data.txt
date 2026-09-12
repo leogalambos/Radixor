@@ -1,0 +1,50 @@
+Radixor model-data notice
+
+Radixor-derived model data
+
+Copyright (C) 2026, Leo Galambos.
+
+Copyright and, where applicable, database rights are claimed in the
+Radixor-specific selection, verification, cleaning, normalization,
+grouping, deduplication, filtering, reformatting, metadata preparation,
+and packaging of this model, to the extent protected by applicable law.
+
+The underlying morphological data remains attributed to UniMorph and
+the upstream contributors identified in this notice.
+
+This derived model data, including Radixor's protectable contributions,
+is distributed under Creative Commons Attribution-ShareAlike 3.0.
+
+Model ID: am-et-default
+Source project: UniMorph
+Official repository: https://github.com/unimorph/amh
+Selected upstream data:
+- amh [lemma-form-features], SHA-256 42014c1c3066495613a5cd1bc7375e4cb3572b779d80f1dc5508d99c753e267f
+Source origin: Not stated in pinned repository evidence
+Attribution: UniMorph
+License:
+Creative Commons Attribution-ShareAlike 3.0 Unported
+
+Canonical license URI: https://creativecommons.org/licenses/by-sa/3.0/
+Source revision: 02db5a185339f6d7a3440f05a4f1d1ca0131881a
+Revision status: recorded
+Repository evidence paths: README.md:evidence-00-README.md
+Repository evidence SHA-256: evidence-00-README.md:d8fe0e3de62651c251bbd4ef6c75d17eddaee298e41d79e4f562314fc30f2c8e
+Import policy: radixor-unimorph-import-v1
+Projection semantics: Each declared three-column source directly projects lemma and surface form.
+Conflict semantics: All valid lemma-form assignments are retained. Surface ambiguity is reported explicitly and is never resolved by dropping or overwriting an assignment.
+Import rows: source=46224; accepted=46224; rejected=0
+Rejection reasons: none
+Per-source import audit:
+- amh: source=46224; accepted=46224; rejected=0; added-groups=2461; added-distinct-surfaces=41308; added-source-pairs=42428; added-output-forms=42462; added-changed-pairs=40001; intrinsic-ambiguous-surfaces=1140; rejection-reasons=none
+Surface conflict audit: cross-source-assignments=0; cross-source-surfaces=0; intrinsic-ambiguous-surfaces=1140
+Audited excluded upstream files:
+- amh.args: duplicate-args — Duplicate .args projection was audited and excluded; only bel.args, grc.args, and hye.args add an approved compatible projection.
+Generated dictionary: groups=2461; forms=42462
+Deterministic GZip SHA-256: 69e9089fae06a465459f288a4e2074ffcb9656bf2b6fd01772a2af3f71e5bb70
+
+Radixor modifications: Strict UTF-8 validation, NFC normalization, lowercase conversion, structural unsafe-character rejection, grouping by lemma, exact deduplication, deterministic ordering, and reproducible GZip packaging.
+
+Neither UniMorph nor any upstream contributor endorses Radixor.
+
+Upstream information verified: 2026-09-11

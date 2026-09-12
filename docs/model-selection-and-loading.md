@@ -27,9 +27,15 @@ These identifiers answer different questions:
 One language can have several models. `Language.PL_PL` is neither UniMorph nor PoliMorf. `loadCompiled(Language.PL_PL, ...)` resolves the stable default ID declared by `Language.defaultModelId()`. An explicit lookup requests exactly one ID. Registry ordering never changes either decision.
 
 Licensing follows the selected artifact. Radixor Java software is BSD-3-Clause; UniMorph-derived
-model data carries a model-specific CC BY-SA 3.0 notice, while PoliMorf carries its separate
-BSD-2-Clause license. The UniMorph notice preserves upstream attribution and identifies the
+model data carries its model-specific audited license and notice, while PoliMorf carries its
+separate BSD-2-Clause license. The UniMorph notice preserves upstream attribution and identifies the
 Radixor transformations and limited protectable contributions without claiming the underlying data.
+
+Only IDs in the public model topology can be selected this way. Filtered
+alternatives are local experiments, and prohibited/quarantined dictionaries are
+private benchmark inputs with unresolved redistribution evidence. Neither has a
+supported Maven coordinate, registry descriptor, BOM/catalog entry, or Python
+package. See [Model categories and lifecycle](stemmer-models.md#model-categories-and-lifecycle).
 
 ## Choose runtime dependencies
 
@@ -78,7 +84,11 @@ dependencies {
 }
 ```
 
-The standard aggregate is POM-only. Its POM supplies exactly one default model per supported language as transitive runtime dependencies and excludes optional PoliMorf. It publishes no empty binary JAR.
+The standard aggregate is POM-only. Its POM supplies exactly the 31 models in
+`models/standard-model-projects.properties` as transitive runtime dependencies.
+The Java-only extended aggregate supplies the other 113 active models, including
+optional PoliMorf. The filtered aggregate supplies ten opt-in alternatives.
+None publishes an empty binary JAR.
 
 ### BOM-managed versions
 

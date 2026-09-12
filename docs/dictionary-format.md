@@ -23,8 +23,8 @@ Consequently, compressed size is not a construction-memory estimate. The PoliMor
 
 Comment headers in maintained model inputs summarize provenance but do not replace packaged legal
 material. Each UniMorph-derived artifact includes a language-specific notice describing its
-official repository, lexical source, upstream attribution, CC BY-SA 3.0 canonical URI, ShareAlike
-status, Radixor transformations, and Leo Galambos's protectable model-data contributions. The
+official repository, lexical source, upstream attribution, exact audited license and canonical
+URI, Radixor transformations, and Leo Galambos's protectable model-data contributions. The
 notice does not claim ownership over the underlying data. GZip packaging and descriptor/checksum
 generation are disclosed transformations; the in-memory trie is a Radixor runtime structure.
 

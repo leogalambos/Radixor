@@ -51,6 +51,9 @@ IFS= read -r jmh_classpath < "${classpath_file}"
 tmp_dir="${project_root}/build/tmp/jmh"
 report_dir="${project_root}/build/reports/jmh"
 mkdir -p "${tmp_dir}" "${report_dir}"
+classpath_content_manifest="${report_dir}/jmh-classpath-content-${report_date}.sha256"
+bash tools/write-classpath-content-manifest.sh \
+    "${classpath_file}" "${classpath_content_manifest}"
 
 for governor_file in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do
     governor="$(<"${governor_file}")"
@@ -60,18 +63,27 @@ for governor_file in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do
     fi
 done
 
-comparison_include='^(org\.egothor\.stemmer\.benchmark\.(EnglishStemmerComparisonBenchmark\.|MultiLanguageStemmerComparisonBenchmark\.|SnowballLanguageStemmerComparisonBenchmark\.).*|org\.egothor\.stemmer\.benchmark\.HunspellStemmerComparisonBenchmark\.luceneHunspellStemFilter)$'
+comparison_include='^(org\.egothor\.stemmer\.benchmark\.(EnglishStemmerComparisonBenchmark\.|MultiLanguageStemmerComparisonBenchmark\.|RadixorModelStemmerBenchmark\.|SnowballLanguageStemmerComparisonBenchmark\.).*|org\.egothor\.stemmer\.benchmark\.HunspellStemmerComparisonBenchmark\.luceneHunspellStemFilter|org\.egothor\.stemmer\.benchmark\.PolishPolimorfStemmerComparisonBenchmark\.polishPolimorfLuceneMorfologikFilter)$'
 coverage_include='^org\.egothor\.stemmer\.benchmark\.EnglishRadixorDictionaryCoverageBenchmark\.changedTokenStemmingSpeed$'
 selection_file="${report_dir}/published-speed-benchmarks-${report_date}.txt"
+main_speed_csv="${report_dir}/stemmer-speed-${report_date}.csv"
 
 java -Djava.io.tmpdir="${tmp_dir}" -cp "${jmh_classpath}" org.openjdk.jmh.Main \
     "${comparison_include}" -l > "${selection_file}"
-if grep -Eq 'PolishPolimorf|BenchmarkQuality|GermanGoldstandard' "${selection_file}"; then
+if grep -Eq 'PolishPolimorfStemmerComparisonBenchmark\.polishPolimorfRadixor|BenchmarkQuality|GermanGoldstandard' "${selection_file}"; then
     printf 'The selected speed benchmark list contains an excluded benchmark.\n' >&2
     exit 1
 fi
 if ! grep -q 'MultiLanguageStemmerComparisonBenchmark.hebrewRadixor' "${selection_file}"; then
     printf 'The selected speed benchmark list omits Hebrew Radixor.\n' >&2
+    exit 1
+fi
+if ! grep -q 'RadixorModelStemmerBenchmark.radixor' "${selection_file}"; then
+    printf 'The selected speed benchmark list omits the all-model Radixor benchmark.\n' >&2
+    exit 1
+fi
+if ! grep -q 'PolishPolimorfStemmerComparisonBenchmark.polishPolimorfLuceneMorfologikFilter' "${selection_file}"; then
+    printf 'The selected speed benchmark list omits the PoliMorf comparator.\n' >&2
     exit 1
 fi
 
@@ -94,6 +106,10 @@ jmh_jar="${jmh_classpath%%:*}"
     sha256sum "${classpath_file}" | cut -d' ' -f1
     printf 'JMH executable JAR SHA-256: '
     sha256sum "${jmh_jar}" | cut -d' ' -f1
+    printf 'JMH runtime classpath content manifest: %s\n' \
+        "${classpath_content_manifest}"
+    printf 'JMH runtime classpath content manifest SHA-256: '
+    sha256sum "${classpath_content_manifest}" | cut -d' ' -f1
     printf 'Measured source patch SHA-256: '
     sha256sum "${source_patch}" | cut -d' ' -f1
     printf 'Untracked source checksum manifest SHA-256: '
@@ -141,8 +157,8 @@ sleep 30
 
 common_arguments=(
     -f 3
-    -wi 5
-    -i 7
+    -wi 3
+    -i 5
     -w 1s
     -r 1s
     -t 1
@@ -155,8 +171,15 @@ common_arguments=(
 java -Djava.io.tmpdir="${tmp_dir}" -Xms512m -Xmx1g \
     -cp "${jmh_classpath}" org.openjdk.jmh.Main \
     "${comparison_include}" "${common_arguments[@]}" \
-    -rff "${report_dir}/stemmer-speed-${report_date}.csv" \
+    -rff "${main_speed_csv}" \
     -o "${report_dir}/stemmer-speed-${report_date}.txt"
+
+bash tools/validate-speed-model-coverage.sh \
+    "${main_speed_csv}" models/model-projects.properties
+{
+    printf '\nMain speed report SHA-256: '
+    sha256sum "${main_speed_csv}" | cut -d' ' -f1
+} >> "${environment_file}"
 
 sleep 15
 

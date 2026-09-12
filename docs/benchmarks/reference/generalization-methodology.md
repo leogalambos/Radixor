@@ -78,13 +78,17 @@ English and Finnish dictionaries from dominating small resources.
 Run:
 
 ```bash
-./gradlew dictionaryGeneralization
+./gradlew dictionaryGeneralizationStandalone
+./gradlew mergeDictionaryGeneralizationSnapshots
 ./gradlew publishDictionaryGeneralizationDocumentation
 ./gradlew verifyDictionaryGeneralizationDocumentation
 ```
 
-The first task writes `build/reports/generalization/dictionary-generalization.csv`.
-Publication validates the complete 20 × 10 × 5 matrix, exact selected-row
+The first task writes the topology-derived 123-language continuation without
+rerunning the frozen original 20 defaults. The merge task validates disjoint
+20/123 model sets, exact 1,000 + 6,150 scenario counts, headers, corpus identities,
+and row-level provenance before creating the dated 7,150-row active snapshot.
+Publication validates the complete 143 × 10 × 5 matrix, exact selected-row
 cardinality, count partitions, overlap arithmetic, model provenance, and the
 100% boundary before checking in the CSV and its SHA-256 checksum. Verification
 re-renders the page from the checked-in counters and fails if either the page or

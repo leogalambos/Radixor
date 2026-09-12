@@ -58,6 +58,7 @@ public final class QualityStemmerMatrix {
     public static List<Candidate> candidates() {
         final List<Candidate> candidates = new ArrayList<>();
         Arrays.stream(StemmerComparisonBenchmarkQuality.QualityCandidate.values())
+                .filter(candidate -> !candidate.name().startsWith("POLISH_POLIMORF_"))
                 .map(candidate -> new Candidate(candidate.name(), candidate.radixorLanguage(),
                         () -> adapt(candidate.createStemmer())))
                 .forEach(candidates::add);

@@ -52,15 +52,18 @@ import static org.junit.jupiter.api.Assertions.assertTrue
 /** Exercises catalog publication filtering, isolation, checksums, and semantic verification. */
 final class ModelCatalogBundleTaskTest {
     private static final String CATALOG_VERSION = '2026.1'
-    private static final List<String> DEFAULTS = ['alpha', 'beta']
-    private static final List<String> ALL = ['alpha', 'beta', 'pl-pl-polimorf']
+    private static final List<String> STANDARD = ['alpha']
+    private static final List<String> EXTENDED = ['beta', 'pl-pl-polimorf']
+    private static final List<String> FILTERED = ['gamma-filtered']
+    private static final List<String> ALL = STANDARD + EXTENDED + FILTERED
     private static final Map<String, String> MODEL_VERSIONS = [
-            alpha: '1.0.0', beta: '1.0.1', 'pl-pl-polimorf': '2.0.0'
+            alpha: '1.0.0', beta: '1.0.1', 'pl-pl-polimorf': '2.0.0',
+            'gamma-filtered': '1.0.2'
     ]
 
     @TempDir Path temporaryDirectory
 
-    /** Prepares exactly two unsigned POMs and their checksums without changing raw bytes. */
+    /** Prepares exactly four unsigned POMs and their checksums without changing raw bytes. */
     @Test
     void preparesUnsignedPublicationsWithoutMutatingRawInput() {
         final Path raw = fixture(false)
@@ -68,7 +71,7 @@ final class ModelCatalogBundleTaskTest {
         final Path prepared = temporaryDirectory.resolve('prepared')
         PrepareModelCatalogBundleInputTask.prepareBundle(raw, prepared, CATALOG_VERSION)
         assertArrayEquals(before, Files.readAllBytes(standardPom(raw)))
-        assertEquals(6L, regularFiles(prepared))
+        assertEquals(12L, regularFiles(prepared))
         assertTrue(Files.isRegularFile(prepared.resolve(relativeStandardPom() + '.md5')))
         assertTrue(Files.isRegularFile(prepared.resolve(relativeBomPom() + '.sha1')))
     }
@@ -78,7 +81,7 @@ final class ModelCatalogBundleTaskTest {
     void preparesSignedPublications() {
         final Path prepared = temporaryDirectory.resolve('prepared')
         PrepareModelCatalogBundleInputTask.prepareBundle(fixture(true), prepared, CATALOG_VERSION)
-        assertEquals(12L, regularFiles(prepared))
+        assertEquals(24L, regularFiles(prepared))
         assertTrue(Files.isRegularFile(prepared.resolve(relativeStandardPom() + '.asc.md5')))
         assertTrue(Files.isRegularFile(prepared.resolve(relativeBomPom() + '.asc.sha1')))
     }
@@ -104,7 +107,7 @@ final class ModelCatalogBundleTaskTest {
         Files.writeString(module.parent.resolve('maven-metadata-local.xml'), 'metadata')
         final Path prepared = temporaryDirectory.resolve('prepared')
         PrepareModelCatalogBundleInputTask.prepareBundle(raw, prepared, CATALOG_VERSION)
-        assertEquals(6L, regularFiles(prepared))
+        assertEquals(12L, regularFiles(prepared))
     }
 
     /** Rejects a missing standard publication. */
@@ -156,8 +159,8 @@ final class ModelCatalogBundleTaskTest {
         PrepareModelCatalogBundleInputTask.prepareBundle(fixture(false), prepared, CATALOG_VERSION)
         final File archive = zip(prepared, temporaryDirectory.resolve('catalog.zip'))
         final List<String> entries = VerifyModelCatalogReleaseCandidateTask.verifyBundle(
-                archive, CATALOG_VERSION, MODEL_VERSIONS, DEFAULTS, ALL)
-        assertEquals(6, entries.size())
+                archive, CATALOG_VERSION, MODEL_VERSIONS, STANDARD, EXTENDED, FILTERED, ALL)
+        assertEquals(12, entries.size())
     }
 
     /** Rejects a catalog dependency that does not use its model's recorded version. */
@@ -170,7 +173,33 @@ final class ModelCatalogBundleTaskTest {
         incorrectVersions.put('beta', '9.9.9')
         assertThrows(GradleException) {
             VerifyModelCatalogReleaseCandidateTask.verifyBundle(
-                    archive, CATALOG_VERSION, incorrectVersions, DEFAULTS, ALL)
+                    archive, CATALOG_VERSION, incorrectVersions, STANDARD, EXTENDED, FILTERED, ALL)
+        }
+    }
+
+    /** Rejects aggregate authorities that assign one model to two packages. */
+    @Test
+    void rejectsOverlappingAggregateMembership() {
+        final Path prepared = temporaryDirectory.resolve('prepared-overlap')
+        PrepareModelCatalogBundleInputTask.prepareBundle(fixture(false), prepared, CATALOG_VERSION)
+        final File archive = zip(prepared, temporaryDirectory.resolve('catalog-overlap.zip'))
+        assertThrows(GradleException) {
+            VerifyModelCatalogReleaseCandidateTask.verifyBundle(
+                    archive, CATALOG_VERSION, MODEL_VERSIONS, STANDARD,
+                    EXTENDED + STANDARD, FILTERED, ALL)
+        }
+    }
+
+    /** Rejects an authority that omits a dependency present in its aggregate POM. */
+    @Test
+    void rejectsMissingAggregateMembership() {
+        final Path prepared = temporaryDirectory.resolve('prepared-missing')
+        PrepareModelCatalogBundleInputTask.prepareBundle(fixture(false), prepared, CATALOG_VERSION)
+        final File archive = zip(prepared, temporaryDirectory.resolve('catalog-missing.zip'))
+        assertThrows(GradleException) {
+            VerifyModelCatalogReleaseCandidateTask.verifyBundle(
+                    archive, CATALOG_VERSION, MODEL_VERSIONS, STANDARD,
+                    EXTENDED.dropRight(1), FILTERED, ALL)
         }
     }
 
@@ -183,7 +212,7 @@ final class ModelCatalogBundleTaskTest {
         final File archive = zip(prepared, temporaryDirectory.resolve('catalog.zip'))
         assertThrows(GradleException) {
             VerifyModelCatalogReleaseCandidateTask.verifyBundle(
-                    archive, CATALOG_VERSION, MODEL_VERSIONS, DEFAULTS, ALL)
+                    archive, CATALOG_VERSION, MODEL_VERSIONS, STANDARD, EXTENDED, FILTERED, ALL)
         }
     }
 
@@ -222,6 +251,8 @@ tasks.register('bundle', Zip) {
 ''')
         final Path raw = project.resolve('raw')
         write(standardPom(raw), pom('radixor-models-standard', false))
+        write(extendedPom(raw), pom('radixor-models-extended', false))
+        write(filteredPom(raw), pom('radixor-models-filtered', false))
         write(bomPom(raw), pom('radixor-models-bom', true))
 
         final List<String> arguments = ['bundle', '--configuration-cache',
@@ -241,16 +272,23 @@ tasks.register('bundle', Zip) {
     private Path fixture(final boolean signed) {
         final Path raw = temporaryDirectory.resolve('raw')
         write(standardPom(raw), pom('radixor-models-standard', false))
+        write(extendedPom(raw), pom('radixor-models-extended', false))
+        write(filteredPom(raw), pom('radixor-models-filtered', false))
         write(bomPom(raw), pom('radixor-models-bom', true))
         if (signed) {
             Files.writeString(standardPom(raw).resolveSibling(standardPom(raw).fileName.toString() + '.asc'), 'test signature')
+            Files.writeString(extendedPom(raw).resolveSibling(extendedPom(raw).fileName.toString() + '.asc'), 'test signature')
+            Files.writeString(filteredPom(raw).resolveSibling(filteredPom(raw).fileName.toString() + '.asc'), 'test signature')
             Files.writeString(bomPom(raw).resolveSibling(bomPom(raw).fileName.toString() + '.asc'), 'test signature')
         }
         return raw
     }
 
     private static String pom(final String artifact, final boolean managed) {
-        final List<String> ids = managed ? ALL : DEFAULTS
+        final List<String> ids = managed ? ALL
+                : artifact.endsWith('standard') ? STANDARD
+                : artifact.endsWith('extended') ? EXTENDED
+                : FILTERED
         final String dependencies = ids.collect { String id ->
             "<dependency><groupId>org.egothor</groupId><artifactId>radixor-model-${id}</artifactId>" +
                     "<version>${MODEL_VERSIONS.get(id)}</version>${managed ? '' : '<scope>runtime</scope>'}</dependency>"
@@ -263,9 +301,17 @@ tasks.register('bundle', Zip) {
     }
 
     private static Path standardPom(final Path raw) { raw.resolve(relativeStandardPom()) }
+    private static Path extendedPom(final Path raw) { raw.resolve(relativeExtendedPom()) }
+    private static Path filteredPom(final Path raw) { raw.resolve(relativeFilteredPom()) }
     private static Path bomPom(final Path raw) { raw.resolve(relativeBomPom()) }
     private static String relativeStandardPom() {
         "org/egothor/radixor-models-standard/${CATALOG_VERSION}/radixor-models-standard-${CATALOG_VERSION}.pom"
+    }
+    private static String relativeExtendedPom() {
+        "org/egothor/radixor-models-extended/${CATALOG_VERSION}/radixor-models-extended-${CATALOG_VERSION}.pom"
+    }
+    private static String relativeFilteredPom() {
+        "org/egothor/radixor-models-filtered/${CATALOG_VERSION}/radixor-models-filtered-${CATALOG_VERSION}.pom"
     }
     private static String relativeBomPom() {
         "org/egothor/radixor-models-bom/${CATALOG_VERSION}/radixor-models-bom-${CATALOG_VERSION}.pom"

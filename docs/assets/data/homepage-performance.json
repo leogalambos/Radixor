@@ -1,8 +1,8 @@
 {
-  "source": "Python all-language batch benchmark, 2026-08-25",
+  "source": "Python all-language batch benchmark, 2026-09-11",
   "environment": {
     "processor": "AMD Ryzen 5 8600G w/ Radeon 760M Graphics",
-    "platform": "Linux-7.1.8-200.fc44.x86_64-x86_64-with-glibc2.43",
+    "platform": "Linux-7.1.13-200.fc44.x86_64-x86_64-with-glibc2.43",
     "python": "CPython 3.14.7",
     "cpu_affinity": [
       0,
@@ -24,234 +24,334 @@
     "amd_pstate_status": "active"
   },
   "versions": {
-    "radixor": "4.2.1",
-    "radixor-c": "4.2.1",
+    "radixor": "4.4.0",
+    "radixor-c": "4.4.0",
+    "radixor-models-standard": "3.0.0",
     "PyStemmer": "3.1.0",
     "snowballstemmer": "3.1.1",
     "NLTK": "3.10.3"
   },
   "batch_size": 100,
-  "direct_pystemmer_comparisons": 18,
-  "direct_pystemmer_wins": 18,
-  "geometric_mean_speedup_vs_pystemmer": 2.1912,
+  "direct_pystemmer_comparisons": 29,
+  "direct_pystemmer_wins": 29,
+  "geometric_mean_speedup_vs_pystemmer": 2.1647,
   "maximum_speedup_vs_pystemmer": {
     "language": "yi",
-    "speedup": 4.5216
+    "speedup": 4.4532
   },
   "radixor_throughput_mwords_per_second": {
     "minimum": {
-      "language": "ru",
-      "value": 6.8508
+      "language": "el",
+      "value": 6.2929
     },
     "maximum": {
-      "language": "nn",
-      "value": 13.8657
+      "language": "st",
+      "value": 15.6762
     }
   },
   "python_c": {
-    "direct_pystemmer_comparisons": 18,
-    "direct_pystemmer_wins": 18,
-    "geometric_mean_speedup_vs_pystemmer": 2.2798,
+    "direct_pystemmer_comparisons": 29,
+    "direct_pystemmer_wins": 29,
+    "geometric_mean_speedup_vs_pystemmer": 2.2783,
     "maximum_speedup_vs_pystemmer": {
       "language": "yi",
-      "speedup": 4.3801
+      "speedup": 4.4183
     },
     "throughput_mwords_per_second": {
       "minimum": {
         "language": "ru",
-        "value": 6.761
+        "value": 6.4431
       },
       "maximum": {
-        "language": "pt",
-        "value": 14.634
+        "language": "st",
+        "value": 17.815
       }
     },
     "head_to_head_vs_pyo3": {
-      "wins": 10,
+      "wins": 21,
       "losses": 10,
-      "geometric_mean_speedup": 1.0313
+      "geometric_mean_speedup": 1.0498
     }
   },
   "languages": {
+    "ar": {
+      "radixor_ns_per_word": 150.2772,
+      "radixor_mwords_per_second": 6.6544,
+      "radixor_c_ns_per_word": 144.2639,
+      "radixor_c_mwords_per_second": 6.9317,
+      "pystemmer_ns_per_word": 407.6508,
+      "speedup_vs_pystemmer": 2.7127,
+      "radixor_c_speedup_vs_pystemmer": 2.8257
+    },
+    "hy": {
+      "radixor_ns_per_word": 118.3856,
+      "radixor_mwords_per_second": 8.447,
+      "radixor_c_ns_per_word": 134.0445,
+      "radixor_c_mwords_per_second": 7.4602,
+      "pystemmer_ns_per_word": 224.4197,
+      "speedup_vs_pystemmer": 1.8957,
+      "radixor_c_speedup_vs_pystemmer": 1.6742
+    },
+    "ca": {
+      "radixor_ns_per_word": 97.5122,
+      "radixor_mwords_per_second": 10.2551,
+      "radixor_c_ns_per_word": 86.9623,
+      "radixor_c_mwords_per_second": 11.4992,
+      "pystemmer_ns_per_word": 191.6192,
+      "speedup_vs_pystemmer": 1.9651,
+      "radixor_c_speedup_vs_pystemmer": 2.2035
+    },
     "cs": {
-      "radixor_ns_per_word": 108.5693,
-      "radixor_mwords_per_second": 9.2107,
-      "radixor_c_ns_per_word": 97.7176,
-      "radixor_c_mwords_per_second": 10.2336,
-      "pystemmer_ns_per_word": 154.257,
-      "speedup_vs_pystemmer": 1.4208,
-      "radixor_c_speedup_vs_pystemmer": 1.5786
+      "radixor_ns_per_word": 114.8401,
+      "radixor_mwords_per_second": 8.7078,
+      "radixor_c_ns_per_word": 103.5002,
+      "radixor_c_mwords_per_second": 9.6618,
+      "pystemmer_ns_per_word": 153.7474,
+      "speedup_vs_pystemmer": 1.3388,
+      "radixor_c_speedup_vs_pystemmer": 1.4855
     },
     "da": {
-      "radixor_ns_per_word": 82.3884,
-      "radixor_mwords_per_second": 12.1376,
-      "radixor_c_ns_per_word": 85.4932,
-      "radixor_c_mwords_per_second": 11.6968,
-      "pystemmer_ns_per_word": 176.7327,
-      "speedup_vs_pystemmer": 2.1451,
-      "radixor_c_speedup_vs_pystemmer": 2.0672
+      "radixor_ns_per_word": 85.8529,
+      "radixor_mwords_per_second": 11.6478,
+      "radixor_c_ns_per_word": 91.6155,
+      "radixor_c_mwords_per_second": 10.9152,
+      "pystemmer_ns_per_word": 188.7244,
+      "speedup_vs_pystemmer": 2.1982,
+      "radixor_c_speedup_vs_pystemmer": 2.06
     },
     "de": {
-      "radixor_ns_per_word": 120.5133,
-      "radixor_mwords_per_second": 8.2978,
-      "radixor_c_ns_per_word": 134.9876,
-      "radixor_c_mwords_per_second": 7.4081,
-      "pystemmer_ns_per_word": 442.122,
-      "speedup_vs_pystemmer": 3.6687,
-      "radixor_c_speedup_vs_pystemmer": 3.2753
+      "radixor_ns_per_word": 127.3626,
+      "radixor_mwords_per_second": 7.8516,
+      "radixor_c_ns_per_word": 142.7616,
+      "radixor_c_mwords_per_second": 7.0047,
+      "pystemmer_ns_per_word": 457.1738,
+      "speedup_vs_pystemmer": 3.5895,
+      "radixor_c_speedup_vs_pystemmer": 3.2024
     },
     "en": {
-      "radixor_ns_per_word": 94.576,
-      "radixor_mwords_per_second": 10.5735,
-      "radixor_c_ns_per_word": 91.5763,
-      "radixor_c_mwords_per_second": 10.9199,
-      "pystemmer_ns_per_word": 233.3893,
-      "speedup_vs_pystemmer": 2.4677,
-      "radixor_c_speedup_vs_pystemmer": 2.5486
+      "radixor_ns_per_word": 96.4462,
+      "radixor_mwords_per_second": 10.3685,
+      "radixor_c_ns_per_word": 97.5645,
+      "radixor_c_mwords_per_second": 10.2496,
+      "pystemmer_ns_per_word": 244.3359,
+      "speedup_vs_pystemmer": 2.5334,
+      "radixor_c_speedup_vs_pystemmer": 2.5044
     },
     "es": {
-      "radixor_ns_per_word": 96.6087,
-      "radixor_mwords_per_second": 10.351,
-      "radixor_c_ns_per_word": 87.4843,
-      "radixor_c_mwords_per_second": 11.4306,
-      "pystemmer_ns_per_word": 201.0881,
-      "speedup_vs_pystemmer": 2.0815,
-      "radixor_c_speedup_vs_pystemmer": 2.2986
+      "radixor_ns_per_word": 102.8162,
+      "radixor_mwords_per_second": 9.7261,
+      "radixor_c_ns_per_word": 94.8216,
+      "radixor_c_mwords_per_second": 10.5461,
+      "pystemmer_ns_per_word": 215.8312,
+      "speedup_vs_pystemmer": 2.0992,
+      "radixor_c_speedup_vs_pystemmer": 2.2762
+    },
+    "et": {
+      "radixor_ns_per_word": 78.6469,
+      "radixor_mwords_per_second": 12.7151,
+      "radixor_c_ns_per_word": 73.7435,
+      "radixor_c_mwords_per_second": 13.5605,
+      "pystemmer_ns_per_word": 207.033,
+      "speedup_vs_pystemmer": 2.6324,
+      "radixor_c_speedup_vs_pystemmer": 2.8075
     },
     "fa": {
-      "radixor_ns_per_word": 112.2558,
-      "radixor_mwords_per_second": 8.9082,
-      "radixor_c_ns_per_word": 97.4969,
-      "radixor_c_mwords_per_second": 10.2567,
-      "pystemmer_ns_per_word": 329.0118,
-      "speedup_vs_pystemmer": 2.9309,
-      "radixor_c_speedup_vs_pystemmer": 3.3746
+      "radixor_ns_per_word": 118.4831,
+      "radixor_mwords_per_second": 8.44,
+      "radixor_c_ns_per_word": 99.9835,
+      "radixor_c_mwords_per_second": 10.0016,
+      "pystemmer_ns_per_word": 345.882,
+      "speedup_vs_pystemmer": 2.9193,
+      "radixor_c_speedup_vs_pystemmer": 3.4594
     },
     "fi": {
-      "radixor_ns_per_word": 137.6457,
-      "radixor_mwords_per_second": 7.265,
-      "radixor_c_ns_per_word": 118.2842,
-      "radixor_c_mwords_per_second": 8.4542,
-      "pystemmer_ns_per_word": 179.0719,
-      "speedup_vs_pystemmer": 1.301,
-      "radixor_c_speedup_vs_pystemmer": 1.5139
+      "radixor_ns_per_word": 148.6901,
+      "radixor_mwords_per_second": 6.7254,
+      "radixor_c_ns_per_word": 125.419,
+      "radixor_c_mwords_per_second": 7.9733,
+      "pystemmer_ns_per_word": 186.6558,
+      "speedup_vs_pystemmer": 1.2553,
+      "radixor_c_speedup_vs_pystemmer": 1.4883
     },
     "fr": {
-      "radixor_ns_per_word": 133.4841,
-      "radixor_mwords_per_second": 7.4915,
-      "radixor_c_ns_per_word": 124.0849,
-      "radixor_c_mwords_per_second": 8.059,
-      "pystemmer_ns_per_word": 330.3007,
-      "speedup_vs_pystemmer": 2.4745,
-      "radixor_c_speedup_vs_pystemmer": 2.6619
+      "radixor_ns_per_word": 139.7256,
+      "radixor_mwords_per_second": 7.1569,
+      "radixor_c_ns_per_word": 133.5694,
+      "radixor_c_mwords_per_second": 7.4867,
+      "pystemmer_ns_per_word": 348.1479,
+      "speedup_vs_pystemmer": 2.4917,
+      "radixor_c_speedup_vs_pystemmer": 2.6065
+    },
+    "el": {
+      "radixor_ns_per_word": 158.9084,
+      "radixor_mwords_per_second": 6.2929,
+      "radixor_c_ns_per_word": 135.3332,
+      "radixor_c_mwords_per_second": 7.3892,
+      "pystemmer_ns_per_word": 560.6059,
+      "speedup_vs_pystemmer": 3.5279,
+      "radixor_c_speedup_vs_pystemmer": 4.1424
     },
     "he": {
-      "radixor_ns_per_word": 136.8469,
-      "radixor_mwords_per_second": 7.3074,
-      "radixor_c_ns_per_word": 141.9508,
-      "radixor_c_mwords_per_second": 7.0447,
+      "radixor_ns_per_word": 143.7695,
+      "radixor_mwords_per_second": 6.9556,
+      "radixor_c_ns_per_word": 134.6086,
+      "radixor_c_mwords_per_second": 7.4289,
       "pystemmer_ns_per_word": null,
       "speedup_vs_pystemmer": null,
       "radixor_c_speedup_vs_pystemmer": null
     },
     "hu": {
-      "radixor_ns_per_word": 91.2273,
-      "radixor_mwords_per_second": 10.9616,
-      "radixor_c_ns_per_word": 91.9708,
-      "radixor_c_mwords_per_second": 10.873,
-      "pystemmer_ns_per_word": 164.5169,
-      "speedup_vs_pystemmer": 1.8034,
-      "radixor_c_speedup_vs_pystemmer": 1.7888
+      "radixor_ns_per_word": 96.666,
+      "radixor_mwords_per_second": 10.3449,
+      "radixor_c_ns_per_word": 96.3693,
+      "radixor_c_mwords_per_second": 10.3767,
+      "pystemmer_ns_per_word": 170.9309,
+      "speedup_vs_pystemmer": 1.7683,
+      "radixor_c_speedup_vs_pystemmer": 1.7737
+    },
+    "id": {
+      "radixor_ns_per_word": 103.2976,
+      "radixor_mwords_per_second": 9.6808,
+      "radixor_c_ns_per_word": 97.0587,
+      "radixor_c_mwords_per_second": 10.303,
+      "pystemmer_ns_per_word": 145.535,
+      "speedup_vs_pystemmer": 1.4089,
+      "radixor_c_speedup_vs_pystemmer": 1.4995
+    },
+    "ga": {
+      "radixor_ns_per_word": 142.683,
+      "radixor_mwords_per_second": 7.0085,
+      "radixor_c_ns_per_word": 132.1107,
+      "radixor_c_mwords_per_second": 7.5694,
+      "pystemmer_ns_per_word": 204.1086,
+      "speedup_vs_pystemmer": 1.4305,
+      "radixor_c_speedup_vs_pystemmer": 1.545
     },
     "it": {
-      "radixor_ns_per_word": 103.0003,
-      "radixor_mwords_per_second": 9.7087,
-      "radixor_c_ns_per_word": 79.8332,
-      "radixor_c_mwords_per_second": 12.5261,
-      "pystemmer_ns_per_word": 347.3633,
-      "speedup_vs_pystemmer": 3.3724,
-      "radixor_c_speedup_vs_pystemmer": 4.3511
+      "radixor_ns_per_word": 107.0386,
+      "radixor_mwords_per_second": 9.3424,
+      "radixor_c_ns_per_word": 83.4222,
+      "radixor_c_mwords_per_second": 11.9872,
+      "pystemmer_ns_per_word": 358.9015,
+      "speedup_vs_pystemmer": 3.353,
+      "radixor_c_speedup_vs_pystemmer": 4.3022
+    },
+    "lt": {
+      "radixor_ns_per_word": 151.67,
+      "radixor_mwords_per_second": 6.5933,
+      "radixor_c_ns_per_word": 122.2159,
+      "radixor_c_mwords_per_second": 8.1822,
+      "pystemmer_ns_per_word": 191.8995,
+      "speedup_vs_pystemmer": 1.2652,
+      "radixor_c_speedup_vs_pystemmer": 1.5702
     },
     "nb": {
-      "radixor_ns_per_word": 82.9529,
-      "radixor_mwords_per_second": 12.055,
-      "radixor_c_ns_per_word": 88.3232,
-      "radixor_c_mwords_per_second": 11.3221,
-      "pystemmer_ns_per_word": 148.3329,
-      "speedup_vs_pystemmer": 1.7882,
-      "radixor_c_speedup_vs_pystemmer": 1.6794
+      "radixor_ns_per_word": 86.0998,
+      "radixor_mwords_per_second": 11.6144,
+      "radixor_c_ns_per_word": 93.5675,
+      "radixor_c_mwords_per_second": 10.6875,
+      "pystemmer_ns_per_word": 149.6108,
+      "speedup_vs_pystemmer": 1.7376,
+      "radixor_c_speedup_vs_pystemmer": 1.599
     },
     "nl": {
-      "radixor_ns_per_word": 89.3445,
-      "radixor_mwords_per_second": 11.1926,
-      "radixor_c_ns_per_word": 80.079,
-      "radixor_c_mwords_per_second": 12.4877,
-      "pystemmer_ns_per_word": 240.8205,
-      "speedup_vs_pystemmer": 2.6954,
-      "radixor_c_speedup_vs_pystemmer": 3.0073
+      "radixor_ns_per_word": 95.449,
+      "radixor_mwords_per_second": 10.4768,
+      "radixor_c_ns_per_word": 85.6981,
+      "radixor_c_mwords_per_second": 11.6689,
+      "pystemmer_ns_per_word": 250.3623,
+      "speedup_vs_pystemmer": 2.623,
+      "radixor_c_speedup_vs_pystemmer": 2.9214
     },
     "nn": {
-      "radixor_ns_per_word": 72.1205,
-      "radixor_mwords_per_second": 13.8657,
-      "radixor_c_ns_per_word": 76.7494,
-      "radixor_c_mwords_per_second": 13.0294,
-      "pystemmer_ns_per_word": 145.1089,
-      "speedup_vs_pystemmer": 2.012,
-      "radixor_c_speedup_vs_pystemmer": 1.8907
+      "radixor_ns_per_word": 74.9449,
+      "radixor_mwords_per_second": 13.3431,
+      "radixor_c_ns_per_word": 80.2466,
+      "radixor_c_mwords_per_second": 12.4616,
+      "pystemmer_ns_per_word": 148.2621,
+      "speedup_vs_pystemmer": 1.9783,
+      "radixor_c_speedup_vs_pystemmer": 1.8476
     },
     "pl": {
-      "radixor_ns_per_word": 89.0246,
-      "radixor_mwords_per_second": 11.2328,
-      "radixor_c_ns_per_word": 87.2593,
-      "radixor_c_mwords_per_second": 11.4601,
-      "pystemmer_ns_per_word": 130.5499,
-      "speedup_vs_pystemmer": 1.4664,
-      "radixor_c_speedup_vs_pystemmer": 1.4961
+      "radixor_ns_per_word": 94.9365,
+      "radixor_mwords_per_second": 10.5334,
+      "radixor_c_ns_per_word": 90.9421,
+      "radixor_c_mwords_per_second": 10.996,
+      "pystemmer_ns_per_word": 133.7537,
+      "speedup_vs_pystemmer": 1.4089,
+      "radixor_c_speedup_vs_pystemmer": 1.4708
     },
     "pt": {
-      "radixor_ns_per_word": 77.3538,
-      "radixor_mwords_per_second": 12.9276,
-      "radixor_c_ns_per_word": 68.3339,
-      "radixor_c_mwords_per_second": 14.634,
-      "pystemmer_ns_per_word": 183.0963,
-      "speedup_vs_pystemmer": 2.367,
-      "radixor_c_speedup_vs_pystemmer": 2.6794
+      "radixor_ns_per_word": 81.2355,
+      "radixor_mwords_per_second": 12.3099,
+      "radixor_c_ns_per_word": 72.3578,
+      "radixor_c_mwords_per_second": 13.8202,
+      "pystemmer_ns_per_word": 217.9039,
+      "speedup_vs_pystemmer": 2.6824,
+      "radixor_c_speedup_vs_pystemmer": 3.0115
+    },
+    "ro": {
+      "radixor_ns_per_word": 106.4166,
+      "radixor_mwords_per_second": 9.397,
+      "radixor_c_ns_per_word": 100.0062,
+      "radixor_c_mwords_per_second": 9.9994,
+      "pystemmer_ns_per_word": 298.3777,
+      "speedup_vs_pystemmer": 2.8039,
+      "radixor_c_speedup_vs_pystemmer": 2.9836
     },
     "ru": {
-      "radixor_ns_per_word": 145.9692,
-      "radixor_mwords_per_second": 6.8508,
-      "radixor_c_ns_per_word": 147.9071,
-      "radixor_c_mwords_per_second": 6.761,
-      "pystemmer_ns_per_word": 263.3541,
-      "speedup_vs_pystemmer": 1.8042,
-      "radixor_c_speedup_vs_pystemmer": 1.7805
+      "radixor_ns_per_word": 153.8463,
+      "radixor_mwords_per_second": 6.5,
+      "radixor_c_ns_per_word": 155.2043,
+      "radixor_c_mwords_per_second": 6.4431,
+      "pystemmer_ns_per_word": 274.066,
+      "speedup_vs_pystemmer": 1.7814,
+      "radixor_c_speedup_vs_pystemmer": 1.7658
+    },
+    "st": {
+      "radixor_ns_per_word": 63.7911,
+      "radixor_mwords_per_second": 15.6762,
+      "radixor_c_ns_per_word": 56.1326,
+      "radixor_c_mwords_per_second": 17.815,
+      "pystemmer_ns_per_word": 106.2372,
+      "speedup_vs_pystemmer": 1.6654,
+      "radixor_c_speedup_vs_pystemmer": 1.8926
     },
     "sv": {
-      "radixor_ns_per_word": 86.851,
-      "radixor_mwords_per_second": 11.514,
-      "radixor_c_ns_per_word": 93.0726,
-      "radixor_c_mwords_per_second": 10.7443,
-      "pystemmer_ns_per_word": 130.1728,
-      "speedup_vs_pystemmer": 1.4988,
-      "radixor_c_speedup_vs_pystemmer": 1.3986
+      "radixor_ns_per_word": 91.5001,
+      "radixor_mwords_per_second": 10.929,
+      "radixor_c_ns_per_word": 98.6489,
+      "radixor_c_mwords_per_second": 10.137,
+      "pystemmer_ns_per_word": 136.398,
+      "speedup_vs_pystemmer": 1.4907,
+      "radixor_c_speedup_vs_pystemmer": 1.3827
+    },
+    "tr": {
+      "radixor_ns_per_word": 124.771,
+      "radixor_mwords_per_second": 8.0147,
+      "radixor_c_ns_per_word": 121.4655,
+      "radixor_c_mwords_per_second": 8.2328,
+      "pystemmer_ns_per_word": 485.6587,
+      "speedup_vs_pystemmer": 3.8924,
+      "radixor_c_speedup_vs_pystemmer": 3.9983
     },
     "uk": {
-      "radixor_ns_per_word": 103.8232,
-      "radixor_mwords_per_second": 9.6318,
-      "radixor_c_ns_per_word": 110.3185,
-      "radixor_c_mwords_per_second": 9.0647,
+      "radixor_ns_per_word": 108.0231,
+      "radixor_mwords_per_second": 9.2573,
+      "radixor_c_ns_per_word": 112.7716,
+      "radixor_c_mwords_per_second": 8.8675,
       "pystemmer_ns_per_word": null,
       "speedup_vs_pystemmer": null,
       "radixor_c_speedup_vs_pystemmer": null
     },
     "yi": {
-      "radixor_ns_per_word": 95.6651,
-      "radixor_mwords_per_second": 10.4531,
-      "radixor_c_ns_per_word": 98.7555,
-      "radixor_c_mwords_per_second": 10.126,
-      "pystemmer_ns_per_word": 432.5561,
-      "speedup_vs_pystemmer": 4.5216,
-      "radixor_c_speedup_vs_pystemmer": 4.3801
+      "radixor_ns_per_word": 102.2511,
+      "radixor_mwords_per_second": 9.7798,
+      "radixor_c_ns_per_word": 103.0592,
+      "radixor_c_mwords_per_second": 9.7032,
+      "pystemmer_ns_per_word": 455.3466,
+      "speedup_vs_pystemmer": 4.4532,
+      "radixor_c_speedup_vs_pystemmer": 4.4183
     }
   },
   "pystemmer_missing_for_radixor_languages": [

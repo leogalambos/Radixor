@@ -1,8 +1,9 @@
 # Polish UniMorph filtered candidate
 
-`pl-pl-unimorph-filtered` is a locally buildable alternative to
-`pl-pl-unimorph`. It is not published, registered as a default, or included in
-the model catalog, BOM, standard pack, or Python model packages.
+`pl-pl-unimorph-filtered` is a published opt-in alternative to
+`pl-pl-unimorph`. It is available individually and through
+`radixor-models-filtered`, but is not a registered default or part of the
+standard, extended, or Python packages.
 
 The checked-in `pl-pl-unimorph` dictionary is the only lexical input. The audit
 removes strongly internally dominated stem assignments without consulting

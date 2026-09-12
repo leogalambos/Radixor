@@ -46,6 +46,14 @@ rootProject.file('models/model-projects.properties').withInputStream { InputStre
     modelTopology.load(input)
 }
 List<String> modelIds = modelTopology.stringPropertyNames().toList().sort()
+Properties alternativeTopology = new Properties()
+rootProject.file('models/alternative-model-projects.properties').withInputStream { InputStream input ->
+    alternativeTopology.load(input)
+}
+modelIds = (modelIds + alternativeTopology.stringPropertyNames()).sort()
+if (modelIds.size() != 154 || modelIds.toSet().size() != 154) {
+    throw new GradleException('The model BOM must manage exactly 154 distinct distributable model artifacts.')
+}
 
 dependencies {
     constraints {

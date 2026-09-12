@@ -1,0 +1,24 @@
+model_id	language	display_name	model_version	model_sha256	dictionary
+cy-gb-default	CY_GB	Welsh — UniMorph	1.0.0	394475eedc3c0fe26d395d06821efa2e8ff0c2ea4b5c63b72bbe3c8a4efd3d5d	/home/galambos/work-home/Radixor/models/cy-gb-default/src/modelInput/stemmer.gz
+eus-default	EUS	Basque — UniMorph	1.0.0	29ea20d68e085f9403c32330259f02599f6c510f47db0475f1e3ea73a276a98b	/home/galambos/work-home/Radixor/models/eus-default/src/modelInput/stemmer.gz
+fy-nl-default	FY_NL	West Frisian — UniMorph	1.0.0	24dbc346fc258d7315048b02d24e8cc3675739e6563613695dac3c548fcfab68	/home/galambos/work-home/Radixor/models/fy-nl-default/src/modelInput/stemmer.gz
+gd-gb-default	GD_GB	Scottish Gaelic — UniMorph	1.0.0	089c9cb590ef564fee033fcaa59c50b7317aaed5e55ebd5493679a60b6458c33	/home/galambos/work-home/Radixor/models/gd-gb-default/src/modelInput/stemmer.gz
+hsb-default	HSB	Upper Sorbian — UniMorph	1.0.0	dd085232541899920df2acfcb11ef8fd914fea6894351f08a1e99f8fb84c3950	/home/galambos/work-home/Radixor/models/hsb-default/src/modelInput/stemmer.gz
+ka-ge-default	KA_GE	Georgian — UniMorph	1.0.0	f8205f3c31e3dc6a0f908b3839956c72688ae04b672ed75ba9083e4280b99c3b	/home/galambos/work-home/Radixor/models/ka-ge-default/src/modelInput/stemmer.gz
+kca-default	KCA	Khanty — UniMorph	1.0.0	22be165f4e2d9805a8db4b84ca943fe66eb6e1c3dbf390bd8f135a03678107e9	/home/galambos/work-home/Radixor/models/kca-default/src/modelInput/stemmer.gz
+ket-default	KET	Ket — UniMorph	1.0.0	4916e12863d306cbda2240606bd667e77d1c0d96bb8a3981c1d72a7d565887eb	/home/galambos/work-home/Radixor/models/ket-default/src/modelInput/stemmer.gz
+kmr-default	KMR	Kurmanji Kurdish — UniMorph	1.0.0	147729f9f3eb36dd1eaf35095cc57086e0aebf42ad4780aaf80034a5c0492948	/home/galambos/work-home/Radixor/models/kmr-default/src/modelInput/stemmer.gz
+ko-kr-default	KO_KR	Korean — UniMorph	1.0.0	bbcb468402ee54327dfd2101df5ef90869db06fe0543d85c1f62ac4d3beba155	/home/galambos/work-home/Radixor/models/ko-kr-default/src/modelInput/stemmer.gz
+oci-default	OCI	Occitan — UniMorph	1.0.0	7c5dcd14b47020d7676a1fc634a1d9f38a06728d69407386d8864cd909046c3c	/home/galambos/work-home/Radixor/models/oci-default/src/modelInput/stemmer.gz
+om-et-default	OM_ET	Oromo — UniMorph	1.0.0	df01f908af60ba4a63933a91845d1241a37d366467026bd826ebec08689406bb	/home/galambos/work-home/Radixor/models/om-et-default/src/modelInput/stemmer.gz
+sah-default	SAH	Yakut — UniMorph	1.0.0	c5b361c9e1df64d60813c96cbea4d228d97fbc76e71bbaccb87609a13e6b67e8	/home/galambos/work-home/Radixor/models/sah-default/src/modelInput/stemmer.gz
+san-default	SAN	Sanskrit — UniMorph	1.0.0	bf94e3c36639ce16b0c11a6e9ab62baebc8acea18d14926a597585cbb179e708	/home/galambos/work-home/Radixor/models/san-default/src/modelInput/stemmer.gz
+sl-si-default	SL_SI	Slovenian — UniMorph	1.0.0	b59e7199dce258b404729e4d708172c535733cfae430a26f1c4faa3d25dc323e	/home/galambos/work-home/Radixor/models/sl-si-default/src/modelInput/stemmer.gz
+slp-default	SLP	Lacandon — UniMorph	1.0.0	fb4cc41d286579f2c0992e282bbfa7e0ccc251526119cf51ad752f363ac352be	/home/galambos/work-home/Radixor/models/slp-default/src/modelInput/stemmer.gz
+tat-default	TAT	Tatar — UniMorph	1.0.0	1617b08152da422aa295ef7f990e9e30ec8834eeeb9555cba805d96142462779	/home/galambos/work-home/Radixor/models/tat-default/src/modelInput/stemmer.gz
+tg-tj-default	TG_TJ	Tajik — UniMorph	1.0.0	4809cdc83d745d0db145d74c6654e4732b83bf70e32df3a208aac22a0db4d6b1	/home/galambos/work-home/Radixor/models/tg-tj-default/src/modelInput/stemmer.gz
+tk-tm-default	TK_TM	Turkmen — UniMorph	1.0.0	3821730499cd42fa7974c907d08377763e1cc1a6f85784b638d22f87124317e2	/home/galambos/work-home/Radixor/models/tk-tm-default/src/modelInput/stemmer.gz
+tyv-default	TYV	Tuvan — UniMorph	1.0.0	7b4189ea74cbc151a0dfa22c01dd30b105a53f9f1be561033184df0d5fecd7b6	/home/galambos/work-home/Radixor/models/tyv-default/src/modelInput/stemmer.gz
+ur-pk-default	UR_PK	Urdu — UniMorph	1.0.0	588e4e2644f121073adc8a62f8f5c14e9fcaa5e57ed29ada787596c0248eb426	/home/galambos/work-home/Radixor/models/ur-pk-default/src/modelInput/stemmer.gz
+vec-default	VEC	Venetian — UniMorph	1.0.0	29d9dee4846c6fee65c69116c9ac2cfa370719af04cf206050ce08b9c5acfb0d	/home/galambos/work-home/Radixor/models/vec-default/src/modelInput/stemmer.gz
+vot-default	VOT	Votic — UniMorph	1.0.0	f05693d86412bf46ca79606c033018d488553c30a180f3d00bee394867ad667b	/home/galambos/work-home/Radixor/models/vot-default/src/modelInput/stemmer.gz

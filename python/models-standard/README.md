@@ -1,6 +1,6 @@
 # Radixor standard models
 
-This pure-Python distribution supplies Radixor's 20 precompiled standard
+This pure-Python distribution supplies Radixor's 31 precompiled standard
 language models. It is installed automatically by `pip install radixor`; users
 normally do not import it directly.
 
@@ -8,7 +8,7 @@ The aggregate Java catalog and individual model versions are recorded in the
 generated `radixor_models_standard/manifest.json`. Release staging reads them from
 `models/catalog-version.txt` and the individual `model-version.txt` files; they
 are not maintained separately in this packaging skeleton. The optional Polish
-PoliMorf model is intentionally not part of the standard catalog.
+PoliMorf model is intentionally not part of the standard package.
 The distribution version is independent of both the catalog identity and the
 individual model versions. Its major version is the runtime compatibility
 boundary; catalog releases within a supported major line are provenance only.

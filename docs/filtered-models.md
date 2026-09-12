@@ -7,11 +7,12 @@ artifacts explain part of the unusually large command vocabulary.
 
 Candidate models are complete model modules under `models/<model-id>`: each has
 an independent version, immutable `stemmer.gz`, descriptor metadata, provenance,
-and licensing material. They are deliberately not published and do not belong
-to the published model catalog, model BOM, standard model pack, Java benchmark
-classpath, or Python model packages. Their Gradle publication and release tasks
-are disabled. Language convenience methods therefore continue to load the
-registered default model. A candidate must be selected by its exact model ID.
+and licensing material. They are published individually, constrained by the
+model BOM, and available together through the opt-in POM-only
+`radixor-models-filtered` aggregate. They remain outside the active language
+registry, language-default helpers, Java standard and extended aggregates,
+benchmarks of active defaults, and every Python model package. A candidate must
+therefore be selected by its exact model ID.
 
 ## Current candidates
 
@@ -133,8 +134,10 @@ Build one candidate independently:
 
 The resulting local JAR is
 `models/de-de-filtered/build/libs/radixor-model-de-de-filtered-1.0.0.jar`.
-Add that file to an application's runtime classpath; do not use nonexistent
-Maven coordinates for an unpublished candidate. Select it explicitly:
+For a published release, add either the individual
+`org.egothor:radixor-model-de-de-filtered:<model-version>` coordinate or the
+opt-in `org.egothor:radixor-models-filtered:<catalog-version>` aggregate. Select
+the model explicitly:
 
 ```java
 final FrequencyTrie<CompiledPatchCommand> german =
@@ -172,6 +175,6 @@ representative application tests, and a check that runtime and trie-size effects
 are acceptable. The approved candidate dictionary can then replace the input of
 the registered default module in a deliberate model release. That release must
 update the default model's own version and provenance, regenerate the checked-in
-catalog documentation manually, and follow the normal model and metapackage
-release procedure. The candidate module remains outside every published package
-until that decision is made.
+catalog documentation, and follow the normal model and metapackage release
+procedure. Until then, the candidate remains an explicitly selected filtered
+alternative and never becomes a language default.

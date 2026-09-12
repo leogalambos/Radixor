@@ -1,0 +1,50 @@
+Radixor model-data notice
+
+Radixor-derived model data
+
+Copyright (C) 2026, Leo Galambos.
+
+Copyright and, where applicable, database rights are claimed in the
+Radixor-specific selection, verification, cleaning, normalization,
+grouping, deduplication, filtering, reformatting, metadata preparation,
+and packaging of this model, to the extent protected by applicable law.
+
+The underlying morphological data remains attributed to UniMorph and
+the upstream contributors identified in this notice.
+
+This derived model data, including Radixor's protectable contributions,
+is distributed under Creative Commons Attribution-ShareAlike 3.0.
+
+Model ID: ckt-default
+Source project: UniMorph
+Official repository: https://github.com/unimorph/ckt
+Selected upstream data:
+- ckt [lemma-form-features], SHA-256 488ad4bfeff6aef4b8d5de536251c7a3887e05f66be68d0901688d6db88e65da
+Source origin: Not stated in pinned repository evidence
+Attribution: UniMorph; Karina Sheifer, Maria Ryskina
+License:
+Creative Commons Attribution-ShareAlike 3.0 Unported
+
+Canonical license URI: https://creativecommons.org/licenses/by-sa/3.0/
+Source revision: facbd482ef2558916b7283b398c9810a8649e7f2
+Revision status: recorded
+Repository evidence paths: README.md:evidence-00-README.md
+Repository evidence SHA-256: evidence-00-README.md:9ffdb66545ca1d413e8c808a1021f76720f132443df9b63adbde036a148c9eed
+Import policy: radixor-unimorph-import-v1
+Projection semantics: Each declared three-column source directly projects lemma and surface form.
+Conflict semantics: All valid lemma-form assignments are retained. Surface ambiguity is reported explicitly and is never resolved by dropping or overwriting an assignment.
+Import rows: source=243; accepted=242; rejected=1
+Rejection reasons: declared-ckt-malformed-row=1
+Per-source import audit:
+- ckt: source=243; accepted=242; rejected=1; added-groups=191; added-distinct-surfaces=302; added-source-pairs=238; added-output-forms=304; added-changed-pairs=113; intrinsic-ambiguous-surfaces=1; rejection-reasons=declared-ckt-malformed-row=1
+Surface conflict audit: cross-source-assignments=0; cross-source-surfaces=0; intrinsic-ambiguous-surfaces=1
+Audited excluded upstream files:
+- none
+Generated dictionary: groups=191; forms=304
+Deterministic GZip SHA-256: 1ac8387d6dad002370756edfb57286e2add869d0591b9551e7dfbcf24cda4367
+
+Radixor modifications: Strict UTF-8 validation, NFC normalization, lowercase conversion, structural unsafe-character rejection, grouping by lemma, exact deduplication, deterministic ordering, and reproducible GZip packaging.
+
+Neither UniMorph nor any upstream contributor endorses Radixor.
+
+Upstream information verified: 2026-09-11

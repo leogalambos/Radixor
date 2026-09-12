@@ -1,0 +1,52 @@
+Radixor model-data notice
+
+Radixor-derived model data
+
+Copyright (C) 2026, Leo Galambos.
+
+Copyright and, where applicable, database rights are claimed in the
+Radixor-specific selection, verification, cleaning, normalization,
+grouping, deduplication, filtering, reformatting, metadata preparation,
+and packaging of this model, to the extent protected by applicable law.
+
+The underlying morphological data remains attributed to UniMorph and
+the upstream contributors identified in this notice.
+
+This derived model data, including Radixor's protectable contributions,
+is distributed under Creative Commons Attribution-ShareAlike 3.0.
+
+Model ID: ca-es-default
+Source project: UniMorph
+Official repository: https://github.com/unimorph/cat
+Selected upstream data:
+- cat [lemma-form-features], SHA-256 22d8ec53f9f6bb40ad97619c01961ca60c0c046804173a9f395c6bf54194ca15
+- cat.segmentations [lemma-form-features-segmentation], SHA-256 1d672c2e11e5d6d17667a7ddc02749ee1da2d91d43187abe02479a61108e9637
+Source origin: Wikipedia
+Attribution: UniMorph
+License:
+Creative Commons Attribution-ShareAlike 3.0 Unported
+
+Canonical license URI: https://creativecommons.org/licenses/by-sa/3.0/
+Source revision: 5fe904e0fb37867b4d9e6099fd0798aeeba37d14
+Revision status: recorded
+Repository evidence paths: README.md:evidence-00-README.md
+Repository evidence SHA-256: evidence-00-README.md:eb4bea8ebd955beaecf201b39bbfba186060111bff31222c1d75f5b36186568c
+Import policy: radixor-unimorph-import-v1
+Projection semantics: cat.segmentations projects the first two columns of the declared lemma/form/features/segmentation schema.
+Conflict semantics: All valid lemma-form assignments are retained. Surface ambiguity is reported explicitly and is never resolved by dropping or overwriting an assignment.
+Import rows: source=240499; accepted=240371; rejected=128
+Rejection reasons: blank-row=1;form-unicode-whitespace=127
+Per-source import audit:
+- cat: source=81577; accepted=81449; rejected=128; added-groups=1547; added-distinct-surfaces=62797; added-source-pairs=64559; added-output-forms=64607; added-changed-pairs=63060; intrinsic-ambiguous-surfaces=1807; rejection-reasons=blank-row=1;form-unicode-whitespace=127
+- cat.segmentations: source=158922; accepted=158922; rejected=0; added-groups=13629; added-distinct-surfaces=67569; added-source-pairs=70430; added-output-forms=71255; added-changed-pairs=57626; intrinsic-ambiguous-surfaces=2930; rejection-reasons=none
+Surface conflict audit: cross-source-assignments=964; cross-source-surfaces=935; intrinsic-ambiguous-surfaces=4646
+Audited excluded upstream files:
+- cat.derivations: derivation — Derivational data is outside the inflectional stem-form model contract.
+Generated dictionary: groups=15176; forms=135862
+Deterministic GZip SHA-256: f6f76fd51fcfa7619968fecbab2a77cc53389d251e203cf3fc2452a0dee6f63e
+
+Radixor modifications: Strict UTF-8 validation, NFC normalization, lowercase conversion, structural unsafe-character rejection, grouping by lemma, exact deduplication, deterministic ordering, and reproducible GZip packaging.
+
+Neither UniMorph nor any upstream contributor endorses Radixor.
+
+Upstream information verified: 2026-09-11

@@ -80,7 +80,8 @@ final class RadixorModelPlugin implements Plugin<Project> {
             versionFile = project.layout.projectDirectory.file('model-version.txt')
             modelId = model.modelId
             moduleName = project.name
-            shareAlike = model.sourceLicense.map { String license -> license == 'CC-BY-SA-3.0' }
+            shareAlike = model.sourceLicense.map { String license -> license != 'BSD-2-Clause' }
+            manifestManaged = model.manifestManaged
             metadata.put('source.project', model.sourceProject)
             metadata.put('source.repository', model.sourceRepository)
             metadata.put('source.dataset', model.sourceDataset)
@@ -99,12 +100,12 @@ final class RadixorModelPlugin implements Plugin<Project> {
             dependsOn(validate)
             dictionaryFile = project.layout.projectDirectory.file('src/modelInput/stemmer.gz')
             versionFile = project.layout.projectDirectory.file('model-version.txt')
-            shareAlike = model.sourceLicense.map { String license -> license == 'CC-BY-SA-3.0' }
             generatedDirectory = project.layout.buildDirectory.dir('generated/modelResources')
             descriptorValues.put('model.id', model.modelId)
             descriptorValues.put('model.language', model.language)
             descriptorValues.put('model.displayName', model.displayName)
             descriptorValues.put('model.default', model.defaultModel.map(String::valueOf))
+            descriptorValues.put('model.rightToLeft', model.rightToLeft.map(String::valueOf))
             descriptorValues.put('source.name', model.sourceName)
             descriptorValues.put('source.version', model.sourceVersion)
             descriptorValues.put('source.project', model.sourceProject)
@@ -119,19 +120,25 @@ final class RadixorModelPlugin implements Plugin<Project> {
             descriptorValues.put('transformations.summary', model.transformationsSummary)
         }
         project.afterEvaluate {
-            final boolean shareAlike = model.sourceLicense.get() == 'CC-BY-SA-3.0'
+            final boolean shareAlike = model.sourceLicense.get() != 'BSD-2-Clause'
             if (shareAlike) {
                 final def notice = project.layout.projectDirectory.file("src/modelInput/${model.noticeFileName.get()}")
                 validate.configure { noticeFile = notice }
                 prepare.configure { noticeFile = notice }
-            } else {
+            }
+            if (!shareAlike || model.sourceLicense.get() == 'LGPLLR') {
                 final def license = project.layout.projectDirectory.file("src/modelInput/${model.licenseFileName.get()}")
                 validate.configure { licenseFile = license }
                 prepare.configure { licenseFile = license }
             }
         }
         project.tasks.named('processResources', Copy).configure { dependsOn(prepare); duplicatesStrategy = DuplicatesStrategy.FAIL }
-        project.tasks.named('sourcesJar', Jar).configure { dependsOn(prepare); exclude('**/stemmer.gz') }
+        project.tasks.named('sourcesJar', Jar).configure {
+            dependsOn(prepare)
+            if (model.sourceLicense.get() != 'LGPLLR') {
+                exclude('**/stemmer.gz')
+            }
+        }
         project.tasks.named('javadocJar', Jar).configure { exclude('**/stemmer.gz') }
         project.tasks.named('jar', Jar).configure {
             archiveBaseName.set("radixor-model-${project.name}")
@@ -155,9 +162,12 @@ final class RadixorModelPlugin implements Plugin<Project> {
                 final File archive = project.tasks.named('jar', Jar).get().archiveFile.get().asFile
                 final List<String> names = []
                 final String resource = "org/egothor/stemmer/models/${model.modelId.get()}/stemmer.gz"
-                final boolean shareAlike = model.sourceLicense.get() == 'CC-BY-SA-3.0'
-                final String licenseResource = 'META-INF/LICENSES/PoliMorf-BSD-2-Clause.txt'
-                final File sourceLicense = shareAlike ? null : project.file("src/modelInput/${model.licenseFileName.get()}")
+                final boolean shareAlike = model.sourceLicense.get() != 'BSD-2-Clause'
+                final boolean requiresFullLicense = !shareAlike || model.sourceLicense.get() == 'LGPLLR'
+                final String licenseResource = requiresFullLicense
+                        ? "META-INF/LICENSES/${model.licenseFileName.get()}" : null
+                final File sourceLicense = requiresFullLicense
+                        ? project.file("src/modelInput/${model.licenseFileName.get()}") : null
                 final File sourceNotice = shareAlike
                         ? project.file("src/modelInput/${model.noticeFileName.get()}") : null
                 final String noticeResource = "META-INF/NOTICE/${model.modelId.get()}-data.txt"
@@ -170,7 +180,7 @@ final class RadixorModelPlugin implements Plugin<Project> {
                     if (entry != null) {
                         packagedChecksum = sha256(zip.getInputStream(entry).bytes)
                     }
-                    final def licenseEntry = zip.getEntry(licenseResource)
+                    final def licenseEntry = licenseResource == null ? null : zip.getEntry(licenseResource)
                     if (licenseEntry != null) {
                         packagedLicenseChecksum = sha256(zip.getInputStream(licenseEntry).bytes)
                     }
@@ -187,7 +197,10 @@ final class RadixorModelPlugin implements Plugin<Project> {
                 }
                 if (shareAlike) {
                     requireMatchingChecksum('notice', noticeResource, sha256(sourceNotice), packagedNoticeChecksum)
-                    validateUniMorphJarContents(names)
+                    if (requiresFullLicense) {
+                        requireMatchingChecksum('license', licenseResource, sha256(sourceLicense), packagedLicenseChecksum)
+                    }
+                    validateUniMorphJarContents(names, licenseResource)
                 } else {
                     requireMatchingChecksum('license', licenseResource, sha256(sourceLicense), packagedLicenseChecksum)
                     validatePoliMorfJarContents(names)
@@ -198,8 +211,21 @@ final class RadixorModelPlugin implements Plugin<Project> {
                 [project.tasks.named('sourcesJar', Jar).get(), project.tasks.named('javadocJar', Jar).get()].each { Jar task ->
                     final File documentationArchive = task.archiveFile.get().asFile
                     new java.util.zip.ZipFile(documentationArchive).withCloseable { zip ->
-                        if (zip.entries().any { entry -> entry.name.endsWith('/stemmer.gz') || entry.name == 'stemmer.gz' }) {
-                            throw new GradleException("Documentation artifact ${documentationArchive.name} must not contain a model dictionary.")
+                        final List<String> documentationNames = []
+                        zip.entries().each { entry -> documentationNames.add(entry.name) }
+                        final boolean containsDictionary = documentationNames.any {
+                            String name -> name.endsWith('/stemmer.gz') || name == 'stemmer.gz'
+                        }
+                        final boolean sourceFormRequired = model.sourceLicense.get() == 'LGPLLR'
+                                && task.name == 'sourcesJar'
+                        if (containsDictionary != sourceFormRequired) {
+                            final String requirement = sourceFormRequired
+                                    ? 'must contain the LGPLLR legible dictionary form'
+                                    : 'must not contain a model dictionary'
+                            throw new GradleException("Documentation artifact ${documentationArchive.name} ${requirement}.")
+                        }
+                        if (sourceFormRequired && !documentationNames.contains(licenseResource)) {
+                            throw new GradleException("Documentation artifact ${documentationArchive.name} must contain ${licenseResource}.")
                         }
                     }
                 }
@@ -221,7 +247,7 @@ final class RadixorModelPlugin implements Plugin<Project> {
                 publication.pom {
                     name.set("Radixor model ${project.name}")
                     description.set(model.displayName.zip(model.sourceLicense) { String displayName, String licenseId ->
-                        final String material = licenseId == 'CC-BY-SA-3.0'
+                        final String material = licenseId != 'BSD-2-Clause'
                                 ? 'See the packaged model-specific notice.'
                                 : 'See the packaged model-data license.'
                         return "${displayName}. This artifact contains Radixor-derived model data licensed under ${licenseId}; "
@@ -333,7 +359,13 @@ final class RadixorModelPlugin implements Plugin<Project> {
                 throw new GradleException("Required model metadata is missing: ${key}")
             }
         }
-        validateRevisionMetadata(model.sourceRevision.get(), model.sourceRevisionStatus.get())
+        validateManifestRevisionMetadata(model.sourceRevision.get(), model.sourceRevisionStatus.get(),
+                model.manifestManaged.get())
+        final Set<String> supportedLicenses = [
+                'CC-BY-SA-3.0', 'CC-BY-SA-4.0', 'CC-BY-4.0', 'LGPLLR', 'BSD-2-Clause'] as Set<String>
+        if (!supportedLicenses.contains(model.sourceLicense.get())) {
+            throw new GradleException("Unsupported or unknown model-data license: ${model.sourceLicense.get()}")
+        }
     }
 
     /** Accepts an exact recorded revision or the explicit legacy-import sentinel, but never an absent status. */
@@ -353,23 +385,45 @@ final class RadixorModelPlugin implements Plugin<Project> {
         }
     }
 
+    /** Rejects the legacy revision sentinel for manifest-managed imports. */
+    static void validateManifestRevisionMetadata(final String revision, final String status,
+            final boolean manifestManaged) {
+        validateRevisionMetadata(revision, status)
+        if (manifestManaged && revision == 'not-recorded-in-legacy-import') {
+            throw new GradleException('Manifest-managed UniMorph models require an exact pinned source revision.')
+        }
+    }
+
     /** Validates the model-specific attribution and ShareAlike notice. */
     static void validateShareAlikeNotice(final File notice, final RadixorModelExtension model) {
         validateShareAlikeNoticeText(notice.getText('UTF-8'), notice.toString(), model.modelId.get(),
-                model.sourceRepository.get(), model.sourceLicenseUri.get(), model.sourceRevision.get(),
+                model.sourceRepository.get(), model.sourceLicense.get(), model.sourceLicenseUri.get(), model.sourceRevision.get(),
                 model.sourceRevisionStatus.get())
     }
 
     /** Validates required content in one UniMorph model-data notice. */
     static void validateShareAlikeNoticeText(final String rawText, final String noticeName,
-            final String modelId, final String repository, final String licenseUri,
+            final String modelId, final String repository, final String licenseId, final String licenseUri,
             final String revision, final String revisionStatus) {
         final String text = rawText.replace('\r\n', '\n')
+        final Map<String, List<String>> licenseText = [
+                'CC-BY-SA-3.0': ['Creative Commons Attribution-ShareAlike 3.0 Unported',
+                        'is distributed under Creative Commons Attribution-ShareAlike 3.0'],
+                'CC-BY-SA-4.0': ['Creative Commons Attribution-ShareAlike 4.0 International',
+                        'is distributed under Creative Commons Attribution-ShareAlike 4.0'],
+                'CC-BY-4.0': ['Creative Commons Attribution 4.0 International',
+                        'is distributed under Creative Commons Attribution 4.0'],
+                'LGPLLR': ['Lesser General Public License For Linguistic Resources',
+                        'is distributed under the Lesser General Public License For Linguistic Resources']]
+        final List<String> expectedLicenseText = licenseText[licenseId]
+        if (expectedLicenseText == null) {
+            throw new GradleException("Unsupported notice-based model-data license: ${licenseId}")
+        }
         final List<String> required = [
                 "Model ID: ${modelId}",
                 "Official repository: ${repository}",
                 'Attribution:',
-                'License:\nCreative Commons Attribution-ShareAlike 3.0 Unported',
+                "License:\n${expectedLicenseText[0]}",
                 "Canonical license URI: ${licenseUri}",
                 'Radixor modifications:',
                 "Revision status: ${revisionStatus}",
@@ -378,7 +432,7 @@ final class RadixorModelPlugin implements Plugin<Project> {
                 'to the extent protected by applicable law.',
                 'The underlying morphological data remains attributed to UniMorph and',
                 "This derived model data, including Radixor's protectable contributions,",
-                'is distributed under Creative Commons Attribution-ShareAlike 3.0',
+                expectedLicenseText[1],
                 'Neither UniMorph nor any upstream contributor endorses Radixor.']
         if (revision == 'not-recorded-in-legacy-import') {
             required.add('The exact UniMorph commit used for the original Radixor import was not recorded.')
@@ -390,12 +444,23 @@ final class RadixorModelPlugin implements Plugin<Project> {
     }
 
     /** Rejects generic license files and foreign notices in a UniMorph model artifact. */
-    static void validateUniMorphJarContents(final List<String> names) {
-        if (names.any { String name -> name.startsWith('META-INF/LICENSES/') }) {
-            throw new GradleException('A UniMorph model artifact must use only its model-specific notice for data licensing.')
+    static void validateUniMorphJarContents(final List<String> names, final String permittedLicenseResource = null) {
+        final List<String> licenseResources = names.findAll {
+            String name -> name.startsWith('META-INF/LICENSES/') && !name.endsWith('/')
+        }
+        if (licenseResources != (permittedLicenseResource == null ? [] : [permittedLicenseResource])) {
+            throw new GradleException('A UniMorph model artifact contains unexpected model-data license resources.')
         }
         if (names.count { String name -> name.startsWith('META-INF/NOTICE/') && !name.endsWith('/') } != 1) {
             throw new GradleException('A UniMorph model artifact must contain exactly one model-specific notice.')
+        }
+    }
+
+    /** Validates the canonical SPDX LGPLLR text used by the Khaling model. */
+    static void validateLgpllrLicense(final File licenseFile) {
+        final String expected = 'e4e0f2f92769aad680aeca07f359521004dac4598d8b03def0e6fe507e871134'
+        if (sha256(licenseFile) != expected) {
+            throw new GradleException('The LGPLLR license must match the canonical SPDX text byte-for-byte.')
         }
     }
 
@@ -438,16 +503,14 @@ final class RadixorModelPlugin implements Plugin<Project> {
                             long lineNumber = 0L
                             while ((line = reader.readLine()) != null) {
                 lineNumber++
-                final String trimmed = line.trim()
-                if (trimmed && !trimmed.startsWith('#') && !trimmed.startsWith('//')) {
-                    final String[] columns = line.split('\\t', -1)
-                    if (columns[0].isEmpty()) {
-                        throw new GradleException("Invalid Radixor dictionary row ${lineNumber} in ${file}.")
-                    }
-                    if (containsUnicodeWhitespace(columns[0])) continue
+                final String logicalLine = stripRemark(line).trim()
+                if (logicalLine) {
+                    final String[] columns = logicalLine.split('\\t', -1)
+                    final String stem = columns[0].strip()
+                    if (!stem || containsUnicodeWhitespace(stem)) continue
                     long acceptedRowForms = 1L
                     for (int index = 1; index < columns.length; index++) {
-                        final String variant = columns[index]
+                        final String variant = columns[index].strip()
                         if (variant.isEmpty()) {
                             ignoredEmptyVariants++
                         } else if (!containsUnicodeWhitespace(variant)) {
@@ -475,6 +538,21 @@ final class RadixorModelPlugin implements Plugin<Project> {
         return new DictionaryValidationResult(acceptedGroups, acceptedForms, ignoredEmptyVariants)
     }
 
+    /** Removes the earliest production-parser comment marker from one physical line. */
+    private static String stripRemark(final String line) {
+        final int hash = line.indexOf('#')
+        final int slash = line.indexOf('//')
+        final int remark
+        if (hash < 0) {
+            remark = slash
+        } else if (slash < 0) {
+            remark = hash
+        } else {
+            remark = Math.min(hash, slash)
+        }
+        return remark < 0 ? line : line.substring(0, remark)
+    }
+
     /** Detects Unicode whitespace in one bounded dictionary field. */
     private static boolean containsUnicodeWhitespace(final String value) {
         for (int index = 0; index < value.length(); index++) {
@@ -495,7 +573,7 @@ model.default=${model.defaultModel.get()}
 model.format=radixor-dictionary-tsv-gzip
 model.formatVersion=1
 model.sha256=${checksum}
-model.rightToLeft=${['FA_IR', 'HE_IL', 'YI'].contains(model.language.get())}
+model.rightToLeft=${model.rightToLeft.get()}
 model.caseProcessing=LOWERCASE_WITH_LOCALE_ROOT
 model.diacriticProcessing=AS_IS
 model.storeOriginal=true

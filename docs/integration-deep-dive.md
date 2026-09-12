@@ -78,7 +78,14 @@ module example.search {
 
 The core ships no language dictionary. Add one or more `radixor-model-<model-id>` artifacts, or the optional metadata-only standard pack. Each model JAR contains an indexed descriptor and a namespaced GZip dictionary. `StemmerPatchTrieLoader.Language` represents language properties and a stable default model ID; it does not own embedded data.
 
-The standard option is specifically a POM-only runtime dependency aggregate, not an all-model binary JAR. It resolves one default model JAR per language and excludes optional PoliMorf. The separate POM-only `radixor-models-bom` manages recommended versions without adding runtime artifacts. Repository tests and JMH attach individual model projects directly to non-production configurations, so neither path changes the root publication's dependency graph.
+The standard option is specifically a POM-only runtime dependency aggregate,
+not an all-model binary JAR. It resolves 31 reviewed standard model JARs. The
+Java-only extended aggregate resolves the remaining 113 active models, including
+optional PoliMorf; the filtered aggregate resolves ten opt-in alternatives. The
+separate POM-only `radixor-models-bom` manages recommended versions for all 154
+distributable individual models without adding runtime artifacts. Repository tests and JMH
+attach individual model projects directly to non-production configurations, so
+neither path changes the root publication's dependency graph.
 
 For minimal deployments choose only required model artifacts. For multiple Polish variants add both `pl-pl-unimorph` and `pl-pl-polimorf`, retain UniMorph as the language default, and request PoliMorf explicitly. See [Model Selection and Loading](model-selection-and-loading.md) for complete dependencies and [Built-in Languages](built-in-languages.md) for mappings.
 

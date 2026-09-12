@@ -1,28 +1,152 @@
 # Benchmark Corpora
 
-The table below describes the Radixor resources used to build speed and quality corpora. `Total tokens` is the complete dictionary token count used by quality benchmarks. `Already-root tokens` counts fields where the token is already equal to the line root. `Changed tokens` is the speed workload before the minimum-size repeat rule.
+The table below describes the Radixor resources used to build speed and quality corpora. `Total benchmark tokens` is the complete dictionary token count used by quality benchmarks. `Changed benchmark tokens` counts fields whose token differs from the line root. Timing normally uses that changed population; a root-only model instead uses all root-preservation tokens. `Timing workload` makes this choice explicit.
 
-| Default model ID | Version | SHA-256 | Language | Dictionary rows | Total tokens | Already-root tokens | Changed tokens | Speed timing tokens |
-| --- | --- | --- | --- | ---: | ---: | ---: | ---: | ---: |
-| `cs-cz-default` | `1.0.0` | `62afdaa6dc7a721b54a0dc278a0c648a63ad52a34a412d27b5b52fbcde9c1ce4` | `CS_CZ` | 5,113 | 56,612 | 10,049 | 46,563 | 46,563 |
-| `da-dk-default` | `1.0.0` | `3f7b670a0e7b872bda0381f5154ce058a4656297b39b7157b4ccf6560257cb90` | `DA_DK` | 4,179 | 32,256 | 8,356 | 23,900 | 23,900 |
-| `nl-nl-default` | `1.0.0` | `c098034adc42da2ca3e419160e6dd2c2b3868f8af334303b3a191e09caadaf5e` | `NL_NL` | 4,992 | 31,466 | 9,981 | 21,485 | 21,485 |
-| `us-uk-default` | `1.0.1` | `0a3ec1fddd5ddb859f5ffa8003efe9200a5ef6203df1fddaf53a58003f33582c` | `US_UK` | 396,939 | 1,002,414 | 793,874 | 208,540 | 208,540 |
-| `fi-fi-default` | `1.0.0` | `ca2628b3db31fee92f1b612ebbbd5e956a6dbbfb10e721325e55ef528f26072f` | `FI_FI` | 57,027 | 1,865,215 | 110,525 | 1,754,690 | 1,754,690 |
-| `fr-fr-default` | `1.0.0` | `a988658758952fd599dc7360e0234178a6d65ac46e5cedc7dcd325a7cb7e71d9` | `FR_FR` | 59,240 | 474,110 | 108,141 | 365,969 | 365,969 |
-| `de-de-default` | `1.0.0` | `cbfa038122823f02e4bdb54b0035492c356b6ecd80f11eb11290d7a7248a59f5` | `DE_DE` | 54,092 | 333,036 | 90,535 | 242,501 | 242,501 |
-| `he-il-default` | `1.0.0` | `9a47dc69bb7dab21aba0266b73cd74cdaeb17db94363796a0a56111ac8518256` | `HE_IL` | 2,358 | 61,071 | 4,715 | 56,356 | 56,356 |
-| `hu-hu-default` | `1.0.0` | `359d46a01d751ec823705ad7f3dd1cc8f6663feb1a9d13cb04d0c6fb51ab646e` | `HU_HU` | 19,406 | 935,713 | 38,775 | 896,938 | 896,938 |
-| `it-it-default` | `1.0.0` | `5e03be31c9761e30dbf24a47a5ced3d6ec949dabd31e92632fdd9f7c67fc2e12` | `IT_IT` | 10,009 | 337,546 | 20,004 | 317,542 | 317,542 |
-| `nb-no-default` | `1.0.0` | `f495bffb44e79d27993e6e2e65d4b1204b29365dc93f481b2d8b96766fc90fd9` | `NB_NO` | 17,929 | 90,757 | 33,376 | 57,381 | 57,381 |
-| `nn-no-default` | `1.0.0` | `900cf2005605aea2a3d8d731ec0b0c1f47fb4469b4ba6b9134145d4d026a0398` | `NN_NO` | 4,688 | 19,651 | 6,089 | 13,562 | 13,562 |
-| `fa-ir-default` | `1.0.0` | `b29a0d168a6a97f980666aa40b74a0edd8b6be4ab3320a7abfbb76b3529f4ea1` | `FA_IR` | 69 | 3,770 | 138 | 3,632 | 5,000 |
-| `pl-pl-unimorph` | `1.0.0` | `8191ed727097839cc808cbc5c56a1bd78b3c851e7733ad226ad9a51519a54721` | `PL_PL` | 9,990 | 132,308 | 19,957 | 112,351 | 112,351 |
-| `pt-pt-default` | `1.0.0` | `7a035ff330a6f0548f446cd0d6617bc1cf4751292125a3564d3a255c5d6f516d` | `PT_PT` | 4,001 | 215,490 | 8,002 | 207,488 | 207,488 |
-| `ru-ru-default` | `1.0.0` | `df7ea25e63a875eeec7a4185be685bd5372a3c568db85c34c44fdf5d8d980a40` | `RU_RU` | 37,410 | 806,279 | 74,808 | 731,471 | 731,471 |
-| `es-es-default` | `1.0.0` | `7a1ec94cfdb1e9a95431289d62dc5579cb2a532d99532eeda90290072e569721` | `ES_ES` | 65,059 | 926,393 | 120,121 | 806,272 | 806,272 |
-| `sv-se-default` | `1.0.0` | `d9be72e3d67c776622c4281e04e4063b9381e8f84a823d98ebf08888b82dff0c` | `SV_SE` | 12,371 | 110,468 | 24,731 | 85,737 | 85,737 |
-| `uk-ua-default` | `1.0.0` | `cf3f612cfff16cb7763f99c55851069489b883c3bdd1a6576cd8c57a97e07eae` | `UK_UA` | 1,493 | 15,737 | 2,985 | 12,752 | 12,752 |
-| `yi-default` | `1.0.0` | `f47de665c27dcd72833a82904e49c68a945bb5aca769a7ec5a0164e2c981a6d3` | `YI` | 802 | 4,300 | 1,524 | 2,776 | 5,000 |
+| Model ID | Role | Version | SHA-256 | Language | Dictionary rows | Distinct usable forms | Total benchmark tokens | Changed benchmark tokens | Timing workload | Speed timing tokens |
+| --- | --- | --- | --- | --- | ---: | ---: | ---: | ---: | --- | ---: |
+| `ady-default` | `standalone` | `1.0.0` | `a6ec25c18612cfdc77d43aba4bf49ec3b6cf07e3e484af404a788dff7e944e16` | `ADY` | 1,635 | 20,347 | 20,366 | 18,731 | changed tokens | 18,731 |
+| `af-za-default` | `standalone` | `1.0.0` | `ab23228100b7671fa7a21a23c6c8662a71de69584b277033d5160806542b4bbd` | `AF_ZA` | 170,974 | 297,154 | 301,545 | 130,571 | changed tokens | 130,571 |
+| `afb-default` | `standalone` | `1.0.0` | `7ba0759227455725063648b569652e0442452501fa58b763f3861a3828655ba7` | `AFB` | 6,345 | 29,344 | 30,156 | 23,811 | changed tokens | 23,811 |
+| `ail-default` | `standalone` | `1.0.0` | `a462d3bc94670a2e37c292d027e70892a35c221441500242b5fa9e350fbfba6f` | `AIL` | 636 | 3,061 | 3,133 | 2,497 | changed tokens | 5,000 |
+| `aka-default` | `standalone` | `1.0.0` | `7dd8e1835f51ced8bc3f87409c1ce6eb089ef0e5cde20111c44282ed9ca498b0` | `AK` | 79 | 1,890 | 1,896 | 1,817 | changed tokens | 5,000 |
+| `am-et-default` | `standalone` | `1.0.0` | `69e9089fae06a465459f288a4e2074ffcb9656bf2b6fd01772a2af3f71e5bb70` | `AM_ET` | 2,461 | 41,308 | 42,462 | 40,001 | changed tokens | 40,001 |
+| `ame-default` | `standalone` | `1.0.0` | `e59d252da23b0152d213b1ccff688971bfb49971e2ffcc50b991340516d8feaa` | `AME` | 326 | 2,635 | 2,668 | 2,342 | changed tokens | 5,000 |
+| `ang-default` | `standalone` | `1.0.0` | `1cb0c94c9df7b61676399d163f0a6b7edc2c9d4c14b7560d8ad3667b447d70cf` | `ANG` | 7,146 | 65,202 | 67,625 | 60,479 | changed tokens | 60,479 |
+| `ar-default` | `standalone` | `1.0.1` | `36fe6a7a80e922f423e80761e27f21c61d86cc7f1b2837a1989761af4d51c904` | `AR` | 12,815 | 452,974 | 460,343 | 447,528 | changed tokens | 447,528 |
+| `arn-default` | `standalone` | `1.0.0` | `a9d691ff4f8d5b9a8c87baa400e70754295a107f81a157ffcf9b0063034e9a99` | `ARN` | 26 | 548 | 548 | 522 | changed tokens | 5,000 |
+| `arz-default` | `standalone` | `1.0.0` | `d5269ffb7e66b59abe39c80415817a7a6ff1cafaa196f9a64d66e74408e70a4f` | `ARZ` | 6,004 | 17,937 | 18,344 | 12,340 | changed tokens | 12,340 |
+| `as-in-default` | `standalone` | `1.0.0` | `07a07c7834b55fe980ed5be459aa9d724f54ba4f2449e714aff6b6bce960cba3` | `AS_IN` | 1,466 | 67,733 | 69,680 | 68,214 | changed tokens | 68,214 |
+| `ast-default` | `standalone` | `1.0.0` | `ace7643781385ebd1c162eb88c4f2b3321048b2e5d4e733627a7eeba42a76bb2` | `AST` | 436 | 21,589 | 21,830 | 21,394 | changed tokens | 21,394 |
+| `aym-default` | `standalone` | `1.0.0` | `a6f0af3899e1b7b84080d727a87672822719a6e5a151aed411fda07b7bfbd353` | `AYM` | 3,319 | 308,884 | 310,187 | 306,868 | changed tokens | 306,868 |
+| `az-az-default` | `standalone` | `1.0.0` | `4d61808b68c94830b228d712b769216171c0a2c4f47be7026f9c6a61e68c595a` | `AZ_AZ` | 340 | 6,669 | 6,671 | 6,331 | changed tokens | 6,331 |
+| `azg-default` | `standalone` | `1.0.0` | `67312c026040f0d7a2eef4448bbb23e462598893ead820db1cfc6c59530f48da` | `AZG` | 258 | 9,371 | 9,441 | 9,183 | changed tokens | 9,183 |
+| `bak-default` | `standalone` | `1.0.0` | `ecc3eafd8f269822efc6aab62f8621de561febc14a85f78b56d393e2e40b577f` | `BAK` | 1,059 | 10,723 | 10,742 | 9,683 | changed tokens | 9,683 |
+| `be-by-default` | `standalone` | `1.0.0` | `52b674acaf9e28461b0e638f562e98aee84461ee7acf6c0693d8a36e79f38548` | `BE_BY` | 1,020 | 19,527 | 19,675 | 18,655 | changed tokens | 18,655 |
+| `bg-bg-default` | `standalone` | `1.0.0` | `dd6b424edc9d8a54626d3ee9408feda774a8a13215840074c912752ee37620d2` | `BG_BG` | 2,413 | 45,806 | 45,929 | 43,516 | changed tokens | 43,516 |
+| `bn-bd-default` | `standalone` | `1.0.0` | `0c5a4e2eab4431ef381e54d74b5b8d5d102fe47902882034a8d03f809090b4a5` | `BN_BD` | 111 | 2,847 | 2,855 | 2,744 | changed tokens | 5,000 |
+| `bra-default` | `standalone` | `1.0.0` | `2c9f7a8f9bbca119cc735633b5dacd9d551267c69c36d0ddfaa3ae78bfef6475` | `BRA` | 1,246 | 2,028 | 2,035 | 789 | changed tokens | 5,000 |
+| `bre-default` | `standalone` | `1.0.0` | `f27b933c1a5c37c83a0824ab1b033f2816269d1da107e18232786fe3914e0e02` | `BRE` | 44 | 1,940 | 1,940 | 1,896 | changed tokens | 5,000 |
+| `ca-es-default` | `standalone` | `1.0.0` | `f6f76fd51fcfa7619968fecbab2a77cc53389d251e203cf3fc2452a0dee6f63e` | `CA_ES` | 15,176 | 130,366 | 135,862 | 120,686 | changed tokens | 120,686 |
+| `ceb-default` | `standalone` | `1.0.0` | `f33a8b4a366ace91154808dd5d51ea089114cca5ba343cdd3d9b1e6c51f57b64` | `CEB` | 95 | 430 | 430 | 335 | changed tokens | 5,000 |
+| `chu-default` | `standalone` | `1.0.0` | `1c5d552abc5ed624bcb7af7533e286e7fd1fa9d44f34e38c32360226cb1f0b90` | `CHU` | 152 | 1,652 | 2,030 | 1,878 | changed tokens | 5,000 |
+| `ckt-default` | `standalone` | `1.0.0` | `1ac8387d6dad002370756edfb57286e2add869d0591b9551e7dfbcf24cda4367` | `CKT` | 191 | 302 | 304 | 113 | changed tokens | 5,000 |
+| `cly-default` | `standalone` | `1.0.0` | `7d9e70a7f756343f88bad3ac07d9108da9e0e38659cf3a0ba0d838a55180a6b6` | `CLY` | 185 | 2,035 | 2,251 | 2,066 | changed tokens | 5,000 |
+| `cni-default` | `standalone` | `1.0.0` | `13edaa2b6fad0c81eac550d3214fd1ecdf258184a2568a91d5d8c3cd04d44766` | `CNI` | 407 | 10,095 | 10,129 | 9,722 | changed tokens | 9,722 |
+| `cor-default` | `standalone` | `1.0.0` | `71602207574edad2377b94ef48821f29338c13ccf1ee16419f69f10476e48a5a` | `COR` | 8 | 162 | 174 | 166 | changed tokens | 5,000 |
+| `cpa-default` | `standalone` | `1.0.0` | `6f2c06058918d2419d53f1698071588a79e0cb5475ad8e1dd286e86f22eeeb89` | `CPA` | 555 | 2,741 | 3,090 | 2,535 | changed tokens | 5,000 |
+| `cre-default` | `standalone` | `1.0.0` | `e70a313201ff437268acc5955ea26caa646a4c3d5dca5e898b957b02f691544e` | `CRE` | 32 | 1,076 | 1,076 | 1,044 | changed tokens | 5,000 |
+| `crh-default` | `standalone` | `1.0.0` | `4698c8efadf49f53c89e0fc7b311a5bd70f40490b8dce671394677b9078d8a2c` | `CRH` | 1,210 | 7,195 | 7,199 | 5,989 | changed tokens | 5,989 |
+| `cs-cz-default` | `default` | `1.0.0` | `62afdaa6dc7a721b54a0dc278a0c648a63ad52a34a412d27b5b52fbcde9c1ce4` | `CS_CZ` | 5,113 | 51,401 | 56,612 | 46,563 | changed tokens | 46,563 |
+| `csb-default` | `standalone` | `1.0.0` | `32cf30a085941969f1acc4149152d515efa99fd1061c4ddd9eb1049e5cc3097b` | `CSB` | 37 | 350 | 355 | 318 | changed tokens | 5,000 |
+| `ctp-default` | `standalone` | `1.0.0` | `36b5b636f158d0d65762e87c2125617847cf1b8c6fd766ddf4c42e4343b39122` | `CTP` | 220 | 2,597 | 2,710 | 2,490 | changed tokens | 5,000 |
+| `czn-default` | `standalone` | `1.0.0` | `f8d1d16cfd2a023c322a50965f7437944cad928f716c268a18eccb39c4dab66a` | `CZN` | 386 | 1,864 | 1,915 | 1,529 | changed tokens | 5,000 |
+| `da-dk-default` | `default` | `1.0.0` | `3f7b670a0e7b872bda0381f5154ce058a4656297b39b7157b4ccf6560257cb90` | `DA_DK` | 4,179 | 27,921 | 32,256 | 23,900 | changed tokens | 23,900 |
+| `dak-default` | `standalone` | `1.0.0` | `a867bb0f4165fc47b0906c179213d8563088a3e5f13d161120a2556fa1d9032a` | `DAK` | 473 | 3,332 | 3,358 | 2,885 | changed tokens | 5,000 |
+| `de-de-default` | `default` | `1.0.0` | `cbfa038122823f02e4bdb54b0035492c356b6ecd80f11eb11290d7a7248a59f5` | `DE_DE` | 54,092 | 277,266 | 333,036 | 242,501 | changed tokens | 242,501 |
+| `dje-default` | `standalone` | `1.0.0` | `e4a09508fed786d640720e44077b59abb5dac9d154712a2a0d721f2300ae20df` | `DJE` | 27 | 81 | 81 | 54 | changed tokens | 5,000 |
+| `dsb-default` | `standalone` | `1.0.0` | `0910f3977f825457d7f64f988c984a0400824e4d696991261211d3e29ad02d92` | `DSB` | 990 | 12,039 | 12,196 | 11,206 | changed tokens | 11,206 |
+| `el-gr-default` | `standalone` | `1.0.0` | `05ecc1b60b714c64ab5b6d29aef1a9544f0594f98640e5c66dd9ac324672ac79` | `EL_GR` | 11,793 | 76,869 | 80,320 | 68,527 | changed tokens | 68,527 |
+| `es-es-default` | `default` | `1.0.0` | `7a1ec94cfdb1e9a95431289d62dc5579cb2a532d99532eeda90290072e569721` | `ES_ES` | 65,059 | 849,661 | 926,393 | 806,272 | changed tokens | 806,272 |
+| `et-ee-default` | `standalone` | `1.0.0` | `0d7da990392011b0312fdee181720c2778ff07581912c718b8e7c1d07267c735` | `ET_EE` | 886 | 24,811 | 24,890 | 24,004 | changed tokens | 24,004 |
+| `evn-default` | `standalone` | `1.0.0` | `4ff0de56329166d6d84c8443f0d6223507874854930b2ba2a339bc8be5045c0f` | `EVN` | 4,493 | 13,549 | 13,655 | 9,162 | changed tokens | 9,162 |
+| `fa-ir-default` | `default` | `1.0.1` | `b29a0d168a6a97f980666aa40b74a0edd8b6be4ab3320a7abfbb76b3529f4ea1` | `FA_IR` | 69 | 3,544 | 3,770 | 3,632 | changed tokens | 5,000 |
+| `fi-fi-default` | `default` | `1.0.0` | `ca2628b3db31fee92f1b612ebbbd5e956a6dbbfb10e721325e55ef528f26072f` | `FI_FI` | 57,027 | 1,788,784 | 1,865,215 | 1,754,690 | changed tokens | 1,754,690 |
+| `fo-fo-default` | `standalone` | `1.0.0` | `c5ab9a35317d6cfbba64e8a4a441c1a8a5c3a922384631941804d0bf4eb81fc0` | `FO_FO` | 3,077 | 31,366 | 33,333 | 30,256 | changed tokens | 30,256 |
+| `fr-fr-default` | `default` | `1.0.0` | `a988658758952fd599dc7360e0234178a6d65ac46e5cedc7dcd325a7cb7e71d9` | `FR_FR` | 59,240 | 404,011 | 474,110 | 365,969 | changed tokens | 365,969 |
+| `frm-default` | `standalone` | `1.0.0` | `e4ed58dd8e6d2305bccf46d2b8273d663d2def09fce1046063a4e27b88a82cb7` | `FRM` | 603 | 27,102 | 27,314 | 26,711 | changed tokens | 26,711 |
+| `fro-default` | `standalone` | `1.0.0` | `dab25d905a872c0623c952c102a958f72b6cf7fe39665c12e8a320b5455a9418` | `FRO` | 1,699 | 94,338 | 105,344 | 103,645 | changed tokens | 103,645 |
+| `frr-default` | `standalone` | `1.0.0` | `d92dacea73857c8ddef8113c70a0c72eb5b1d1f6796ef1a4b640993aabc544c4` | `FRR` | 51 | 364 | 381 | 330 | changed tokens | 5,000 |
+| `fur-default` | `standalone` | `1.0.0` | `279631dc8998d6d55a2707d7746ba0e50fe9e5b7f1279e128ac48a70dcf06685` | `FUR` | 168 | 5,007 | 5,017 | 4,849 | changed tokens | 5,000 |
+| `ga-ie-default` | `standalone` | `1.0.0` | `b669438f4375857896dcf9adc535f46f25ddc12c2c163b6980dc33564c48991b` | `GA_IE` | 7,287 | 24,035 | 24,533 | 17,246 | changed tokens | 17,246 |
+| `gaa-default` | `standalone` | `1.0.0` | `981733932ac87c90b142c9230e721513d642bac1d25f131a9c36643015b68108` | `GAA` | 94 | 469 | 470 | 376 | changed tokens | 5,000 |
+| `gal-default` | `standalone` | `1.0.0` | `d57ad44d8863d70fb6c28152de8e96b1480ae66b9bacd59a27f7f0e9aa44f566` | `GAL` | 486 | 25,436 | 26,195 | 25,709 | changed tokens | 25,709 |
+| `gmh-default` | `standalone` | `1.0.0` | `9dfcff6fca22db34b3206e35ab50e1e7d91fd4ce81fd50b6a7461d8f6fe3e5d6` | `GMH` | 29 | 384 | 384 | 355 | changed tokens | 5,000 |
+| `gml-default` | `standalone` | `1.0.0` | `3461579139d22f110969530d3a88820895c0e6818efc988c025549787e7c54da` | `GML` | 54 | 624 | 635 | 581 | changed tokens | 5,000 |
+| `goh-default` | `standalone` | `1.0.0` | `42f175991354ce30b3cf6563b9f8c7a0c1ecfc7593a8151fd1320b09575b0208` | `GOH` | 482 | 5,267 | 5,300 | 4,818 | changed tokens | 5,000 |
+| `got-default` | `standalone` | `1.0.0` | `d7f0bb16c028f9e80151e8f33b4e56e786c099a514a393d7ddb079861e0ba321` | `GOT` | 6,227 | 134,332 | 137,914 | 131,687 | changed tokens | 131,687 |
+| `grc-default` | `standalone` | `1.0.0` | `8c50d12e6489acff903ed5a9e5cf463da9e543845d48989255d99609f9a4e2e9` | `GRC` | 2,426 | 26,386 | 26,581 | 24,155 | changed tokens | 24,155 |
+| `gsw-default` | `standalone` | `1.0.0` | `65ffa4b644e8adef0fe6e484a478a5017bb9c079e015f6a02dd478a4f6c9a871` | `GSW` | 145 | 1,186 | 1,190 | 1,045 | changed tokens | 5,000 |
+| `gup-default` | `standalone` | `1.0.0` | `9a9193fc4b921801a12c91e585a3fb71824c243a0f66138675e5be6ec731772b` | `GUP` | 73 | 370 | 371 | 298 | changed tokens | 5,000 |
+| `gv-im-default` | `standalone` | `1.0.0` | `da48ff4553af69f5f7dce09951a0d0e93a35ac649034de9d88f4067bac48a1ea` | `GV_IM` | 1 | 15 | 15 | 14 | changed tokens | 5,000 |
+| `hai-default` | `standalone` | `1.0.0` | `71a80067a05106b90668da2a78c8f9412d64406036ef13e24de732124fff69a5` | `HAI` | 36 | 5,385 | 5,385 | 5,349 | changed tokens | 5,349 |
+| `hbs-default` | `standalone` | `1.0.0` | `be225aef70bd01ee8f988ac5e6a58f3d6e1cddc284a6564dd15f93d4f1634dda` | `HBS` | 24,385 | 272,634 | 278,024 | 253,639 | changed tokens | 253,639 |
+| `he-il-default` | `default` | `1.0.1` | `9a47dc69bb7dab21aba0266b73cd74cdaeb17db94363796a0a56111ac8518256` | `HE_IL` | 2,358 | 57,658 | 61,071 | 56,356 | changed tokens | 56,356 |
+| `hil-default` | `standalone` | `1.0.0` | `d8114c609f5a38623a2fa3c7c3cf2ba74a2b5d9e78258cf0c428b50afcb9e031` | `HIL` | 97 | 393 | 398 | 301 | changed tokens | 5,000 |
+| `hsi-default` | `standalone` | `1.0.0` | `82f3518b9ef41c53429248865abdd539aa0436cba9a5f0517f333fe18e4c9146` | `HSI` | 49 | 158 | 159 | 110 | changed tokens | 5,000 |
+| `hu-hu-default` | `default` | `1.0.0` | `359d46a01d751ec823705ad7f3dd1cc8f6663feb1a9d13cb04d0c6fb51ab646e` | `HU_HU` | 19,406 | 910,688 | 935,713 | 896,938 | changed tokens | 896,938 |
+| `hy-am-default` | `standalone` | `1.0.0` | `42eea1564db57d86b2f09fec3d6d19104253cd389769b834c823b1684f21a757` | `HY_AM` | 6,990 | 246,576 | 247,803 | 240,813 | changed tokens | 240,813 |
+| `id-id-default` | `standalone` | `1.0.0` | `ed7ab0190fcd098ff4e871605f61056cf43b54a6967e8c40652584720ddb5044` | `ID_ID` | 3,877 | 21,296 | 21,298 | 17,421 | changed tokens | 17,421 |
+| `is-is-default` | `standalone` | `1.0.0` | `0d16a717f7c71b5fc333ec8687b1e44d6840092a5e3ce88785830ea9083e9b60` | `IS_IS` | 4,772 | 52,197 | 53,388 | 48,616 | changed tokens | 48,616 |
+| `it-it-default` | `default` | `1.0.0` | `5e03be31c9761e30dbf24a47a5ced3d6ec949dabd31e92632fdd9f7c67fc2e12` | `IT_IT` | 10,009 | 324,366 | 337,546 | 317,542 | changed tokens | 317,542 |
+| `itl-default` | `standalone` | `1.0.0` | `4664dc2087cf79102555fecdf978c6a2b7e830192f4e7c01e4f7642d167e8175` | `ITL` | 1,633 | 3,659 | 3,663 | 2,030 | changed tokens | 5,000 |
+| `izh-default` | `standalone` | `1.0.0` | `294754b0e212cd5045fcced35de8e0016a77cb46732d285e2babef0d1e3c5d84` | `IZH` | 50 | 1,026 | 1,026 | 976 | changed tokens | 5,000 |
+| `ja-jp-default` | `standalone` | `1.0.0` | `852e1431af196108ac5c79a46e8aa11caead2931dd0960fc4b653cde08fbc161` | `JA_JP` | 107 | 10,848 | 11,592 | 11,485 | changed tokens | 11,485 |
+| `kbd-default` | `standalone` | `1.0.0` | `36208c790afe93152677ba6a4cabb3adfc420b521857ea462d81933e1f38cdb4` | `KBD` | 249 | 3,054 | 3,054 | 2,805 | changed tokens | 5,000 |
+| `kjh-default` | `standalone` | `1.0.0` | `210b01be8a529b3bd8611f82d1050dc9702a41784226c6eab31ceebb77e652e2` | `KJH` | 74 | 1,172 | 1,172 | 1,098 | changed tokens | 5,000 |
+| `kk-kz-default` | `standalone` | `1.0.0` | `73216ba98bc3e3c240d626fc47f4dc3ff95148ba086c8a9e8d89bd6cfbdc648b` | `KK_KZ` | 1,744 | 35,223 | 35,269 | 33,525 | changed tokens | 33,525 |
+| `kl-gl-default` | `standalone` | `1.0.0` | `19212cb272cf695b77a6e90cb5c6394689cf7ea738830cab29b4ea629865d782` | `KL_GL` | 23 | 321 | 321 | 298 | changed tokens | 5,000 |
+| `klr-default` | `standalone` | `1.0.0` | `dba18e7da6b469e0e7d3c0a4b49280a88bb1845c8466f1b6db994c9747a2eb2d` | `KLR` | 591 | 54,602 | 59,637 | 59,046 | changed tokens | 59,046 |
+| `kn-in-default` | `standalone` | `1.0.0` | `aba11fd379a9d89366d045dc87dcf1e2a1b3d5b1e1425ada894caf54517be265` | `KN_IN` | 159 | 3,802 | 4,167 | 4,008 | changed tokens | 5,000 |
+| `kod-default` | `standalone` | `1.0.0` | `38c0562b78e339601d44d91cb4cb510039495710fe162d4797df2b973dcc0196` | `KOD` | 65 | 524 | 524 | 459 | changed tokens | 5,000 |
+| `kon-default` | `standalone` | `1.0.0` | `08f082c093e50f6cc95c9e80fe08a0b2f6e249894159eb1a503d557b4eadc645` | `KON` | 186 | 557 | 558 | 372 | changed tokens | 5,000 |
+| `krl-default` | `standalone` | `1.0.0` | `8f99c9c57ba8bb642be3c033a973d37e6b1064be186f0b9c1f43a900ad1a1706` | `KRL` | 20 | 566 | 566 | 546 | changed tokens | 5,000 |
+| `ky-kg-default` | `standalone` | `1.0.0` | `3b7d57494e647317afd9075559f7727c38d9d98041f968e6f0237c649b63ebed` | `KY_KG` | 72 | 2,997 | 2,997 | 2,925 | changed tokens | 5,000 |
+| `la-default` | `standalone` | `1.0.0` | `1ecc8889f0cf91f5005f8c1434dd2d12b03c34ec11f16336896544ef676709d1` | `LA` | 46,170 | 486,375 | 500,731 | 454,561 | changed tokens | 454,561 |
+| `lg-ug-default` | `standalone` | `1.0.0` | `bdf75bc28bc51c41d1b2d4eab15988a165824a0859b737c9eb25e5f03016108f` | `LG_UG` | 87 | 4,673 | 4,746 | 4,659 | changed tokens | 5,000 |
+| `lin-default` | `standalone` | `1.0.0` | `d784b140022b3cdff26dcb83d1ff9132eb4db12a6f6b5bb5e1d0bae53f956909` | `LIN` | 57 | 230 | 230 | 173 | changed tokens | 5,000 |
+| `liv-default` | `standalone` | `1.0.0` | `3f8f654cbcd4b2ada1db6be64c7eeed8d8ea4c09a961de34fe907a1d01e22a7f` | `LIV` | 201 | 2,861 | 2,878 | 2,677 | changed tokens | 5,000 |
+| `lld-default` | `standalone` | `1.0.0` | `014be5ac5327c64f68287595d371735da93a3f36d3ae22e8209b3db4f8331ab1` | `LLD` | 180 | 4,819 | 4,854 | 4,674 | changed tokens | 5,000 |
+| `lt-lt-default` | `standalone` | `1.0.0` | `c7b8536235bc7de9d101393ec41a829a4b750b4c45d3ab7324d8ef974c277d30` | `LT_LT` | 1,391 | 28,889 | 28,998 | 27,607 | changed tokens | 27,607 |
+| `lv-lv-default` | `standalone` | `1.0.0` | `6ad88bdd8283f4fbc98093a5dfc08fe69b4f9baf9bb0f8cf156edeaa114216f3` | `LV_LV` | 7,238 | 75,492 | 80,227 | 72,989 | changed tokens | 72,989 |
+| `mag-default` | `standalone` | `1.0.0` | `a3cf63802ff531265bd5867123cfe0dc305ec57aea29f2d8654f7c19f9df1c85` | `MAG` | 938 | 1,448 | 1,456 | 518 | changed tokens | 5,000 |
+| `mg-mg-default` | `standalone` | `1.0.0` | `f45cb5edae2859c0f6730edf4e0614be0fb6256d7e3e22dfbd97a12cb559133c` | `MG_MG` | 159 | 636 | 636 | 477 | changed tokens | 5,000 |
+| `mi-nz-default` | `standalone` | `1.0.0` | `0de22749a54aa35d4a788fe9b07a3e7e2cb1ce6774258eb69475b91c97666c1f` | `MI_NZ` | 104 | 207 | 208 | 104 | changed tokens | 5,000 |
+| `mk-mk-default` | `standalone` | `1.0.0` | `16f138c9b020209290f4bd88aa16a1b08f766e793b8f4f7a51078ff18c29f875` | `MK_MK` | 9,788 | 135,754 | 136,554 | 126,766 | changed tokens | 126,766 |
+| `mn-mn-default` | `standalone` | `1.0.0` | `e178aca6228449ecc967e6a00e3ee209ba9e1bc4bf43935ff29bb63a49fa18e3` | `MN_MN` | 2,140 | 17,231 | 17,593 | 15,453 | changed tokens | 15,453 |
+| `mt-mt-default` | `standalone` | `1.0.0` | `3be6ab250e1f9489c0b28d24a5fae8a43da6ddb2528c9d74281dac6a620618b6` | `MT_MT` | 112 | 1,491 | 1,500 | 1,388 | changed tokens | 5,000 |
+| `mwf-default` | `standalone` | `1.0.0` | `cc20412e152352ea121257c724b63f9a4dbc575beb90bfa3b10d664c32917f69` | `MWF` | 29 | 592 | 720 | 691 | changed tokens | 5,000 |
+| `nap-default` | `standalone` | `1.0.0` | `7caaaac7ed1ceedf5f8eca36a1ded21371e7003189fdb4b43a215072f600dfdc` | `NAP` | 40 | 1,497 | 1,497 | 1,457 | changed tokens | 5,000 |
+| `nav-default` | `standalone` | `1.0.0` | `0015e0e7d39918770a8f94ac21469cf0f3cb0f9d62aa8e56b36763af80e36735` | `NAV` | 627 | 11,046 | 11,378 | 10,751 | changed tokens | 10,751 |
+| `nb-no-default` | `default` | `1.0.0` | `f495bffb44e79d27993e6e2e65d4b1204b29365dc93f481b2d8b96766fc90fd9` | `NB_NO` | 17,929 | 73,170 | 90,757 | 57,381 | changed tokens | 57,381 |
+| `nds-default` | `standalone` | `1.0.0` | `262c5a5aa1ab0bcb2145e43968b1cffeace44a614aa9cab0496c4fdc5b1f1a14` | `NDS` | 325 | 2,495 | 2,545 | 2,220 | changed tokens | 5,000 |
+| `nl-nl-default` | `default` | `1.0.0` | `c098034adc42da2ca3e419160e6dd2c2b3868f8af334303b3a191e09caadaf5e` | `NL_NL` | 4,992 | 26,201 | 31,466 | 21,485 | changed tokens | 21,485 |
+| `nn-no-default` | `default` | `1.0.0` | `900cf2005605aea2a3d8d731ec0b0c1f47fb4469b4ba6b9134145d4d026a0398` | `NN_NO` | 4,688 | 16,937 | 19,651 | 13,562 | changed tokens | 13,562 |
+| `non-default` | `standalone` | `1.0.0` | `d231245493a2d59d541247546133e102e021661ddcd9d3ef486b76a0900bf7b8` | `NON` | 2,666 | 46,089 | 49,612 | 46,946 | changed tokens | 46,946 |
+| `ny-mw-default` | `standalone` | `1.0.0` | `7d7487a8ed6db1d058f5f6871d35cece850205423e77134553dae767927fba99` | `NY_MW` | 227 | 3,178 | 3,178 | 2,951 | changed tokens | 5,000 |
+| `ood-default` | `standalone` | `1.0.0` | `e4bc4feb122a2bab40e981b3916f260cc13e4a2750796cf88d9bb9eba155448e` | `OOD` | 368 | 1,159 | 1,178 | 810 | changed tokens | 5,000 |
+| `osx-default` | `standalone` | `1.0.0` | `1f6b3cc29edb4b6c25872133805f212f8fcdc72b139ba96fee8b3715de729a01` | `OSX` | 863 | 12,361 | 12,553 | 11,690 | changed tokens | 11,690 |
+| `ote-default` | `standalone` | `1.0.0` | `c7af96b64a51275622783265da6eb8ed30cfc5a1e60a9aad1ddced08874d7e4d` | `OTE` | 2,026 | 3,417 | 3,564 | 1,538 | changed tokens | 5,000 |
+| `pl-pl-polimorf` | `optional` | `1.0.0` | `4fe4bf5e6c22c1beea5b3d57f1ce4c9ea5aac1ed8ab24c616fb06df745e40d15` | `PL_PL` | 315,639 | 4,668,685 | 4,812,023 | 4,496,384 | changed tokens | 4,496,384 |
+| `pl-pl-unimorph` | `default` | `1.0.0` | `8191ed727097839cc808cbc5c56a1bd78b3c851e7733ad226ad9a51519a54721` | `PL_PL` | 9,990 | 120,867 | 132,308 | 112,351 | changed tokens | 112,351 |
+| `ps-af-default` | `standalone` | `1.0.0` | `104ddc76f34a17c4f16719280c5fe6e11d7c0a6cea2c79f99226bdb667aebbc5` | `PS_AF` | 381 | 2,945 | 3,064 | 2,683 | changed tokens | 5,000 |
+| `pt-pt-default` | `default` | `1.0.0` | `7a035ff330a6f0548f446cd0d6617bc1cf4751292125a3564d3a255c5d6f516d` | `PT_PT` | 4,001 | 211,091 | 215,490 | 207,488 | changed tokens | 207,488 |
+| `que-default` | `standalone` | `1.0.0` | `2a9eb15b84f19ccfbfeb0b323fb93267109f49968914e5723f155f72db1188b8` | `QUE` | 1,003 | 147,914 | 150,259 | 149,256 | changed tokens | 149,256 |
+| `ro-ro-default` | `standalone` | `1.0.0` | `94637c539437fd719436ded52fdef0a5271fc0b91e306efcd7e4fa8deadf6e79` | `RO_RO` | 4,387 | 48,565 | 48,969 | 44,582 | changed tokens | 44,582 |
+| `ru-ru-default` | `default` | `1.0.0` | `df7ea25e63a875eeec7a4185be685bd5372a3c568db85c34c44fdf5d8d980a40` | `RU_RU` | 37,410 | 759,333 | 806,279 | 731,471 | changed tokens | 731,471 |
+| `sdh-default` | `standalone` | `1.0.0` | `e50b3b8a342c09a07b5df99de263246617724188cb7176420ebaf34cab1ea89b` | `SDH` | 1 | 165 | 165 | 164 | changed tokens | 5,000 |
+| `see-default` | `standalone` | `1.0.0` | `ba81e101e0c2f5c2ef6762a3bcae3e9af95b79eedc7dd9a2bacc9216ea70ed65` | `SEE` | 139 | 5,318 | 5,331 | 5,192 | changed tokens | 5,192 |
+| `sga-default` | `standalone` | `1.0.0` | `d5a1f169cfb32c134e287b98a652ffce1a43f71f856a3e875a60475ba0d0989b` | `SGA` | 49 | 934 | 936 | 887 | changed tokens | 5,000 |
+| `shp-default` | `standalone` | `1.0.0` | `213ad85c4a6b892750c90ed6bdbead05a64e56dd2091ad203a47d2b84198bc9b` | `SHP` | 1,999 | 7,729 | 7,972 | 5,973 | changed tokens | 5,973 |
+| `sjo-default` | `standalone` | `1.0.0` | `ca640317c3b84c98e3d296fe6f2dba266181087135475d1320ba2980c66cb3fc` | `SJO` | 1,892 | 3,151 | 3,197 | 1,305 | changed tokens | 5,000 |
+| `sme-default` | `standalone` | `1.0.0` | `d42d30a9b27e1aae3122ee0c5367f60ebe7afe9cf2bca2472afcae959af972f9` | `SME` | 2,103 | 54,435 | 55,027 | 52,924 | changed tokens | 52,924 |
+| `sn-zw-default` | `standalone` | `1.0.0` | `e0f2e68f72fadf364d9e93fd1210566044981769f3d6f749504402dc7db1b06d` | `SN_ZW` | 86 | 2,640 | 2,640 | 2,554 | changed tokens | 5,000 |
+| `sq-al-default` | `standalone` | `1.0.0` | `f36caf9057f6eede49212d2ea0612d8f5db850fcbfc08f7f921573507bf938be` | `SQ_AL` | 587 | 10,218 | 10,264 | 9,677 | changed tokens | 9,677 |
+| `st-za-default` | `standalone` | `1.0.0` | `79cf6bd61d12a2115418e35a185ae6b66a4f99f678fe3690d774ced6be604eb5` | `ST_ZA` | 26 | 416 | 416 | 390 | changed tokens | 5,000 |
+| `sv-se-default` | `default` | `1.0.0` | `d9be72e3d67c776622c4281e04e4063b9381e8f84a823d98ebf08888b82dff0c` | `SV_SE` | 12,371 | 95,181 | 110,468 | 85,737 | changed tokens | 85,737 |
+| `swc-default` | `standalone` | `1.0.0` | `a00d480708771bd7c70fcc82e013255444624c4b7a20dc95ea346a8a584c561a` | `SWC` | 183 | 11,121 | 11,121 | 10,938 | changed tokens | 10,938 |
+| `syc-default` | `standalone` | `1.0.0` | `62bd6eaf022709cd4188c99bd491301c31dbcce5075877981b3a5ea421366a8f` | `SYC` | 3,257 | 27,529 | 27,703 | 24,446 | changed tokens | 24,446 |
+| `tl-ph-default` | `standalone` | `1.0.0` | `7ff4fcdf97eb7e2f432480d2bfa4cceaa54acb7e2a1426737c7911c972f429ed` | `TL_PH` | 342 | 2,510 | 2,518 | 2,176 | changed tokens | 5,000 |
+| `tr-tr-default` | `standalone` | `1.0.0` | `a3605d0abd12c4bd077c72bdc0be52153400601dbd985897cb5c4ec424330200` | `TR_TR` | 3,017 | 222,553 | 224,205 | 221,188 | changed tokens | 221,188 |
+| `ug-cn-default` | `standalone` | `1.0.0` | `26d181f6d1114ed9ba838608a77d1e7849086e3ad90bc1f2c246e4b4034e63ad` | `UG_CN` | 85 | 6,368 | 6,399 | 6,314 | changed tokens | 6,314 |
+| `uk-ua-default` | `default` | `1.0.0` | `cf3f612cfff16cb7763f99c55851069489b883c3bdd1a6576cd8c57a97e07eae` | `UK_UA` | 1,493 | 14,150 | 15,737 | 12,752 | changed tokens | 12,752 |
+| `us-uk-default` | `default` | `1.0.1` | `0a3ec1fddd5ddb859f5ffa8003efe9200a5ef6203df1fddaf53a58003f33582c` | `US_UK` | 396,939 | 591,946 | 1,002,414 | 208,540 | changed tokens | 208,540 |
+| `uz-uz-default` | `standalone` | `1.0.0` | `caf2d4038429a72be272b400d611f80ac37fd1b0f3c54ea44c7a1159ea42728f` | `UZ_UZ` | 295 | 9,835 | 9,838 | 9,543 | changed tokens | 9,543 |
+| `vro-default` | `standalone` | `1.0.0` | `5da7535bd5e629b8ffb99a3b6d906ad0189b1c0d46c6deada72d72f0791f575e` | `VRO` | 63 | 412 | 413 | 350 | changed tokens | 5,000 |
+| `xcl-default` | `standalone` | `1.0.0` | `7a4000404b5f55b67dea02bf5d3e84972979cac3138fb83458b5a6dcf3495864` | `XCL` | 4,300 | 59,215 | 62,753 | 58,453 | changed tokens | 58,453 |
+| `xno-default` | `standalone` | `1.0.0` | `90941356e0bd87195290432052ed9a85011f8e7c1607e24655ba298c519035da` | `XNO` | 5 | 186 | 186 | 181 | changed tokens | 5,000 |
+| `xty-default` | `standalone` | `1.0.0` | `9985fe69992665a30309475c30f6734cb24393b21e1c3628543e4810775e711c` | `XTY` | 585 | 2,754 | 2,781 | 2,196 | changed tokens | 5,000 |
+| `yi-default` | `default` | `1.0.1` | `f47de665c27dcd72833a82904e49c68a945bb5aca769a7ec5a0164e2c981a6d3` | `YI` | 802 | 3,532 | 4,300 | 2,776 | changed tokens | 5,000 |
+| `zpv-default` | `standalone` | `1.0.0` | `e3cae35dca9b29226dbbbfe49415e4cb80f8379228edbd657f9bfe7c25eb0998` | `ZPV` | 204 | 818 | 824 | 620 | changed tokens | 5,000 |
+| `zu-za-default` | `standalone` | `1.0.0` | `6200464bc24c7519e1a1c42b2c292375fdd9e07bdd66ef994d925d466d636bc9` | `ZU_ZA` | 563 | 32,384 | 32,734 | 32,171 | changed tokens | 32,171 |
 
-Speed benchmarks process the complete changed-token dictionary sequence for the language. Only resources with fewer than 5,000 changed tokens are repeated to reach the minimum timing size; larger resources are not sampled or truncated.
+Speed benchmarks process the complete selected timing sequence for the model. Changed tokens are selected whenever any exist. For root-only dictionaries, the complete root-preservation sequence is selected so the model still receives a speed measurement. Only selected populations with fewer than 5,000 tokens are repeated to reach the minimum timing size; larger populations are not sampled or truncated.

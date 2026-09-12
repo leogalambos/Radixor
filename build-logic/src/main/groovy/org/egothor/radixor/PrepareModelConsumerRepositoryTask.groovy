@@ -73,6 +73,12 @@ abstract class PrepareModelConsumerRepositoryTask extends DefaultTask {
     abstract RegularFileProperty getStandardPom()
 
     @InputFile @PathSensitive(PathSensitivity.RELATIVE)
+    abstract RegularFileProperty getExtendedPom()
+
+    @InputFile @PathSensitive(PathSensitivity.RELATIVE)
+    abstract RegularFileProperty getFilteredPom()
+
+    @InputFile @PathSensitive(PathSensitivity.RELATIVE)
     abstract RegularFileProperty getBomPom()
 
     @OutputDirectory
@@ -98,6 +104,8 @@ abstract class PrepareModelConsumerRepositoryTask extends DefaultTask {
                     repository, "radixor-model-${modelId}", modelVersion, pom, jar)
         }
         install(repository, 'radixor-models-standard', catalogVersion.get(), standardPom.get().asFile.toPath(), null)
+        install(repository, 'radixor-models-extended', catalogVersion.get(), extendedPom.get().asFile.toPath(), null)
+        install(repository, 'radixor-models-filtered', catalogVersion.get(), filteredPom.get().asFile.toPath(), null)
         install(repository, 'radixor-models-bom', catalogVersion.get(), bomPom.get().asFile.toPath(), null)
     }
 

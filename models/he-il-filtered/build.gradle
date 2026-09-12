@@ -38,6 +38,7 @@ radixorModel {
     language = 'HE_IL'
     displayName = 'Hebrew filtered candidate model'
     defaultModel = false
+    rightToLeft = true
     sourceName = 'UniMorph via he-il-default'
     sourceVersion = 'not-recorded-in-legacy-import'
     sourceRevision = 'not-recorded-in-legacy-import'

@@ -22,12 +22,14 @@ Source project: UniMorph
 Official repository: https://github.com/unimorph/heb
 Upstream dataset: UniMorph Hebrew morphological dataset (`heb`)
 Upstream lexical source: Wiktionary
-Attribution: UniMorph; Omer Goldman (annotator); Wiktionary contributors
+Attribution: UniMorph; Omer Goldman
 License:
 Creative Commons Attribution-ShareAlike 3.0 Unported
+
 Canonical license URI: https://creativecommons.org/licenses/by-sa/3.0/
 Source revision: not-recorded-in-legacy-import
 Revision status: not-recorded-in-legacy-import
+Note: license not stated explicitly in repository source; CC-BY-SA-3.0 is the UniMorph project standard.
 
 The exact UniMorph commit used for the original Radixor import was not recorded. The model remains attributed to the official UniMorph language repository and is distributed under the repository's stated data license.
 

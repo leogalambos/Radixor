@@ -1,0 +1,50 @@
+Radixor model-data notice
+
+Radixor-derived model data
+
+Copyright (C) 2026, Leo Galambos.
+
+Copyright and, where applicable, database rights are claimed in the
+Radixor-specific selection, verification, cleaning, normalization,
+grouping, deduplication, filtering, reformatting, metadata preparation,
+and packaging of this model, to the extent protected by applicable law.
+
+The underlying morphological data remains attributed to UniMorph and
+the upstream contributors identified in this notice.
+
+This derived model data, including Radixor's protectable contributions,
+is distributed under Creative Commons Attribution-ShareAlike 3.0.
+
+Model ID: afb-default
+Source project: UniMorph
+Official repository: https://github.com/unimorph/afb
+Selected upstream data:
+- afb [lemma-form-features], SHA-256 525d5e9bd66d0213cfbdbcee8277eb3e50bd3682c6277fdb489780154acccec7
+Source origin: Not stated in pinned repository evidence
+Attribution: UniMorph; Salam Khalifa and Nizar Habash ([CAMeL Lab](https://www.camel-lab.com) @ NYU Abu Dhabi)
+License:
+Creative Commons Attribution-ShareAlike 3.0 Unported
+
+Canonical license URI: https://creativecommons.org/licenses/by-sa/3.0/
+Source revision: aca24ea0d194d5fec56e18ee7cb341bb93be729e
+Revision status: recorded
+Repository evidence paths: README.md:evidence-00-README.md
+Repository evidence SHA-256: evidence-00-README.md:b639189cb6ddd0cb94c970fe5777521ce1d78925fc88e27926225dfc4a55e18f
+Import policy: radixor-unimorph-import-v1
+Projection semantics: Each declared three-column source directly projects lemma and surface form.
+Conflict semantics: All valid lemma-form assignments are retained. Surface ambiguity is reported explicitly and is never resolved by dropping or overwriting an assignment.
+Import rows: source=32236; accepted=32236; rejected=0
+Rejection reasons: none
+Per-source import audit:
+- afb: source=32236; accepted=32236; rejected=0; added-groups=6345; added-distinct-surfaces=29344; added-source-pairs=24796; added-output-forms=30156; added-changed-pairs=23811; intrinsic-ambiguous-surfaces=648; rejection-reasons=none
+Surface conflict audit: cross-source-assignments=0; cross-source-surfaces=0; intrinsic-ambiguous-surfaces=648
+Audited excluded upstream files:
+- afb.args: duplicate-args — Duplicate .args projection was audited and excluded; only bel.args, grc.args, and hye.args add an approved compatible projection.
+Generated dictionary: groups=6345; forms=30156
+Deterministic GZip SHA-256: 7ba0759227455725063648b569652e0442452501fa58b763f3861a3828655ba7
+
+Radixor modifications: Strict UTF-8 validation, NFC normalization, lowercase conversion, structural unsafe-character rejection, grouping by lemma, exact deduplication, deterministic ordering, and reproducible GZip packaging.
+
+Neither UniMorph nor any upstream contributor endorses Radixor.
+
+Upstream information verified: 2026-09-11

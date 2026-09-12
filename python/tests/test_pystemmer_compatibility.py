@@ -45,62 +45,95 @@ import radixor
 
 
 _PY_STEMMER_ALIASES: dict[str, tuple[str, ...]] = {
+    "arabic": ("arabic", "ar", "ara"),
+    "armenian": ("armenian", "hy", "hye", "arm"),
+    "catalan": ("catalan", "ca", "cat"),
     "czech": ("czech", "cs", "ces", "cze"),
     "danish": ("danish", "da", "dan"),
     "dutch": ("dutch", "nl", "dut", "nld", "kraaij_pohlmann"),
     "english": ("english", "en", "eng"),
+    "estonian": ("estonian", "et", "est"),
     "finnish": ("finnish", "fi", "fin"),
     "french": ("french", "fr", "fre", "fra"),
     "german": ("german", "de", "ger", "deu"),
+    "greek": ("greek", "el", "ell", "gre"),
     "hungarian": ("hungarian", "hu", "hun"),
+    "indonesian": ("indonesian", "id", "ind"),
+    "irish": ("irish", "ga", "gle"),
     "italian": ("italian", "it", "ita"),
+    "lithuanian": ("lithuanian", "lt", "lit"),
     "norwegian": ("norwegian", "no", "nor"),
     "persian": ("persian", "fa", "fas", "pers"),
     "polish": ("polish", "pl", "pol"),
     "portuguese": ("portuguese", "pt", "por"),
+    "romanian": ("romanian", "ro", "ron", "rum"),
     "russian": ("russian", "ru", "rus"),
+    "sesotho": ("sesotho", "st", "sot"),
     "spanish": ("spanish", "es", "esl", "spa"),
     "swedish": ("swedish", "sv", "swe"),
+    "turkish": ("turkish", "tr", "tur"),
     "yiddish": ("yiddish", "yi", "yid"),
 }
 
 _ALIASES_EXPECTED_ORDER = [
+    "arabic",
+    "armenian",
+    "catalan",
     "czech",
     "danish",
     "dutch",
     "english",
+    "estonian",
     "finnish",
     "french",
     "german",
+    "greek",
     "hungarian",
+    "indonesian",
+    "irish",
     "italian",
+    "lithuanian",
     "norwegian",
     "persian",
     "polish",
     "portuguese",
+    "romanian",
     "russian",
+    "sesotho",
     "spanish",
     "swedish",
+    "turkish",
     "yiddish",
 ]
 
 _ALIASES_MODEL_IDS: dict[str, str] = {
+    "arabic": "ar-default",
+    "armenian": "hy-am-default",
+    "catalan": "ca-es-default",
     "czech": "cs-cz-default",
     "danish": "da-dk-default",
     "dutch": "nl-nl-default",
     "english": "us-uk-default",
+    "estonian": "et-ee-default",
     "finnish": "fi-fi-default",
     "french": "fr-fr-default",
     "german": "de-de-default",
+    "greek": "el-gr-default",
     "hungarian": "hu-hu-default",
+    "indonesian": "id-id-default",
+    "irish": "ga-ie-default",
     "italian": "it-it-default",
+    "lithuanian": "lt-lt-default",
     "norwegian": "nb-no-default",
     "persian": "fa-ir-default",
     "polish": "pl-pl-unimorph",
     "portuguese": "pt-pt-default",
+    "romanian": "ro-ro-default",
     "russian": "ru-ru-default",
+    "sesotho": "st-za-default",
     "spanish": "es-es-default",
     "swedish": "sv-se-default",
+    "turkish": "tr-tr-default",
     "yiddish": "yi-default",
 }
 
@@ -133,8 +166,6 @@ def test_aliases_from_py_stemmer_modern_alias_set_work(alias: str):
 def test_unsupported_algorithm_raises_key_error() -> None:
     with pytest.raises(KeyError):
         radixor.Stemmer("porter")
-    with pytest.raises(KeyError):
-        radixor.Stemmer("turkish")
 
 
 def test_version_is_exposed_via_module_and_stemmer() -> None:

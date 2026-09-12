@@ -35,12 +35,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.zip.GZIPInputStream;
 
@@ -55,8 +56,11 @@ import org.egothor.stemmer.StemmerPatchTrieLoader;
  * <p>
  * Corpus construction is setup work only. It is intentionally based on the same
  * resource that backs the Radixor benchmark path so every competitor for a
- * language consumes the same changed-token timing workload, while quality
- * benchmarks can still use the complete dictionary workload.
+ * language consumes the same timing workload, while quality benchmarks can
+ * still use the complete dictionary workload. The timing workload contains
+ * changed token/root pairs whenever at least one exists. A root-only dictionary
+ * instead uses its complete root-preservation corpus so that every registered
+ * model remains measurable.
  * </p>
  */
 final class LanguageBenchmarkCorpus {
@@ -75,13 +79,8 @@ final class LanguageBenchmarkCorpus {
     /**
      * Shared changed-token timing corpora keyed by bundled Radixor language.
      */
-    private static final Map<StemmerPatchTrieLoader.Language, Corpus> CHANGED_TIMING_CORPORA =
+    private static final Map<StemmerPatchTrieLoader.Language, TimingCorpus> TIMING_WORKLOADS =
             new EnumMap<>(StemmerPatchTrieLoader.Language.class);
-
-    /**
-     * Shared changed-token timing corpora keyed by explicit bundled model ID.
-     */
-    private static final Map<String, Corpus> MODEL_CHANGED_TIMING_CORPORA = new HashMap<>();
 
     /**
      * Shared complete corpora keyed by bundled Radixor language.
@@ -97,65 +96,97 @@ final class LanguageBenchmarkCorpus {
     }
 
     /**
-     * Creates a deterministic changed-token timing corpus from a bundled language
-     * dictionary.
+     * Creates the canonical timing token array from a bundled language dictionary.
      *
      * <p>
-     * Only token/root pairs where the token differs from the expected root are
-     * included. Smaller changed-token resources are repeated in stable order until
-     * the timing corpus reaches 5,000 tokens.
+     * Changed token/root pairs are preferred. A root-only dictionary falls back to
+     * its complete root-preservation corpus. Smaller resources are repeated in
+     * stable order until the timing corpus reaches 5,000 tokens.
      * </p>
      *
      * @param language bundled Radixor language
-     * @return token array containing changed-token dictionary entries, repeated
-     *         only when the changed-token resource is smaller than 5,000 tokens
+     * @return canonical timing tokens, repeated only when the selected population
+     *         is smaller than 5,000 tokens
      * @throws IOException if the resource cannot be read
      */
     static String[] createTokens(final StemmerPatchTrieLoader.Language language) throws IOException {
-        return createChangedCorpus(language).tokens();
+        return createTimingCorpus(language).corpus().tokens();
     }
 
     /**
-     * Creates a deterministic changed-token timing corpus from an explicitly
-     * selected bundled model dictionary.
+     * Creates the canonical timing token array for an exact model identifier.
      *
      * <p>
-     * Only token/root pairs where the token differs from the expected root are
-     * included. Smaller changed-token resources are repeated in stable order until
-     * the timing corpus reaches 5,000 tokens.
+     * Changed token/root pairs are preferred. A root-only dictionary falls back to
+     * its complete root-preservation corpus. Smaller resources are repeated in
+     * stable order until the timing corpus reaches 5,000 tokens.
      * </p>
      *
      * @param modelId exact bundled model identifier
-     * @return token array containing changed-token dictionary entries, repeated
-     *         only when the changed-token resource is smaller than 5,000 tokens
+     * @return canonical timing tokens, repeated only when the selected population
+     *         is smaller than 5,000 tokens
      * @throws IOException if the resource cannot be read
      */
     static String[] createTokens(final String modelId) throws IOException {
-        return createChangedCorpus(modelId).tokens();
+        return createTimingCorpus(modelId).corpus().tokens();
     }
 
     /**
-     * Creates a deterministic changed-token timing corpus from a bundled language
-     * dictionary.
+     * Creates the canonical timing corpus from a bundled language dictionary.
      *
      * @param language bundled Radixor language
-     * @return changed-token corpus with expected roots
+     * @return changed-token corpus, or the root-preservation fallback
      * @throws IOException if the resource cannot be read
      */
     static Corpus createChangedCorpus(final StemmerPatchTrieLoader.Language language) throws IOException {
-        return cachedChangedCorpus(language);
+        return createTimingCorpus(language).corpus();
     }
 
     /**
-     * Creates a deterministic changed-token timing corpus from an explicitly
-     * selected bundled model dictionary.
+     * Creates the canonical timing corpus for an exact model identifier.
      *
      * @param modelId exact bundled model identifier
-     * @return changed-token corpus with expected roots
+     * @return changed-token corpus, or the root-preservation fallback
      * @throws IOException if the resource cannot be read
      */
     static Corpus createChangedCorpus(final String modelId) throws IOException {
-        return cachedChangedCorpus(modelId);
+        return createTimingCorpus(modelId).corpus();
+    }
+
+    /**
+     * Creates the canonical timing workload for a bundled language default.
+     *
+     * @param language bundled Radixor language
+     * @return timing corpus and its explicit workload basis
+     * @throws IOException if the resource cannot be read
+     */
+    static TimingCorpus createTimingCorpus(final StemmerPatchTrieLoader.Language language) throws IOException {
+        return cachedTimingCorpus(language);
+    }
+
+    /**
+     * Creates the canonical timing workload for an exact model identifier.
+     *
+     * @param modelId exact bundled model identifier
+     * @return timing corpus and its explicit workload basis
+     * @throws IOException if the resource cannot be read
+     */
+    static TimingCorpus createTimingCorpus(final String modelId) throws IOException {
+        Objects.requireNonNull(modelId, "modelId");
+        return buildTimingWorkload(modelId, MINIMUM_TIMING_TOKEN_COUNT);
+    }
+
+    /**
+     * Creates the canonical timing workload from an explicitly guarded dictionary file.
+     *
+     * @param dictionary compressed UTF-8 dictionary path
+     * @return timing corpus and its explicit workload basis
+     * @throws IOException if the dictionary cannot be read
+     */
+    static TimingCorpus createTimingCorpus(final Path dictionary) throws IOException {
+        Objects.requireNonNull(dictionary, "dictionary");
+        return buildTimingWorkload(readCandidates(dictionary, Integer.MAX_VALUE), dictionary.toString(),
+                MINIMUM_TIMING_TOKEN_COUNT);
     }
 
     /**
@@ -210,6 +241,52 @@ final class LanguageBenchmarkCorpus {
     }
 
     /**
+     * Creates a complete deterministic corpus for an exact model identifier.
+     *
+     * @param modelId exact bundled model identifier
+     * @return complete token corpus with expected roots
+     * @throws IOException if the resource cannot be read
+     */
+    static Corpus createFullCorpus(final String modelId) throws IOException {
+        Objects.requireNonNull(modelId, "modelId");
+        final List<Entry> candidates = readCandidates(modelId, Integer.MAX_VALUE);
+        if (candidates.isEmpty()) {
+            throw new IllegalStateException("No benchmark corpus tokens were available for " + modelId + ".");
+        }
+        final String[] tokens = new String[candidates.size()];
+        final String[] expectedRoots = new String[candidates.size()];
+        for (int index = 0; index < candidates.size(); index++) {
+            final Entry entry = candidates.get(index);
+            tokens[index] = entry.token();
+            expectedRoots[index] = entry.root();
+        }
+        return new Corpus(tokens, expectedRoots);
+    }
+
+    /**
+     * Creates the complete corpus from an explicitly guarded dictionary file.
+     *
+     * @param dictionary compressed UTF-8 dictionary path
+     * @return complete token corpus with expected roots
+     * @throws IOException if the dictionary cannot be read
+     */
+    static Corpus createFullCorpus(final Path dictionary) throws IOException {
+        Objects.requireNonNull(dictionary, "dictionary");
+        final List<Entry> candidates = readCandidates(dictionary, Integer.MAX_VALUE);
+        if (candidates.isEmpty()) {
+            throw new IllegalStateException("No benchmark corpus tokens were available for " + dictionary + ".");
+        }
+        final String[] tokens = new String[candidates.size()];
+        final String[] expectedRoots = new String[candidates.size()];
+        for (int index = 0; index < candidates.size(); index++) {
+            final Entry entry = candidates.get(index);
+            tokens[index] = entry.token();
+            expectedRoots[index] = entry.root();
+        }
+        return new Corpus(tokens, expectedRoots);
+    }
+
+    /**
      * Returns a cached corpus, creating it once per JVM when necessary.
      *
      * @param cache corpus cache
@@ -237,47 +314,24 @@ final class LanguageBenchmarkCorpus {
     }
 
     /**
-     * Returns a cached changed-token timing corpus, creating it once per JVM when
+     * Returns a cached canonical timing workload, creating it once per JVM when
      * necessary.
      *
      * @param language bundled Radixor language
-     * @return changed-token timing corpus
+     * @return canonical timing workload
      * @throws IOException if the resource cannot be read
      */
-    private static Corpus cachedChangedCorpus(final StemmerPatchTrieLoader.Language language) throws IOException {
+    private static TimingCorpus cachedTimingCorpus(final StemmerPatchTrieLoader.Language language) throws IOException {
         Objects.requireNonNull(language, "language");
 
         synchronized (LanguageBenchmarkCorpus.class) {
-            final Corpus existing = CHANGED_TIMING_CORPORA.get(language);
+            final TimingCorpus existing = TIMING_WORKLOADS.get(language);
             if (existing != null) {
                 return existing;
             }
 
-            final Corpus created = buildChangedTimingCorpus(language, MINIMUM_TIMING_TOKEN_COUNT);
-            CHANGED_TIMING_CORPORA.put(language, created);
-            return created;
-        }
-    }
-
-    /**
-     * Returns a cached changed-token timing corpus, creating it once per JVM when
-     * necessary.
-     *
-     * @param modelId exact bundled model identifier
-     * @return changed-token timing corpus
-     * @throws IOException if the resource cannot be read
-     */
-    private static Corpus cachedChangedCorpus(final String modelId) throws IOException {
-        Objects.requireNonNull(modelId, "modelId");
-
-        synchronized (LanguageBenchmarkCorpus.class) {
-            final Corpus existing = MODEL_CHANGED_TIMING_CORPORA.get(modelId);
-            if (existing != null) {
-                return existing;
-            }
-
-            final Corpus created = buildChangedTimingCorpus(modelId, MINIMUM_TIMING_TOKEN_COUNT);
-            MODEL_CHANGED_TIMING_CORPORA.put(modelId, created);
+            final TimingCorpus created = buildTimingWorkload(language, MINIMUM_TIMING_TOKEN_COUNT);
+            TIMING_WORKLOADS.put(language, created);
             return created;
         }
     }
@@ -314,45 +368,44 @@ final class LanguageBenchmarkCorpus {
     }
 
     /**
-     * Builds a deterministic changed-token timing corpus from a bundled language
+     * Builds a deterministic canonical timing workload from a bundled language
      * dictionary.
      *
      * @param language bundled Radixor language
      * @param minimumTokenCount minimum token count for timing
-     * @return changed-token corpus with expected roots
+     * @return canonical timing workload and basis
      * @throws IOException if the resource cannot be read
      */
-    private static Corpus buildChangedTimingCorpus(final StemmerPatchTrieLoader.Language language,
+    private static TimingCorpus buildTimingWorkload(final StemmerPatchTrieLoader.Language language,
             final int minimumTokenCount) throws IOException {
         Objects.requireNonNull(language, "language");
-        return buildChangedTimingCorpus(readCandidates(language, Integer.MAX_VALUE), language.toString(),
+        return buildTimingWorkload(readCandidates(language, Integer.MAX_VALUE), language.toString(),
                 minimumTokenCount);
     }
 
     /**
-     * Builds a deterministic changed-token timing corpus from an explicitly
-     * selected bundled model dictionary.
+     * Builds a deterministic canonical timing workload for an exact model.
      *
      * @param modelId exact bundled model identifier
      * @param minimumTokenCount minimum token count for timing
-     * @return changed-token corpus with expected roots
+     * @return canonical timing workload and basis
      * @throws IOException if the resource cannot be read
      */
-    private static Corpus buildChangedTimingCorpus(final String modelId, final int minimumTokenCount)
+    private static TimingCorpus buildTimingWorkload(final String modelId, final int minimumTokenCount)
             throws IOException {
         Objects.requireNonNull(modelId, "modelId");
-        return buildChangedTimingCorpus(readCandidates(modelId, Integer.MAX_VALUE), modelId, minimumTokenCount);
+        return buildTimingWorkload(readCandidates(modelId, Integer.MAX_VALUE), modelId, minimumTokenCount);
     }
 
     /**
-     * Builds a deterministic changed-token timing corpus from parsed entries.
+     * Builds a canonical timing workload from parsed entries.
      *
      * @param allCandidates all valid dictionary entries
      * @param sourceLabel human-readable source label for diagnostics
      * @param minimumTokenCount minimum token count for timing
-     * @return changed-token corpus with expected roots
+     * @return canonical timing workload and basis
      */
-    private static Corpus buildChangedTimingCorpus(final List<Entry> allCandidates, final String sourceLabel,
+    private static TimingCorpus buildTimingWorkload(final List<Entry> allCandidates, final String sourceLabel,
             final int minimumTokenCount) {
         Objects.requireNonNull(allCandidates, "allCandidates");
         Objects.requireNonNull(sourceLabel, "sourceLabel");
@@ -366,20 +419,23 @@ final class LanguageBenchmarkCorpus {
                 changedCandidates.add(entry);
             }
         }
-        if (changedCandidates.isEmpty()) {
-            throw new IllegalStateException("No changed-token benchmark corpus tokens were available for "
-                    + sourceLabel + ".");
+        if (allCandidates.isEmpty()) {
+            throw new IllegalStateException("No benchmark corpus tokens were available for " + sourceLabel + ".");
         }
 
-        final int timingTokenCount = Math.max(changedCandidates.size(), minimumTokenCount);
+        final List<Entry> timingCandidates = changedCandidates.isEmpty() ? allCandidates : changedCandidates;
+        final TimingWorkloadBasis basis = changedCandidates.isEmpty()
+                ? TimingWorkloadBasis.ROOT_ONLY_TOKENS
+                : TimingWorkloadBasis.CHANGED_TOKENS;
+        final int timingTokenCount = Math.max(timingCandidates.size(), minimumTokenCount);
         final String[] tokens = new String[timingTokenCount];
         final String[] expectedRoots = new String[timingTokenCount];
         for (int index = 0; index < tokens.length; index++) {
-            final Entry entry = changedCandidates.get(index % changedCandidates.size());
+            final Entry entry = timingCandidates.get(index % timingCandidates.size());
             tokens[index] = entry.token();
             expectedRoots[index] = entry.root();
         }
-        return new Corpus(tokens, expectedRoots);
+        return new TimingCorpus(new Corpus(tokens, expectedRoots), basis);
     }
 
     /**
@@ -443,6 +499,16 @@ final class LanguageBenchmarkCorpus {
         return readCandidatesFromResource(descriptor.resource(), maximumTokenCount);
     }
 
+    /** Reads token candidates from one guarded filesystem dictionary. */
+    private static List<Entry> readCandidates(final Path dictionary, final int maximumTokenCount) throws IOException {
+        if (!Files.isRegularFile(dictionary)) {
+            throw new IOException("Guarded benchmark dictionary is missing: " + dictionary + ".");
+        }
+        try (InputStream inputStream = Files.newInputStream(dictionary)) {
+            return readCandidates(inputStream, dictionary.toString(), maximumTokenCount);
+        }
+    }
+
     /**
      * Reads token candidates from a bundled compressed dictionary resource.
      *
@@ -458,9 +524,19 @@ final class LanguageBenchmarkCorpus {
             throw new IllegalStateException("Missing bundled benchmark resource " + resourcePath + ".");
         }
 
+        try (InputStream inputStream = resource) {
+            return readCandidates(inputStream, resourcePath, maximumTokenCount);
+        }
+    }
+
+    /** Reads deterministic candidates from an already owned compressed stream. */
+    private static List<Entry> readCandidates(final InputStream compressed, final String sourceLabel,
+            final int maximumTokenCount) throws IOException {
+        Objects.requireNonNull(compressed, "compressed");
+        Objects.requireNonNull(sourceLabel, "sourceLabel");
+
         final List<Entry> candidates = new ArrayList<>(MINIMUM_TIMING_TOKEN_COUNT);
-        try (InputStream inputStream = resource;
-                GZIPInputStream gzipInputStream = new GZIPInputStream(inputStream);
+        try (GZIPInputStream gzipInputStream = new GZIPInputStream(compressed);
                 InputStreamReader inputStreamReader = new InputStreamReader(gzipInputStream, StandardCharsets.UTF_8);
                 BufferedReader reader = new BufferedReader(inputStreamReader)) {
             String line = reader.readLine();
@@ -529,6 +605,43 @@ final class LanguageBenchmarkCorpus {
             }
         }
         return false;
+    }
+
+    /** Identifies the token population used by a canonical timing workload. */
+    enum TimingWorkloadBasis {
+        /** Token/root pairs whose token differs from its expected root. */
+        CHANGED_TOKENS("changed tokens"),
+
+        /** Complete root-preservation corpus used when no changed pair exists. */
+        ROOT_ONLY_TOKENS("root-only tokens");
+
+        private final String reportValue;
+
+        TimingWorkloadBasis(final String reportValue) {
+            this.reportValue = reportValue;
+        }
+
+        /**
+         * Returns the stable human-readable CSV value.
+         *
+         * @return report value
+         */
+        String reportValue() {
+            return this.reportValue;
+        }
+    }
+
+    /**
+     * Canonical timing corpus together with its auditable token-population basis.
+     *
+     * @param corpus measured token/root pairs
+     * @param basis token-population basis
+     */
+    record TimingCorpus(Corpus corpus, TimingWorkloadBasis basis) {
+        TimingCorpus {
+            Objects.requireNonNull(corpus, "corpus");
+            Objects.requireNonNull(basis, "basis");
+        }
     }
 
     /**

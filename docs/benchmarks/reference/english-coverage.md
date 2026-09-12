@@ -15,21 +15,21 @@ The speed cells are JMH point estimates with their 99.9% score errors. The 100% 
 
 <!-- ENGLISH-SPEED-SUITES:START -->
 !!! note "Separate English speed suites"
-    The full-knowledge `97.9 ns/token` point on this page belongs to the coverage suite. The [English language comparison](../languages/english.md#speed) reports `80.8 ns/token` from a separate JMH method and run. Their uncertainty intervals overlap; neither point estimate should replace the other.
+    The full-knowledge `107.1 ns/token` point on this page belongs to the coverage suite. The [English language comparison](../languages/english.md#speed) reports `131.3 ns/token` from a separate JMH method and run. Their uncertainty intervals overlap; neither point estimate should replace the other.
 <!-- ENGLISH-SPEED-SUITES:END -->
 
 | Used rows | Actual row ratio | All exact | Changed exact | Root preserved | Speed ms/op | Error ms | ns/token |
 | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| 100% | 100.000% | 97.668% | 98.110% | 97.552% | 20.425 | 3.636 | 97.9 |
-| 90% | 90.000% | 97.239% | 95.821% | 97.612% | 17.779 | 1.827 | 85.3 |
-| 80% | 80.000% | 96.827% | 93.673% | 97.656% | 15.343 | 1.321 | 73.6 |
-| 70% | 70.000% | 96.392% | 91.430% | 97.695% | 16.444 | 2.027 | 78.9 |
-| 60% | 60.000% | 95.935% | 89.244% | 97.693% | 14.330 | 1.350 | 68.7 |
-| 50% | 50.000% | 95.453% | 86.979% | 97.678% | 14.953 | 2.625 | 71.7 |
-| 40% | 40.000% | 94.939% | 84.667% | 97.638% | 12.919 | 1.155 | 62.0 |
-| 30% | 30.000% | 94.398% | 82.443% | 97.538% | 12.166 | 1.305 | 58.3 |
-| 20% | 20.000% | 93.821% | 80.174% | 97.406% | 11.549 | 1.535 | 55.4 |
-| 10% | 10.000% | 93.057% | 77.327% | 97.190% | 14.360 | 3.524 | 68.9 |
+| 100% | 100.000% | 97.668% | 98.110% | 97.552% | 22.344 | 2.858 | 107.1 |
+| 90% | 90.000% | 97.239% | 95.821% | 97.612% | 21.843 | 2.078 | 104.7 |
+| 80% | 80.000% | 96.827% | 93.673% | 97.656% | 20.895 | 1.896 | 100.2 |
+| 70% | 70.000% | 96.392% | 91.430% | 97.695% | 20.598 | 1.265 | 98.8 |
+| 60% | 60.000% | 95.935% | 89.244% | 97.693% | 19.394 | 1.610 | 93.0 |
+| 50% | 50.000% | 95.453% | 86.979% | 97.678% | 18.054 | 1.228 | 86.6 |
+| 40% | 40.000% | 94.939% | 84.667% | 97.638% | 17.279 | 1.803 | 82.9 |
+| 30% | 30.000% | 94.398% | 82.443% | 97.538% | 18.227 | 2.224 | 87.4 |
+| 20% | 20.000% | 93.821% | 80.174% | 97.406% | 16.065 | 2.378 | 77.0 |
+| 10% | 10.000% | 93.057% | 77.327% | 97.190% | 16.297 | 2.881 | 78.1 |
 
 ## Column Meanings
 

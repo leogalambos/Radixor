@@ -55,6 +55,10 @@ final class StemmerModelRegistryTest {
                 polish.stream().map(StemmerModelDescriptor::id).toList());
         assertEquals("pl-pl-unimorph", registry.requireDefault(StemmerPatchTrieLoader.Language.PL_PL).id());
         assertEquals("pl-pl-polimorf", registry.require("pl-pl-polimorf").id());
+        assertEquals("Hsilimo — UniMorph", registry.require("hsi-default").displayName());
+        assertEquals(StemmerPatchTrieLoader.Language.values().length + 1, registry.models().size());
+        assertTrue(registry.models().stream().allMatch(
+                descriptor -> descriptor.isRightToLeft() == descriptor.language().isRightToLeft()));
         assertEquals(registry.models().stream().sorted().toList(), registry.models());
     }
 

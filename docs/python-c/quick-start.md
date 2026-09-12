@@ -6,7 +6,7 @@
 python -m pip install --only-binary=:all: radixor-c
 ```
 
-The dependency `radixor-models-standard` supplies the 20 compiled standard
+The dependency `radixor-models-standard` supplies the 31 compiled standard
 models. Radixor-C supports CPython 3.10 through 3.14.
 
 ## 2. Stem one word

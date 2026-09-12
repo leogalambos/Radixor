@@ -32,6 +32,8 @@
 package org.egothor.radixor
 
 import org.gradle.api.GradleException
+import org.gradle.testkit.runner.BuildResult
+import org.gradle.testkit.runner.GradleRunner
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 
@@ -39,6 +41,7 @@ import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.zip.GZIPOutputStream
+import java.util.zip.ZipFile
 
 import static org.junit.jupiter.api.Assertions.assertEquals
 import static org.junit.jupiter.api.Assertions.assertThrows
@@ -60,6 +63,17 @@ final class RadixorModelPluginTest {
     void acceptsUnknownLegacyRevision() {
         RadixorModelPlugin.validateRevisionMetadata(
                 'not-recorded-in-legacy-import', 'not-recorded-in-legacy-import')
+    }
+
+    /** Preserves legacy compatibility while forbidding sentinels in manifest-managed models. */
+    @Test
+    void rejectsUnknownRevisionForManifestManagedModel() {
+        assertThrows(GradleException) {
+            RadixorModelPlugin.validateManifestRevisionMetadata(
+                    'not-recorded-in-legacy-import', 'not-recorded-in-legacy-import', true)
+        }
+        RadixorModelPlugin.validateManifestRevisionMetadata(
+                'not-recorded-in-legacy-import', 'not-recorded-in-legacy-import', false)
     }
 
     /** Rejects a missing revision-status declaration. */
@@ -126,6 +140,131 @@ final class RadixorModelPluginTest {
         }
     }
 
+    /** Packages CC BY-SA 4.0 as ShareAlike notice material and describes that notice in the POM. */
+    @Test
+    void packagesCcBySaFourNoticeAndDescribesItInPom() {
+        final Path project = temporaryDirectory.resolve('cc4-model')
+        final Path modelInput = project.resolve('src/modelInput')
+        Files.createDirectories(modelInput)
+        Files.writeString(project.resolve('settings.gradle'), "rootProject.name = 'hsi-default'\n",
+                StandardCharsets.UTF_8)
+        Files.writeString(project.resolve('model-version.txt'), '1.0.0\n', StandardCharsets.UTF_8)
+        writeGzip(modelInput.resolve('stemmer.gz').toFile()) { BufferedWriter writer ->
+            writer.write('root\trooted\n')
+        }
+        Files.writeString(modelInput.resolve('NOTICE-model-data.txt'), validVersionFourNotice(),
+                StandardCharsets.UTF_8)
+        Files.writeString(project.resolve('build.gradle'), '''plugins {
+    id 'org.egothor.radixor.model'
+}
+radixorModel {
+    modelId = 'hsi-default'
+    language = 'HSI'
+    displayName = 'Hsilimo — UniMorph'
+    defaultModel = true
+    rightToLeft = true
+    sourceName = 'UniMorph'
+    sourceVersion = 'revision'
+    sourceRevision = 'revision'
+    sourceProject = 'UniMorph'
+    sourceRepository = 'https://github.com/unimorph/hsi'
+    sourceDataset = 'UniMorph Hsilimo morphological dataset'
+    sourceRevisionStatus = 'recorded'
+    sourceLicense = 'CC-BY-SA-4.0'
+    sourceLicenseUri = 'https://creativecommons.org/licenses/by-sa/4.0/'
+    sourceAttribution = 'UniMorph contributors'
+    sourceVerificationDate = '2026-09-10'
+    transformationsSummary = 'Cleaning and deterministic model packaging'
+    noticeFileName = 'NOTICE-model-data.txt'
+}
+''', StandardCharsets.UTF_8)
+
+        final BuildResult result = GradleRunner.create()
+                .withProjectDir(project.toFile())
+                .withPluginClasspath()
+                .withArguments('verifyModelJar', 'generatePomFileForModelPublication', '--stacktrace')
+                .build()
+
+        assertTrue(result.output.contains('BUILD SUCCESSFUL'))
+        final Path archive = project.resolve('build/libs/radixor-model-hsi-default-1.0.0.jar')
+        new ZipFile(archive.toFile()).withCloseable { ZipFile zip ->
+            assertTrue(zip.getEntry('META-INF/NOTICE/hsi-default-data.txt') != null)
+            assertTrue(zip.getEntry('META-INF/LICENSES/PoliMorf-BSD-2-Clause.txt') == null)
+        }
+        final String pom = Files.readString(
+                project.resolve('build/publications/model/pom-default.xml'), StandardCharsets.UTF_8)
+        assertTrue(pom.contains('See the packaged model-specific notice.'))
+        assertTrue(!pom.contains('See the packaged model-data license.'))
+        final String descriptor = Files.readString(project.resolve(
+                'build/generated/modelResources/META-INF/radixor/models/hsi-default.properties'),
+                StandardCharsets.UTF_8)
+        assertTrue(descriptor.contains('model.rightToLeft=true\n'))
+    }
+
+    /** Packages the canonical LGPLLR text and legible dictionary form in the Khaling source artifact. */
+    @Test
+    void packagesLgpllrLicenseAndLegibleDictionarySource() {
+        final Path project = temporaryDirectory.resolve('lgpllr-model')
+        final Path modelInput = project.resolve('src/modelInput')
+        Files.createDirectories(modelInput)
+        Files.writeString(project.resolve('settings.gradle'), "rootProject.name = 'klr-default'\n",
+                StandardCharsets.UTF_8)
+        Files.writeString(project.resolve('model-version.txt'), '1.0.0\n', StandardCharsets.UTF_8)
+        writeGzip(modelInput.resolve('stemmer.gz').toFile()) { BufferedWriter writer ->
+            writer.write('root\trooted\n')
+        }
+        Files.writeString(modelInput.resolve('NOTICE-model-data.txt'), validLgpllrNotice(),
+                StandardCharsets.UTF_8)
+        final List<Path> licenseCandidates = [
+                Path.of('models/klr-default/src/modelInput/LGPLLR.txt'),
+                Path.of('../models/klr-default/src/modelInput/LGPLLR.txt')]
+        final Path license = licenseCandidates.find { Path candidate -> Files.isRegularFile(candidate) }
+        assertTrue(license != null, 'The canonical LGPLLR license text must be checked in.')
+        Files.copy(license, modelInput.resolve('LGPLLR.txt'))
+        Files.writeString(project.resolve('build.gradle'), '''plugins {
+    id 'org.egothor.radixor.model'
+}
+radixorModel {
+    modelId = 'klr-default'
+    language = 'KLR'
+    displayName = 'Khaling — UniMorph'
+    defaultModel = true
+    sourceName = 'UniMorph'
+    sourceVersion = 'revision'
+    sourceRevision = 'revision'
+    sourceProject = 'UniMorph'
+    sourceRepository = 'https://github.com/unimorph/klr'
+    sourceDataset = 'UniMorph Khaling morphological dataset'
+    sourceRevisionStatus = 'recorded'
+    sourceLicense = 'LGPLLR'
+    sourceLicenseUri = 'https://spdx.org/licenses/LGPLLR.html'
+    sourceAttribution = 'UniMorph contributors'
+    sourceVerificationDate = '2026-09-11'
+    transformationsSummary = 'Cleaning and deterministic model packaging'
+    noticeFileName = 'NOTICE-model-data.txt'
+    licenseFileName = 'LGPLLR.txt'
+}
+''', StandardCharsets.UTF_8)
+
+        final BuildResult result = GradleRunner.create()
+                .withProjectDir(project.toFile())
+                .withPluginClasspath()
+                .withArguments('verifyModelJar', '--stacktrace')
+                .build()
+
+        assertTrue(result.output.contains('BUILD SUCCESSFUL'))
+        final Path archive = project.resolve('build/libs/radixor-model-klr-default-1.0.0.jar')
+        new ZipFile(archive.toFile()).withCloseable { ZipFile zip ->
+            assertTrue(zip.getEntry('META-INF/NOTICE/klr-default-data.txt') != null)
+            assertTrue(zip.getEntry('META-INF/LICENSES/LGPLLR.txt') != null)
+        }
+        final Path sources = project.resolve('build/libs/klr-default-1.0.0-sources.jar')
+        new ZipFile(sources.toFile()).withCloseable { ZipFile zip ->
+            assertTrue(zip.getEntry('org/egothor/stemmer/models/klr-default/stemmer.gz') != null)
+            assertTrue(zip.getEntry('META-INF/LICENSES/LGPLLR.txt') != null)
+        }
+    }
+
     /** Streams a large dictionary while retaining only aggregate counters and the current row. */
     @Test
     void validatesLargeDictionaryWithBoundedState() {
@@ -142,7 +281,7 @@ final class RadixorModelPluginTest {
 
         assertEquals(groups, result.acceptedGroupCount)
         assertEquals(groups * 2L, result.acceptedFormCount)
-        assertEquals(groups, result.ignoredEmptyVariantCount)
+        assertEquals(0L, result.ignoredEmptyVariantCount)
     }
 
     /** Rejects a source that is not a GZip stream. */
@@ -163,12 +302,15 @@ final class RadixorModelPluginTest {
         assertThrows(GradleException) { RadixorModelPlugin.validateDictionary(dictionary) }
     }
 
-    /** Rejects structurally invalid rows with an empty stem. */
+    /** Trims a physical row before splitting it exactly as the production parser does. */
     @Test
-    void rejectsInvalidRows() {
+    void trimsRowsBeforeSplittingFields() {
         final File dictionary = temporaryDirectory.resolve('invalid-row.gz').toFile()
-        writeGzip(dictionary) { BufferedWriter writer -> writer.write("\tvariant\n") }
-        assertThrows(GradleException) { RadixorModelPlugin.validateDictionary(dictionary) }
+        writeGzip(dictionary) { BufferedWriter writer -> writer.write("\tvariant\nvalid\tvariant\n") }
+        final RadixorModelPlugin.DictionaryValidationResult result =
+                RadixorModelPlugin.validateDictionary(dictionary)
+        assertEquals(2L, result.acceptedGroupCount)
+        assertEquals(3L, result.acceptedFormCount)
     }
 
     /** Preserves the production parser policy for Unicode-whitespace items. */
@@ -183,6 +325,26 @@ final class RadixorModelPluginTest {
                 RadixorModelPlugin.validateDictionary(dictionary)
         assertEquals(1L, result.acceptedGroupCount)
         assertEquals(2L, result.acceptedFormCount)
+    }
+
+    /** Mirrors production parsing for trimming, comments, NBSP, marks, joiners, and punctuation. */
+    @Test
+    void matchesProductionDictionaryFieldGrammar() {
+        final File dictionary = temporaryDirectory.resolve('parser-conformance.gz').toFile()
+        writeGzip(dictionary) { BufferedWriter writer ->
+            writer.write("  root  \t  variant  \n")
+            writer.write("bad stem\tvariant\n")
+            writer.write("nbsp\u00a0stem\taccepted\n")
+            writer.write("mark\u0301\tzwnj\u200c\tzwj\u200d\to'neil\tco-op\ta:b\ta/b\n")
+            writer.write("comment\tkept#discarded\n")
+            writer.write("slash\tkept//discarded\n")
+        }
+
+        final RadixorModelPlugin.DictionaryValidationResult result =
+                RadixorModelPlugin.validateDictionary(dictionary)
+
+        assertEquals(5L, result.acceptedGroupCount)
+        assertEquals(15L, result.acceptedFormCount)
     }
 
     /** Streams the complete maintained PoliMorf model input successfully. */
@@ -210,7 +372,8 @@ final class RadixorModelPluginTest {
 
     private static void validateNotice(final String text) {
         RadixorModelPlugin.validateShareAlikeNoticeText(text, 'test notice', 'test-model',
-                'https://github.com/unimorph/test', 'https://creativecommons.org/licenses/by-sa/3.0/',
+                'https://github.com/unimorph/test', 'CC-BY-SA-3.0',
+                'https://creativecommons.org/licenses/by-sa/3.0/',
                 'not-recorded-in-legacy-import', 'not-recorded-in-legacy-import')
     }
 
@@ -230,6 +393,44 @@ to the extent protected by applicable law.
 The underlying morphological data remains attributed to UniMorph and
 This derived model data, including Radixor's protectable contributions,
 is distributed under Creative Commons Attribution-ShareAlike 3.0
+Neither UniMorph nor any upstream contributor endorses Radixor.
+'''
+    }
+
+    private static String validVersionFourNotice() {
+        return '''Model ID: hsi-default
+Official repository: https://github.com/unimorph/hsi
+Attribution: UniMorph contributors
+License:
+Creative Commons Attribution-ShareAlike 4.0 International
+Canonical license URI: https://creativecommons.org/licenses/by-sa/4.0/
+Radixor modifications: Cleaning and deterministic model packaging.
+Revision status: recorded
+Copyright (C) 2026, Leo Galambos.
+Radixor-specific selection, verification, cleaning, normalization,
+to the extent protected by applicable law.
+The underlying morphological data remains attributed to UniMorph and
+This derived model data, including Radixor's protectable contributions,
+is distributed under Creative Commons Attribution-ShareAlike 4.0
+Neither UniMorph nor any upstream contributor endorses Radixor.
+'''
+    }
+
+    private static String validLgpllrNotice() {
+        return '''Model ID: klr-default
+Official repository: https://github.com/unimorph/klr
+Attribution: UniMorph contributors
+License:
+Lesser General Public License For Linguistic Resources
+Canonical license URI: https://spdx.org/licenses/LGPLLR.html
+Radixor modifications: Cleaning and deterministic model packaging.
+Revision status: recorded
+Copyright (C) 2026, Leo Galambos.
+Radixor-specific selection, verification, cleaning, normalization,
+to the extent protected by applicable law.
+The underlying morphological data remains attributed to UniMorph and
+This derived model data, including Radixor's protectable contributions,
+is distributed under the Lesser General Public License For Linguistic Resources
 Neither UniMorph nor any upstream contributor endorses Radixor.
 '''
     }

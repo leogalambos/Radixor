@@ -216,7 +216,622 @@ public final class StemmerPatchTrieLoader {
         /**
          * Yiddish.
          */
-        YI("yi", "yi-default", true);
+        YI("yi", "yi-default", true),
+
+        /**
+         * Adyghe.
+         */
+        ADY("ady", "ady-default", false),
+
+        /**
+         * Gulf Arabic.
+         */
+        AFB("afb", "afb-default", true),
+
+        /**
+         * Afrikaans.
+         */
+        AF_ZA("af_za", "af-za-default", false),
+
+        /**
+         * Aimele.
+         */
+        AIL("ail", "ail-default", false),
+
+        /**
+         * Akan.
+         */
+        AK("ak", "aka-default", false),
+
+        /**
+         * Yanesha’.
+         */
+        AME("ame", "ame-default", false),
+
+        /**
+         * Amharic.
+         */
+        AM_ET("am_et", "am-et-default", false),
+
+        /**
+         * Old English.
+         */
+        ANG("ang", "ang-default", false),
+
+        /**
+         * Arabic.
+         */
+        AR("ar", "ar-default", true),
+
+        /**
+         * Mapudungun.
+         */
+        ARN("arn", "arn-default", false),
+
+        /**
+         * Egyptian Arabic.
+         */
+        ARZ("arz", "arz-default", true),
+
+        /**
+         * Asturian.
+         */
+        AST("ast", "ast-default", false),
+
+        /**
+         * Assamese.
+         */
+        AS_IN("as_in", "as-in-default", false),
+
+        /**
+         * Aymara.
+         */
+        AYM("aym", "aym-default", false),
+
+        /**
+         * Amuzgo.
+         */
+        AZG("azg", "azg-default", false),
+
+        /**
+         * Azerbaijani.
+         */
+        AZ_AZ("az_az", "az-az-default", false),
+
+        /**
+         * Bashkir.
+         */
+        BAK("bak", "bak-default", false),
+
+        /**
+         * Belarusian.
+         */
+        BE_BY("be_by", "be-by-default", false),
+
+        /**
+         * Bulgarian.
+         */
+        BG_BG("bg_bg", "bg-bg-default", false),
+
+        /**
+         * Bengali.
+         */
+        BN_BD("bn_bd", "bn-bd-default", false),
+
+        /**
+         * Braj.
+         */
+        BRA("bra", "bra-default", false),
+
+        /**
+         * Breton.
+         */
+        BRE("bre", "bre-default", false),
+
+        /**
+         * Catalan.
+         */
+        CA_ES("ca_es", "ca-es-default", false),
+
+        /**
+         * Cebuano.
+         */
+        CEB("ceb", "ceb-default", false),
+
+        /**
+         * Church Slavonic.
+         */
+        CHU("chu", "chu-default", false),
+
+        /**
+         * Chukchi.
+         */
+        CKT("ckt", "ckt-default", false),
+
+        /**
+         * Eastern Chatino.
+         */
+        CLY("cly", "cly-default", false),
+
+        /**
+         * Ashaninka.
+         */
+        CNI("cni", "cni-default", false),
+
+        /**
+         * Cornish.
+         */
+        COR("cor", "cor-default", false),
+
+        /**
+         * Copala Triqui.
+         */
+        CPA("cpa", "cpa-default", false),
+
+        /**
+         * Cree.
+         */
+        CRE("cre", "cre-default", false),
+
+        /**
+         * Crimean Tatar.
+         */
+        CRH("crh", "crh-default", false),
+
+        /**
+         * Kashubian.
+         */
+        CSB("csb", "csb-default", false),
+
+        /**
+         * Western Highland Chatino.
+         */
+        CTP("ctp", "ctp-default", false),
+
+        /**
+         * Zenzontepec Chatino.
+         */
+        CZN("czn", "czn-default", false),
+
+        /**
+         * Dakota.
+         */
+        DAK("dak", "dak-default", false),
+
+        /**
+         * Zarma.
+         */
+        DJE("dje", "dje-default", false),
+
+        /**
+         * Lower Sorbian.
+         */
+        DSB("dsb", "dsb-default", false),
+
+        /**
+         * Greek.
+         */
+        EL_GR("el_gr", "el-gr-default", false),
+
+        /**
+         * Estonian.
+         */
+        ET_EE("et_ee", "et-ee-default", false),
+
+        /**
+         * Evenki.
+         */
+        EVN("evn", "evn-default", false),
+
+        /**
+         * Faroese.
+         */
+        FO_FO("fo_fo", "fo-fo-default", false),
+
+        /**
+         * Middle French.
+         */
+        FRM("frm", "frm-default", false),
+
+        /**
+         * Old French.
+         */
+        FRO("fro", "fro-default", false),
+
+        /**
+         * North Frisian.
+         */
+        FRR("frr", "frr-default", false),
+
+        /**
+         * Friulian.
+         */
+        FUR("fur", "fur-default", false),
+
+        /**
+         * Ga.
+         */
+        GAA("gaa", "gaa-default", false),
+
+        /**
+         * Galolen.
+         */
+        GAL("gal", "gal-default", false),
+
+        /**
+         * Irish.
+         */
+        GA_IE("ga_ie", "ga-ie-default", false),
+
+        /**
+         * Middle High German.
+         */
+        GMH("gmh", "gmh-default", false),
+
+        /**
+         * Middle Low German.
+         */
+        GML("gml", "gml-default", false),
+
+        /**
+         * Old High German.
+         */
+        GOH("goh", "goh-default", false),
+
+        /**
+         * Gothic.
+         */
+        GOT("got", "got-default", false),
+
+        /**
+         * Ancient Greek.
+         */
+        GRC("grc", "grc-default", false),
+
+        /**
+         * Alsatian.
+         */
+        GSW("gsw", "gsw-default", false),
+
+        /**
+         * Bininj Kun-wok.
+         */
+        GUP("gup", "gup-default", false),
+
+        /**
+         * Manx.
+         */
+        GV_IM("gv_im", "gv-im-default", false),
+
+        /**
+         * Haida.
+         */
+        HAI("hai", "hai-default", false),
+
+        /**
+         * Serbo-Croatian.
+         */
+        HBS("hbs", "hbs-default", false),
+
+        /**
+         * Hiligaynon.
+         */
+        HIL("hil", "hil-default", false),
+
+        /**
+         * Hsilimo.
+         */
+        HSI("hsi", "hsi-default", false),
+
+        /**
+         * Armenian.
+         */
+        HY_AM("hy_am", "hy-am-default", false),
+
+        /**
+         * Indonesian.
+         */
+        ID_ID("id_id", "id-id-default", false),
+
+        /**
+         * Icelandic.
+         */
+        IS_IS("is_is", "is-is-default", false),
+
+        /**
+         * Itelmen.
+         */
+        ITL("itl", "itl-default", false),
+
+        /**
+         * Ingrian.
+         */
+        IZH("izh", "izh-default", false),
+
+        /**
+         * Japanese.
+         */
+        JA_JP("ja_jp", "ja-jp-default", false),
+
+        /**
+         * Kabardian.
+         */
+        KBD("kbd", "kbd-default", false),
+
+        /**
+         * Khakas.
+         */
+        KJH("kjh", "kjh-default", false),
+
+        /**
+         * Kazakh.
+         */
+        KK_KZ("kk_kz", "kk-kz-default", false),
+
+        /**
+         * Khaling.
+         */
+        KLR("klr", "klr-default", false),
+
+        /**
+         * Kalaallisut.
+         */
+        KL_GL("kl_gl", "kl-gl-default", false),
+
+        /**
+         * Kannada.
+         */
+        KN_IN("kn_in", "kn-in-default", false),
+
+        /**
+         * Kodi.
+         */
+        KOD("kod", "kod-default", false),
+
+        /**
+         * Kongo.
+         */
+        KON("kon", "kon-default", false),
+
+        /**
+         * Karelian.
+         */
+        KRL("krl", "krl-default", false),
+
+        /**
+         * Kyrgyz.
+         */
+        KY_KG("ky_kg", "ky-kg-default", false),
+
+        /**
+         * Latin.
+         */
+        LA("la", "la-default", false),
+
+        /**
+         * Luganda.
+         */
+        LG_UG("lg_ug", "lg-ug-default", false),
+
+        /**
+         * Lingala.
+         */
+        LIN("lin", "lin-default", false),
+
+        /**
+         * Livonian.
+         */
+        LIV("liv", "liv-default", false),
+
+        /**
+         * Ladin.
+         */
+        LLD("lld", "lld-default", false),
+
+        /**
+         * Lithuanian.
+         */
+        LT_LT("lt_lt", "lt-lt-default", false),
+
+        /**
+         * Latvian.
+         */
+        LV_LV("lv_lv", "lv-lv-default", false),
+
+        /**
+         * Magahi.
+         */
+        MAG("mag", "mag-default", false),
+
+        /**
+         * Malagasy.
+         */
+        MG_MG("mg_mg", "mg-mg-default", false),
+
+        /**
+         * Maori.
+         */
+        MI_NZ("mi_nz", "mi-nz-default", false),
+
+        /**
+         * Macedonian.
+         */
+        MK_MK("mk_mk", "mk-mk-default", false),
+
+        /**
+         * Mongolian.
+         */
+        MN_MN("mn_mn", "mn-mn-default", false),
+
+        /**
+         * Maltese.
+         */
+        MT_MT("mt_mt", "mt-mt-default", false),
+
+        /**
+         * Murrinh-Patha.
+         */
+        MWF("mwf", "mwf-default", false),
+
+        /**
+         * Neapolitan.
+         */
+        NAP("nap", "nap-default", false),
+
+        /**
+         * Navajo.
+         */
+        NAV("nav", "nav-default", false),
+
+        /**
+         * Low German.
+         */
+        NDS("nds", "nds-default", false),
+
+        /**
+         * Old Norse.
+         */
+        NON("non", "non-default", false),
+
+        /**
+         * Chichewa.
+         */
+        NY_MW("ny_mw", "ny-mw-default", false),
+
+        /**
+         * Oodham.
+         */
+        OOD("ood", "ood-default", false),
+
+        /**
+         * Old Saxon.
+         */
+        OSX("osx", "osx-default", false),
+
+        /**
+         * Otomi (ote).
+         */
+        OTE("ote", "ote-default", false),
+
+        /**
+         * Pashto.
+         */
+        PS_AF("ps_af", "ps-af-default", true),
+
+        /**
+         * Quechua.
+         */
+        QUE("que", "que-default", false),
+
+        /**
+         * Romanian.
+         */
+        RO_RO("ro_ro", "ro-ro-default", false),
+
+        /**
+         * Southern Kurdish.
+         */
+        SDH("sdh", "sdh-default", true),
+
+        /**
+         * Seneca.
+         */
+        SEE("see", "see-default", false),
+
+        /**
+         * Old Irish.
+         */
+        SGA("sga", "sga-default", false),
+
+        /**
+         * Shipibo-Conibo.
+         */
+        SHP("shp", "shp-default", false),
+
+        /**
+         * Xibe.
+         */
+        SJO("sjo", "sjo-default", false),
+
+        /**
+         * Northern Sami.
+         */
+        SME("sme", "sme-default", false),
+
+        /**
+         * Shona.
+         */
+        SN_ZW("sn_zw", "sn-zw-default", false),
+
+        /**
+         * Albanian.
+         */
+        SQ_AL("sq_al", "sq-al-default", false),
+
+        /**
+         * Sotho, Southern.
+         */
+        ST_ZA("st_za", "st-za-default", false),
+
+        /**
+         * Congo Swahili.
+         */
+        SWC("swc", "swc-default", false),
+
+        /**
+         * Classical Syriac.
+         */
+        SYC("syc", "syc-default", true),
+
+        /**
+         * Tagalog.
+         */
+        TL_PH("tl_ph", "tl-ph-default", false),
+
+        /**
+         * Turkish.
+         */
+        TR_TR("tr_tr", "tr-tr-default", false),
+
+        /**
+         * Uyghur.
+         */
+        UG_CN("ug_cn", "ug-cn-default", true),
+
+        /**
+         * Uzbek.
+         */
+        UZ_UZ("uz_uz", "uz-uz-default", false),
+
+        /**
+         * Voro.
+         */
+        VRO("vro", "vro-default", false),
+
+        /**
+         * Classical Armenian.
+         */
+        XCL("xcl", "xcl-default", false),
+
+        /**
+         * Anglo-Norman.
+         */
+        XNO("xno", "xno-default", false),
+
+        /**
+         * Yoloxóchitl Mixtec.
+         */
+        XTY("xty", "xty-default", false),
+
+        /**
+         * Chichicapan Zapotec.
+         */
+        ZPV("zpv", "zpv-default", false),
+
+        /**
+         * Zulu.
+         */
+        ZU_ZA("zu_za", "zu-za-default", false);
 
         /**
          * Resource directory name.

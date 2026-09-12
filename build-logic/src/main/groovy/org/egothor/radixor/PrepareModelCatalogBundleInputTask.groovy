@@ -48,7 +48,7 @@ import java.nio.file.StandardCopyOption
 import java.security.MessageDigest
 import java.util.stream.Stream
 
-/** Prepares the two POM-only catalog publications for a Maven Central bundle. */
+/** Prepares the four POM-only catalog publications for a Maven Central bundle. */
 abstract class PrepareModelCatalogBundleInputTask extends DefaultTask {
     @InputDirectory
     @PathSensitive(PathSensitivity.RELATIVE)
@@ -77,6 +77,8 @@ abstract class PrepareModelCatalogBundleInputTask extends DefaultTask {
 
         final Set<String> expectedPoms = [
                 "org/egothor/radixor-models-standard/${version}/radixor-models-standard-${version}.pom",
+                "org/egothor/radixor-models-extended/${version}/radixor-models-extended-${version}.pom",
+                "org/egothor/radixor-models-filtered/${version}/radixor-models-filtered-${version}.pom",
                 "org/egothor/radixor-models-bom/${version}/radixor-models-bom-${version}.pom"
         ] as Set<String>
         final List<Path> copied = []
@@ -109,8 +111,8 @@ abstract class PrepareModelCatalogBundleInputTask extends DefaultTask {
         if (copied.isEmpty()) {
             throw new GradleException('No model catalog publication files were copied from the raw staging repository.')
         }
-        if (poms.size() != 2 || !expectedPoms.every { String expected -> Files.isRegularFile(preparedDirectory.resolve(expected)) }) {
-            throw new GradleException("The prepared model catalog must contain exactly the standard and BOM POMs; found ${poms.size()} POM files.")
+        if (poms.size() != 4 || !expectedPoms.every { String expected -> Files.isRegularFile(preparedDirectory.resolve(expected)) }) {
+            throw new GradleException("The prepared model catalog must contain exactly the standard, extended, filtered, and BOM POMs; found ${poms.size()} POM files.")
         }
         copied.each { Path artifact ->
             writeDigest(artifact, 'MD5', artifact.resolveSibling(artifact.fileName.toString() + '.md5'))

@@ -41,7 +41,7 @@ import shutil
 import tempfile
 from pathlib import Path
 
-EXPECTED_MODEL_COUNT = 20
+EXPECTED_MODEL_COUNT = 31
 
 
 def _ignore_build_artifacts(_directory: str, names: list[str]) -> set[str]:

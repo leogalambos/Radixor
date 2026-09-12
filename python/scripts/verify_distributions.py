@@ -49,11 +49,15 @@ import zipfile
 from email.parser import BytesParser
 from pathlib import Path, PurePosixPath
 
-EXPECTED_DEFAULT_COUNT = 20
-EXPECTED_DEPENDENCY = "radixor-models-standard>=2.0,<3.0"
+EXPECTED_DEFAULT_COUNT = 31
+EXPECTED_DEPENDENCY = "radixor-models-standard>=3.0,<4.0"
 REPOSITORY = Path(__file__).resolve().parents[2]
 EXPECTED_NATIVE_LICENSE = REPOSITORY.joinpath("LICENSE").read_bytes()
+EXPECTED_STANDARD_LICENSE = REPOSITORY.joinpath(
+    "python/models-standard/LICENSE-MODEL-DATA.txt"
+).read_bytes()
 MODEL_TOPOLOGY = REPOSITORY / "models" / "model-projects.properties"
+STANDARD_MEMBERSHIP = REPOSITORY / "models" / "standard-model-projects.properties"
 CATALOG_VERSION_FILE = REPOSITORY / "models" / "catalog-version.txt"
 CATALOG_VERSION_PATTERN = re.compile(r"[1-9][0-9]{3}\.[1-9][0-9]*\Z")
 MODEL_VERSION_PATTERN = re.compile(
@@ -75,25 +79,37 @@ def _tracked_catalog_version() -> str:
 
 
 def _tracked_default_model_versions() -> dict[str, str]:
-    versions: dict[str, str] = {}
+    active_ids: set[str] = set()
     for raw_line in MODEL_TOPOLOGY.read_text(encoding="utf-8").splitlines():
         line = raw_line.strip()
         if not line or line.startswith("#"):
             continue
         model_id, separator, membership = line.partition("=")
-        if not separator or membership not in {"default", "optional"}:
+        if not separator or membership not in {
+            "default",
+            "standalone",
+            "optional",
+        }:
             raise ValueError(f"Invalid model topology line: {raw_line!r}")
-        if membership != "default":
+        active_ids.add(model_id)
+    standard_ids: set[str] = set()
+    for raw_line in STANDARD_MEMBERSHIP.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#"):
             continue
+        model_id, separator, membership = line.partition("=")
+        if not separator or not model_id or membership != "true" or model_id in standard_ids:
+            raise ValueError(f"Invalid standard membership line: {raw_line!r}")
+        standard_ids.add(model_id)
+    if len(standard_ids) != EXPECTED_DEFAULT_COUNT or not standard_ids.issubset(active_ids):
+        raise ValueError("Standard Python catalog must contain 31 active models")
+    versions: dict[str, str] = {}
+    for model_id in sorted(standard_ids):
         version_file = REPOSITORY / "models" / model_id / "model-version.txt"
         version = version_file.read_text(encoding="utf-8").strip()
         if MODEL_VERSION_PATTERN.fullmatch(version) is None:
             raise ValueError(f"Invalid model version in {version_file}: {version!r}")
         versions[model_id] = version
-    if len(versions) != EXPECTED_DEFAULT_COUNT or "pl-pl-polimorf" in versions:
-        raise ValueError(
-            "Standard Python catalog must contain 20 defaults and exclude pl-pl-polimorf"
-        )
     return versions
 
 
@@ -206,7 +222,7 @@ def _validate_standard_manifest(
         manifest["schema_version"] != 1
         or manifest["catalog_version"] != expected_catalog_version
         or manifest["distribution_version"] != expected_version
-        or manifest["topology"] != "models/model-projects.properties"
+        or manifest["topology"] != "models/standard-model-projects.properties"
         or manifest["format"] != {"compression": "gzip", "magic": "EGTR", "version": 7}
         or not isinstance(manifest["models"], list)
     ):
@@ -239,6 +255,7 @@ def _validate_standard_manifest(
             "file",
             "id",
             "notice",
+            "notice_sha256",
             "provenance",
             "sha256",
             "source",
@@ -249,6 +266,8 @@ def _validate_standard_manifest(
         if (
             model["file"] != f"models/{model_id}.rxc"
             or model["notice"] != f"notices/{model_id}/NOTICE-model-data.txt"
+            or not isinstance(model["notice_sha256"], str)
+            or len(model["notice_sha256"]) != 64
             or model["version"] != EXPECTED_MODEL_VERSIONS[model_id]
             or not isinstance(model["sha256"], str)
             or len(model["sha256"]) != 64
@@ -432,6 +451,8 @@ def _verify_standard_wheel(
             f"{dist_info}/top_level.txt",
             f"{dist_info}/licenses/LICENSE-MODEL-DATA.txt",
         }
+        if archive.read(f"{dist_info}/licenses/LICENSE-MODEL-DATA.txt") != EXPECTED_STANDARD_LICENSE:
+            raise ValueError("Standard wheel contains a non-canonical top-level model-data license")
         for model in models:
             model_name = f"radixor_models_standard/{model['file']}"
             notice_name = f"radixor_models_standard/{model['notice']}"
@@ -443,6 +464,15 @@ def _verify_standard_wheel(
                 raise ValueError(f"Invalid v7 marker/version for {model['id']}")
             if notice_name not in names:
                 raise ValueError(f"Missing model notice for {model['id']}")
+            notice = archive.read(notice_name)
+            canonical_notice = REPOSITORY.joinpath(
+                "models", model["id"], "src/modelInput/NOTICE-model-data.txt"
+            ).read_bytes()
+            if (
+                hashlib.sha256(notice).hexdigest() != model["notice_sha256"]
+                or notice != canonical_notice
+            ):
+                raise ValueError(f"Notice mismatch for {model['id']}")
         unexpected = set(names) - allowed
         missing = allowed - set(names)
         if unexpected or missing:
@@ -503,6 +533,8 @@ def _verify_standard_sdist(
             f"{root}/radixor_models_standard/notices",
             egg_info,
         }
+        if _tar_file_bytes(archive, f"{root}/LICENSE-MODEL-DATA.txt") != EXPECTED_STANDARD_LICENSE:
+            raise ValueError("Standard sdist contains a non-canonical top-level model-data license")
         for model in models:
             model_name = f"{root}/radixor_models_standard/{model['file']}"
             notice_name = f"{root}/radixor_models_standard/{model['notice']}"
@@ -518,6 +550,15 @@ def _verify_standard_sdist(
                 raise ValueError(
                     f"Invalid v7 marker/version for {model['id']} in standard sdist"
                 )
+            notice = _tar_file_bytes(archive, notice_name)
+            canonical_notice = REPOSITORY.joinpath(
+                "models", model["id"], "src/modelInput/NOTICE-model-data.txt"
+            ).read_bytes()
+            if (
+                hashlib.sha256(notice).hexdigest() != model["notice_sha256"]
+                or notice != canonical_notice
+            ):
+                raise ValueError(f"Notice mismatch for {model['id']} in standard sdist")
         files = {member.name for member in archive.getmembers() if member.isfile()}
         directories = {member.name for member in archive.getmembers() if member.isdir()}
         if files != allowed_files or directories != allowed_dirs:

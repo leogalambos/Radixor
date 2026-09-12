@@ -1,0 +1,50 @@
+Radixor model-data notice
+
+Radixor-derived model data
+
+Copyright (C) 2026, Leo Galambos.
+
+Copyright and, where applicable, database rights are claimed in the
+Radixor-specific selection, verification, cleaning, normalization,
+grouping, deduplication, filtering, reformatting, metadata preparation,
+and packaging of this model, to the extent protected by applicable law.
+
+The underlying morphological data remains attributed to UniMorph and
+the upstream contributors identified in this notice.
+
+This derived model data, including Radixor's protectable contributions,
+is distributed under Creative Commons Attribution-ShareAlike 3.0.
+
+Model ID: cni-default
+Source project: UniMorph
+Official repository: https://github.com/unimorph/cni
+Selected upstream data:
+- cni [lemma-form-features], SHA-256 c746746193d21f993f07ec947f9fcc4eadb94f99bf5a9bad12debc4170744dc0
+Source origin: Zumaeta Rojas, Esaú and Zerdin, Gerardo Anton. 2018. Guía teórica del idioma Asháninka
+Attribution: UniMorph; Jaime Rafael Montoya Samame, Esaú Zumaeta Rojas, Delio Siticonatzi C., Roberto Zariquiey, Arturo Oncevay
+License:
+Creative Commons Attribution-ShareAlike 3.0 Unported
+
+Canonical license URI: https://creativecommons.org/licenses/by-sa/3.0/
+Source revision: 0d8a9abca12da88a5ca00b3e04113fcf4d2382d1
+Revision status: recorded
+Repository evidence paths: README.md:evidence-00-README.md
+Repository evidence SHA-256: evidence-00-README.md:d38b11c0cfe95f5f26e58502a6c00d68a666a6d461731bba5a23649299209663
+Import policy: radixor-unimorph-import-v1
+Projection semantics: Each declared three-column source directly projects lemma and surface form.
+Conflict semantics: All valid lemma-form assignments are retained. Surface ambiguity is reported explicitly and is never resolved by dropping or overwriting an assignment.
+Import rows: source=20070; accepted=20070; rejected=0
+Rejection reasons: none
+Per-source import audit:
+- cni: source=20070; accepted=20070; rejected=0; added-groups=407; added-distinct-surfaces=10095; added-source-pairs=10129; added-output-forms=10129; added-changed-pairs=9722; intrinsic-ambiguous-surfaces=34; rejection-reasons=none
+Surface conflict audit: cross-source-assignments=0; cross-source-surfaces=0; intrinsic-ambiguous-surfaces=34
+Audited excluded upstream files:
+- none
+Generated dictionary: groups=407; forms=10129
+Deterministic GZip SHA-256: 13edaa2b6fad0c81eac550d3214fd1ecdf258184a2568a91d5d8c3cd04d44766
+
+Radixor modifications: Strict UTF-8 validation, NFC normalization, lowercase conversion, structural unsafe-character rejection, grouping by lemma, exact deduplication, deterministic ordering, and reproducible GZip packaging.
+
+Neither UniMorph nor any upstream contributor endorses Radixor.
+
+Upstream information verified: 2026-09-11

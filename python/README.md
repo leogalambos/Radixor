@@ -62,7 +62,7 @@ for provenance and source-checkout builds.
 
 Wheels are provided for Linux, macOS, and Windows (Python 3.9+). The install
 also resolves the mandatory pure `radixor-models-standard` dependency
-with 20 precompiled standard models. Building the native source distribution
+with 31 precompiled standard models. Building the native source distribution
 requires Rust ≥ 1.75 and [maturin](https://www.maturin.rs/).
 
 ## Quick start
@@ -301,10 +301,10 @@ sdist contains build-ready gzip v7 `.rxc` files, a checksummed provenance
 manifest, and per-model CC BY-SA 3.0 notices. They are generated below `build/`
 from canonical `models/*/src/modelInput/stemmer.gz` inputs and are never stored
 in Git. `./gradlew regeneratePythonStandardModels` performs this deterministic
-generation; repository topology selects the 20 defaults and excludes optional
-`pl-pl-polimorf`.
+generation; `models/standard-model-projects.properties` selects exactly 31
+language defaults and excludes optional `pl-pl-polimorf`.
 
-`radixor` requires `radixor-models-standard>=2.0,<3.0`. The Python distribution
+`radixor` requires `radixor-models-standard>=3.0,<4.0`. The Python distribution
 version is independent of the Java model-catalog identity and of the individual
 model versions recorded in the manifest.
 

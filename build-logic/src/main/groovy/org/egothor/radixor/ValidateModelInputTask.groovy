@@ -52,6 +52,7 @@ abstract class ValidateModelInputTask extends DefaultTask {
     @Input abstract Property<String> getModelId()
     @Input abstract Property<String> getModuleName()
     @Input abstract Property<Boolean> getShareAlike()
+    @Input abstract Property<Boolean> getManifestManaged()
     @Input abstract MapProperty<String, String> getMetadata()
 
     /** Performs deterministic metadata, licensing, and streaming dictionary validation. */
@@ -60,7 +61,7 @@ abstract class ValidateModelInputTask extends DefaultTask {
         final File dictionary = dictionaryFile.get().asFile
         final String id = modelId.get()
         final String version = versionFile.get().asFile.getText('UTF-8').trim()
-        if (id != moduleName.get() || !(id ==~ /[a-z]{2}(?:-[a-z]{2})?-[a-z0-9]+(?:-[a-z0-9]+)*/)) {
+        if (id != moduleName.get() || !(id ==~ /[a-z]{2,3}(?:-[a-z]{2})?-[a-z0-9]+(?:-[a-z0-9]+)*/)) {
             throw new GradleException("Model ID '${id}' must equal module '${moduleName.get()}' and use the safe model-ID syntax.")
         }
         if (!(version ==~ /[0-9]+\.[0-9]+\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?/)) {
@@ -70,12 +71,16 @@ abstract class ValidateModelInputTask extends DefaultTask {
         values.each { String key, String value ->
             if (value == null || value.isBlank()) throw new GradleException("Required model metadata is missing: ${key}")
         }
-        RadixorModelPlugin.validateRevisionMetadata(values['source.revision'], values['source.revisionStatus'])
+        RadixorModelPlugin.validateManifestRevisionMetadata(values['source.revision'],
+                values['source.revisionStatus'], manifestManaged.get())
         if (shareAlike.get()) {
             final File notice = noticeFile.get().asFile
             RadixorModelPlugin.validateShareAlikeNoticeText(notice.getText('UTF-8'), notice.toString(), id,
-                    values['source.repository'], values['source.licenseUri'], values['source.revision'],
+                    values['source.repository'], values['source.license'], values['source.licenseUri'], values['source.revision'],
                     values['source.revisionStatus'])
+            if (values['source.license'] == 'LGPLLR') {
+                RadixorModelPlugin.validateLgpllrLicense(licenseFile.get().asFile)
+            }
         } else {
             final String text = licenseFile.get().asFile.getText('UTF-8')
             if (!text.contains('SPDX-License-Identifier: BSD-2-Clause')

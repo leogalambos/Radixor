@@ -62,9 +62,16 @@ public final class StemmingQualityDocumentationPublisher {
     private static final String OVERVIEW_START = "<!-- STEMMING-QUALITY-OVERVIEW:START -->";
     private static final String OVERVIEW_END = "<!-- STEMMING-QUALITY-OVERVIEW:END -->";
     private static final List<String> MODES = List.of("ALL_WORDS", "LOWERCASE_GROUPS_ONLY");
+    private static final Set<String> LEGACY_LANGUAGES = Set.of(
+            "CS_CZ", "DA_DK", "DE_DE", "ES_ES", "FA_IR", "FI_FI", "FR_FR", "HE_IL", "HU_HU", "IT_IT",
+            "NB_NO", "NL_NL", "NN_NO", "PL_PL", "PT_PT", "RU_RU", "SV_SE", "UK_UA", "US_UK", "YI");
+    private static final String OPTIONAL_POLIMORF = "pl-pl-polimorf";
+    private static final String ACTIVE_MANIFEST = "active-snapshots.properties";
+    private static final String LEGACY_SOURCE_SHA256 =
+            "85763189eab4d0fbb047c2d5d3554c66abf9732182bd0d8fd758d7aef680e66f";
     private static final Map<String, Integer> POLICY_ORDER = Map.of("PRIMARY_OUTPUT", 0, "ANY_CANDIDATE", 1, "ALL_CANDIDATES", 2);
-    private static final Pattern PAGE_ROW = Pattern.compile("^\\|[^|]+\\| `([^`]+)` \\| \\[([^]]+)]\\(([^)]+\\.md)\\) \\|$");
-    private static final Pattern BUILT_IN_LANGUAGE_ROW = Pattern.compile("^\\|[^|]+\\| `([^`]+)` \\|.*$");
+    private static final Pattern PAGE_ROW = Pattern.compile(
+            "^\\| ([^|]+) \\| `([^`]+)` \\|.*\\| \\[([^]]+)]\\(([^)]+\\.md)\\) \\|$");
 
     /** Prevents construction of this command-line utility. */
     private StemmingQualityDocumentationPublisher() { }
@@ -76,8 +83,8 @@ public final class StemmingQualityDocumentationPublisher {
      * @throws IOException when source or documentation access fails
      */
     public static void main(final String[] arguments) throws IOException {
-        if (arguments.length != 3) {
-            throw new IllegalArgumentException("Expected arguments: source CSV, documentation root, and update or verify mode.");
+        if (arguments.length != 4) {
+            throw new IllegalArgumentException("Expected arguments: source CSV, documentation root, update or verify mode, and active snapshot file name.");
         }
         final Path source = Path.of(arguments[0]);
         final Path documentationRoot = Path.of(arguments[1]);
@@ -86,7 +93,7 @@ public final class StemmingQualityDocumentationPublisher {
             case "verify" -> false;
             default -> throw new IllegalArgumentException("Documentation mode must be update or verify.");
         };
-        publish(source, documentationRoot, update);
+        publish(source, documentationRoot, update, arguments[3]);
     }
 
     /**
@@ -97,25 +104,37 @@ public final class StemmingQualityDocumentationPublisher {
      * @param update whether files may be replaced
      * @throws IOException when files cannot be read or written
      */
-    static void publish(final Path source, final Path documentationRoot, final boolean update) throws IOException {
+    static void publish(final Path source, final Path documentationRoot, final boolean update,
+            final String activeSnapshotFileName) throws IOException {
+        if (!activeSnapshotFileName.matches("stemming-quality-[0-9]{4}-[0-9]{2}-[0-9]{2}\\.csv")) {
+            throw new IllegalArgumentException("The active stemming-quality snapshot must use a dated file name.");
+        }
         if (!Files.isRegularFile(source) || source.getFileName().toString().contains("filtered")) {
             throw new IllegalArgumentException("The documentation source must be an existing complete, unfiltered CSV report: " + source);
         }
-        final List<ResultRow> rows = readRows(source);
-        final Map<String, Page> pages = readPages(documentationRoot.resolve("benchmarks/languages/index.md"));
-        final Set<String> languageUniverse = readLanguageUniverse(documentationRoot.resolve("built-in-languages.md"));
-        validate(rows, pages.keySet(), languageUniverse);
+        final List<ResultRow> sourceRows = readRows(source);
+        final Set<String> resultLanguages = new HashSet<>();
+        sourceRows.forEach(row -> resultLanguages.add(row.language()));
         final String checksum = sha256(source);
+        final Set<String> languageUniverse = publicationLanguageUniverse(
+                resultLanguages, update, source, documentationRoot, checksum);
+        final List<ResultRow> rows = sourceRows.stream()
+                .filter(row -> languageUniverse.contains(row.language())).toList();
+        final Map<String, Page> pages = readPages(
+                documentationRoot.resolve("benchmarks/languages/index.md"), languageUniverse);
+        validate(rows, pages.keySet(), languageUniverse);
         if (!update) {
-            final Path checksumFile = documentationRoot.resolve("benchmarks/data/stemming-quality.sha256");
+            final Path checksumFile = documentationRoot.resolve("benchmarks/data/")
+                    .resolve(activeSnapshotFileName.replace(".csv", ".sha256"));
             final String recorded = Files.readString(checksumFile, StandardCharsets.UTF_8).strip();
-            if (!recorded.equals(checksum + "  stemming-quality.csv")) {
+            if (!recorded.equals(checksum + "  " + activeSnapshotFileName)) {
                 throw new IllegalStateException("The published stemming-quality checksum does not match the authoritative CSV.");
             }
+            verifyActiveManifest(documentationRoot, activeSnapshotFileName);
         }
         for (Page page : pages.values()) {
             final List<ResultRow> languageRows = rows.stream().filter(row -> row.language().equals(page.language())).toList();
-            final String section = render(page, languageRows, checksum);
+            final String section = render(page, languageRows, checksum, activeSnapshotFileName);
             final Path path = documentationRoot.resolve("benchmarks/languages").resolve(page.file());
             final String original = Files.readString(path, StandardCharsets.UTF_8);
             final String expected = replaceSection(original, section);
@@ -127,7 +146,8 @@ public final class StemmingQualityDocumentationPublisher {
         }
         final Path overviewPath = documentationRoot.resolve("benchmarks/index.md");
         final String overview = Files.readString(overviewPath, StandardCharsets.UTF_8);
-        final String expectedOverview = replaceMarkedSection(overview, renderOverview(pages, rows, checksum),
+        final String expectedOverview = replaceMarkedSection(overview,
+                renderOverview(pages, rows, checksum, activeSnapshotFileName),
                 OVERVIEW_START, OVERVIEW_END);
         if (update) {
             Files.writeString(overviewPath, expectedOverview, StandardCharsets.UTF_8);
@@ -135,39 +155,109 @@ public final class StemmingQualityDocumentationPublisher {
             throw new IllegalStateException("The generated benchmark quality overview is stale or manually altered: " + overviewPath);
         }
         if (update) {
-            final Path publishedSource = documentationRoot.resolve("benchmarks/data/stemming-quality.csv");
+            final Path publishedSource = documentationRoot.resolve("benchmarks/data").resolve(activeSnapshotFileName);
             Files.createDirectories(publishedSource.getParent());
             Files.copy(source, publishedSource, StandardCopyOption.REPLACE_EXISTING);
-            Files.writeString(documentationRoot.resolve("benchmarks/data/stemming-quality.sha256"), checksum + "  stemming-quality.csv\n", StandardCharsets.UTF_8);
+            Files.writeString(publishedSource.resolveSibling(activeSnapshotFileName.replace(".csv", ".sha256")),
+                    checksum + "  " + activeSnapshotFileName + "\n", StandardCharsets.UTF_8);
+            updateActiveManifest(documentationRoot, activeSnapshotFileName);
         }
         System.out.printf(Locale.ROOT, "%s stemming-quality documentation for %d languages from %d validated rows.%n",
                 update ? "Updated" : "Verified", pages.size(), rows.stream().filter(row -> pages.containsKey(row.language())).count());
     }
 
-    /** Reads the authoritative built-in language identifiers from the existing registry table. */
-    private static Set<String> readLanguageUniverse(final Path builtInLanguages) throws IOException {
-        final Set<String> languages = new HashSet<>();
-        for (String line : Files.readAllLines(builtInLanguages, StandardCharsets.UTF_8)) {
-            final Matcher matcher = BUILT_IN_LANGUAGE_ROW.matcher(line);
-            if (matcher.matches()) {
-                languages.add(matcher.group(1));
+    /** Verifies that the shared lifecycle manifest selects the supplied quality snapshot. */
+    private static void verifyActiveManifest(final Path documentationRoot, final String activeSnapshotFileName)
+            throws IOException {
+        final Path manifest = documentationRoot.resolve("benchmarks/data").resolve(ACTIVE_MANIFEST);
+        final String expected = "quality=" + activeSnapshotFileName;
+        if (Files.readAllLines(manifest, StandardCharsets.UTF_8).stream().noneMatch(expected::equals)) {
+            throw new IllegalStateException("The active snapshot manifest does not select " + activeSnapshotFileName + ".");
+        }
+    }
+
+    /** Updates only the quality pointer while preserving the other lifecycle entries. */
+    private static void updateActiveManifest(final Path documentationRoot, final String activeSnapshotFileName)
+            throws IOException {
+        final Path manifest = documentationRoot.resolve("benchmarks/data").resolve(ACTIVE_MANIFEST);
+        final List<String> lines = Files.exists(manifest)
+                ? new ArrayList<>(Files.readAllLines(manifest, StandardCharsets.UTF_8))
+                : new ArrayList<>(List.of("# Radixor benchmark active snapshots v1"));
+        final String entry = "quality=" + activeSnapshotFileName;
+        boolean replaced = false;
+        for (int index = 0; index < lines.size(); index++) {
+            if (lines.get(index).startsWith("quality=")) {
+                lines.set(index, entry);
+                replaced = true;
+                break;
             }
         }
-        if (languages.isEmpty()) {
-            throw new IllegalStateException("No authoritative built-in languages were discovered in " + builtInLanguages);
+        if (!replaced) {
+            lines.add(entry);
         }
-        return Set.copyOf(languages);
+        Files.writeString(manifest, String.join("\n", lines) + "\n", StandardCharsets.UTF_8);
+    }
+
+    /**
+     * Selects either the frozen legacy snapshot or the complete current default
+     * universe. Partial current-universe reports are never publishable.
+     *
+     * @param reportedLanguages language labels present in the source report
+     * @param update whether documentation would be updated
+     * @param source source CSV path
+     * @param documentationRoot documentation root
+     * @param checksum source CSV SHA-256
+     * @return authoritative default-language universe for publication
+     */
+    static Set<String> publicationLanguageUniverse(final Set<String> reportedLanguages,
+            final boolean update, final Path source, final Path documentationRoot, final String checksum) {
+        final Set<String> authoritative = new HashSet<>();
+        for (Language language : Language.values()) {
+            authoritative.add(language.name());
+        }
+        final Set<String> unexpected = new HashSet<>(reportedLanguages);
+        unexpected.removeAll(authoritative);
+        unexpected.remove(OPTIONAL_POLIMORF);
+        if (!unexpected.isEmpty()) {
+            throw new IllegalStateException("Unknown stemming-quality language labels: " + unexpected);
+        }
+        final Set<String> reportedDefaults = new HashSet<>(reportedLanguages);
+        reportedDefaults.retainAll(authoritative);
+        if (reportedDefaults.equals(LEGACY_LANGUAGES)) {
+            final Path expectedSource = documentationRoot.resolve("benchmarks/data/stemming-quality.csv")
+                    .toAbsolutePath().normalize();
+            final Path actualSource = source.toAbsolutePath().normalize();
+            if (update || !actualSource.equals(expectedSource) || !LEGACY_SOURCE_SHA256.equals(checksum)) {
+                throw new IllegalStateException("The frozen 20-language snapshot is accepted only in verify mode "
+                        + "from docs/benchmarks/data/stemming-quality.csv with its historical SHA-256.");
+            }
+            return LEGACY_LANGUAGES;
+        }
+        if (reportedDefaults.equals(authoritative)) {
+            if (reportedLanguages.contains(OPTIONAL_POLIMORF)) {
+                throw new IllegalStateException("The active default-language stemming-quality snapshot must not "
+                        + "contain optional PoliMorf rows; publish that model under a separate protocol.");
+            }
+            return Set.copyOf(authoritative);
+        }
+        final Set<String> missing = new HashSet<>(authoritative);
+        missing.removeAll(reportedDefaults);
+        throw new IllegalStateException("A non-legacy stemming-quality report must cover all "
+                + authoritative.size() + " language defaults; missing: " + missing + ".");
     }
 
     /** Reads the language-code-to-page mapping from the existing documentation index. */
-    private static Map<String, Page> readPages(final Path index) throws IOException {
+    private static Map<String, Page> readPages(final Path index, final Set<String> includedLanguages)
+            throws IOException {
         final Map<String, Page> pages = new LinkedHashMap<>();
         for (String line : Files.readAllLines(index, StandardCharsets.UTF_8)) {
             final Matcher matcher = PAGE_ROW.matcher(line);
-            if (matcher.matches()) {
-                final Page previous = pages.put(matcher.group(1), new Page(matcher.group(1), matcher.group(2), matcher.group(3)));
+            if (matcher.matches() && includedLanguages.contains(matcher.group(2))) {
+                final String language = matcher.group(2);
+                final Page previous = pages.put(language,
+                        new Page(language, matcher.group(1), matcher.group(4)));
                 if (previous != null) {
-                    throw new IllegalStateException("Duplicate language mapping in benchmark index: " + matcher.group(1));
+                    throw new IllegalStateException("Duplicate language mapping in benchmark index: " + language);
                 }
             }
         }
@@ -316,13 +406,15 @@ public final class StemmingQualityDocumentationPublisher {
     }
 
     /** Renders one complete generated section for a language page. */
-    private static String render(final Page page, final List<ResultRow> rows, final String checksum) {
+    private static String render(final Page page, final List<ResultRow> rows, final String checksum,
+            final String activeSnapshotFileName) {
         final String modelId = Language.valueOf(page.language()).defaultModelId();
         final StringBuilder output = new StringBuilder(32768);
         output.append(START).append("\n\n## Stemming Quality\n\n")
                 .append("Runtime performance and linguistic grouping quality are independent dimensions. This section evaluates language `")
                 .append(page.language()).append("` using the complete validated stemming-quality result matrix. Every distinct surface form is one evaluated item and can belong to several dictionary groups. Two forms are a positive pair when their group-membership sets intersect and a negative pair when those sets are disjoint. A pair shared through several groups is counted once. Exact equality with a predetermined lemma is not required.\n\n")
-                .append("`ALL_WORDS` includes every valid group and its original forms. `LOWERCASE_GROUPS_ONLY` excludes an entire group when any Unicode code point is uppercase or titlecase; retained words are not lowercased or otherwise rewritten. This isolates case-handling effects without changing retained inputs. [Download the complete machine-readable result snapshot](../data/stemming-quality.csv).\n\n")
+                .append("`ALL_WORDS` includes every valid group and its original forms. `LOWERCASE_GROUPS_ONLY` excludes an entire group when any Unicode code point is uppercase or titlecase; retained words are not lowercased or otherwise rewritten. This isolates case-handling effects without changing retained inputs. [Download the complete machine-readable result snapshot](../data/")
+                .append(activeSnapshotFileName).append(").\n\n")
                 .append("### Evaluation Scope and Key Findings\n\n")
                 .append("The default model is `").append(modelId).append("`, loaded from classpath resource `org/egothor/stemmer/models/")
                 .append(modelId).append("/stemmer.gz`. The following findings compare only deterministic `PRIMARY_OUTPUT` rows over identical included groups; candidate policies are reported separately as capability analyses.\n\n");
@@ -342,7 +434,10 @@ public final class StemmingQualityDocumentationPublisher {
                     if (policy.equals("ANY_CANDIDATE")) {
                         renderAnyCandidatePolicy(output, policyRows);
                     } else {
-                        output.append("#### `").append(policy).append("` ranking\n\n");
+                        final boolean rankable = policyRows.stream()
+                                .anyMatch(row -> row.isDefined("Balanced accuracy"));
+                        output.append("#### `").append(policy)
+                                .append(rankable ? "` ranking\n\n" : "` results (balanced accuracy `n/a`)\n\n");
                         renderPrimaryTable(output, policyRows);
                         renderDetailedTables(output, policyRows);
                     }
@@ -352,7 +447,7 @@ public final class StemmingQualityDocumentationPublisher {
         }
         appendMethodology(output);
         output.append("### Provenance\n\n")
-                .append("- Authoritative source: `docs/benchmarks/data/stemming-quality.csv`\n")
+                .append("- Authoritative source: `docs/benchmarks/data/").append(activeSnapshotFileName).append("`\n")
                 .append("- Source SHA-256: `").append(checksum).append("`\n")
                 .append("- Evaluation command: `./gradlew stemmingQuality --no-daemon`\n")
                 .append("- Dictionary language: `").append(page.language()).append("`\n")
@@ -367,7 +462,12 @@ public final class StemmingQualityDocumentationPublisher {
     /** Appends one deterministic primary-output winner and runner-up statement. */
     private static void appendFinding(final StringBuilder output, final List<ResultRow> rows, final String mode) {
         final List<ResultRow> primary = rows.stream().filter(row -> row.mode().equals(mode) && row.policy().equals("PRIMARY_OUTPUT"))
-                .sorted(resultOrder()).toList();
+                .filter(row -> row.isDefined("Balanced accuracy")).sorted(resultOrder()).toList();
+        if (primary.isEmpty()) {
+            output.append("- **").append(mode)
+                    .append(":** balanced-accuracy ranking is **n/a** because this corpus has no pairs in one required class. OI/UI and raw numerators and denominators remain authoritative.\n");
+            return;
+        }
         final ResultRow winner = primary.getFirst();
         final ResultRow runnerUp = primary.size() > 1 ? primary.get(1) : null;
         output.append("- **").append(mode).append(":** `").append(displayStemmer(winner.stemmer())).append("` ranks first by balanced accuracy at **")
@@ -393,7 +493,7 @@ public final class StemmingQualityDocumentationPublisher {
                 .append("|---:|---|---:|---:|---:|\n");
         for (int index = 0; index < rows.size(); index++) {
             final ResultRow row = rows.get(index);
-            output.append('|').append(index + 1).append('|').append(displayStemmer(row.stemmer())).append('|')
+            output.append('|').append(rank(row, index)).append('|').append(displayStemmer(row.stemmer())).append('|')
                     .append(metric(row, "Balanced accuracy")).append('|')
                     .append(rate(row, "Over-stemming error pairs", "Over-stemming percentage")).append('|')
                     .append(rate(row, "Under-stemming error pairs", "Under-stemming percentage")).append("|\n");
@@ -489,7 +589,12 @@ public final class StemmingQualityDocumentationPublisher {
 
     /** Returns the repeated rank, stemmer, and policy prefix for a detailed table row. */
     private static String identity(final int index, final ResultRow row) {
-        return "|" + (index + 1) + "|" + displayStemmer(row.stemmer()) + "|" + row.policy() + "|";
+        return "|" + rank(row, index) + "|" + displayStemmer(row.stemmer()) + "|" + row.policy() + "|";
+    }
+
+    /** Returns a rank only when the navigation metric is mathematically defined. */
+    private static String rank(final ResultRow row, final int index) {
+        return row.isDefined("Balanced accuracy") ? Integer.toString(index + 1) : "n/a";
     }
 
     /** Converts authoritative adapter identifiers into a stable readable label without merging competitors. */
@@ -518,7 +623,8 @@ public final class StemmingQualityDocumentationPublisher {
     }
 
     /** Renders the generated executive findings, winner matrix, and Radixor aggregates. */
-    private static String renderOverview(final Map<String, Page> pages, final List<ResultRow> rows, final String checksum) {
+    private static String renderOverview(final Map<String, Page> pages, final List<ResultRow> rows, final String checksum,
+            final String activeSnapshotFileName) {
         final StringBuilder output = new StringBuilder(16384);
         output.append(OVERVIEW_START).append("\n\n## Pairwise Quality Findings\n\n")
                 .append("The validated snapshot is a broad multilingual comparison covering the complete ")
@@ -528,7 +634,10 @@ public final class StemmingQualityDocumentationPublisher {
         int directComparisons = 0;
         for (String mode : MODES) {
             for (String language : pages.keySet()) {
-                final List<ResultRow> ranked = primaryRows(rows, language, mode);
+                final List<ResultRow> ranked = definedPrimaryRows(rows, language, mode);
+                if (ranked.isEmpty()) {
+                    continue;
+                }
                 comparisons++;
                 if (ranked.size() > 1) {
                     directComparisons++;
@@ -550,7 +659,12 @@ public final class StemmingQualityDocumentationPublisher {
                 .append("|---|---|---|---:|---|---:|---|---:|\n");
         for (Page page : pages.values()) {
             for (String mode : MODES) {
-                final List<ResultRow> ranked = primaryRows(rows, page.language(), mode);
+                final List<ResultRow> ranked = definedPrimaryRows(rows, page.language(), mode);
+                if (ranked.isEmpty()) {
+                    output.append('|').append(page.displayName()).append(" (`").append(page.language()).append("`)|")
+                            .append(mode).append("|n/a|n/a|n/a|n/a|n/a|0|\n");
+                    continue;
+                }
                 final ResultRow winner = ranked.getFirst();
                 final ResultRow runner = ranked.size() > 1 ? ranked.get(1) : null;
                 final double difference = runner == null ? Double.NaN : winner.number("Balanced accuracy") - runner.number("Balanced accuracy");
@@ -573,7 +687,10 @@ public final class StemmingQualityDocumentationPublisher {
         for (String mode : MODES) {
             final List<ResultRow> radixor = rows.stream().filter(row -> pages.containsKey(row.language()) && row.mode().equals(mode)
                     && row.policy().equals("PRIMARY_OUTPUT") && row.stemmer().endsWith("_RADIXOR")).toList();
-            final double macroBalanced = radixor.stream().mapToDouble(row -> row.number("Balanced accuracy")).average().orElseThrow();
+            final List<ResultRow> definedRadixor = radixor.stream()
+                    .filter(row -> row.isDefined("Balanced accuracy")).toList();
+            final double macroBalanced = definedRadixor.stream()
+                    .mapToDouble(row -> row.number("Balanced accuracy")).average().orElseThrow();
             long tp = 0;
             long fp = 0;
             long fn = 0;
@@ -588,11 +705,13 @@ public final class StemmingQualityDocumentationPublisher {
             final double recall = (double) tp / Math.addExact(tp, fn);
             final double specificity = (double) tn / Math.addExact(tn, fp);
             final double f1 = 2.0 * tp / (2.0 * tp + fp + fn);
-            output.append('|').append(mode).append('|').append(radixor.size()).append('|').append(format(macroBalanced)).append('|')
+            output.append('|').append(mode).append('|').append(definedRadixor.size()).append(" / ")
+                    .append(radixor.size()).append('|').append(format(macroBalanced)).append('|')
                     .append(format((recall + specificity) / 2.0)).append('|').append(format(precision)).append('|')
                     .append(format(recall)).append('|').append(format(f1)).append("|\n");
         }
-        output.append("\n### Reproducible data\n\n- [Machine-readable quality snapshot](data/stemming-quality.csv)\n")
+        output.append("\n### Reproducible data\n\n- [Machine-readable quality snapshot](data/")
+                .append(activeSnapshotFileName).append(")\n")
                 .append("- SHA-256: `").append(checksum).append("`\n")
                 .append("- [Linguistic quality methodology](reference/linguistic-quality.md)\n")
                 .append("- [Tested stemmer inventory](reference/tested-stemmers.md)\n")
@@ -618,7 +737,10 @@ public final class StemmingQualityDocumentationPublisher {
         int count = 0;
         for (Page page : pages.values()) {
             for (String mode : MODES) {
-                final List<ResultRow> primary = primaryRows(rows, page.language(), mode);
+                final List<ResultRow> primary = definedPrimaryRows(rows, page.language(), mode);
+                if (primary.isEmpty()) {
+                    continue;
+                }
                 for (Map.Entry<String, Boolean> metric : metrics.entrySet()) {
                     final Comparator<ResultRow> comparator = Comparator.comparingDouble(row -> row.number(metric.getKey()));
                     final ResultRow leader = metric.getValue() ? primary.stream().max(comparator).orElseThrow()
@@ -646,7 +768,10 @@ public final class StemmingQualityDocumentationPublisher {
         final Map<String, Integer> ties = new HashMap<>();
         final Map<String, Integer> topThree = new HashMap<>();
         for (String language : pages.keySet()) {
-            final List<ResultRow> ranked = primaryRows(rows, language, mode);
+            final List<ResultRow> ranked = definedPrimaryRows(rows, language, mode);
+            if (ranked.isEmpty()) {
+                continue;
+            }
             final double leading = ranked.getFirst().number("Balanced accuracy");
             final long leaders = ranked.stream().filter(row -> row.number("Balanced accuracy") == leading).count();
             for (int index = 0; index < ranked.size(); index++) {
@@ -688,6 +813,13 @@ public final class StemmingQualityDocumentationPublisher {
     private static List<ResultRow> primaryRows(final List<ResultRow> rows, final String language, final String mode) {
         return rows.stream().filter(row -> row.language().equals(language) && row.mode().equals(mode)
                 && row.policy().equals("PRIMARY_OUTPUT")).sorted(resultOrder()).toList();
+    }
+
+    /** Returns primary-output rows whose balanced-accuracy ranking metric is defined. */
+    private static List<ResultRow> definedPrimaryRows(final List<ResultRow> rows, final String language,
+            final String mode) {
+        return primaryRows(rows, language, mode).stream()
+                .filter(row -> row.isDefined("Balanced accuracy")).toList();
     }
 
     /** Formats an aggregate metric at the publication precision. */
@@ -750,7 +882,11 @@ public final class StemmingQualityDocumentationPublisher {
         if (start < 0) {
             return original.stripTrailing() + "\n\n" + section;
         }
-        return original.substring(0, start) + section + original.substring(end + endMarker.length()).stripLeading();
+        final String trailingContent = original.substring(end + endMarker.length()).stripLeading();
+        if (trailingContent.isEmpty()) {
+            return original.substring(0, start) + section;
+        }
+        return original.substring(0, start) + section + "\n" + trailingContent;
     }
 
     /** Calculates a lowercase hexadecimal SHA-256 checksum. */
@@ -800,6 +936,8 @@ public final class StemmingQualityDocumentationPublisher {
         private long longValue(final String name) { return Long.parseLong(value(name)); }
         /** Parses a numeric field, placing undefined values last during sorting. */
         private double number(final String name) { return value(name).isEmpty() ? Double.NEGATIVE_INFINITY : Double.parseDouble(value(name)); }
+        /** Reports whether a metric has a mathematically defined source value. */
+        private boolean isDefined(final String name) { return !value(name).isEmpty(); }
         /** Returns false-negative pairs. */
         private long fn() { return longValue("Under-stemming error pairs"); }
         /** Returns false-positive pairs. */
@@ -829,8 +967,17 @@ public final class StemmingQualityDocumentationPublisher {
             if (Math.addExact(tp, fn) != underPossible || Math.addExact(tn, fp) != overPossible) {
                 throw new IllegalStateException("Raw confusion-count invariants fail for " + key());
             }
-            final double recall = ratio(tp, Math.addExact(tp, fn));
-            final double specificity = ratio(tn, Math.addExact(tn, fp));
+            final long recallDenominator = Math.addExact(tp, fn);
+            final long specificityDenominator = Math.addExact(tn, fp);
+            if (recallDenominator == 0 || specificityDenominator == 0) {
+                if (!value("Balanced accuracy").isEmpty()) {
+                    throw new IllegalStateException("Balanced accuracy must be empty when either class is absent for "
+                            + key());
+                }
+                return;
+            }
+            final double recall = ratio(tp, recallDenominator);
+            final double specificity = ratio(tn, specificityDenominator);
             final double expected = (recall + specificity) / 2.0;
             if (Math.abs(expected - number("Balanced accuracy")) > 0.0000000000015) {
                 throw new IllegalStateException("Balanced accuracy is inconsistent with raw counts for " + key());

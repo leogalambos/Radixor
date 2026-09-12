@@ -58,23 +58,34 @@ from radixor._radixor import compile as _compile
 
 _PYSTEMMER_MODEL_MAP: tuple[tuple[str, bool, tuple[str, ...], tuple[str, ...]], ...] = (
     # (model ID, PyStemmer-compatible model, pystemmer aliases, native-only aliases)
+    ("ar-default", True, ("arabic", "ar", "ara"), ()),
+    ("hy-am-default", True, ("armenian", "hy", "hye", "arm"), ()),
+    ("ca-es-default", True, ("catalan", "ca", "cat"), ()),
     ("cs-cz-default", True, ("czech", "cs", "ces", "cze"), ()),
     ("da-dk-default", True, ("danish", "da", "dan"), ()),
     ("nl-nl-default", True, ("dutch", "nl", "dut", "nld", "kraaij_pohlmann"), ("dutch",)),
     ("us-uk-default", True, ("english", "en", "eng"), ()),
+    ("et-ee-default", True, ("estonian", "et", "est"), ()),
     ("fi-fi-default", True, ("finnish", "fi", "fin"), ()),
     ("fr-fr-default", True, ("french", "fr", "fre", "fra"), ()),
     ("de-de-default", True, ("german", "de", "ger", "deu"), ()),
+    ("el-gr-default", True, ("greek", "el", "ell", "gre"), ()),
     ("hu-hu-default", True, ("hungarian", "hu", "hun"), ()),
+    ("id-id-default", True, ("indonesian", "id", "ind"), ()),
+    ("ga-ie-default", True, ("irish", "ga", "gle"), ()),
     ("it-it-default", True, ("italian", "it", "ita"), ()),
+    ("lt-lt-default", True, ("lithuanian", "lt", "lit"), ()),
     ("nb-no-default", True, ("norwegian", "no", "nor"), ("nb",)),
     ("nn-no-default", False, tuple(), ("nn",)),
     ("fa-ir-default", True, ("persian", "fa", "fas", "pers"), ()),
     ("pl-pl-unimorph", True, ("polish", "pl", "pol"), ()),
     ("pt-pt-default", True, ("portuguese", "pt", "por"), ()),
+    ("ro-ro-default", True, ("romanian", "ro", "ron", "rum"), ()),
     ("ru-ru-default", True, ("russian", "ru", "rus"), ()),
+    ("st-za-default", True, ("sesotho", "st", "sot"), ()),
     ("es-es-default", True, ("spanish", "es", "esl", "spa"), ()),
     ("sv-se-default", True, ("swedish", "sv", "swe"), ()),
+    ("tr-tr-default", True, ("turkish", "tr", "tur"), ()),
     ("yi-default", True, ("yiddish", "yi", "yid"), ()),
     ("he-il-default", False, tuple(), ("he", "hebrew")),
     ("uk-ua-default", False, tuple(), ("uk", "ukrainian")),
@@ -103,7 +114,7 @@ _CATALOG_VERSION_PATTERN = re.compile(
     r"[1-9][0-9]{3}\.[1-9][0-9]*\Z"
 )
 _STANDARD_DISTRIBUTION_VERSION = re.compile(
-    r"(?:0\.0\.0|2\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*))\Z"
+    r"(?:0\.0\.0|3\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*))\Z"
 )
 _MODEL_ID = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*\Z")
 _SHA256 = re.compile(r"[0-9a-f]{64}\Z")
@@ -140,7 +151,7 @@ def _load_standard_manifest() -> dict[str, Any]:
     except (ModuleNotFoundError, TypeError) as exc:
         raise ModuleNotFoundError(
             "The standard Radixor model package is not installed. Install a compatible "
-            "provider with 'pip install radixor-models-standard>=2.0,<3.0', "
+            "provider with 'pip install radixor-models-standard>=3.0,<4.0', "
             "or reinstall Radixor with 'pip install radixor'."
         ) from exc
     try:
@@ -187,7 +198,7 @@ def _load_standard_manifest() -> dict[str, Any]:
     except (KeyError, TypeError, ValueError) as exc:
         raise RuntimeError(
             f"The installed radixor-models-standard manifest is incompatible or corrupt: {exc}. "
-            "Install radixor-models-standard>=2.0,<3.0."
+            "Install radixor-models-standard>=3.0,<4.0."
         ) from exc
     return manifest
 

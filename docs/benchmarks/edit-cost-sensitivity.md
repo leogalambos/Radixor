@@ -16,9 +16,9 @@ numbers are edit-path costs, not counts of generated or retained commands.
 
 - Protocol: `radixor-cost-sensitivity-v4`
 - Source identity: `4.2.0-6-g84e57fb`
-- Git revision: `84e57fb27ae40913569e826858a8ebb07cf2ea01` (dirty)
+- Git revision: `84e57fb27ae40913569e826858a8ebb07cf2ea01` (recorded pre-release source state)
 - Generator SHA-256: `fc6aec8f08c3596a33e7f167ababfd2e583aed0671869bc4a208d75191ccc1df`
-- Analysis script SHA-256: `9541a7be0e57a4cba51a0077e7027e4c009343908232ad9731ccfba9f6df13e8`
+- Analysis script SHA-256: `14c2c3172f677778358e441b824d89f330f342fa1ee6b27184594ef460e1636f`
 - Raw CSV SHA-256: `13ec2dfe0af799c3cf6a4cf9948903a02497f2e7de540627a507ba2950d7f738`
 - Exact classes across languages: 334
 - Physically measured scenarios: 16,700

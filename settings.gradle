@@ -36,19 +36,72 @@ pluginManagement {
 rootProject.name = 'Radixor'
 
 include(':models:standard')
+include(':models:extended')
+include(':models:filtered')
 include(':models:bom')
 
 Properties modelTopology = new Properties()
 file('models/model-projects.properties').withInputStream { InputStream input ->
     modelTopology.load(input)
 }
+final Set<String> acceptedModelRoles = ['default', 'standalone', 'optional'] as Set<String>
+modelTopology.each { Object modelId, Object role ->
+    if (!acceptedModelRoles.contains(role.toString())) {
+        throw new GradleException("Model ${modelId} has unsupported topology role '${role}'. "
+                + "Expected default, standalone, or optional.")
+    }
+}
 modelTopology.stringPropertyNames().toList().sort().each { String modelId ->
     include(":models:${modelId}")
+}
+
+Properties modelQuarantine = new Properties()
+file('models/model-quarantine.properties').withInputStream { InputStream input ->
+    modelQuarantine.load(input)
+}
+final boolean prohibitedBenchmarkBuild = providers.gradleProperty('radixorInternalProhibitedBenchmark')
+        .map { String value -> value == 'true' }
+        .getOrElse(false)
+final Set<String> quarantineOverlap = modelTopology.stringPropertyNames().intersect(
+        modelQuarantine.stringPropertyNames())
+if (!quarantineOverlap.isEmpty()) {
+    throw new GradleException("Quarantined model IDs must not appear in active topology: "
+            + quarantineOverlap.toList().sort().join(', '))
+}
+final List<String> prohibitedModelIds = modelQuarantine.stringPropertyNames().toList().sort()
+prohibitedModelIds.each { String modelId ->
+    String record = modelQuarantine.getProperty(modelId)
+    if (!(record ==~ /https:\/\/github\.com\/unimorph\/[a-z0-9-]+\|\S.*\S/)) {
+        throw new GradleException("Quarantine record for ${modelId} must contain an evidence URI and reason.")
+    }
+    if (prohibitedBenchmarkBuild) {
+        if (!file("models/${modelId}").isDirectory()) {
+            throw new GradleException("Guarded prohibited benchmark model is not staged: models/${modelId}")
+        }
+        include(":models:${modelId}")
+    } else if (file("models/${modelId}").exists()) {
+        throw new GradleException("Prohibited model directory must not remain under models/: models/${modelId}")
+    }
+}
+if (prohibitedBenchmarkBuild) {
+    final File stageMarker = file('build/prohibited-model-benchmark/staged-models.txt')
+    final List<String> stagedModelIds = stageMarker.isFile()
+            ? stageMarker.readLines('UTF-8')
+            : []
+    if (stagedModelIds != prohibitedModelIds) {
+        throw new GradleException('Guarded prohibited benchmark build requires the exact staged-model marker.')
+    }
 }
 
 Properties alternativeModelTopology = new Properties()
 file('models/alternative-model-projects.properties').withInputStream { InputStream input ->
     alternativeModelTopology.load(input)
+}
+final Set<String> alternativeQuarantineOverlap = alternativeModelTopology.stringPropertyNames().intersect(
+        modelQuarantine.stringPropertyNames())
+if (!alternativeQuarantineOverlap.isEmpty()) {
+    throw new GradleException("Quarantined model IDs must not appear in alternative topology: "
+            + alternativeQuarantineOverlap.toList().sort().join(', '))
 }
 alternativeModelTopology.stringPropertyNames().toList().sort().each { String modelId ->
     include(":models:${modelId}")

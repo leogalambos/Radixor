@@ -1,8 +1,8 @@
 # Hebrew filtered candidate
 
-`he-il-filtered` is a locally buildable alternative to `he-il-default`. It is
-not published, registered as a default, or included in the model catalog, BOM,
-standard pack, or Python model packages.
+`he-il-filtered` is a published opt-in alternative to `he-il-default`. It is
+available individually and through `radixor-models-filtered`, but is not a
+registered default or part of the standard, extended, or Python packages.
 
 The checked-in `he-il-default` dictionary is the only lexical input. The audit
 removes 41 non-lexical dash placeholders without consulting external

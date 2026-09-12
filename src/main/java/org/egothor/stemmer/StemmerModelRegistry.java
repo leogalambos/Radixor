@@ -32,7 +32,6 @@ package org.egothor.stemmer;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -198,9 +197,11 @@ public final class StemmerModelRegistry {
     /** Parses and validates one immutable descriptor. */
     private static StemmerModelDescriptor readDescriptor(final URL source, final ClassLoader classLoader) throws IOException {
         final Properties properties = new Properties();
-        try (InputStream input = source.openStream()) { properties.load(input); }
+        try (InputStreamReader reader = new InputStreamReader(source.openStream(), StandardCharsets.UTF_8)) {
+            properties.load(reader);
+        }
         final String id = required(properties, "model.id", source);
-        if (!id.matches("[a-z]{2}(?:-[a-z]{2})?-[a-z0-9]+(?:-[a-z0-9]+)*")) throw new StemmerModelIntegrityException("Invalid model.id '" + id + "' at " + source);
+        if (!id.matches("[a-z]{2,3}(?:-[a-z]{2})?-[a-z0-9]+(?:-[a-z0-9]+)*")) throw new StemmerModelIntegrityException("Invalid model.id '" + id + "' at " + source);
         final String format = required(properties, "model.format", source);
         final int version;
         try { version = Integer.parseInt(required(properties, "model.formatVersion", source)); }
@@ -214,9 +215,15 @@ public final class StemmerModelRegistry {
         if (classLoader.getResource(resource) == null) throw new StemmerModelIntegrityException("Model resource is missing: " + resource + " declared at " + source);
         final String checksum = required(properties, "model.sha256", source);
         if (!checksum.matches("[0-9a-f]{64}")) throw new StemmerModelIntegrityException("Invalid model.sha256 at " + source);
+        final boolean rightToLeft = requiredBoolean(properties, "model.rightToLeft", source);
+        if (rightToLeft != language.isRightToLeft()) {
+            throw new StemmerModelIntegrityException("Model right-to-left metadata for '" + id
+                    + "' does not match language " + language + " at " + source + ".");
+        }
         return new StemmerModelDescriptor(id, required(properties, "model.version", source), language,
                 required(properties, "model.displayName", source), resource,
-                Boolean.parseBoolean(required(properties, "model.default", source)), format, version, checksum, source, classLoader);
+                requiredBoolean(properties, "model.default", source), format, version, checksum, rightToLeft, source,
+                classLoader);
     }
 
     /** Returns a required nonblank property. */
@@ -224,5 +231,16 @@ public final class StemmerModelRegistry {
         final String value = properties.getProperty(key);
         if (value == null || value.isBlank()) throw new StemmerModelIntegrityException("Required property '" + key + "' is missing at " + source);
         return value.trim();
+    }
+
+    /** Returns one required strict boolean property. */
+    private static boolean requiredBoolean(final Properties properties, final String key, final URL source) {
+        final String value = required(properties, key, source);
+        return switch (value) {
+            case "true" -> true;
+            case "false" -> false;
+            default -> throw new StemmerModelIntegrityException(
+                    "Property '" + key + "' must be true or false at " + source + ".");
+        };
     }
 }

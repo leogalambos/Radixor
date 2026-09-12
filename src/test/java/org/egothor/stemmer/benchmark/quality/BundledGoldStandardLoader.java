@@ -35,6 +35,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -89,6 +91,44 @@ public final class BundledGoldStandardLoader {
             });
         }
         return List.copyOf(groups);
+    }
+
+    /**
+     * Parses one explicitly guarded compressed UTF-8 dictionary path with case preserved.
+     *
+     * <p>The caller retains ownership of the path; this method opens and closes
+     * its own stream. It performs one sequential pass and retains the parsed
+     * groups in memory.</p>
+     *
+     * @param dictionary exact dictionary path
+     * @param modelId diagnostic model identifier
+     * @return immutable groups in source-row order
+     * @throws IOException if the path is absent, malformed, or unreadable
+     */
+    public static List<GoldStandardGroup> loadPath(final Path dictionary, final String modelId) throws IOException {
+        Objects.requireNonNull(dictionary, "dictionary");
+        Objects.requireNonNull(modelId, "modelId");
+        final List<GoldStandardGroup> groups = new ArrayList<>();
+        try (InputStream raw = Files.newInputStream(dictionary);
+                InputStream gzip = new GZIPInputStream(raw);
+                BufferedReader reader = new BufferedReader(new InputStreamReader(gzip, StandardCharsets.UTF_8))) {
+            StemmerDictionaryParser.parse(reader, dictionary.toString(), CaseProcessingMode.AS_IS,
+                    (stem, variants, row) -> appendGroup(groups, modelId, dictionary.toString(), stem, variants, row));
+        }
+        return List.copyOf(groups);
+    }
+
+    private static void appendGroup(final List<GoldStandardGroup> groups, final String modelId,
+            final String resource, final String stem, final String[] variants, final int row) throws IOException {
+        final List<String> forms = new ArrayList<>(variants.length + 1);
+        forms.add(stem);
+        forms.addAll(Arrays.asList(variants));
+        try {
+            groups.add(new GoldStandardGroup(row, forms));
+        } catch (IllegalArgumentException exception) {
+            throw new IOException("Invalid dictionary group for model " + modelId + ", resource "
+                    + resource + ", row " + row + ": " + exception.getMessage(), exception);
+        }
     }
 
     /** Opens one required classpath resource with a precise language diagnostic. */

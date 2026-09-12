@@ -9,7 +9,7 @@ and the [model catalog](stemmer-model-catalog.md), respectively. The core JAR
 contains no `stemmer.gz`.
 
 The Python implementation has its own native API. `pip install radixor` also
-installs the separate standard data package containing 20 precompiled models.
+installs the separate standard data package containing 31 precompiled models.
 See the [Python Quick Start](python/quick-start.md) and
 [Python Usage and API](python/usage.md).
 

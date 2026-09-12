@@ -1,0 +1,55 @@
+Radixor model-data notice
+
+Radixor-derived model data
+
+Copyright (C) 2026, Leo Galambos.
+
+Copyright and, where applicable, database rights are claimed in the
+Radixor-specific selection, verification, cleaning, normalization,
+grouping, deduplication, filtering, reformatting, metadata preparation,
+and packaging of this model, to the extent protected by applicable law.
+
+The underlying morphological data remains attributed to UniMorph and
+the upstream contributors identified in this notice.
+
+This derived model data, including Radixor's protectable contributions,
+is distributed under the Lesser General Public License For Linguistic Resources.
+
+Model ID: klr-default
+Source project: UniMorph
+Official repository: https://github.com/unimorph/klr
+Selected upstream data:
+- klr [lemma-form-features], SHA-256 e14f454911ebcdeb94b621658ac7025937796389196795472a060b9a76a67007
+Source origin: Wikipedia
+Attribution: UniMorph
+License:
+Lesser General Public License For Linguistic Resources
+
+Canonical license URI: https://spdx.org/licenses/LGPLLR.html
+Packaged canonical license text: META-INF/LICENSES/LGPLLR.txt
+Packaged license text source: https://raw.githubusercontent.com/spdx/license-list-data/main/text/LGPLLR.txt
+Packaged license text SHA-256: e4e0f2f92769aad680aeca07f359521004dac4598d8b03def0e6fe507e871134
+The model JAR and sources JAR contain the complete machine-readable legible
+dictionary form used by Radixor, so recipients can modify the linguistic resource.
+Source revision: e9c1cd9e6def47a33759d2f4331dd886bacd5964
+Revision status: recorded
+Repository evidence paths: README.md:evidence-00-README.md
+Repository evidence SHA-256: evidence-00-README.md:3b14f88901a387f864b0dec901f3d0af818d82a3b3aa80768f1305e2b5056cb6
+Import policy: radixor-unimorph-import-v1
+Projection semantics: Each declared three-column source directly projects lemma and surface form.
+Conflict semantics: All valid lemma-form assignments are retained. Surface ambiguity is reported explicitly and is never resolved by dropping or overwriting an assignment.
+Import rows: source=156097; accepted=156097; rejected=0
+Rejection reasons: none
+Per-source import audit:
+- klr: source=156097; accepted=156097; rejected=0; added-groups=591; added-distinct-surfaces=54602; added-source-pairs=59104; added-output-forms=59637; added-changed-pairs=59046; intrinsic-ambiguous-surfaces=4783; rejection-reasons=none
+Surface conflict audit: cross-source-assignments=0; cross-source-surfaces=0; intrinsic-ambiguous-surfaces=4783
+Audited excluded upstream files:
+- none
+Generated dictionary: groups=591; forms=59637
+Deterministic GZip SHA-256: dba18e7da6b469e0e7d3c0a4b49280a88bb1845c8466f1b6db994c9747a2eb2d
+
+Radixor modifications: Strict UTF-8 validation, NFC normalization, lowercase conversion, structural unsafe-character rejection, grouping by lemma, exact deduplication, deterministic ordering, and reproducible GZip packaging.
+
+Neither UniMorph nor any upstream contributor endorses Radixor.
+
+Upstream information verified: 2026-09-11

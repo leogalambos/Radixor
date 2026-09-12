@@ -1,0 +1,50 @@
+Radixor model-data notice
+
+Radixor-derived model data
+
+Copyright (C) 2026, Leo Galambos.
+
+Copyright and, where applicable, database rights are claimed in the
+Radixor-specific selection, verification, cleaning, normalization,
+grouping, deduplication, filtering, reformatting, metadata preparation,
+and packaging of this model, to the extent protected by applicable law.
+
+The underlying morphological data remains attributed to UniMorph and
+the upstream contributors identified in this notice.
+
+This derived model data, including Radixor's protectable contributions,
+is distributed under Creative Commons Attribution-ShareAlike 3.0.
+
+Model ID: ky-kg-default
+Source project: UniMorph
+Official repository: https://github.com/unimorph/kir
+Selected upstream data:
+- kir [lemma-form-features], SHA-256 05ab494323aa83a3b27be2264ea450a28957bf48c32804b743c77ccc6a066e73
+Source origin: Aytnatova, Alima. (2016). Kyrgyz language: 100 Kyrgyz verbs fully conjugated in all tenses. CreateSpace Independent Publishing Platform. Middletown, DE.
+Attribution: UniMorph; Eleanor Chodroff
+License:
+Creative Commons Attribution-ShareAlike 3.0 Unported
+
+Canonical license URI: https://creativecommons.org/licenses/by-sa/3.0/
+Source revision: 3eba9b72cc8222bf964a06842e4ae31c45ce21bf
+Revision status: recorded
+Repository evidence paths: README.md:evidence-00-README.md
+Repository evidence SHA-256: evidence-00-README.md:334f5a1904d1db9b0c835a2ccba7cb4046578fec087da4dd4afcd55921f7f4be
+Import policy: radixor-unimorph-import-v1
+Projection semantics: Each declared three-column source directly projects lemma and surface form.
+Conflict semantics: All valid lemma-form assignments are retained. Surface ambiguity is reported explicitly and is never resolved by dropping or overwriting an assignment.
+Import rows: source=5544; accepted=3066; rejected=2478
+Rejection reasons: form-unicode-whitespace=1022;lemma-unicode-whitespace=1456
+Per-source import audit:
+- kir: source=5544; accepted=3066; rejected=2478; added-groups=72; added-distinct-surfaces=2997; added-source-pairs=2925; added-output-forms=2997; added-changed-pairs=2925; intrinsic-ambiguous-surfaces=0; rejection-reasons=form-unicode-whitespace=1022;lemma-unicode-whitespace=1456
+Surface conflict audit: cross-source-assignments=0; cross-source-surfaces=0; intrinsic-ambiguous-surfaces=0
+Audited excluded upstream files:
+- kir.args: duplicate-args — Duplicate .args projection was audited and excluded; only bel.args, grc.args, and hye.args add an approved compatible projection.
+Generated dictionary: groups=72; forms=2997
+Deterministic GZip SHA-256: 3b7d57494e647317afd9075559f7727c38d9d98041f968e6f0237c649b63ebed
+
+Radixor modifications: Strict UTF-8 validation, NFC normalization, lowercase conversion, structural unsafe-character rejection, grouping by lemma, exact deduplication, deterministic ordering, and reproducible GZip packaging.
+
+Neither UniMorph nor any upstream contributor endorses Radixor.
+
+Upstream information verified: 2026-09-11

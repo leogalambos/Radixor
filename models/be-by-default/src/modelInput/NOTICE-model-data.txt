@@ -1,0 +1,52 @@
+Radixor model-data notice
+
+Radixor-derived model data
+
+Copyright (C) 2026, Leo Galambos.
+
+Copyright and, where applicable, database rights are claimed in the
+Radixor-specific selection, verification, cleaning, normalization,
+grouping, deduplication, filtering, reformatting, metadata preparation,
+and packaging of this model, to the extent protected by applicable law.
+
+The underlying morphological data remains attributed to UniMorph and
+the upstream contributors identified in this notice.
+
+This derived model data, including Radixor's protectable contributions,
+is distributed under Creative Commons Attribution-ShareAlike 3.0.
+
+Model ID: be-by-default
+Source project: UniMorph
+Official repository: https://github.com/unimorph/bel
+Selected upstream data:
+- bel [lemma-form-features], SHA-256 07073665ab13b448624933b8643998cf40b89529d6b32317adeadb161dc960ee
+- bel.args [lemma-form-features], SHA-256 8be3aecfec1266cc022e2759a0ba533506bf6f0b0e6d83b8912761af8121119e
+Source origin: Wikipedia
+Attribution: UniMorph
+License:
+Creative Commons Attribution-ShareAlike 3.0 Unported
+
+Canonical license URI: https://creativecommons.org/licenses/by-sa/3.0/
+Source revision: cba29019d3ba581c26d4152ead81c27ff16a6550
+Revision status: recorded
+Repository evidence paths: README.md:evidence-00-README.md
+Repository evidence SHA-256: evidence-00-README.md:00218f9d799789b1fdbaf0c7e7324a20d6bccb0a7be6156e83979871b5c61538
+Import policy: radixor-unimorph-import-v1
+Projection semantics: bel.args is the provided three-column UM4 argument projection; no generic deaccenting or synthesized transform is applied.
+Conflict semantics: All valid lemma-form assignments are retained. Surface ambiguity is reported explicitly and is never resolved by dropping or overwriting an assignment.
+Import rows: source=33256; accepted=30088; rejected=3168
+Rejection reasons: blank-row=1030;form-unicode-whitespace=2040;form-unsupported-character=2;lemma-unicode-whitespace=96
+Per-source import audit:
+- bel: source=17143; accepted=15044; rejected=2099; added-groups=1020; added-distinct-surfaces=10894; added-source-pairs=10034; added-output-forms=10963; added-changed-pairs=9943; intrinsic-ambiguous-surfaces=69; rejection-reasons=blank-row=1030;form-unicode-whitespace=1020;form-unsupported-character=1;lemma-unicode-whitespace=48
+- bel.args: source=16113; accepted=15044; rejected=1069; added-groups=0; added-distinct-surfaces=8633; added-source-pairs=9383; added-output-forms=8712; added-changed-pairs=8712; intrinsic-ambiguous-surfaces=74; rejection-reasons=form-unicode-whitespace=1020;form-unsupported-character=1;lemma-unicode-whitespace=48
+Surface conflict audit: cross-source-assignments=9; cross-source-surfaces=9; intrinsic-ambiguous-surfaces=147
+Audited excluded upstream files:
+- none
+Generated dictionary: groups=1020; forms=19675
+Deterministic GZip SHA-256: 52b674acaf9e28461b0e638f562e98aee84461ee7acf6c0693d8a36e79f38548
+
+Radixor modifications: Strict UTF-8 validation, NFC normalization, lowercase conversion, structural unsafe-character rejection, grouping by lemma, exact deduplication, deterministic ordering, and reproducible GZip packaging.
+
+Neither UniMorph nor any upstream contributor endorses Radixor.
+
+Upstream information verified: 2026-09-11

@@ -1,8 +1,12 @@
-# Polish Stemmer Benchmarks
+# Polish Stemmer Benchmarks <span class="dictionary-rating" role="img" aria-label="Relative dictionary size 5 of 5; 120,867 distinct usable word forms" title="Relative dictionary size 5 of 5; 120,867 distinct usable word forms">★★★★★</span>
 
 This page reports same-language stemming benchmarks for Polish. Accuracy is listed first because speed without root agreement is not enough to interpret stemmer quality.
 
-All speed values are environment-specific and were measured on the hardware and JVM listed in the [benchmark overview](../index.md). The command distribution, exact-root accuracy, and speed tables belong to the published 2026-08-25 Radixor/Java `4.2.0-6-g84e57fb` snapshot. Speed benchmark operations process changed dictionary tokens only. Accuracy uses the complete Radixor dictionary for the language.
+<!-- DICTIONARY-SIZE-RATING:START -->
+Dictionary size: <span class="dictionary-rating" role="img" aria-label="Relative dictionary size 5 of 5; 120,867 distinct usable word forms" title="Relative dictionary size 5 of 5; 120,867 distinct usable word forms">★★★★★</span>. The exact count is **120,867 distinct usable word forms** after parser-compatible filtering and exact, case-preserved deduplication. Stars rank dictionary size relative to all benchmarked dictionaries in five nearly equal groups; they do **not** measure linguistic quality or benchmark accuracy.
+<!-- DICTIONARY-SIZE-RATING:END -->
+
+All speed values are environment-specific and were measured on the hardware and JVM listed in the [benchmark overview](../index.md). The command distribution, exact-root accuracy, and speed tables belong to the published 2026-09-11 Radixor/Java `4.4.0` snapshot. Speed benchmark operations process changed tokens. Accuracy uses the complete Radixor dictionary for the language.
 
 <!-- BENCHMARK-EVIDENCE-MAP:START -->
 !!! info "How to read this page"
@@ -13,9 +17,9 @@ Runtime and exact-root agreement measure different properties. Light, minimal, p
 
 ## Dictionary Corpus
 
-| Model ID | Model version | Language | Dictionary rows | Complete quality tokens | Already-root tokens | Changed tokens | JMH timing tokens |
-| --- | --- | --- | ---: | ---: | ---: | ---: | ---: |
-| `pl-pl-unimorph` | `1.0.0` | `PL_PL` | 9,990 | 132,308 | 19,957 | 112,351 | 112,351 |
+| Model ID | Model version | Language | Dictionary rows | Distinct usable forms | Complete quality tokens | Already-root tokens | Changed tokens | Timing workload | JMH timing tokens |
+| --- | --- | --- | ---: | ---: | ---: | ---: | ---: | --- | ---: |
+| `pl-pl-unimorph` | `1.0.0` | `PL_PL` | 9,990 | 120,867 | 132,308 | 19,957 | 112,351 | changed tokens | 112,351 |
 
 ## Radixor Patch Command Distribution
 
@@ -40,20 +44,20 @@ Accuracy is computed from JMH auxiliary counters in the current report. The coun
 | Lucene MorfologikFilter | 87.729% | 86.606% | 94.047% | Dictionary-based path; Morfologik can emit multiple terms. |
 | Lucene StempelFilter | 70.009% | 69.262% | 74.220% | Lucene TokenFilter integration path for table-driven Polish Stempel. |
 | Lucene StempelStemmer direct | 70.009% | 69.262% | 74.220% | Direct table-driven Polish Stempel stemmer API. |
-| Official Snowball direct | 22.315% | 20.225% | 34.078% | Official Snowball 3.1.0 generated Java stemmer; rule-based suffix algorithm. |
+| Official Snowball direct (Java) | 22.315% | 20.225% | 34.078% | Official Snowball 3.1.0 generated Java stemmer; rule-based suffix algorithm. |
 
 ## Speed
 
-Speed uses JMH average time, 5 warmup iterations, 7 measurement iterations, 3 independent forks, and 1 thread. Relative factor is computed against the single Radixor row on this language page. Values below 1.000 are faster than that Radixor baseline; values above 1.000 are slower.
+Speed uses JMH average time, 3 warmup iterations, 5 measurement iterations, 3 independent forks, and 1 thread. Relative factor is computed against the single Radixor row on this language page. Values below 1.000 are faster than that Radixor baseline; values above 1.000 are slower.
 
 | Stemmer | Benchmark method | Score ms/op | Error ms | ns/token | Relative vs Radixor | Note |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
-| Radixor | `polishRadixor` | 8.470 | 0.176 | 75.4 | 1.000 | Radixor dictionary-trained patch-command stemmer. |
-| Lucene HunspellStemFilter | `luceneHunspellStemFilter` | 537.060 | 32.708 | 4780.2 | 63.408 | Benchmark-only Polish Hunspell dictionary compared via Lucene HunspellStemFilter. |
-| Lucene StempelStemmer direct | `polishLuceneStempelStemmerDirect` | 33.209 | 0.662 | 295.6 | 3.921 | Direct table-driven Polish Stempel stemmer API. |
-| Lucene StempelFilter | `polishLuceneStempelFilter` | 41.041 | 0.656 | 365.3 | 4.846 | Lucene TokenFilter integration path for table-driven Polish Stempel. |
-| Lucene MorfologikFilter | `polishLuceneMorfologikFilter` | 140.092 | 1.931 | 1246.9 | 16.540 | Dictionary-based Morfologik TokenFilter; may emit multiple terms. |
-| Official Snowball direct | `snowballDirect[POLISH]` | 10.168 | 1.442 | 90.5 | 1.201 | Official Snowball 3.1.0 generated Java stemmer; direct API. |
+| Radixor | `radixor[pl-pl-unimorph]` | 12.165 | 2.202 | 108.3 | 1.000 | Radixor dictionary-trained patch-command stemmer. |
+| Lucene HunspellStemFilter | `luceneHunspellStemFilter` | 540.950 | 39.356 | 4814.8 | 44.466 | Benchmark-only Polish Hunspell dictionary compared via Lucene HunspellStemFilter. |
+| Lucene StempelStemmer direct | `polishLuceneStempelStemmerDirect` | 34.399 | 1.421 | 306.2 | 2.828 | Direct table-driven Polish Stempel stemmer API. |
+| Lucene StempelFilter | `polishLuceneStempelFilter` | 41.206 | 1.179 | 366.8 | 3.387 | Lucene TokenFilter integration path for table-driven Polish Stempel. |
+| Lucene MorfologikFilter | `polishLuceneMorfologikFilter` | 144.144 | 2.779 | 1283.0 | 11.849 | Dictionary-based Morfologik TokenFilter; may emit multiple terms. |
+| Official Snowball direct (Java) | `snowballDirect[POLISH]` | 11.946 | 1.916 | 106.3 | 0.982 | Official Snowball 3.1.0 generated Java stemmer; direct API. The Radixor and Snowball 99.9% JMH intervals overlap; statistically tied, so the runtime ratio is a point estimate only. |
 
 ## Interpretation Notes
 
@@ -62,6 +66,37 @@ Speed uses JMH average time, 5 warmup iterations, 7 measurement iterations, 3 in
 - Lucene TokenFilter rows include TokenStream, attribute, and required normalization overhead. Direct rows measure exposed direct APIs.
 - Morfologik rows are dictionary-based and can emit multiple terms for one input token. Quality rows use the first returned term when no ranking weight is available.
 - Snowball rows are rule-based generated suffix stemmers; they are useful algorithmic baselines, not dictionary-root equivalence guarantees.
+
+<!-- POLIMORF-BENCHMARK:START -->
+
+## Optional PoliMorf Model
+
+PoliMorf is an independently available optional Polish model and is not the `PL_PL` default or a member of either standard aggregate. Its evidence is kept separate from the UniMorph default above.
+
+Optional dictionary size: <span class="dictionary-rating" role="img" aria-label="Relative dictionary size 5 of 5; 4,668,685 distinct usable word forms" title="Relative dictionary size 5 of 5; 4,668,685 distinct usable word forms">★★★★★</span>. The exact count is **4,668,685 distinct usable word forms**; the rating is relative size, not linguistic quality.
+
+### PoliMorf Corpus
+
+| Model ID | Model version | Language | Dictionary rows | Distinct usable forms | Complete quality tokens | Already-root tokens | Changed tokens | Timing workload | JMH timing tokens |
+| --- | --- | --- | ---: | ---: | ---: | ---: | ---: | --- | ---: |
+| `pl-pl-polimorf` | `1.0.0` | `PL_PL` | 315,639 | 4,668,685 | 4,812,023 | 315,639 | 4,496,384 | changed tokens | 4,496,384 |
+
+### PoliMorf Exact-root Accuracy
+
+| Stemmer | All exact | Changed exact | Root preserved | Note |
+| --- | ---: | ---: | ---: | --- |
+| Radixor PoliMorf | 98.837% | 98.744% | 99.359% | Exact optional model. |
+| PoliMorf Lucene MorfologikFilter | 87.729% | 86.606% | 94.047% | Matching Polish dictionary adapter. |
+| PoliMorf Official Snowball direct | 22.315% | 20.225% | 34.078% | Matching Polish Snowball algorithm. |
+
+### PoliMorf Speed
+
+| Stemmer | Benchmark method | Score ms/op | Error ms | ns/token | Relative vs Radixor PoliMorf | Note |
+| --- | --- | ---: | ---: | ---: | ---: | --- |
+| Radixor PoliMorf | `radixor[pl-pl-polimorf]` | 930.102 | 17.399 | 206.9 | 1.000 | Exact optional-model baseline. |
+| Lucene MorfologikFilter | `polishPolimorfLuceneMorfologikFilter` | 5912.219 | 246.399 | 1314.9 | 6.357 | PoliMorf-derived corpus. |
+
+<!-- POLIMORF-BENCHMARK:END -->
 
 <!-- DICTIONARY-GENERALIZATION:START -->
 
@@ -91,18 +126,15 @@ also appeared in training. Parentheses show the observed split minimum–maximum
 
 ### Generalization conclusion
 
-- Median exactness on genuinely unseen changed forms moves from **61.996%**
-  at 10% training knowledge to **69.972%** at 90%, a measured
-  **+7.976 percentage-point** change for this dictionary.
-- Over the same endpoints, unseen all-form exactness changes by **+7.307 pp** and
-  preservation of unseen already-root forms changes by **+4.352 pp**. These separate
-  outcomes show whether the changed-form result coexists with preservation behavior.
+- Median exactness on genuinely unseen changed forms moves from **61.996%** at 10% training knowledge to **69.972%** at 90%, a measured **+7.976 percentage-point** change.
+- Unseen all-form exactness moves from **65.763%** at 10% training knowledge to **73.070%** at 90%, a measured **+7.307 percentage-point** change.
+- Preservation of unseen already-root forms moves from **86.633%** at 10% training knowledge to **90.985%** at 90%, a measured **+4.352 percentage-point** change.
 - The evidence establishes within-resource transfer across withheld dictionary families. It
   does not estimate unrelated domains, misspellings, arbitrary compounds, or external corpora.
 
 The complete ten-level table and split ranges remain in the
 [independent generalization report](../generalization.md); raw counters and provenance are in
-[`dictionary-generalization.csv`](../data/dictionary-generalization.csv). The
+[active machine-readable snapshot](../data/dictionary-generalization-2026-09-11.csv). The
 [frozen methodology](../reference/generalization-methodology.md) defines family-level
 splitting, unseen-surface leakage control, aggregation, and the limits of the claim.
 
@@ -195,7 +227,7 @@ The complete evidence is available in the [raw logical matrix](../data/edit-cost
 
 Runtime performance and linguistic grouping quality are independent dimensions. This section evaluates language `PL_PL` using the complete validated stemming-quality result matrix. Every distinct surface form is one evaluated item and can belong to several dictionary groups. Two forms are a positive pair when their group-membership sets intersect and a negative pair when those sets are disjoint. A pair shared through several groups is counted once. Exact equality with a predetermined lemma is not required.
 
-`ALL_WORDS` includes every valid group and its original forms. `LOWERCASE_GROUPS_ONLY` excludes an entire group when any Unicode code point is uppercase or titlecase; retained words are not lowercased or otherwise rewritten. This isolates case-handling effects without changing retained inputs. [Download the complete machine-readable result snapshot](../data/stemming-quality.csv).
+`ALL_WORDS` includes every valid group and its original forms. `LOWERCASE_GROUPS_ONLY` excludes an entire group when any Unicode code point is uppercase or titlecase; retained words are not lowercased or otherwise rewritten. This isolates case-handling effects without changing retained inputs. [Download the complete machine-readable result snapshot](../data/stemming-quality-2026-09-11.csv).
 
 ### Evaluation Scope and Key Findings
 
@@ -494,8 +526,8 @@ Standard ARI, homogeneity, completeness, V-measure, and NMI are not calculated: 
 
 ### Provenance
 
-- Authoritative source: `docs/benchmarks/data/stemming-quality.csv`
-- Source SHA-256: `85763189eab4d0fbb047c2d5d3554c66abf9732182bd0d8fd758d7aef680e66f`
+- Authoritative source: `docs/benchmarks/data/stemming-quality-2026-09-11.csv`
+- Source SHA-256: `24bddfeed06a60bb3eeed58e1bfc93aed46c1d32e7bebd293aec2dacfddfef5b`
 - Evaluation command: `./gradlew stemmingQuality --no-daemon`
 - Dictionary language: `PL_PL`
 - Processing modes: `ALL_WORDS`, `LOWERCASE_GROUPS_ONLY`

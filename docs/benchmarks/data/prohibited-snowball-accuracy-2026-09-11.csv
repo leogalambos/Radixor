@@ -1,0 +1,2 @@
+Candidate,Language,Dictionary model ID,Dictionary model version,Dictionary model SHA-256,Total tokens,Already-root tokens,Changed tokens,All exact matches,Changed exact matches,Root preserved matches
+SNOWBALL_BASQUE_DIRECT,EUS,eus-default,1.0.0,29ea20d68e085f9403c32330259f02599f6c510f47db0475f1e3ea73a276a98b,11535,52,11483,48,8,40
