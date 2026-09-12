@@ -2,322 +2,906 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://leogalambos.github.io/Radixor/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/architecture-and-reduction/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/architecture/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/benchmarking/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/builds/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/built-in-languages/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/cli-compilation/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/compatibility-and-guarantees/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/contributing-dictionaries/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/data-formats/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/dictionary-format/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/fast-track/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/filtered-models/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/getting-started/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/integration-deep-dive/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/lookup-edge-optimization/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/migration-and-backward-compatibility/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/model-selection-and-loading/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/programmatic-extending-and-persistence/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/programmatic-loading-and-building/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/programmatic-querying-and-ambiguity/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/programmatic-usage/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/quality-and-operations/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/quick-start/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/reduction-semantics/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/reports/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/scientific-results/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/stemmer-model-catalog/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/stemmer-models/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/stemming-quality/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/technology-lineage/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/test-taxonomy-and-filtering/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/trust-security-and-support/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/why-radixor-is-different/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/benchmarks/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/benchmarks/edit-cost-sensitivity/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/benchmarks/generalization/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/ady/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/af-za/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/afb/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/ail/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/aka/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/am-et/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/ame/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/ang/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/ar/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/arn/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/arz/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/as-in/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/ast/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/aym/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/az-az/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/azg/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/bak/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/be-by/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/bg-bg/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/bn-bd/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/bra/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/bre/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/ca-es/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/ceb/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/chu/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/ckt/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/cly/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/cni/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/cor/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/cpa/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/cre/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/crh/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/csb/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/ctp/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/cy-gb/</loc>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/czech/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/czn/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/dak/</loc>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/danish/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/dje/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/dsb/</loc>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/dutch/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/el-gr/</loc>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/english/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/et-ee/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/eus/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/evn/</loc>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/finnish/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/fo-fo/</loc>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/french/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/frm/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/fro/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/frr/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/fur/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/fy-nl/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/ga-ie/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/gaa/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/gal/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/gd-gb/</loc>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/german/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/gmh/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/gml/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/goh/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/got/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/grc/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/gsw/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/gup/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/gv-im/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/hai/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/hbs/</loc>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/hebrew/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/hil/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/hsb/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/hsi/</loc>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/hungarian/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/hy-am/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/id-id/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/is-is/</loc>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/italian/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/itl/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/izh/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/ja-jp/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/ka-ge/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/kbd/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/kca/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/ket/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/kjh/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/kk-kz/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/kl-gl/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/klr/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/kmr/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/kn-in/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/ko-kr/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/kod/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/kon/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/krl/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/ky-kg/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/la/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/lg-ug/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/lin/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/liv/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/lld/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/lt-lt/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/lv-lv/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/mag/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/mg-mg/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/mi-nz/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/mk-mk/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/mn-mn/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/mt-mt/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/mwf/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/nap/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/nav/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/nds/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/non/</loc>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/norwegian-bokmal/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/norwegian-nynorsk/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/ny-mw/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/oci/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/om-et/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/ood/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/osx/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/ote/</loc>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/persian/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/polish/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/portuguese/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/ps-af/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/que/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/ro-ro/</loc>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/russian/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/sah/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/san/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/sdh/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/see/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/sga/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/shp/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/sjo/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/sl-si/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/slp/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/sme/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/sn-zw/</loc>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/spanish/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/sq-al/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/st-za/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/swc/</loc>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/swedish/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/syc/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/tat/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/tg-tj/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/tk-tm/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/tl-ph/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/tr-tr/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/tyv/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/ug-cn/</loc>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/ukrainian/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/ur-pk/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/uz-uz/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/vec/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/vot/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/vro/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/xcl/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/xno/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/xty/</loc>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/yiddish/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/zpv/</loc>
+         <lastmod>2026-09-12</lastmod>
+    </url>
+    <url>
+         <loc>https://leogalambos.github.io/Radixor/benchmarks/languages/zu-za/</loc>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/benchmarks/reference/candidates/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/benchmarks/reference/corpora/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/benchmarks/reference/edit-cost-methodology/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/benchmarks/reference/english-coverage/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/benchmarks/reference/environment/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/benchmarks/reference/generalization-methodology/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/benchmarks/reference/linguistic-quality/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/benchmarks/reference/methodology/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/benchmarks/reference/reproducibility/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/benchmarks/reference/tested-stemmers/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/python/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/python/customization/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/python/fast-track/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/python/installation/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/python/model-compilation/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/python/performance/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/python/quick-start/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/python/usage/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/python-c/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/python-c/installation/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/python-c/quick-start/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
     <url>
          <loc>https://leogalambos.github.io/Radixor/python-c/usage/</loc>
-         <lastmod>2026-09-08</lastmod>
+         <lastmod>2026-09-12</lastmod>
     </url>
 </urlset>

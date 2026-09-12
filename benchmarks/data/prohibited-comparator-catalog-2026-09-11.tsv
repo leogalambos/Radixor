@@ -1,0 +1,2 @@
+model_id	language	display_language	candidate	speed_benchmark
+eus-default	EUS	Basque	SNOWBALL_BASQUE_DIRECT	ProhibitedModelStemmerBenchmark.snowballDirect

@@ -1,0 +1,8 @@
+Benchmark class: prohibited documentation-only Snowball comparisons
+Benchmark date: 2026-09-11
+Source identity: 4.3.0.dirty
+Base commit: 14f61beb106bca21d78f828e2f8e35fb457d3d90
+Quarantine manifest SHA-256: f5e169b7bf4db2ef8cafa4e4a24c673454683aa676bc6d6d3dbc8dba3c673693
+Source hash manifest SHA-256: efd5fddcc13e5fb8462b2d5824c865378fd32bad6cfbd2599dcc06b95b417257
+Runtime classpath manifest SHA-256: 3d789540c05f5fffaba386f969ecdd9e48cc00eb0ddc65782c94ed3435bc6411
+Protocol: 3 warmup iterations, 5 measurement iterations, 3 forks, 1 thread, 1 s iterations

@@ -1,0 +1,24 @@
+"Benchmark","Mode","Threads","Samples","Score","Score Error (99.9%)","Unit","Param: modelId"
+"org.egothor.stemmer.benchmark.ProhibitedModelStemmerBenchmark.radixor","avgt",1,15,367663.705970,74525.391858,"ns/op",cy-gb-default
+"org.egothor.stemmer.benchmark.ProhibitedModelStemmerBenchmark.radixor","avgt",1,15,1158728.170834,134357.745875,"ns/op",eus-default
+"org.egothor.stemmer.benchmark.ProhibitedModelStemmerBenchmark.radixor","avgt",1,15,230958.844113,53184.216988,"ns/op",fy-nl-default
+"org.egothor.stemmer.benchmark.ProhibitedModelStemmerBenchmark.radixor","avgt",1,15,237629.271960,53179.874929,"ns/op",gd-gb-default
+"org.egothor.stemmer.benchmark.ProhibitedModelStemmerBenchmark.radixor","avgt",1,15,198571.878086,63982.137815,"ns/op",hsb-default
+"org.egothor.stemmer.benchmark.ProhibitedModelStemmerBenchmark.radixor","avgt",1,15,6323064.220103,1865531.461417,"ns/op",ka-ge-default
+"org.egothor.stemmer.benchmark.ProhibitedModelStemmerBenchmark.radixor","avgt",1,15,314322.455024,82890.310185,"ns/op",kca-default
+"org.egothor.stemmer.benchmark.ProhibitedModelStemmerBenchmark.radixor","avgt",1,15,312914.480719,70702.528155,"ns/op",ket-default
+"org.egothor.stemmer.benchmark.ProhibitedModelStemmerBenchmark.radixor","avgt",1,15,10405682.838915,2056952.296568,"ns/op",kmr-default
+"org.egothor.stemmer.benchmark.ProhibitedModelStemmerBenchmark.radixor","avgt",1,15,21239016.055693,3761933.180061,"ns/op",ko-kr-default
+"org.egothor.stemmer.benchmark.ProhibitedModelStemmerBenchmark.radixor","avgt",1,15,372407.169696,88398.363145,"ns/op",oci-default
+"org.egothor.stemmer.benchmark.ProhibitedModelStemmerBenchmark.radixor","avgt",1,15,118443.491067,31156.409145,"ns/op",om-et-default
+"org.egothor.stemmer.benchmark.ProhibitedModelStemmerBenchmark.radixor","avgt",1,15,59746708.341218,11961245.141804,"ns/op",sah-default
+"org.egothor.stemmer.benchmark.ProhibitedModelStemmerBenchmark.radixor","avgt",1,15,78206.774280,364.222566,"ns/op",san-default
+"org.egothor.stemmer.benchmark.ProhibitedModelStemmerBenchmark.radixor","avgt",1,15,2131798.277428,362679.990593,"ns/op",sl-si-default
+"org.egothor.stemmer.benchmark.ProhibitedModelStemmerBenchmark.radixor","avgt",1,15,206550.581125,62660.368699,"ns/op",slp-default
+"org.egothor.stemmer.benchmark.ProhibitedModelStemmerBenchmark.radixor","avgt",1,15,151904.278177,52864.201119,"ns/op",tat-default
+"org.egothor.stemmer.benchmark.ProhibitedModelStemmerBenchmark.radixor","avgt",1,15,133823.590925,10710.384400,"ns/op",tg-tj-default
+"org.egothor.stemmer.benchmark.ProhibitedModelStemmerBenchmark.radixor","avgt",1,15,126827.518239,41800.189716,"ns/op",tk-tm-default
+"org.egothor.stemmer.benchmark.ProhibitedModelStemmerBenchmark.radixor","avgt",1,15,44090069.962239,8598368.519448,"ns/op",tyv-default
+"org.egothor.stemmer.benchmark.ProhibitedModelStemmerBenchmark.radixor","avgt",1,15,205251.873945,75869.867197,"ns/op",ur-pk-default
+"org.egothor.stemmer.benchmark.ProhibitedModelStemmerBenchmark.radixor","avgt",1,15,390584.191211,113380.233410,"ns/op",vec-default
+"org.egothor.stemmer.benchmark.ProhibitedModelStemmerBenchmark.radixor","avgt",1,15,245694.860037,60291.145268,"ns/op",vot-default

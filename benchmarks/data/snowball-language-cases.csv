@@ -1,0 +1,30 @@
+Case,Language,Model ID,Display language,Speed method,Quality candidate,Direct available,Lucene available,Homepage chart,Homepage aggregate
+ARABIC,AR,ar-default,Arabic,snowballDirect[ARABIC],SNOWBALL_ARABIC_DIRECT,true,true,true,true
+ARMENIAN,HY_AM,hy-am-default,Armenian,snowballDirect[ARMENIAN],SNOWBALL_ARMENIAN_DIRECT,true,true,true,true
+CATALAN,CA_ES,ca-es-default,Catalan,snowballDirect[CATALAN],SNOWBALL_CATALAN_DIRECT,true,true,true,true
+CZECH,CS_CZ,cs-cz-default,Czech,snowballDirect[CZECH],SNOWBALL_CZECH_DIRECT,true,false,true,true
+DANISH,DA_DK,da-dk-default,Danish,snowballDirect[DANISH],SNOWBALL_DANISH_DIRECT,true,true,true,true
+DUTCH,NL_NL,nl-nl-default,Dutch,snowballDirect[DUTCH],SNOWBALL_DUTCH_DIRECT,true,true,true,true
+ESTONIAN,ET_EE,et-ee-default,Estonian,snowballDirect[ESTONIAN],SNOWBALL_ESTONIAN_DIRECT,true,true,true,true
+ENGLISH,US_UK,us-uk-default,English,snowballEnglishPorter2,ENGLISH_SNOWBALL_PORTER2,true,true,true,true
+FINNISH,FI_FI,fi-fi-default,Finnish,snowballDirect[FINNISH],SNOWBALL_FINNISH_DIRECT,true,true,true,true
+FRENCH,FR_FR,fr-fr-default,French,snowballDirect[FRENCH],SNOWBALL_FRENCH_DIRECT,true,true,true,true
+GERMAN,DE_DE,de-de-default,German,snowballDirect[GERMAN],SNOWBALL_GERMAN_DIRECT,true,true,true,true
+GREEK,EL_GR,el-gr-default,Greek,snowballDirect[GREEK],SNOWBALL_GREEK_DIRECT,true,true,true,true
+HUNGARIAN,HU_HU,hu-hu-default,Hungarian,snowballDirect[HUNGARIAN],SNOWBALL_HUNGARIAN_DIRECT,true,true,true,true
+INDONESIAN,ID_ID,id-id-default,Indonesian,snowballDirect[INDONESIAN],SNOWBALL_INDONESIAN_DIRECT,true,true,true,true
+IRISH,GA_IE,ga-ie-default,Irish,snowballDirect[IRISH],SNOWBALL_IRISH_DIRECT,true,true,true,true
+ITALIAN,IT_IT,it-it-default,Italian,snowballDirect[ITALIAN],SNOWBALL_ITALIAN_DIRECT,true,true,true,true
+LITHUANIAN,LT_LT,lt-lt-default,Lithuanian,snowballDirect[LITHUANIAN],SNOWBALL_LITHUANIAN_DIRECT,true,true,true,true
+NORWEGIAN_BOKMAL,NB_NO,nb-no-default,Norwegian Bokmal,snowballDirect[NORWEGIAN_BOKMAL],SNOWBALL_NORWEGIAN_BOKMAL_DIRECT,true,true,true,true
+NORWEGIAN_NYNORSK,NN_NO,nn-no-default,Norwegian Nynorsk,snowballDirect[NORWEGIAN_NYNORSK],SNOWBALL_NORWEGIAN_NYNORSK_DIRECT,true,true,true,true
+PERSIAN,FA_IR,fa-ir-default,Persian,snowballDirect[PERSIAN],SNOWBALL_PERSIAN_DIRECT,true,false,true,true
+POLISH,PL_PL,pl-pl-unimorph,Polish,snowballDirect[POLISH],SNOWBALL_POLISH_DIRECT,true,false,true,true
+PORTUGUESE,PT_PT,pt-pt-default,Portuguese,snowballDirect[PORTUGUESE],SNOWBALL_PORTUGUESE_DIRECT,true,true,true,true
+RUSSIAN,RU_RU,ru-ru-default,Russian,snowballDirect[RUSSIAN],SNOWBALL_RUSSIAN_DIRECT,true,true,true,true
+ROMANIAN,RO_RO,ro-ro-default,Romanian,snowballDirect[ROMANIAN],SNOWBALL_ROMANIAN_DIRECT,true,true,true,true
+SESOTHO,ST_ZA,st-za-default,Southern Sotho,snowballDirect[SESOTHO],SNOWBALL_SESOTHO_DIRECT,true,false,true,true
+SPANISH,ES_ES,es-es-default,Spanish,snowballDirect[SPANISH],SNOWBALL_SPANISH_DIRECT,true,true,true,true
+SWEDISH,SV_SE,sv-se-default,Swedish,snowballDirect[SWEDISH],SNOWBALL_SWEDISH_DIRECT,true,true,true,true
+TURKISH,TR_TR,tr-tr-default,Turkish,snowballDirect[TURKISH],SNOWBALL_TURKISH_DIRECT,true,true,true,true
+YIDDISH,YI,yi-default,Yiddish,snowballDirect[YIDDISH],SNOWBALL_YIDDISH_DIRECT,true,true,true,true

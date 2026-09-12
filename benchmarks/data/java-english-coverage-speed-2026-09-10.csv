@@ -1,0 +1,11 @@
+"Benchmark","Mode","Threads","Samples","Score","Score Error (99.9%)","Unit","Param: coveragePercent"
+"org.egothor.stemmer.benchmark.EnglishRadixorDictionaryCoverageBenchmark.changedTokenStemmingSpeed","avgt",1,15,25107375.906395,4358203.381655,"ns/op",100
+"org.egothor.stemmer.benchmark.EnglishRadixorDictionaryCoverageBenchmark.changedTokenStemmingSpeed","avgt",1,15,24020677.057527,1865319.437411,"ns/op",90
+"org.egothor.stemmer.benchmark.EnglishRadixorDictionaryCoverageBenchmark.changedTokenStemmingSpeed","avgt",1,15,23592912.721729,2656036.541903,"ns/op",80
+"org.egothor.stemmer.benchmark.EnglishRadixorDictionaryCoverageBenchmark.changedTokenStemmingSpeed","avgt",1,15,18964537.343876,1559373.435306,"ns/op",70
+"org.egothor.stemmer.benchmark.EnglishRadixorDictionaryCoverageBenchmark.changedTokenStemmingSpeed","avgt",1,15,18588378.084868,1039890.889672,"ns/op",60
+"org.egothor.stemmer.benchmark.EnglishRadixorDictionaryCoverageBenchmark.changedTokenStemmingSpeed","avgt",1,15,18479054.929853,2303998.967997,"ns/op",50
+"org.egothor.stemmer.benchmark.EnglishRadixorDictionaryCoverageBenchmark.changedTokenStemmingSpeed","avgt",1,15,17344572.495079,1503924.346432,"ns/op",40
+"org.egothor.stemmer.benchmark.EnglishRadixorDictionaryCoverageBenchmark.changedTokenStemmingSpeed","avgt",1,15,17164364.631359,1252488.142186,"ns/op",30
+"org.egothor.stemmer.benchmark.EnglishRadixorDictionaryCoverageBenchmark.changedTokenStemmingSpeed","avgt",1,15,14911775.683781,1511954.531609,"ns/op",20
+"org.egothor.stemmer.benchmark.EnglishRadixorDictionaryCoverageBenchmark.changedTokenStemmingSpeed","avgt",1,15,14937309.399643,2319633.025638,"ns/op",10
