@@ -21,7 +21,7 @@ concurrency:
 jobs:
   validate:
     name: Validate selected model
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, X64, trusted-release]
     outputs:
       model_id: ${{ steps.release.outputs.MODEL_ID }}
       model_version: ${{ steps.release.outputs.MODEL_VERSION }}
@@ -88,7 +88,7 @@ jobs:
     name: Publish selected model
     if: github.event_name == 'push'
     needs: validate
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, X64, trusted-release]
     environment: maven-central
 
     steps:

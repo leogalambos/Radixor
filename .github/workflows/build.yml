@@ -22,7 +22,7 @@ concurrency:
 jobs:
   quality-gates:
     name: Quality gates
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, X64, trusted-release]
 
     steps:
       - name: Check out repository
@@ -125,7 +125,7 @@ jobs:
   release:
     name: Publish tagged distribution
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/release@')
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, X64, trusted-release]
     needs: quality-gates
     permissions:
       contents: write

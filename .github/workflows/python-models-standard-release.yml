@@ -27,7 +27,7 @@ jobs:
   build:
     name: Build and verify standard models
     if: github.event_name == 'push' || inputs.publish_existing_to_pypi != true
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, X64, trusted-release]
     outputs:
       version: ${{ steps.release.outputs.version }}
       tag: ${{ steps.release.outputs.tag }}
@@ -166,7 +166,7 @@ jobs:
     name: Publish immutable GitHub Release
     if: github.event_name == 'push'
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, X64, trusted-release]
     environment: python-github-release
     permissions:
       contents: write
@@ -228,7 +228,7 @@ jobs:
       ((github.event_name == 'push' && needs.publish.result == 'success') ||
        (github.event_name == 'workflow_dispatch' && inputs.publish_existing_to_pypi))
     needs: [build, publish]
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, X64, trusted-release]
     environment: python-pypi
     permissions:
       attestations: read
@@ -318,7 +318,7 @@ jobs:
     name: Publish Python package index
     if: github.event_name == 'push'
     needs: [build, publish]
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, X64, trusted-release]
     environment: python-github-pages
     permissions:
       contents: write
